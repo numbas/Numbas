@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!-- Copyright (c) Christian Perfect for Newcastle University 2010-2011 -->
+<html>
+	<head>
+		<title>Main Exam Window</title>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+
+		<!--Sarissa XML handling-->
+		<script type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
+		<script type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
+
+		<!--JQuery scripts-->
+		<script type="text/javascript" src="scripts/jquery/jquery.js"></script>
+		<script type="text/javascript" src="scripts/jquery/jquery-ui.custom.min.js"></script>
+		<script type="text/javascript" src="scripts/jquery/jcarousellite.js"></script>
+		<script type="text/javascript" src="scripts/jquery/jquery.mousewheel.js"></script>
+		<script type="text/javascript" src="scripts/jquery/jquery.xslTransform.js"></script>
+		<script type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
+		<script type="text/javascript" src="scripts/jquery/json2.js"></script>
+
+		<!-- numbas stuff -->
+		<script type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
+
+		<script type="text/javascript" src="scripts/numbas.js" charset="utf-8"></script>
+
+		<!-- mathjax stuff -->
+		<SCRIPT SRC="http://cdn.mathjax.org/mathjax/latest/MathJax.js">
+		  MathJax.Hub.Config({
+			extensions: ['tex2jax.js',"MathMenu.js","TeX/AMSmath.js"],
+			tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+			jax: ["input/TeX","output/HTML-CSS"],
+			displayAlign: "center",
+			displayIndent: "0.1em"
+		  });
+		</SCRIPT>
+
+
+		<!-- CSS -->
+		<link rel="stylesheet" type="text/css" href="resources/reset.css" />
+		<link rel="stylesheet" type="text/css" href="resources/typography.css" />
+		<link rel="stylesheet" type="text/css" href="resources/exam.css" />
+	</head>
+	
+	<body style="font-size:1em;">
+
+		<div id="loading">
+			<div id="progressbar">
+				<p>Loading...</p>
+				<div id="completed"><p>Loading...</p></div>
+			</div>
+		</div>
+
+		<div id="everything" style="display:none">
+		<!-- top bar - logo, exam title, timing -->
+		<div class="mainDiv titleBar">
+			<div class="logo">
+				<img src="resources/numbas-logo.gif"/>
+			</div>
+			<div id="examBanner">exam name</div>
+		</div>
+
+		<!-- main content area - info pages or questions go in here -->
+		<div class="mainDisplay">
+			<div id="infoDisplay">
+			</div>
+
+			<div id="questionContainer">
+				<!-- top navigation bar - prv/nxt, and question name -->
+				<div class="mainDiv navBar">
+					<input class="btn leftNav" type="button" value="Previous" id="prevBtn">
+					<input class="btn rightNav" type="button" value="Next" id="nextBtn">
+					<div class="titleBits">
+						<span id="questionNameDisplay">Question Name</span>
+						<span class="adviceNav">
+							<input class="btn" type="button" value="Advice" id="adviceBtn">
+							<input class="btn" type="button" value="Reveal" id="revealBtn">
+						</span>
+					</div>
+				</div>
+
+				<div class="colwrap">
+
+					<!-- question and advice go in here -->
+					<div class="col1wrap">
+						<div id="questionDisplay">
+						</div>
+						<div id="adviceContainer">
+							<h3>Advice</h3>
+							<span id="adviceDisplay"></span>
+						</div>
+					</div>
+
+					<!-- menu for navigating questions and displaying scores/feedback -->
+					<!-- also timing controls -->
+					<div class="questionMenu">
+						<div class="carouselBtn prev"><img src="resources/arrow-up.png" /></div>
+						<div class="questionList">
+							<ul id="questionList">
+							</ul>
+						</div>
+						<div class="carouselBtn next"><img src="resources/arrow-down.png" /></div>
+
+						<!-- total exam score display -->
+						<div class="examScore">
+							Total <span id="examScore">0/0</span>
+						</div>
+						
+						<!-- stopwatch and timing controls -->
+						<div class="mainDiv timeBox">
+							<p id="stopWatch">Time remaining: 01:00:00</p>
+							<p>
+								<input class="btn" type="button" value="Pause" id="pauseBtn">
+							</p>
+						</div>
+
+						<!-- end exam button -->
+						<div class="menuEndBtn"><input class="btn" type="button" value="End Exam" id="endBtn"></div>
+					</div>
+				</div>
+				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
+				<div class="mainDiv navBar">
+					<input class="btn leftNav" type="button" value="Previous" id="prevBtn">
+					<input class="btn rightNav" type="button" value="Next" id="nextBtn">
+					<div class="submitDiv">
+						<input class="btn" type="button" value="Submit" id="submitBtn">
+						<span id="score"></span>
+						<span id="feedback"><img src="resources/cross.png"/></span>
+					</div>
+				</div>
+			</div>
+
+			<div id="warningDisplay">
+				<div class="errorBar">
+					<h1>Alert</h1>
+				</div>
+				<div id="warningMessage"></div>
+				<div class="errorBar" id="alert">
+					<input type="button" id="warningOK" value="Ok">
+				</div>
+				<div class="errorBar" id="confirm">
+					<input type="button" id="warningOK" value="OK">
+					<input type="button" id="warningCancel" value="Cancel">
+				</div>
+			</div>
+
+		</div>
+		</div>
+		<ul style="display:hidden;">
+			<!-- empty question selector thing - will be copied into question list for each question -->
+			<li id="questionSelector" class="questionSelector-hidden">
+				<a href="#">
+				<span id="name"></span>
+				<div id="feedback"></div>
+				<div id="score"></div>
+				</a>
+			</li>
+		</ul>
+	</body>
+
+</html>

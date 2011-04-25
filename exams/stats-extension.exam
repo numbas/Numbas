@@ -1,0 +1,36 @@
+{
+  //Define exam properties
+  name: Stats Exam
+
+  extensions: [stats]
+
+  //Define questions
+  questions: [
+    {
+      name: Normal variables
+      statement: """	 
+	  	$n = \var{n}$
+	  	$\hat \mu = \var{precround(mean(sample),3)}$
+		$\hat \sigma^2 = \var{precround(variance(sample),3)}$
+		$z = \var{z}$
+		\[\var{normalcdf(z)}, \var{ztest(sample,0)}\]
+
+		$\var{mean(sample2)}$
+	  """
+
+      variables: {
+		  n: "10^(random(1..4))*random(1..4#0.5)"
+		  sample: "repeat(randomnormal(0.1,1),n)"
+		  z: "mean(sample)/sqr(variance(sample)/n)"
+
+		  sample2: "repeat(randompoisson(5),100)"
+      }
+
+      parts: [
+      ]
+      advice: """
+
+      """
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<xs:schema targetNamespace="http://ltsc.ieee.org/xsd/LOM/extend"
+           xmlns="http://ltsc.ieee.org/xsd/LOM/extend"
+           xmlns:lom="http://ltsc.ieee.org/xsd/LOM"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           version="IEEE LTSC LOM XML 1.0">
+
+  <xs:annotation>
+    <xs:documentation>
+       This work is licensed under the Creative Commons Attribution-ShareAlike
+       License.  To view a copy of this license, see the file license.txt,
+       visit http://creativecommons.org/licenses/by-sa/2.0 or send a letter to
+       Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
+    </xs:documentation>
+
+    <xs:documentation>
+       This component schema defines the XML Schema content model groups customElements 
+       and customAttributes to support validation of extension XML elements and attributes. 
+
+       This component XSD should be used if extensions are to be supported in LOM 
+       XML instances.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:import namespace="http://ltsc.ieee.org/xsd/LOM"/>
+
+  <!-- Model group declarations -->
+
+  <xs:group name="customElements">
+    <xs:choice>
+      <xs:group ref="lom:customElements"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:attributeGroup name="customAttributes">
+     <xs:anyAttribute namespace="##other" processContents="lax" /> 
+  </xs:attributeGroup>
+
+</xs:schema>

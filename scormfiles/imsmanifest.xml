@@ -1,0 +1,62 @@
+<manifest identifier="numbas.scorm.v1.exampleTest" version="1"
+					xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+					xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+					xmlns:adlnav="http://www.adlnet.org/xsd/adlnav_v1p3"
+					xmlns:imsss="http://www.imsglobal.org/xsd/imsss"
+					xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd
+										http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd
+										http://www.adlnet.org/xsd/adlseq_v1p3 adlseq_v1p3.xsd
+										http://www.adlnet.org/xsd/adlnav_v1p3 adlnav_v1p3.xsd
+										http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd"> 
+	
+	<!--The metadata node simply declares which SCORM version this course operates under.--> 
+	<metadata> 
+		<schema>ADL SCORM</schema> 
+		<schemaversion>2004 3rd Edition</schemaversion> 
+	</metadata> 
+	<!-- There is just one organization. The organization contains just one item.--> 
+	<organizations default="numbas_default_org"> 
+		<organization identifier="numbas_default_org"> 
+			<title>numbas exam</title> 
+			<item identifier="item_1" identifierref="resource_1"> 
+				<title>Exam</title> 
+				<imsss:sequencing>
+					<imsss:deliveryControls completionSetByContent="true" objectiveSetByContent="true"/>
+				</imsss:sequencing>
+			</item> 
+			<imsss:sequencing>
+				<imsss:controlMode choice="true" flow="true"/>
+			</imsss:sequencing>
+		</organization> 
+	</organizations> 
+	<resources> 
+		<resource identifier="resource_1" type="webcontent" adlcp:scormType="sco" href="index.html"> 
+			<file href="index.html"/> 
+			<file href="xmls.js"/> 
+			<file href="resources/cross.png"/> 
+			<file href="resources/exam.css"/> 
+			<file href="resources/numbas-logo.gif"/> 
+			<file href="resources/percent.png"/> 
+			<file href="resources/tick.png"/> 
+			<file href="scripts/SCORM_API_wrapper.js"/> 
+			<file href="scripts/browser-storage.js"/> 
+			<file href="scripts/display.js"/> 
+			<file href="scripts/exam.js"/> 
+			<file href="scripts/numbas.js"/> 
+			<file href="scripts/jme.js"/> 
+			<file href="scripts/pretendlms.js"/> 
+			<file href="scripts/question.js"/> 
+			<file href="scripts/question.js"/> 
+			<file href="scripts/scorm-storage.js"/> 
+			<file href="scripts/storage.js"/> 
+			<file href="scripts/jquery/jcarousellite.js"/> 
+			<file href="scripts/jquery/jquery.js"/> 
+			<file href="scripts/jquery/jquery.mousewheel.js"/> 
+			<file href="scripts/jquery/jquery.xslTransform.js"/> 
+			<file href="scripts/sarissa/sarissa.js"/> 
+			<file href="scripts/sarissa/sarissa_ieemu_xpath.js"/> 
+		</resource> 
+	</resources> 
+</manifest> 
