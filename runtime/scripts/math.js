@@ -1,4 +1,3 @@
-
 /*
 Copyright 2011 Newcastle University
 
@@ -223,14 +222,9 @@ var math = Numbas.math = {
 	arg: function(n)
 	{
 		if(n.complex)
-			if(n.im==0)
-				return 0;
-			else if(n.re==0)
-				return Math.PI/2;
-			else
-				return Math.atan(n.im/n.re);
+			return Math.atan2(n.im,n.re);
 		else
-			return 0;
+			return Math.atan2(0,n);
 	},
 
 	//real part of a number
