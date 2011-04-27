@@ -65,12 +65,21 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 	
 	var jme = Numbas.jme;	
 	var util = Numbas.util;
-	console.log("jsxgraph!");
+	var math = Numbas.math;
 
 	var QuestionDisplay = Numbas.display.QuestionDisplay;
 
 	QuestionDisplay.prototype.show = util.extend(QuestionDisplay.prototype.show, function() {
-		console.log("QUESTION");
+		JXG.Options.text.useMathJax = true;
+
+		var question = this.q;
+
+		var variables = {};
+		for(var x in question.variables)
+		{
+			variables[x] = question.variables[x].value;
+		}
+
 		$('jsxgraph').each(function(index) {
 			var id ='jsxgraphboard'+index;
 			var text = $(this).text();
@@ -96,19 +105,16 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 			//create board
 			var board = JXG.JSXGraph.initBoard(id,options);
 
-			Numbas.debug(language,true);
-			Numbas.debug(text,true);
 			switch(language)
 			{
 			case 'jessiescript':
 				var constr = board.construct(text);
 				break;
 			case 'javascript':
-				console.log("eval");
 				eval(text);
 				break;
 			}
-			console.log("DONE");
+			MathJax.Hub.Queue(['Typeset',MathJax.Hub,$('#'+id)[0]]);
 		});
 	});
 });

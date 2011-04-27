@@ -1,0 +1,119 @@
+{
+	// Define exam properties
+	name: Interactive graph example
+
+	extensions: [jsxgraph]
+
+	// Define questions
+	questions: [
+		{
+			name: Point of intersection
+			statement: """
+				notextile. 
+				<jsxgraph language="javascript">
+					board.create('axis',[[0.0,0.0],[1.0,0.0]]);
+					board.create('axis',[[0.0,0.0],[0.0,1.0]]);
+					var pA = board.create('point',[0,0],{name: '', face: 'x',size:7});
+					var l1 = board.create('line',[[0,variables.c1],[-variables.c1/variables.m1,0]],{straightFirst:true,straightLast:true});
+					board.create('text',[-2,-2*variables.m1+variables.c1,function(){return '\\[l_1\\]';}],{fontSize:'100%'});
+					var l2 = board.create('line',[[0,variables.c2],[-variables.c2/variables.m2,0]],{straightFirst:true,straightLast:true});
+					var sp11 = board.create('point',[0,0],{visible:false});
+					var sp12 = board.create('point',[1,0],{visible:false});
+					var sl1 = board.create('line',[sp11,sp12],{visible:false,strokeColor:'0f0'});
+					board.create('text',[-2,-2*variables.m2+variables.c2,function(){return '\\[l_2\\]';}],{fontSize:'100%'});
+					var xInput = $('#p0g0 > input');
+					var yInput = $('#p0g1 > input');
+					board.addHook(function(){
+						if(parseFloat(xInput.val())!=pA.X())
+							$('#p0g0 > input').val(pA.X()).trigger('change');
+						if(parseFloat(yInput.val())!=pA.Y())
+							$('#p0g1 > input').val(pA.Y()).trigger('change');
+					});
+					var changeX = function() {
+						var x = parseFloat(xInput.val());
+						if(util.isFloat(x))
+							pA.moveTo([x,pA.Y()]);
+					};
+					xInput.bind('change', changeX).bind('keyup',changeX);
+					var changeY = function() {
+						var y = parseFloat(yInput.val());
+						if(util.isFloat(y))
+							pA.moveTo([pA.X(),y]);
+					};
+					yInput.bind('change', changeY).bind('keyup',changeY);
+					var changeLine1 = function() {
+						var m = parseFloat($('#p1g0>input').val());
+						var c = parseFloat($('#p1g1>input').val());
+						if(util.isFloat(m) &amp;&amp; util.isFloat(c))
+						{
+							sl1.showElement();
+							sp11.moveTo([0,c]);
+							if(m==0)
+							{
+								sp12.moveTo([1,c]);
+							}
+							else
+							{
+								sp12.moveTo([-c/m,0]);
+							}
+						}
+						else
+						{
+							sl1.hideElement();
+						}
+					};
+					$('#p1g0>input,#p1g1>input').bind('keyup',changeLine1).bind('change',changeLine1);
+				</jsxgraph>
+			"""
+
+			variables: {
+				ix: "random(-1..2#0.2)"
+				iy: "random(0.4..2#0.2)*random(-1,1)"
+				m1: "random(0.2..1#0.2)*random(-1,1)"
+				c1: "iy-m1*ix"
+				m2: "-sgn(m1)*random(0.2..1#0.2)"
+				c2: "iy-m2*ix"
+			}
+
+			parts: [
+				{
+					type: gapfill
+					prompt: """
+						Enter the co-ordinates of the point of intersection of $l_1$ and $l_2$, or position the red cross over the intersection. Your answer must be correct to one decimal place.
+						
+						$\Big ($[[0]]$\, , \,$[[1]]$\Big )$
+					"""
+					marks: 1
+					gaps: [
+						{type: numberentry, minvalue: ix-0.05, maxvalue: ix+0.05, marks: 1}
+						{type: numberentry, minvalue: iy-0.05, maxvalue: iy+0.05, marks: 1}
+					]
+				}
+				{
+					type: gapfill
+					prompt: """
+						Enter the slope, $m_1$, and the intercept, $c_1$, of the line $l_1$. The line corresponding to your answer will be shown in green on the graph.
+						
+						$m_1 = \;$[[0]] $,\; c_1 = \;$[[1]]
+
+					"""
+					gaps: [
+						{type: numberentry, minvalue: "m1-0.05", maxvalue: "m1+0.05", marks: 1}
+						{type: numberentry, minvalue: "c1-0.05", maxvalue: "c1+0.05", marks: 1}
+					]
+				}
+				{
+					type: gapfill
+					prompt: """
+						Write down the equation of the line $l_1$.
+
+						$y = \;$[[0]]
+					"""
+					gaps: [
+						{type: jme, answer: "{m1}*x+{c1}", marks: 2, checkingaccuracy: 0.1}
+					]
+				}
+			]
+		}
+	]
+}
