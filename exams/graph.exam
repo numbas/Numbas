@@ -23,7 +23,7 @@
 					board.create('text',[-2,-2*variables.m2+variables.c2,function(){return '\\[l_2\\]';}],{fontSize:'100%'});
 					var xInput = $('#p0g0 > input');
 					var yInput = $('#p0g1 > input');
-					board.addHook(function(){
+					$('#'+id).bind('mouseup',function(){
 						if(parseFloat(xInput.val())!=pA.X())
 							$('#p0g0 > input').val(pA.X()).trigger('change');
 						if(parseFloat(yInput.val())!=pA.Y())
@@ -32,13 +32,13 @@
 					var changeX = function() {
 						var x = parseFloat(xInput.val());
 						if(util.isFloat(x))
-							pA.moveTo([x,pA.Y()]);
+							pA.moveTo([x,pA.Y()],200);
 					};
 					xInput.bind('change', changeX).bind('keyup',changeX);
 					var changeY = function() {
 						var y = parseFloat(yInput.val());
 						if(util.isFloat(y))
-							pA.moveTo([pA.X(),y]);
+							pA.moveTo([pA.X(),y],200);
 					};
 					yInput.bind('change', changeY).bind('keyup',changeY);
 					var changeLine1 = function() {
@@ -47,14 +47,14 @@
 						if(util.isFloat(m) &amp;&amp; util.isFloat(c))
 						{
 							sl1.showElement();
-							sp11.moveTo([0,c]);
+							sp11.moveTo([0,c],200);
 							if(m==0)
 							{
-								sp12.moveTo([1,c]);
+								sp12.moveTo([1,c],200);
 							}
 							else
 							{
-								sp12.moveTo([-c/m,0]);
+								sp12.moveTo([-c/m,0],200);
 							}
 						}
 						else

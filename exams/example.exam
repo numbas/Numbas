@@ -1,46 +1,48 @@
 {
-  // Define exam properties
-  name: My First Exam
-  duration: 1800
+	// Define exam properties
+	name: My First Exam
+	duration: 1800
 
-  resources: [example_files]
+	resources: [example_files]
 
-  // Define questions
-  questions: [
-    {
-      name: Addition and subtraction
-      statement: "Answer the following questions on addition and subtraction.
-	    !resources/example_files/Love_math_1.jpg!"
+	// Define questions
+	questions: [
+		{
+			name: Addition and subtraction
+			statement: """
+				Answer the following questions on addition and subtraction.
+				<img src="resources/example_files/Love_math_1.jpg"/>
+			"""
 
-      variables: {
-        a: random(1..9)
-        b: random(1..9)
-        c: random(1..9)
-        d: random(1..9)
-      }
+			variables: {
+				a: "random(1..9)"
+				b: "random(1..9)"
+				c: "random(1..9)"
+				d: "random(1..9)"
+			}
 
-      parts: [
-        {
-          type: numberentry
-          prompt: "What is $\var{a}+\var{b}$?"
-          marks: 1
-          answer: "{a+b}"
-        }
+			parts: [
+				{
+					type: numberentry
+					prompt: "What is $\var{a}+\var{b}$?"
+					marks: 1
+					answer: "{a+b}"
+				}
 
-        {
-          type: numberentry
-          prompt: "What is $\var{c}-\var{d}$?"
-          marks: 1
-          answer: "{c-d}"
-        }
-      ]
-      advice: "
-        In part 1 simply add the two numbers, so that
-        \[\var{a}+\var{b} = \var{a+b}.\]
+				{
+					type: numberentry
+					prompt: "What is $\var{c}-\var{d}$?"
+					marks: 1
+					answer: "{c-d}"
+				}
+			]
+			advice: """
+				In part 1 simply add the two numbers, so that
+				\[\var{a}+\var{b} = \var{a+b}.\]
 
-        In part 2 simply subtract the two numbers, so that
-        \[\var{c}-\var{d} = \var{c-d}.\]
-      "
-    }
-  ]
+				In part 2 simply subtract the two numbers, so that
+				\[\var{c}-\var{d} = \var{c-d}.\]
+			"""
+		}
+	]
 }
