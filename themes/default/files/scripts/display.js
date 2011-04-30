@@ -889,9 +889,7 @@ $.textMetrics = function(el) {
 	var styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing'];
 	$(styles).each(function() {
 		var s = this.toString();
-		$(div).css({
-			s: $(el).css(s)
-		});
+		$(div).css(s, $(el).css(s));
 	});
 
 	h = $(div).outerHeight();
