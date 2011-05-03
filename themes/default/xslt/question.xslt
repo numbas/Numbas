@@ -303,7 +303,7 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	
 	
-	<input type="text" spellcheck="false" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
+	<input type="number" step="0.1" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
 </xsl:template>
 
 <xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">
