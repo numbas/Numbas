@@ -545,6 +545,8 @@ display.PartDisplay.prototype =
 		}
 		this.restoreAnswer();
 
+		$(this.warningDiv).mouseover(function(){$(this).find('.partwarning').show();}).mouseout(function(){$(this).find('.partwarning').hide()});
+
 		if(Numbas.exam.showTotalMark && this.p.marks>0)
 			this.htmlContext().find('#marks').html(this.p.marks+(this.p.marks==1 ? ' mark' : ' marks'));
 		else
