@@ -325,6 +325,10 @@ div.part {
 	border:1px;
 }
 
+.warningcontainer {
+	display:none;
+}
+
 .partwarning {
 	color:red;
 	font-size: 1em;

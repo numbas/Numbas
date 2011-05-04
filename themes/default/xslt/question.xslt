@@ -100,7 +100,7 @@ Copyright 2011 Newcastle University
 		<xsl:apply-templates select="partdata">
 			<xsl:with-param name="path" select="$path"/>
 		</xsl:apply-templates>
-		<span class="partwarning" id="warning-{$path}"></span>
+		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="count(part) > 0">
 			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn" onclick="Numbas.controls.showSteps('{$path}')"></input></div>
 		</xsl:if>

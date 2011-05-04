@@ -518,14 +518,14 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).append('<span>'+warning+'</span>').show();
+		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning+'</span>');
 		Numbas.display.typeset();
 	},
 
 	//remove all previously displayed warnings
 	removeWarnings: function()
 	{
-		this.htmlContext().find('.partwarning').html('').hide();
+		$(this.warningDiv).hide().find('.partwarning').html('');
 	},
 
 	//returns a jquery selector for the HTML div containing this part's things
