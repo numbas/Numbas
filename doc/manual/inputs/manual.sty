@@ -1,0 +1,159 @@
+%Copyright 2011 Newcastle University
+%
+%   Licensed under the Apache License, Version 2.0 (the "License");
+%   you may not use this file except in compliance with the License.
+%   You may obtain a copy of the License at
+%
+%       http://www.apache.org/licenses/LICENSE-2.0
+%
+%   Unless required by applicable law or agreed to in writing, software
+%   distributed under the License is distributed on an "AS IS" BASIS,
+%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%   See the License for the specific language governing permissions and
+%   limitations under the License.
+
+% To use this titlepage you need a line which says
+% \manualtitle{title}{name}{image}{date}.  Any other changes can be made below.
+\newcommand{\manualtitle}[4]{%
+ \begin{titlepage}
+   \begin{tabular}{c}
+     \vspace{30mm}
+   \end{tabular}
+   \begin{center}
+     \begin{tabular}{c}
+       \hspace{2mm}
+       \scalebox{0.75}{\includegraphics{#1}}
+     \end{tabular}
+     \vspace{1cm}\\
+     \Large{\sc{\hspace{2mm}#2}}
+     \vspace{1cm}\\
+     \emph{\small
+       School of Mathematics \& Statistics\\
+       Newcastle University\\
+       Newcastle upon Tyne\\
+       United Kingdom\\
+     }
+     \vspace{1cm}\Large{#3}\\         
+     \vspace{1cm}
+     \tiny{\copyright Newcastle University 2010--2011}
+   \end{center}
+ \end{titlepage}
+}
+%------------------------------------------------------------------------------
+
+% Any external packages.
+\usepackage[round]{natbib}              % BiBTeX style
+\usepackage{hyperref}
+\usepackage{fancyhdr}                   % Fancy headers
+\usepackage[centertags]{amsmath}        % AMS Stuff
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{newlfont}                   % Special fonts
+\usepackage{psfrag}                     % PSFrag (LaTeX style labels)
+\usepackage{dcolumn}                    % Line up at decimal point in a table
+\usepackage{fancyvrb}                   % Better verbatim environment
+\usepackage{graphicx}                   % Graphics stuff
+\usepackage{pictexwd}                   % Line drawings
+\usepackage{color}                      % Colours
+\usepackage{makeidx}                    % Enable making an index
+\usepackage[small]{caption}             % Captions
+\usepackage[it]{subfigure}              % Subfigures
+\usepackage{enumerate}                  % Enumerated lists
+\usepackage{mathrsfs}                   % Serif fonts
+\usepackage{longtable}                  % Stretch tables
+\usepackage{lscape}                     % Landscape mode
+\usepackage{listings}                   % Code listings
+\usepackage{afterpage}                  % Clear a page
+\usepackage[figuresright]{rotating}     % Rotate a figure
+\usepackage{setspace}                   % Spacing tools
+\usepackage{multirow}                   % Multirow cells in a table
+\usepackage{bigstrut}                   % Alter table row height
+\usepackage{upquote}                    % Upright quotes in verbatim
+
+%----------------------------------------------------------------------------
+% Fancy headers.  See the fancyhdr documentation of a full explanation of what
+% these are.  R=Right hand side of page, L=Left hand side of page
+\pagestyle{fancy}
+\fancyhead[R]{\slshape\nouppercase\leftmark}
+\fancyhead[L]{}
+%------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------
+% Make all upper-case Greek letters slanted.  Just comment these if you prefer
+% upright Greek letters.
+\DeclareMathSymbol{\Gamma}{\mathalpha}{letters}{"00}
+\DeclareMathSymbol{\Delta}{\mathalpha}{letters}{"01}
+\DeclareMathSymbol{\Theta}{\mathalpha}{letters}{"02}
+\DeclareMathSymbol{\Lambda}{\mathalpha}{letters}{"03}
+\DeclareMathSymbol{\Xi}{\mathalpha}{letters}{"04}
+\DeclareMathSymbol{\Pi}{\mathalpha}{letters}{"05}
+\DeclareMathSymbol{\Sigma}{\mathalpha}{letters}{"06}
+\DeclareMathSymbol{\Upsilon}{\mathalpha}{letters}{"07}
+\DeclareMathSymbol{\Phi}{\mathalpha}{letters}{"08}
+\DeclareMathSymbol{\Psi}{\mathalpha}{letters}{"09}
+\DeclareMathSymbol{\Omega}{\mathalpha}{letters}{"0A}
+%------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------
+% Various miscellaneous new commands.
+\newcommand{\etal}{\mbox{\textit{et al.\ }}}
+\newcommand{\pa}{\partial}
+\newcommand{\total}{\mathrm{d}}
+\newcommand{\red}{\textcolor{red}}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\codevar}[1]{\texttt{#1}}
+\newcommand{\codefile}[1]{\texttt{#1}}
+\newcommand{\codeobject}[1]{\texttt{#1}}
+\newcommand{\codecontent}[1]{\texttt{#1}}
+\newcommand{\codeprop}[1]{\texttt{#1}}
+\newcommand{\codepropreq}[1]{\textit{\texttt{#1}}}
+\newcommand{\codebutton}[1]{\textit{#1}}
+\newcommand{\codeexample}[1]{\textit{#1}}
+\newcommand{\emstr}{\textit{empty string}}
+\newcommand{\nodef}{\textit{no default}}
+\newcommand{\numbas}{Numbas}
+
+\newcommand\etc{etc.\ }
+\newcommand\eg{e.g.\ }
+\newcommand\ie{i.e.\ }
+\newcommand{\ednote}[1]{\marginpar{\textcolor{red}{\footnotesize{#1}}}}
+
+%------------------------------------------------------------------------------
+% Array strut to make delimiters come out right size both ends
+\newsavebox{\astrutbox}
+\sbox{\astrutbox}{\rule[-5pt]{0pt}{20pt}}
+\newcommand{\astrut}{\usebox{\astrutbox}}
+%------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------
+% Make a DRAFT watermark across the page
+\usepackage{type1cm,eso-pic}
+
+\newcommand{\setdraft}{
+  \makeatletter
+  \AddToShipoutPicture{
+    \setlength{\@tempdimb}{.5\paperwidth}
+    \setlength{\@tempdimc}{.5\paperheight}
+    \setlength{\unitlength}{1pt}
+    \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc) {
+      \makebox(0,0){\rotatebox{55}{\textcolor[gray]{0.85}
+      {\fontsize{5cm}{5cm}\normalfont\selectfont{DRAFT}}}}
+    }
+  }
+  \makeatother
+}
+%------------------------------------------------------------------------------
+
+%------------------------------------------------------------------------------
+% Licence page
+\makeatletter
+\newenvironment{licence}{
+  \titlepage\null\vfil
+  \@beginparpenalty\@lowpenalty
+  }{
+  \par\vfil\null\endtitlepage
+}
+\makeatother
+%------------------------------------------------------------------------------
