@@ -28,247 +28,12 @@ var Question = Numbas.Question = function( xml, number, loading )
 {
 	var q = this;
 	q.xml = xml;
+	q.originalXML = q.xml;
 	q.number = number;
 
-	var myfunctions = q.functions = {};
-	var tmpFunctions = [];
-	job(function()
-	{
-		//get question's name
-		tryGetAttribute(q,'.','name');
+	this.makeVariables(loading);
 
-		if(loading)
-			var qobj = Numbas.store.loadQuestion(q);
-
-		q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
-
-		//work out functions
-		var functionNodes = q.xml.selectNodes('functions/function');
-
-		//first pass: get function names and types
-		for(var i=0; i<functionNodes.length; i++)
-		{
-			var name = functionNodes[i].getAttribute('name').toLowerCase();
-
-			var definition = functionNodes[i].getAttribute('definition');
-
-			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-			var outcons = Numbas.jme.types[outtype];
-
-			var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-			var paramNames = [];
-			var intype = [];
-			for(var j=0; j<parameterNodes.length; j++)
-			{
-				var paramName = parameterNodes[j].getAttribute('name');
-				var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
-				paramNames.push(paramName);
-				var incons = Numbas.jme.types[paramType];
-				intype.push(incons);
-			}
-
-			var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
-			tmpfunc.definition = definition;
-			tmpfunc.paramNames = paramNames;
-
-			if(q.functions[name]===undefined)
-				q.functions[name] = [];
-			q.functions[name].push(tmpfunc);
-			tmpFunctions.push(tmpfunc);
-		}
-	});
-
-	job(function()
-	{
-		//second pass: compile functions
-		for(var i=0; i<tmpFunctions.length; i++)
-		{
-			tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,q.functions);
-
-			tmpFunctions[i].evaluate = function(args,variables,functions)
-			{
-				nvariables = Numbas.util.copyobj(variables);
-
-				for(var j=0;j<args.length;j++)
-				{
-					nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
-				}
-				return jme.evaluate(this.tree,nvariables,functions);
-			}
-		}
-	});
-
-	job(function()
-	{
-		//evaluate question variables
-		q.variables = {};
-		if(loading)
-		{
-			for(var x in qobj.variables)
-			{
-				q.variables[x] = qobj.variables[x];
-			}
-		}
-		else
-		{
-			var variableNodes = q.xml.selectNodes('variables/variable');	//get variable definitions out of XML
-
-			//list of variable names to ignore because they don't make sense
-			var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
-
-			//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-			var todo = {};
-			for( var i=0; i<variableNodes.length; i++ )
-			{
-				var name = variableNodes[i].getAttribute('name').toLowerCase();
-				if(!ignoreVariables.contains(name))
-				{
-					var value = variableNodes[i].getAttribute('value');
-
-					var vars = [];
-					//get vars referred to in string definitions like "hi {name}"
-					/*
-					var stringvars = value.split(/{(\w+)}/g);
-					for(var j=1;j<stringvars.length;j+=2)
-					{
-						if(!vars.contains(stringvars[j]))
-							vars.push(stringvars[j].toLowerCase());
-					}
-					*/
-
-					var tree = jme.compile(value,q.functions);
-					vars = vars.merge(jme.findvars(tree));
-					todo[name]={
-						tree: tree,
-						vars: vars
-					};
-				}
-			}
-			function compute(name,todo,variables,path)
-			{
-				if(variables[name]!==undefined)
-					return;
-
-				if(path===undefined)
-					path=[];
-
-
-				if(path.contains(name))
-				{
-					alert("Circular variable reference in question "+name+' '+path);
-					return;
-				}
-
-				var v = todo[name];
-
-				if(v===undefined)
-					throw(new Error("Variable "+name+" not defined."));
-
-				//work out dependencies
-				for(var i=0;i<v.vars.length;i++)
-				{
-					var x=v.vars[i];
-					if(variables[x]===undefined)
-					{
-						var newpath = path.slice(0);
-						newpath.splice(0,0,name);
-						compute(x,todo,variables,newpath);
-					}
-				}
-
-				variables[name] = jme.evaluate(v.tree,variables,myfunctions);
-			}
-			for(var x in todo)
-			{
-				compute(x,todo,q.variables);
-			}
-		}
-
-	});
-
-	job(function()
-	{
-		//convert mathml to string expressions
-		var mathsNodes = q.xml.selectNodes('descendant::math');
-		for( i=0; i<mathsNodes.length; i++ )
-		{
-			if(mathsNodes[i].selectNodes('*').length)
-			{
-				var text = jme.MathMLToJME(mathsNodes[i]);
-			}
-			else
-			{
-				var text = Numbas.xml.getTextContent(mathsNodes[i]);
-			}
-			for( var j=mathsNodes[i].childNodes.length-1; j>=0; j-- )
-			{
-				mathsNodes[i].removeChild( mathsNodes[i].childNodes[j] );
-			}
-			var stext = jme.subvars( text, q.variables, q.functions );
-			mathsNodes[i].appendChild( Numbas.xml.examXML.createTextNode(stext) );
-		}
-
-		//substitute variables into content nodes
-		var serializer = new XMLSerializer();
-		var parser = new DOMParser();
-		var contents = q.xml.selectNodes('descendant::content');
-
-		//filter to get non-whitespace text nodes 
-		function tnf(){ return ((this.nodeType == Node.TEXT_NODE) && !(/^\s*$/.test(this.nodeValue))); }
-
-		//do contentsubvars on all content
-		for(var i=0;i<contents.length;i++)
-		{
-			//get all non-whitespace text nodes
-			var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*').contents().filter(tnf));
-
-			//filter out script nodes
-			textNodes = textNodes.filter(function(){return !$(this).parent().attr('language')});
-
-			//run contentsubvars on the collection of text nodes
-			textNodes.each(function(){
-					var old = this.nodeValue;
-					//this.nodeValue = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
-					var newtext = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
-					newtext = util.escapeHTML(newtext);
-					if(newtext!=old)
-					{
-						//parse new content
-						var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
-						if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
-						{
-							throw(new Error("Error substituting content: \n"+Sarissa.getParseErrorText(newNode)+'\n\n'+newtext));
-						}
-
-						//copy new content to same place as original text
-						var p = this.parentNode;
-						Sarissa.copyChildNodes(newNode,p,true);
-						var t = this;
-
-						//move all the new content next to original text
-						$(p).find('tempContent').contents().each(function(){
-							p.insertBefore(this,t);
-						});
-
-						//remove tempContent tag and original text
-						$(p).find('tempContent').remove();
-						$(this).remove();
-					}
-			});
-		}
-
-
-		//turn content maths into LaTeX
-		mathsNodes = q.xml.selectNodes('descendant::content/descendant::math');
-		for( i=0; i<mathsNodes.length; i++ )
-		{
-			var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-			var settingsString = mathsNodes[i].getAttribute('simplificationsettings') || '111111111111111';
-			var simplificationSettings = jme.display.parseSimplificationSettings( settingsString );
-			var tex = jme.display.exprToLaTeX(expr, simplificationSettings);
-			Numbas.xml.setTextContent( mathsNodes[i], tex );
-		}
-	});
+	this.subvars();
 
 	job(function()
 	{
@@ -308,6 +73,259 @@ Question.prototype =
 	partDictionary: {},		//dictionary mapping part addresses to objects
 
 	display: undefined,		//display code
+
+	makeVariables: function(loading)
+	{
+		var q = this;
+		var myfunctions = q.functions = {};
+		var tmpFunctions = [];
+		job(function()
+		{
+			//get question's name
+			tryGetAttribute(q,'.','name');
+
+			if(loading)
+				var qobj = Numbas.store.loadQuestion(q);
+
+			q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
+
+			//work out functions
+			var functionNodes = q.xml.selectNodes('functions/function');
+
+			//first pass: get function names and types
+			for(var i=0; i<functionNodes.length; i++)
+			{
+				var name = functionNodes[i].getAttribute('name').toLowerCase();
+
+				var definition = functionNodes[i].getAttribute('definition');
+
+				var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
+				var outcons = Numbas.jme.types[outtype];
+
+				var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
+				var paramNames = [];
+				var intype = [];
+				for(var j=0; j<parameterNodes.length; j++)
+				{
+					var paramName = parameterNodes[j].getAttribute('name');
+					var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
+					paramNames.push(paramName);
+					var incons = Numbas.jme.types[paramType];
+					intype.push(incons);
+				}
+
+				var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
+				tmpfunc.definition = definition;
+				tmpfunc.paramNames = paramNames;
+
+				if(q.functions[name]===undefined)
+					q.functions[name] = [];
+				q.functions[name].push(tmpfunc);
+				tmpFunctions.push(tmpfunc);
+			}
+		});
+
+		job(function()
+		{
+			//second pass: compile functions
+			for(var i=0; i<tmpFunctions.length; i++)
+			{
+				tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,q.functions);
+
+				tmpFunctions[i].evaluate = function(args,variables,functions)
+				{
+					nvariables = Numbas.util.copyobj(variables);
+
+					for(var j=0;j<args.length;j++)
+					{
+						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+					}
+					return jme.evaluate(this.tree,nvariables,functions);
+				}
+			}
+		});
+
+		job(function()
+		{
+			//evaluate question variables
+			q.variables = {};
+			if(loading)
+			{
+				for(var x in qobj.variables)
+				{
+					q.variables[x] = qobj.variables[x];
+				}
+			}
+			else
+			{
+				var variableNodes = q.xml.selectNodes('variables/variable');	//get variable definitions out of XML
+
+				//list of variable names to ignore because they don't make sense
+				var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
+
+				//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
+				var todo = {};
+				for( var i=0; i<variableNodes.length; i++ )
+				{
+					var name = variableNodes[i].getAttribute('name').toLowerCase();
+					if(!ignoreVariables.contains(name))
+					{
+						var value = variableNodes[i].getAttribute('value');
+
+						var vars = [];
+						//get vars referred to in string definitions like "hi {name}"
+						/*
+						var stringvars = value.split(/{(\w+)}/g);
+						for(var j=1;j<stringvars.length;j+=2)
+						{
+							if(!vars.contains(stringvars[j]))
+								vars.push(stringvars[j].toLowerCase());
+						}
+						*/
+
+						var tree = jme.compile(value,q.functions);
+						vars = vars.merge(jme.findvars(tree));
+						todo[name]={
+							tree: tree,
+							vars: vars
+						};
+					}
+				}
+				function compute(name,todo,variables,path)
+				{
+					if(variables[name]!==undefined)
+						return;
+
+					if(path===undefined)
+						path=[];
+
+
+					if(path.contains(name))
+					{
+						alert("Circular variable reference in question "+name+' '+path);
+						return;
+					}
+
+					var v = todo[name];
+
+					if(v===undefined)
+						throw(new Error("Variable "+name+" not defined."));
+
+					//work out dependencies
+					for(var i=0;i<v.vars.length;i++)
+					{
+						var x=v.vars[i];
+						if(variables[x]===undefined)
+						{
+							var newpath = path.slice(0);
+							newpath.splice(0,0,name);
+							compute(x,todo,variables,newpath);
+						}
+					}
+
+					variables[name] = jme.evaluate(v.tree,variables,myfunctions);
+				}
+				for(var x in todo)
+				{
+					compute(x,todo,q.variables);
+				}
+			}
+
+		});
+	},
+
+	subvars: function()
+	{
+		var q = this;
+		q.xml = $(q.originalXML).clone()[0];	//get a fresh copy of the original XML, to sub variables into
+
+		job(function()
+		{
+			//convert mathml to string expressions
+			var mathsNodes = q.xml.selectNodes('descendant::math');
+			for( i=0; i<mathsNodes.length; i++ )
+			{
+				if(mathsNodes[i].selectNodes('*').length)
+				{
+					var text = jme.MathMLToJME(mathsNodes[i]);
+				}
+				else
+				{
+					var text = Numbas.xml.getTextContent(mathsNodes[i]);
+				}
+				for( var j=mathsNodes[i].childNodes.length-1; j>=0; j-- )
+				{
+					mathsNodes[i].removeChild( mathsNodes[i].childNodes[j] );
+				}
+				var stext = jme.subvars( text, q.variables, q.functions );
+				mathsNodes[i].appendChild( Numbas.xml.examXML.createTextNode(stext) );
+			}
+
+			//substitute variables into content nodes
+			var serializer = new XMLSerializer();
+			var parser = new DOMParser();
+			var contents = q.xml.selectNodes('descendant::content');
+
+			//filter to get non-whitespace text nodes 
+			function tnf(){ return ((this.nodeType == Node.TEXT_NODE) && !(/^\s*$/.test(this.nodeValue))); }
+
+			//do contentsubvars on all content
+			for(var i=0;i<contents.length;i++)
+			{
+				//get all non-whitespace text nodes
+				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*').contents().filter(tnf));
+
+				//filter out script nodes
+				textNodes = textNodes.filter(function(){return !$(this).parent().attr('language')});
+
+				//run contentsubvars on the collection of text nodes
+				textNodes.each(function(){
+						var old = this.nodeValue;
+						//this.nodeValue = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
+						var newtext = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
+						newtext = util.escapeHTML(newtext);
+						if(newtext!=old)
+						{
+							//parse new content
+							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
+							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
+							{
+								throw(new Error("Error substituting content: \n"+Sarissa.getParseErrorText(newNode)+'\n\n'+newtext));
+							}
+
+							//copy new content to same place as original text
+							var p = this.parentNode;
+							Sarissa.copyChildNodes(newNode,p,true);
+							var t = this;
+
+							//move all the new content next to original text
+							$(p).find('tempContent').contents().each(function(){
+								p.insertBefore(this,t);
+							});
+
+							//remove tempContent tag and original text
+							$(p).find('tempContent').remove();
+							$(this).remove();
+						}
+				});
+			}
+
+
+		});
+
+		job(function() {
+			//turn content maths into LaTeX
+			mathsNodes = q.xml.selectNodes('descendant::content/descendant::math');
+			for( i=0; i<mathsNodes.length; i++ )
+			{
+				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
+				var settingsString = mathsNodes[i].getAttribute('simplificationsettings') || '111111111111111';
+				var simplificationSettings = jme.display.parseSimplificationSettings( settingsString );
+				var tex = jme.display.exprToLaTeX(expr, simplificationSettings);
+				Numbas.xml.setTextContent( mathsNodes[i], tex );
+			}
+		});
+	},
 
 	//get the part object corresponding to a path
 	getPart: function(path)
