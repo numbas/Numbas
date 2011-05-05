@@ -938,6 +938,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
+	tryGetAttribute(settings,'answer/inputstep','value','inputStep',{xml:this.xml});
 	tryGetAttribute(settings,'answer/minvalue','value','minvalue',{xml: this.xml, string:true});
 	tryGetAttribute(settings,'answer/maxvalue','value','maxvalue',{xml: this.xml, string:true});
 	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
@@ -963,6 +964,7 @@ NumberEntryPart.prototype =
 
 	settings:
 	{
+		inputStep: 1,
 		minvalue: 0,
 		maxvalue: 0,
 		integerAnswer: false,//must answer be an integer?
