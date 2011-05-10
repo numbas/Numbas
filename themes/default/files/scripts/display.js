@@ -518,14 +518,14 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).append('<span>'+warning+'</span>').show();
+		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning+'</span>');
 		Numbas.display.typeset();
 	},
 
 	//remove all previously displayed warnings
 	removeWarnings: function()
 	{
-		this.htmlContext().find('.partwarning').html('').hide();
+		$(this.warningDiv).hide().find('.partwarning').html('');
 	},
 
 	//returns a jquery selector for the HTML div containing this part's things
@@ -544,6 +544,8 @@ display.PartDisplay.prototype =
 			this.showSteps();
 		}
 		this.restoreAnswer();
+
+		$(this.warningDiv).mouseover(function(){$(this).find('.partwarning').show();}).mouseout(function(){$(this).find('.partwarning').hide()});
 
 		if(Numbas.exam.showTotalMark && this.p.marks>0)
 			this.htmlContext().find('#marks').html(this.p.marks+(this.p.marks==1 ? ' mark' : ' marks'));

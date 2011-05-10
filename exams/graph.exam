@@ -34,13 +34,13 @@
 						if(util.isFloat(x))
 							pA.moveTo([x,pA.Y()],200);
 					};
-					xInput.bind('change', changeX).bind('keyup',changeX);
+					xInput.bind('change', changeX).bind('input',changeX);
 					var changeY = function() {
 						var y = parseFloat(yInput.val());
 						if(util.isFloat(y))
 							pA.moveTo([pA.X(),y],200);
 					};
-					yInput.bind('change', changeY).bind('keyup',changeY);
+					yInput.bind('change', changeY).bind('input',changeY);
 					var changeLine1 = function() {
 						var m = parseFloat($('#p1g0>input').val());
 						var c = parseFloat($('#p1g1>input').val());
@@ -62,7 +62,7 @@
 							sl1.hideElement();
 						}
 					};
-					$('#p1g0>input,#p1g1>input').bind('keyup',changeLine1).bind('change',changeLine1);
+					$('#p1g0>input,#p1g1>input').bind('input',changeLine1).bind('change',changeLine1);
 				</jsxgraph>
 			"""
 

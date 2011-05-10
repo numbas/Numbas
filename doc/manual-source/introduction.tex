@@ -1,0 +1,116 @@
+%Copyright 2011 Newcastle University
+%
+%   Licensed under the Apache License, Version 2.0 (the "License");
+%   you may not use this file except in compliance with the License.
+%   You may obtain a copy of the License at
+%
+%       http://www.apache.org/licenses/LICENSE-2.0
+%
+%   Unless required by applicable law or agreed to in writing, software
+%   distributed under the License is distributed on an "AS IS" BASIS,
+%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%   See the License for the specific language governing permissions and
+%   limitations under the License.
+
+\begin{chapter}{\label{cha:introduction}Introduction}
+  \numbas\ is a web-based e-assessment system developed at Newcastle
+  University.  It consists of a set of tools which produce SCORM-compliant exam
+  packages (\url{http://scorm.com/}).
+
+  \section{Features}
+  \begin{itemize}
+    \item Simple installation.  Unpack \numbas\ anywhere on your computer.
+    \item Web-based, so it can run on a wide range of computers.  In
+      particular, Windows, Mac and Linux operating systems are supported, under
+      Internet Explorer 8+, Mozilla Firefox 2.5+, Google Chrome and Safari.
+    \item Runs entirely on the client computer in JavaScript.  This means there
+      is no backend server, and exams can be deployed in a variety of
+      locations, for example, in Virtual Learning Environments (VLEs) or
+      Learning Management Systems (LMS) such as Blackboard, DVDs, and even
+      stand-alone on the web.
+    \item Extensive support for questions of a mathematical nature. Answers to
+      questions can be complicated mathematical expressions.
+    \item Support for \LaTeX, using MathJax (\url{http://www.mathjax.org/}).
+    \item Write questions using simple markup with any text editor.
+    \item Questions can be fully randomised.
+    \item Because the exam runs in the browser, rich content such as videos and
+      interactive graphs can be included.
+    \item SCORM 2004 standards compliant, so the exams can be run in a VLE
+      which supports this standard.
+    \item Support for themes to change the look and user interface of exams.
+    \item Support for extensions to add new features, such as new question
+      types, or mathematical and statistical libraries.
+  \end{itemize}
+
+  \section{System requirements}
+  \numbas\ has modest system requirements, whether you are running an
+  exam or if you want to author questions.
+  %
+  \begin{itemize}
+    \item A web browser on Windows, Linux, or Mac.  \numbas\ has been tested
+      and is known to work with Internet Explorer (versions 8 and higher),
+      Mozilla Firefox (versions 2.5 and higher), Google Chrome, and Safari.
+    \item If you wish to author questions, you will need a text editor, and an
+      installation of the Python programming language
+      (\url{http://www.python.org/}), version 3.1 or higher.
+  \end{itemize}
+  %
+  \subsection{\label{sec:mathjax_fonts}Important information about MathJax}
+  \numbas\ uses MathJax to render mathematics using native web fonts, which are
+  supported by all modern browsers.  Due to a security setting in Mozilla
+  Firefox, web fonts cannot be loaded by the exam when it is run locally within
+  the browser (\ie not from a web server), and MathJax falls back to rendering
+  mathematics using images, which is slower.  (The layout of content on the
+  page is not affected.)  This can be remedied, however, by installing a local
+  copy of MathJax.  See appendix~\ref{cha:scorm} on SCORM (specifically
+  \S\ref{sec:local_mathjax}).
+
+  \section{\numbas\ structure}
+  \numbas\ can be unpacked anywhere on your system, and does not require
+  any further installation.  Once unpacked, the directory structure is as follows.
+  %
+  \begin{description}
+    \item[bin:] Python scripts for compiling an exam.
+    \item[doc:] The documentation for \numbas.
+    \item[exams:] Files which describe your exams.
+    \item[extensions:] You can extend the functionality of \numbas\ by writing
+      JavaScript files and putting them in this directory.
+    \item[output:] Once an exam is compiled, the output goes in this directory.
+    \item[runtime:] The core JavaScript files which must be included with every \numbas\ exam.
+    \item[scormfiles:] Additional files necessary to create a SCORM-compliant
+      exam --- see appendix~\ref{cha:scorm}.
+    \item[themes:] The look and feel of an exam can be
+      customised by creating themes. Themes should go in this directory.
+  \end{description}
+
+  \section{Organisation of this manual}
+  The manual is designed to be read from beginning to end.  Each chapter builds
+  on the last.  Chapters should not be skipped, otherwise certain concepts are
+  unlikely to make sense.
+
+  The next chapter --- chapter~\ref{cha:quickstart} --- is intended as a quick
+  start guide, by the end of which you should have a fully functioning exam,
+  using the simple example exam provided.  Subsequent chapters explain \numbas\
+  in detail.
+  \begin{itemize}
+    \item Chapter~\ref{cha:examformat} describes the basics of the markup used
+      to construct exams.
+    \item Chapter~\ref{cha:exam_object} describes the \codeobject{exam} object,
+      which is used to define all aspects of an exam.
+    \item Chapter~\ref{cha:question_object} describes the \codeobject{question}
+      object, which is used to define questions with an exam.
+    \item Chapter~\ref{cha:part_object} describes the \codeobject{part} object.
+      Each question in your exam must have a part; this object is used to
+      define the properties of a question part.
+    \item Chapter~\ref{cha:content_blocks} describes content blocks.  These are
+      used for prompting students to do something, and for the display of
+      various aspects of the exam.
+    \item Chapter~\ref{cha:question_parts} describes the part types which can
+      be used within a question.
+    \item Chapter~\ref{cha:jme_syntax} describes the Judged Mathematical
+      Expression syntax, which is used to define variables, functions, and the
+      answers to the JME part type.
+    \item Appendix~\ref{cha:scorm} explains how to produce SCORM objects, which
+      could be included in a VLE, such as Blackboard.
+  \end{itemize}
+\end{chapter}

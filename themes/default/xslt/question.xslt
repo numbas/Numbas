@@ -100,7 +100,7 @@ Copyright 2011 Newcastle University
 		<xsl:apply-templates select="partdata">
 			<xsl:with-param name="path" select="$path"/>
 		</xsl:apply-templates>
-		<span class="partwarning" id="warning-{$path}"></span>
+		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="count(part) > 0">
 			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn" onclick="Numbas.controls.showSteps('{$path}')"></input></div>
 		</xsl:if>
@@ -302,8 +302,7 @@ Copyright 2011 Newcastle University
 <xsl:template match="partdata[@type='numberentry' or @type='CUEdt.NumberEntryPart']">
 	<xsl:param name="path"/>
 	
-	
-	<input type="number" step="0.1" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
+	<input type="number" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
 </xsl:template>
 
 <xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">

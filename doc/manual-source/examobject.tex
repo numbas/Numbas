@@ -1,0 +1,412 @@
+%Copyright 2011 Newcastle University
+%
+%   Licensed under the Apache License, Version 2.0 (the "License");
+%   you may not use this file except in compliance with the License.
+%   You may obtain a copy of the License at
+%
+%       http://www.apache.org/licenses/LICENSE-2.0
+%
+%   Unless required by applicable law or agreed to in writing, software
+%   distributed under the License is distributed on an "AS IS" BASIS,
+%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%   See the License for the specific language governing permissions and
+%   limitations under the License.
+
+\begin{chapter}{\label{cha:exam_object}The exam object}
+  The fundamental data structure is the \codeobject{exam} object, containing
+  all the data necessary to define an exam.  This chapter describes the \codeobject{exam} object, and the data types and objects which can be used
+  within it.
+
+  By default, all object properties are optional, and if they are not present
+  in the exam file, they will take their default values.
+  Table~\ref{tab:exam_object} describes the properties of the exam itself.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{18em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{name} & The name of the exam as it appears at the top of the
+      page. & \verb"Untitled exam" \\
+      \codeprop{duration} & The time allowed for the exam, in seconds.  A value
+      of 0 means there is no time limit. & \verb"0" \\
+      \codeprop{percentpass} & The minimum percentage score to be classified as
+      a pass. & \verb"0" \\
+      \codeprop{shufflequestions} & Determines whether the question order
+      should be randomised. & \verb"false" \\
+      \codeprop{navigation} & An object defining navigation rules, \ie how the
+      student is allowed to move between questions (see
+      \S\ref{sec:navigation}). & \verb"{}" \\
+      \codeprop{timing} & An object defining the warning messages shown to the
+      student when they have run out of time, or when a certain amount of time
+      is left (see \S\ref{sec:timing}). & \verb"{}" \\
+      \codeprop{feedback} & An object defining feedback rules (see
+      \S\ref{sec:feedback}). & \verb"{}" \\
+      \codeprop{resources} & An array of directories or file names (relative to
+      the directory containing the exam) to be included in the resources
+      directory of a compiled exam (see \S\ref{sec:resources}). & \verb"[]" \\
+      \codepropreq{questions} & An array of \codeobject{question} objects (see
+      chapter~\ref{cha:question_object}). & \nodef \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:exam_object}
+    The valid properties of an exam.  The \codeprop{questions} property is
+    required, as denoted by the italic typeface.
+    }
+  \end{table}
+
+  \section{\label{sec:event_object}Event object}
+  One of the properties of an object might be an \codeobject{event} object.
+  The \codeobject{event} object defines what action to take when a particular
+  event occurs.  Table~\ref{tab:event_object} describes the properties of the
+  \codeobject{event} object.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{action} & What to do when a particular event occurs (see
+      below).  & \verb"None" \\
+      \codeprop{message} & The message to display when an event occurs,
+      providing \codeprop{action} is not \verb"None". & \emstr \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:event_object}
+      The valid properties of an event object.
+    }
+  \end{table}
+
+  The \codeprop{action} property can take various values, depending on the
+  context under which the \codeobject{event} object appears.  The permissible
+  values are described elsewhere, where an \codeobject{event} object is a
+  property of another object.
+
+  \section{\label{sec:navigation}Navigation}
+  It is possible to control how and when students are allowed to move between
+  questions, for example, whether they are allowed to return to a question once
+  they have completed it, whether they can jump between questions at will, or
+  whether they must complete a question before moving on to another one.
+
+  Navigation is an \codeobject{exam} property, and is controlled by the
+  \codeobject{navigation} object.  A simple example might be the following:
+  %
+  \begin{Verbatim}
+    navigation: {
+      reverse: false
+      browse: false
+    }
+  \end{Verbatim}
+  %
+  which means that the student is not allowed to return to a previous question
+  (\codeprop{reverse}), and is not allowed to jump between questions at will
+  (\codeprop{browse}), so the student can only move forward through the exam.
+  By default, both of these properties are \verb"true".
+
+  Table~\ref{tab:navigation_object} describes the properties of the
+  \codeobject{navigation} object.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{reverse} & Whether the student is allowed to move to the
+      previous question. & \verb"true" \\
+      \codeprop{browse} & Whether the student is allowed to move to any
+      question, by using the question list. & \verb"true" \\
+      \codeprop{onadvance} & An \codeobject{event} object describing what to do
+      when a student attempts to move on to the next question, without
+      completing the current question. &
+      \mbox{see \S\ref{sec:nav_events}} \\
+      \codeprop{onreverse} & An \codeobject{event} object describing what to do
+      when a student attempts to move to the previous question, without
+      completing the current question. &
+      \mbox{see \S\ref{sec:nav_events}} \\
+      \codeprop{onmove} & An \codeobject{event} object describing what to do
+      when a student attempts to move on to any other question, without
+      completing the current question. &
+      \mbox{see \S\ref{sec:nav_events}} \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:navigation_object}
+      The valid properties of a navigation object.
+    }
+  \end{table}
+
+  \subsection{\label{sec:nav_events}Navigation events}
+  The \codeprop{onadvance}, \codeprop{onreverse}, and \codeprop{onmove}
+  properties are \codeobject{event} objects (see \S\ref{sec:event_object}),
+  which determine what action should be taken when the student attempts to
+  navigate away from the current question, having not completed the
+  current question.  They take the default value of
+  %
+  \begin{Verbatim}
+    { action: none, message: "" }
+  \end{Verbatim}
+  %
+  so the student is allowed to move back or forward to another question, or
+  jump between questions in the question list unhindered.
+
+  The permissible values for the \codeprop{action} property of the
+  \codeobject{event} objects are:
+  %
+  \begin{itemize}
+    \item \verb"none": do nothing;
+    \item \verb"warnifunattempted": warn the student that they have not
+      completed the current question, but move on anyway;
+    \item \verb"preventifunattempted": warn the student that they have not
+      completed the current question, and do not allow the student to move on
+      to the next question.
+  \end{itemize}
+
+  \section{\label{sec:timing}Timing}
+  If the assignment is timed, by setting the exam property \codeprop{duration}
+  to a non-zero value, then the \codeobject{timing} object can be used to
+  define warning messages shown to the student when a certain amount of time is
+  left, or when the time has expired.  Table~\ref{tab:timing_object} describes
+  the valid properties of the \codeobject{timing} object.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{timeout} & An \codeobject{event} object describing what to do
+      when the student has run out of time. & see
+      \mbox{\S\ref{sec:timing_events}} \\
+      \codeprop{timedwarning} & An \codeobject{event} object describing what to
+      do when the student has five minutes left. & see
+      \mbox{\S\ref{sec:timing_events}} \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:timing_object}
+      The valid properties of a timing object.
+    }
+  \end{table}
+
+  \subsection{\label{sec:timing_events}Timing events}
+  The \codeprop{timeout} and \codeprop{timedwarning} properties are
+  \codeprop{event} objects (see \S\ref{sec:event_object}), which determine what
+  action to take when a student has run out of time, or when there is a certain
+  amount of time left (this is fixed at five minutes at the moment).  The
+  default for both properties is
+  %
+  \begin{Verbatim}
+    {
+      action: none
+      message: ""
+    }
+  \end{Verbatim}
+  %
+  so no action is taken in either case.  The valid values for the
+  \codeprop{action} property are
+  %
+  \begin{itemize}
+    \item \verb"none": do nothing;
+    \item \verb"warn": display the warning \codeprop{message}.
+  \end{itemize}
+
+  \section{\label{sec:feedback}Feedback and advice}
+  \numbas\ includes the facility to provide feedback and advice to the
+  student taking the exam.  The most common use of feedback is to provide the
+  student with a fully worked solution to a question.  The student can see this
+  feedback by pressing the \codebutton{Reveal} button (see the screen shot in
+  figure~\ref{fig:example_screen2}).  You can control when and how the student
+  sees this feedback, by using the \codeobject{feedback} object, which is an
+  \codeobject{exam} property.  All valid properties of the
+  \codeobject{feedback} object are detailed in table~\ref{tab:feedback_object}.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{18em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{showactualmark} & Whether to show the student's score while the
+      exam is in progress. & \verb"true" \\
+      \codeprop{showtotalmark} & Whether to show the total marks available for
+      the exam, questions, and question parts. & \verb"true" \\
+      \codeprop{showanswerstate} & Whether to show the tick, cross, or percent
+      sign when a student submits an answer. & \verb"true" \\
+      \codeprop{allowrevealanswer} & Whether the student is allowed to click
+      the \codebutton{Reveal} button to see the advice. & \verb"true" \\
+      \codeprop{advice} & An \codeobject{advice} object defining under which
+      circumstances advice is shown (see \S\ref{sec:advice_object}). &
+      \verb"{}" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:feedback_object}
+      The valid properties of a feedback object.
+    }
+  \end{table}
+  
+  \subsection{Restricting advice}
+  By default, the student is allowed to reveal the advice to a question at any
+  time, by pressing the \codebutton{Reveal} button.  Doing so will remove all
+  marks awarded for the current question (the student is warned that this will
+  happen).  To prevent the student being able to see the advice, set the
+  \codeprop{allowrevealanswer} property to \verb"false", \eg
+  %
+  \begin{Verbatim}
+    feedback: {
+      allowrevealanswer: false
+    }
+  \end{Verbatim}
+  %
+  This will remove the \codebutton{Reveal} button from the page.
+
+  \subsection{Restricting mark information}
+  By default, the student can see how many marks are available for the entire
+  exam, and how many marks have been awarded so far.  This behaviour can be
+  altered by setting the \codeprop{showtotalmark} and \codeprop{showactualmark}
+  properties, \eg
+  %
+  \begin{Verbatim}
+    feedback: {
+      showtotalmark: false
+      showactualmark: false
+    }
+  \end{Verbatim}
+  %
+  This will prevent the student from being able to see how many marks have been
+  awarded, and how many are available for the exam.
+
+  \subsection{Restricting the answer state}
+  By default, the student will be shown whether the submitted answer is correct
+  (green tick), incorrect (red cross), or --- in the case of multiple submit
+  boxes --- partially correct (blue percent sign).
+
+  You can alter this behaviour with the \codeprop{showanswerstate} property,
+  \eg
+  %
+  \begin{Verbatim}
+    feedback: {
+      showanswerstate: false
+    }
+  \end{Verbatim}
+  %
+  In this case, the student receives no indication of whether the submitted
+  answer is correct.
+
+  \textbf{Note:} Be careful of how you use \codeprop{showanswerstate} and
+  \codeprop{showactualmark}.  If you set the former to \verb"false", but the
+  latter to \verb"true", then students can still see whether their answers are
+  correct by looking at the current mark total.  In contrast, it is reasonable
+  to set \codeprop{showanswerstate} to \verb"true", but
+  \codeprop{showactualmark} to \verb"false", when you want to show whether the
+  answer is correct, but not how many marks are gained.
+
+  \subsection{\label{sec:advice_object}Advice object}
+  The \codeobject{advice} object defines under which circumstances advice is
+  shown to the student.  Advice is a property of the \codeobject{feedback}
+  object.  Table~\ref{tab:advice_object} describes the properties
+  of the \codeobject{advice} object.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{type} & When advice is shown to the student.  If the value is
+      \verb"onreveal", then advice is only shown to the student when the
+      \codebutton{Reveal} button is pressed.  If the value is \verb"threshold",
+      then advice is shown when the student scores below
+      \codeprop{threshold}\%.  & \verb"onreveal" \\
+      \codeprop{threshold} & Reveal advice if the student scores less than this
+      percentage on a single question. & \verb"0" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:advice_object}
+      The valid properties of an advice object.
+    }
+  \end{table}
+
+  As a property of the \codeobject{feedback} object, the \codeobject{advice}
+  object determines when advice is shown to the student.  The actual
+  advice content shown to the student is set with the \codeprop{advice}
+  property of the \codeobject{question} object --- see
+  \S\ref{sec:advice_content}.
+
+  \subsection{Feedback examples}
+  There are a number of feedback and advice options, and choosing the correct
+  ones for the behaviour you desire can be tricky at first.  Some examples are
+  listed below.
+
+  \subsubsection{All feedback}
+  Set no feedback options explicitly; the default options will turn on all
+  forms of feedback except threshold advice.
+
+  \subsubsection{No feedback}
+  Use a \codeobject{feedback} object with the following properties set to 
+	\verb"false".
+  %
+  \begin{Verbatim}
+    feedback: {
+      showtotalmark: false
+      showactualmark: false
+      showanswerstate: false
+      allowrevealanswer: false
+    }
+  \end{Verbatim}
+
+  \subsubsection{No Reveal button but automatic feedback when student scores
+    less than a threshold}
+  Use a \codeobject{feedback} object with \codeprop{showanswerstate} set to
+  \verb"false".  Also use the feedback \codeobject{advice} object with
+  \codeprop{type} set to \verb"threshold", and \codeprop{threshold} set to the
+  threshold percentage.
+   %
+  \begin{Verbatim}
+    feedback: {
+      allowrevealanswer: false
+      advice: {
+        type: threshold
+        threshold: n
+      }
+    }
+  \end{Verbatim}
+
+  \subsubsection{Reveal button and automatic feedback when student scores less
+    than a threshold}
+  Use a \codeobject{feedback} object with an \codeobject{advice} object.  Set
+  \codeprop{type} to \verb"threshold", and \codeprop{threshold} to the
+  threshold percentage.
+  %
+  \begin{Verbatim}
+    feedback: {
+      advice: {
+        type: threshold
+        threshold: n
+      }
+    }
+  \end{Verbatim}
+
+  \section{\label{sec:resources}Resources}
+  If you want to include videos or images in your exams, then they must be part
+  of the collection of files which make up the compiled exam.
+
+  This can be achieved by setting the \codeprop{resources} property of the
+  \codeobject{exam} object to an array of directories or file names (relative
+  to the directory in which the \codefile{.exam} file resides), which are to be
+  included.  These directories and files then appear under the
+  \codefile{resources} directory of the compiled exam.
+
+  As an example, suppose you want to include the images \verb"graph.png" and
+  \verb"ball.png" in an exam.  You should set \codeprop{resources} as
+  %
+  \begin{Verbatim}
+    resources: [graph.png, ball.png]
+  \end{Verbatim}
+  %
+  Then, when you need to make reference to \verb"graph.png" in a question, for
+  example, the path to the image is \verb"resources/graph.png".  Images and
+  videos can be included in \codecontent{content} blocks, which are described
+  later in chapter~\ref{cha:content_blocks}.
+
+\end{chapter}

@@ -566,6 +566,7 @@ class NumberEntryPart(Part):
 	partialCredit = 0
 	minvalue = 0
 	maxvalue = 0
+	inputStep = 1
 
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
@@ -573,7 +574,7 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','partialCredit','minvalue','maxvalue'],part)
+		tryLoad(data,['integerAnswer','partialCredit','minvalue','maxvalue','inputStep'],part)
 		if 'answer' in data:
 			part.maxvalue = part.minvalue = data['answer']
 
@@ -585,13 +586,16 @@ class NumberEntryPart(Part):
 		pd.append(makeTree(['answer',
 								['minvalue'],
 								['maxvalue'],
-								['allowonlyintegeranswers']
-							]))
+								['allowonlyintegeranswers'],
+								['inputstep']
+							]
+							))
 
 		answer = pd.find('answer')
 		answer.find('minvalue').attrib = {'value': str(self.minvalue)}
 		answer.find('maxvalue').attrib = {'value': str(self.maxvalue)}
 		answer.find('allowonlyintegeranswers').attrib = {'value': str(self.integerAnswer), 'partialcredit': str(self.partialCredit)+'%'}
+		answer.find('inputstep').attrib = {'value': str(self.inputStep)}
 
 		return part
 
