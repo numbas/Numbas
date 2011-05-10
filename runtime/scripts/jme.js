@@ -1430,7 +1430,18 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 	}
 	if(r1.type == 'number')
 	{
-		return checkingFunction( r1.value, r2.value, checkingAccuracy );
+		if(r1.value.complex || r2.value.complex)
+		{
+			if(!r1.value.complex)
+				r1.value = {re:r1.value, im:0, complex:true};
+			if(!r2.value.complex)
+				r2.value = {re:r2.value, im:0, complex:true};
+			return checkingFunction(r1.value.re, r2.value.re, checkingAccuracy) && checkingFunction(r1.value.im,r2.value.im,checkingAccuracy);
+		}
+		else
+		{
+			return checkingFunction( r1.value, r2.value, checkingAccuracy );
+		}
 	}
 	else
 	{
