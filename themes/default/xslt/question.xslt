@@ -105,7 +105,10 @@ Copyright 2011 Newcastle University
 			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn" onclick="Numbas.controls.showSteps('{$path}')"></input></div>
 		</xsl:if>
 		<xsl:if test="not(ancestor::gaps)">
-			<div id="marks">Some marks</div>
+			<div id="marks">
+				<span id="score"></span>
+				<span id="feedback"><img src="resources/cross.png"/></span>
+			</div>
 		</xsl:if>
 	</xsl:element>
 </xsl:template>

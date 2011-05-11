@@ -371,28 +371,25 @@ Question.prototype =
 	//validate question - returns true if all parts completed
 	validate: function()
 	{
-		var currentQuestion = Numbas.exam.currentQuestion;
 		//remove any part warnings currently displayed
-		for(var i=0; i<currentQuestion.parts.length; i++)
-			currentQuestion.parts[i].display.removeWarnings();
+		for(var i=0; i<this.parts.length; i++)
+			this.parts[i].display.removeWarnings();
 
 		var success = true;
-		for(i=0; i<currentQuestion.parts.length; i++)
+		for(i=0; i<this.parts.length; i++)
 		{
-			success = success && currentQuestion.parts[i].validate();
+			success = success && this.parts[i].validate();
 		}
 		return success;
 	},
 
 	//mark the student's answer to a given part/gap/step
-	markPart: function(answerList, partRef)
+	doPart: function(answerList, partRef)
 	{
 		var part = this.getPart(partRef);
-		part.display.removeWarnings();
-		part.answerList = answerList;
-		part.mark();
-		part.calculateScore();
-		Numbas.store.partAnswered(part);
+		if(!part)
+			throw(new Error("Can't find part "+partRef+"/"));
+		part.do(answerList);
 	},
 
 	//calculate score - adds up all part scores
@@ -424,6 +421,12 @@ Question.prototype =
 	//submit question answers
 	submit: function()
 	{
+		//submit every part
+		for(var i=0; i<this.parts.length; i++)
+		{
+			this.parts[i].submit();
+		}
+
 		//validate every part
 		//displays warning messages if appropriate, 
 		//and returns false if any part is not completed sufficiently
@@ -434,13 +437,7 @@ Question.prototype =
 			this.submitted += 1;
 
 		//display message about success or failure
-		if( this.answered )
-		{
-			//var currentQuestion = Numbas.exam.currentQuestion;
-			//answerMsg = "Answer Submitted "+ currentQuestion.submitted+(currentQuestion.submitted==1 ? " time" : " times");
-			//don't showAlert, can't see the point
-		}
-		else
+		if(! this.answered )
 		{
 			answerMsg = "Can not submit answer - check for errors.";
 			Numbas.display.showAlert(answerMsg);
@@ -545,7 +542,7 @@ Part.prototype = {
 	stepsMarks: 0,			//marks available in the steps, if any
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
-	currentAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
+	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
 	answerList: undefined,	//student's last submitted answer
 	answered: false,		//has this part been answered
 
@@ -596,6 +593,21 @@ Part.prototype = {
 
 		if(this.parentPart)
 			this.parentPart.calculateScore();
+	},
+
+	//update the stored answer from the student (called when student changes their answer, before submitting)
+	do: function(answerList) {
+		this.stagedAnswer = answerList;
+		this.display.removeWarnings();
+	},
+
+	//submit answer to this part - save answer, mark, update score
+	submit: function() {
+		this.answerList = this.stagedAnswer.slice();
+		this.mark();
+		this.calculateScore();
+		this.question.updateScore();
+		this.display.showScore();
 	},
 
 	//function which marks the student's answer

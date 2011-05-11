@@ -434,11 +434,12 @@ display.QuestionDisplay.prototype =
 	showScore: function()
 	{
 		var exam = Numbas.exam;
-		var niceNumber = Numbas.math.niceNumber;
+		var q = this.q;
 
 		var selector = $(this.questionSelector).add('.submitDiv');
 
-		var scoreDisplay = '';
+		showScoreFeedback(selector,q.answered,q.score,q.marks,exam);
+
 		if(!exam.showTotalMark && !exam.showActualMark)
 		{
 			if(this.q.answered)
@@ -455,50 +456,7 @@ display.QuestionDisplay.prototype =
 				selector.find('#submitBtn').val('Submit');
 			}
 		}
-		else
-		{
-			if(!exam.showTotalMark && exam.showActualMark)
-				scoreDisplay = niceNumber(this.q.score);
-			if(exam.showTotalMark && !exam.showActualMark)
-				scoreDisplay = '('+niceNumber(this.q.marks)+')';
-			if(exam.showTotalMark && exam.showActualMark)
-				scoreDisplay = niceNumber(this.q.score)+'/'+niceNumber(this.q.marks);
 
-			selector.find('#score')
-				.show()
-				.html(scoreDisplay);
-		}
-
-		if( exam.showAnswerState )
-		{
-			if( this.q.answered )
-			{
-				var state;
-				if( this.q.score<=0  )
-				{
-					state = 'cross';
-				}
-				else if( this.q.score == this.q.marks )
-				{
-					state = 'tick';
-				}		
-				else
-				{
-					state = 'partial';
-				}
-				selector.find('#feedback')
-					.show()
-					.attr('class',state)
-				;
-			}
-		}
-		else
-		{
-			selector.find('#feedback').hide();
-		}	
-
-		if(!this.q.answered)
-			$('.submitDiv').find('#feedback,#score').hide();
 	}
 };
 
@@ -547,10 +505,20 @@ display.PartDisplay.prototype =
 
 		$(this.warningDiv).mouseover(function(){$(this).find('.partwarning').show();}).mouseout(function(){$(this).find('.partwarning').hide()});
 
+		/*
 		if(Numbas.exam.showTotalMark && this.p.marks>0)
 			this.htmlContext().find('#marks').html(this.p.marks+(this.p.marks==1 ? ' mark' : ' marks'));
 		else
 			this.htmlContext().find('#marks').hide();
+		*/
+		showScoreFeedback(this.htmlContext(),false,this.p.score,this.p.marks,Numbas.exam);
+	},
+
+	//update 
+	showScore: function()
+	{
+		var c = this.htmlContext();
+		showScoreFeedback(c,this.p.validate(),this.p.score,this.p.marks,Numbas.exam);
 	},
 
 	//called when 'show steps' button is pressed, or coming back to a part after steps shown
@@ -910,6 +878,69 @@ $.textMetrics = function(el) {
 function resizeF() {
 	var w = $.textMetrics(this).width;
 	$(this).width(Math.max(w+5,60)+'px');
+};
+
+//update a score feedback box
+//selector - jQuery selector of element to update
+//score - student's score
+//marks - total marks available
+//settings - object containing the following properties:
+//	showTotalMark
+//	showActualMark
+//	showAnswerState
+function showScoreFeedback(selector,answered,score,marks,settings)
+{
+	var niceNumber = Numbas.math.niceNumber;
+	var scoreDisplay = '';
+	if(settings.showTotalMark || settings.showActualMark)
+	{
+		if(!settings.showTotalMark && settings.showActualMark)
+			scoreDisplay = niceNumber(score);
+		else if(settings.showTotalMark && !settings.showActualMark)
+			scoreDisplay = '('+niceNumber(marks)+')';
+		else if(settings.showTotalMark && settings.showActualMark)
+			scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
+
+		selector.find('#score')
+			.show()
+			.html(scoreDisplay);
+	}
+	else
+	{
+		selector.find('#score').hide();
+	}
+
+	if( settings.showAnswerState )
+	{
+		if( answered )
+		{
+			var state;
+			if( score<=0  )
+			{
+				state = 'cross';
+			}
+			else if( score == marks )
+			{
+				state = 'tick';
+			}		
+			else
+			{
+				state = 'partial';
+			}
+			selector.find('#feedback')
+				.show()
+				.attr('class',state)
+			;
+		}
+	}
+	else
+	{
+		selector.find('#feedback').hide();
+	}	
+
+	if(!answered)
+		$('.submitDiv').find('#feedback,#score').hide();
+
 };
 
 });

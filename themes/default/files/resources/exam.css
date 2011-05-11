@@ -115,15 +115,21 @@ html{
 	text-align:center;
 	margin: -0.4em auto;
 }
-.submitDiv #feedback {
+#marks {
+	display:inline;
+}
+#marks #feedback {
 	width:25px;
 	height:25px;
 	padding: 0.2em 0;
 }
-.submitDiv #feedback img {
+.questionSelector #marks #feedback {
+	padding: 0;
+}
+#marks #feedback img {
 	visibility:hidden;
 }
-.submitDiv #score {
+#marks #score {
 	display:none;
 }
 
@@ -346,7 +352,8 @@ div.part {
 
 .part #marks {
 	float:right;
-	background: #cfc;
+	background: #A2D1F0;
+	border: 1px solid #999999;
 	padding: 0.1em 0.5em;
 	font-weight: bold;
 }

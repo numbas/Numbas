@@ -100,7 +100,7 @@ Numbas.controls = {
 	//student has changed answer to part - record it and calculate new score
 	doPart: function( answerList, partRef )
 	{
-		Numbas.exam.currentQuestion.markPart(answerList, partRef);
+		Numbas.exam.currentQuestion.doPart(answerList, partRef);
 	},
 
 	//show steps for a question part
