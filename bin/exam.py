@@ -642,7 +642,7 @@ class MultipleChoicePart(Part):
 	
 		if 'matrix' in data:
 			part.matrix = data['matrix']
-			if part.matrix[0] is not list:	#so you can give just one row without wrapping it in another array
+			if not isinstance(part.matrix[0],list):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
 		return part
