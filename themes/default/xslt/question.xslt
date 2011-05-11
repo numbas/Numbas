@@ -158,7 +158,7 @@ Copyright 2011 Newcastle University
 			</form>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice" onChange="Numbas.controls.doKeyPart([this.selectedIndex,0],'{$path}')">
+			<select class="multiplechoice" onChange="Numbas.controls.doPart([this.selectedIndex,0],'{$path}')">
 				<xsl:apply-templates select="choice" mode="dropdownlist">
 					<xsl:with-param name="path" select="$path"/>
 				</xsl:apply-templates>
@@ -181,7 +181,7 @@ Copyright 2011 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" onClick="Numbas.controls.doKeyPart([{$choicenum},{$answernum},this.checked],'{$path}')"/>
+		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" onClick="Numbas.controls.doPart([{$choicenum},{$answernum},this.checked],'{$path}')"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -200,7 +200,7 @@ Copyright 2011 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" onClick="Numbas.controls.doKeyPart([{$choicenum},{$answernum},this.checked],'{$path}')"/>
+		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" onClick="Numbas.controls.doPart([{$choicenum},{$answernum},this.checked],'{$path}')"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -265,10 +265,10 @@ Copyright 2011 Newcastle University
 			<td>
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" onClick="Numbas.controls.doKeyPart([{$answernum},{$choicenum},this.checked],'{$path}')"/>
+						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" onClick="Numbas.controls.doPart([{$answernum},{$choicenum},this.checked],'{$path}')"/>
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" onClick="Numbas.controls.doKeyPart([{$answernum},{$choicenum},this.checked],'{$path}')"/>
+						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" onClick="Numbas.controls.doPart([{$answernum},{$choicenum},this.checked],'{$path}')"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
@@ -279,7 +279,7 @@ Copyright 2011 Newcastle University
 <xsl:template match="partdata[@type='patternmatch' or @type='CUEdt.PatternMatchPart']">
 	<xsl:param name="path"/>
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" onchange="Numbas.controls.doPart([this.value],'{$path}')"></input>
 </xsl:template>
 
 <xsl:template match="partdata[@type='gapfill' or @type='CUEdt.GapFillPart']">
@@ -302,7 +302,7 @@ Copyright 2011 Newcastle University
 <xsl:template match="partdata[@type='numberentry' or @type='CUEdt.NumberEntryPart']">
 	<xsl:param name="path"/>
 	
-	<input type="number" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
+	<input type="number" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" onchange="Numbas.controls.doPart([this.value],'{$path}')"/>
 </xsl:template>
 
 <xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">

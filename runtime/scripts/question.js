@@ -545,7 +545,8 @@ Part.prototype = {
 	stepsMarks: 0,			//marks available in the steps, if any
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
-	answerList: undefined,	//student's last answer to this part
+	currentAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
+	answerList: undefined,	//student's last submitted answer
 	answered: false,		//has this part been answered
 
 	gaps: [],				//child gapfills, if any

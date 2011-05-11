@@ -645,7 +645,7 @@ display.JMEPartDisplay.prototype =
 
 		//when input box loses focus, hide it
 		inputDiv.blur(function() {
-			Numbas.controls.doKeyPart([this.value],p.path);
+			Numbas.controls.doPart([this.value],p.path);
 			pd.hasFocus = false;
 			inputPositionF();
 		});

@@ -98,7 +98,7 @@ Numbas.controls = {
 	},
 
 	//student has changed answer to part - record it and calculate new score
-	doKeyPart: function( answerList, partRef )
+	doPart: function( answerList, partRef )
 	{
 		Numbas.exam.currentQuestion.markPart(answerList, partRef);
 	},
