@@ -603,7 +603,7 @@ Part.prototype = {
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
-		this.answerList = this.stagedAnswer.slice();
+		this.answerList = util.copyarray(this.stagedAnswer);
 		this.mark();
 		this.calculateScore();
 		this.question.updateScore();
@@ -1122,6 +1122,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//fill marks matrix
 	var matrix=[];
 	var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
+	var matrixTotal = 0;
 	for( i=0; i<matrixNodes.length; i++ )
 	{
 		var cell = {value: ""};
@@ -1132,7 +1133,11 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		else
 		{
 			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
+			if(!util.isFloat(cell.value))
+				throw(new Error("Part "+this.path+" marking matrix cell "+cell.possibleAnswerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
+			cell.value = parseFloat(cell.value);
 		}
+		matrixTotal += cell.value;
 
 		//take into account shuffling
 		cell.possibleAnswerIndex = this.shuffleAnswers[cell.possibleAnswerIndex];
@@ -1151,6 +1156,8 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 	settings.matrix = matrix;
 	
+	if(this.marks == 0)
+		this.marks = matrixTotal;
 
 	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{	//because we swapped answers and choices round in the marking matrix
@@ -1163,11 +1170,16 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	//ticks array - which answers/choices are selected?
 	this.ticks=[];
+	this.stagedAnswer = [];
 	for( i=0; i<this.numAnswers; i++ )
 	{
 		this.ticks.push([]);
+		this.stagedAnswer.push([]);
 		for( var j=0; j<this.numChoices; j++ )
+		{
 			this.ticks[i].push(false);
+			this.stagedAnswer[i].push(false);
+		}
 	}
 
 	//restore saved choices
@@ -1209,12 +1221,12 @@ MultipleResponsePart.prototype =
 		warningMessage: ''			//message to display if wrong number of responses
 	},
 
-	mark: function()
+	do: function(answerList)
 	{
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
-		var answerIndex = this.answerList[0];
-		var choiceIndex = this.answerList[1];
+		var answerIndex = answerList[0];
+		var choiceIndex = answerList[1];
 
 		switch(this.settings.displayType)
 		{
@@ -1222,12 +1234,17 @@ MultipleResponsePart.prototype =
 		case 'dropdownlist':
 			for(var i=0; i<this.numAnswers; i++)
 			{
-				this.ticks[i][choiceIndex]= i==answerIndex;
+				this.stagedAnswer[i][choiceIndex]= i==answerIndex;
 			}
 			break;
 		default:
-			this.ticks[answerIndex][choiceIndex] = this.answerList[2];
+			this.stagedAnswer[answerIndex][choiceIndex] = this.answerList[2];
 		}
+	},
+
+	mark: function()
+	{
+		this.ticks = util.copyarray(this.stagedAnswer);
 
 		this.numTicks = 0;
 		var partScore = 0;
@@ -1245,7 +1262,7 @@ MultipleResponsePart.prototype =
 
 		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
 
-		if(!this.wrongNumber)
+		if(this.marks>0 && !this.wrongNumber)
 			this.credit = Math.min(partScore,this.marks)/this.marks;	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		else
 			this.credit = 0;
