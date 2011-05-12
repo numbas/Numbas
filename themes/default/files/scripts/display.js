@@ -705,7 +705,7 @@ display.JMEPartDisplay.prototype =
 	//display a live preview of the student's answer typeset properly
 	inputChanged: function(txt,force)
 	{
-		this.p.do([txt]);
+		this.p.storeAnswer([txt]);
 		if((txt!=this.oldtxt && txt!==undefined) || force)
 		{
 			this.txt = txt;
@@ -756,7 +756,7 @@ display.PatternMatchPartDisplay.prototype =
 		var c = this.htmlContext();
 		var p = this.p;
 		c.find('#patternmatch').bind('input',function() {
-			p.do([$(this).val()]);
+			p.storeAnswer([$(this).val()]);
 		});
 	},
 
@@ -785,7 +785,7 @@ display.NumberEntryPartDisplay.prototype =
 	show: function() {
 		var p = this.p;
 		this.htmlContext().find('#numberentry').bind('input',function(){
-			p.do([$(this).val()]);
+			p.storeAnswer([$(this).val()]);
 		});
 	},
 
@@ -820,7 +820,7 @@ display.MultipleResponsePartDisplay.prototype =
 		function makeClicker(choice,answer)
 		{
 			return function() {
-				p.do([choice,answer,$(this).prop('checked')]);
+				p.storeAnswer([choice,answer,$(this).prop('checked')]);
 			};
 		}
 
@@ -829,7 +829,7 @@ display.MultipleResponsePartDisplay.prototype =
 		case 'dropdownlist':
 			c.find('.multiplechoice').bind('change',function() {
 				var i = $(this).find('option:selected').index();
-				p.do([i-1,0]);
+				p.storeAnswer([i-1,0]);
 			});
 			break;
 		default:
@@ -1028,7 +1028,6 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		selector.find('#feedback').hide();
 	}	
 
-	console.log(selector);
 	selector.find('#marks').each(function(){
 		if(!$(this).is(':animated'))
 			$(this).fadeOut(200).fadeIn(200);

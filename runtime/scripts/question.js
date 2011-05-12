@@ -385,7 +385,7 @@ Question.prototype =
 		var part = this.getPart(partRef);
 		if(!part)
 			throw(new Error("Can't find part "+partRef+"/"));
-		part.do(answerList);
+		part.storeAnswer(answerList);
 	},
 
 	//calculate score - adds up all part scores
@@ -592,7 +592,7 @@ Part.prototype = {
 	},
 
 	//update the stored answer from the student (called when student changes their answer, before submitting)
-	do: function(answerList) {
+	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
 		this.display.removeWarnings();
 	},
@@ -1242,7 +1242,7 @@ MultipleResponsePart.prototype =
 		warningMessage: ''			//message to display if wrong number of responses
 	},
 
-	do: function(answerList)
+	storeAnswer: function(answerList)
 	{
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
