@@ -440,6 +440,7 @@ Question.prototype =
 		if(! this.answered )
 		{
 			Numbas.display.showAlert("Can not submit answer - check for errors.");
+			this.display.scrollToError();
 		}
 
 							
@@ -604,7 +605,10 @@ Part.prototype = {
 	submit: function() {
 		this.display.removeWarnings();
 		if(this.stagedAnswer==undefined)
+		{
+			this.giveWarning("No answer submitted.");
 			return;
+		}
 
 		this.answerList = util.copyarray(this.stagedAnswer);
 		this.mark();

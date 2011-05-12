@@ -459,6 +459,10 @@ display.QuestionDisplay.prototype =
 		if(!this.q.answered)
 			$('.submitDiv').find('#feedback,#score').hide();
 
+	},
+
+	scrollToError: function() {
+		scrollTo($('.warningcontainer:visible:first'));
 	}
 };
 
@@ -524,7 +528,10 @@ display.PartDisplay.prototype =
 			p.display.removeWarnings();
 			p.submit();
 			if(!p.answered)
+			{
 				Numbas.display.showAlert("Can not submit answer - check for errors.");
+				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
+			}
 		});
 
 		this.showScore(false);
@@ -1016,5 +1023,15 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 
 };
+
+function scrollTo(el)
+{
+	var docTop = $(window).scrollTop();
+	var docBottom = docTop + $(window).height();
+	var elemTop = $(el).offset().top;
+	if((elemTop-docTop < 50) || (elemTop>docBottom-50))
+		$('html,body').animate({scrollTop: $(el).offset().top-50 });
+}
+
 
 });
