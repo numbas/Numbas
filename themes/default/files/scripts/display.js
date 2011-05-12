@@ -990,7 +990,14 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	}
 	else
 	{
-		selector.find('#score').hide();
+		if(answered)
+		{
+			selector.find('#score')
+				.show()
+				.html('Answered');
+		}
+		else
+			selector.find('#score').hide();
 	}
 
 	if( settings.showAnswerState )
@@ -1021,6 +1028,11 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		selector.find('#feedback').hide();
 	}	
 
+	console.log(selector);
+	selector.find('#marks').each(function(){
+		if(!$(this).is(':animated'))
+			$(this).fadeOut(200).fadeIn(200);
+	});
 
 };
 

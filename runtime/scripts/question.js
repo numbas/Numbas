@@ -371,10 +371,6 @@ Question.prototype =
 	//validate question - returns true if all parts completed
 	validate: function()
 	{
-		//remove any part warnings currently displayed
-		for(var i=0; i<this.parts.length; i++)
-			this.parts[i].display.removeWarnings();
-
 		var success = true;
 		for(i=0; i<this.parts.length; i++)
 		{
