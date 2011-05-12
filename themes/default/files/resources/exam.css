@@ -369,7 +369,7 @@ div.part {
 	text-align:right;
 }
 
-input[type=text,type=number] {
+input[type=text],input[type=number] {
 	width: 60px;
 	text-align: center;
 }

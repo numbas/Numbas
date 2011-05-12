@@ -368,7 +368,7 @@ display.QuestionDisplay.prototype =
 					.focus( function(e) { Numbas.display.inInput = true; } );
 
 		//resize text inputs to just fit their contents
-		$('input[type=text]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+		$('input[type=text],input[type=number]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
 
 		//scroll back to top of page
 		scroll(0,0);
@@ -959,7 +959,7 @@ $.textMetrics = function(el) {
 
 function resizeF() {
 	var w = $.textMetrics(this).width;
-	$(this).width(Math.max(w+5,60)+'px');
+	$(this).width(Math.max(w+30,60)+'px');
 };
 
 //update a score feedback box
