@@ -456,6 +456,8 @@ display.QuestionDisplay.prototype =
 				selector.find('#submitBtn').val('Submit');
 			}
 		}
+		if(!this.q.answered)
+			$('.submitDiv').find('#feedback,#score').hide();
 
 	}
 };
@@ -497,28 +499,45 @@ display.PartDisplay.prototype =
 	//show steps if appropriate, restore answers
 	show: function()
 	{
-		if(this.p.stepsShown)
+		var p = this.p;
+		if(p.stepsShown)
 		{
 			this.showSteps();
 		}
+		else
+		{
+			this.htmlContext().find('#stepsBtn').click(function() {
+				p.showSteps();
+			});
+		}
 		this.restoreAnswer();
 
-		$(this.warningDiv).mouseover(function(){$(this).find('.partwarning').show();}).mouseout(function(){$(this).find('.partwarning').hide()});
+		$(this.warningDiv)
+			.mouseover(function(){
+				$(this).find('.partwarning').show();
+			})
+			.mouseout(function(){
+				$(this).find('.partwarning').hide()
+			});
 
-		/*
-		if(Numbas.exam.showTotalMark && this.p.marks>0)
-			this.htmlContext().find('#marks').html(this.p.marks+(this.p.marks==1 ? ' mark' : ' marks'));
-		else
-			this.htmlContext().find('#marks').hide();
-		*/
-		showScoreFeedback(this.htmlContext(),false,this.p.score,this.p.marks,Numbas.exam);
+		this.showScore(false);
 	},
 
 	//update 
-	showScore: function()
+	showScore: function(valid)
 	{
 		var c = this.htmlContext();
-		showScoreFeedback(c,this.p.validate(),this.p.score,this.p.marks,Numbas.exam);
+		if(this.p.marks==0)
+		{
+			c.find('#marks:last').hide();
+		}
+		else
+		{
+			c.find('#marks:last').show();
+			if(valid===undefined)
+				valid = this.p.validate();
+			showScoreFeedback(c,valid,this.p.score,this.p.marks,Numbas.exam);
+		}
 	},
 
 	//called when 'show steps' button is pressed, or coming back to a part after steps shown
@@ -602,11 +621,12 @@ display.JMEPartDisplay.prototype =
 		};
 
 		//when student types in input box, update display
-		inputDiv.keyup(function() {
+		inputDiv.bind('input',function() {
 			if(pd.timer!=undefined)
 				return;
 
 			clearTimeout(pd.timer);
+
 
 			pd.timer = setTimeout(keyPressed,100);
 		});
@@ -671,6 +691,7 @@ display.JMEPartDisplay.prototype =
 	//display a live preview of the student's answer typeset properly
 	inputChanged: function(txt,force)
 	{
+		this.p.do([txt]);
 		if((txt!=this.oldtxt && txt!==undefined) || force)
 		{
 			this.txt = txt;
@@ -716,6 +737,15 @@ display.PatternMatchPartDisplay = function()
 }
 display.PatternMatchPartDisplay.prototype = 
 {
+	show: function()
+	{
+		var c = this.htmlContext();
+		var p = this.p;
+		c.find('#patternmatch').bind('input',function() {
+			p.do([$(this).val()]);
+		});
+	},
+
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
@@ -738,6 +768,13 @@ display.NumberEntryPartDisplay = function()
 }
 display.NumberEntryPartDisplay.prototype =
 {
+	show: function() {
+		var p = this.p;
+		this.htmlContext().find('#numberentry').bind('input',function(){
+			p.do([$(this).val()]);
+		});
+	},
+
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
@@ -761,6 +798,38 @@ display.MultipleResponsePartDisplay = function()
 }
 display.MultipleResponsePartDisplay.prototype =
 {
+	show: function()
+	{
+		var p = this.p;
+		var c = this.htmlContext();
+
+		function makeClicker(choice,answer)
+		{
+			return function() {
+				p.do([choice,answer,$(this).prop('checked')]);
+			};
+		}
+
+		switch(p.settings.displayType)
+		{
+		case 'dropdownlist':
+			c.find('.multiplechoice').bind('change',function() {
+				var i = $(this).find('option:selected').index()-1;
+				if(i>=0)
+					p.do([i,0]);
+			});
+			break;
+		default:
+			for(var i=0; i<p.numAnswers; i++)
+			{
+				for(var j=0; j<p.numChoices; j++)
+				{
+					c.find('#choice-'+j+'-'+i).change(makeClicker(i,j));
+				}
+			}
+		}
+
+	},
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
@@ -892,6 +961,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 {
 	var niceNumber = Numbas.math.niceNumber;
 	var scoreDisplay = '';
+
 	if(settings.showTotalMark || settings.showActualMark)
 	{
 		if(!settings.showTotalMark && settings.showActualMark)
@@ -938,8 +1008,6 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		selector.find('#feedback').hide();
 	}	
 
-	if(!answered)
-		$('.submitDiv').find('#feedback,#score').hide();
 
 };
 

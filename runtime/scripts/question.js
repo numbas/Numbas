@@ -603,6 +603,8 @@ Part.prototype = {
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
+		if(this.stagedAnswer==undefined)
+			return;
 		this.answerList = util.copyarray(this.stagedAnswer);
 		this.mark();
 		this.calculateScore();
@@ -1298,20 +1300,9 @@ function GapFillPart(xml, path, question, parentPart, loading)
 
 	this.marks = 0;
 
-	//wrapper for marking function which updates this object after child gap marked
-	function wrapGapMark(oldmark)
-	{
-		return function()
-				{
-					oldmark.apply(this);	//mark gap
-					this.parentPart.mark();
-				};
-	}
-
 	for( var i=0 ; i<gapXML.length; i++ )
 	{
 		var gap = createPart(gapXML[i], path+'g'+i, this.question, this, loading);
-		gap.mark = wrapGapMark(gap.mark);
 		this.marks += gap.marks;
 		this.gaps[i]=gap;
 	}
@@ -1320,10 +1311,20 @@ function GapFillPart(xml, path, question, parentPart, loading)
 }	
 GapFillPart.prototype =
 {
+	stagedAnswer: 'something',
+
 	revealAnswer: function()
 	{
 		for(var i=0; i<this.gaps.length; i++)
 			this.gaps[i].revealAnswer();
+	},
+
+	submit: function()
+	{
+		for(var i=0;i<this.gaps.length;i++)
+		{
+			this.gaps[i].submit();
+		}
 	},
 
 	mark: function()
@@ -1334,6 +1335,7 @@ GapFillPart.prototype =
 			for(var i=0; i<this.gaps.length; i++)
 			{
 				var gap = this.gaps[i];
+				gap.mark();
 				this.credit += gap.credit*gap.marks;
 			}
 			this.credit/=this.marks;
@@ -1352,6 +1354,7 @@ GapFillPart.prototype =
 		return success;
 	}
 };
+GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
 
 function InformationPart(xml, path, question, parentPart, loading)
 {
