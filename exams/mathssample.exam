@@ -700,7 +700,7 @@
 								"$p$ lies between $5 \%$ and $1 \%$"
 								"$p$ is smaller than $1 \%$"
 							]
-							matrix: ["pval=0", "pval=1", "pval=2", "pval=3"]
+							matrix: ["if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)"]
 							marks: 1
 						}
 					]
@@ -724,9 +724,9 @@
 					"""
 
 					gaps: [
-						{type: 1_n_2, choices: ["None","Slight","Moderate","Strong"], matrix: ["pval=0","pval=1","pval=2","pval=3"], marks: 1}
-						{type: 1_n_2, choices: ["Retain $H_0$","Reject $H_0$"], matrix: ["pval<2","pval>=2"], marks: 1}
-						{type: 1_n_2, choices: ["There *is* evidence to suggest an association between degree subject and performance.","There is *no* evidence to suggest an association between degree subject and performance."], matrix: ["pval>=2","pval<2"], marks: 1, displayColumns: 1}
+						{type: 1_n_2, choices: ["None","Slight","Moderate","Strong"], matrix: ["if(if(pval=0,1,0),1,0)","if(if(pval=1,1,0),1,0)","if(pval=2,1,0)","if(pval=3,1,0)"], marks: 1}
+						{type: 1_n_2, choices: ["Retain $H_0$","Reject $H_0$"], matrix: ["if(pval<2,1,0)","if(pval>=2,1,0)"], marks: 1}
+						{type: 1_n_2, choices: ["There *is* evidence to suggest an association between degree subject and performance.","There is *no* evidence to suggest an association between degree subject and performance."], matrix: ["if(pval>=2,1,0)","if(pval<2,1,0)"], marks: 1, displayColumns: 1}
 					]
 				}
 			]
