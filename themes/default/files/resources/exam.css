@@ -115,6 +115,9 @@ html{
 	text-align:center;
 	margin: -0.4em auto;
 }
+#submitBtn {
+	width: 9em;
+}
 #marks {
 	display:inline;
 }
@@ -363,7 +366,7 @@ div.part {
 	text-align:right;
 }
 
-input[type=text] {
+input[type=text,type=number] {
 	width: 60px;
 	text-align: center;
 }
