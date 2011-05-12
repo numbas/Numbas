@@ -26,9 +26,13 @@ def collectFiles(options):
 	dirs=[('runtime','.')]
 
 	resources = [os.path.join(os.path.dirname(options.source),x) for x in options.resources]
-	dirs += [(x,os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
+	dirs += [(os.path.join(os.getcwd(),x),os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
 
-	extfiles = [(x,os.path.join('extensions',os.path.split(x)[1])) for x in [os.path.join('extensions',y) for y in options.extensions] if os.path.isdir(x)]
+	extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
+	extfiles = [
+			(os.path.join(os.getcwd(),x),os.path.join('extensions',os.path.split(x)[1]))
+				for x in extensions if os.path.isdir(x)
+			]
 	dirs += extfiles
 
 	themepath=os.path.join(options.theme,'files')
