@@ -1028,7 +1028,6 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		selector.find('#feedback').hide();
 	}	
 
-	console.log(selector);
 	selector.find('#marks').each(function(){
 		if(!$(this).is(':animated'))
 			$(this).fadeOut(200).fadeIn(200);
