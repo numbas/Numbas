@@ -353,11 +353,14 @@ div.part {
 	margin: 0.1em;
 }
 
-.part #marks {
-	float:right;
+.part #partFeedback {
 	background: #A2D1F0;
 	border: 1px solid #999999;
 	padding: 0.1em 0.5em;
+	float:right;
+}
+
+.part #marks {
 	font-weight: bold;
 }
 

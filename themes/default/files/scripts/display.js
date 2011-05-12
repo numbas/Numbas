@@ -520,6 +520,13 @@ display.PartDisplay.prototype =
 				$(this).find('.partwarning').hide()
 			});
 
+		this.htmlContext().find('#partFeedback #submitPart').click(function() {
+			p.display.removeWarnings();
+			p.submit();
+			if(!p.answered)
+				Numbas.display.showAlert("Can not submit answer - check for errors.");
+		});
+
 		this.showScore(false);
 	},
 
@@ -529,7 +536,7 @@ display.PartDisplay.prototype =
 		var c = this.htmlContext();
 		if(this.p.marks==0)
 		{
-			c.find('#marks:last').hide();
+			c.find('#partFeedback:last').hide();
 		}
 		else
 		{
@@ -814,9 +821,8 @@ display.MultipleResponsePartDisplay.prototype =
 		{
 		case 'dropdownlist':
 			c.find('.multiplechoice').bind('change',function() {
-				var i = $(this).find('option:selected').index()-1;
-				if(i>=0)
-					p.do([i,0]);
+				var i = $(this).find('option:selected').index();
+				p.do([i-1,0]);
 			});
 			break;
 		default:

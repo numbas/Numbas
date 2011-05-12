@@ -378,7 +378,7 @@ Question.prototype =
 		var success = true;
 		for(i=0; i<this.parts.length; i++)
 		{
-			success = success && this.parts[i].validate();
+			success = success && this.parts[i].answered;
 		}
 		return success;
 	},
@@ -439,8 +439,7 @@ Question.prototype =
 		//display message about success or failure
 		if(! this.answered )
 		{
-			answerMsg = "Can not submit answer - check for errors.";
-			Numbas.display.showAlert(answerMsg);
+			Numbas.display.showAlert("Can not submit answer - check for errors.");
 		}
 
 							
@@ -603,10 +602,15 @@ Part.prototype = {
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
+		this.display.removeWarnings();
 		if(this.stagedAnswer==undefined)
 			return;
+
 		this.answerList = util.copyarray(this.stagedAnswer);
 		this.mark();
+		this.answered = this.validate();
+		if(!this.answered)
+			return;
 		this.calculateScore();
 		this.question.updateScore();
 		this.display.showScore();
@@ -759,6 +763,11 @@ JMEPart.prototype =
 
 	mark: function()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		this.failMinLength = (this.settings.minLength>0 && this.studentAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.studentAnswer.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
@@ -908,6 +917,11 @@ PatternMatchPart.prototype = {
 
 	mark: function ()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		this.answered = this.studentAnswer.length>0;
 
@@ -991,6 +1005,11 @@ NumberEntryPart.prototype =
 
 	mark: function()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		
 		// do a bit of string tidy up
@@ -1246,6 +1265,11 @@ MultipleResponsePart.prototype =
 
 	mark: function()
 	{
+		if(this.stagedAnswer==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.ticks = util.copyarray(this.stagedAnswer);
 
 		this.numTicks = 0;
@@ -1349,7 +1373,7 @@ GapFillPart.prototype =
 		//whole part fails to validate
 		var success = true;
 		for(var i=0; i<this.gaps.length; i++)
-			success = success && this.gaps[i].validate();
+			success = success && this.gaps[i].answered;
 
 		return success;
 	}

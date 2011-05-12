@@ -106,9 +106,12 @@ Copyright 2011 Newcastle University
 			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
 		</xsl:if>
 		<xsl:if test="not(ancestor::gaps)">
-			<div id="marks">
-				<span id="score"></span>
-				<span id="feedback"><img src="resources/cross.png"/></span>
+			<div id="partFeedback">
+				<input class="btn" id="submitPart" value="Submit part" type="button"></input>
+				<div id="marks">
+					<span id="score"></span>
+					<span id="feedback"><img src="resources/cross.png"/></span>
+				</div>
 			</div>
 		</xsl:if>
 	</xsl:element>
