@@ -763,7 +763,7 @@ display.PatternMatchPartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
-		c.find('#patternmatch').attr('value',this.p.studentAnswer);
+		c.find('#patternmatch').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -771,7 +771,7 @@ display.PatternMatchPartDisplay.prototype =
 		var c = this.htmlContext();
 		c.find('#patternmatch')
 			.attr('disabled',true)
-			.attr('value',this.p.settings.displayAnswer);
+			.val(this.p.settings.displayAnswer);
 	}
 };
 display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);
@@ -792,7 +792,7 @@ display.NumberEntryPartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
-		c.find('#numberentry').attr('value',this.p.studentAnswer);
+		c.find('#numberentry').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -800,7 +800,7 @@ display.NumberEntryPartDisplay.prototype =
 		var c = this.htmlContext();
 		c.find('#numberentry')
 			.attr('disabled','true')
-			.attr('value',this.p.settings.displayAnswer);
+			.val(this.p.settings.displayAnswer);
 	}
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
@@ -851,7 +851,7 @@ display.MultipleResponsePartDisplay.prototype =
 			for(var j=0; j<this.p.numAnswers; j++)
 			{
 				var checked = this.p.ticks[j][i];
-				c.find('#choice-'+i+'-'+j).attr('checked',checked);
+				c.find('#choice-'+i+'-'+j).prop('checked',checked);
 			}
 		}
 	},
@@ -871,7 +871,7 @@ display.MultipleResponsePartDisplay.prototype =
 					var checked = this.p.settings.matrix[j][i]>0;
 					c.find('#choice-'+i+'-'+j)
 						.attr('disabled',true)
-						.attr('checked',checked);
+						.prop('checked',checked);
 				}
 			}
 			break;
