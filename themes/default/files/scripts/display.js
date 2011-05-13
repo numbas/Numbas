@@ -576,7 +576,10 @@ display.PartDisplay.prototype =
 	//fills inputs with correct answers
 	revealAnswer: function() 
 	{
-		this.htmlContext().find('input[type=text]').each(resizeF);
+		var c = this.htmlContext();
+		c.find('input[type=text],input[type=number]').each(resizeF);
+		c.find('#submitPart').attr('disabled',true);
+		this.showScore();
 	}
 };
 

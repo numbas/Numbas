@@ -635,6 +635,8 @@ Part.prototype = {
 	revealAnswer: function()
 	{
 		this.display.revealAnswer();
+		this.answered = true;
+		this.credit = 0;
 	}
 
 };
