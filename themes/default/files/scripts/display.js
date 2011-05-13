@@ -534,7 +534,7 @@ display.PartDisplay.prototype =
 			}
 		});
 
-		this.showScore(false);
+		this.showScore(this.answered);
 	},
 
 	//update 
@@ -980,16 +980,33 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 	if(settings.showTotalMark || settings.showActualMark)
 	{
-		if(!settings.showTotalMark && settings.showActualMark)
-			scoreDisplay = niceNumber(score);
-		else if(settings.showTotalMark && !settings.showActualMark)
-			scoreDisplay = '('+niceNumber(marks)+')';
-		else if(settings.showTotalMark && settings.showActualMark)
-			scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
+		if(answered)
+		{
+			if(!settings.showTotalMark && settings.showActualMark)
+				scoreDisplay = niceNumber(score);
+			else if(settings.showTotalMark && !settings.showActualMark)
+				scoreDisplay = '('+niceNumber(marks)+')';
+			else if(settings.showTotalMark && settings.showActualMark)
+				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
 
-		selector.find('#score')
-			.show()
-			.html(scoreDisplay);
+			selector.find('#score')
+				.show()
+				.html(scoreDisplay);
+		}
+		else
+		{
+			if(settings.showTotalMark)
+			{
+				scoreDisplay = niceNumber(marks)+' '+(marks==1 ? 'mark' : 'marks');
+				selector.find('#score')
+					.show()
+					.html(scoreDisplay);
+			}
+			else
+				selector.find('#score').hide();
+
+		}
+
 	}
 	else
 	{
