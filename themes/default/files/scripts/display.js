@@ -534,7 +534,7 @@ display.PartDisplay.prototype =
 			}
 		});
 
-		this.showScore(this.answered);
+		this.showScore(this.p.answered);
 	},
 
 	//update 
