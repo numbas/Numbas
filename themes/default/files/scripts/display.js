@@ -61,7 +61,7 @@ var display = Numbas.display = {
 	//
 
 	showAlert: function(msg) {
-		$.prompt(msg);
+		$.prompt(Numbas.util.textile(msg));
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
