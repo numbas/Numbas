@@ -18,7 +18,9 @@ Copyright 2011 Newcastle University
 // controls.js
 // wrappers for the various navigation actions the user can do
 
-Numbas.queueScript('scripts/controls.js',[],function() {
+Numbas.queueScript('scripts/controls.js',['schedule'],function() {
+
+var job = Numbas.schedule.add;
 
 Numbas.controls = {
 //user controls - these wrap the exam methods so I can just bind buttons once to these
@@ -26,87 +28,99 @@ Numbas.controls = {
 	beginExam: function()
 	//Start the exam - triggered when user clicks "Start" button on frontpage
 	{
-		Numbas.exam.begin();
+		job(Numbas.exam.begin,Numbas.exam);
 	},
 
 	pauseExam: function()
 	{
-		Numbas.exam.pause();
+		job(Numbas.exam.pause,Numbas.exam);
 	},
 
 	resumeExam: function()
 	{
-		Numbas.exam.resume();
+		job(Numbas.exam.resume,Numbas.exam);
 	},
 
 	endExam: function()
 	{
-		Numbas.exam.end();
+		job(Numbas.exam.end,Numbas.exam);
 	},
 
 	exitExam: function()
 	{
-		Numbas.exam.exit();
+		job(Numbas.exam.exit,Numbas.exam);
 	},
 
 	nextQuestion: function( )
 	{
-		Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number+1 );
+		job(function() {
+			Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number+1 );
+		});
 	},
 
 
 	previousQuestion: function()
 	{
-		Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number-1 );
+		job(function() {
+			Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number-1 );
+		});
 	},
 
 
 	// move directly to a particular question
 	jumpQuestion: function( jumpTo )
 	{
-		if(jumpTo == Numbas.exam.currentQuestion.number)
-			return;
+		job(function() {
+			if(jumpTo == Numbas.exam.currentQuestion.number)
+				return;
 
-		if( Numbas.exam.navigateBrowse || 											// is browse navigation enabled?
-			(questionList[jumpTo].visited && Numbas.exam.navigateReverse) ||		// if not, we can still move backwards to questions already seen if reverse navigation is enabled
-			(jumpTo>Numbas.exam.currentQuestion.number && questionList[jumpTo-1].visited)// or you can always move to the next question
-		)
-		{
-			Numbas.exam.tryChangeQuestion( jumpTo );
-		}
+			if( Numbas.exam.navigateBrowse || 											// is browse navigation enabled?
+				(questionList[jumpTo].visited && Numbas.exam.navigateReverse) ||		// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+				(jumpTo>Numbas.exam.currentQuestion.number && questionList[jumpTo-1].visited)// or you can always move to the next question
+			)
+			{
+				Numbas.exam.tryChangeQuestion( jumpTo );
+			}
+		});
 	},
 
 
 	//show the advice for this question
 	getAdvice: function()
 	{
-		Numbas.exam.currentQuestion.getAdvice();
+		job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam);
 	},
 
 	//reveal the answers to all parts in this question
 	revealAnswer: function()
 	{
-		Numbas.display.showConfirm("Would you like to reveal the answer to this question? Any marks you have received so far will be removed and you will not be able to answer this question later.",
-			function(){ Numbas.exam.currentQuestion.revealAnswer(); }
-		);
+		job(function() {
+			Numbas.display.showConfirm("Would you like to reveal the answer to this question? Any marks you have received so far will be removed and you will not be able to answer this question later.",
+				function(){ Numbas.exam.currentQuestion.revealAnswer(); }
+			);
+		});
 	},
 
 	//submit student's answers, and then update exam total
 	submitQuestion: function()
 	{
-		Numbas.exam.currentQuestion.submit();
+		job(Numbas.exam.currentQuestion.submit,Numbas.exam);
 	},
 
 	//student has changed answer to part - record it and calculate new score
 	doPart: function( answerList, partRef )
 	{
-		Numbas.exam.currentQuestion.doPart(answerList, partRef);
+		job(function() {
+			Numbas.exam.currentQuestion.doPart(answerList, partRef);
+		});
 	},
 
 	//show steps for a question part
 	showSteps: function( partRef )
 	{
-		Numbas.exam.currentQuestion.getPart(partRef).showSteps();
+		job(function() {
+			Numbas.exam.currentQuestion.getPart(partRef).showSteps();
+		});
 	}
 };
 
