@@ -88,7 +88,7 @@ Numbas.controls = {
 	//show the advice for this question
 	getAdvice: function()
 	{
-		job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam);
+		job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam.currentQuestion);
 	},
 
 	//reveal the answers to all parts in this question
@@ -104,7 +104,7 @@ Numbas.controls = {
 	//submit student's answers, and then update exam total
 	submitQuestion: function()
 	{
-		job(Numbas.exam.currentQuestion.submit,Numbas.exam);
+		job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
 	},
 
 	//student has changed answer to part - record it and calculate new score
