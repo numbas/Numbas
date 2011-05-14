@@ -73,13 +73,21 @@ var display = Numbas.display = {
 	//make MathJax typeset any maths in elem (or whole page if elem not given)
 	typeset: function(elem,callback)
 	{
-		//return;
-		if(MathJax)
+		try
+		{
 			MathJax.Hub.Queue(['Typeset',MathJax.Hub,elem,callback]);
+		}
+		catch(e)
+		{
+			if(!display.failedMathJax)
+			{
+				display.failedMathJax = true;
+				display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+			}
+		};
 	}
 
 };
-
 
 
 
