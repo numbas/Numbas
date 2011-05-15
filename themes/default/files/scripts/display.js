@@ -450,7 +450,7 @@ display.QuestionDisplay.prototype =
 
 		if(!exam.showTotalMark && !exam.showActualMark)
 		{
-			if(this.q.answered)
+			if(q.answered)
 			{
 				$('.submitDiv > #score').show().html('Answer submitted').fadeOut(200).fadeIn(200);
 
@@ -464,7 +464,12 @@ display.QuestionDisplay.prototype =
 				selector.find('#submitBtn').val('Submit');
 			}
 		}
-		if(!this.q.answered)
+		var anyAnswered = false;
+		for(var i=0;i<q.parts.length;i++)
+		{
+			anyAnswered |= q.parts[i].answered;
+		}
+		if(!anyAnswered)
 			$('.submitDiv').find('#feedback,#score').hide();
 
 	},
@@ -986,6 +991,8 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	var niceNumber = Numbas.math.niceNumber;
 	var scoreDisplay = '';
 
+	answered = answered || score>0;
+
 	if(settings.showTotalMark || settings.showActualMark)
 	{
 		if(answered)
@@ -1049,6 +1056,10 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 				.show()
 				.attr('class',state)
 			;
+		}
+		else
+		{
+			selector.find('#feedback').attr('class','');
 		}
 	}
 	else

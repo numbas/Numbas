@@ -600,17 +600,18 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
-		if(this.stagedAnswer==undefined)
+		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning("No answer submitted.");
-			return;
+			this.credit = 0;
+			this.answered = false;
 		}
-
-		this.answerList = util.copyarray(this.stagedAnswer);
-		this.mark();
-		this.answered = this.validate();
-		if(!this.answered)
-			return;
+		else
+		{
+			this.answerList = util.copyarray(this.stagedAnswer);
+			this.mark();
+			this.answered = this.validate();
+		}
 		this.calculateScore();
 		this.question.updateScore();
 		this.display.showScore();
