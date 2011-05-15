@@ -378,6 +378,8 @@ display.QuestionDisplay.prototype =
 		//resize text inputs to just fit their contents
 		$('input[type=text],input[type=number]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
 
+		$('input').bind('propertychange',function(){$(this).trigger('input')});
+
 		//scroll back to top of page
 		scroll(0,0);
 	},
