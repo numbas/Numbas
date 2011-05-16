@@ -519,13 +519,14 @@ display.PartDisplay.prototype =
 	show: function()
 	{
 		var p = this.p;
+		var c = this.htmlContext();
 		if(p.stepsShown)
 		{
 			this.showSteps();
 		}
 		else
 		{
-			this.htmlContext().find('#stepsBtn').click(function() {
+			c.find('#stepsBtn').click(function() {
 				p.showSteps();
 			});
 		}
@@ -539,7 +540,14 @@ display.PartDisplay.prototype =
 				$(this).find('.partwarning').hide()
 			});
 
-		this.htmlContext().find('#partFeedback #submitPart').click(function() {
+		//hide part submit button and score feedback if there's only one part
+		if(p.parentPart==null && p.question.parts.length==1)
+		{
+			c.find('#partFeedback').hide();
+		}
+
+
+		c.find('#partFeedback #submitPart').click(function() {
 			p.display.removeWarnings();
 			p.submit();
 			if(!p.answered)
