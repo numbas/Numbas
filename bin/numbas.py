@@ -1,4 +1,4 @@
-#!/usr/bin/python3.1
+#!/usr/bin/python3
 
 #Copyright 2011 Newcastle University
 #
