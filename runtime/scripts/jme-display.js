@@ -848,7 +848,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['sin(n)',['n isa "number"','isint(2*n/pi)'],'eval(sin(n))'],
 		['cos(n)',['n isa "number"','isint(2*n/pi)'],'eval(cos(n))'],
 		['tan(n)',['n isa "number"','isint(n/pi)'],'0'],
-		['cosh(0)',[],'0'],
+		['cosh(0)',[],'1'],
 		['sinh(0)',[],'0'],
 		['tanh(0)',[],'0']
 	],
