@@ -61,7 +61,7 @@ var display = Numbas.display = {
 	//
 
 	showAlert: function(msg) {
-		$.prompt(msg);
+		$.prompt(Numbas.util.textile(msg));
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
@@ -73,13 +73,21 @@ var display = Numbas.display = {
 	//make MathJax typeset any maths in elem (or whole page if elem not given)
 	typeset: function(elem,callback)
 	{
-		//return;
-		if(MathJax)
+		try
+		{
 			MathJax.Hub.Queue(['Typeset',MathJax.Hub,elem,callback]);
+		}
+		catch(e)
+		{
+			if(!display.failedMathJax)
+			{
+				display.failedMathJax = true;
+				display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+			}
+		};
 	}
 
 };
-
 
 
 
@@ -368,7 +376,9 @@ display.QuestionDisplay.prototype =
 					.focus( function(e) { Numbas.display.inInput = true; } );
 
 		//resize text inputs to just fit their contents
-		$('input[type=text]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+		$('input[type=text],input[type=number]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+
+		$('input').bind('propertychange',function(){$(this).trigger('input')});
 
 		//scroll back to top of page
 		scroll(0,0);
@@ -434,14 +444,15 @@ display.QuestionDisplay.prototype =
 	showScore: function()
 	{
 		var exam = Numbas.exam;
-		var niceNumber = Numbas.math.niceNumber;
+		var q = this.q;
 
 		var selector = $(this.questionSelector).add('.submitDiv');
 
-		var scoreDisplay = '';
+		showScoreFeedback(selector,q.answered,q.score,q.marks,exam);
+
 		if(!exam.showTotalMark && !exam.showActualMark)
 		{
-			if(this.q.answered)
+			if(q.answered)
 			{
 				$('.submitDiv > #score').show().html('Answer submitted').fadeOut(200).fadeIn(200);
 
@@ -455,50 +466,18 @@ display.QuestionDisplay.prototype =
 				selector.find('#submitBtn').val('Submit');
 			}
 		}
-		else
+		var anyAnswered = false;
+		for(var i=0;i<q.parts.length;i++)
 		{
-			if(!exam.showTotalMark && exam.showActualMark)
-				scoreDisplay = niceNumber(this.q.score);
-			if(exam.showTotalMark && !exam.showActualMark)
-				scoreDisplay = '('+niceNumber(this.q.marks)+')';
-			if(exam.showTotalMark && exam.showActualMark)
-				scoreDisplay = niceNumber(this.q.score)+'/'+niceNumber(this.q.marks);
-
-			selector.find('#score')
-				.show()
-				.html(scoreDisplay);
+			anyAnswered |= q.parts[i].answered;
 		}
-
-		if( exam.showAnswerState )
-		{
-			if( this.q.answered )
-			{
-				var state;
-				if( this.q.score<=0  )
-				{
-					state = 'cross';
-				}
-				else if( this.q.score == this.q.marks )
-				{
-					state = 'tick';
-				}		
-				else
-				{
-					state = 'partial';
-				}
-				selector.find('#feedback')
-					.show()
-					.attr('class',state)
-				;
-			}
-		}
-		else
-		{
-			selector.find('#feedback').hide();
-		}	
-
-		if(!this.q.answered)
+		if(!anyAnswered)
 			$('.submitDiv').find('#feedback,#score').hide();
+
+	},
+
+	scrollToError: function() {
+		scrollTo($('.warningcontainer:visible:first'));
 	}
 };
 
@@ -539,18 +518,63 @@ display.PartDisplay.prototype =
 	//show steps if appropriate, restore answers
 	show: function()
 	{
-		if(this.p.stepsShown)
+		var p = this.p;
+		var c = this.htmlContext();
+		if(p.stepsShown)
 		{
 			this.showSteps();
 		}
+		else
+		{
+			c.find('#stepsBtn').click(function() {
+				p.showSteps();
+			});
+		}
 		this.restoreAnswer();
 
-		$(this.warningDiv).mouseover(function(){$(this).find('.partwarning').show();}).mouseout(function(){$(this).find('.partwarning').hide()});
+		$(this.warningDiv)
+			.mouseover(function(){
+				$(this).find('.partwarning').show();
+			})
+			.mouseout(function(){
+				$(this).find('.partwarning').hide()
+			});
 
-		if(Numbas.exam.showTotalMark && this.p.marks>0)
-			this.htmlContext().find('#marks').html(this.p.marks+(this.p.marks==1 ? ' mark' : ' marks'));
+		//hide part submit button and score feedback if there's only one part
+		if(p.parentPart==null && p.question.parts.length==1)
+		{
+			c.find('#partFeedback').hide();
+		}
+
+
+		c.find('#partFeedback #submitPart').click(function() {
+			p.display.removeWarnings();
+			p.submit();
+			if(!p.answered)
+			{
+				Numbas.display.showAlert("Can not submit answer - check for errors.");
+				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
+			}
+		});
+
+		this.showScore(this.p.answered);
+	},
+
+	//update 
+	showScore: function(valid)
+	{
+		var c = this.htmlContext();
+		if(this.p.marks==0)
+		{
+			c.find('#partFeedback:last').hide();
+		}
 		else
-			this.htmlContext().find('#marks').hide();
+		{
+			c.find('#marks:last').show();
+			if(valid===undefined)
+				valid = this.p.validate();
+			showScoreFeedback(c,valid,this.p.score,this.p.marks,Numbas.exam);
+		}
 	},
 
 	//called when 'show steps' button is pressed, or coming back to a part after steps shown
@@ -575,7 +599,10 @@ display.PartDisplay.prototype =
 	//fills inputs with correct answers
 	revealAnswer: function() 
 	{
-		this.htmlContext().find('input[type=text]').each(resizeF);
+		var c = this.htmlContext();
+		c.find('input[type=text],input[type=number]').each(resizeF);
+		c.find('#submitPart').attr('disabled',true);
+		this.showScore();
 	}
 };
 
@@ -634,18 +661,19 @@ display.JMEPartDisplay.prototype =
 		};
 
 		//when student types in input box, update display
-		inputDiv.keyup(function() {
+		inputDiv.bind('input',function() {
 			if(pd.timer!=undefined)
 				return;
 
 			clearTimeout(pd.timer);
+
 
 			pd.timer = setTimeout(keyPressed,100);
 		});
 
 		//when input box loses focus, hide it
 		inputDiv.blur(function() {
-			Numbas.controls.doKeyPart([this.value],p.path);
+			Numbas.controls.doPart([this.value],p.path);
 			pd.hasFocus = false;
 			inputPositionF();
 		});
@@ -703,6 +731,7 @@ display.JMEPartDisplay.prototype =
 	//display a live preview of the student's answer typeset properly
 	inputChanged: function(txt,force)
 	{
+		this.p.storeAnswer([txt]);
 		if((txt!=this.oldtxt && txt!==undefined) || force)
 		{
 			this.txt = txt;
@@ -748,10 +777,19 @@ display.PatternMatchPartDisplay = function()
 }
 display.PatternMatchPartDisplay.prototype = 
 {
+	show: function()
+	{
+		var c = this.htmlContext();
+		var p = this.p;
+		c.find('#patternmatch').bind('input',function() {
+			p.storeAnswer([$(this).val()]);
+		});
+	},
+
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
-		c.find('#patternmatch').attr('value',this.p.studentAnswer);
+		c.find('#patternmatch').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -759,7 +797,7 @@ display.PatternMatchPartDisplay.prototype =
 		var c = this.htmlContext();
 		c.find('#patternmatch')
 			.attr('disabled',true)
-			.attr('value',this.p.settings.displayAnswer);
+			.val(this.p.settings.displayAnswer);
 	}
 };
 display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);
@@ -770,10 +808,17 @@ display.NumberEntryPartDisplay = function()
 }
 display.NumberEntryPartDisplay.prototype =
 {
+	show: function() {
+		var p = this.p;
+		this.htmlContext().find('#numberentry').bind('input',function(){
+			p.storeAnswer([$(this).val()]);
+		});
+	},
+
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
-		c.find('#numberentry').attr('value',this.p.studentAnswer);
+		c.find('#numberentry').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -781,7 +826,7 @@ display.NumberEntryPartDisplay.prototype =
 		var c = this.htmlContext();
 		c.find('#numberentry')
 			.attr('disabled','true')
-			.attr('value',this.p.settings.displayAnswer);
+			.val(this.p.settings.displayAnswer);
 	}
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
@@ -793,6 +838,37 @@ display.MultipleResponsePartDisplay = function()
 }
 display.MultipleResponsePartDisplay.prototype =
 {
+	show: function()
+	{
+		var p = this.p;
+		var c = this.htmlContext();
+
+		function makeClicker(choice,answer)
+		{
+			return function() {
+				p.storeAnswer([choice,answer,$(this).prop('checked')]);
+			};
+		}
+
+		switch(p.settings.displayType)
+		{
+		case 'dropdownlist':
+			c.find('.multiplechoice').bind('change',function() {
+				var i = $(this).find('option:selected').index();
+				p.storeAnswer([i-1,0]);
+			});
+			break;
+		default:
+			for(var i=0; i<p.numAnswers; i++)
+			{
+				for(var j=0; j<p.numChoices; j++)
+				{
+					c.find('#choice-'+j+'-'+i).change(makeClicker(i,j));
+				}
+			}
+		}
+
+	},
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
@@ -801,7 +877,7 @@ display.MultipleResponsePartDisplay.prototype =
 			for(var j=0; j<this.p.numAnswers; j++)
 			{
 				var checked = this.p.ticks[j][i];
-				c.find('#choice-'+i+'-'+j).attr('checked',checked);
+				c.find('#choice-'+i+'-'+j).prop('checked',checked);
 			}
 		}
 	},
@@ -821,7 +897,7 @@ display.MultipleResponsePartDisplay.prototype =
 					var checked = this.p.settings.matrix[j][i]>0;
 					c.find('#choice-'+i+'-'+j)
 						.attr('disabled',true)
-						.attr('checked',checked);
+						.prop('checked',checked);
 				}
 			}
 			break;
@@ -909,7 +985,113 @@ $.textMetrics = function(el) {
 
 function resizeF() {
 	var w = $.textMetrics(this).width;
-	$(this).width(Math.max(w+5,60)+'px');
+	$(this).width(Math.max(w+30,60)+'px');
 };
+
+//update a score feedback box
+//selector - jQuery selector of element to update
+//score - student's score
+//marks - total marks available
+//settings - object containing the following properties:
+//	showTotalMark
+//	showActualMark
+//	showAnswerState
+function showScoreFeedback(selector,answered,score,marks,settings)
+{
+	var niceNumber = Numbas.math.niceNumber;
+	var scoreDisplay = '';
+
+	answered = answered || score>0;
+
+	if(settings.showTotalMark || settings.showActualMark)
+	{
+		if(answered)
+		{
+			if(!settings.showTotalMark && settings.showActualMark)
+				scoreDisplay = niceNumber(score);
+			else if(settings.showTotalMark && !settings.showActualMark)
+				scoreDisplay = '('+niceNumber(marks)+')';
+			else if(settings.showTotalMark && settings.showActualMark)
+				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
+
+			selector.find('#score')
+				.show()
+				.html(scoreDisplay);
+		}
+		else
+		{
+			if(settings.showTotalMark)
+			{
+				scoreDisplay = niceNumber(marks)+' '+(marks==1 ? 'mark' : 'marks');
+				selector.find('#score')
+					.show()
+					.html(scoreDisplay);
+			}
+			else
+				selector.find('#score').hide();
+
+		}
+
+	}
+	else
+	{
+		if(answered)
+		{
+			selector.find('#score')
+				.show()
+				.html('Answered');
+		}
+		else
+			selector.find('#score').hide();
+	}
+
+	if( settings.showAnswerState )
+	{
+		if( answered )
+		{
+			var state;
+			if( score<=0  )
+			{
+				state = 'cross';
+			}
+			else if( score == marks )
+			{
+				state = 'tick';
+			}		
+			else
+			{
+				state = 'partial';
+			}
+			selector.find('#feedback')
+				.show()
+				.attr('class',state)
+			;
+		}
+		else
+		{
+			selector.find('#feedback').attr('class','');
+		}
+	}
+	else
+	{
+		selector.find('#feedback').hide();
+	}	
+
+	selector.find('#marks').each(function(){
+		if(!$(this).is(':animated'))
+			$(this).fadeOut(200).fadeIn(200);
+	});
+
+};
+
+function scrollTo(el)
+{
+	var docTop = $(window).scrollTop();
+	var docBottom = docTop + $(window).height();
+	var elemTop = $(el).offset().top;
+	if((elemTop-docTop < 50) || (elemTop>docBottom-50))
+		$('html,body').animate({scrollTop: $(el).offset().top-50 });
+}
+
 
 });

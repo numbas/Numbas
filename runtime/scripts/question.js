@@ -371,28 +371,21 @@ Question.prototype =
 	//validate question - returns true if all parts completed
 	validate: function()
 	{
-		var currentQuestion = Numbas.exam.currentQuestion;
-		//remove any part warnings currently displayed
-		for(var i=0; i<currentQuestion.parts.length; i++)
-			currentQuestion.parts[i].display.removeWarnings();
-
 		var success = true;
-		for(i=0; i<currentQuestion.parts.length; i++)
+		for(i=0; i<this.parts.length; i++)
 		{
-			success = success && currentQuestion.parts[i].validate();
+			success = success && this.parts[i].answered;
 		}
 		return success;
 	},
 
 	//mark the student's answer to a given part/gap/step
-	markPart: function(answerList, partRef)
+	doPart: function(answerList, partRef)
 	{
 		var part = this.getPart(partRef);
-		part.display.removeWarnings();
-		part.answerList = answerList;
-		part.mark();
-		part.calculateScore();
-		Numbas.store.partAnswered(part);
+		if(!part)
+			throw(new Error("Can't find part "+partRef+"/"));
+		part.storeAnswer(answerList);
 	},
 
 	//calculate score - adds up all part scores
@@ -424,6 +417,12 @@ Question.prototype =
 	//submit question answers
 	submit: function()
 	{
+		//submit every part
+		for(var i=0; i<this.parts.length; i++)
+		{
+			this.parts[i].submit();
+		}
+
 		//validate every part
 		//displays warning messages if appropriate, 
 		//and returns false if any part is not completed sufficiently
@@ -434,16 +433,10 @@ Question.prototype =
 			this.submitted += 1;
 
 		//display message about success or failure
-		if( this.answered )
+		if(! this.answered )
 		{
-			//var currentQuestion = Numbas.exam.currentQuestion;
-			//answerMsg = "Answer Submitted "+ currentQuestion.submitted+(currentQuestion.submitted==1 ? " time" : " times");
-			//don't showAlert, can't see the point
-		}
-		else
-		{
-			answerMsg = "Can not submit answer - check for errors.";
-			Numbas.display.showAlert(answerMsg);
+			Numbas.display.showAlert("Can not submit answer - check for errors.");
+			this.display.scrollToError();
 		}
 
 							
@@ -545,7 +538,8 @@ Part.prototype = {
 	stepsMarks: 0,			//marks available in the steps, if any
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
-	answerList: undefined,	//student's last answer to this part
+	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
+	answerList: undefined,	//student's last submitted answer
 	answered: false,		//has this part been answered
 
 	gaps: [],				//child gapfills, if any
@@ -597,6 +591,32 @@ Part.prototype = {
 			this.parentPart.calculateScore();
 	},
 
+	//update the stored answer from the student (called when student changes their answer, before submitting)
+	storeAnswer: function(answerList) {
+		this.stagedAnswer = answerList;
+		this.display.removeWarnings();
+	},
+
+	//submit answer to this part - save answer, mark, update score
+	submit: function() {
+		this.display.removeWarnings();
+		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
+		{
+			this.giveWarning("No answer submitted.");
+			this.credit = 0;
+			this.answered = false;
+		}
+		else
+		{
+			this.answerList = util.copyarray(this.stagedAnswer);
+			this.mark();
+			this.answered = this.validate();
+		}
+		this.calculateScore();
+		this.question.updateScore();
+		this.display.showScore();
+	},
+
 	//function which marks the student's answer
 	mark: function() {},
 
@@ -616,6 +636,8 @@ Part.prototype = {
 	revealAnswer: function()
 	{
 		this.display.revealAnswer();
+		this.answered = true;
+		this.credit = 0;
 	}
 
 };
@@ -744,6 +766,11 @@ JMEPart.prototype =
 
 	mark: function()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		this.failMinLength = (this.settings.minLength>0 && this.studentAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.studentAnswer.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
@@ -893,6 +920,11 @@ PatternMatchPart.prototype = {
 
 	mark: function ()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		this.answered = this.studentAnswer.length>0;
 
@@ -976,6 +1008,11 @@ NumberEntryPart.prototype =
 
 	mark: function()
 	{
+		if(this.answerList==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
 		this.studentAnswer = this.answerList[0];
 		
 		// do a bit of string tidy up
@@ -1109,6 +1146,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//fill marks matrix
 	var matrix=[];
 	var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
+	var matrixTotal = 0;
 	for( i=0; i<matrixNodes.length; i++ )
 	{
 		var cell = {value: ""};
@@ -1119,7 +1157,11 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		else
 		{
 			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
+			if(!util.isFloat(cell.value))
+				throw(new Error("Part "+this.path+" marking matrix cell "+cell.possibleAnswerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
+			cell.value = parseFloat(cell.value);
 		}
+		matrixTotal += cell.value;
 
 		//take into account shuffling
 		cell.possibleAnswerIndex = this.shuffleAnswers[cell.possibleAnswerIndex];
@@ -1138,6 +1180,8 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 	settings.matrix = matrix;
 	
+	if(this.marks == 0)
+		this.marks = matrixTotal;
 
 	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{	//because we swapped answers and choices round in the marking matrix
@@ -1150,11 +1194,16 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	//ticks array - which answers/choices are selected?
 	this.ticks=[];
+	this.stagedAnswer = [];
 	for( i=0; i<this.numAnswers; i++ )
 	{
 		this.ticks.push([]);
+		this.stagedAnswer.push([]);
 		for( var j=0; j<this.numChoices; j++ )
+		{
 			this.ticks[i].push(false);
+			this.stagedAnswer[i].push(false);
+		}
 	}
 
 	//restore saved choices
@@ -1196,12 +1245,12 @@ MultipleResponsePart.prototype =
 		warningMessage: ''			//message to display if wrong number of responses
 	},
 
-	mark: function()
+	storeAnswer: function(answerList)
 	{
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
-		var answerIndex = this.answerList[0];
-		var choiceIndex = this.answerList[1];
+		var answerIndex = answerList[0];
+		var choiceIndex = answerList[1];
 
 		switch(this.settings.displayType)
 		{
@@ -1209,12 +1258,22 @@ MultipleResponsePart.prototype =
 		case 'dropdownlist':
 			for(var i=0; i<this.numAnswers; i++)
 			{
-				this.ticks[i][choiceIndex]= i==answerIndex;
+				this.stagedAnswer[i][choiceIndex]= i==answerIndex;
 			}
 			break;
 		default:
-			this.ticks[answerIndex][choiceIndex] = this.answerList[2];
+			this.stagedAnswer[answerIndex][choiceIndex] = this.answerList[2];
 		}
+	},
+
+	mark: function()
+	{
+		if(this.stagedAnswer==undefined)
+		{
+			this.credit = 0;
+			return false;
+		}
+		this.ticks = util.copyarray(this.stagedAnswer);
 
 		this.numTicks = 0;
 		var partScore = 0;
@@ -1232,7 +1291,7 @@ MultipleResponsePart.prototype =
 
 		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
 
-		if(!this.wrongNumber)
+		if(this.marks>0 && !this.wrongNumber)
 			this.credit = Math.min(partScore,this.marks)/this.marks;	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		else
 			this.credit = 0;
@@ -1268,20 +1327,9 @@ function GapFillPart(xml, path, question, parentPart, loading)
 
 	this.marks = 0;
 
-	//wrapper for marking function which updates this object after child gap marked
-	function wrapGapMark(oldmark)
-	{
-		return function()
-				{
-					oldmark.apply(this);	//mark gap
-					this.parentPart.mark();
-				};
-	}
-
 	for( var i=0 ; i<gapXML.length; i++ )
 	{
 		var gap = createPart(gapXML[i], path+'g'+i, this.question, this, loading);
-		gap.mark = wrapGapMark(gap.mark);
 		this.marks += gap.marks;
 		this.gaps[i]=gap;
 	}
@@ -1290,10 +1338,20 @@ function GapFillPart(xml, path, question, parentPart, loading)
 }	
 GapFillPart.prototype =
 {
+	stagedAnswer: 'something',
+
 	revealAnswer: function()
 	{
 		for(var i=0; i<this.gaps.length; i++)
 			this.gaps[i].revealAnswer();
+	},
+
+	submit: function()
+	{
+		for(var i=0;i<this.gaps.length;i++)
+		{
+			this.gaps[i].submit();
+		}
 	},
 
 	mark: function()
@@ -1304,6 +1362,7 @@ GapFillPart.prototype =
 			for(var i=0; i<this.gaps.length; i++)
 			{
 				var gap = this.gaps[i];
+				gap.mark();
 				this.credit += gap.credit*gap.marks;
 			}
 			this.credit/=this.marks;
@@ -1317,11 +1376,12 @@ GapFillPart.prototype =
 		//whole part fails to validate
 		var success = true;
 		for(var i=0; i<this.gaps.length; i++)
-			success = success && this.gaps[i].validate();
+			success = success && this.gaps[i].answered;
 
 		return success;
 	}
 };
+GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
 
 function InformationPart(xml, path, question, parentPart, loading)
 {

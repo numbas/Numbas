@@ -52,10 +52,7 @@ Numbas.util = {
 	//shallow copy of array
 	copyarray: function(arr)
 	{
-		var arr2 = [];
-		for(var i=0;i<arr.length;i++)
-			arr2.push(arr[i]);
-		return arr2;
+		return arr.slice();
 	},
 
 	//shallow copy of object

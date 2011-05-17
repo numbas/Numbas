@@ -137,9 +137,11 @@ Copyright 2011 Newcastle University
 					<input class="btn leftNav" type="button" value="Previous" id="prevBtn">
 					<input class="btn rightNav" type="button" value="Next" id="nextBtn">
 					<div class="submitDiv">
-						<input class="btn" type="button" value="Submit" id="submitBtn">
-						<span id="score"></span>
-						<span id="feedback"><img src="resources/cross.png"/></span>
+						<input class="btn" type="button" value="Submit all parts" id="submitBtn">
+						<div id="marks">	
+							<span id="score"></span>
+							<span id="feedback"><img src="resources/cross.png"/></span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -164,9 +166,11 @@ Copyright 2011 Newcastle University
 			<!-- empty question selector thing - will be copied into question list for each question -->
 			<li id="questionSelector" class="questionSelector-hidden">
 				<a href="#">
-				<span id="name"></span>
-				<div id="feedback"></div>
-				<div id="score"></div>
+					<span id="name"></span>
+					<div id="marks">
+						<div id="feedback"></div>
+						<div id="score"></div>
+					</div>
 				</a>
 			</li>
 		</ul>
