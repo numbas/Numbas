@@ -310,7 +310,7 @@ Copyright 2011 Newcastle University
 <xsl:template match="partdata[@type='numberentry' or @type='CUEdt.NumberEntryPart']">
 	<xsl:param name="path"/>
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" onchange="Numbas.controls.doKeyPart([this.value],'{$path}')"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry"/>
 </xsl:template>
 
 <xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">
