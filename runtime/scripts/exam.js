@@ -430,7 +430,7 @@ Exam.prototype = {
 						 },
 			performancesummary: {	start: this.start.toGMTString(),
 									stop: this.stop.toGMTString(),
-									timespent: (new Date((this.duration - this.timeRemaining)*1000)).toLocaleTimeString(),
+									timespent: Numbas.timing.secsToDisplayTime(this.duration - this.timeRemaining),
 									score: this.score,
 									percentagescore: this.percentScore,
 									passed: this.passed,
