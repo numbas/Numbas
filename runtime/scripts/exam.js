@@ -125,6 +125,7 @@ Exam.prototype = {
 	stopwatch: undefined,		//stopwatch object - updates timer every second
 	endTime: undefined,			//time that the exam should stop
 	timeRemaining: 0,			//seconds until end of exam
+	timeSpent: 0,				//seconds exam has been in progress
 	inProgress: false,			//is the exam in progress? False before starting, when paused, and after ending.
 
 	start: Date(),				//time exam started
@@ -275,7 +276,6 @@ Exam.prototype = {
 
 	resume: function()
 	{
-		this.endTime = new Date((new Date()).getTime() + this.timeRemaining*1000);
 		this.startTiming();
 		this.display.showQuestion();
 	},
@@ -284,53 +284,60 @@ Exam.prototype = {
 	startTiming: function()
 	{
 		this.inProgress = true;
+		this.stopwatch = {
+			start: new Date(),
+			end: new Date((new Date()).getTime() + this.timeRemaining*1000),
+			oldTimeSpent: this.timeSpent,
+			id: setInterval(function(){exam.countDown();}, 1000)
+		};
 
 		if( this.duration > 0 )
-		{
-			this.timeRemaining = Math.ceil((this.endTime - (new Date()))/1000);
 			this.display.showTiming();
 			
-			var exam = this;
-			this.stopwatch = setInterval(function(){exam.countDown();}, 1000);
-		}
 		else
-		{
 			this.display.hideTiming();
-		}
+
+		var exam = this;
+		this.countDown();
 	},
 
 	//display time remaining and end exam when timer reaches zero
 	countDown: function()
 	{
-		this.timeRemaining = Math.ceil((this.endTime - (new Date()))/1000);
+		var t = new Date();
+		this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
 
-		this.display.showTiming();
-
-		if(this.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
+		if(this.duration > 0)
 		{
-			this.showedTimeWarning = true;
-			var e = this.timerEvents['timedwarning'];
-			if(e && e.action=='warn')
+			this.timeRemaining = Math.ceil((this.endTime - t)/1000);
+			this.display.showTiming();
+
+			if(this.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
 			{
-				Numbas.display.showAlert(e.message);
+				this.showedTimeWarning = true;
+				var e = this.timerEvents['timedwarning'];
+				if(e && e.action=='warn')
+				{
+					Numbas.display.showAlert(e.message);
+				}
 			}
+			else if(this.timeRemaining===0)
+			{
+				var e = this.timerEvents['timeout'];
+				if(e && e.action=='warn')
+				{
+					Numbas.display.showAlert(e.message);
+				}
+				this.end();
+			}	
 		}
-		else if(this.timeRemaining===0)
-		{
-			var e = this.timerEvents['timeout'];
-			if(e && e.action=='warn')
-			{
-				Numbas.display.showAlert(e.message);
-			}
-			this.end();
-		}	
 	},
 
 	//stop the stopwatch
 	endTiming: function()
 	{
 		this.inProgress = false;
-		clearInterval( this.stopwatch );
+		clearInterval( this.stopwatch.id );
 	},
 
 
@@ -430,7 +437,7 @@ Exam.prototype = {
 						 },
 			performancesummary: {	start: this.start.toGMTString(),
 									stop: this.stop.toGMTString(),
-									timespent: Numbas.timing.secsToDisplayTime(this.duration - this.timeRemaining),
+									timespent: Numbas.timing.secsToDisplayTime(this.timeSpent),
 									score: this.score,
 									percentagescore: this.percentScore,
 									passed: this.passed,
