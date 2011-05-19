@@ -564,7 +564,12 @@ display.PartDisplay.prototype =
 	showScore: function(valid)
 	{
 		var c = this.htmlContext();
-		if(this.p.marks==0)
+
+		if(this.p.question.revealed)
+		{
+			showScoreFeedback(c,false,0,this.p.marks,Numbas.exam);
+		}
+		else if(this.p.marks==0)
 		{
 			c.find('#partFeedback:last').hide();
 		}
