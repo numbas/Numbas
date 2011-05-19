@@ -25,9 +25,9 @@
 					var yInput = $('#p0g1 > input');
 					$('#'+id).bind('mouseup',function(){
 						if(parseFloat(xInput.val())!=pA.X())
-							$('#p0g0 > input').val(pA.X()).trigger('change');
+							$('#p0g0 > input').val(pA.X()).trigger('input');
 						if(parseFloat(yInput.val())!=pA.Y())
-							$('#p0g1 > input').val(pA.Y()).trigger('change');
+							$('#p0g1 > input').val(pA.Y()).trigger('input');
 					});
 					var changeX = function() {
 						var x = parseFloat(xInput.val());
