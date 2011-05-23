@@ -41,7 +41,7 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 
 	//get all question-objective indices
 	this.questionIndices = {};
-	var numObjectives = parseInt(this.get('objectives._count'));
+	var numObjectives = parseInt(this.get('objectives._count'),10);
 	for(var i=0;i<numObjectives;i++)
 	{
 		var id = this.get('objectives.'+i+'.id');
@@ -50,7 +50,7 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 
 	//get part-interaction indices
 	this.partIndices = {};
-	var numInteractions = parseInt(this.get('interactions._count'));
+	var numInteractions = parseInt(this.get('interactions._count'),10);
 	for(var i=0;i<numInteractions;i++)
 	{
 		var id = this.get('interactions.'+i+'.id');
@@ -305,14 +305,14 @@ SCORMStorage.prototype = {
 		
 		var location = this.get('location');
 		if(location.length)
-			location=parseInt(location);
+			location=parseInt(location,10);
 		else
 			location=undefined;
 
 		return {timeRemaining: eobj.timeRemaining,
 				questionSubset: eobj.questionSubset,
 				start: eobj.start,
-				score: parseInt(this.get('score.raw')),
+				score: parseInt(this.get('score.raw'),10),
 				location: location
 		};
 	},
@@ -326,7 +326,7 @@ SCORMStorage.prototype = {
 		var id = this.getQuestionId(question);
 		var index = this.questionIndices[id];
 
-		return {score: parseInt(this.get('objectives.'+index+'.score.raw')),
+		return {score: parseInt(this.get('objectives.'+index+'.score.raw'),10),
 				visited: qobj.visited,
 				answered: qobj.answered,
 				submitted: qobj.submitted,
@@ -382,8 +382,8 @@ SCORMStorage.prototype = {
 				var m = bits[i].match(tick_re);
 				if(m)
 				{
-					var x = parseInt(m[1]);
-					var y = parseInt(m[2]);
+					var x = parseInt(m[1],10);
+					var y = parseInt(m[2],10);
 					ticks[x][y]=true;
 				}
 			}

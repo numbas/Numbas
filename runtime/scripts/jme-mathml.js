@@ -27,7 +27,7 @@ var MathMLToJME = Numbas.jme.MathMLToJME = function(node)
 	case 'csymbol':
 		return node.childNodes[0].data;
 	case 'cn':
-		var n = parseInt(node.childNodes[0].data);
+		var n = parseInt(node.childNodes[0].data,10);
 		if(n<0) { n = '('+n+')';}
 		return ''+n;
 	case 'reln':

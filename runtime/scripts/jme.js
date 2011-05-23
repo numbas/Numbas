@@ -692,7 +692,7 @@ var jme = Numbas.jme = {
 				break;
 			case 'simplify': //a JME expression to be simplified
 				var simplificationSettings = jme.display.parseSimplificationSettings('');
-				if(parseInt(args))
+				if(/[01]+/.test(args))
 				{
 					simplificationSettings = jme.display.parseSimplificationSettings(args);
 				}
