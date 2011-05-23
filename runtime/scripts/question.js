@@ -37,6 +37,8 @@ var Question = Numbas.Question = function( xml, number, loading )
 
 	job(function()
 	{
+		q.followVariables = {};
+
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -612,9 +614,26 @@ Part.prototype = {
 			this.mark();
 			this.answered = this.validate();
 		}
+		if(this.answered)
+			this.reportStudentAnswer(this.studentAnswer);
+		else
+			this.reportStudentAnswer('');
+
+
 		this.calculateScore();
 		this.question.updateScore();
 		this.display.showScore();
+	},
+
+	//save the student's answer as a question variable
+	//so it can be used for carry-over marking
+	reportStudentAnswer: function(answer) {
+		var val;
+		if(util.isFloat(answer))
+			val = new Numbas.jme.types.TNum(answer);
+		else
+			val = new Numbas.jme.types.TString(answer);
+		this.question.followVariables['$'+this.path] = val;
 	},
 
 	//function which marks the student's answer
@@ -779,7 +798,7 @@ JMEPart.prototype =
 		this.answered = this.studentAnswer.length > 0;
 		
 		//do comparison of student's answer with correct answer
-		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings))
+		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
 			this.credit = 0;
 			return;
