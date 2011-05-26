@@ -379,6 +379,7 @@ function texRationalNumber(n)
 	}
 	else
 	{
+		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
 
@@ -437,6 +438,7 @@ function texRealNumber(n)
 	}
 	else
 	{
+		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
 
