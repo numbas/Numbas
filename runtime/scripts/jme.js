@@ -468,6 +468,8 @@ var jme = Numbas.jme = {
 	{
 		expr+='';	//make sure expression is a string and not a number or anything like that
 
+		if(!expr.length)
+			return null;
 		//typecheck
 		if(functions===undefined)
 			functions = {};
