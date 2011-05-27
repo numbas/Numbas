@@ -25,7 +25,8 @@ jme.display = {
 
 	exprToLaTeX: function(expr,settings)
 	{
-		if(expr.trim()=='')
+		expr+='';
+		if(!expr.trim().length)
 			return '';
 		var tree = jme.display.simplify(expr,settings);
 		var tex = texify(tree,settings);
