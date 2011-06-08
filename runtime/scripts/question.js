@@ -614,7 +614,7 @@ Part.prototype = {
 		}
 		this.calculateScore();
 		this.question.updateScore();
-		this.display.showScore();
+		this.display.showScore(this.answered);
 	},
 
 	//function which marks the student's answer
