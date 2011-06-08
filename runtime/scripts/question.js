@@ -773,7 +773,7 @@ JMEPart.prototype =
 		}
 		this.studentAnswer = this.answerList[0];
 		this.failMinLength = (this.settings.minLength>0 && this.studentAnswer.length<this.settings.minLength);
-		this.failMaxLength = (this.studentAnswer.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
+		this.failMaxLength = (this.settings.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
 
 		//did student actually write anything?
 		this.answered = this.studentAnswer.length > 0;
