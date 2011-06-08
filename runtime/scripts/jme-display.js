@@ -25,6 +25,9 @@ jme.display = {
 
 	exprToLaTeX: function(expr,settings)
 	{
+		expr+='';
+		if(!expr.trim().length)
+			return '';
 		var tree = jme.display.simplify(expr,settings);
 		var tex = texify(tree,settings);
 		return tex;
@@ -377,6 +380,7 @@ function texRationalNumber(n)
 	}
 	else
 	{
+		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
 
@@ -435,6 +439,7 @@ function texRealNumber(n)
 	}
 	else
 	{
+		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
 

@@ -468,6 +468,8 @@ var jme = Numbas.jme = {
 	{
 		expr+='';	//make sure expression is a string and not a number or anything like that
 
+		if(!expr.trim().length)
+			return null;
 		//typecheck
 		if(functions===undefined)
 			functions = {};
@@ -692,7 +694,7 @@ var jme = Numbas.jme = {
 				break;
 			case 'simplify': //a JME expression to be simplified
 				var simplificationSettings = jme.display.parseSimplificationSettings('');
-				if(parseInt(args))
+				if(/[01]+/.test(args))
 				{
 					simplificationSettings = jme.display.parseSimplificationSettings(args);
 				}

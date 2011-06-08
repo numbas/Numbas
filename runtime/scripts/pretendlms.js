@@ -308,7 +308,7 @@ PretendLMS.prototype =
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.comments_from_learner.length )
 		{
@@ -339,7 +339,7 @@ PretendLMS.prototype =
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.comments_from_lms.length )
 		{
@@ -370,7 +370,7 @@ PretendLMS.prototype =
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.interactions.length )
 		{
@@ -430,7 +430,7 @@ PretendLMS.prototype =
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.interactions.length )
 		{
@@ -789,7 +789,7 @@ PretendLMS.prototype =
 			return false;
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.comments_from_learner.length )
 		{
@@ -841,7 +841,7 @@ PretendLMS.prototype =
 			return false;
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.comments_from_lms.length )
 		{
@@ -893,7 +893,7 @@ PretendLMS.prototype =
 			return false;
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.interactions.length )
 		{
@@ -1047,7 +1047,7 @@ PretendLMS.prototype =
 			return false;
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.objectives.length )
 		{
@@ -1299,7 +1299,7 @@ Interaction.prototype = {
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.objectives.length )
 		{
@@ -1326,7 +1326,7 @@ Interaction.prototype = {
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>=this.correct_responses.length )
 		{
@@ -1353,7 +1353,7 @@ Interaction.prototype = {
 			return '';
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.objectives.length )
 		{
@@ -1516,7 +1516,7 @@ Interaction.prototype = {
 			return false;
 		}
 
-		var n = parseInt(path[0]);
+		var n = parseInt(path[0],10);
 				
 		if( n<0 || n>this.correct_responses.length )
 		{
@@ -1608,13 +1608,13 @@ function isTimestamp(t)
 		return false;
 
 	var res = t.match(re);
-	var year = parseInt(res[1]);
-	var month = parseInt(res[2]);
-	var day = parseInt(res[3]);
-	var hour = parseInt(res[4]);
-	var minute = parseInt(res[5]);
-	var second = parseInt(res[6]);
-	var milliseconds = parseInt(res[7])*10;
+	var year = parseInt(res[1,10]);
+	var month = parseInt(res[2],10);
+	var day = parseInt(res[3],10);
+	var hour = parseInt(res[4],10);
+	var minute = parseInt(res[5],10);
+	var second = parseInt(res[6],10);
+	var milliseconds = parseInt(res[7],10)*10;
 	var timezone = res[8];
 
 	if( year<1970 || month<1 || month>12 || day<1 || day>31 || hour<0 || hour>23 || minute<0 || minute>59 || second<0 || second>59)
@@ -1623,8 +1623,8 @@ function isTimestamp(t)
 	if(timezone!='Z' && timezone!==undefined)
 	{
 		var plusminus = res[9];
-		var addhour = parseInt(res[10]);
-		var addminute = parseInt(res[11]);
+		var addhour = parseInt(res[10],10);
+		var addminute = parseInt(res[11],10);
 		if(!(plusminus=='+' || plusminus=='-') || addhour<0 || addhour > 23 || addminute < 0 || addminute > 59 )
 			return false;
 	}
@@ -1637,13 +1637,13 @@ function timestampToDate(t)
 	var re = /^(\d{4})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2})(?::(\d{2})(?::(\d{2})(?:\.(\d\d?)(?:(Z)|(\+|\-)(\d{2}):(\d{2}))?)?)?)?)?)?)?$/;
 	
 	var res = t.match(re);
-	var year = parseInt(res[1]);
-	var month = parseInt(res[2]) || 1;
-	var day = parseInt(res[3]) || 1;
-	var hour = parseInt(res[4]) || 0;
-	var minute = parseInt(res[5]) || 0;
-	var second = parseInt(res[6]) || 0;
-	var milliseconds = parseInt(res[7])*10 || 0;
+	var year = parseInt(res[1],10);
+	var month = parseInt(res[2],10) || 1;
+	var day = parseInt(res[3],10) || 1;
+	var hour = parseInt(res[4],10) || 0;
+	var minute = parseInt(res[5],10) || 0;
+	var second = parseInt(res[6],10) || 0;
+	var milliseconds = parseInt(res[7],10)*10 || 0;
 
 	var timezone = res[8];
 	
@@ -1659,8 +1659,8 @@ function timestampToDate(t)
 	default:
 		plusminus=0;
 	}
-	var addhour = parseInt(res[10]) || 0;
-	var addminute = parseInt(res[11]) || 0;
+	var addhour = parseInt(res[10],10) || 0;
+	var addminute = parseInt(res[11],10) || 0;
 
 	hour += addhour*plusminus;
 	minute += addminute*plusminus;
@@ -1719,12 +1719,12 @@ function timeIntervalToSeconds(i)
 	var re = /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/;
 
 	var res = i.match(re);
-	var t = (parseInt(res[1]) || 0);	//years
-	t = t*12+(parseInt(res[2]) || 0);	//months
-	t = t*31+(parseInt(res[3]) || 0);	//days
-	t = t*24+(parseInt(res[4]) || 0);	//hours
-	t = t*60+(parseInt(res[5]) || 0);	//minutes
-	t = t*60000+(parseInt(res[6])*1000 || 0);	//seconds
+	var t = (parseInt(res[1],10) || 0);	//years
+	t = t*12+(parseInt(res[2],10) || 0);	//months
+	t = t*31+(parseInt(res[3],10) || 0);	//days
+	t = t*24+(parseInt(res[4],10) || 0);	//hours
+	t = t*60+(parseInt(res[5],10) || 0);	//minutes
+	t = t*60000+(parseInt(res[6],10)*1000 || 0);	//seconds
 
 	return t;
 

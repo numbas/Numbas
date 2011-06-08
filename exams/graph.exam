@@ -19,15 +19,15 @@
 					var l2 = board.create('line',[[0,variables.c2],[-variables.c2/variables.m2,0]],{straightFirst:true,straightLast:true});
 					var sp11 = board.create('point',[0,0],{visible:false});
 					var sp12 = board.create('point',[1,0],{visible:false});
-					var sl1 = board.create('line',[sp11,sp12],{visible:false,strokeColor:'0f0'});
+					var sl1 = board.create('line',[sp11,sp12],{visible:false,strokeColor:'#0f0'});
 					board.create('text',[-2,-2*variables.m2+variables.c2,function(){return '\\[l_2\\]';}],{fontSize:'100%'});
 					var xInput = $('#p0g0 > input');
 					var yInput = $('#p0g1 > input');
 					$('#'+id).bind('mouseup',function(){
 						if(parseFloat(xInput.val())!=pA.X())
-							$('#p0g0 > input').val(pA.X()).trigger('change');
+							$('#p0g0 > input').val(pA.X()).trigger('input');
 						if(parseFloat(yInput.val())!=pA.Y())
-							$('#p0g1 > input').val(pA.Y()).trigger('change');
+							$('#p0g1 > input').val(pA.Y()).trigger('input');
 					});
 					var changeX = function() {
 						var x = parseFloat(xInput.val());
@@ -51,6 +51,10 @@
 							if(m==0)
 							{
 								sp12.moveTo([1,c],200);
+							}
+							else if(c==0)
+							{
+								sp12.moveTo([m,m],200);
 							}
 							else
 							{

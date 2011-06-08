@@ -79,7 +79,7 @@ Numbas.util = {
 	//test if parameter is an integer
 	isInt: function(i)
 	{
-		return parseInt(i)==i;
+		return parseInt(i,10)==i;
 	},
 
 	//test if parameter is a float
