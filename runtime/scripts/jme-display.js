@@ -98,7 +98,7 @@ jme.display = {
 					{
 						//Numbas.debug("match rule "+rules[i].patternString,true);
 						//Numbas.debug(treeToJME(exprTree),true);
-						exprTree = jme.substituteTree(rules[i].result,match);
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
 						//Numbas.debug(treeToJME(exprTree),true);
 						applied = true;
 						break;
@@ -670,7 +670,7 @@ Rule.prototype = {
 	{
 		for(var i=0;i<this.conditions.length;i++)
 		{
-			var c = this.conditions[i];
+			var c = Numbas.util.copyobj(this.conditions[i],true);
 			c = jme.substituteTree(c,match);
 			try
 			{
@@ -818,7 +818,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['(x-n)-y',['n isa "number"'],'(x-y)-n'],
 
 		['n*m',['n isa "number"','m isa "number"'],'eval(n*m)'],		//multiply numbers
-		['x*n',['n isa "number"'],'n*x']								//shift numbers to left hand side
+		['x*n',['n isa "number"','!(x isa "number")'],'n*x']								//shift numbers to left hand side
 	],
 
 	simplifyFractions: [
