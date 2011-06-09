@@ -664,7 +664,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	settings.answerSimplification = jme.display.parseSimplificationSettings(settings.answerSimplification);
 
 	settings.correctAnswer = jme.display.simplifyExpression(
-		Numbas.xml.getTextContent(answerMathML),
+		Numbas.xml.getTextContent(answerMathML).trim(),
 		settings.answerSimplification
 	);
 	
