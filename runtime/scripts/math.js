@@ -732,9 +732,11 @@ var math = Numbas.math = {
 			return math.complex(math.siground(a.re,b),math.siground(a.im,b));
 		else
 		{
-			if(a==0) { return a; }
+			var s = math.sign(a);
+			a = Math.abs(a);
+			if(a==0) { return s*a; }
 			b = Math.pow(10,Math.ceil(Math.log(a)/Math.log(10))-b);
-			return Math.round(a/b)*b;
+			return s*Math.round(a/b)*b;
 		}
 	},
 

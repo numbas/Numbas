@@ -16,7 +16,7 @@ Copyright 2011 Newcastle University
 
 
 Numbas.queueScript('scripts/util.js',[],function() {
-Numbas.util = {
+var util = Numbas.util = {
 	//extend(A,B) - derive type B from A
 	//(class inheritance, really)
 	extend: function(a,b,extendMethods)
@@ -50,20 +50,44 @@ Numbas.util = {
 	},
 
 	//shallow copy of array
-	copyarray: function(arr)
+	copyarray: function(arr,deep)
 	{
-		return arr.slice();
+		arr = arr.slice();
+		if(deep)
+		{
+			for(var i=0;i<arr.length;i++)
+			{
+				arr[i]=util.copyobj(arr[i],deep);
+			}
+		}
+		return arr;
 	},
 
-	//shallow copy of object
-	copyobj: function(obj)
+	//copy of object (shallow copy unless deep == true)
+	copyobj: function(obj,deep)
 	{
-		var newobj={};
-		for(x in obj)
+		switch(typeof(obj))
 		{
-			newobj[x]=obj[x];
+		case 'object':
+			if(obj.length!==undefined)
+			{
+				return util.copyarray(obj,deep);
+			}
+			else
+			{
+				var newobj={};
+				for(x in obj)
+				{
+					if(deep)
+						newobj[x] = util.copyobj(obj[x],deep);
+					else
+						newobj[x]=obj[x];
+				}
+				return newobj;
+			}
+		default:
+			return obj;
 		}
-		return newobj;
 	},
 
 	//shallow copy object into already existing object

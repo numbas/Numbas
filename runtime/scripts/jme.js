@@ -1393,13 +1393,13 @@ var checkingFunctions =
 
 	dp: function(r1,r2,tolerance) {
 		//rounds both values to 'tolerance' decimal places, and fails if unequal 
-		tolerance = Math.floor(tolerance);
+		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
 	},
 
 	sigfig: function(r1,r2,tolerance) {
 		//rounds both values to 'tolerance' sig figs, and fails if unequal
-		tolerance = Math.floor(tolerance);
+		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq(math.siground(r1,tolerance), math.siground(r2,tolerance));
 	}
 };

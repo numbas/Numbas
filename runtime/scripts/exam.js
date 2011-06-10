@@ -216,6 +216,11 @@ Exam.prototype = {
 		{
 			this.questionSubset = Numbas.math.range(this.numQuestions);
 		}
+
+		if(this.questionSubset.length==0)
+		{
+			Numbas.display.showAlert("This exam contains no questions! Check the .exam file for errors.");
+		}
 	},
 
 	//having chosen which questions to use, make question list and create question objects
@@ -411,6 +416,10 @@ Exam.prototype = {
 	changeQuestion: function(i)
 	{
 		this.currentQuestion = this.questionList[i];
+		if(!this.currentQuestion)
+		{
+			throw(new Error("This exam contains no questions! Check the .exam file for errors."));
+		}
 		this.currentQuestion.visited = true;
 		Numbas.store.changeQuestion(this.currentQuestion);
 	},

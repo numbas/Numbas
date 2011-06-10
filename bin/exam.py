@@ -429,12 +429,12 @@ class JMEPart(Part):
 	answer = ''
 	answerSimplification = '1111111011111011'
 	checkingType = 'RelDiff'
-	checkingAccuracy = 0
+	checkingAccuracy = 0		#real default value depends on checkingtype - 0.0001 for difference ones, 5 for no. of digits ones
 	failureRate = 1
 	vsetRangeStart = 0
 	vsetRangeEnd = 1
 	vsetRangePoints = 5
-	
+
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
 
@@ -448,7 +448,16 @@ class JMEPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = JMEPart()
-		tryLoad(data,['answer','answerSimplification','checkingType','checkingAccuracy','failureRate','vsetRangePoints'],part)
+		tryLoad(data,['answer','answerSimplification','checkingType','failureRate','vsetRangePoints'],part)
+
+		#default checking accuracies
+		if part.checkingType.lower() == 'reldiff' or part.checkingType.lower() == 'absdiff':
+			part.checkingAccuracy = 0.0001
+		else:	#dp or sigfig
+			part.checkingAccuracy = 5
+		#get checking accuracy from data, if defined
+		tryLoad(data,'checkingType',part)
+
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'])
 		if 'minlength' in data:
