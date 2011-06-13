@@ -541,7 +541,12 @@ var jme = Numbas.jme = {
 			var op = tok.name.toLowerCase();
 
 			if(functions[op]===undefined)
-				throw(new Error("Operation "+op+" is not defined"));
+			{
+				if(tok.type=='function')
+					throw(new Error("Operation '"+op+"' is not defined. Did you mean \n\n'"+op+"*(...)' ?"));
+				else
+					throw(new Error("Operation '"+op+"' is not defined"));
+			}
 
 			var result = undefined;
 
@@ -555,8 +560,7 @@ var jme = Numbas.jme = {
 					return true;
 				}
 			}
-			throw(new Error("No definition of "+op+" of correct type found"));
-			return false; //?
+			throw(new Error("No definition of "+op+" of correct type found."));
 		}
 	},
 
@@ -1400,13 +1404,13 @@ var checkingFunctions =
 
 	dp: function(r1,r2,tolerance) {
 		//rounds both values to 'tolerance' decimal places, and fails if unequal 
-		tolerance = Math.floor(tolerance);
+		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
 	},
 
 	sigfig: function(r1,r2,tolerance) {
 		//rounds both values to 'tolerance' sig figs, and fails if unequal
-		tolerance = Math.floor(tolerance);
+		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq(math.siground(r1,tolerance), math.siground(r2,tolerance));
 	}
 };

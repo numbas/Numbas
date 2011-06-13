@@ -125,17 +125,17 @@
       \hline
       \codepropreq{answer} & A JME expression defining the correct answer (see
       chapter~\ref{cha:jme_syntax}). & \nodef \\
-      \footnotesize{\codeprop{answersimplification}} & The simplification rules which should
-      be applied to the revealed answer.  For display purposes only.  A string
-      of 0s and 1s, or the names of simplification rules to enable & \mbox{see
-      \S\ref{sec:answer_simplification}}. \\
+      \footnotesize{\codeprop{answersimplification}} & The simplification rules
+      that should be applied to the revealed answer.  For display purposes
+      only.  A string of 0s and 1s, or the names of simplification rules to
+      enable & \mbox{see \S\ref{sec:answer_simplification}} \\
       \codeprop{checkingtype} & The method to use when comparing the student's
-      answer to the correct answer (see \S\ref{sec:answer_comparison}). &
+      answer to the correct answer (see \S\ref{sec:accuracy}). &
       \verb"reldiff" \\
       \codeprop{checkingaccuracy} & The inaccuracy tolerance when checking the
       student's answer against the correct answer.  What value this takes
       depends on the \codeprop{checkingtype} (see
-      \S\ref{sec:answer_comparison}). & \verb"0" \\
+      \S\ref{sec:accuracy}). & \mbox{see \S\ref{sec:accuracy}} \\
       \codeprop{failurerate} & The number of comparison failures to allow,
       before the student's answer is deemed incorrect (see
       \S\ref{sec:answer_comparison}). & \verb"1" \\
@@ -215,8 +215,8 @@
   Because evaluation in this way can lead to rounding errors, there are a
   number of available ``checking methods,'' to overcome any possible problems.
   You can also decide that the comparison is allowed to fail up to a certain
-  number of times before the student's answer is deemed incorrect.  See below
-  for more on this.
+  number of times before the student's answer is deemed incorrect.  See
+  \S\ref{sec:accuracy} for more on this.
 
   A consequence of this method of comparison is that any mathematical
   expression which is equivalent to the correct answer is permitted.  For
@@ -284,44 +284,89 @@
   As briefly mentioned earlier, evaluation and comparison of the correct answer
   and student's answer can lead to rounding errors.  Several checking methods
   are available to help alleviate this problem.  The \codeprop{checkingtype}
-  property controls the method, and \codeprop{checkingaccuracy} controls the
-  tolerance involved in the method.  See table~\ref{tab:checking_types} for a
-  list of the checking methods.
+  property controls the method, of which there are four --- relative difference
+  (\codeprop{reldiff}), absolute difference (\codeprop{absdiff}), decimal
+  points (\codeprop{dp}), and significant figures (\codeprop{sigfig}).  The
+  \codeprop{checkingaccuracy} property controls the tolerance involved in the
+  method.  See table~\ref{tab:checking_types} for a summary of the checking
+  methods.
   %
   \begin{table}[ht]
     \centering
     \begin{tabular}{llp{18em}}
       \hline
-      \multicolumn{3}{c}{Correct answer: $a_{c}$; Student answer: $a_{s}$} \\
-      Checking method & Description & When comparison fails \\
+      \multicolumn{3}{c}{Correct answer: $a_{\mathrm{c}}$; Student answer:
+      $a_{\mathrm{s}}$} \\ Checking method & Description & When comparison
+      fails \\
       \hline
+      \codeprop{reldiff} & \small{Relative difference} & $\abs{(a_{\mathrm{c}}
+      - a_{\mathrm{s}}) / a_{\mathrm{s}}} > \codeprop{checkingaccuracy}$ \\
       \codeprop{absdiff} & \small{Absolute difference} &
       $\abs{a_{c}-a_{s}}>\codeprop{checkingaccuracy}$ \\
-      \codeprop{reldiff} & \small{Relative difference} &
-      $\abs{(a_{c}-a_{s})/a_{s}}>\codeprop{checkingaccuracy}$ \\
-      \codeprop{dp} & \small{Decimal points} & $a_{c}$ and $a_{s}$ rounded to
-      \codeprop{checkingaccuracy} decimal points.  Failure if the rounded
-      numbers are not exactly equal. \\
-      \codeprop{sigfig} & \small{Significant figures} & $a_{c}$ and $a_{s}$
-      rounded to \codeprop{checkingaccuracy} significant figures.  Failure if
-      the rounded numbers are not exactly equal. \\
+      \codeprop{dp} & \small{Decimal points} & $a_{\mathrm{c}}$ and
+      $a_{\mathrm{s}}$ rounded to \codeprop{checkingaccuracy} decimal points.
+      Failure if the rounded numbers are not exactly equal. \\
+      \codeprop{sigfig} & \small{Significant figures} & $a_{\mathrm{c}}$ and
+      $a_{\mathrm{s}}$ rounded to \codeprop{checkingaccuracy} significant
+      figures.  Failure if the rounded numbers are not exactly equal. \\
       \hline\hline
     \end{tabular}
     \caption{\label{tab:checking_types}
       The available checking methods, and the methods for determining when the
-      comparison between the correct answer and student's answer fails.
+      comparison between the correct answer and student's answer fails (see
+      \S\ref{sec:accuracy}).
     }
   \end{table}
 
-  The \codeprop{failurerate} property can be set, so that the comparison is
-  allowed to fail a certain number of times before the student's answer is
-  deemed incorrect.  You might do this if you know the comparison will probably
-  fail so many times over the range \codeprop{vsetrange}.
+  In each of the checking methods described below, the comparison is performed
+  a number of times (determined by the \codeprop{vsetrangepoints} property, for
+  which the default is $5$).  The student's answer is deemed incorrect as soon
+  as a comparison fails, unless the \codeprop{failurerate} property is set to a
+  value other than the default of $1$.  In this case the comparison is allowed
+  to fail a certain number of times before the student's answer is deemed
+  incorrect.  You might do this if you know the comparison will probably fail
+  so many times over the range \codeprop{vsetrange}.
 
-  Finally, be wary of setting a comparison range including points on which
-  the correct answer is not defined.  For example, if the correct answer were
-  $1/(2x-1)$, then the default comparison range of $[0,1]$ is not acceptable,
-  because the expression is not defined on $x=1/2$.
+  Be wary of setting a comparison range including points on which the correct
+  answer is not defined.  For example, if the correct answer were $1/(2x-1)$,
+  then the default comparison range of $[0,1]$ is not acceptable, because the
+  expression is not defined on $x=1/2$.
+
+  The \emph{relative difference} checking method calculates
+  %
+  \begin{equation*}
+    \abs{\left( a_{\mathrm{c}} - a_{\mathrm{s}} \right) / a_{\mathrm{s}}}
+  \end{equation*}
+  %
+  (where $a_{\mathrm{c}}$ is the correct answer and $a_{\mathrm{s}}$ is the
+  student's answer), and compares this value to \codeprop{checkingaccuracy}.
+  If it is strictly greater than \codeprop{checkingaccuracy} (for which the
+  default is $0.0001$) then the comparison has failed, and the student's answer
+  is deemed incorrect.
+
+  The \emph{absolute difference} checking method is very similar to the
+  relative difference method, except the value compared to
+  \codeprop{checkingaccuracy} is
+  %
+  \begin{equation*}
+    \abs{a_{\mathrm{c}} - a_{\mathrm{s}}}.
+  \end{equation*}
+  %
+  If this value is strictly greater than \codeprop{checkingaccuracy} (for which
+  the default is again $0.0001$), then the comparison fails, and the student's
+  answer is deemed incorrect.
+
+  In the \emph{decimal points} checking method, the two answers
+  $a_{\mathrm{c}}$ and $a_{\mathrm{s}}$ are both rounded to
+  \codeprop{checkingaccuracy} decimal points (the default is $5$ decimal
+  points).  If, after rounding, the two answers are not exactly equal, the
+  comparison has failed, and the student's answer is deemed incorrect.
+
+  The final checking method, \emph{significant figures}, works in much the same
+  way as the decimal points method, except the two answers are rounded to
+  \codeprop{checkingaccuracy} significant figures (the default is $5$
+  significant figures).  If the two rounded answers are not exactly equal, then
+  the comparison has failed, and the student's answer is deemed incorrect.
 
   \subsection{\label{sec:answer_simplification}Revealed answer simplification}
   The simplification rules applied to the displayed answer in a JME part can be

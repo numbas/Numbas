@@ -563,6 +563,7 @@ Part.prototype = {
 	//then calls the display code
 	giveWarning: function(warning)
 	{
+		warning = warning.replace('\n\n','\n<br/>\n');
 		this.display.warning(warning);
 	},
 
@@ -683,7 +684,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	settings.answerSimplification = jme.display.parseSimplificationSettings(settings.answerSimplification);
 
 	settings.correctAnswer = jme.display.simplifyExpression(
-		Numbas.xml.getTextContent(answerMathML),
+		Numbas.xml.getTextContent(answerMathML).trim(),
 		settings.answerSimplification
 	);
 	
@@ -866,7 +867,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.giveWarning("This is not a valid mathematical expression: "+e);
+			this.giveWarning("This is not a valid mathematical expression.\n\n"+e.message);
 			return false;
 		}
 
@@ -885,7 +886,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.giveWarning('Your answer must contain: "'+this.settings.mustHave.join('", "')+'"');
+				this.giveWarning('Your answer must contain all of: "'+this.settings.mustHave.join('", "')+'"');
 			}
 		}
 
@@ -894,7 +895,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.giveWarning('Your answer must not contain: "'+this.settings.notAllowed.join('", "')+'"');
+				this.giveWarning('Your answer must not contain any of: "'+this.settings.notAllowed.join('", "')+'"');
 			}
 		}
 
