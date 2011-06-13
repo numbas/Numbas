@@ -153,7 +153,7 @@ class Exam:
 
 	def toxml(self):
 		root = makeTree(['exam',
-							['questiongroup',
+							['settings',
 								['navigation',
 									['settings',
 										['reverse'],
@@ -194,7 +194,7 @@ class Exam:
 				'balancingRule': ''
 			}
 		
-		qg = root.find('questiongroup')
+		qg = root.find('settings')
 
 		nav = qg.find('navigation')
 		settings = nav.find('settings')
