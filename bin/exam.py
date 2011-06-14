@@ -43,8 +43,8 @@ def tryLoad(data,attr,obj,altname=''):
 def makeContentNode(s,addHTML=False):
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
 	s=textile(s)
-	if addHTML:
-		s='<html>'+s+'</html>'
+	#if addHTML:
+	#	s='<html>'+s+'</html>'
 	return etree.fromstring('<content>'+s+'</content>')
 
 #make an XML element tree. Pass in an array of arrays or strings.
@@ -154,72 +154,42 @@ class Exam:
 	def toxml(self):
 		root = makeTree(['exam',
 							['settings',
-								['navigation',
-									['settings',
-										['reverse'],
-										['browse']
-									],
-									['events']
-								],
-								['timing',
-									['settings',
-										['duration'],
-										['timer']
-									],
-									['events']
-								],
+								['navigation'],
+								['timing'],
 								['feedback',
-									['settings',
-										['showactualmark'],
-										['showtotalmark'],
-										['showanswerstate'],
-										['allowrevealanswer'],
-										['advice']
-									],
-									['events']
-								]
+									['advice']]
 							],
 							['questions']
 						])
 		root.attrib = {
 				'name': self.name,
-				'duration': str(self.duration),
-				'score': str(0),
 				'percentPass': str(self.percentPass)+'%',
 				'totalQuestions': str(len(self.questions)),
-				'allQuestions': 'true',
-				'selectQuestions': '',
-				'shuffleFinalList': str(self.shuffleQuestions),
-				'sortingList': '',
-				'balancingRule': ''
+				'shuffleQuestions': str(self.shuffleQuestions),
 			}
 		
 		qg = root.find('settings')
 
 		nav = qg.find('navigation')
-		settings = nav.find('settings')
-		settings.find('reverse').attrib = {'active':str(self.navigation['reverse'])}
-		settings.find('browse').attrib = {'active':str(self.navigation['browse']),'type':'dropdownlist'}
+		nav.attrib = {'reverse':str(self.navigation['reverse']), 'browse': str(self.navigation['browse'])}
 
-		events = nav.find('events')
-		events.append(self.navigation['onadvance'].toxml())
-		events.append(self.navigation['onreverse'].toxml())
-		events.append(self.navigation['onmove'].toxml())
+		nav.append(self.navigation['onadvance'].toxml())
+		nav.append(self.navigation['onreverse'].toxml())
+		nav.append(self.navigation['onmove'].toxml())
 
 		timing = qg.find('timing')
-		settings = timing.find('settings')
-		settings.find('duration').attrib = {'value': str(self.duration)}
-		settings.find('timer').attrib = {'countup': 'TRUE'}
-		events = timing.find('events')
-		events.append(self.timing['timeout'].toxml())
-		events.append(self.timing['timedwarning'].toxml())
+		timing.attrib = {'duration': str(self.duration)}
+		timing.append(self.timing['timeout'].toxml())
+		timing.append(self.timing['timedwarning'].toxml())
 
-		feedback = qg.find('feedback/settings')
-		feedback.find('showactualmark').attrib = {'active':str(self.showactualmark)}
-		feedback.find('showtotalmark').attrib = {'active':str(self.showtotalmark)}
-		feedback.find('showanswerstate').attrib = {'active':str(self.showanswerstate)}
-		feedback.find('allowrevealanswer').attrib = {'active':str(self.allowrevealanswer)}
-		feedback.find('advice').attrib = {'type':self.adviceType, 'globalthreshold': str(self.adviceGlobalThreshold)}
+		feedback = qg.find('feedback')
+		feedback.attrib = {
+				'showactualmark': str(self.showactualmark),
+				'showtotalmark': str(self.showtotalmark),
+				'showanswerstate': str(self.showanswerstate),
+				'allowrevealanswer': str(self.allowrevealanswer)
+		}
+		feedback.find('advice').attrib = {'type':self.adviceType, 'threshold': str(self.adviceGlobalThreshold)}
 
 		questions = root.find('questions')
 		for q in self.questions:
@@ -243,16 +213,9 @@ class Event:
 		self.message = message
 
 	def toxml(self):
-		event = makeTree(['event',
-							['action',
-								['warning',
-									['message']
-								]
-							]
-						])
-		event.attrib = {'type':self.kind}
-		event.find('action').attrib = {'type':self.action}
-		event.find('action/warning/message').append(makeContentNode(self.message))
+		event = makeTree(['event'])
+		event.attrib = {'type':self.kind, 'action': self.action}
+		event.append(makeContentNode(self.message))
 		return event
 
 class Question:
@@ -293,12 +256,7 @@ class Question:
 		question = makeTree(['question',
 								['statement'],
 								['parts'],
-								['advice',
-									['adviceitem',
-										['trigger'],
-										['text']
-									]
-								],
+								['advice'],
 								['notes'],
 								['variables'],
 								['functions']
@@ -306,7 +264,7 @@ class Question:
 
 		question.attrib = {'name': self.name}
 		question.find('statement').append(makeContentNode(self.statement,True))
-		question.find('advice/adviceitem/text').append(makeContentNode(self.advice,True))
+		question.find('advice').append(makeContentNode(self.advice,True))
 
 		parts = question.find('parts')
 		for part in self.parts:
@@ -412,15 +370,15 @@ class Part:
 		return part
 	
 	def toxml(self):
-		part = makeTree(['part',['partdata',['prompt']]])
+		part = makeTree(['part',['prompt'],['steps']])
 
-		pd = part.find('partdata')
-		pd.attrib = {'type': self.kind, 'marks': str(self.marks), 'stepspenalty': str(self.stepsPenalty), 'enableminimummarks': str(self.enableMinimumMarks), 'minimummarks': str(self.minimumMarks)}
+		part.attrib = {'type': self.kind, 'marks': str(self.marks), 'stepspenalty': str(self.stepsPenalty), 'enableminimummarks': str(self.enableMinimumMarks), 'minimummarks': str(self.minimumMarks)}
 
-		pd.find('prompt').append(makeContentNode(self.prompt,True))
+		part.find('prompt').append(makeContentNode(self.prompt,True))
 
+		steps = part.find('steps')
 		for step in self.steps:
-			part.append(step.toxml())
+			steps.append(step.toxml())
 
 		return part
 
@@ -475,30 +433,29 @@ class JMEPart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		pd = part.find('partdata')
-		pd.append(makeTree(['answer',
+		part.append(makeTree(['answer',
 								['correctanswer',['math']],
-								['parameters',
-									['checking'],
-									['failurerate'],
-									['vset',
+								['checking',
 										['range']
-									]
 								]
 							]))
 
-		answer = pd.find('answer/correctanswer')
-		answer.attrib = {'simplification': str(self.answerSimplification)}
-		answer.find('math').text = str(self.answer)
+		answer = part.find('answer')
+		correctAnswer = answer.find('correctanswer')
+		correctAnswer.attrib = {'simplification': str(self.answerSimplification)}
+		correctAnswer.find('math').text = str(self.answer)
 		
-		parameters = pd.find('answer/parameters')
-		parameters.find('checking').attrib = {'type': self.checkingType, 'accuracy': str(self.checkingAccuracy)}
-		parameters.find('failurerate').attrib = {'value': str(self.failureRate)}
-		parameters.find('vset/range').attrib = {'start': str(self.vsetRangeStart), 'end': str(self.vsetRangeEnd),  'points': str(self.vsetRangePoints)}
-		parameters.append(self.maxLength.toxml())
-		parameters.append(self.minLength.toxml())
-		parameters.append(self.mustHave.toxml())
-		parameters.append(self.notAllowed.toxml())
+		checking = answer.find('checking')
+		checking.attrib = {
+				'type': self.checkingType, 
+				'accuracy': str(self.checkingAccuracy),
+				'failurerate': str(self.failureRate)
+		}
+		checking.find('range').attrib = {'start': str(self.vsetRangeStart), 'end': str(self.vsetRangeEnd),  'points': str(self.vsetRangePoints)}
+		answer.append(self.maxLength.toxml())
+		answer.append(self.minLength.toxml())
+		answer.append(self.mustHave.toxml())
+		answer.append(self.notAllowed.toxml())
 
 		return part
 
@@ -523,7 +480,7 @@ class Restriction:
 		return restriction
 
 	def toxml(self):
-		restriction = makeTree([self.name,['message']])
+		restriction = makeTree([self.name,'message'])
 
 		restriction.attrib = {'partialcredit': str(self.partialCredit)+'%', 'showstrings': str(self.showStrings)}
 		if self.length>=0:
@@ -558,14 +515,15 @@ class PatternMatchPart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		pd = part.find('partdata')
-		appendMany(pd,['displayanswer','correctanswer',['parameters',['case']]])
+		appendMany(part,['answer',
+							['displayanswer','correctanswer','case']
+						])
 		
-		pd.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
+		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
 
-		pd.find('correctanswer').attrib = {'value': self.answer}
+		part.find('correctanswer').attrib = {'value': self.answer}
 
-		pd.find('parameters/case').attrib = {'sensitive': str(self.caseSensitive), 'partialcredit': str(self.partialCredit)+'%'}
+		part.find('case').attrib = {'sensitive': str(self.caseSensitive), 'partialcredit': str(self.partialCredit)+'%'}
 
 		return part
 
@@ -591,20 +549,18 @@ class NumberEntryPart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		pd = part.find('partdata')
-		pd.append(makeTree(['answer',
-								['minvalue'],
-								['maxvalue'],
+		part.append(makeTree(['answer',
 								['allowonlyintegeranswers'],
-								['inputstep']
 							]
 							))
 
-		answer = pd.find('answer')
-		answer.find('minvalue').attrib = {'value': str(self.minvalue)}
-		answer.find('maxvalue').attrib = {'value': str(self.maxvalue)}
+		answer = part.find('answer')
+		answer.attrib = {
+				'minvalue': str(self.minvalue),
+				'maxvalue': str(self.maxvalue),
+				'inputstep': str(self.inputStep)
+				}
 		answer.find('allowonlyintegeranswers').attrib = {'value': str(self.integerAnswer), 'partialcredit': str(self.partialCredit)+'%'}
-		answer.find('inputstep').attrib = {'value': str(self.inputStep)}
 
 		return part
 
@@ -619,8 +575,6 @@ class MultipleChoicePart(Part):
 	shuffleAnswers = False
 	displayType = 'radiogroup'
 	displayColumns = 0
-	warningType = 'uwNone'
-	warningMessage = ''
 	
 	def __init__(self,kind,marks=0,prompt=''):
 		self.kind = kind
@@ -658,10 +612,9 @@ class MultipleChoicePart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		pd = part.find('partdata')
-		appendMany(pd,['choices','possibleanswers',['marking','matrix','maxmarks','minmarks'],'uiwarning'])
+		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks']])
 
-		choices = pd.find('choices')
+		choices = part.find('choices')
 		choices.attrib = {
 			'minimumexpected': str(self.minAnswers),
 			'maximumexpected': str(self.maxAnswers),
@@ -673,12 +626,12 @@ class MultipleChoicePart(Part):
 		for choice in self.choices:
 			choices.append(makeTree(['choice',makeContentNode(choice,True)]))
 
-		answers = pd.find('possibleanswers')
+		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
 			answers.append(makeTree(['possibleanswer',makeContentNode(answer,True)]))
 
-		marking = pd.find('marking')
+		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}
 		marking.find('minmarks').attrib = {'enabled': str(self.minMarksEnabled), 'value': str(self.minMarks)}
 		matrix = marking.find('matrix')
@@ -690,10 +643,6 @@ class MultipleChoicePart(Part):
 					'value': str(self.matrix[i][j])
 					})
 				matrix.append(mark)
-
-		warning = pd.find('uiwarning')
-		warning.attrib = {'type': self.warningType}
-		warning.append(makeContentNode(self.warningMessage,True))
 
 		return part
 
@@ -737,7 +686,7 @@ class GapFillPart(Part):
 		self.prompt = prompt
 
 		gaps = etree.Element('gaps')
-		part.find('partdata').append(gaps)
+		part.append(gaps)
 
 		for gap in self.gaps:
 			gaps.append(gap.toxml())
