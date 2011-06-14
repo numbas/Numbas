@@ -115,7 +115,6 @@ def makeExam(options):
 	else:
 		exam = Exam.fromstring(data)
 		examXML = exam.tostring()
-		print(examXML)
 		options.resources = exam.resources
 		options.extensions = exam.extensions
 	options.examXML = examXML

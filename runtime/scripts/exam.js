@@ -1,4 +1,4 @@
-/*
+huf*
 Copyright 2011 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,29 +32,28 @@ var Exam = Numbas.Exam = function()
 	}
 
 	//load settings from XML
-	tryGetAttribute(this,'.',['name','score','duration','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleFinalList']);
+	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 
-	tryGetAttribute(this,'questiongroup/navigation/settings/reverse','active','navigateReverse');
-	tryGetAttribute(this,'questiongroup/navigation/settings/browse',['active','type'],['navigateBrowse','navigateBrowseType']);
+	tryGetAttribute(this,'settings/navigation',['reverse','browse'],['navigateReverse','navigateBrowse']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
 
-	var navigationEventNodes = xml.selectNodes('questiongroup/navigation/events/event');
+	var navigationEventNodes = xml.selectNodes('settings/navigation/event');
 	for( var i=0; i<navigationEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(navigationEventNodes[i]);
 		this.navigationEvents[e.type] = e;
 	}
+
+	tryGetAttribute(this,'settings/timing','duration');
 	
-	//can't use builtin time display methods easily because duration could be more than 24 hours
+	//get text representation of exam duration
 	this.displayDuration = this.duration>0 ? Numbas.timing.secsToDisplayTime( this.duration ) : '';
 						
-	tryGetAttribute(this,'questiongroup/timing/settings/timer','countUp');
-	
 	//get timing events
 	this.timerEvents = {};
-	var timerEventNodes = this.xml.selectNodes('questiongroup/timing/events/event');
+	var timerEventNodes = this.xml.selectNodes('settings/timing/event');
 	for( i=0; i<timerEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(timerEventNodes[i]);
@@ -62,13 +61,12 @@ var Exam = Numbas.Exam = function()
 	}
 		
 	//feedback
-	var feedbackPath = 'questiongroup/feedback/settings';
-	tryGetAttribute(this,feedbackPath+'/showactualmark','active','showActualMark');
-	tryGetAttribute(this,feedbackPath+'/showtotalmark','active','showTotalMark');
-	tryGetAttribute(this,feedbackPath+'/showanswerstate','active','showAnswerState');
-	tryGetAttribute(this,feedbackPath+'/allowrevealanswer','active','allowRevealAnswer');
+	var feedbackPath = 'settings/feedback';
+	tryGetAttribute(this,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer']);
 
-	tryGetAttribute(this,feedbackPath+'/advice',['type','globalthreshold','overrideSubItems'],['adviceType','adviceGlobalThreshold']);	
+	tryGetAttribute(this,feedbackPath+'/advice',['type','threshold'],['adviceType','adviceGlobalThreshold']);	
+
+	this.totalQuestions = xml.selectNodes('questions/question').length;
 
 	//initialise display
 	this.display = new Numbas.display.ExamDisplay(this);
@@ -78,7 +76,7 @@ Exam.prototype = {
 
 	xml: undefined,				//base node of exam XML
 
-	mode: 'entry',			//can be 	"entry" - exam not started yet
+	mode: 'entry',				//can be 	"entry" - exam not started yet
 								//			"in progress" - exam started, not finished
                                 //			"review" - looking at completed exam
                                 //			"suspend" - exam is paused
@@ -95,7 +93,7 @@ Exam.prototype = {
 	totalQuestions: 0,			//how many questions are available?
 	allQuestions: true,			//use all questions?
 	selectQuestions: 0,			//how many questions to select, if not using all?
-	shuffleFinalList: false,	//should the questions be shuffled?
+	shuffleQuestions: false,	//should the questions be shuffled?
 	sortingList: [],			//??
 	balancingRule: '',			//??
 	currentQuestionNumber: 0,	//number of current question
@@ -119,7 +117,6 @@ Exam.prototype = {
 	//timing
 	duration: 0,				//how long is exam?
 	displayDuration: '',//exam duration in h:m:s format
-	countUp: false,				//should timer count up from zero or down from duration?
 	timeoutAction: 'none',		//what to do when timer runs out
 	timedWarningAction: 'none',	//warning 5 minutes before end?
 	stopwatch: undefined,		//stopwatch object - updates timer every second
@@ -138,7 +135,6 @@ Exam.prototype = {
 	allowRevealAnswer: false,	//allow 'reveal answer' button ?
 	adviceType: '',				//something to do with when advice can be shown ??
 	adviceGlobalThreshold: 0, 	//if student scores lower than this percentage on a question, the advice is displayed
-	overrideSubItems: false, 	//??
 
 	display: undefined,			//display code
 
@@ -208,7 +204,7 @@ Exam.prototype = {
 
 		//shuffle questions?
 		this.questionSubset = [];
-		if(this.shuffleFinalList)
+		if(this.shuffleQuestions)
 		{
 			this.questionSubset=Numbas.math.deal(this.numQuestions);
 		}

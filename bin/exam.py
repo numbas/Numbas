@@ -164,7 +164,6 @@ class Exam:
 		root.attrib = {
 				'name': self.name,
 				'percentPass': str(self.percentPass)+'%',
-				'totalQuestions': str(len(self.questions)),
 				'shuffleQuestions': str(self.shuffleQuestions),
 			}
 		
