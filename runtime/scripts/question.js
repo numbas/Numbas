@@ -472,7 +472,7 @@ Question.prototype =
 
 function createPart(xml, path, question, parentPart, loading)
 {
-	var type = tryGetAttribute(null,'partdata','type',[],{xml: xml});
+	var type = tryGetAttribute(null,'.','type',[],{xml: xml});
 	if(type==null)
 		throw(new Error("Missing part type attribute"));
 	if(partConstructors[type])
@@ -491,9 +491,7 @@ function createPart(xml, path, question, parentPart, loading)
 function Part( xml, path, question, parentPart, loading )
 {
 	//remember XML
-	this.xml = xml.selectSingleNode('partdata');
-	if(!xml)
-		throw(new Error("This Part element in the exam XML doesn't have a child partdata element."));
+	this.xml = xml;
 
 	//remember parent question object
 	this.question = question;
@@ -517,7 +515,7 @@ function Part( xml, path, question, parentPart, loading )
 	this.steps = [];
 
 	//load steps
-	var stepNodes = xml.selectNodes('part');
+	var stepNodes = xml.selectNodes('steps/part');
 	for(var i=0; i<stepNodes.length; i++)
 	{
 		var step = createPart( stepNodes[i], this.path+'s'+i,this.question, this, loading);
@@ -689,11 +687,10 @@ function JMEPart(xml, path, question, parentPart, loading)
 	);
 	
 	//get checking type, accuracy, checking range
-	var parametersPath = 'answer/parameters';
-	tryGetAttribute(settings,parametersPath+'/checking',['type','accuracy'],['checkingType','checkingAccuracy'],{xml: this.xml});
-	tryGetAttribute(settings,parametersPath+'/failurerate','value','failureRate',{xml: this.xml});
+	var parametersPath = 'answer';
+	tryGetAttribute(settings,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate'],{xml: this.xml});
 
-	tryGetAttribute(settings,parametersPath+'/vset/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints'],{xml: this.xml});
+	tryGetAttribute(settings,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints'],{xml: this.xml});
 
 
 	//max length and min length
@@ -701,7 +698,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
 
 	//get list of 'must have' strings
-	var mustHaveNode = this.xml.selectSingleNode('answer/parameters/musthave');
+	var mustHaveNode = this.xml.selectSingleNode('answer/musthave');
 	settings.mustHave = [];
 	if(mustHaveNode)
 	{
@@ -719,7 +716,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 
 	//get list of 'not allowed' strings
-	var notAllowedNode = this.xml.selectSingleNode('answer/parameters/notallowed');
+	var notAllowedNode = this.xml.selectSingleNode('answer/notallowed');
 	settings.notAllowed = [];
 	if(notAllowedNode)
 	{
@@ -909,15 +906,15 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,'correctanswer','value','correctAnswer',{xml: this.xml});
+	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('answer/correctanswer'));
 	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.variables);
 
-	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
+	var displayAnswerNode = this.xml.selectSingleNode('answer/displayanswer');
 	if(!displayAnswerNode)
 		throw(new Error("Display answer is missing from a Pattern Match part ("+this.path+")"));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
-	tryGetAttribute(settings,'parameters/case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
+	tryGetAttribute(settings,'answer/case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
 
 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
 
@@ -992,9 +989,8 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,'answer/inputstep','value','inputStep',{xml:this.xml});
-	tryGetAttribute(settings,'answer/minvalue','value','minvalue',{xml: this.xml, string:true});
-	tryGetAttribute(settings,'answer/maxvalue','value','maxvalue',{xml: this.xml, string:true});
+	tryGetAttribute(settings,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{xml: this.xml, string:true});
+	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
 	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
 	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.variables,this.question.functions);
 	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value;

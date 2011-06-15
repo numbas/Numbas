@@ -520,7 +520,7 @@ class PatternMatchPart(Part):
 		
 		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
 
-		part.find('correctanswer').attrib = {'value': self.answer}
+		part.find('correctanswer').text = str(self.answer)
 
 		part.find('case').attrib = {'sensitive': str(self.caseSensitive), 'partialcredit': str(self.partialCredit)+'%'}
 

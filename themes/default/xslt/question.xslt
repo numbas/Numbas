@@ -73,7 +73,7 @@ Copyright 2011 Newcastle University
 	</xsl:variable>
 	<xsl:variable name="tag">
 		<xsl:choose>
-			<xsl:when test="ancestor::gaps and not (partdata/choices)">span</xsl:when>
+			<xsl:when test="ancestor::gaps and not (choices)">span</xsl:when>
 			<xsl:otherwise>div</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -90,7 +90,7 @@ Copyright 2011 Newcastle University
 		</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
-			<xsl:apply-templates select="partdata/prompt" />
+			<xsl:apply-templates select="prompt" />
 		</xsl:if>
 		<xsl:if test="count(part) > 0">
 			<div class="steps" id="steps-{$path}">
@@ -98,7 +98,7 @@ Copyright 2011 Newcastle University
 				<div style="clear:both;"></div>
 			</div>
 		</xsl:if>
-		<xsl:apply-templates select="partdata">
+		<xsl:apply-templates select="." mode="typespecific">
 			<xsl:with-param name="path" select="$path"/>
 		</xsl:apply-templates>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
@@ -124,7 +124,7 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="content">
-	<xsl:apply-templates select="html/*" mode="content" />
+	<xsl:apply-templates select="*" mode="content" />
 </xsl:template>
 
 
@@ -223,7 +223,7 @@ Copyright 2011 Newcastle University
 	</option>
 </xsl:template>
 
-<xsl:template match="partdata[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']">
+<xsl:template match="part[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<xsl:apply-templates select="choices" mode="one">
@@ -231,14 +231,14 @@ Copyright 2011 Newcastle University
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="partdata[@type='m_n_2' or @type='CUEdt.MRm_n_2Part']">
+<xsl:template match="part[@type='m_n_2' or @type='CUEdt.MRm_n_2Part']" mode="typespecific">
 	<xsl:param name="path"/>
 	<xsl:apply-templates select="choices" mode="one">
 		<xsl:with-param name="path" select="$path"/>
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="partdata[@type='m_n_x' or @type='CUEdt.MRm_n_xPart']">
+<xsl:template match="part[@type='m_n_x' or @type='CUEdt.MRm_n_xPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
@@ -284,13 +284,13 @@ Copyright 2011 Newcastle University
 	</tr>
 </xsl:template>
 
-<xsl:template match="partdata[@type='patternmatch' or @type='CUEdt.PatternMatchPart']">
+<xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch"></input>
 </xsl:template>
 
-<xsl:template match="partdata[@type='gapfill' or @type='CUEdt.GapFillPart']">
+<xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
 	<xsl:param name="path"/>
 </xsl:template>
 
@@ -298,26 +298,26 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	
 	<xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
-	<xsl:apply-templates select="ancestor::partdata/gaps/part[$n+1]" />
+	<xsl:apply-templates select="ancestor::part/gaps/part[$n+1]" />
 </xsl:template>
 
-<xsl:template match="partdata[@type='jme' or @type='CUEdt.JMEPart']">
+<xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<input type="text" spellcheck="false" class="jme" id="jme" /><span id="preview" class="mathPreview"></span>
 </xsl:template>
 
-<xsl:template match="partdata[@type='numberentry' or @type='CUEdt.NumberEntryPart']">
+<xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry"/>
 </xsl:template>
 
-<xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">
+<xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">
 	<xsl:param name="path"/>
 </xsl:template>
 
-<xsl:template match="partdata">
+<xsl:template match="part" mode="typespecific">
 	Unsupported part type <xsl:value-of select="@type"/>
 </xsl:template>
 

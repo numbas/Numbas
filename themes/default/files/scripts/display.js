@@ -286,7 +286,7 @@ display.QuestionDisplay = function(q)
 
 	//make html for question and advice text
 	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
-	this.advice = $.xsl.transform(Numbas.xml.templates.question, q.xml.selectSingleNode('advice/adviceitem')).string;
+	this.advice = $.xsl.transform(Numbas.xml.templates.question, q.xml.selectSingleNode('advice')).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
