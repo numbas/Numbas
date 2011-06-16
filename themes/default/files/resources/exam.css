@@ -8,6 +8,10 @@ html{
 	overflow: hidden;
 }
 
+#preview {
+	font-family: serif;
+}
+
 .btn{
 	margin:.4em 0;
 	width: 7em;
