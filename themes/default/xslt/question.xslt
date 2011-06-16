@@ -35,9 +35,6 @@ Copyright 2011 Newcastle University
 	</div>
 </xsl:template>
 
-<xsl:template match="advice">
-</xsl:template>
-
 <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing" />
 
 <xsl:template match="statement">
@@ -53,11 +50,11 @@ Copyright 2011 Newcastle University
 <xsl:template match="part" mode="path">
 	<xsl:choose>
 		<xsl:when test="parent::gaps">
-			<xsl:apply-templates select="../../.." mode="path" />
+			<xsl:apply-templates select="../.." mode="path" />
 			<xsl:text>g</xsl:text>
 		</xsl:when>
-		<xsl:when test="parent::part">
-			<xsl:apply-templates select=".." mode="path" />
+		<xsl:when test="parent::steps">
+			<xsl:apply-templates select="../.." mode="path" />
 			<xsl:text>s</xsl:text>
 		</xsl:when>
 		<xsl:when test="parent::parts">
@@ -128,7 +125,7 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 
-<xsl:template match="adviceitem">
+<xsl:template match="advice">
 	<div>
 		<xsl:apply-templates />
 	</div>
