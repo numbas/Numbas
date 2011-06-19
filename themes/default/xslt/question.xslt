@@ -89,19 +89,15 @@ Copyright 2011 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<xsl:apply-templates select="prompt" />
 		</xsl:if>
-		<xsl:if test="count(part) > 0">
-			<div class="steps" id="steps-{$path}">
-				<xsl:apply-templates select="part"/>
-				<div style="clear:both;"></div>
-			</div>
+		<xsl:if test="count(steps/part)>0">
+			<xsl:apply-templates select="steps">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
 		</xsl:if>
 		<xsl:apply-templates select="." mode="typespecific">
 			<xsl:with-param name="path" select="$path"/>
 		</xsl:apply-templates>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
-		<xsl:if test="count(part) > 0">
-			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
-		</xsl:if>
 		<xsl:if test="not(ancestor::gaps)">
 			<div id="partFeedback">
 				<input class="btn" id="submitPart" value="Submit part" type="button"></input>
@@ -112,6 +108,16 @@ Copyright 2011 Newcastle University
 			</div>
 		</xsl:if>
 	</xsl:element>
+</xsl:template>
+
+<xsl:template match="steps">
+	<xsl:param name="path"/>
+
+	<div class="steps" id="steps-{$path}">
+		<xsl:apply-templates select="part"/>
+		<div style="clear:both;"></div>
+	</div>
+	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
 </xsl:template>
 
 <xsl:template match="prompt">
