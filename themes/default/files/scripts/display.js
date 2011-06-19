@@ -293,7 +293,6 @@ display.QuestionDisplay = function(q)
 
 	//make html for question and advice text
 	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
-	this.advice = $.xsl.transform(Numbas.xml.templates.question, q.xml.selectSingleNode('advice')).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
@@ -318,7 +317,6 @@ display.QuestionDisplay.prototype =
 {
 	q: undefined,					//reference back to the main question object
 	html: '',						//HTML for displaying question
-	advice: '',						//question advice in HTML
 	questionSelector: '',			//jQuery selector for this question's menu entry
 
 	show: function()
@@ -405,16 +403,12 @@ display.QuestionDisplay.prototype =
 	{
 		if( this.q.adviceDisplayed )
 		{
-			$('#adviceDisplay').html(this.advice);
-			$('#adviceContainer').show();			
 			$('#adviceBtn').attr('disabled','true');
-
-			//remove empty paragraphs
-			$('#adviceDisplay p').filter(function(){return $.trim($(this).text())=='';}).remove();
 
 			//if advice text non-empty, show it and typeset maths
 			if($.trim($('#adviceDisplay').text()))
 			{
+				$('#adviceContainer').show();			
 				if(fromButton)
 				{
 					Numbas.display.typeset();
@@ -426,7 +420,6 @@ display.QuestionDisplay.prototype =
 		}
 		else
 		{
-			$('#adviceDisplay').html('');
 			$('#adviceContainer').hide();
 			$('#adviceBtn').removeAttr('disabled');
 		}	

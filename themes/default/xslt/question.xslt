@@ -126,8 +126,11 @@ Copyright 2011 Newcastle University
 
 
 <xsl:template match="advice">
-	<div>
-		<xsl:apply-templates />
+	<div id="adviceContainer">
+		<h3>Advice</h3>
+		<span id="adviceDisplay">
+			<xsl:apply-templates />
+		</span>
 	</div>
 </xsl:template>
 

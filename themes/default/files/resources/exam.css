@@ -169,7 +169,7 @@ html{
 	padding-bottom:1em;
 }
 
-#questionDisplay,#adviceContainer {
+#questionDisplay{
 	margin:1em 0.5em 0 14.5em;
 	position:relative;
 	right:100%;
@@ -243,6 +243,10 @@ html{
 	margin: 0 0.2em;
 }
 
+#adviceContainer {
+	clear:both;
+}
+
 #adviceDisplay ol,ul {
 	margin-left:1em;
 }
@@ -290,7 +294,7 @@ html{
 
 /* question bits */
 
-#questionDisplay table, #adviceContainer table {
+#questionDisplay table{
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
