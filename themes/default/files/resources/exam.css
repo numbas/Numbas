@@ -8,6 +8,12 @@ html{
 	overflow: hidden;
 }
 
+#preview {
+	font-family: serif;
+	display: inline-block;
+	font-size: 120%;
+}
+
 .btn{
 	margin:.4em 0;
 	width: 7em;
@@ -392,6 +398,12 @@ div.lemma p {
 	font-style: italic;
 	margin-left: 1em;
 }
+
+.monospace {
+	font-family: monospace;
+	font-size: 130%;
+}
+
 
 /* jquery.impromptu dialog boxes */
 
