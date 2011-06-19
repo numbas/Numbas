@@ -10,6 +10,8 @@ html{
 
 #preview {
 	font-family: serif;
+	display: inline-block;
+	font-size: 120%;
 }
 
 .btn{
