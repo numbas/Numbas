@@ -96,10 +96,10 @@ jme.display = {
 					var match;
 					if(match = rules[i].match(exprTree))
 					{
-						Numbas.debug("match rule "+rules[i].patternString,true);
-						Numbas.debug(treeToJME(exprTree),true);
+						//Numbas.debug("match rule "+rules[i].patternString,true);
+						//Numbas.debug(treeToJME(exprTree),true);
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
-						Numbas.debug(treeToJME(exprTree),true);
+						//Numbas.debug(treeToJME(exprTree),true);
 						applied = true;
 						break;
 					}
