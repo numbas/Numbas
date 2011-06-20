@@ -353,6 +353,17 @@ display.QuestionDisplay.prototype =
 			q.parts[i].display.show();
 		}
 
+		var submitMsg;
+		if(q.parts.length<=1)
+		{
+			submitMsg = 'Submit answer';
+		}
+		else
+		{
+			submitMsg = 'Submit all parts';
+		}
+		$('.navBar #submitBtn').val(submitMsg);
+
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
 
