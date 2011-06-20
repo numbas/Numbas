@@ -96,10 +96,10 @@ jme.display = {
 					var match;
 					if(match = rules[i].match(exprTree))
 					{
-						//Numbas.debug("match rule "+rules[i].patternString,true);
-						//Numbas.debug(treeToJME(exprTree),true);
+						Numbas.debug("match rule "+rules[i].patternString,true);
+						Numbas.debug(treeToJME(exprTree),true);
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
-						//Numbas.debug(treeToJME(exprTree),true);
+						Numbas.debug(treeToJME(exprTree),true);
 						applied = true;
 						break;
 					}
@@ -766,7 +766,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(y+z)',[],'(x-y)-z'],
 		['x+(y-z)',[],'(x+y)-z'],
 		['x-(y-z)',[],'(x-y)+z'],
-		['x*(y*z)',[],'(x*y)*z'],		//make sure multiplications go left-to-right
+		['(x*y)*z',[],'x*(y*z)'],		//make sure multiplications go right-to-left
 		['n*i',['n isa "number"'],'eval(n*i)'],			//always collect multiplication by i
 		['i*n',['n isa "number"'],'eval(n*i)']
 	],
