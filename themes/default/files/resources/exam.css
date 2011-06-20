@@ -135,6 +135,16 @@ html{
 .questionSelector #marks #feedback {
 	padding: 0;
 }
+
+.questionSelector #name {
+	float:left;
+	width: 11em;
+}
+
+.questionSelector #marks {
+	float:right;
+}
+
 #marks #feedback img {
 	visibility:hidden;
 }
