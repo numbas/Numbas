@@ -681,7 +681,22 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	//max length and min length
 	tryGetAttribute(settings,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC'],{xml: this.xml});
+	var messageNode = xml.selectSingleNode('partdata/answer/parameters/maxlength/message');
+	if(messageNode)
+	{
+		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+		if($(settings.maxLengthMessage).text() == '')
+			settings.maxLengthMessage = 'Your answer is too long.';
+	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
+	var messageNode = xml.selectSingleNode('partdata/answer/parameters/minlength/message');
+	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
+	if(messageNode)
+	{
+		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+		if($(settings.minLengthMessage).text() == '')
+			settings.minLengthMessage = 'Your answer is too long.';
+	}
 
 	//get list of 'must have' strings
 	var mustHaveNode = this.xml.selectSingleNode('answer/parameters/musthave');
@@ -752,9 +767,11 @@ JMEPart.prototype =
 		
 		maxLength: 0,		//max length of student's answer
 		maxLengthPC: 0,		//partial credit if student's answer too long
+		maxLengthMessage: 'Your answer is too long',
 
 		minLength: 0,		//min length of student's answer
 		minLengthPC: 0,		//partial credit if student's answer too short
+		minLengthMessage: 'Your answer is too short',
 
 		mustHave: [],				//strings which must be present in student's answer
 		mustHavePC: 0,				//partial credit if a must-have is missing
@@ -856,12 +873,12 @@ JMEPart.prototype =
 
 		if( this.failMinLength)
 		{
-			this.giveWarning("Your answer is too short.");
+			this.giveWarning(this.settings.minLengthMessage);
 		}
 
 		if( this.failMaxLength )
 		{
-			this.giveWarning("Your answer is too long.");
+			this.giveWarning(this.settings.maxLengthMessage);
 		}
 
 		if( this.failMustHave )
