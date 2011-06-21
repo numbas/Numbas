@@ -792,8 +792,11 @@ JMEPart.prototype =
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
-		this.failMinLength = (this.settings.minLength>0 && this.studentAnswer.length<this.settings.minLength);
-		this.failMaxLength = (this.settings.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
+
+		var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+
+		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
+		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
 
 		//did student actually write anything?
 		this.answered = this.studentAnswer.length > 0;
