@@ -601,6 +601,8 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
+		if(this.marks==0)
+			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning("No answer submitted.");
@@ -1388,6 +1390,11 @@ function InformationPart(xml, path, question, parentPart, loading)
 {
 	this.display = new Numbas.display.InformationPartDisplay(this);
 }
+InformationPart.prototype = {
+	validate: function() {
+		return true;
+	}
+};
 
 
 //associate part type names with their object constructors
