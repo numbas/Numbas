@@ -601,6 +601,8 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
+		if(this.marks==0)
+			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning("No answer submitted.");
@@ -679,7 +681,22 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	//max length and min length
 	tryGetAttribute(settings,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC'],{xml: this.xml});
+	var messageNode = xml.selectSingleNode('partdata/answer/parameters/maxlength/message');
+	if(messageNode)
+	{
+		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+		if($(settings.maxLengthMessage).text() == '')
+			settings.maxLengthMessage = 'Your answer is too long.';
+	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
+	var messageNode = xml.selectSingleNode('partdata/answer/parameters/minlength/message');
+	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
+	if(messageNode)
+	{
+		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+		if($(settings.minLengthMessage).text() == '')
+			settings.minLengthMessage = 'Your answer is too long.';
+	}
 
 	//get list of 'must have' strings
 	var mustHaveNode = this.xml.selectSingleNode('answer/parameters/musthave');
@@ -750,9 +767,11 @@ JMEPart.prototype =
 		
 		maxLength: 0,		//max length of student's answer
 		maxLengthPC: 0,		//partial credit if student's answer too long
+		maxLengthMessage: 'Your answer is too long',
 
 		minLength: 0,		//min length of student's answer
 		minLengthPC: 0,		//partial credit if student's answer too short
+		minLengthMessage: 'Your answer is too short',
 
 		mustHave: [],				//strings which must be present in student's answer
 		mustHavePC: 0,				//partial credit if a must-have is missing
@@ -773,8 +792,11 @@ JMEPart.prototype =
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
-		this.failMinLength = (this.settings.minLength>0 && this.studentAnswer.length<this.settings.minLength);
-		this.failMaxLength = (this.settings.maxLength>0 && this.studentAnswer.length>this.settings.maxLength);
+
+		var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+
+		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
+		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
 
 		//did student actually write anything?
 		this.answered = this.studentAnswer.length > 0;
@@ -854,12 +876,12 @@ JMEPart.prototype =
 
 		if( this.failMinLength)
 		{
-			this.giveWarning("Your answer is too short.");
+			this.giveWarning(this.settings.minLengthMessage);
 		}
 
 		if( this.failMaxLength )
 		{
-			this.giveWarning("Your answer is too long.");
+			this.giveWarning(this.settings.maxLengthMessage);
 		}
 
 		if( this.failMustHave )
@@ -867,7 +889,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.giveWarning('Your answer must contain all of: "'+this.settings.mustHave.join('", "')+'"');
+				this.giveWarning('Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
 			}
 		}
 
@@ -876,7 +898,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.giveWarning('Your answer must not contain any of: "'+this.settings.notAllowed.join('", "')+'"');
+				this.giveWarning('Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
 			}
 		}
 
@@ -1388,6 +1410,11 @@ function InformationPart(xml, path, question, parentPart, loading)
 {
 	this.display = new Numbas.display.InformationPartDisplay(this);
 }
+InformationPart.prototype = {
+	validate: function() {
+		return true;
+	}
+};
 
 
 //associate part type names with their object constructors

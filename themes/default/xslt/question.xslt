@@ -124,7 +124,7 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="content">
-	<xsl:apply-templates select="html/*" mode="content" />
+	<span><xsl:apply-templates select="html/*" mode="content" /></span>
 </xsl:template>
 
 

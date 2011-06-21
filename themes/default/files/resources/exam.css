@@ -159,7 +159,6 @@ html{
 	clear:both;
 	float:left;
 	width:100%;			/* width of whole page */
-	overflow:hidden;	/* This chops off any overhanging divs */
 	background:#A2D1F0;
 }
 
