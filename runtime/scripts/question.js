@@ -869,7 +869,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.giveWarning('Your answer must contain all of: "'+this.settings.mustHave.join('", "')+'"');
+				this.giveWarning('Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
 			}
 		}
 
@@ -878,7 +878,7 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.giveWarning('Your answer must not contain any of: "'+this.settings.notAllowed.join('", "')+'"');
+				this.giveWarning('Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
 			}
 		}
 

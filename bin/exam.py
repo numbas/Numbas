@@ -515,7 +515,7 @@ class Restriction:
 	@staticmethod
 	def fromDATA(name,data):
 		restriction = Restriction(name)
-		tryLoad(data,['showstrings','partialCredit','message','length'],restriction)
+		tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
 		if 'strings' in data:
 			for string in data['strings']:
 				restriction.strings.append(string)
