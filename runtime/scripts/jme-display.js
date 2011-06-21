@@ -766,7 +766,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(y+z)',[],'(x-y)-z'],
 		['x+(y-z)',[],'(x+y)-z'],
 		['x-(y-z)',[],'(x-y)+z'],
-		['x*(y*z)',[],'(x*y)*z'],		//make sure multiplications go left-to-right
+		['(x*y)*z',[],'x*(y*z)'],		//make sure multiplications go right-to-left
 		['n*i',['n isa "number"'],'eval(n*i)'],			//always collect multiplication by i
 		['i*n',['n isa "number"'],'eval(n*i)']
 	],

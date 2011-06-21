@@ -75,7 +75,10 @@ var display = Numbas.display = {
 	{
 		try
 		{
-			MathJax.Hub.Queue(['Typeset',MathJax.Hub,elem,callback]);
+			var queue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
+			queue.Push(['Typeset',MathJax.Hub,elem]);
+			if(callback)
+				queue.Push(callback);
 		}
 		catch(e)
 		{
@@ -349,6 +352,17 @@ display.QuestionDisplay.prototype =
 		{
 			q.parts[i].display.show();
 		}
+
+		var submitMsg;
+		if(q.parts.length<=1)
+		{
+			submitMsg = 'Submit answer';
+		}
+		else
+		{
+			submitMsg = 'Submit all parts';
+		}
+		$('.navBar #submitBtn').val(submitMsg);
 
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
@@ -649,8 +663,6 @@ display.JMEPartDisplay.prototype =
 				{
 					inputDiv.css('z-index',1)
 							.position({my: 'left top',at: 'left bottom', of: previewDiv, offset:'0 10', collision: 'none'})
-							.position({my: 'left top',at: 'left bottom', of: previewDiv, offset:'0 10', collision: 'none'});
-							//do it twice because some kind of timing problem means it goes in the wrong place sometimes
 				}
 				else
 					inputDiv.css('z-index',-1);
@@ -750,8 +762,9 @@ display.JMEPartDisplay.prototype =
 				try {
 					var tex = Numbas.jme.display.exprToLaTeX(txt,{});
 					if(tex===undefined){throw('Error making maths display')};
-					previewDiv.html('<span class="MathJax_Preview">'+tex+'</span><script type="math/tex">'+tex+'</script>');
-					Numbas.display.typeset(previewDiv[0], this.inputPositionF);
+					previewDiv.html('$'+tex+'$');
+					var pp = this;
+					Numbas.display.typeset(previewDiv[0], function(){pp.inputPositionF();});
 					this.validEntry = true;
 					this.oldtex = tex;
 				}
