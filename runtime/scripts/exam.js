@@ -364,7 +364,7 @@ Exam.prototype = {
 	//will check move is allowed and if so change question and update display
 	tryChangeQuestion: function(i)
 	{
-		if(i<0 || i>this.numQuestions)
+		if(i<0 || i>=this.numQuestions)
 			return;
 
 		var currentQuestion = this.currentQuestion;
