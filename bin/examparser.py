@@ -12,15 +12,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import sys
+import re
 
 class ParseError(Exception):
-	def __init__(self,parser,message):
+	def __init__(self,parser,message,hint=''):
 		self.expression = parser.source[parser.cursor:parser.cursor+50]
 		self.line = parser.source[:parser.cursor].count('\n')+1
 		self.message = message
+		self.hint = hint
 	
 	def __str__(self):
-		return '%s at line %s near: \n\t %s ' % (self.message,self.line,self.expression)
+		msg = '%s at line %s near: \n\t %s ' % (self.message,self.line,self.expression)
+		if self.hint:
+			msg += '\nPossible fix: '+self.hint
+		return msg
 
 class ExamParser:
 	source = ''
@@ -32,7 +37,7 @@ class ExamParser:
 		self.cursor = 0
 		self.data = self.getthing()
 		if self.source[self.cursor:].strip()!='':
-			raise ParseError(self,"Didn't parse all input - check for unmatched braces")
+			raise ParseError(self,"Didn't parse all input","check for unmatched brackets")
 		return self.data
 
 	#scan past comments
@@ -62,7 +67,10 @@ class ExamParser:
 			obj = {}
 			while self.cursor<len(self.source) and self.source[self.cursor]!='}':
 				i=self.cursor
+				namere = re.compile(r'^\w*$')
 				while i<len(self.source) and self.source[i]!=':':
+					if(not namere.match(self.source[self.cursor:i].strip())):
+						raise ParseError(self,"Invalid name '%s' for an object property" % self.source[self.cursor:i],"check for mismatched brackets")
 					i+=1
 				if i==len(self.source):
 					raise ParseError(self,"Expected a colon")
@@ -72,7 +80,12 @@ class ExamParser:
 				thing = self.getthing()
 				obj[name] = thing
 
+				oc = self.cursor
 				self.stripspace()
+
+				if i==len(self.source):
+					self.cursor=oc
+					raise ParseError(self,"Couldn't find anything to assign as object property '%s'" % name,"check for unmatched brackets")
 
 				if self.source[self.cursor]=='\n':
 					self.cursor +=1
