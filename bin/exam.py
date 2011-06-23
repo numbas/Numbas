@@ -115,9 +115,14 @@ class Exam:
 	
 	@staticmethod
 	def fromstring(string):
-		data = examparser.fromstring(string)
-		exam = Exam.fromDATA(data)
-		return exam
+		try:
+			data = examparser.ExamParser().parse(string)
+			print(data)
+			exam = Exam.fromDATA(data)
+			return exam
+		except examparser.ParseError as err:
+			print('Parse error: ',str(err))
+			raise
 
 	@staticmethod
 	def fromDATA(data):
@@ -228,9 +233,13 @@ class Exam:
 		return root
 
 	def tostring(self):
-		xml = self.toxml()
-		indent(xml)
-		return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
+		try:
+			xml = self.toxml()
+			indent(xml)
+			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
+		except etree.ParseError as err:
+			print('XML Error:',str(err))
+
 
 class Event:
 	kind = ''
