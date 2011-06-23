@@ -65,7 +65,7 @@ class ExamParser:
 				while i<len(self.source) and self.source[i]!=':':
 					i+=1
 				if i==len(self.source):
-					raise ParseError("Expected a colon")
+					raise ParseError(self,"Expected a colon")
 
 				name = self.source[self.cursor:i].rstrip().lower()
 				self.cursor = i+1
@@ -130,7 +130,7 @@ class ExamParser:
 				while i<len(self.source)-2 and self.source[i:i+3]!='"""':
 					i+=1
 				if i==len(self.source)-2:
-					raise ParseError('Expected """ to end string literal')
+					raise ParseError(self,'Expected """ to end string literal')
 				string = self.source[self.cursor+3:i]
 				self.cursor = i+3
 			else:
