@@ -18,6 +18,7 @@
 import os
 import shutil
 from optparse import OptionParser
+import examparser
 from exam import Exam
 from xml2js import xml2js
 from zipfile import ZipFile
@@ -113,10 +114,17 @@ def makeExam(options):
 		options.resources=[]
 		options.extensions=[]
 	else:
-		exam = Exam.fromstring(data)
-		examXML = exam.tostring()
-		options.resources = exam.resources
-		options.extensions = exam.extensions
+		try:
+			exam = Exam.fromstring(data)
+			examXML = exam.tostring()
+			options.resources = exam.resources
+			options.extensions = exam.extensions
+		except examparser.ParseError as err:
+			print("Failed to compile exam due to parsing error.")
+			raise
+		except:
+			print("Failed to compile exam")
+			raise
 	options.examXML = examXML
 	options.xmls = xml2js(options)
 
@@ -208,5 +216,8 @@ if __name__ == '__main__':
 			print("Couldn't find theme %s" % options.theme)
 			options.theme = os.path.join(options.path,'themes','default')
 
-	makeExam(options)
+	try:
+		makeExam(options)
+	except:
+		pass
 
