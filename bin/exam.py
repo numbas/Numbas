@@ -117,7 +117,6 @@ class Exam:
 	def fromstring(string):
 		try:
 			data = examparser.ExamParser().parse(string)
-			print(data)
 			exam = Exam.fromDATA(data)
 			return exam
 		except examparser.ParseError as err:
