@@ -331,7 +331,7 @@ display.QuestionDisplay.prototype =
 		//enable the submit button
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
-		$('#revealBtn').show();
+		$('#revealBtn').show().removeAttr('disabled');
 
 		//display the question container - content and nav bars
 		$('#questionContainer').show();
