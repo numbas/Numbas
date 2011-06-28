@@ -1410,6 +1410,7 @@ GapFillPart.prototype =
 	}
 };
 GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
+GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
 function InformationPart(xml, path, question, parentPart, loading)
 {
