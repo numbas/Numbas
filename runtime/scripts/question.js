@@ -641,6 +641,10 @@ Part.prototype = {
 		this.display.revealAnswer();
 		this.answered = true;
 		this.credit = 0;
+		for(var i=0; i<this.steps.length; i++ )
+		{
+			this.steps[i].revealAnswer();
+		}
 	}
 
 };

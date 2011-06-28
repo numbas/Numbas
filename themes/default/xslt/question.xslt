@@ -98,9 +98,11 @@ Copyright 2011 Newcastle University
 				<div style="clear:both;"></div>
 			</div>
 		</xsl:if>
-		<xsl:apply-templates select="partdata">
-			<xsl:with-param name="path" select="$path"/>
-		</xsl:apply-templates>
+		<span id="answer-{$path}">
+			<xsl:apply-templates select="partdata">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
+		</span>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="count(part) > 0">
 			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
