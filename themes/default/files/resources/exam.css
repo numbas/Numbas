@@ -197,18 +197,23 @@ html{
 	width:100%;
 }
 
-#questionList {
-	width: 100%; 
+.questionList {
+	overflow: hidden;
+	max-height: 20em;
 }
+
+#questionList {
+	width: 100%;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
 .questionSelector-hidden {
 	display:none; 
 }
 .questionSelector {
-	font-size:0.7em;
-}
-
-.questionSelector td {
-	padding: 0.2em 0.2em;  
+	display:inline-block;
 }
 
 .questionSelector #feedback {

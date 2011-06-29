@@ -201,8 +201,8 @@ display.ExamDisplay.prototype =
 		}
 
 		//scroll question list to centre on current question
-		if(carouselGo)
-			carouselGo(exam.currentQuestion.number-1,300);
+		if(display.carouselGo)
+			display.carouselGo(exam.currentQuestion.number-1,300);
 		
 		//enable or disable 'previous question' button
 		if(exam.currentQuestion.number === 0)
@@ -280,7 +280,7 @@ display.ExamDisplay.prototype =
 		exam.currentQuestion.display.show();
 		if(!this.madeCarousel)
 		{
-			$('.questionList').jCarouselLite({btnNext: '.next', btnPrev: '.prev',mouseWheel:true, vertical: true, circular: false, visible: Math.min(10,exam.numQuestions), speed: 50, scroll:2});
+			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
 		}
 	}
@@ -1090,7 +1090,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		}
 		else
 		{
-			selector.find('#feedback').attr('class','');
+			selector.find('#feedback').attr('class','').hide();
 		}
 	}
 	else
@@ -1114,5 +1114,63 @@ function scrollTo(el)
 		$('html,body').animate({scrollTop: $(el).offset().top-50 });
 }
 
+//make a carousel out of a div containing a list
+var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
+	options = $.extend({
+		prevBtn: null,
+		nextBtn: null,
+		speed: 200,
+		step: 2
+	}, options || {});
+
+	var div = $(elem);
+	var current = div.find('li:first');
+
+	function scrollTo(i)
+	{
+		var listOffset = div.find('ul,ol').position().top;
+		var listHeight = div.find('ul,ol').height();
+
+		var lis = div.find('li');
+		var divHeight = div.height();
+		for(var j=0;j<lis.length;j++)
+		{
+			var y = lis.eq(j).position().top - listOffset;
+			if(listHeight - y < divHeight)
+			{
+				var maxI = j;
+				break;
+			}
+		}
+		i = Math.max(Math.min(i,maxI-1),0);
+
+		current = div.find('li').eq(i);
+		var itemOffset = current.position().top;
+		div.animate({'scrollTop': itemOffset-listOffset},options.speed);
+	}
+
+	function scrollUp() {
+		var i = div.find('li').index(current) || 0;
+		i = Math.max(i-options.step, 0);
+		scrollTo(i);
+	}
+	function scrollDown() {
+		var lis = div.find('li');
+		var i = lis.index(current) || 0;
+		i = Math.min(i+options.step,lis.length-1);
+		scrollTo(i);
+	}
+
+	$(options.prevBtn).click(scrollUp);
+	$(options.nextBtn).click(scrollDown);
+	div.mousewheel(function(e,d) {
+		d > 0 ? scrollUp() : scrollDown();
+		return false;
+	});
+
+	return scrollTo;
+};
+
 
 });
+

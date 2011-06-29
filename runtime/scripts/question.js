@@ -702,7 +702,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	//max length and min length
 	tryGetAttribute(settings,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC'],{xml: this.xml});
-	var messageNode = xml.selectSingleNode('partdata/answer/parameters/maxlength/message');
+	var messageNode = xml.selectSingleNode('answer/maxlength/message');
 	if(messageNode)
 	{
 		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -710,7 +710,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.maxLengthMessage = 'Your answer is too long.';
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
-	var messageNode = xml.selectSingleNode('partdata/answer/parameters/minlength/message');
+	var messageNode = xml.selectSingleNode('answer/minlength/message');
 	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
 	if(messageNode)
 	{
