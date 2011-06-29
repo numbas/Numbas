@@ -94,9 +94,11 @@ Copyright 2011 Newcastle University
 				<xsl:with-param name="path" select="$path"/>
 			</xsl:apply-templates>
 		</xsl:if>
-		<xsl:apply-templates select="." mode="typespecific">
-			<xsl:with-param name="path" select="$path"/>
-		</xsl:apply-templates>
+		<span id="answer-{$path}">
+			<xsl:apply-templates select="." mode="typespecific">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
+		</span>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="not(ancestor::gaps)">
 			<div id="partFeedback">

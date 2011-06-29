@@ -49,7 +49,7 @@ var jme = Numbas.jme = {
 			{
 				token = new TNum(result[0]);
 
-				if(tokens.length>0 && (tokens[tokens.length-1].type==')'))
+				if(tokens.length>0 && (tokens[tokens.length-1].type==')'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
 				{
 					tokens.push(new TOp('*'));
 				}
@@ -100,7 +100,7 @@ var jme = Numbas.jme = {
 					token = new TName(result[1]);
 				}
 				
-				if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
+				if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
 					tokens.push(new TOp('*'));
 				}
 

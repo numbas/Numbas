@@ -115,9 +115,13 @@ class Exam:
 	
 	@staticmethod
 	def fromstring(string):
-		data = examparser.fromstring(string)
-		exam = Exam.fromDATA(data)
-		return exam
+		try:
+			data = examparser.ExamParser().parse(string)
+			exam = Exam.fromDATA(data)
+			return exam
+		except examparser.ParseError as err:
+			print('Parse error: ',str(err))
+			raise
 
 	@staticmethod
 	def fromDATA(data):
@@ -197,9 +201,13 @@ class Exam:
 		return root
 
 	def tostring(self):
-		xml = self.toxml()
-		indent(xml)
-		return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
+		try:
+			xml = self.toxml()
+			indent(xml)
+			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
+		except etree.ParseError as err:
+			print('XML Error:',str(err))
+
 
 class Event:
 	kind = ''
@@ -395,12 +403,12 @@ class JMEPart(Part):
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
 
-		self.maxLength = Restriction('maxlength',0)
+		self.maxLength = Restriction('maxlength',0,'Your answer is too long.')
 		self.maxLength.length = 0
-		self.minLength = Restriction('minlength',0)
+		self.minLength = Restriction('minlength',0,'Your answer is too short.')
 		self.minLength.length = 0
-		self.mustHave = Restriction('musthave',0)
-		self.notAllowed = Restriction('notallowed',0)
+		self.mustHave = Restriction('musthave',0,'Your answer does not contain all required elements.')
+		self.notAllowed = Restriction('notallowed',0,'Your answer contains elements which are not allowed.')
 	
 	@staticmethod
 	def fromDATA(data):
@@ -416,13 +424,13 @@ class JMEPart(Part):
 		tryLoad(data,'checkingType',part)
 
 		if 'maxlength' in data:
-			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'])
+			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
 		if 'minlength' in data:
-			part.minLength = Restriction.fromDATA('minlength',data['minlength'])
+			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLengt)
 		if 'musthave' in data:
-			part.mustHave = Restriction.fromDATA('musthave',data['musthave'])
+			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
 		if 'notallowed' in data:
-			part.notAllowed = Restriction.fromDATA('notallowed',data['notallowed'])
+			part.notAllowed = Restriction.fromDATA('notallowed',data['notallowed'],part.notAllowed)
 
 		if 'vsetrange' in data and len(data['vsetrange']) == 2:
 			part.vsetRangeStart = data['vsetrange'][0]
@@ -463,15 +471,17 @@ class Restriction:
 	length = -1
 	showStrings = False
 
-	def __init__(self,name='',partialCredit=0):
+	def __init__(self,name='',partialCredit=0,message=''):
 		self.name = name
 		self.strings = []
 		self.partialCredit = partialCredit
+		self.message = message
 	
 	@staticmethod
-	def fromDATA(name,data):
-		restriction = Restriction(name)
-		tryLoad(data,['showstrings','partialCredit','message','length'],restriction)
+	def fromDATA(name,data,restriction=None):
+		if restriction==None:
+			restriction = Restriction(name)
+		tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
 		if 'strings' in data:
 			for string in data['strings']:
 				restriction.strings.append(string)

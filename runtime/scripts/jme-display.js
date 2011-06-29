@@ -597,11 +597,26 @@ function treeToJME(tree)
 		for(var i=0;i<l;i++)
 		{
 			if(args[i].tok.type=='op' && opBrackets[op][args[i].tok.name]==true)
-				{bits[i]='('+bits[i]+')';}
+			{
+				bits[i]='('+bits[i]+')';
+				args[i].bracketed=true;
+			}
 			else if(args[i].tok.type=='number' && args[i].tok.value.complex && (op=='*' || op=='-u'))
 			{
 				if(!(args[i].tok.value.re==0 || args[i].tok.value.im==0))
-				{bits[i] = '('+bits[i]+')';}
+				{
+					bits[i] = '('+bits[i]+')';
+					args[i].bracketed = true;
+				}
+			}
+		}
+		
+		//omit multiplication symbol when not necessary
+		if(op=='*')
+		{
+			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed) )	//number or brackets followed by name or brackets doesn't need a times symbol
+			{
+				op = '';
 			}
 		}
 
@@ -766,7 +781,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(y+z)',[],'(x-y)-z'],
 		['x+(y-z)',[],'(x+y)-z'],
 		['x-(y-z)',[],'(x-y)+z'],
-		['x*(y*z)',[],'(x*y)*z'],		//make sure multiplications go left-to-right
+		['(x*y)*z',[],'x*(y*z)'],		//make sure multiplications go right-to-left
 		['n*i',['n isa "number"'],'eval(n*i)'],			//always collect multiplication by i
 		['i*n',['n isa "number"'],'eval(n*i)']
 	],

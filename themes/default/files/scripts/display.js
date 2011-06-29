@@ -333,7 +333,7 @@ display.QuestionDisplay.prototype =
 		//enable the submit button
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
-		$('#revealBtn').show();
+		$('#revealBtn').show().removeAttr('disabled');
 
 		//display the question container - content and nav bars
 		$('#questionContainer').show();
@@ -354,6 +354,17 @@ display.QuestionDisplay.prototype =
 		{
 			q.parts[i].display.show();
 		}
+
+		var submitMsg;
+		if(q.parts.length<=1)
+		{
+			submitMsg = 'Submit answer';
+		}
+		else
+		{
+			submitMsg = 'Submit all parts';
+		}
+		$('.navBar #submitBtn').val(submitMsg);
 
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
@@ -434,10 +445,6 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').attr('disabled','true');
 		//hide reveal button
 		$('#revealBtn').hide();
-
-		//go through parts, filling in answers
-		for(var i=0; i<this.q.parts.length; i++)
-			this.q.parts[i].display.revealAnswer();
 	},
 
 	//display question score and answer state
@@ -514,6 +521,11 @@ display.PartDisplay.prototype =
 		return s;
 	},
 
+	answerContext: function()
+	{
+		return this.htmlContext().find('#answer-'+this.p.path);
+	},
+
 	//called when part is displayed (basically when question is changed)
 	//show steps if appropriate, restore answers
 	show: function()
@@ -557,6 +569,11 @@ display.PartDisplay.prototype =
 			}
 		});
 
+		for(var i=0;i<this.p.steps.length; i++)
+		{
+			this.p.steps[i].display.show();
+		}
+
 		this.showScore(this.p.answered);
 	},
 
@@ -598,7 +615,7 @@ display.PartDisplay.prototype =
 	//called when question displayed - fills student's last answer into inputs
 	restoreAnswer: function() 
 	{
-		this.htmlContext().find('input[type=text]').each(resizeF);
+		this.answerContext().find('input[type=text]').each(resizeF);
 	},
 
 	//fills inputs with correct answers
@@ -630,8 +647,9 @@ display.JMEPartDisplay.prototype =
 		var pd = this;
 		var p = this.p;
 		var hc = this.htmlContext();
-		var previewDiv = hc.find('#preview');
-		var inputDiv = hc.find('#jme');
+		var ac = this.answerContext();
+		var previewDiv = ac.find('#preview');
+		var inputDiv = ac.find('#jme');
 		var errorSpan = hc.find('#warning-'+p.path);
 
 		this.hasFocus = false;
@@ -706,8 +724,6 @@ display.JMEPartDisplay.prototype =
 		});
 
 		this.oldtxt='';
-		//previewDiv.html('<span class="MathJax_Preview">'+this.oldtex+'</span><script type="math/tex">'+this.oldtex+'</script>');
-		//Numbas.display.typeset(previewDiv[0], this.inputPositionF);
 		this.inputChanged(this.p.studentAnswer,true);
 
 		this.p.question.display.addPostTypesetCallback( function(){inputPositionF();} );
@@ -716,13 +732,13 @@ display.JMEPartDisplay.prototype =
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#jme').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function() 
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#jme')
 			.attr('disabled','true')
 			.val(this.p.settings.correctAnswer);
@@ -740,8 +756,9 @@ display.JMEPartDisplay.prototype =
 			this.txt = txt;
 
 			this.removeWarnings();
-			var previewDiv = this.htmlContext().find('#preview');
-			var inputDiv = this.htmlContext().find('#jme');
+			var ac = this.answerContext();
+			var previewDiv = ac.find('#preview');
+			var inputDiv = ac.find('#jme');
 			var errorSpan = this.htmlContext().find('#warning-'+this.p.path);
 			if(txt!=='')
 			{
@@ -783,7 +800,7 @@ display.PatternMatchPartDisplay.prototype =
 {
 	show: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		var p = this.p;
 		c.find('#patternmatch').bind('input',function() {
 			p.storeAnswer([$(this).val()]);
@@ -792,13 +809,13 @@ display.PatternMatchPartDisplay.prototype =
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#patternmatch').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#patternmatch')
 			.attr('disabled',true)
 			.val(this.p.settings.displayAnswer);
@@ -814,20 +831,20 @@ display.NumberEntryPartDisplay.prototype =
 {
 	show: function() {
 		var p = this.p;
-		this.htmlContext().find('#numberentry').bind('input',function(){
+		this.answerContext().find('#numberentry').bind('input',function(){
 			p.storeAnswer([$(this).val()]);
 		});
 	},
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#numberentry').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#numberentry')
 			.attr('disabled','true')
 			.val(this.p.settings.displayAnswer);
@@ -893,7 +910,7 @@ display.MultipleResponsePartDisplay.prototype =
 		case 'radiogroup':
 		case 'checkbox':
 			//tick a response if it has positive marks
-			var c = this.htmlContext();
+			var c = this.answerContext();
 			for(var j=0; j<this.p.numAnswers; j++)
 			{
 				for(var i=0; i<this.p.numChoices; i++)
@@ -912,7 +929,7 @@ display.MultipleResponsePartDisplay.prototype =
 				if(this.p.settings.matrix[i][0] > bigscore)
 				{
 					bigscore = this.p.settings.matrix[i][0];
-					$(this.htmlContext().find('option')[i]).attr('selected','true');
+					$(this.answerContext().find('option')[i]).attr('selected','true');
 				}
 			}
 			break;

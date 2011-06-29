@@ -11,129 +11,169 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import sys
+import re
 
-def fromstring(s):
-	return getthing(s)[1]
+class ParseError(Exception):
+	def __init__(self,parser,message,hint=''):
+		self.expression = parser.source[parser.cursor:parser.cursor+50]
+		self.line = parser.source[:parser.cursor].count('\n')+1
+		self.message = message
+		self.hint = hint
+	
+	def __str__(self):
+		msg = '%s at line %s near: \n\t %s ' % (self.message,self.line,self.expression)
+		if self.hint:
+			msg += '\nPossible fix: '+self.hint
+		return msg
 
-def lstripcomments(s):
-	s=s.lstrip()	#get rid of leading whitespace
+class ExamParser:
+	source = ''
+	cursor = 0
 
-	while s[:2]=='//':
-		s=s[s.find('\n')+1:].lstrip()
-	return s
+	#parse a string into a data structure
+	def parse(self,source):
+		self.source = source
+		self.cursor = 0
+		self.data = self.getthing()
+		if self.source[self.cursor:].strip()!='':
+			raise ParseError(self,"Didn't parse all input","check for unmatched brackets")
+		return self.data
 
-def getthing(s):
-	s=lstripcomments(s)	#get rid of leading whitespace
+	#scan past comments
+	def lstripcomments(self):
+		os=self.source[self.cursor:]
+		s = os.lstrip()
+		s=s.lstrip()	#get rid of leading whitespace
 
-	f=s[0]
+		while s[:2]=='//':
+			s=s[s.find('\n')+1:].lstrip()
+		self.cursor += len(os)-len(s)
 
-	if f=='{':	#object
-		s=lstripcomments(s[1:])
-		obj = {}
-		while s[0]!='}':
-			i=0
-			while i<len(s) and s[i]!=':':
-				i+=1
-			if i==len(s):
-				print("Expected a colon from %s" % s[:100])
-				return
-			name = s[0:i].rstrip().lower()
-			s, thing = getthing(s[i+1:])
-			obj[name] = thing
-			s=s.lstrip(' \t\r\x0b\x0c')
-			if s[0]=='\n':
-				s=lstripcomments(s[1:])
-			elif s[:2]=='//':
-				s=lstripcomments(s)
-			else:
-				s=lstripcomments(s)
-				if s[0]==',' or s[0]=='\n':
-					s=lstripcomments(s[1:])
-				elif s[0]=='}':
-					break
+	def stripspace(self):
+		os = self.source[self.cursor:]
+		s=os.lstrip(' \t\r\x0b\x0c')
+		self.cursor += len(os)-len(s)
+
+	def getthing(self):
+		self.lstripcomments()
+
+		f=self.source[self.cursor]
+
+		if f=='{':	#object
+			self.cursor+=1
+			self.lstripcomments()
+
+			obj = {}
+			while self.cursor<len(self.source) and self.source[self.cursor]!='}':
+				i=self.cursor
+				namere = re.compile(r'^\w*$')
+				while i<len(self.source) and self.source[i]!=':':
+					if(not namere.match(self.source[self.cursor:i].strip())):
+						raise ParseError(self,"Invalid name '%s' for an object property" % self.source[self.cursor:i],"check for mismatched brackets")
+					i+=1
+				if i==len(self.source):
+					raise ParseError(self,"Expected a colon")
+
+				name = self.source[self.cursor:i].rstrip().lower()
+				self.cursor = i+1
+				thing = self.getthing()
+				obj[name] = thing
+
+				oc = self.cursor
+				self.stripspace()
+
+				if i==len(self.source):
+					self.cursor=oc
+					raise ParseError(self,"Couldn't find anything to assign as object property '%s'" % name,"check for unmatched brackets")
+
+				if self.source[self.cursor]=='\n':
+					self.cursor +=1
+					self.lstripcomments()
+
+				elif self.source[self.cursor:self.cursor+2]=='//':
+					self.lstripcomments()
 				else:
-					print(name)
-					print("Expected either } or , or linebreak from %s" % s[:100])
-					return
-		return s[1:], obj
+					self.lstripcomments()
+					if self.source[self.cursor]==',' or self.source[self.cursor]=='\n':
+						self.cursor+=1
+						self.lstripcomments()
+					elif self.source[self.cursor]=='}':
+						break
+					else:
+						raise ParseError(self,'Expected either } or , in object definition')
+			if self.cursor == len(self.source):
+				raise ParseError(self,'Expected a } to close an object')
 
-	elif f=='[':	#array
-		s=lstripcomments(s[1:])
-		arr=[]
-		while len(s) and s[0]!=']':
-			s, thing = getthing(s)
-			arr.append(thing)
-			s=s.lstrip(' \t\r\x0b\x0c')
-			if s[0]=='\n':
-				s=lstripcomments(s[1:])
-			elif s[:2]=='//':
-				s=lstripcomments(s)
-			else:
-				s=lstripcomments(s)
-				if s[0]==',':
-					s=s[1:]
-				elif s[0]==']':
-					break
+			self.cursor +=1
+			return obj
+
+		elif f=='[':	#array
+			self.cursor += 1
+			self.lstripcomments()
+
+			arr=[]
+			while self.cursor<len(self.source) and self.source[self.cursor]!=']':
+				thing = self.getthing()
+				arr.append(thing)
+
+				self.stripspace()
+
+				if self.source[self.cursor]=='\n':
+					self.cursor+=1
+					self.lstripcomments()
+				elif self.source[self.cursor:self.cursor+2]=='//':
+					self.lstripcomments()
 				else:
-					print("Expected either , or ] from %s" % s[:100])
-					return
-		if not len(s):
-			print("Missing ] to end array")
-			return
-		return s[1:],arr
+					self.lstripcomments()
+					if self.source[self.cursor]==',':
+						self.cursor +=1
+					elif self.source[self.cursor]==']':
+						break
+					else:
+						raise ParseError(self,"Expected either , or ] in array definition")
+			if self.cursor == len(self.source):
+				raise ParseError(self,'Expected a ] to end an array')
+			self.cursor +=1
+			return arr
 
-	elif f=='"':	#string literal
-		if len(s)>=6 and s[:3]=='"""':	#triple-quoted  string
-			i=3
-			while i<len(s)-2 and s[i:i+3]!='"""':
-				i+=1
-			if i==len(s)-2:
-				print('Expected """ from %s' % s[:100])
-				return
-			string = s[3:i]
-			s=s[i+3:]
-		else:
-			i=1
-			while i<len(s) and s[i]!='"':
-				i+=1
-			if i==len(s):
-				print('Expected " from %s' % s[:100])
-				return
-			string = s[1:i]
-			s=s[i+1:]
-		return s,string
-	else:	#undelimited literal
-		i=0
-		while i<len(s) and s[i] not in ']}\n,' and s[i:i+2]!='//':
-			i+=1
-		
-		v=s[:i].strip()
-		l=v.lower()
-		if is_number(v):
-			if is_int(v):
-				v=int(v)
+		elif f=='"':	#string literal
+			if self.source[self.cursor:self.cursor+3]=='"""':	#triple-quoted  string
+				i=self.cursor+3
+				while i<len(self.source)-2 and self.source[i:i+3]!='"""':
+					i+=1
+				if i==len(self.source)-2:
+					raise ParseError(self,'Expected """ to end string literal')
+				string = self.source[self.cursor+3:i]
+				self.cursor = i+3
 			else:
-				v=float(v)
-		elif l=='true':
-			v=True
-		elif l=='false':
-			v=False
-		return s[i:],v
+				i=self.cursor+1
+				while i<len(self.source) and self.source[i]!='"':
+					i+=1
+				if i==len(self.source):
+					raise ParseError(self,'Expected " to end string literal')
+				string = self.source[self.cursor+1:i]
+				self.cursor = i+1
+			return string
+		else:	#undelimited literal
+			i=self.cursor
+			while i<len(self.source) and self.source[i] not in ']}\n,' and self.source[i:i+2]!='//':
+				i+=1
+			
+			v=self.source[self.cursor:i].strip()
+			l=v.lower()
+			if is_number(v):
+				if is_int(v):
+					v=int(v)
+				else:
+					v=float(v)
+			elif l=='true':
+				v=True
+			elif l=='false':
+				v=False
 
-
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-def is_int(s):
-	try:
-		int(s)
-		return True
-	except ValueError:
-		return False
+			self.cursor = i
+			return v
 
 def printdata(data,tabs=''):
 	if type(data)==dict:
@@ -179,19 +219,46 @@ def printdata(data,tabs=''):
 		else:
 			return str(data)
 
-if __name__ == '__main__':
+
+#utility functions
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def is_int(s):
+	try:
+		int(s)
+		return True
+	except ValueError:
+		return False
+
+
+def __demo():
 	source='''
-	{ 
-		a: """ "hi"
-	said the man"""
-		b: howdy, c: there
-		d: "sailor,man"
-		e: geoff
+	//comment
+	{ 			//comment!
+		a: """ "hi"	//comment
+	said the man"""	//comment
+		b: howdy, c: there	//comment
+		d: "sailor,man"    //comment asd 
+
+		e: geoff		//comment
 		f: [eggs , beans,{a:hi}]
 	}
 	'''
-	source=open('testExam.exam').read()
-	data = fromstring(source)
-	source=printdata(data)
-	data=fromstring(source)
-	print(printdata(data))
+	#source=open('testExam.exam').read()
+	parser = ExamParser()
+	try:
+		data = parser.parse(source)
+		source=printdata(data)
+		data=parser.parse(source)
+		print(printdata(data))
+	except ParseError as err:
+		print('Parse error: ', str(err))
+
+if __name__ == '__main__':
+	__demo()
