@@ -1125,9 +1125,14 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 	var div = $(elem);
 	var current = div.find('li:first');
+	var going = false;
+	var nextScroll;
 
 	function scrollTo(i)
 	{
+		nextScroll = i;
+		if(going)
+			return;
 		var listOffset = div.find('ul,ol').position().top;
 		var listHeight = div.find('ul,ol').height();
 
@@ -1144,9 +1149,22 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 		}
 		i = Math.max(Math.min(i,maxI-1),0);
 
+		var ocurrent = current;
 		current = div.find('li').eq(i);
-		var itemOffset = current.position().top;
-		div.animate({'scrollTop': itemOffset-listOffset},options.speed);
+		var itemOffset = current.position().top - listOffset;
+		if(itemOffset != div.scrollTop() && ocurrent != current)
+		{
+			going = true;
+			nextScroll = null;
+			div.animate({scrollTop: itemOffset},{
+				duration: options.speed,
+				complete: function() { 
+					going = false;
+					if(nextScroll != null)
+						scrollTo(nextScroll);
+				} 
+			});
+		}
 	}
 
 	function scrollUp() {
