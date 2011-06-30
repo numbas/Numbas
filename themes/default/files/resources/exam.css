@@ -139,7 +139,7 @@ html{
 
 .questionSelector #name {
 	float:left;
-	width: 11em;
+	width: 12em;
 }
 
 .questionSelector #marks {
@@ -215,6 +215,7 @@ html{
 }
 .questionSelector {
 	display:inline-block;
+	font-size:0.8em;
 }
 
 .questionSelector #feedback {
