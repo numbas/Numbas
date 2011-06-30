@@ -110,6 +110,7 @@ html{
 
 .mainDisplay {
 	margin: 0 0;
+	overflow-x:hidden;
 }
 
 #infoDisplay {
