@@ -1147,7 +1147,7 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 				break;
 			}
 		}
-		i = Math.max(Math.min(i,maxI-1),0);
+		i = Math.max(Math.min(i,maxI),0);
 
 		var ocurrent = current;
 		current = div.find('li').eq(i);
