@@ -26,14 +26,13 @@ var jme = Numbas.jme = {
 	
 		expr += '';
 
-		expr = expr.replace(/\\sub *\\\\space/g,'');	//get rid of stupid hack which avoids times symbols
 		expr = expr.replace(/^\s+|\s+$/g, '');	//get rid of whitespace
 
 		var tokens = [];
 		var i = 0;
 		var re_bool = /^true|^false/;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
-		var re_name = /^{?((?:[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
+		var re_name = /^{?((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|not|and|or|xor|isa|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!])/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
@@ -564,7 +563,7 @@ var jme = Numbas.jme = {
 		}
 	},
 
-	compare: function(expr1,expr2,settings) {
+	compare: function(expr1,expr2,settings,variables) {
 		date = new Date();	//might as well get an even more up-to-date time than the one got when the script was loaded
 
 		expr1 += '';
@@ -586,8 +585,14 @@ var jme = Numbas.jme = {
 			//find variable names used in both expressions - can't compare if different
 			var vars1 = findvars(tree1);
 			var vars2 = findvars(tree2);
+
+			for(var v in variables)
+			{
+				delete vars1[v];
+				delete vars2[v];
+			}
 			
-			if( !areArraysEqual(vars1,vars2) ) 
+			if( !varnamesAgree(vars1,vars2) ) 
 			{	//whoops, differing variables
 				return false;
 			}
@@ -597,6 +602,7 @@ var jme = Numbas.jme = {
 				var errors = 0;
 				var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
 				for(var i = 0; i<rs.length; i++) {
+					Numbas.util.copyinto(variables,rs[i]);
 					var r1 = evaluate(tree1,rs[i]);
 					var r2 = evaluate(tree2,rs[i]);
 					if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
@@ -608,8 +614,8 @@ var jme = Numbas.jme = {
 				}
 			} else {
 				//if no variables used, can just evaluate both expressions once and compare
-				r1 = evaluate(tree1,{});
-				r2 = evaluate(tree2,{});
+				r1 = evaluate(tree1,variables);
+				r2 = evaluate(tree2,variables);
 				return resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy);
 			}
 		}
@@ -1368,11 +1374,11 @@ function randoms(varnames,min,max,times)
 }
 
 
-function areArraysEqual(array1, array2) {
-	if(array1.length != array2.length) { return false; }
-	
+function varnamesAgree(array1, array2) {
+	var name;
 	for(var i=0; i<array1.length; i++) {
-		if( array1[i] != array2[i] ) { return false; }
+		if( (name=array1[i][0])!='$' && !array2.contains(name) )
+			return false;
 	}
 	
 	return true;

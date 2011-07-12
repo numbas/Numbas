@@ -110,6 +110,7 @@ html{
 
 .mainDisplay {
 	margin: 0 0;
+	overflow-x:hidden;
 }
 
 #infoDisplay {
@@ -138,7 +139,7 @@ html{
 
 .questionSelector #name {
 	float:left;
-	width: 11em;
+	width: 12em;
 }
 
 .questionSelector #marks {
@@ -178,7 +179,7 @@ html{
 	padding-bottom:1em;
 }
 
-#questionDisplay,#adviceContainer {
+#questionDisplay{
 	margin:1em 0.5em 0 14.5em;
 	position:relative;
 	right:100%;
@@ -197,18 +198,24 @@ html{
 	width:100%;
 }
 
-#questionList {
-	width: 100%; 
+.questionList {
+	overflow: hidden;
+	max-height: 20em;
 }
+
+#questionList {
+	width: 100%;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
 .questionSelector-hidden {
 	display:none; 
 }
 .questionSelector {
-	font-size:0.7em;
-}
-
-.questionSelector td {
-	padding: 0.2em 0.2em;  
+	display:inline-block;
+	font-size:0.8em;
 }
 
 .questionSelector #feedback {
@@ -250,6 +257,10 @@ html{
 
 .adviceNav .btn {
 	margin: 0 0.2em;
+}
+
+#adviceContainer {
+	clear:both;
 }
 
 #adviceDisplay ol,ul {
@@ -299,7 +310,7 @@ html{
 
 /* question bits */
 
-#questionDisplay table, #adviceContainer table {
+#questionDisplay table{
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;

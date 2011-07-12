@@ -35,9 +35,6 @@ Copyright 2011 Newcastle University
 	</div>
 </xsl:template>
 
-<xsl:template match="advice">
-</xsl:template>
-
 <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing" />
 
 <xsl:template match="statement">
@@ -53,11 +50,11 @@ Copyright 2011 Newcastle University
 <xsl:template match="part" mode="path">
 	<xsl:choose>
 		<xsl:when test="parent::gaps">
-			<xsl:apply-templates select="../../.." mode="path" />
+			<xsl:apply-templates select="../.." mode="path" />
 			<xsl:text>g</xsl:text>
 		</xsl:when>
-		<xsl:when test="parent::part">
-			<xsl:apply-templates select=".." mode="path" />
+		<xsl:when test="parent::steps">
+			<xsl:apply-templates select="../.." mode="path" />
 			<xsl:text>s</xsl:text>
 		</xsl:when>
 		<xsl:when test="parent::parts">
@@ -73,7 +70,7 @@ Copyright 2011 Newcastle University
 	</xsl:variable>
 	<xsl:variable name="tag">
 		<xsl:choose>
-			<xsl:when test="ancestor::gaps and not (partdata/choices)">span</xsl:when>
+			<xsl:when test="ancestor::gaps and not (choices)">span</xsl:when>
 			<xsl:otherwise>div</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -90,21 +87,19 @@ Copyright 2011 Newcastle University
 		</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
-			<xsl:apply-templates select="partdata/prompt" />
+			<xsl:apply-templates select="prompt" />
 		</xsl:if>
-		<xsl:if test="count(part) > 0">
-			<div class="steps" id="steps-{$path}">
-				<xsl:apply-templates select="part"/>
-				<div style="clear:both;"></div>
-			</div>
+		<xsl:if test="count(steps/part)>0">
+			<xsl:apply-templates select="steps">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
 		</xsl:if>
-		<xsl:apply-templates select="partdata">
-			<xsl:with-param name="path" select="$path"/>
-		</xsl:apply-templates>
+		<span id="answer-{$path}">
+			<xsl:apply-templates select="." mode="typespecific">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
+		</span>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
-		<xsl:if test="count(part) > 0">
-			<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
-		</xsl:if>
 		<xsl:if test="not(ancestor::gaps)">
 			<div id="partFeedback">
 				<input class="btn" id="submitPart" value="Submit part" type="button"></input>
@@ -117,6 +112,16 @@ Copyright 2011 Newcastle University
 	</xsl:element>
 </xsl:template>
 
+<xsl:template match="steps">
+	<xsl:param name="path"/>
+
+	<div class="steps" id="steps-{$path}">
+		<xsl:apply-templates select="part"/>
+		<div style="clear:both;"></div>
+	</div>
+	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
+</xsl:template>
+
 <xsl:template match="prompt">
 	<span id="prompt">
 		<xsl:apply-templates />
@@ -124,13 +129,16 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="content">
-	<span><xsl:apply-templates select="html/*" mode="content" /></span>
+	<xsl:apply-templates select="*" mode="content" />
 </xsl:template>
 
 
-<xsl:template match="adviceitem">
-	<div>
-		<xsl:apply-templates />
+<xsl:template match="advice">
+	<div id="adviceContainer">
+		<h3>Advice</h3>
+		<span id="adviceDisplay">
+			<xsl:apply-templates />
+		</span>
 	</div>
 </xsl:template>
 
@@ -223,7 +231,7 @@ Copyright 2011 Newcastle University
 	</option>
 </xsl:template>
 
-<xsl:template match="partdata[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']">
+<xsl:template match="part[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<xsl:apply-templates select="choices" mode="one">
@@ -231,14 +239,14 @@ Copyright 2011 Newcastle University
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="partdata[@type='m_n_2' or @type='CUEdt.MRm_n_2Part']">
+<xsl:template match="part[@type='m_n_2' or @type='CUEdt.MRm_n_2Part']" mode="typespecific">
 	<xsl:param name="path"/>
 	<xsl:apply-templates select="choices" mode="one">
 		<xsl:with-param name="path" select="$path"/>
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="partdata[@type='m_n_x' or @type='CUEdt.MRm_n_xPart']">
+<xsl:template match="part[@type='m_n_x' or @type='CUEdt.MRm_n_xPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
@@ -284,13 +292,13 @@ Copyright 2011 Newcastle University
 	</tr>
 </xsl:template>
 
-<xsl:template match="partdata[@type='patternmatch' or @type='CUEdt.PatternMatchPart']">
+<xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch"></input>
 </xsl:template>
 
-<xsl:template match="partdata[@type='gapfill' or @type='CUEdt.GapFillPart']">
+<xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
 	<xsl:param name="path"/>
 </xsl:template>
 
@@ -298,26 +306,26 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	
 	<xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
-	<xsl:apply-templates select="ancestor::partdata/gaps/part[$n+1]" />
+	<xsl:apply-templates select="ancestor::part/gaps/part[$n+1]" />
 </xsl:template>
 
-<xsl:template match="partdata[@type='jme' or @type='CUEdt.JMEPart']">
+<xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<input type="text" spellcheck="false" class="jme" id="jme" /><span id="preview" class="mathPreview"></span>
 </xsl:template>
 
-<xsl:template match="partdata[@type='numberentry' or @type='CUEdt.NumberEntryPart']">
+<xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry"/>
 </xsl:template>
 
-<xsl:template match="partdata[@type='information' or @type='CUEdt.InformationOnlyPart']">
+<xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">
 	<xsl:param name="path"/>
 </xsl:template>
 
-<xsl:template match="partdata">
+<xsl:template match="part" mode="typespecific">
 	Unsupported part type <xsl:value-of select="@type"/>
 </xsl:template>
 

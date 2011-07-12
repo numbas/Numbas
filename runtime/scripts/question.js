@@ -37,6 +37,8 @@ var Question = Numbas.Question = function( xml, number, loading )
 
 	job(function()
 	{
+		q.followVariables = {};
+
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -470,7 +472,7 @@ Question.prototype =
 
 function createPart(xml, path, question, parentPart, loading)
 {
-	var type = tryGetAttribute(null,'partdata','type',[],{xml: xml});
+	var type = tryGetAttribute(null,'.','type',[],{xml: xml});
 	if(type==null)
 		throw(new Error("Missing part type attribute"));
 	if(partConstructors[type])
@@ -489,9 +491,7 @@ function createPart(xml, path, question, parentPart, loading)
 function Part( xml, path, question, parentPart, loading )
 {
 	//remember XML
-	this.xml = xml.selectSingleNode('partdata');
-	if(!xml)
-		throw(new Error("This Part element in the exam XML doesn't have a child partdata element."));
+	this.xml = xml;
 
 	//remember parent question object
 	this.question = question;
@@ -515,7 +515,7 @@ function Part( xml, path, question, parentPart, loading )
 	this.steps = [];
 
 	//load steps
-	var stepNodes = xml.selectNodes('part');
+	var stepNodes = xml.selectNodes('steps/part');
 	for(var i=0; i<stepNodes.length; i++)
 	{
 		var step = createPart( stepNodes[i], this.path+'s'+i,this.question, this, loading);
@@ -615,9 +615,26 @@ Part.prototype = {
 			this.mark();
 			this.answered = this.validate();
 		}
+		if(this.answered)
+			this.reportStudentAnswer(this.studentAnswer);
+		else
+			this.reportStudentAnswer('');
+
+
 		this.calculateScore();
 		this.question.updateScore();
 		this.display.showScore(this.answered);
+	},
+
+	//save the student's answer as a question variable
+	//so it can be used for carry-over marking
+	reportStudentAnswer: function(answer) {
+		var val;
+		if(util.isFloat(answer))
+			val = new Numbas.jme.types.TNum(answer);
+		else
+			val = new Numbas.jme.types.TString(answer);
+		this.question.followVariables['$'+this.path] = val;
 	},
 
 	//function which marks the student's answer
@@ -641,6 +658,11 @@ Part.prototype = {
 		this.display.revealAnswer();
 		this.answered = true;
 		this.credit = 0;
+		this.showSteps();
+		for(var i=0; i<this.steps.length; i++ )
+		{
+			this.steps[i].revealAnswer();
+		}
 	}
 
 };
@@ -672,16 +694,15 @@ function JMEPart(xml, path, question, parentPart, loading)
 	);
 	
 	//get checking type, accuracy, checking range
-	var parametersPath = 'answer/parameters';
-	tryGetAttribute(settings,parametersPath+'/checking',['type','accuracy'],['checkingType','checkingAccuracy'],{xml: this.xml});
-	tryGetAttribute(settings,parametersPath+'/failurerate','value','failureRate',{xml: this.xml});
+	var parametersPath = 'answer';
+	tryGetAttribute(settings,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate'],{xml: this.xml});
 
-	tryGetAttribute(settings,parametersPath+'/vset/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints'],{xml: this.xml});
+	tryGetAttribute(settings,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints'],{xml: this.xml});
 
 
 	//max length and min length
 	tryGetAttribute(settings,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC'],{xml: this.xml});
-	var messageNode = xml.selectSingleNode('partdata/answer/parameters/maxlength/message');
+	var messageNode = xml.selectSingleNode('answer/maxlength/message');
 	if(messageNode)
 	{
 		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -689,7 +710,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.maxLengthMessage = 'Your answer is too long.';
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
-	var messageNode = xml.selectSingleNode('partdata/answer/parameters/minlength/message');
+	var messageNode = xml.selectSingleNode('answer/minlength/message');
 	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
 	if(messageNode)
 	{
@@ -699,7 +720,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 
 	//get list of 'must have' strings
-	var mustHaveNode = this.xml.selectSingleNode('answer/parameters/musthave');
+	var mustHaveNode = this.xml.selectSingleNode('answer/musthave');
 	settings.mustHave = [];
 	if(mustHaveNode)
 	{
@@ -717,7 +738,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 
 	//get list of 'not allowed' strings
-	var notAllowedNode = this.xml.selectSingleNode('answer/parameters/notallowed');
+	var notAllowedNode = this.xml.selectSingleNode('answer/notallowed');
 	settings.notAllowed = [];
 	if(notAllowedNode)
 	{
@@ -802,7 +823,7 @@ JMEPart.prototype =
 		this.answered = this.studentAnswer.length > 0;
 		
 		//do comparison of student's answer with correct answer
-		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings))
+		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
 			this.credit = 0;
 			return;
@@ -912,15 +933,15 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,'correctanswer','value','correctAnswer',{xml: this.xml});
+	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('answer/correctanswer'));
 	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.variables);
 
-	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
+	var displayAnswerNode = this.xml.selectSingleNode('answer/displayanswer');
 	if(!displayAnswerNode)
 		throw(new Error("Display answer is missing from a Pattern Match part ("+this.path+")"));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
-	tryGetAttribute(settings,'parameters/case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
+	tryGetAttribute(settings,'answer/case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
 
 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
 
@@ -995,9 +1016,8 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,'answer/inputstep','value','inputStep',{xml:this.xml});
-	tryGetAttribute(settings,'answer/minvalue','value','minvalue',{xml: this.xml, string:true});
-	tryGetAttribute(settings,'answer/maxvalue','value','maxvalue',{xml: this.xml, string:true});
+	tryGetAttribute(settings,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{xml: this.xml, string:true});
+	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
 	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
 	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.variables,this.question.functions);
 	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value;
@@ -1405,6 +1425,7 @@ GapFillPart.prototype =
 	}
 };
 GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
+GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
 function InformationPart(xml, path, question, parentPart, loading)
 {

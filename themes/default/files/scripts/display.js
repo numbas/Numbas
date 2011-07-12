@@ -82,10 +82,14 @@ var display = Numbas.display = {
 		}
 		catch(e)
 		{
-			if(!display.failedMathJax)
+			if(MathJax===undefined && !display.failedMathJax)
 			{
 				display.failedMathJax = true;
 				display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+			}
+			else
+			{
+				Numbas.showError(e);
 			}
 		};
 	}
@@ -197,8 +201,8 @@ display.ExamDisplay.prototype =
 		}
 
 		//scroll question list to centre on current question
-		if(carouselGo)
-			carouselGo(exam.currentQuestion.number-1,300);
+		if(display.carouselGo)
+			display.carouselGo(exam.currentQuestion.number-1,300);
 		
 		//enable or disable 'previous question' button
 		if(exam.currentQuestion.number === 0)
@@ -276,7 +280,7 @@ display.ExamDisplay.prototype =
 		exam.currentQuestion.display.show();
 		if(!this.madeCarousel)
 		{
-			$('.questionList').jCarouselLite({btnNext: '.next', btnPrev: '.prev',mouseWheel:true, vertical: true, circular: false, visible: Math.min(10,exam.numQuestions), speed: 50, scroll:2});
+			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
 		}
 	}
@@ -289,7 +293,6 @@ display.QuestionDisplay = function(q)
 
 	//make html for question and advice text
 	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
-	this.advice = $.xsl.transform(Numbas.xml.templates.question, q.xml.selectSingleNode('advice/adviceitem')).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
@@ -314,7 +317,6 @@ display.QuestionDisplay.prototype =
 {
 	q: undefined,					//reference back to the main question object
 	html: '',						//HTML for displaying question
-	advice: '',						//question advice in HTML
 	questionSelector: '',			//jQuery selector for this question's menu entry
 
 	show: function()
@@ -331,7 +333,7 @@ display.QuestionDisplay.prototype =
 		//enable the submit button
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
-		$('#revealBtn').show();
+		$('#revealBtn').show().removeAttr('disabled');
 
 		//display the question container - content and nav bars
 		$('#questionContainer').show();
@@ -412,16 +414,12 @@ display.QuestionDisplay.prototype =
 	{
 		if( this.q.adviceDisplayed )
 		{
-			$('#adviceDisplay').html(this.advice);
-			$('#adviceContainer').show();			
 			$('#adviceBtn').attr('disabled','true');
-
-			//remove empty paragraphs
-			$('#adviceDisplay p').filter(function(){return $.trim($(this).text())=='';}).remove();
 
 			//if advice text non-empty, show it and typeset maths
 			if($.trim($('#adviceDisplay').text()))
 			{
+				$('#adviceContainer').show();			
 				if(fromButton)
 				{
 					Numbas.display.typeset();
@@ -433,7 +431,6 @@ display.QuestionDisplay.prototype =
 		}
 		else
 		{
-			$('#adviceDisplay').html('');
 			$('#adviceContainer').hide();
 			$('#adviceBtn').removeAttr('disabled');
 		}	
@@ -448,10 +445,6 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').attr('disabled','true');
 		//hide reveal button
 		$('#revealBtn').hide();
-
-		//go through parts, filling in answers
-		for(var i=0; i<this.q.parts.length; i++)
-			this.q.parts[i].display.revealAnswer();
 	},
 
 	//display question score and answer state
@@ -528,6 +521,11 @@ display.PartDisplay.prototype =
 		return s;
 	},
 
+	answerContext: function()
+	{
+		return this.htmlContext().find('#answer-'+this.p.path);
+	},
+
 	//called when part is displayed (basically when question is changed)
 	//show steps if appropriate, restore answers
 	show: function()
@@ -571,6 +569,11 @@ display.PartDisplay.prototype =
 			}
 		});
 
+		for(var i=0;i<this.p.steps.length; i++)
+		{
+			this.p.steps[i].display.show();
+		}
+
 		this.showScore(this.p.answered);
 	},
 
@@ -612,7 +615,7 @@ display.PartDisplay.prototype =
 	//called when question displayed - fills student's last answer into inputs
 	restoreAnswer: function() 
 	{
-		this.htmlContext().find('input[type=text]').each(resizeF);
+		this.answerContext().find('input[type=text]').each(resizeF);
 	},
 
 	//fills inputs with correct answers
@@ -644,8 +647,9 @@ display.JMEPartDisplay.prototype =
 		var pd = this;
 		var p = this.p;
 		var hc = this.htmlContext();
-		var previewDiv = hc.find('#preview');
-		var inputDiv = hc.find('#jme');
+		var ac = this.answerContext();
+		var previewDiv = ac.find('#preview');
+		var inputDiv = ac.find('#jme');
 		var errorSpan = hc.find('#warning-'+p.path);
 
 		this.hasFocus = false;
@@ -720,8 +724,6 @@ display.JMEPartDisplay.prototype =
 		});
 
 		this.oldtxt='';
-		//previewDiv.html('<span class="MathJax_Preview">'+this.oldtex+'</span><script type="math/tex">'+this.oldtex+'</script>');
-		//Numbas.display.typeset(previewDiv[0], this.inputPositionF);
 		this.inputChanged(this.p.studentAnswer,true);
 
 		this.p.question.display.addPostTypesetCallback( function(){inputPositionF();} );
@@ -730,13 +732,13 @@ display.JMEPartDisplay.prototype =
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#jme').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function() 
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#jme')
 			.attr('disabled','true')
 			.val(this.p.settings.correctAnswer);
@@ -754,8 +756,9 @@ display.JMEPartDisplay.prototype =
 			this.txt = txt;
 
 			this.removeWarnings();
-			var previewDiv = this.htmlContext().find('#preview');
-			var inputDiv = this.htmlContext().find('#jme');
+			var ac = this.answerContext();
+			var previewDiv = ac.find('#preview');
+			var inputDiv = ac.find('#jme');
 			var errorSpan = this.htmlContext().find('#warning-'+this.p.path);
 			if(txt!=='')
 			{
@@ -797,7 +800,7 @@ display.PatternMatchPartDisplay.prototype =
 {
 	show: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		var p = this.p;
 		c.find('#patternmatch').bind('input',function() {
 			p.storeAnswer([$(this).val()]);
@@ -806,13 +809,13 @@ display.PatternMatchPartDisplay.prototype =
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#patternmatch').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#patternmatch')
 			.attr('disabled',true)
 			.val(this.p.settings.displayAnswer);
@@ -828,20 +831,20 @@ display.NumberEntryPartDisplay.prototype =
 {
 	show: function() {
 		var p = this.p;
-		this.htmlContext().find('#numberentry').bind('input',function(){
+		this.answerContext().find('#numberentry').bind('input',function(){
 			p.storeAnswer([$(this).val()]);
 		});
 	},
 
 	restoreAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#numberentry').val(this.p.studentAnswer);
 	},
 
 	revealAnswer: function()
 	{
-		var c = this.htmlContext();
+		var c = this.answerContext();
 		c.find('#numberentry')
 			.attr('disabled','true')
 			.val(this.p.settings.displayAnswer);
@@ -907,7 +910,7 @@ display.MultipleResponsePartDisplay.prototype =
 		case 'radiogroup':
 		case 'checkbox':
 			//tick a response if it has positive marks
-			var c = this.htmlContext();
+			var c = this.answerContext();
 			for(var j=0; j<this.p.numAnswers; j++)
 			{
 				for(var i=0; i<this.p.numChoices; i++)
@@ -926,7 +929,7 @@ display.MultipleResponsePartDisplay.prototype =
 				if(this.p.settings.matrix[i][0] > bigscore)
 				{
 					bigscore = this.p.settings.matrix[i][0];
-					$(this.htmlContext().find('option')[i]).attr('selected','true');
+					$(this.answerContext().find('option')[i]).attr('selected','true');
 				}
 			}
 			break;
@@ -1087,7 +1090,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		}
 		else
 		{
-			selector.find('#feedback').attr('class','');
+			selector.find('#feedback').attr('class','').hide();
 		}
 	}
 	else
@@ -1111,5 +1114,81 @@ function scrollTo(el)
 		$('html,body').animate({scrollTop: $(el).offset().top-50 });
 }
 
+//make a carousel out of a div containing a list
+var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
+	options = $.extend({
+		prevBtn: null,
+		nextBtn: null,
+		speed: 200,
+		step: 2
+	}, options || {});
+
+	var div = $(elem);
+	var current = div.find('li:first');
+	var going = false;
+	var nextScroll;
+
+	function scrollTo(i)
+	{
+		nextScroll = i;
+		if(going)
+			return;
+		var listOffset = div.find('ul,ol').position().top;
+		var listHeight = div.find('ul,ol').height();
+
+		var lis = div.find('li');
+		var divHeight = div.height();
+		for(var j=0;j<lis.length;j++)
+		{
+			var y = lis.eq(j).position().top - listOffset;
+			if(listHeight - y < divHeight)
+			{
+				var maxI = j;
+				break;
+			}
+		}
+		i = Math.max(Math.min(i,maxI),0);
+
+		var ocurrent = current;
+		current = div.find('li').eq(i);
+		var itemOffset = current.position().top - listOffset;
+		if(itemOffset != div.scrollTop() && ocurrent != current)
+		{
+			going = true;
+			nextScroll = null;
+			div.animate({scrollTop: itemOffset},{
+				duration: options.speed,
+				complete: function() { 
+					going = false;
+					if(nextScroll != null)
+						scrollTo(nextScroll);
+				} 
+			});
+		}
+	}
+
+	function scrollUp() {
+		var i = div.find('li').index(current) || 0;
+		i = Math.max(i-options.step, 0);
+		scrollTo(i);
+	}
+	function scrollDown() {
+		var lis = div.find('li');
+		var i = lis.index(current) || 0;
+		i = Math.min(i+options.step,lis.length-1);
+		scrollTo(i);
+	}
+
+	$(options.prevBtn).click(scrollUp);
+	$(options.nextBtn).click(scrollDown);
+	div.mousewheel(function(e,d) {
+		d > 0 ? scrollUp() : scrollDown();
+		return false;
+	});
+
+	return scrollTo;
+};
+
 
 });
+
