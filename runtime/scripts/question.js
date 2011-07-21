@@ -1119,11 +1119,11 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.numChoices = choiceNodes.length;
 	
 	//randomise answers?
-	var answersNode = this.xml.selectSingleNode('possibleanswers');
+	var answersNode = this.xml.selectSingleNode('answers');
 	if(answersNode)
 	{
 		tryGetAttribute(settings,answersNode,'order','answerOrder');
-		var answerNodes = answersNode.selectNodes('possibleanswer');
+		var answerNodes = answersNode.selectNodes('answer');
 		this.numAnswers = answerNodes.length;
 	}
 
@@ -1193,7 +1193,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	for( i=0; i<matrixNodes.length; i++ )
 	{
 		var cell = {value: ""};
-		tryGetAttribute(cell, matrixNodes[i], ['possibleAnswerIndex', 'choiceIndex', 'value']);
+		tryGetAttribute(cell, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
 
 		if(util.isFloat(cell.value))
 			cell.value = parseFloat(cell.value);
@@ -1201,25 +1201,25 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		{
 			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
 			if(!util.isFloat(cell.value))
-				throw(new Error("Part "+this.path+" marking matrix cell "+cell.possibleAnswerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
+				throw(new Error("Part "+this.path+" marking matrix cell "+cell.answerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
 			cell.value = parseFloat(cell.value);
 		}
 		matrixTotal += cell.value;
 
 		//take into account shuffling
-		cell.possibleAnswerIndex = this.shuffleAnswers[cell.possibleAnswerIndex];
+		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
 		cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
 
 		if(this.type == '1_n_2' || this.type == 'm_n_2')
 		{	//for some reason, possible answers are recorded as choices in the multiple choice types.
 			//switch the indices round, so we don't have to worry about this again
-			cell.possibleAnswerIndex = cell.choiceIndex;
+			cell.answerIndex = cell.choiceIndex;
 			cell.choiceIndex = 0;
 		}
 
-		if(!matrix[cell.possibleAnswerIndex])
-			matrix[cell.possibleAnswerIndex]=[];
-		matrix[cell.possibleAnswerIndex][cell.choiceIndex] = cell.value;
+		if(!matrix[cell.answerIndex])
+			matrix[cell.answerIndex]=[];
+		matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 	}
 	settings.matrix = matrix;
 	
