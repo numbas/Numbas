@@ -638,7 +638,7 @@ class MultipleChoicePart(Part):
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
-			answers.append(makeTree(['possibleanswer',makeContentNode(answer,True)]))
+			answers.append(makeTree(['answer',makeContentNode(answer,True)]))
 
 		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}
@@ -647,7 +647,7 @@ class MultipleChoicePart(Part):
 		for i in range(len(self.matrix)):
 			for j in range(len(self.matrix[i])):
 				mark = etree.Element('mark',{
-					'possibleanswerindex': str(j), 
+					'answerindex': str(j), 
 					'choiceindex': str(i), 
 					'value': str(self.matrix[i][j])
 					})

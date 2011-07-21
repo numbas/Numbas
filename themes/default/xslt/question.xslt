@@ -254,7 +254,7 @@ Copyright 2011 Newcastle University
 		<table>
 			<tr>
 				<td/>
-				<xsl:for-each select="possibleanswers/possibleanswer">
+				<xsl:for-each select="answers/answer">
 					<td><xsl:apply-templates select="content"/></td>
 				</xsl:for-each>
 			</tr>
@@ -272,12 +272,12 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	<xsl:param name="displaytype"/>
 
-	<xsl:variable name="answers" select="../../possibleanswers"/>
+	<xsl:variable name="answers" select="../../answers"/>
 	<xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
 	<tr>
 		<td><xsl:apply-templates select="content"/></td>
-		<xsl:for-each select="$answers/possibleanswer">
-			<xsl:variable name="answernum" select="count(preceding-sibling::possibleanswer)"/>
+		<xsl:for-each select="$answers/answer">
+			<xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
 			<td>
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
