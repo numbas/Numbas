@@ -856,7 +856,7 @@ var simplificationRules = jme.display.simplificationRules = {
 	],
 
 	sqrtDivision: [
-		['sqrt(x)*sqrt(y)',[],'sqrt(x/y)']
+		['sqrt(x)/sqrt(y)',[],'sqrt(x/y)']
 	],
 
 	sqrtSquare: [

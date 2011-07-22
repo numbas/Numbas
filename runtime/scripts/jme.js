@@ -26,7 +26,6 @@ var jme = Numbas.jme = {
 	
 		expr += '';
 
-		expr = expr.replace(/\\sub *\\\\space/g,'');	//get rid of stupid hack which avoids times symbols
 		expr = expr.replace(/^\s+|\s+$/g, '');	//get rid of whitespace
 
 		var tokens = [];
