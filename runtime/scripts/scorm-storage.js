@@ -200,19 +200,19 @@ SCORMStorage.prototype = {
 			this.set(prepath+'correct_responses.0.pattern',pattern);
 
 			break;
-		case 'CUEdt.NumberEntryPart':
+		case 'numberentry':
 			this.set(prepath+'type','numeric');
 			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+':'+p.settings.maxvalue);
 			break;
-		case 'CUEdt.PatternMatchPart':
+		case 'patternmatch':
 			this.set(prepath+'type','fill-in');
 			this.set(prepath+'correct_responses.0.pattern','{case_matters='+p.settings.caseSensitive+'}{order_matters=false}'+p.settings.correctAnswer);
 			break;
-		case 'CUEdt.JMEPart':
+		case 'jme':
 			this.set(prepath+'type','fill-in');
 			this.set(prepath+'correct_responses.0.pattern','{case_matters=false}{order_matters=false}'+p.settings.correctAnswer);
 			break;
-		case 'CUEdt.GapFillPart':
+		case 'gapfill':
 			this.set(prepath+'type','other');
 
 			for(var i=0;i<p.gaps.length;i++)
@@ -271,7 +271,7 @@ SCORMStorage.prototype = {
 		var pobj = {};
 		switch(part.type)
 		{
-		case 'CUEdt.GapFillPart':
+		case 'gapfill':
 			pobj.gaps=[];
 			for(var i=0;i<part.gaps.length;i++)
 			{
@@ -354,13 +354,13 @@ SCORMStorage.prototype = {
 		var answer = get('learner_response');
 		switch(part.type)
 		{
-		case 'CUEdt.JMEPart':
+		case 'jme':
 			out.studentAnswer = answer || '';
 			break;
-		case 'CUEdt.PatternMatchPart':
+		case 'patternmatch':
 			out.studentAnswer = answer || '';
 			break;
-		case 'CUEdt.NumberentryPart':
+		case 'numberentry':
 			out.studentAnswer = parseFloat(answer) || 0;
 			break;
 		case '1_n_2':
@@ -463,13 +463,13 @@ SCORMStorage.prototype = {
 
 		switch(part.type)
 		{
-		case 'CUEdt.JMEPart':
+		case 'jme':
 			this.set(prepath+'learner_response',part.studentAnswer);
 			break;
-		case 'CUEdt.PatternMatchPart':
+		case 'patternmatch':
 			this.set(prepath+'learner_response',part.studentAnswer);
 			break;
-		case 'CUEdt.NumberEntryPart':
+		case 'numberentry':
 			this.set(prepath+'learner_response',part.studentAnswer);
 			break;
 		case '1_n_2':
