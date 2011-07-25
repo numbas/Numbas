@@ -306,7 +306,7 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	
 	<xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
-	<xsl:apply-templates select="ancestor::part/gaps/part[$n+1]" />
+	<xsl:apply-templates select="ancestor::part[1]/gaps/part[$n+1]" />
 </xsl:template>
 
 <xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
