@@ -86,8 +86,6 @@ Question.prototype =
 			//get question's name
 			tryGetAttribute(q,'.','name');
 
-			if(loading)
-				var qobj = Numbas.store.loadQuestion(q);
 
 			q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
 
@@ -153,6 +151,7 @@ Question.prototype =
 			q.variables = {};
 			if(loading)
 			{
+				var qobj = Numbas.store.loadQuestion(q);
 				for(var x in qobj.variables)
 				{
 					q.variables[x] = qobj.variables[x];

@@ -292,7 +292,11 @@ SCORMStorage.prototype = {
 	getSuspendData: function()
 	{
 		if(!this.suspendData)
-			this.suspendData = JSON.parse(this.get('suspend_data'));
+		{
+			var suspend_data = this.get('suspend_data');
+			if(suspend_data.length)
+				this.suspendData = JSON.parse(suspend_data);
+		}
 		return this.suspendData;
 	},
 
@@ -349,7 +353,8 @@ SCORMStorage.prototype = {
 
 		var out = {};
 
-		function get(key) { return this.get('interactions.'+index+'.'+key); };
+		var sc = this;
+		function get(key) { return sc.get('interactions.'+index+'.'+key); };
 
 		var answer = get('learner_response');
 		switch(part.type)

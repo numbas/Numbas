@@ -92,7 +92,7 @@ function init()
 			break;
 
 		case 'resume':
-			job(exam.load);
+			job(exam.load,exam);
 			job(Numbas.display.init);
 
 			if(exam.currentQuestion !== undefined)
