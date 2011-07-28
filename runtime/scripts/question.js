@@ -623,6 +623,7 @@ Part.prototype = {
 
 		this.calculateScore();
 		this.question.updateScore();
+		Numbas.store.partAnswered(this);
 		this.display.showScore(this.answered);
 	},
 

@@ -547,6 +547,8 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 			return texname+' \\left ( '+texArgs.join(', ')+' \\right )';
 		}
 		break;
+	default:
+		throw(new Error("Can't texify token type "+tok.type));
 	}
 }
 
