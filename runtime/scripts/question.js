@@ -49,6 +49,23 @@ var Question = Numbas.Question = function( xml, number, loading )
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
+
+		if(loading)
+		{
+			var qobj = Numbas.store.loadQuestion(q);
+
+			q.adviceDisplayed = qobj.adviceDisplayed;
+			q.answered = qobj.answered;
+			q.revealed = qobj.revealed;
+			q.submitted = qobj.submitted;
+			q.visited = qobj.visited;
+			q.score = qobj.score;
+
+			if(q.revealed)
+				q.revealAnswer(true);
+			else if(q.adviceDisplayed)
+				q.getAdvice(true);
+		}
 		
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
@@ -337,34 +354,40 @@ Question.prototype =
 	},
 
 	//trigger advice
-	getAdvice: function()
+	getAdvice: function(loading)
 	{
 		this.adviceDisplayed = true;
-		this.display.showAdvice(true);
-		Numbas.store.adviceDisplayed(this);
+		if(!loading)
+		{
+			this.display.showAdvice(true);
+			Numbas.store.adviceDisplayed(this);
+		}
 	},
 
 	//reveal correct answer to student
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
 		this.revealed = true;
 		this.answered = true;
 		
 		//display advice if allowed
-		this.getAdvice();
+		this.getAdvice(loading);
 
 		//part-specific reveal code. Might want to do some logging in future? 
 		for(var i=0; i<this.parts.length; i++)
-			this.parts[i].revealAnswer();
-
-		//display revealed answers
-		this.display.revealAnswer();
+			this.parts[i].revealAnswer(loading);
 
 		this.score = 0;
 
-		this.display.showScore();
+		if(!loading)
+		{
+			//display revealed answers
+			this.display.revealAnswer();
 
-		Numbas.store.answerRevealed(this);
+			this.display.showScore();
+
+			Numbas.store.answerRevealed(this);
+		}
 
 		Numbas.exam.updateScore();
 	},
@@ -525,6 +548,12 @@ function Part( xml, path, question, parentPart, loading )
 
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
+
+	if(loading)
+	{
+		var pobj = Numbas.store.loadPart(this);
+		this.answered = pobj.answered;
+	}
 }
 
 Part.prototype = {
@@ -644,24 +673,28 @@ Part.prototype = {
 	validate: function() { return true; },
 
 	//reveal the steps
-	showSteps: function()
+	showSteps: function(loading)
 	{
 		this.stepsShown = true;
 		this.calculateScore();
-		this.display.showSteps();
-		this.question.updateScore();
+		if(!loading)
+		{
+			this.display.showSteps();
+			this.question.updateScore();
+		}
 	},
 
 	//reveal the correct answer
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
-		this.display.revealAnswer();
+		if(!loading)
+			this.display.revealAnswer();
 		this.answered = true;
 		this.credit = 0;
-		this.showSteps();
+		this.showSteps(loading);
 		for(var i=0; i<this.steps.length; i++ )
 		{
-			this.steps[i].revealAnswer();
+			this.steps[i].revealAnswer(loading);
 		}
 	}
 
@@ -1252,9 +1285,9 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//restore saved choices
 	if(loading)
 	{
-		for( i=0;i<this.numAnswers;i++)
+		for( i=0;i<this.settings.numAnswers;i++)
 		{
-			for(j=0;j<this.numChoices;j++)
+			for(j=0;j<this.settings.numChoices;j++)
 			{
 				if( (flipped && (pobj.ticks[j][i])) || (!flipped && pobj.ticks[i][j]) )
 					this.ticks[i][j]=true;
@@ -1383,10 +1416,10 @@ GapFillPart.prototype =
 {
 	stagedAnswer: 'something',
 
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
 		for(var i=0; i<this.gaps.length; i++)
-			this.gaps[i].revealAnswer();
+			this.gaps[i].revealAnswer(loading);
 	},
 
 	submit: function()

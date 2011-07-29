@@ -17,6 +17,11 @@ Copyright 2011 Newcastle University
 
 Numbas.queueScript('scripts/scorm-storage.js',[],function() {
 Numbas.storage = {
+	clean: function()
+	{
+		for(x in localStorage) delete localStorage[x];
+	},
+
 	startLMS: function()
 	//tries to initialise the SCORM API
 	//if it isn't present, a pretend LMS is started
@@ -103,7 +108,7 @@ SCORMStorage.prototype = {
 	//make an id string corresponding to a part
 	getPartId: function(part)
 	{
-		return 'q'+part.question.number+part.path;
+		return this.getQuestionId(part.question)+part.path;
 	},
 
 	//
@@ -257,6 +262,13 @@ SCORMStorage.prototype = {
 			revealed: question.revealed,
 			variables: question.variables
 		};
+
+		qobj.variables = {}
+		for(var name in question.variables)
+		{
+			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.variables[name]});
+		}
+
 		qobj.parts = [];
 		for(var i=0;i<question.parts.length;i++)
 		{
@@ -268,7 +280,9 @@ SCORMStorage.prototype = {
 
 	partSuspendData: function(part)
 	{
-		var pobj = {};
+		var pobj = {
+			answered: part.answered
+		};
 		switch(part.type)
 		{
 		case 'gapfill':
@@ -284,6 +298,12 @@ SCORMStorage.prototype = {
 			pobj.shuffleChoices = part.shuffleChoices;
 			pobj.shuffleAnswers = part.shuffleAnswers;
 			break;
+		}
+
+		pobj.steps = [];
+		for(var i=0;i<part.steps.length;i++)
+		{
+			pobj.steps.push(this.partSuspendData(part.steps[i]));
 		}
 
 		return pobj;
@@ -303,8 +323,9 @@ SCORMStorage.prototype = {
 	//get suspended exam info
 	//returns an object 
 	//{ timeRemaining, questionSubset, start, score }
-	load: function() 
+	load: function(exam) 
 	{
+		this.e = exam;
 		var eobj = this.getSuspendData();
 		
 		var location = this.get('location');
@@ -330,13 +351,19 @@ SCORMStorage.prototype = {
 		var id = this.getQuestionId(question);
 		var index = this.questionIndices[id];
 
+		var variables = {};
+		for(var name in qobj.variables)
+		{
+			variables[name] = Numbas.jme.evaluate(qobj.variables[name]);
+		}
+
 		return {score: parseInt(this.get('objectives.'+index+'.score.raw'),10),
 				visited: qobj.visited,
 				answered: qobj.answered,
 				submitted: qobj.submitted,
 				adviceDisplayed: qobj.adviceDisplayed,
 				revealed: qobj.revealed,
-				variables: qobj.variables
+				variables: variables
 		};
 	},
 
@@ -344,14 +371,30 @@ SCORMStorage.prototype = {
 	loadPart: function(part)
 	{
 		var eobj = this.getSuspendData();
-		var pobj = eobj.questions[part.question.number].parts[part.partNumber];
+		var pobj = eobj.questions[part.question.number];
+		var re = /(p|g|s)(\d+)/g;
+		while(m = re.exec(part.path))
+		{
+			var i = parseInt(m[2]);
+			switch(m[1])
+			{
+			case 'p':
+				pobj = pobj.parts[i];
+				break;
+			case 'g':
+				pobj = pobj.gaps[i];
+				break;
+			case 's':
+				pobj = pobj.steps[i];
+				break;
+			}
+		}
 		var id = this.getPartId( part );
 		var index = this.partIndices[id];
 
-		if(part.gapNumber!==undefined)
-			pobj = pobj.gaps[part.gapNumber];
-
-		var out = {};
+		var out = {
+			answered: pobj.answered
+		};
 
 		var sc = this;
 		function get(key) { return sc.get('interactions.'+index+'.'+key); };
@@ -366,16 +409,16 @@ SCORMStorage.prototype = {
 			out.studentAnswer = answer || '';
 			break;
 		case 'numberentry':
-			out.studentAnswer = parseFloat(answer) || 0;
+			out.studentAnswer = parseFloat(answer) || '';
 			break;
 		case '1_n_2':
 		case 'm_n_2':
 		case 'm_n_x':
 			var ticks = [];
-			for(var i=0;i<part.numAnswers;i++)
+			for(var i=0;i<part.settings.numAnswers;i++)
 			{
 				ticks.push([]);
-				for(var j=0;j<part.numChoices;j++)
+				for(var j=0;j<part.settings.numChoices;j++)
 				{
 					ticks[i].push(false);
 				}
@@ -481,9 +524,9 @@ SCORMStorage.prototype = {
 		case 'm_n_2':
 		case 'm_n_x':
 			var s='';
-			for(var i=0;i<part.numAnswers;i++)
+			for(var i=0;i<part.settings.numAnswers;i++)
 			{
-				for( var j=0;j<part.numChoices;j++ )
+				for( var j=0;j<part.settings.numChoices;j++ )
 				{
 					if(part.ticks[i][j])
 					{

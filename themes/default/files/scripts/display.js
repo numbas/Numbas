@@ -17,6 +17,8 @@ Copyright 2011 Newcastle University
 //Display code
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
+	
+	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
 var display = Numbas.display = {
 	// update progress bar when loading
@@ -75,10 +77,9 @@ var display = Numbas.display = {
 	{
 		try
 		{
-			var queue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
-			queue.Push(['Typeset',MathJax.Hub,elem]);
+			MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
 			if(callback)
-				queue.Push(callback);
+				MathJaxQueue.Push(callback);
 		}
 		catch(e)
 		{
@@ -372,6 +373,9 @@ display.QuestionDisplay.prototype =
 		//display advice if appropriate
 		this.showAdvice();
 
+		// make mathjax process the question text (render the maths)
+		Numbas.display.typeset($('#questionDisplay')[0],this.postTypesetF);
+
 		//show/hide reveal answer button
 		if(exam.allowRevealAnswer)
 			$('#revealBtn').show();
@@ -384,9 +388,6 @@ display.QuestionDisplay.prototype =
 		//display score if appropriate
 		this.showScore();
 		
-		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset(null,this.postTypesetF);
-
 		//make input elements report when they get and lose focus
 		$('input')	.blur( function(e) { Numbas.display.inInput = false; } )
 					.focus( function(e) { Numbas.display.inInput = true; } );
@@ -445,6 +446,11 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').attr('disabled','true');
 		//hide reveal button
 		$('#revealBtn').hide();
+
+		for(var i=0;i<this.q.parts.length;i++)
+		{
+			this.q.parts[i].display.revealAnswer();
+		}
 	},
 
 	//display question score and answer state

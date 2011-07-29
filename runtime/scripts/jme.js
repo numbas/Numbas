@@ -728,6 +728,8 @@ var jme = Numbas.jme = {
 					}
 				}
 				expr = jme.subvars(expr,variables,functions);
+				if(expr.search(/\[/)>=0)
+					throw(expr);
 				var tex = jme.display.exprToLaTeX(expr,simplificationSettings);
 				out += ' '+tex+' ';
 				break;
