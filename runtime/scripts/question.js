@@ -1069,7 +1069,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.stagedAnswer = [pobj.studentAnswer];
+		this.stagedAnswer = [pobj.studentAnswer+''];
 		if(this.answered)
 			this.submit();
 	}
