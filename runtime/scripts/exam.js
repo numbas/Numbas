@@ -151,6 +151,7 @@ Exam.prototype = {
 	//restore previously started exam from storage
 	load: function()
 	{
+		this.loading = true;
 		var suspendData = Numbas.store.load(this);	//get saved info from storage
 
 		job(function() {
@@ -172,14 +173,7 @@ Exam.prototype = {
 		job(function() {
 			if(suspendData.location!==undefined)
 				this.changeQuestion(suspendData.location);
-
-		/*	for(i=0; i<this.numQuestions; i++)
-			{
-				if(this.questionList[i].visited)
-					this.questionList[i].display.showScore();
-			}
-			this.display.showScore();
-		*/
+			this.loading = false;
 		},this);
 	},
 

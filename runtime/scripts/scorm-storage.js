@@ -238,6 +238,8 @@ SCORMStorage.prototype = {
 	setSuspendData: function()
 	{
 		var exam = this.e;
+		if(exam.loading)
+			return;
 		var eobj = 
 		{
 			timeRemaining: exam.timeRemaining,
@@ -543,12 +545,15 @@ SCORMStorage.prototype = {
 			this.set(prepath+'learner_response',s);
 			break;
 		}
+		this.setSuspendData();
 	},
 
 	//called when current question is submitted
 	submitQuestion: function(question) 
 	{
 		var exam = Numbas.exam;
+		if(exam.loading)
+			return;
 		//update total exam score and so on
 		this.set('score.raw',exam.score);
 		this.set('score.scaled',exam.score/exam.mark);

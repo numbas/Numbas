@@ -38,6 +38,9 @@ var Question = Numbas.Question = function( xml, number, loading )
 	job(function()
 	{
 		q.followVariables = {};
+		
+		//initialise display - get question HTML, make menu item, etc.
+		q.display = new Numbas.display.QuestionDisplay(q);
 
 		//load parts
 		q.parts=new Array();
@@ -66,9 +69,6 @@ var Question = Numbas.Question = function( xml, number, loading )
 			else if(q.adviceDisplayed)
 				q.getAdvice(true);
 		}
-		
-		//initialise display - get question HTML, make menu item, etc.
-		q.display = new Numbas.display.QuestionDisplay(q);
 	});
 
 }
@@ -792,7 +792,9 @@ function JMEPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer];
+		if(this.answered)
+			this.submit();
 	}
 }
 
@@ -981,7 +983,9 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer];
+		if(this.answered)
+			this.submit();
 	}
 }
 PatternMatchPart.prototype = {
@@ -1065,7 +1069,9 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer];
+		if(this.answered)
+			this.submit();
 	}
 }
 NumberEntryPart.prototype =
@@ -1290,9 +1296,12 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 			for(j=0;j<this.settings.numChoices;j++)
 			{
 				if( (flipped && (pobj.ticks[j][i])) || (!flipped && pobj.ticks[i][j]) )
-					this.ticks[i][j]=true;
+					this.stagedAnswer[i][j]=true;
+					this.stagedAnswer[i][j]=true;
 			}
 		}
+		if(this.answered)
+			this.submit();
 	}
 
 	//if this part has a minimum number of answers more than zero, then
@@ -1411,6 +1420,12 @@ function GapFillPart(xml, path, question, parentPart, loading)
 	}
 
 	this.display = new Numbas.display.GapFillPartDisplay(this);
+
+	if(loading)
+	{
+		if(this.answered)
+			this.submit();
+	}
 }	
 GapFillPart.prototype =
 {
