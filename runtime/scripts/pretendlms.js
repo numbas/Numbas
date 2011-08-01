@@ -1735,7 +1735,7 @@ Interaction.prototype = {
 			return true;
 
 		case 'numeric':
-			var numeric_re = /^(-?\d+(?:\.\d+)?)?:(-?\d+(?:\.\d+)?)?$/;
+			var numeric_re = /^(-?\d+(?:\.\d+)?)?(:(-?\d+(?:\.\d+)?)?)?$/;
 
 			if(!numeric_re.test(value))
 			{
