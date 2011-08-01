@@ -226,6 +226,11 @@ SCORMStorage.prototype = {
 			}
 			break;
 		}
+
+		for(var i=0;i<p.steps.length;i++)
+		{
+			this.initPart(p.steps[i]);
+		}
 	},
 
 
