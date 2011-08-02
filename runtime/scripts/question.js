@@ -815,7 +815,15 @@ JMEPart.prototype =
 		}
 		this.studentAnswer = this.answerList[0];
 
-		var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+		try
+		{
+			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+		}
+		catch(e)
+		{
+			this.credit = 0;
+			return;
+		}
 
 		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
