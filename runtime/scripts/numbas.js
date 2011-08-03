@@ -95,14 +95,16 @@ function init()
 			job(exam.load,exam);
 			job(Numbas.display.init);
 
-			if(exam.currentQuestion !== undefined)
-			{
-				job(exam.display.showInfoPage,exam.display,'suspend');
-			}
-			else
-			{
-				job(exam.display.showInfoPage,exam.display,'frontpage');
-			}
+			job(function() {
+				if(exam.currentQuestion !== undefined)
+				{
+					job(exam.display.showInfoPage,exam.display,'suspend');
+				}
+				else
+				{
+					job(exam.display.showInfoPage,exam.display,'frontpage');
+				}
+			});
 
 			break;
 		}
