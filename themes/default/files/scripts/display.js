@@ -263,7 +263,6 @@ display.ExamDisplay.prototype =
 			$('#infoDisplay').getTransform(Numbas.xml.templates.suspend,exam.xmlize());
 		
 			$('#resumeBtn').click( Numbas.controls.resumeExam );
-			$('#endBtn').click( Numbas.controls.endExam );
 
 			break;
 		
@@ -327,6 +326,9 @@ display.QuestionDisplay.prototype =
 
 		//hides the info page, if visible
 		$('#infoDisplay').hide();
+
+		//display the question container - content and nav bars
+		$('#questionContainer').show();
 		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
@@ -335,9 +337,6 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
 		$('#revealBtn').show().removeAttr('disabled');
-
-		//display the question container - content and nav bars
-		$('#questionContainer').show();
 
 		//display question's html
 		
@@ -1144,12 +1143,13 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 		var lis = div.find('li');
 		var divHeight = div.height();
+		var maxI = 0;
 		for(var j=0;j<lis.length;j++)
 		{
 			var y = lis.eq(j).position().top - listOffset;
 			if(listHeight - y < divHeight)
 			{
-				var maxI = j;
+				maxI = j;
 				break;
 			}
 		}
