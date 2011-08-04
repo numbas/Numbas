@@ -1,0 +1,15 @@
+{
+	name: test simplification
+	questions: [
+		{
+			name: testing
+			variables: {
+			a: "random(1..5)"
+			b: "random(1..5)"
+			c: "random(1..5)"
+			}
+			statement:""" $\simplify{{a}^2-{b}^2}$ and $\simplify[1111110111111111]{{c}*{a}*{b}}$"""
+		
+		}
+		]
+}

@@ -1,0 +1,17 @@
+{
+	name: Follow-through test
+
+	questions: [
+		{
+			name: Trapping algebraic entry
+			statement: """
+				Try this out
+			"""
+
+			parts: [
+				{type: numberentry, prompt: "Answer is $15$", answer: 15, marks: 1}
+				{type: jme, prompt: "Answer is $x$ plus answer to first part", answer: "x+$p0", marks: 1}
+			]
+		}
+	]
+}

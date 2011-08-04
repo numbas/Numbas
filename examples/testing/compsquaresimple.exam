@@ -1,0 +1,58 @@
+{
+	name: compsquaresimple
+	questions: [
+				{
+			name: compsquaresimp
+			variables: {a: "s1*random(1.0..9.5#0.5)"
+				b:"random(1..20)-a^2"		
+				s1: "random(1,-1)"		
+				}	
+			statement: """Put the following quadratic in the form $(x+a)^2+b$ for suitable numbers $a$ and $b$ . 
+
+Note that you have to input these numbers exactly as decimals or fractions."""
+			
+			parts: [
+				{
+					type: GapFill
+					prompt: """$\simplify{x^2+{2*a}x+ {a^2+b}} = \phantom{{}}$ [[0]]. """   
+					gaps: [ 
+						{type: jme
+						answer:"(x+{a})^2+{b}"
+						answersimplification: "1111111111111110"
+						notallowed:{strings:[x^2,x*x,x x,x),(x,( x,x(,x*(],message: """input in the form $(x+a)^2+b$"""}
+						musthave: {strings:[(,),^],message:"""input in the form $(x+a)^2+b$"""}
+						checkingtype: absdiff
+						checkingaccuracy:0.0001
+						marks: 2}
+						
+					]
+					steps: [
+						{
+							type: information
+							prompt: """Given the quadratic $\simplify{x^2+{2*a}x+ {a^2+b}}$ we complete the square by:
+							
+							1. Halving the coefficient of $x$ gives $\var{a}$ 
+							
+							2. Work out $\simplify[1111111111111110]{p(x)=(x+{a})^2=x^2+{2*a}x+{a^2}}$.
+							   This gives the first two terms of $q(x)$.
+							   
+							3. But the constant term $\simplify[1111111111111110]{{a^2}}$ in $p(x)$ is not the same as in $q(x)$  - so we need to adjust by adding on a suitable constant to $p(x)$."""
+						}	 
+					]
+					stepspenalty: 1
+				}	
+			]
+			advice: 
+					"""Given the quadratic $\simplify{x^2+{2*a}x+ {a^2+b}}$ we complete the square by:
+					
+					1. Halving the coefficient of $x$ gives $\var{a}$ 
+							
+					   2. Work out $\simplify[1111111111111110]{p(x)=(x+{a})^2=x^2+{2*a}x+{a^2}}$.
+							   This gives the first two terms of $q(x)$.
+							   
+							3. But the constant term $\simplify[1111111111111110]{{a^2}}$ in $p(x)$ is not the same as in $q(x)$, so we need to adjust by adding on $\simplify[1111110111111110]{{a^2+b}-{a^2}={b}}$ to $p(x)$.
+							Hence we get \[q(x) = \simplify[1111111111111110]{p(x)+{b} = (x+{a})^2+{b}}=\simplify[1111111111111110]{ (x+{a})^2+{b}}\]
+"""
+		}
+		]
+}

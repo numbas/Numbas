@@ -1,0 +1,29 @@
+{
+	name: Testround
+	questions: [
+		
+		{
+			name: Hullo2
+			variables: {
+				est: "precround(1.234567,5)"
+				}	
+			statement: "Input to 5 decimal places 1.234567 
+			"
+			parts: [
+				{
+					type: GapFill
+					prompt: """Input here [[0]]		(input your answer to 5 decimal places).
+					"""
+					gaps: [ 
+						{type: numberentry, answer: "{est}", marks: 0.25}
+											]
+				}	
+			]
+			advice: 
+					""" 
+					"""
+		}
+
+	]		
+}		
+		

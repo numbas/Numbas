@@ -1,0 +1,79 @@
+{
+	name: solvelogs1
+	questions: [
+		{
+			name: Question 12
+			variables: {
+				a: "random(2..5)"
+				c: "b-random(1..20)"
+				d: "random(1,2)"
+				b: "random(1..20)"	
+				}	
+			statement: """Solve the following equation for $x$. 
+
+Input your answer as a fraction or an integer as appropriate and NOT as a decimal."""
+			parts: [
+				{
+					type: GapFill
+					prompt: 
+			"""\[\log_{\var{a}}(x+\var{b})- \log_{\var{a}}(\simplify{(x+{c})})=\var{d}\]
+			
+			$x=\;$ [[0]]	
+			
+			If you want help in solving the equation, click on Steps.  If you do so then you will lose 1 marks and so the question will be marked out of 1 marks rather than 2 marks..
+
+Remember: Input all numbers as fractions or integers and not as decimals.
+
+"""
+					gaps: [ 
+						{type: jme
+						answer:"{b-c*a^d}/{a^d-1}"
+						answersimplification: "1111111111111111"
+						notallowed: {strings: [.],message:"""Input as a fraction or an integer, not as a decimal"""}
+						checkingtype: absdiff
+						checkingaccuracy:0.0001
+						marks: 2}
+					]
+					steps: [
+						{
+							type: information
+							prompt: """
+							Two rules for logs should be used:
+								1. $\log_a(b)-\log_a(c)=\log_a(b/c)$
+								2. $\log_a(p)=r \Rightarrow p=a^r$
+							So use 1. followed by 2. to get an equation for $x$.
+							"""
+						}	 
+					]
+					stepspenalty: 1
+				}	
+				
+			]
+			advice: 
+"""
+We use the following two rules for logs :
+								1. $\log_a(b)-\log_a(c)=\log_a(b/c)$
+								2. $\log_a(p)=r \Rightarrow p=a^r$
+								
+Using 1. we get
+ \[\log_{\var{a}}(x+\var{b})- \log_{\var{a}}(\simplify{(x+{c})})=\log_{\var{a}}\left(\simplify{(x+{b})/(x+{c})}\right)\]
+ So the equation to solve becomes:
+ \[\log_{\var{a}}\left(\simplify{(x+{b})/(x+{c})}\right)=\var{d}\]
+ and using 2 this gives:
+ \[ \begin{eqnarray}
+ \simplify{(x+{b})/(x+{c})}&=&{\var{a}}^{\var{d}}\Rightarrow\\
+ x+\var{b}&=&{\var{a}}^{\var{d}}(x+\var{c})=\simplify{{a^d}}(x+\var{c})\Rightarrow\\
+ \simplify{{a^d-1}x}&=&\simplify[1111110111111111]{{b}-{c}*{a^d}={b-c*a^d}}\Rightarrow\\
+ x&=&\simplify{{b-c*a^d}/{a^d-1}}
+ \end{eqnarray}
+ \]
+ We should check that this solution gives positive values for $x+\var{b}$ and $\simplify{x+{c}}$ as otherwise the logs are not defined.
+Substituting this value for $x$ into $\log_{\var{a}}(x+\var{b})$ we get $\log_{\var{a}}(\simplify{({b-c
+}{a^d})/{a^d-1}})$ so OK.
+For $\log_{\var{a}}(\simplify{x+{c}})$ we get on substituting for $x$, $\log_{\var{a}}(\simplify{({b-c
+})/{a^d-1}})$ so OK.
+Hence the value we found for $x$ is a solution to the original equation.
+"""
+		}
+	]
+}

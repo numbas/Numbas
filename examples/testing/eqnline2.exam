@@ -1,0 +1,62 @@
+{ name: Equation Line 1
+
+  questions: [
+	{
+			name: Question 14
+			statement: """
+				Find the equation of the straight line which has gradient $\simplify{{b-d}/{a-c}}$ and also passes through the point $(\var{a},\var{b})$.
+				Input your answer in the form $mx+c$ for suitable values of $m$ and $c$. 
+				Input $m$ and $c$ as fractions or integers as appropriate and not as decimals.
+				You use the help given by Steps - you will not lose any marks.
+			"""
+			variables: {
+				a: "random(1,-1)*random(1..4)"
+				b1: "random(-9..9)"
+				b: "if(b1=d,b1+random(1..3),b1)"	
+				c: "a+Random(1..4)*s1"
+				d: "random(-9..9)"
+				s1: "random(-1,1)"
+				f:"(b-d)/(a-c)"
+				g:"(b*c-a*d)/(c-a)"
+			}
+
+			parts: [
+				{
+					type: gapfill
+					prompt: """
+						$y=\;\phantom{{}}$[[0]]
+					"""
+
+					gaps: [
+						{ type: jme, answer: "({b-d}/{a-c})x+{b*c-a*d}/{c-a}", marks: 2,answersimplification: "1111110111111111" }
+					]
+					steps: [
+						{
+							type: information
+							prompt: """
+								The equation of the line is of the form $y=mx+c$. 
+								You are given the gradient $m$ in and you can calculate the constant term by noting that $y=\var{b}$ when $x=\var{a}$.
+
+							"""
+						}
+					]
+				}
+			]
+			
+			advice: """
+				The equation of the line is of the form $y=mx+c$. 
+				You are given the gradient $m= \simplify{{b-d}/{a-c}}$ and we can calculate the constant term $c$ by noting that $y=\var{b}$ when $x=\var{a}$. 
+				Using this we get:
+				\[
+				\begin{eqnarray}
+				\var{b}&=&\simplify[1111110111111111]{({f}){a}+c} \Rightarrow\\
+				c&=&\simplify[1111110111111111]{{b}-{f}{a}={g}}
+				\end{eqnarray}
+				\]
+
+Hence the equation of the line is  
+				\[y = \simplify[1111110111111111]{{f}x+{g}}\]
+			"""
+		}
+		]
+}

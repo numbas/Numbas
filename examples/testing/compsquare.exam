@@ -1,0 +1,111 @@
+{
+	name: compsquare
+	questions: [
+		{
+			name: Question 9
+			variables: {
+				a: random(2..5)
+				c1: "switch(f=1, random(1..6),f=2,random(1,3,5,7,9),f=3,random(1,2,5,7,8),f=4,random(1,3,5,7,9),f=6, random(1,5,7,8),f=9,random(1,2,4,7,8),f=8,random(1,3,5,7,9),f=12,random(1,5,7),random(1,3,5,7))"				
+				c: "c1*s3"
+				d1:"switch(f=1, random(1..6),f=2,random(1,3,5,7,9),f=3,random(1,2,5,7,8),f=4,random(1,3,5,7,9),f=6, random(1,5,7,8),f=9,random(1,2,4,7,8),f=8,random(1,3,5,7,9),f=12,random(1,5,7),random(1,3,5,7))"
+				d: "if(d1=-b*c/a, max(d1+1,random(1..5))*s3,d1*s3)"
+				s3:"random(1,-1)"
+				b: "random(1..4)"				
+				f: "a*b"
+				s1: "random(1,-1)"
+				s2:"random(1,-1)"
+				n1: "b*c+a*d"
+				n2: "b*c-a*d"
+				n3: "2*a*b"
+				n5: "a*b"
+				n4: "abs(n2)"
+				disc: "(b*c+a*d)^2-4*a*b*c*d"
+				rdis:"switch(disc=0,'The discriminant is '+ 0+' and so we get two repeated roots in this case.',disc<0, 'There are no real roots.','The roots exist and are distinct. ')"
+				rep: "switch(disc=0,'repeated', ' ')"
+				
+				}	
+			statement: """Complete the square for the quadratic expression $q(x)$ by writing it in the form \[a(x+b)^2+c\]  for numbers $a,\;b$ and $c$
+			Using that find both roots of the equation $q(x)=0$"""
+			parts: [
+				{
+					type: GapFill
+					prompt: 
+			"""\[q(x)=\simplify[1111110111111111]{{a*b} * x ^ 2 + ( {-b*c-a * d}) * x + {c * d}}\]
+			Now write $q(x) = a(x+b)^2+c$ for fractions or integers $a$, $b$, $c$.
+			$q(x)=\;$ [[0]]	
+			
+			You can get more information on completing the square by clicking on Steps. You will lose 1 mark if you do so.
+
+Remember: Input all numbers as fractions or integers and not as decimals.
+
+"""
+					gaps: [ 
+						{type: jme
+						answer:"{n5}(x+({-n1}/{2*n5}))^2-{n2^2}/{4*n5}"
+						answersimplification: "1111110111111111"
+						notallowed: {strings: [.,x*x, x x, x(, x (,)x,) x],message:"""write in the form $a(x+b)^2+c$ without using decimals"""}
+						musthave: {strings: [(,),^], message: """write in the form $a(x+b)^2+c$"""}
+						checkingtype: absdiff
+						checkingaccuracy:0.0001
+						marks: 2}
+					]
+					steps: [
+						{
+							type: information
+							prompt: """Given the quadratic $\simplify{{a*b} * x ^ 2 + ( {-b*c-a * d}) * x + {c * d}}$ we complete the square by:
+							
+							1. Writing the quadratic as \[\var{n5}\left(\simplify{x^2+({-n1}/{n5})x+ {c*d}/{n5}}\right)\]
+							
+							2. Then complete the square for the quadratic \[\simplify{x^2+({-n1}/{n5})x+ {c*d}/{n5}}\]
+							
+							3. Remember to multiply by {n5} the expression found from the second stage.
+							"""
+						}	 
+					]
+					stepspenalty: 1
+				}	
+				{type: GapFill
+				prompt: """Now find the roots of the quadratic equation $\simplify{{a*b}x^2+{-n1}x+{c*d}}=0$
+				The least root is $x=\;$ [[0]].    The greatest root is $x=\;$ [[1]]"""
+				gaps: [ 
+						{type: jme
+						answer:"{n1-n4}/{2*a*b}"
+						answersimplification: "1111111111111111"
+						notallowed:{strings:[.],message: input numbers as fractions or integers not as a decimals}
+						checkingtype: absdiff
+						checkingaccuracy:0.0001
+						marks: 1}
+						{type: jme
+						answer:"{n1+n4}/{2*a*b}"
+						answersimplification: "1111111111111111"
+						notallowed:{strings:[.],message: input numbers as fractions or integers not as a decimals}
+						checkingtype: absdiff
+						checkingaccuracy:0.0001
+						marks: 1}
+					]
+					}
+				
+			]
+			advice: 
+"""Completing the square for the quadratic expression $\simplify{{a*b}x^2+{-n1}x+{c*d}}$
+\[\begin{eqnarray}
+\simplify{{a*b}x^2+{-n1}x+{c*d}}&=&\var{n5}\left(\simplify{x^2+({-n1}/{a*b})x+ {c*d}/{a*b}}\right)\\
+&=&\var{n5}\left(\left(\simplify{x+({-n1}/{2*a*b})}\right)^2+ \simplify{{c*d}/{a*b}-({-n1}/({2*a*b}))^2}\right)\\
+&=&\var{n5}\left(\left(\simplify{x+({-n1}/{2*a*b})}\right)^2 -\simplify{ {n2^2}/{4*(a*b)^2}}\right)\\
+&=&\var{n5}\left(\simplify{x+({-n1}/{2*n5})}\right)^2 -\simplify{ {n2^2}/{4*(n5)}}
+\end{eqnarray}
+\]
+So to solve $\simplify{{a*b}x^2+{-n1}x+{c*d}}=0$ we have to solve:
+\[\begin{eqnarray}
+\left(\simplify{x+({-n1}/{2*a*b})}\right)^2&\phantom{{}}& -\simplify{ {n2^2}/{4*(a*b)^2}}=0\Rightarrow\\
+\left(\simplify{x+({-n1}/{2*a*b})}\right)^2&\phantom{{}}&=\simplify{ {n2^2}/{4*(a*b)^2}=({abs(n2)}/{2*a*b})^2}
+\end{eqnarray}\]
+So we get the two {rep} solutions:
+\[\begin{eqnarray}
+\simplify{x+({-n1}/{2*a*b})}&=&\simplify{{abs(n2)}/{2*a*b}} \Rightarrow  &x& = \simplify{({abs(n2)+n1}/{2*a*b})}\\
+\simplify{x+({-n1}/{2*a*b})}&=&\simplify{-({abs(n2)}/{2*a*b})} \Rightarrow &x& = \simplify{({n1-abs(n2)}/{2*a*b})}
+\end{eqnarray}\]
+"""
+		}
+	]
+}

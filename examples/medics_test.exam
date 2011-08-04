@@ -1,0 +1,843 @@
+{
+	name: Medics Test
+	duration: 0
+	percentpass: 0
+	shufflequestions: false
+	
+	navigation: {
+		reverse: true
+		browse: true
+	}
+	
+	questions: [
+		{
+			name: SI and Non-SI Units
+			statement: "The *International System of Units* (abbreviated *SI* from the French language name _Systeme international d'unites_) is the modern form of the metric system. It is the world's most widely used system of units, both in everyday commerce and in science.
+			          
+					   Note: The litre is not an SI unit, but it is accepted for use with the SI, however it is not the standard SI unit of volume. (A litre is defined as a special name for a cubic decimetre (1 L = 1 dm$^3$). 1 L = 0.001 m$^3$ (exactly). The original metric system used litres as a base unit.)"
+			
+			parts: [
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *length*:"
+					choices: [
+						"L"
+						"cm"
+						"ft"
+						"km"
+						"in"
+						"m"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *volume*:"
+					choices: [
+						"cm$^3$"
+						"kg"
+						"pint"
+						"L"
+						"V"
+						"m$^3$"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *amount of substance*:"
+					choices: [
+						"L"
+						"Mo"
+						"gm"
+						"kg"
+						"molar"
+						"mole"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *time*:"
+					choices: [
+						"parsec"
+						"hour"
+						"min"
+						"sec"
+						"t"
+						"s"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *mass*:"
+					choices: [
+						"mg"
+						"lb"
+						"tonne"
+						"gm"
+						"K"
+						"kg"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *electrical current*:"
+					choices: [
+						"c"
+						"i"
+						"V"
+						"am"
+						"r"
+						"A"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: "Choose the base SI unit for *temperature*:"
+					choices: [
+						"Ce"
+						"F"
+						"C"
+						"T"
+						"k"
+						"K"
+					]
+					matrix: [0,0,0,0,0,1]
+					shufflechoices: true
+					displaycolumns: 6
+				}
+			]
+		}
+		{
+			name: Exponential Value Units
+			statement: """
+			
+				Given the units displayed, choose the correct exponential value in terms of the base unit.
+			
+			"""
+			
+			variables: {
+				x1: "random('m','g')"
+				x2: "if(x1='m',random('M','g'),random('M','m'))"
+				x3: "if(x1='m' and x2='g','L',if(x1='g' and x2='m','L','g'))"
+				x4: "random('m','L','g','byte')"
+				x5: "if(x4='m',random('L','g'),if(x4='L',random('m','g'),random('L','m')))"
+				x6: "if(x4='m' and x5='g','L',if(x4='m' and x5='L','g',if(x4='g' and x5='L','m',if(x4='g' and x5='m','L',if(x4='L' and x5='g','m','g')))))"
+			}
+			
+			parts: [
+				{
+					type: m_n_x
+					marks: 6
+					
+					choices: [
+						"M{x1}"
+						"n{x2}"
+						"c{x3}"
+						"m{x4}"
+						"p{x5}"
+						"$\mu${x6}"
+					]
+					
+					answers: [
+						"$1 \times 10^1$"
+						"$1 \times 10^2$"
+						"$1 \times 10^3$"
+						"$1 \times 10^6$"
+						"$1 \times 10^{-1}$"
+						"$1 \times 10^{-2}$"
+						"$1 \times 10^{-3}$"
+						"$1 \times 10^{-6}$"
+						"$1 \times 10^{-9}$"
+						"$1 \times 10^{-12}$"
+						"$1 \times 10^{-15}$"
+					]
+					
+					shufflechoices: true
+					shuffleanswers: true
+					matrix: [[0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,1,0,0,0,0],[0,0,0,0,0,0,0,0,0,1,0],[0,0,0,0,0,0,0,1,0,0,0,0]]
+				}	
+			]
+		}
+		{
+			name: Conversions
+			statement: """
+			
+				Some rules of the SI system:
+				
+				* A data value is written as a number, separated from its unit by a single space e.g. $3$ g and not $3$g.
+					
+				* No spaces are left between a prefix and the base unit to which it refers e.g. $3$ Mg and not $3$ M g.
+						
+				* Symbols for base units are never written as plurals e.g. $420$ cm and not $420$ cms.
+							
+				* Full stops are not used within SI units e.g. $420$ cm and not $420$ c.m.
+							
+				* The decimal point is shown as a full stop, on the line (or often above the line) e.g. $42.3$ cm.
+						
+				* Commas are not used to show thousands, millions etc (spaces are used instead) e.g. $12$ $000$ cm and not $12,000$ cm.
+							
+				* Note that many European countries use a comma instead of a decimal point.
+							
+			"""
+			
+			variables: {
+				y1: "random(1010..4600#10)"
+				y2: "random(150..990#10)"
+				y3: "random(1.5..9.5#0.1)"
+				y4: "random(-6,-5,-4,-3)"
+			}
+			
+			parts: [
+				{
+					type: gapfill
+					prompt: """
+						Convert ALL of the following to the unit specified and express the final answers in exponential notation i.e. in the form $a \times 10^b$ for suitable $a$ and $b$.
+						
+						If the answer is $1.1 \times 10^3$ you input 1.1 in the first box and 10^3 in the second box.
+						
+						If the answer is $1.1 \times 10^{-3}$ then you input 10^(-3) in the second box, including the brackets.
+						
+						You can click on steps to reveal more information on scientific notation and exponential numbers.
+						
+						h4. 1.
+						
+						$\var{y1}$ $\mu$mol = [[0]] $\phantom{{}}\times\phantom{{}}$ [[1]] nmol,
+						
+						$\var{y1}$ $\mu$mol = [[2]] $\phantom{{}}\times\phantom{{}}$ [[3]] mol.
+						
+						h4. 2.
+						
+						$\var{y2}$ cm = [[4]] $\phantom{{}}\times\phantom{{}}$ [[5]] mm,
+			
+						$\var{y2}$ cm = [[6]] $\phantom{{}}\times\phantom{{}}$ [[7]] m.
+								
+						h4. 3.
+						
+						$\var{y3} \times 10^{\var{y4}}$ = [[8]] $\phantom{{}}\times\phantom{{}}$ [[9]] ng,
+						
+						$\var{y3} \times 10^{\var{y4}}$ = [[10]] $\phantom{{}}\times\phantom{{}}$ [[11]] g.
+						
+					"""
+					
+					gaps: [
+						{ type: numberentry, answer: "{y1}/1000", marks: 1 }
+						{ type: jme, answer: "10^6", marks: 1, answersimplification: "" }
+						{ type: numberentry, answer: "{y1}/1000", marks: 1 }
+						{ type: jme, answer: "10^(-3)", marks: 1, answersimplification: "" }
+						{ type: numberentry, answer: "{y2}/100", marks: 1 }
+						{ type: jme, answer: "10^3", marks: 1, answersimplification: "" }
+						{ type: numberentry, answer: "{y2}/1000", marks: 1 }
+						{ type: jme, answer: "10^0", marks: 1, answersimplification: "" }
+						{ type: numberentry, answer: "{y3}", marks: 1 }
+						{ type: jme, answer: "10^{y4 + 6}", marks: 1, answersimplification: "" }
+						{ type: numberentry, answer: "{y3}", marks: 1 }
+						{ type: jme, answer: "10^{y4 - 3}", marks: 1, answersimplification: "" }
+					]
+					
+					steps: [
+						{ 
+							type: information
+							prompt: """
+							
+							*Scientific Notation and Exponential Numbers.*
+
+							Exponential notation is an alternative method of expressing numbers. 	
+
+							Exponential numbers take the form $a^n$, where $a$ is multiplied by itself $n$ times. A simple example is $8 = 2^3 = 2 \times 2 \times 2$.
+
+							In exponential notation, $a$ is termed the _base_ while $n$ is termed the _power_ or _exponent_ or _index_.
+
+							Scientific notation is a specific example of exponential numbers, $10$ is almost always used as the base number. Thus $10^3$ means $10 \times 10 \times 10 = 1000$, while $10^{-3}$ is the notation for the reciprocal of $10^3$ namely $\frac{1}{1000}$.
+
+							The other name for this mathematical format is _standard form_ (you may have come across this in GCSE mathematics).
+
+							Expressing numbers which are not whole powers of $10$ in scientific notation often requires a further multiplier, termed the _coefficient_ ($C$), giving the expression in the form $C \times 10^n$.
+
+							For example, $5 \times 10^3$ is the scientific notation for the number $5000$, while $3.25 \times 10^2$ is the scientific notation for the number $325$.
+
+							Similarly, $3.25 \times 10^{-2}$ would represent $3.25 \times \frac{1}{100} = 0.0325$.
+
+							It is scientific convention to express all such numbers as coefficients between $1$ and $10$ followed by an appropriate power of $10$ (for example, as $3.25 \times 10^{-2}$, not as $0.325 \times 10^{-1}$, nor as $32.5 \times 10^{-3}$).
+
+							You should use such scientific notation whenever you express very large or very small numbers - it is a recognized form of "shorthand", and it avoids spurious accuracy (e.g. writing $9$ $000$ $000$  suggests that the number is exactly $9$ million, in contrast to $9.0 \times 10^6$ which suggests no such accuracy beyond the first decimal place of the coefficient).
+							
+						"""
+						}
+					]
+				}				
+			]
+			
+			advice: """ 
+				h3. 1.
+
+					To convert from $\mu$mol to nmol and then convert to mol units.
+					
+					a) First convert $\var{y1}$ $\mu$mol to exponential notation:
+						$\var{y1}$ $\mu$mol = $\var{y1}/1000 \times 10^3$ $\mu$mol.
+					
+					b) Now write $1$ $\mu$mol in terms of nmol units:
+						$1$ $\mu$mol = $10^3$ nmol.
+					
+					c) Putting these together gives:
+						$\var{y1}$ $\mu$mol = $\var{y1}/1000 \times 10^6$ nmol.
+
+					To convert from nmol to mol units we have to multiply by $10^{-9}$ and so we get $\var{y1}/1000 \times 10^{-3}$ mol.
+					
+				h3. 2.
+				
+					To convert from cm to mm and then convert to m units.
+					
+					a) First convert $\var{y2}$ cm to exponential notation:
+						$\var{y2}$ cm = $\var{y2}/100 \times 10^2$ cm.
+						
+					b) Now write $1$ cm in terms of mm units:
+						$1$ cm = $10^1$ = $10$ mm.
+						
+					c) Putting these together gives:
+						$\var{y2}$ cm = $\var{y2}/100 \times 10^3$ mm.
+						
+					To convert from mm to m units we have to multiply by $10^{-3}$ and so we get $5.5 \times 10^0$ m.
+					
+				h3. 3.
+				
+					$\var{y3} \times 10^{\var{y4}}$ mg is already in exponential notation and to convert to ng units we use the fact that $1$ mg = $10^6$ ng.
+					
+					So, $\var{y3} \times 10^{\var{y4}}$ mg = $\var{y3} \times 10^{\var{y4 +6}}$ ng.
+					
+					To convert from ng to grammes (g) we have to multiply by $10^{-9}$ to get $\var{y3} \times 10^{\var{y4 - 3}}$ g.
+					
+			"""
+		}
+		{
+			name: Prepare Solutions
+			statement: """
+				
+				How would you prepare the following solutions?
+			
+				Note that you can click on steps for each of the following questions. There you can follow a sequence of steps to get the answer. 
+					
+				However, you should be able (perhaps after practice) to answer these questions without using steps.
+					
+			"""
+					
+			variables: {
+				z1: "random(100..500#5)"
+				z2: "random(3..9#1)"
+				z3: "random(5..100#5)"
+				z4: "random(0.1..3#0.1)"
+				z5: "random(0.1..0.9#0.1)"
+				z6: "random(5..100#5)"
+				z7: "precround(z1*z2/1000, 3)"
+				z8: "precround(z3*z4*74.5/1000, 3)"
+				z9: "precround(z5*z6*180.2/1000, 3)"
+			}
+					
+			parts: [
+				{
+					type: gapfill
+					prompt: """
+					
+						$\var{z1}$ ml of a sucrose solution at a concentration $\var{z2}$ g/l.
+						
+						Grammes of sucrose needed = [[0]] g in $\var{z1}$ ml (to $3$ decimal places).
+						
+					"""
+					
+					gaps: [
+						{ type: numberentry, minvalue: "{z7 - 0.001}", maxvalue: "{z7 + 0.001}", marks: 1 }
+					]
+					
+					steps: [
+						{
+							type: gapfill
+							prompt: """
+								In this question you are given the required volume of the solution, $\var{z1}$ ml, and the required concentration, $\var{z2}$ g/l. You need to calculate how many grammes are required per $\var{z1}$ ml to achieve this concentration. The first step is to express the required concentration in ml by dividing by $1000$.
+								
+								$\var{z2}$ g/l = [[0]] g/ml (enter as an exact decimal).
+								
+								Now multiply this by $\var{z1}$ to get:
+								
+								$\var{z2}$ g/l = [[1]] g/$\var{z1}$ ml (answer to $3$ decimal places).
+								
+								This gives you the answer you want.
+								
+							"""
+							gaps: [
+								{ type: numberentry, answer: "{z2}/1000", marks: 0 }
+								{ type: numberentry, minvalue: "{z7 - 0.001}", maxvalue: "{z7 + 0.001}", marks: 0 }
+							]		
+						}
+					]
+				}
+				{
+					type: gapfill
+					prompt: """
+						
+						$\var{z3}$ ml of a $\var{z4}$ molar (can be expressed as mol/l or mol l$^-1$, but usually expressed as M) solution of KCl (relative molecular mass $74.5$) in water.
+						
+						Grammes of KCl needed = [[0]] g in $\var{z3}$ ml (answer to $3$ decimal places).
+						
+					"""
+					
+					gaps: [
+						{ type: numberentry, minvalue: "{z8 - 0.001}", maxvalue: "{z8 + 0.001}", marks: 1 }
+					]
+
+					steps: [
+						{
+							type: gapfill
+							prompt: """
+								First step is to express $1$ mol of KCl in grammes
+
+								$1$ mol solution = $74.5$ g KCl in $1$ L (enter as an exact decimal).
+
+								Next express $\var{z4}$ mol as grammes of KCl by multiplying by $\var{z4}$.
+
+								$\var{z4}$ mol solution = [[0]] g KCl in $1$ L (enter as an exact decimal).
+
+								Since $1$ L = $1000$ ml we can find the number of grammes in $1$ ml by dividing by $1000$.
+
+								$\var{z4}$ mol solution = [[1]] g KCl in $1$ ml (enter as an exact decimal).
+
+								Next to get the number of grammes needed for $\var{z4}$ mol of KCl solution in $\var{z3}$ ml you multiply this result by $\var{z3}$ mol.
+
+								$\var{z4}$ mol solution = [[2]] g KCl in $\var{z3}$ ml (answer to $3$ decimal places).
+
+								This gives the answer you want.
+								
+							"""
+							
+							gaps: [
+								{ type: numberentry, answer: "{z4*74.5}", marks: 0 }
+								{ type: numberentry, answer: "{z4*74.5/1000}", marks: 0 }
+								{ type: numberentry, minvalue: "{z8 - 0.001}", maxvalue: "{z8 + 0.001}", marks: 0 } 
+							]
+						}
+					]
+				}
+				{
+					type: gapfill
+					prompt: """
+						
+						$\var{z5}$ L of $\var{z6}$ millimolar (mmol/l, or mmol$^-1$ or mM) glucose (relative molecular mass $180.2$) in water.
+						
+						Grammes of glucose needed = [[0]] g in $\var{z5}$ L (answer to $3$ decimal places).
+						
+					"""
+					
+					gaps: [
+						{ type: numberentry, minvalue: "{z9 - 0.001}", maxvalue: "{z9 + 0.001}", marks: 1 }
+					]
+					
+					steps: [
+						{
+							type: gapfill
+							prompt: """
+							
+								First step is to express $1$ mol of glucose in grammes $1$ in L.
+
+								$1$ mol solution = $180.2$ g glucose in $1$ L (enter as an exact decimal).
+
+								Hence in $\var{z5}$ litres you obtain the number of grammes of glucose to get $1$ mol by multiplying this by $\var{z5}$.
+
+								$1$ mol solution = [[0]] g glucose in $\var{z5}$ L (enter as an exact decimal).
+
+								Now you convert to mmol by dividing by $1000$.
+
+								$1$ mmol solution = [[1]] g glucose in $\var{z5}$ L (enter as an exact decimal).
+
+								So for $\var{z6}$ mmol we multiply by $\var{z6}$ to get the required number of grammes of glucose in $\var{z5}$ L.
+
+								$\var{z6}$ mmol solution = [[2]] g glucose in $\var{z5}$ L (answer to $3$ decimal places)
+
+								This gives the answer you want.
+								
+							"""
+							
+							gaps: [
+								{ type: numberentry, answer: "{z5*180.2}", marks: 0 }
+								{ type: numberentry, answer: "{z5*180.2/1000}", marks: 0 }
+								{ type: numberentry, minvalue: "{z9 - 0.001}", maxvalue: "{z9 + 0.001}", marks: 0 }
+							]
+						}
+					]
+				}
+			]	
+				
+			advice: """
+				These question test your ability to convert between different SI units.
+				
+				h3. Part 1:
+				
+			    Here, you are given the required volume of the solution, $\var{z1}$ ml, and the required concentration, 3 g/l. You need to calculate how many grams are required per $\var{z1}$ ml. Therefore,
+
+				$\var{z2}$ g/l = $\frac{\var{z2} \text{g}}{1000 \text{ml}} = \frac{\var{z2} \text{g}}{\var{1000/z1} \times \var{z1} \text{ml}} = \var{z1*z2/1000}$ g in $\var{z1}$ ml.
+
+				h3. Part 2:
+				
+				This can be calculated in a similar way.
+				
+				$1$ mol solution = $74.5$ KCl in $1$ L.
+				
+				$\var{z4}$ mol solution = $\var{z4} \times 74.5$ g KCl in $1$ L.
+				
+				$\var{z4}$ mol solution = $\var{z4*74.5}$ g KCl in $1000$ ml.
+				
+				$\var{z4}$ mol solution = $\frac{\var{z4*74.5}}{1000}$ g KCl in $1$ ml.
+				
+				$\var{z4}$ mol solution = $\var{z3} \times \var{z4*74.5/1000}$ g KCl in $\var{z3}$ ml.
+				
+				$\var{z4}$ mol solution = $\var{z8}$ g KCl in $\var{z3}$ ml.
+				
+				h3. Part 3:
+				
+				Again, this is similar.
+				
+				$1$ mol solution = $180.2$ g glucose in $1$ L.
+				
+				$1$ mol solution = $\var{z5} \times 180.2$ g glucose in $\var{z5}$ L.
+				
+				$1000$ mmol solution = $\var{z5} \times 180.2$ g glucose in $\var{z5}$ L.
+				
+				$1$ mmol solution = $\frac{\var{z5} \times 180.2}{1000}$ g glucose in $\var{z5}$ L.
+				
+				$\var{z6}$ mmol solution = $\frac{\var{z6} \times \var{z5} \times 180.2}{1000}$ g glucose in $\var{z5}$ L.
+				
+				$\var{z6}$ mmol solution = $\var{z9}$ g glucose in $\var{z5}$ L.
+				
+			"""
+		}
+		{
+			name: Dilutions and Concentrations
+			statement: """
+				
+				*Introduction*
+
+				There are many occasions when you have to work out what happens when solutions are diluted (or concentrated). The following relationship is useful, if you are diluting (or concentrating), it tells you that the mass remains constant:
+				
+				\[\begin{eqnarray}
+				C_1V_1 = C_2V_2
+				\end{eqnarray}\]
+												
+				where you are diluting or concentrating volume $V_1$ with initial concentration $C_1$ to get volume $V_2$ with new concentration $C_2$.
+
+				The important aspect to consider is either (a) the ratio of initial and final volumes used (this is often termed the 'dilution factor') or (b) the ratio of initial and final concentrations required (depending upon the calculation).
+
+			"""
+				
+			variables: {
+				w1: "random(5..20#1)"
+				w2: "random(3..8#1)"
+				w3: "(w1*w2)"
+				w4: "random(2..10#1)"
+				w5: "(w1*w4)"
+				w6: "random(0.15..0.95#0.05)"
+				w7: "random('glucose', 'surcose', 'NaCl')"
+				w8: "random(2..9#1)"
+				w9: "random(3..12#1)"
+				w10: "precround((0.5*w8*w9),1)"
+				w11: "random(5..10#1)"
+				w12: "(w10 + w11 + random(5..10#1))"
+				w13: "(w6*w8/(w9+w8))"
+				w14: "precround(w10*w13/(w10+w11), 4)"
+				w15: "precround(w10*w13/w12, 4)"
+			}
+				
+			parts: [
+				{
+					type: gapfill
+					prompt: """
+
+						h4. (i)
+						
+						If $\var{w1}$ ml of an aqueous sample is added to $\var{w3}$ ml of diluent (diluting liquid), what is the diluting factor?
+						
+						Dilution factor = $1$ in [[0]].
+
+						h4. (ii)
+						
+						If instead the $\var{w1}$ ml of an aqueous sample is made up to $\var{w5}$ ml by adding diluent, what is the diluting factor?
+						
+						Dilution factor = $1$ in [[1]].
+						
+					"""
+			
+					gaps: [
+						{ type: numberentry, answer: "{w2 + 1}", marks: 1 }
+						{ type: numberentry, answer: "{w4}", marks: 1 }
+					]
+					
+					steps: [
+						{	type: information
+							prompt: """
+							
+								For part (i) you take the ratio of the final volume to the initial volume to get the dilution factor. The initial volume is $\var{w1}$ ml. The final volume is $\var{w1} + \var{w3} = \var{w1 + w3}$ ml and so you can calculate the dilution factor.
+								
+								In part (ii) the final volume is now $\var{w5}$ ml and you use the same formula for the dilution factor.
+								
+							"""
+						}
+					]
+				}
+				{
+					type: gapfill
+					prompt: """
+					
+						You have a solution containing $\var{w6}$ mol/l {w7} and you add $\var{w8}$ ml of this solution to $\var{w9}$ ml of sterile water in a test tube. 
+						
+						h4. (i)
+						
+						After mixing these liquids together, you take $\var{w10}$ ml and add it to a conical flask containing $\var{w11}$ ml of sterile water. What would be the final concentration of {w7} (in mol/l) in the conical flask at the end of the procedure?
+
+						Final concentration = [[0]] mol/l (to $4$ decimal places).
+
+						h4. (ii)
+						
+						Alternatively, after mixing the liquids you take $\var{w10}$ ml as before and make it up to $\var{w12}$ ml in a conical flask by adding sterile water. What now would be the final concentration of {w7} (in mol/l) in the conical flask at the end of this procedure?
+
+						Final concentration = [[1]] mol/l (to $4$ decimal places).
+						
+					"""
+					
+					gaps: [
+						{ type: numberentry, minvalue: "{w14 - 0.0001}", maxvalue: "{w14 + 0.0001}", marks: 1 }
+						{ type: numberentry, minvalue: "{w15 - 0.0001}", maxvalue: "{w15 + 0.0001}", marks: 1 }
+					]	
+					
+					steps: [
+						{	type: information
+							prompt: """
+								(i) You do this in two steps. Note that initially you have $C_1 = \var{w6}$ mol/l and $V_1 = \var{w8}$ ml.
+								
+								Step 1. Find the concentration $C_2$ after adding the $\var{w8}$ ml of the solution to the $\var{w9}$ ml of sterile water so that $V_2 = \var{w8} + \var{w9} = \var{w8 + w9}$ ml. You use $C_1V_1 = C_2V_2$ to find $C_2$.
+
+								Step 2. Now you take $V_3 = \var{w10}$ ml at the concentration $C_2$ you have just found and add it to $\var{w11}$ ml of sterile water to get a volume $V_4 = \var{w10} + \var{w11} = \var{w10 + w11}$ ml. If $C_4$ is the concentration of this volume you use $C_2V_3 = C_4V_4$ and so find $C_4$ mol/l which is the final concentration required.
+
+								(ii) As in part (i) above, you split the problem into two steps. You get the same concentration at the end of Step 1. The only difference is that now $V_4 = \var{w12}$ but you use the same formula $C_2V_3 = C_4V_4$ to find $C_4$.
+								
+							"""
+						}
+					]
+				}
+			]
+			
+			advice: """
+
+				h4. a)
+				
+				For part (i) you take the ratio of the final volume to the initial volume to get the dilution factor.
+				
+				The initial volume is $\var{w1}$ ml.
+				
+				The final volume is $\var{w1} + \var{w3} = \var{w1 + w3}$ ml and so the dilution factor is $\frac{\var{w1 + w3}}{\var{w1}} = \var{(w1+w3)/w1}$.
+								
+				In part (ii) the final volume is now $\var{w5}$ ml and you use the same formula for the dilution factor giving $\frac{\var{w5}}{\var{w1}} = \var{w5/w1}$.
+				
+				h4. b)
+				
+				(i) You do this in two steps. Note that initially you have $C_1 = \var{w6}$ mol/l and $V_1 = \var{w8}$ ml.
+								
+				Step 1. Find the concentration $C_2$ after adding the $\var{w8}$ ml of the solution to the $\var{w9}$ ml of sterile water so that $V_2 = \var{w8} + \var{w9} = \var{w8 + w9}$ ml. 
+				
+				This is given by $C_2 = \frac{\var{w8} \times \var{w6}}{\var{w8} + \var{w9}} = \frac{\var{w8*w6}}{\var{w8+w9}} = \var{w14}$ mol/l to $4$ decimal places.
+
+				Step 2. Now you take $V_3 = \var{w10}$ ml at the concentration $C_2 = \var{(w8*w6)/(w8+w9)}$ mol/l and add it to $\var{w11}$ ml of sterile water to get a volume $V_4 = \var{w10} + \var{w11} = \var{w10 + w11}$ ml. If $C_4$ is the concentration of this volume you use $C_2V_3 = C_4V_4$ and so $C_4 = \frac{C_2V_3}{V_4} = \frac{\var{(w8*w6)/(w8+w9)} \times \var{w10}}{\var{w10 + w11}} = \var{(w8*w6*w10)/((w8+w9)*(w10+w11))}$ mol/l which is the final concentration required.
+
+				(ii) As in part a) above, you split the problem into two steps. You get the same concentration at the end of Step 1. The only difference is that now $V_4 = \var{w12}$ and so in this case $C_4 = \frac{C_2V_3}{V_4} = \frac{\var{(w8*w6)/(w8+w9)} \times \var{w10}}{\var{w12}} = \var{w15}$ mol/l
+				
+			"""
+			
+		}
+		{
+			name: More Concentrations
+			statement: """
+				The following questions ask you to express concentration in different ways.
+				
+			"""
+			variables: {
+				u1: "random(5..50#5)"
+				u2: "random(2..7#1)"
+				u3: "random(5..25#5)"
+				u4: "precround(1000*u8,2)"
+				u5: "precround(58.44*u2, 3)"				
+				u6: "precround(10*u3*0.789/46.06, 3)"
+				u7: "precround(1/342.3, 4)"
+				u8: "precround(30*u7, 3)"	
+			}
+			
+			parts: [
+				{	type: gapfill
+					prompt: """
+						What is $\var{u1}$ gl$^{-1}$ sucrose expressed in terms of molarity (relative molecular mass of sucrose is $342.3$)?
+						
+						[[0]] mmol (to $2$ decimal places)
+					"""
+					
+					gaps: [
+						{ type: numberentry, answer: "{u4}", marks: 1 }
+					]
+					
+					steps: [
+						{	type: gapfill
+							prompt: """
+								You must express gl$^{-1}$ in terms of molarity.  You are given that the relative molecular mass of sucrose is $342.3$, and this tells us that $342.3$ gl$^{-1}$ sucrose = $1$ mol.
+
+								In order to calculate $\var{u1}$ gl$^{-1}$ sucrose in terms of molarity we first find it for $1$ gl$^{-1}$ and then for $\var{u1}$ gl$^{-1}$ by multiplying by $\var{u1}$ and following that convert to mmol.
+
+								$1$ gl$^{-1}$ sucrose = [[0]] mol (to $4$ decimal places) and then
+
+								$\var{u1}$ gl$^{-1}$ sucrose = [[1]] mol (to $3$ decimal places). 
+
+								Now convert to mmol by multiplying by $1000$:
+
+								$\var{u1}$ gl$^{-1}$ sucrose = [[2]] mmol (to $2$ decimal places).
+							"""	
+							
+							gaps: [
+								{ type: numberentry, answer: "{u7}", marks: 0 }
+								{ type: numberentry, answer: "{u8}", marks: 0 }
+								{ type: numberentry, answer: "{u4}", marks: 0 }
+							]
+						}
+					]
+				}
+				{	type: gapfill
+					prompt: """
+						What is $\var{u2}$ M NaCl expressed in gl$^{-1}$ (relative molecular mass of NaCl is $58.44$)?
+						
+						[[0]] gl$^{-1}$ (to $3$ decimal places)
+					"""
+					
+					gaps: [
+						{ type: numberentry, answer: "{u5}", marks: 1 }
+					]
+					
+					steps: [
+						{	type: gapfill
+							prompt: """
+								You must express M in terms of gl$^{-1}$.  
+
+								Using the information given on the relative mass of NaCl you can write:
+
+								$1$ M NaCl = [[0]] gl$^{-1}$.  
+
+								Now multiply by $\var{u2}$ to get the result:
+
+								$\var{u2}$ M NaCl = [[1]] gl$^{-1}$ (to $3$ decimal places).
+							"""
+							
+							gaps: [
+								{ type: numberentry, answer: "58.44", marks: 0 }
+								{ type: numberentry, answer: "{u5}", marks: 0 }
+							]
+						}
+					]
+				}
+				{	type: gapfill
+					prompt: """
+						What is $\var{u3}$ %w/v ethanol expressed in terms of molarity (realtive molecular mass of ethanol is $46.06$ and density of ethanol at $25^{\circ}C$ is $0.789$ gml$^{-1}$)?
+						
+						[[0]] mmol (to $3$ decimal places)
+					"""
+					
+					gaps: [
+						{ type: numberentry, answer: "{u6}", marks: 1 }
+					]
+					
+					steps: [
+						{	type: gapfill
+							prompt: """
+								You must express %w/v in terms of molarity.  The strategy is to find the mass of ethanol in one litre given the concentration and then to convert this into mmol units.
+
+								Fill in the following:
+
+								$\var{u3}$% ethanol contains [[0]] ml ethanol per litre.
+
+								This volume of ethanol has weight [[1]] g (here use the density $0.789$ gml$^{-1}$).
+
+								Now $46.06$ g of ethanol in $1$ L = $1$ mol.
+
+								Hence:
+
+								$1$ g of ethanol in $1$ L = $\frac{1}{46.06}$ mol
+
+								Multiply by $\var{10*u3*0.789}$, the weight of the ethanol in $1$ litre, to find the concentration in terms of mol and then by $100$ to get the answer in molarity, mmol.
+
+							"""
+							
+							gaps: [
+								{ type: numberentry, answer: "{10*u3}", marks: 0 }
+								{ type: numberentry, answer: "{10*u3*0.789}", marks: 0 }
+							]
+						}
+					]
+				}
+			]
+			
+			advice: """			
+			
+				h4. a)
+				
+				Here, you must express gl$^{-1}$ in terms of molarity. Therefore:
+
+				$342.3$ gl$^{-1}$ sucrose = $1$ mol.
+				
+				$1$ gl$^{-1}$ sucrose = $\frac{1}{342.3}$ mol.
+				
+				$\var{u1}$ gl$^{-1}$ sucrose = $\frac{\var{u1}}{342.3}$ mol.
+				
+				$\var{u1}$ gl$^{-1}$ sucrose = $\frac{\var{100*u1}}{342.3}$ mmol.
+				
+				$\var{u1}$ gl$^{-1}$ sucrose = $\var{u4}$ mmol to $2$ decimal places.
+				
+				h4. b)
+				
+				Here, you must express M in terms of gl$^{-1}$. Therefore:
+				
+				$1$ M NaCl = $58.44$ gl$^{-1}$.
+				
+				$\var{u2}$ M NaCl = $\var{u2} \times 58.44$ gl$^{-1}$.
+				
+				$\var{u2}$ M NaCl = $\var{u2*58.44}$ gl$^{-1}$ to $3$ decimal places.
+				
+				h4. c)
+				
+				Here, you must express %w/v in terms of molarity. Therefore:
+				
+				$\var{u3}$% ethanol contains $\var{u3}$ ml ethanol per $100$ ml solution, or $100$ ml ethanol in a litre.
+
+				$\var{10*u3}$ ml ethanol weighs $\var{10*u3} \times 0.789$ g = $\var{10*u3*0.789}$ g.
+				
+				$46.06$ g of ethanol in $1$ L = $1$ mol.
+				
+				$1$ g of ethanol in $1$ L = $\frac{1}{46.06}$ mol.
+				
+				$\var{10*u3*0.789}$ g of ethanol in $1$ L = $\frac{\var{10*u3*0.789}}{46.06}$ mol = $\var{u6}$ mol to $3$ decimal places.
+			"""	
+		}	
+	]
+}
