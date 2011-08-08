@@ -863,7 +863,8 @@ var simplificationRules = jme.display.simplificationRules = {
 
 	sqrtSquare: [
 		['sqrt(x^2)',[],'x'],
-		['sqrt(x)^2',[],'x']
+		['sqrt(x)^2',[],'x'],
+		['sqrt(n)',['n isa "number"','isint(sqrt(n))'],'eval(sqrt(n))']
 	],
 
 	trig: [
