@@ -80,7 +80,8 @@
   sub-parts guiding the student to the final answer.  Initially, the steps are
   hidden from the student.  Clicking on the \codebutton{Show steps} button will
   reveal the steps.  You can also decide whether marks should be deducted if
-  the student views the steps.
+  the student views the steps and can award partial marks if students give correct
+  answers within steps.
 
   \subsection{Creating steps}
   You define steps using the \codeprop{steps} property of the \codeobject{part}
@@ -94,5 +95,53 @@
   non-zero value.  This number is then subtracted from the maximum number of
   marks available for the part.  Note that this procedure can result in
   negative marking for parts --- see \S\ref{sec:part_marks}.
+  
+  \subsection{Steps examples}
+  Below are two different examples of how steps could be used.
+  
+  \subsubsection{Informative steps}
+  In this example viewing steps deducts no marks as it is simply a reminder.
+  %
+  \begin{Verbatim}
+  {
+    type: numberentry
+    marks: 1
+    prompt: "Convert $\var{a}$ km into metres."
+    answer: "{a*1000}"
+    steps: [
+      {
+        type: information
+        prompt: "Recall: $1$ km = $1000$ m."
+      }
+    ]		
+  } 
+  \end{Verbatim}
+  
+  \subsubsection{Sub-part steps}  
+  In this example viewing steps deducts 1 mark from the student's total. If the
+  student answers steps correctly but does not enter the correct answer overall
+  they are given partial marks.  However, if the student gives the correct
+  overall answer the answer to steps is not considered when awarding marks. 
+  %
+  \begin{Verbatim}
+  {
+     type: numberentry
+     marks: 2
+     prompt: "Find $x$ where $15 + 3x = 42$."
+     answer: "9"
+     steps: [
+       {
+         type: gapfill
+  	     prompt: "Rearrange the equation and the solve for $x$. 
+  	              So, $3x =$ [[0]]. You should now be able to enter
+  	              your final answer."'
+  	     gaps: [
+  	       { type: numberentry, answer: "27", marks: 0.5 }
+  	     ]
+       }
+     ]
+     stepspenalty: 1
+  }				
+  \end{Verbatim}	
   
 \end{chapter}
