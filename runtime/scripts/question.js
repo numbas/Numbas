@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/question.js',['display','jme','jme-mathml','xml','util','scorm-storage'],function() {
+Numbas.queueScript('scripts/question.js',['schedule','display','jme','jme-variables','xml','util','scorm-storage'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -31,12 +31,34 @@ var Question = Numbas.Question = function( xml, number, loading )
 	q.originalXML = q.xml;
 	q.number = number;
 
-	this.makeVariables(loading);
+	//get question's name
+	tryGetAttribute(q,'.','name');
 
-	this.subvars();
+	job(function() {
+		q.functions = Numbas.jme.variables.makeFunctions(q.xml);
+	});
+
+	job(function() {
+		if(loading)
+		{
+			q.variables = {};
+			var qobj = Numbas.store.loadQuestion(q);
+			for(var x in qobj.variables)
+			{
+				q.variables[x] = qobj.variables[x];
+			}
+		}
+		else
+		{
+			q.variables = Numbas.jme.variables.makeVariables(q.xml,q.functions);
+		}
+	});
+
+	job(this.subvars,this);
 
 	job(function()
 	{
+		q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
 		q.followVariables = {};
 
 		//load parts
@@ -76,165 +98,6 @@ Question.prototype =
 
 	display: undefined,		//display code
 
-	makeVariables: function(loading)
-	{
-		var q = this;
-		var myfunctions = q.functions = {};
-		var tmpFunctions = [];
-		job(function()
-		{
-			//get question's name
-			tryGetAttribute(q,'.','name');
-
-			if(loading)
-				var qobj = Numbas.store.loadQuestion(q);
-
-			q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
-
-			//work out functions
-			var functionNodes = q.xml.selectNodes('functions/function');
-
-			//first pass: get function names and types
-			for(var i=0; i<functionNodes.length; i++)
-			{
-				var name = functionNodes[i].getAttribute('name').toLowerCase();
-
-				var definition = functionNodes[i].getAttribute('definition');
-
-				var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-				var outcons = Numbas.jme.types[outtype];
-
-				var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-				var paramNames = [];
-				var intype = [];
-				for(var j=0; j<parameterNodes.length; j++)
-				{
-					var paramName = parameterNodes[j].getAttribute('name');
-					var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
-					paramNames.push(paramName);
-					var incons = Numbas.jme.types[paramType];
-					intype.push(incons);
-				}
-
-				var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
-				tmpfunc.definition = definition;
-				tmpfunc.paramNames = paramNames;
-
-				if(q.functions[name]===undefined)
-					q.functions[name] = [];
-				q.functions[name].push(tmpfunc);
-				tmpFunctions.push(tmpfunc);
-			}
-		});
-
-		job(function()
-		{
-			//second pass: compile functions
-			for(var i=0; i<tmpFunctions.length; i++)
-			{
-				tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,q.functions);
-
-				tmpFunctions[i].evaluate = function(args,variables,functions)
-				{
-					nvariables = Numbas.util.copyobj(variables);
-
-					for(var j=0;j<args.length;j++)
-					{
-						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
-					}
-					return jme.evaluate(this.tree,nvariables,functions);
-				}
-			}
-		});
-
-		job(function()
-		{
-			//evaluate question variables
-			q.variables = {};
-			if(loading)
-			{
-				for(var x in qobj.variables)
-				{
-					q.variables[x] = qobj.variables[x];
-				}
-			}
-			else
-			{
-				var variableNodes = q.xml.selectNodes('variables/variable');	//get variable definitions out of XML
-
-				//list of variable names to ignore because they don't make sense
-				var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
-
-				//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-				var todo = {};
-				for( var i=0; i<variableNodes.length; i++ )
-				{
-					var name = variableNodes[i].getAttribute('name').toLowerCase();
-					if(!ignoreVariables.contains(name))
-					{
-						var value = variableNodes[i].getAttribute('value');
-
-						var vars = [];
-						//get vars referred to in string definitions like "hi {name}"
-						/*
-						var stringvars = value.split(/{(\w+)}/g);
-						for(var j=1;j<stringvars.length;j+=2)
-						{
-							if(!vars.contains(stringvars[j]))
-								vars.push(stringvars[j].toLowerCase());
-						}
-						*/
-
-						var tree = jme.compile(value,q.functions);
-						vars = vars.merge(jme.findvars(tree));
-						todo[name]={
-							tree: tree,
-							vars: vars
-						};
-					}
-				}
-				function compute(name,todo,variables,path)
-				{
-					if(variables[name]!==undefined)
-						return;
-
-					if(path===undefined)
-						path=[];
-
-
-					if(path.contains(name))
-					{
-						alert("Circular variable reference in question "+name+' '+path);
-						return;
-					}
-
-					var v = todo[name];
-
-					if(v===undefined)
-						throw(new Error("Variable "+name+" not defined."));
-
-					//work out dependencies
-					for(var i=0;i<v.vars.length;i++)
-					{
-						var x=v.vars[i];
-						if(variables[x]===undefined)
-						{
-							var newpath = path.slice(0);
-							newpath.splice(0,0,name);
-							compute(x,todo,variables,newpath);
-						}
-					}
-
-					variables[name] = jme.evaluate(v.tree,variables,myfunctions);
-				}
-				for(var x in todo)
-				{
-					compute(x,todo,q.variables);
-				}
-			}
-
-		});
-	},
 
 	subvars: function()
 	{
@@ -245,26 +108,6 @@ Question.prototype =
 
 		job(function()
 		{
-			//convert mathml to string expressions
-			var mathsNodes = q.xml.selectNodes('descendant::math');
-			for( i=0; i<mathsNodes.length; i++ )
-			{
-				if(mathsNodes[i].selectNodes('*').length)
-				{
-					var text = jme.MathMLToJME(mathsNodes[i]);
-				}
-				else
-				{
-					var text = Numbas.xml.getTextContent(mathsNodes[i]);
-				}
-				for( var j=mathsNodes[i].childNodes.length-1; j>=0; j-- )
-				{
-					mathsNodes[i].removeChild( mathsNodes[i].childNodes[j] );
-				}
-				var stext = jme.subvars( text, q.variables, q.functions );
-				mathsNodes[i].appendChild( Numbas.xml.examXML.createTextNode(stext) );
-			}
-
 			//substitute variables into content nodes
 			var serializer = new XMLSerializer();
 			var parser = new DOMParser();
