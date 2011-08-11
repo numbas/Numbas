@@ -108,6 +108,9 @@ class Exam:
 				'timeout': Event('timeout','none',''),
 				'timedwarning': Event('timedwarning','none','')
 			}
+
+		self.functions = []
+		self.variables = []
 		
 		self.questions = []
 
@@ -149,6 +152,16 @@ class Exam:
 				tryLoad(advice,'type',exam,'adviceType')
 				tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
 
+		if 'functions' in data:
+			functions = data['functions']
+			for function in functions.keys():
+				exam.functions.append(Function.fromDATA(function,functions[function]))
+
+		if 'variables' in data:
+			variables = data['variables']
+			for variable in variables.keys():
+				exam.variables.append(Variable(variable,variables[variable]))
+
 		if 'questions' in data:
 			for question in data['questions']:
 				exam.questions.append(Question.fromDATA(question))
@@ -164,6 +177,8 @@ class Exam:
 								['feedback',
 									['advice']]
 							],
+							['functions'],
+							['variables'],
 							['questions']
 						])
 		root.attrib = {
@@ -194,6 +209,14 @@ class Exam:
 				'allowrevealanswer': str(self.allowrevealanswer)
 		}
 		feedback.find('advice').attrib = {'type':self.adviceType, 'threshold': str(self.adviceGlobalThreshold)}
+
+		variables = root.find('variables')
+		for variable in self.variables:
+			variables.append(variable.toxml())
+
+		functions = root.find('functions')
+		for function in self.functions:
+			functions.append(function.toxml())
 
 		questions = root.find('questions')
 		for q in self.questions:
@@ -282,9 +305,6 @@ class Question:
 		for variable in self.variables:
 			variables.append(variable.toxml())
 
-		functions = question.find('functions')
-		for function in self.functions:
-			functions.append(function.toxml())
 
 		return question
 

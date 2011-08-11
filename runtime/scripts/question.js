@@ -24,7 +24,7 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-var Question = Numbas.Question = function( xml, number, loading )
+var Question = Numbas.Question = function( xml, number, loading, gvariables, gfunctions )
 {
 	var q = this;
 	q.xml = xml;
@@ -36,6 +36,11 @@ var Question = Numbas.Question = function( xml, number, loading )
 
 	job(function() {
 		q.functions = Numbas.jme.variables.makeFunctions(q.xml);
+		for(var f in gfunctions)
+		{
+			if(!(f in q.functions))
+				q.functions[f] = gfunctions[f];
+		}
 	});
 
 	job(function() {
@@ -51,6 +56,11 @@ var Question = Numbas.Question = function( xml, number, loading )
 		else
 		{
 			q.variables = Numbas.jme.variables.makeVariables(q.xml,q.functions);
+		}
+		for(var v in gvariables)
+		{
+			if(!(v in q.variables))
+				q.variables[v] = gvariables[v];
 		}
 	});
 

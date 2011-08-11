@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question'],function() {
+Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables'],function() {
 
 
 // exam object keeps track of all info we need to know while exam is running
@@ -88,6 +88,10 @@ Exam.prototype = {
 	percentPass: 0,				//percentage student must achieve to pass
 	percentScore: 0,			//student's score as a percentage
 	passed: false,				//did student pass the exam?
+
+	//variables and functions
+	functions: {},				//functions available to every question
+	variables: {},				//variables available to every question
 	
 	//question selection
 	totalQuestions: 0,			//how many questions are available?
@@ -143,9 +147,13 @@ Exam.prototype = {
 	{
 		var job = Numbas.schedule.add;
 		var exam = this;
+		job(function() {
+			exam.functions = Numbas.jme.variables.makeFunctions(exam.xml);
+			exam.variables = Numbas.jme.variables.makeVariables(exam.xml,exam.functions);
+		});
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
-		job(Numbas.store.init,Numbas.store,exam);	//initialise storage
+		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
 	},
 
 	//restore previously started exam from storage
@@ -232,7 +240,7 @@ Exam.prototype = {
 		{
 			job(function(i)
 			{
-				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading );
+				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading, this.variables, this.functions );
 				this.questionList.push(question);
 			},this,i);
 		}

@@ -26,6 +26,8 @@ jme.variables = {
 
 		//work out functions
 		var functionNodes = xml.selectNodes('functions/function');
+		if(!functionNodes)
+			return {};
 
 		//first pass: get function names and types
 		for(var i=0; i<functionNodes.length; i++)
@@ -81,6 +83,8 @@ jme.variables = {
 	makeVariables: function(xml,functions)
 	{
 		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
+		if(!variableNodes)
+			return {};
 
 		//list of variable names to ignore because they don't make sense
 		var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
