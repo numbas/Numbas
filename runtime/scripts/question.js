@@ -815,7 +815,15 @@ JMEPart.prototype =
 		}
 		this.studentAnswer = this.answerList[0];
 
-		var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+		try
+		{
+			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+		}
+		catch(e)
+		{
+			this.credit = 0;
+			return;
+		}
 
 		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
@@ -934,15 +942,15 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
-	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('answer/correctanswer'));
+	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
 	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.variables);
 
-	var displayAnswerNode = this.xml.selectSingleNode('answer/displayanswer');
+	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
 		throw(new Error("Display answer is missing from a Pattern Match part ("+this.path+")"));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
-	tryGetAttribute(settings,'answer/case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
+	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
 
 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
 

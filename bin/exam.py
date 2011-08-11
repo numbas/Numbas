@@ -41,6 +41,7 @@ def tryLoad(data,attr,obj,altname=''):
 
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
 def makeContentNode(s,addHTML=False):
+	s=str(s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
 	s=textile(s)
 	#if addHTML:
@@ -524,9 +525,7 @@ class PatternMatchPart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['answer',
-							['displayanswer','correctanswer','case']
-						])
+		appendMany(part,['displayanswer','correctanswer','case'])
 		
 		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
 

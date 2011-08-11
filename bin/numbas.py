@@ -16,6 +16,8 @@
 
 
 import os
+import sys
+import traceback
 import shutil
 from optparse import OptionParser
 import examparser
@@ -124,16 +126,21 @@ def makeExam(options):
 			raise
 		except:
 			print("Failed to compile exam")
+			traceback.print_exc(file=sys.stdout)
 			raise
 	options.examXML = examXML
 	options.xmls = xml2js(options)
 
-
-	if options.zip:
-		compileToZip(options)
-	else:
-		compileToDir(options)
-
+	try:
+		if options.zip:
+			compileToZip(options)
+		else:
+			compileToDir(options)
+	except IOError as err:
+		print(err)
+	except:
+		traceback.print_exc(file=sys.stdout)
+		raise
 
 if __name__ == '__main__':
 

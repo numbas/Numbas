@@ -2,5 +2,7 @@
 *.log
 *.out
 *.toc
+*.blg
+*.bbl
 manual.pdf
 .vimrc

@@ -349,6 +349,9 @@ var jme = Numbas.jme = {
 			}
 		}
 
+		if(listmode.length>0)
+			throw(new Error("No matching right square bracket to end list"));
+
 		if(output.length>1)
 			throw(new Error("Expression can't be evaluated -- missing an operator."));
 

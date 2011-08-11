@@ -547,6 +547,8 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 			return texname+' \\left ( '+texArgs.join(', ')+' \\right )';
 		}
 		break;
+	default:
+		throw(new Error("Can't texify token type "+tok.type));
 	}
 }
 
@@ -861,7 +863,8 @@ var simplificationRules = jme.display.simplificationRules = {
 
 	sqrtSquare: [
 		['sqrt(x^2)',[],'x'],
-		['sqrt(x)^2',[],'x']
+		['sqrt(x)^2',[],'x'],
+		['sqrt(n)',['n isa "number"','isint(sqrt(n))'],'eval(sqrt(n))']
 	],
 
 	trig: [
