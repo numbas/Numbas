@@ -176,9 +176,7 @@ Question.prototype =
 			for( i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-				var settingsString = mathsNodes[i].getAttribute('simplificationsettings') || '111111111111111';
-				var simplificationSettings = jme.display.parseSimplificationSettings( settingsString );
-				var tex = jme.display.exprToLaTeX(expr, simplificationSettings);
+				var tex = jme.display.exprToLaTeX(expr);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}
 		});
@@ -521,9 +519,6 @@ Part.prototype = {
 
 };
 
-//simplification settings to use for correct answers - turn off collectNumbers, simplifyFractions and trig simplifications
-var answerSimplification = jme.display.parseSimplificationSettings('111111101111101');
-
 //Judged Mathematical Expression
 //student enters a string representing a mathematical expression, eg.
 //		'x^2+x+1'
@@ -540,7 +535,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
 
-	settings.answerSimplification = jme.display.parseSimplificationSettings(settings.answerSimplification);
+	settings.answerSimplification = Numbas.jme.display.collectRuleset(settings.answerSimplification,Numbas.exam.rulesets);
 
 	settings.correctAnswer = jme.display.simplifyExpression(
 		Numbas.xml.getTextContent(answerMathML).trim(),
@@ -625,7 +620,9 @@ JMEPart.prototype =
 	{
 		//string representing correct answer to question
 		correctAnswer: '',
-		answerSimplification: '1111111011111011',
+
+		//default simplification rules to use on correct answer
+		answerSimplification: ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
 		
 		//	checking type : SigFig (round answers to x sig figs)
 		//					RelDiff (compare ratio of student answer to correct answer)

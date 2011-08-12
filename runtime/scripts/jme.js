@@ -706,32 +706,8 @@ var jme = Numbas.jme = {
 				out += ' '+v+' ';
 				break;
 			case 'simplify': //a JME expression to be simplified
-				var simplificationSettings = jme.display.parseSimplificationSettings('');
-				if(/[01]+/.test(args))
-				{
-					simplificationSettings = jme.display.parseSimplificationSettings(args);
-				}
-				else if(args.length==0)
-				{
-					if(!argbrackets)
-					{
-						var simplificationNames = jme.display.simplificationNames;
-						for(var c=0;c<simplificationNames.length;c++)
-						{
-							simplificationSettings[simplificationNames[c]] = true;
-						}
-					}
-				}
-				else
-				{
-					args = args.split(',');
-					for(var c=0;c<args.length;c++)
-					{
-						simplificationSettings[args[c]]=true;
-					}
-				}
 				expr = jme.subvars(expr,variables,functions);
-				var tex = jme.display.exprToLaTeX(expr,simplificationSettings);
+				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;
 			}

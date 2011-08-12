@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables'],function() {
+Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables','jme-display'],function() {
 
 
 // exam object keeps track of all info we need to know while exam is running
@@ -67,6 +67,49 @@ var Exam = Numbas.Exam = function()
 	tryGetAttribute(this,feedbackPath+'/advice',['type','threshold'],['adviceType','adviceGlobalThreshold']);	
 
 	this.totalQuestions = xml.selectNodes('questions/question').length;
+
+
+	//rulesets
+	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
+	this.rulesets = Numbas.util.copyobj(Numbas.jme.display.simplificationRules);
+
+	var sets = {};
+	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
+	for( i=0; i<rulesetNodes.length; i++)
+	{
+		var name = rulesetNodes[i].getAttribute('name');
+		var set = [];
+
+		//get new rule definitions
+		defNodes = rulesetNodes[i].selectNodes('ruledef');
+		for( var j=0; j<defNodes.length; j++ )
+		{
+			var pattern = defNodes[j].getAttribute('pattern');
+			var result = defNodes[j].getAttribute('result');
+			var conditions = [];
+			var conditionNodes = defNodes[j].selectNodes('conditions/condition');
+			for(var k=0; k<conditionNodes.length; k++)
+			{
+				conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
+			}
+			var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+			set.push(rule);
+		}
+
+		//get included sets
+		var includeNodes = rulesetNodes[i].selectNodes('include');
+		for(var j=0; j<includeNodes.length; j++ )
+		{
+			set.push(includeNodes[j].getAttribute('name'));
+		}
+
+		sets[name] = this.rulesets[name] = set;
+	}
+
+	for(var name in sets)
+	{
+		this.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],this.rulesets);
+	}
 
 	//initialise display
 	this.display = new Numbas.display.ExamDisplay(this);

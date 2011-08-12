@@ -17,14 +17,19 @@ Copyright 2011 Newcastle University
 
 Numbas.queueScript('scripts/jme-display.js',['math','jme'],function() {
 	
-	var math = Numbas.math;
-
-	var jme = Numbas.jme;
+var math = Numbas.math;
+var jme = Numbas.jme;
 
 jme.display = {
 
+	//convert a JME expression to LaTeX
+	//settings can be anything accepted by jme.display.collectRuleset
+	//settings are also passed through to the texify function
 	exprToLaTeX: function(expr,settings)
 	{
+		if(!settings)
+			settings = [];
+
 		expr+='';
 		if(!expr.trim().length)
 			return '';
@@ -33,41 +38,27 @@ jme.display = {
 		return tex;
 	},
 
-	parseSimplificationSettings: function(settingsString)
+	//simplify a JME expression and return it as a JME string
+	simplifyExpression: function(expr,ruleset)
 	{
-		var settings = {};
-
-		for(var i=0; i<settingsString.length && i<simplificationNames.length; i++)
-		{
-			settings[ simplificationNames[i] ] = settingsString.substr(i,1)=='1';
-		}
-
-		return settings;
+		return treeToJME(jme.display.simplify(expr,ruleset));
 	},
 
-	simplifyExpression: function(expr,settings)
+	//simplify a JME expression and return it as a syntax tree
+	simplify: function(expr,ruleset)
 	{
-		return treeToJME(jme.display.simplify(expr,settings));
-	},
+		if(!ruleset)
+			ruleset = simplificationRules.basic;
+		ruleset = collectRuleset(ruleset,Numbas.exam.rulesets);
 
-	simplify: function(expr,settings)
-	{
 		try 
 		{
 			var exprTree = jme.compile(expr,{},true);
-			var rules = Numbas.util.copyarray(simplificationRules.basic);
-			for(var x in settings)
-			{
-				if(settings[x]==true && simplificationRules[x]!==undefined)
-				{
-					rules = rules.concat(simplificationRules[x]);
-				}
-			}
-			return jme.display.simplifyTree(exprTree,rules);
+			return jme.display.simplifyTree(exprTree,ruleset);
 		}
 		catch(e) 
 		{
-			e.message += '\nExpression was: '+expr;
+			e.message += '\nSimplifying expression failed. Expression was: '+expr;
 			throw(e);
 		}
 	},
@@ -110,11 +101,6 @@ jme.display = {
 	}
 };
 
-
-var simplificationNames = jme.display.simplificationNames = [	
-							'unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower',
-							'collectNumbers','simplifyFractions','zeroBase','constantsFirst','sqrtProduct',
-							'sqrtDivision','sqrtSquare','trig','otherNumbers', 'fractionNumbers' ];
 
 //gets the LaTeX version of an op argument - applies brackets if appropraite
 function texifyOpArg(thing,texArgs,i)
@@ -893,9 +879,68 @@ var compileRules = jme.display.compileRules = function(rules)
 	return rules;
 }
 
+var all=[];
 for(var x in simplificationRules)
-	simplificationRules[x] = compileRules(simplificationRules[x]);
+{
+	simplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+	all = all.concat(simplificationRules[x.toLowerCase()]);
+}
+simplificationRules['all']=all;
 
+var collectRuleset = jme.display.collectRuleset = function(set,sets)
+{
+	if(typeof(set)=='string')
+	{
+		set = set.split(',');
+	}
+	if(!set)
+	{
+		throw(new Error("Ruleset doesn't exist"));
+		return [];
+	}
+	if(!sets)
+	{
+		throw(new Error('no sets!'));
+	}
 
-
+	var out = [];
+	for(var i=0; i<set.length; i++ )
+	{
+		if(typeof(set[i])=='string')
+		{
+			var m = /^(!)?(.*)$/.exec(set[i]);
+			var neg = m[1]=='!' ? true : false;
+			var name = m[2].trim().toLowerCase();
+			console.log(name);
+			if(name!=='fractionnumbers')
+			{
+				var sub = collectRuleset(sets[name],sets);
+				sets[name] = sub;
+				if(neg)
+				{
+					for(var j=0; j<sub.length; j++)
+					{
+						if((m=out.indexOf(sub[j]))>=0)
+						{
+							out.splice(m,1);
+						}
+					}
+				}
+				else
+				{
+					for(var j=0; j<sub.length; j++)
+					{
+						if(!(out.contains(sub[j])))
+						{
+							out.push(sub[j]);
+						}
+					}
+				}
+			}
+		}
+		else
+			out.push(set[i]);
+	}
+	return out;
+}
 });

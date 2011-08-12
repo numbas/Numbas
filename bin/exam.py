@@ -109,6 +109,8 @@ class Exam:
 				'timedwarning': Event('timedwarning','none','')
 			}
 
+		self.rulesets = {}
+
 		self.functions = []
 		self.variables = []
 		
@@ -152,6 +154,17 @@ class Exam:
 				tryLoad(advice,'type',exam,'adviceType')
 				tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
 
+		if 'rulesets' in data:
+			rulesets = data['rulesets']
+			for name in rulesets.keys():
+				l=[]
+				for rule in rulesets[name]:
+					if isinstance(rule,str):
+						l.append(rule)
+					else:
+						l.append(SimplificationRule.fromDATA(rule))
+				exam.rulesets[name] = l
+
 		if 'functions' in data:
 			functions = data['functions']
 			for function in functions.keys():
@@ -175,7 +188,9 @@ class Exam:
 								['navigation'],
 								['timing'],
 								['feedback',
-									['advice']]
+									['advice']
+								],
+								['rulesets']
 							],
 							['functions'],
 							['variables'],
@@ -187,21 +202,21 @@ class Exam:
 				'shuffleQuestions': str(self.shuffleQuestions),
 			}
 		
-		qg = root.find('settings')
+		settings = root.find('settings')
 
-		nav = qg.find('navigation')
+		nav = settings.find('navigation')
 		nav.attrib = {'reverse':str(self.navigation['reverse']), 'browse': str(self.navigation['browse'])}
 
 		nav.append(self.navigation['onadvance'].toxml())
 		nav.append(self.navigation['onreverse'].toxml())
 		nav.append(self.navigation['onmove'].toxml())
 
-		timing = qg.find('timing')
+		timing = settings.find('timing')
 		timing.attrib = {'duration': str(self.duration)}
 		timing.append(self.timing['timeout'].toxml())
 		timing.append(self.timing['timedwarning'].toxml())
 
-		feedback = qg.find('feedback')
+		feedback = settings.find('feedback')
 		feedback.attrib = {
 				'showactualmark': str(self.showactualmark),
 				'showtotalmark': str(self.showtotalmark),
@@ -209,6 +224,16 @@ class Exam:
 				'allowrevealanswer': str(self.allowrevealanswer)
 		}
 		feedback.find('advice').attrib = {'type':self.adviceType, 'threshold': str(self.adviceGlobalThreshold)}
+
+		rules = settings.find('rulesets')
+		for name in self.rulesets.keys():
+			st = etree.Element('set',{'name':name})
+			for rule in self.rulesets[name]:
+				if isinstance(rule,str):
+					st.append(etree.Element('include',{'name':rule}))
+				else:
+					st.append(rule.toxml())
+			rules.append(st)
 
 		variables = root.find('variables')
 		for variable in self.variables:
@@ -231,6 +256,32 @@ class Exam:
 			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
 		except etree.ParseError as err:
 			print('XML Error:',str(err))
+
+class SimplificationRule:
+	pattern = ''
+	result = ''
+
+	def __init__(self):
+		self.conditions = []
+
+	@staticmethod
+	def fromDATA(data):
+		rule=SimplificationRule()
+		tryLoad(data,['pattern','conditions','result'],rule)
+		return rule
+
+	def toxml(self):
+		rule = makeTree(['ruledef',
+							['conditions']
+						])
+		rule.attrib = {	'pattern': self.pattern,
+						'result': self.result
+						}
+		conditions = rule.find('conditions')
+		for condition in self.conditions:
+			conditions.append(etree.fromstring('<condition>'+condition+'</condition>'))
+
+		return rule
 
 
 class Event:
