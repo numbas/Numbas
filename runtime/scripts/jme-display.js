@@ -895,7 +895,6 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 	}
 	if(!set)
 	{
-		throw(new Error("Ruleset doesn't exist"));
 		return [];
 	}
 	if(!sets)
@@ -911,9 +910,13 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 			var m = /^(!)?(.*)$/.exec(set[i]);
 			var neg = m[1]=='!' ? true : false;
 			var name = m[2].trim().toLowerCase();
-			console.log(name);
-			if(name!=='fractionnumbers')
+			if(name!=='fractionnumbers' && name.length>0)
 			{
+				if(!(name in sets))
+				{
+					throw(new Error("Ruleset "+name+" has not been defined"));
+				}
+
 				var sub = collectRuleset(sets[name],sets);
 				sets[name] = sub;
 				if(neg)

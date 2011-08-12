@@ -171,11 +171,20 @@ Question.prototype =
 		});
 
 		job(function() {
+			//sub vars into math nodes
+			var mathsNodes = q.xml.selectNodes('descendant::math');
+			for( i=0; i<mathsNodes.length; i++ )
+			{
+				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
+				expr = jme.subvars(expr,q.variables,q.functions);
+				Numbas.xml.setTextContent(mathsNodes[i],expr);
+			}
 			//turn content maths into LaTeX
 			mathsNodes = q.xml.selectNodes('descendant::content/descendant::math');
 			for( i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
+				expr = jme.subvars(expr,q.variables,q.functions);
 				var tex = jme.display.exprToLaTeX(expr);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}

@@ -356,6 +356,10 @@ class Question:
 		for variable in self.variables:
 			variables.append(variable.toxml())
 
+		functions = question.find('functions')
+		for function in self.functions:
+			functions.append(function.toxml())
+
 
 		return question
 
@@ -464,7 +468,7 @@ class Part:
 class JMEPart(Part):
 	kind = 'jme'
 	answer = ''
-	answerSimplification = '1111111011111011'
+	answerSimplification = 'unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers'
 	checkingType = 'RelDiff'
 	checkingAccuracy = 0		#real default value depends on checkingtype - 0.0001 for difference ones, 5 for no. of digits ones
 	failureRate = 1
