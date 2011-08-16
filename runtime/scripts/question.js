@@ -550,6 +550,10 @@ function JMEPart(xml, path, question, parentPart, loading)
 		Numbas.xml.getTextContent(answerMathML).trim(),
 		settings.answerSimplification
 	);
+
+	settings.displaySimplification = {
+		fractionNumbers: settings.answerSimplification.fractionNumbers
+	};
 	
 	//get checking type, accuracy, checking range
 	var parametersPath = 'answer';

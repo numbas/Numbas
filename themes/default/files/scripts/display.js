@@ -763,7 +763,7 @@ display.JMEPartDisplay.prototype =
 			if(txt!=='')
 			{
 				try {
-					var tex = Numbas.jme.display.exprToLaTeX(txt,{});
+					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification);
 					if(tex===undefined){throw('Error making maths display')};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;

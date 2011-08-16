@@ -910,7 +910,11 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 			var m = /^(!)?(.*)$/.exec(set[i]);
 			var neg = m[1]=='!' ? true : false;
 			var name = m[2].trim().toLowerCase();
-			if(name!=='fractionnumbers' && name.length>0)
+			if(name=='fractionnumbers')
+			{
+				out.fractionNumbers = !neg;
+			}
+			else if(name.length>0)
 			{
 				if(!(name in sets))
 				{
@@ -918,6 +922,10 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 				}
 
 				var sub = collectRuleset(sets[name],sets);
+
+				if('fractionNumbers' in sub)
+					out.fractionNumbers = sub.fractionNumbers
+
 				sets[name] = sub;
 				if(neg)
 				{
