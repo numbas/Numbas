@@ -589,7 +589,7 @@ function treeToJME(tree)
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
 			}
-			else if(args[i].tok.type=='number' && args[i].tok.value.complex && (op=='*' || op=='-u'))
+			else if(args[i].tok.type=='number' && args[i].tok.value.complex && (op=='*' || op=='-u' || op=='/'))
 			{
 				if(!(args[i].tok.value.re==0 || args[i].tok.value.im==0))
 				{
