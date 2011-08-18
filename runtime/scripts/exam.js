@@ -34,7 +34,7 @@ var Exam = Numbas.Exam = function()
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 
-	tryGetAttribute(this,'settings/navigation',['reverse','browse'],['navigateReverse','navigateBrowse']);
+	tryGetAttribute(this,'settings/navigation',['reverse','browse','showfrontpage'],['navigateReverse','navigateBrowse','showFrontPage']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};

@@ -99,6 +99,7 @@ class Exam:
 		self.navigation = {	
 				'reverse': True,
 				'browse': True,
+				'showfrontpage': True,
 				'onadvance': Event('onadvance','none','You have not finished the current question'),
 				'onreverse': Event('onreverse','none','You have not finished the current question'),
 				'onmove': Event('onmove','none','You have not finished the current question')
@@ -136,7 +137,7 @@ class Exam:
 
 		if 'navigation' in data:
 			nav = data['navigation']
-			tryLoad(nav,['reverse','browse'],exam.navigation)
+			tryLoad(nav,['reverse','browse','showfrontpage'],exam.navigation)
 			for event in ['onadvance','onreverse','onmove']:
 				if event in nav:
 					tryLoad(nav[event],['action','message'],exam.navigation[event])
@@ -205,7 +206,11 @@ class Exam:
 		settings = root.find('settings')
 
 		nav = settings.find('navigation')
-		nav.attrib = {'reverse':str(self.navigation['reverse']), 'browse': str(self.navigation['browse'])}
+		nav.attrib = {
+			'reverse':str(self.navigation['reverse']), 
+			'browse': str(self.navigation['browse']),
+			'showfrontpage': str(self.navigation['showfrontpage'])
+		}
 
 		nav.append(self.navigation['onadvance'].toxml())
 		nav.append(self.navigation['onreverse'].toxml())

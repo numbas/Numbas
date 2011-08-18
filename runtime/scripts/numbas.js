@@ -88,7 +88,16 @@ function init()
 		case 'ab-initio':
 			job(exam.init,exam);
 			job(Numbas.display.init);
-			job(exam.display.showInfoPage,exam.display,'frontpage');	//display front page
+			job(function() {
+				if(exam.showFrontPage)
+				{
+					exam.display.showInfoPage('frontpage');
+				}
+				else
+				{
+					exam.begin();
+				}
+			});	
 			break;
 
 		case 'resume':
