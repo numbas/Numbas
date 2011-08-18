@@ -1,3 +1,4 @@
+
 html{	
 	font-family: sans-serif;
 }
@@ -488,4 +489,39 @@ div.jqi button.jqidefaultbutton{
 }
 .jqiwarning .jqi .jqibuttons{
 	background-color: #BF5E26;
+}
+
+@media print {
+	.logo img {
+		height: 50%;
+	}
+	.navBar {
+		display:none;
+	}
+	#questionContainer .colwrap {
+		width: 100%;
+		left: initial;
+	}
+	#questionContainer .col1wrap {
+		width: 100%;
+		right: auto;
+		padding: initial;
+		position:initial;
+	}
+	#questionDisplay {
+		margin:initial;
+		right:initial;
+	}
+	#partFeedback {
+		display: none;
+	}
+
+	.questionMenu {
+		display: none;
+	}
+
+	input[type="text"], input[type="number"] {
+		border:none;
+		border-bottom: 1px solid;
+	}
 }
