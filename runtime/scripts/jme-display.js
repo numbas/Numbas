@@ -499,7 +499,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 				return texRealNumber(tok.value);
 			}
 	case 'string':
-		return '"\\textrm{'+tok.value+'}"';
+		return '\\textrm{"'+tok.value+'"}';
 		break;
 	case 'boolean':
 		return tok.value ? 'true' : 'false';

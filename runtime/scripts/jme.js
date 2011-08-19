@@ -763,6 +763,10 @@ var jme = Numbas.jme = {
 					else
 						v = '('+v+')';
 				}
+				else if(v.type=='string')
+				{
+					v="'"+v.value+"'";
+				}
 				else if(v.type=='list')
 				{
 					v = '['+v.value.map(function(x){return x.value;}).join(',')+']';
