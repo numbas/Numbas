@@ -690,6 +690,8 @@ JMEPart.prototype =
 
 		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
+		this.failNotAllowed = false;
+		this.failMustHave = false;
 
 		//did student actually write anything?
 		this.answered = this.studentAnswer.length > 0;
@@ -702,13 +704,11 @@ JMEPart.prototype =
 		}
 
 		//see if student answer contains any forbidden strings
-		this.failNotAllowed = false;
 		for( i=0; i<this.settings.notAllowed.length; i++ )
 		{
 			if(this.studentAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
 		}
 		
-		this.failMustHave = false;
 		if(!this.failNotAllowed)
 		{
 			//see if student answer contains all the required strings
