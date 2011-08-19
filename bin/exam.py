@@ -40,12 +40,13 @@ def tryLoad(data,attr,obj,altname=''):
 				setattr(obj,altname,data[attr])
 
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
-def makeContentNode(s,addHTML=False):
+def makeContentNode(s,doTextile=True):
 	s=str(s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
-	s=textile(s)
-	#if addHTML:
-	#	s='<html>'+s+'</html>'
+	if doTextile:
+		s=textile(s)
+	else:
+		s='<span>'+s+'</span>'
 	return etree.fromstring('<content>'+s+'</content>')
 
 #make an XML element tree. Pass in an array of arrays or strings.
@@ -350,8 +351,8 @@ class Question:
 							])
 
 		question.attrib = {'name': self.name}
-		question.find('statement').append(makeContentNode(self.statement,True))
-		question.find('advice').append(makeContentNode(self.advice,True))
+		question.find('statement').append(makeContentNode(self.statement))
+		question.find('advice').append(makeContentNode(self.advice))
 
 		parts = question.find('parts')
 		for part in self.parts:
@@ -462,7 +463,7 @@ class Part:
 
 		part.attrib = {'type': self.kind, 'marks': str(self.marks), 'stepspenalty': str(self.stepsPenalty), 'enableminimummarks': str(self.enableMinimumMarks), 'minimummarks': str(self.minimumMarks)}
 
-		part.find('prompt').append(makeContentNode(self.prompt,True))
+		part.find('prompt').append(makeContentNode(self.prompt))
 
 		steps = part.find('steps')
 		for step in self.steps:
@@ -581,7 +582,7 @@ class Restriction:
 			string.text = s
 			restriction.append(string)
 
-		restriction.find('message').append(makeContentNode(self.message,True))
+		restriction.find('message').append(makeContentNode(self.message,doTextile=False))
 
 		return restriction
 
@@ -607,7 +608,7 @@ class PatternMatchPart(Part):
 		part = Part.toxml(self)
 		appendMany(part,['displayanswer','correctanswer','case'])
 		
-		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
+		part.find('displayanswer').append(makeContentNode(self.displayAnswer))
 
 		part.find('correctanswer').text = str(self.answer)
 
@@ -712,12 +713,12 @@ class MultipleChoicePart(Part):
 			}
 
 		for choice in self.choices:
-			choices.append(makeTree(['choice',makeContentNode(choice,True)]))
+			choices.append(makeTree(['choice',makeContentNode(choice)]))
 
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
-			answers.append(makeTree(['answer',makeContentNode(answer,True)]))
+			answers.append(makeTree(['answer',makeContentNode(answer)]))
 
 		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}

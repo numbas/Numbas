@@ -597,6 +597,19 @@ display.PartDisplay.prototype =
 				valid = this.p.validate();
 			showScoreFeedback(c,valid,this.p.score,this.p.marks,Numbas.exam);
 		}
+
+		if(Numbas.exam.showAnswerState)
+		{
+			if(this.p.markingFeedback.length)
+			{
+				var feedback = textile(this.p.markingFeedback.join('\n\n'));
+				c.find('#feedbackMessage').html(feedback).hide().fadeIn(500);
+			}
+			else
+			{
+				c.find('#feedbackMessage').hide();
+			}
+		}
 	},
 
 	//called when 'show steps' button is pressed, or coming back to a part after steps shown

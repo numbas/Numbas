@@ -384,6 +384,8 @@ function Part( xml, path, question, parentPart, loading )
 	}
 	this.marks += this.stepsMarks;
 
+	this.markingFeedback = [];
+
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
 }
@@ -398,6 +400,8 @@ Part.prototype = {
 	stepsMarks: 0,			//marks available in the steps, if any
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
+	markingFeedback: [],	//messages explaining awarded marks
+
 	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
 	answerList: undefined,	//student's last submitted answer
 	answered: false,		//has this part been answered
@@ -421,8 +425,7 @@ Part.prototype = {
 	//then calls the display code
 	giveWarning: function(warning)
 	{
-		warning = warning.replace('\n\n','\n<br/>\n');
-		this.display.warning(warning);
+		this.display.warning(textile(warning));
 	},
 
 	//calculate student's score for given answer.
@@ -461,12 +464,13 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
+		this.markingFeedback = [];
 		if(this.marks==0)
 			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning("No answer submitted.");
-			this.credit = 0;
+			this.setCredit(0,'You did not answer this question.');;
 			this.answered = false;
 		}
 		else
@@ -475,14 +479,20 @@ Part.prototype = {
 			this.mark();
 			this.answered = this.validate();
 		}
+
+		this.calculateScore();
+		this.question.updateScore();
+
 		if(this.answered)
+		{
 			this.reportStudentAnswer(this.studentAnswer);
+			if(!(this.parentPart && this.parentPart.type=='gapfill'))
+				this.markingFeedback.push('You scored *'+this.score+'* '+(this.score==1 ? 'mark' : 'marks')+' for this part.');
+		}
 		else
 			this.reportStudentAnswer('');
 
 
-		this.calculateScore();
-		this.question.updateScore();
 		Numbas.store.partAnswered(this);
 		this.display.showScore(this.answered);
 	},
@@ -501,6 +511,34 @@ Part.prototype = {
 	//function which marks the student's answer
 	mark: function() {},
 
+	////////marking feedback helpers
+	setCredit: function(credit,message)
+	{
+		this.addCredit(credit-this.credit,message);
+	},
+
+	addCredit: function(credit,message)
+	{
+		var marksN = credit*this.marks;
+		marks = '*'+Math.abs(marksN)+'* '+(marksN==1 ? 'mark' : 'marks');
+
+		if(message!==undefined)
+		{
+			if(credit>0)
+				message+='\nYou were awarded '+marks+'.';
+			else if(credit<0)
+				message+='\n'+marks+' '+(marksN==1 ? 'was' : 'were')+' taken away.';
+			this.markingFeedback.push(message);
+		}
+		this.credit += credit;
+	},
+
+	multCredit: function(credit,message)
+	{
+		credit = this.credit*credit-1;
+		this.addCredit(credit,message);
+	},
+
 	//is student's answer acceptable?
 	validate: function() { return true; },
 
@@ -518,7 +556,7 @@ Part.prototype = {
 	{
 		this.display.revealAnswer();
 		this.answered = true;
-		this.credit = 0;
+		this.setCredit(0);
 		this.showSteps();
 		for(var i=0; i<this.steps.length; i++ )
 		{
@@ -673,7 +711,7 @@ JMEPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -684,7 +722,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.credit = 0;
+			this.setCredit(0,'Your answer is not a valid mathematical expression.');
 			return;
 		}
 
@@ -699,7 +737,7 @@ JMEPart.prototype =
 		//do comparison of student's answer with correct answer
 		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
-			this.credit = 0;
+			this.setCredit(0,'Your answer is incorrect.');
 			return;
 		}
 
@@ -720,25 +758,33 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.credit = 1;
+		this.setCredit(1,'Your answer is correct.');
 
 		if(this.failMinLength)
 		{
-			this.credit *= this.settings.minLengthPC;
+			this.multCredit(this.settings.minLengthPC,this.settings.minLengthMessage);
 		}
 		if(this.failMaxLength)
 		{
-			this.credit *= this.settings.maxLengthPC;
+			this.multCredit(this.settings.maxLengthPC,this.settings.maxLengthMessage);
 		}
 
 		if(this.failMustHave)
 		{
-			this.credit *= this.settings.mustHavePC;
+			if(this.settings.mustHaveShowStrings)
+			{
+				this.addCredit(0,'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+			}
+			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
 		}
 
 		if(this.failNotAllowed)
 		{
-			this.credit *= this.settings.notAllowedPC;
+			if(this.settings.notAllowedShowStrings)
+			{
+				this.addCredit(0,'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+			}
+			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
 		}
 
 	},
@@ -838,7 +884,7 @@ PatternMatchPart.prototype = {
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0);
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1277,8 +1323,8 @@ GapFillPart.prototype =
 			for(var i=0; i<this.gaps.length; i++)
 			{
 				var gap = this.gaps[i];
-				gap.mark();
 				this.credit += gap.credit*gap.marks;
+				this.markingFeedback = this.markingFeedback.concat(gap.markingFeedback);
 			}
 			this.credit/=this.marks;
 		}

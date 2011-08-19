@@ -108,6 +108,7 @@ Copyright 2011 Newcastle University
 					<span id="feedback"><img src="resources/cross.png"/></span>
 				</div>
 			</div>
+			<div id="feedbackMessage"></div>
 		</xsl:if>
 	</xsl:element>
 </xsl:template>

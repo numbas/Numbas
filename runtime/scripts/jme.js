@@ -755,7 +755,7 @@ var jme = Numbas.jme = {
 				}
 				if(display)
 				{
-					v = textile(v);
+					v = textile(' '+v);
 				}
 				out += v;
 			}
