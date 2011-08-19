@@ -382,7 +382,6 @@ function Part( xml, path, question, parentPart, loading )
 		this.steps[i] = step;
 		this.stepsMarks += step.marks;
 	}
-	this.marks += this.stepsMarks;
 
 	this.markingFeedback = [];
 
@@ -433,18 +432,21 @@ Part.prototype = {
 	{
 		if(this.steps.length && this.stepsShown)
 		{
-			this.score = (this.marks - this.stepsMarks) * this.credit; 	//score for main keypart
+			this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
 
+			var stepsScore = 0;
 			for(var i=0; i<this.steps.length; i++)
 			{
-				this.score += this.steps[i].score;
+				stepsScore += this.steps[i].score;
 			}
-			this.score -= this.settings.stepsPenalty;
 
-			if(this.settings.enableMinimumMarks && this.score < this.settings.minimumMarks)
-			{
-				this.score = this.settings.minimumMarks;
-			}
+			var stepsFraction = Math.max(Math.min(1-this.credit,1),0);	//any credit not earned in main part can be earned back in steps
+			stepsScore *= stepsFraction;
+			this.score += stepsScore;									//add score from steps to total score
+			this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)	//if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
+
+			if(this.settings.enableMinimumMarks)								//make sure awarded score is not less than minimum allowed
+				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
 		else
 		{
@@ -491,6 +493,11 @@ Part.prototype = {
 		}
 		else
 			this.reportStudentAnswer('');
+
+		for(var i=0;i<this.steps.length;i++)
+		{
+			this.steps[i].submit();
+		}
 
 
 		Numbas.store.partAnswered(this);
