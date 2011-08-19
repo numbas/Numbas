@@ -763,7 +763,7 @@ var jme = Numbas.jme = {
 					else
 						v = '('+v+')';
 				}
-				else if(v.type=='string')
+				else if(!display && v.type=='string')
 				{
 					v="'"+v.value+"'";
 				}
