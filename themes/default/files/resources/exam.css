@@ -155,6 +155,7 @@ html{
 }
 
 #feedbackMessage {
+	clear:both;
 	text-align:center;
 	padding: 0.5em 0.5em 0 0;
 	border: 1px solid #a2d1f0;

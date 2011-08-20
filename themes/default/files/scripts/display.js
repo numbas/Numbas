@@ -555,7 +555,7 @@ display.PartDisplay.prototype =
 		//hide part submit button and score feedback if there's only one part
 		if(p.parentPart==null && p.question.parts.length==1)
 		{
-			c.find('#partFeedback').hide();
+			c.find('#partFeedback:last').hide();
 		}
 
 
@@ -603,11 +603,11 @@ display.PartDisplay.prototype =
 			if(this.p.markingFeedback.length)
 			{
 				var feedback = textile(this.p.markingFeedback.join('\n\n'));
-				c.find('#feedbackMessage').html(feedback).hide().fadeIn(500);
+				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
 			}
 			else
 			{
-				c.find('#feedbackMessage').hide();
+				c.find('#feedbackMessage:last').hide();
 			}
 		}
 	},
