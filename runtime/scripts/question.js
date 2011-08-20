@@ -428,11 +428,16 @@ Part.prototype = {
 	},
 
 	//calculate student's score for given answer.
-	calculateScore: function(answerList)
+	calculateScore: function(bubbling)
 	{
 		if(this.steps.length && this.stepsShown)
 		{
 			this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
+			if(!this.markingFeedback.didSteps)
+			{
+				var topMarks = this.marks - this.settings.stepsPenalty;
+				this.reportMarkChange(-this.settings.stepsPenalty,'You revealed the steps. The maximum you can score for this part is now *'+topMarks+'* '+util.pluralise(topMarks,'mark','marks')+'.');
+			}
 
 			var stepsScore = 0;
 			for(var i=0; i<this.steps.length; i++)
@@ -441,12 +446,23 @@ Part.prototype = {
 			}
 
 			var stepsFraction = Math.max(Math.min(1-this.credit,1),0);	//any credit not earned in main part can be earned back in steps
-			stepsScore *= stepsFraction;
-			this.score += stepsScore;									//add score from steps to total score
+
+			this.score += stepsScore*stepsFraction;						//add score from steps to total score
+
+			if(!this.markingFeedback.didSteps)
+			{
+				console.log(stepsScore);
+				this.reportMarkChange(stepsScore,
+					util.formatString('You scored *%s* %s for the steps.',[stepsScore,util.pluralise(stepsScore,'mark','marks')])
+				);
+			}
+
 			this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)	//if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
 
 			if(this.settings.enableMinimumMarks)								//make sure awarded score is not less than minimum allowed
 				this.score = Math.max(this.score,this.settings.minimumMarks);
+
+			this.markingFeedback.didSteps = true;
 		}
 		else
 		{
@@ -466,6 +482,7 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
+		this.credit = 0;
 		this.markingFeedback = [];
 		if(this.marks==0)
 			return;
@@ -482,6 +499,14 @@ Part.prototype = {
 			this.answered = this.validate();
 		}
 
+		if(this.stepsShown)
+		{
+			for(var i=0;i<this.steps.length;i++)
+			{
+				this.steps[i].submit();
+			}
+		}
+
 		this.calculateScore();
 		this.question.updateScore();
 
@@ -489,7 +514,7 @@ Part.prototype = {
 		{
 			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
-				this.markingFeedback.push('You scored *'+this.score+'* '+(this.score==1 ? 'mark' : 'marks')+' for this part.');
+				this.markingFeedback.push('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
 		}
 		else
 			this.reportStudentAnswer('');
@@ -527,17 +552,22 @@ Part.prototype = {
 	addCredit: function(credit,message)
 	{
 		var marksN = credit*this.marks;
-		marks = '*'+Math.abs(marksN)+'* '+(marksN==1 ? 'mark' : 'marks');
+		this.reportMarkChange(marksN,message);
+		this.credit += credit;
+	},
+
+	reportMarkChange: function(marksN,message)
+	{
+		marks = '*'+Math.abs(marksN)+'* '+util.pluralise(marksN,'mark','marks');
 
 		if(message!==undefined)
 		{
-			if(credit>0)
+			if(marksN>0)
 				message+='\nYou were awarded '+marks+'.';
-			else if(credit<0)
-				message+='\n'+marks+' '+(marksN==1 ? 'was' : 'were')+' taken away.';
+			else if(marksN<0)
+				message+='\n'+marks+' '+util.pluralise(marksN,'was','were')+' taken away.';
 			this.markingFeedback.push(message);
 		}
-		this.credit += credit;
 	},
 
 	multCredit: function(credit,message)
