@@ -1,5 +1,3 @@
-///aaaaaaA!
-
 var textile;
 (function() {
 	textile = function(src) {
@@ -99,7 +97,7 @@ var textile;
 			index = Math.min(index,arr1.length)
 			if(index % 2)
 			{
-				arr1[index-1] = arr2[0];
+				arr1[index-1] += arr2[0];
 				arr2 = arr2.slice(1);
 			}
 			if(arr2.length % 2 && index<arr1.length &&  arr2.length>1)
