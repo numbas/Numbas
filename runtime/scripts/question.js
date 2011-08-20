@@ -430,7 +430,6 @@ Part.prototype = {
 	//calculate student's score for given answer.
 	calculateScore: function()
 	{
-		Numbas.debug(this.path+' calculateScore',true);
 		if(this.steps.length && this.stepsShown)
 		{
 			var oScore = this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
@@ -480,7 +479,6 @@ Part.prototype = {
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
-		Numbas.debug(this.path+' submit',true);
 		this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
@@ -931,7 +929,7 @@ PatternMatchPart.prototype = {
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0);
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -944,24 +942,24 @@ PatternMatchPart.prototype = {
 		{
 			if( caseSensitiveAnswer.test(this.studentAnswer) )
 			{
-				this.credit = 1;
+				this.setCredit(1,'Your answer is correct.');
 			}
 			else if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.credit = this.settings.partialCredit;
+				this.setCredit(this.settings.partialCredit,'Your answer is correct, except for the case.');
 			}
 			else
 			{
-				this.credit = 0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 		}else{
 			if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.credit = 1;
+				this.setCredit(1,'Your answer is correct.');
 			}
 			else
 			{
-				this.credit = 0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 		}
 	},
@@ -1018,7 +1016,7 @@ NumberEntryPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1034,16 +1032,16 @@ NumberEntryPart.prototype =
 			if( this.studentAnswer <= this.settings.maxvalue && this.studentAnswer >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && !util.isInt(this.studentAnswer))
-					this.credit = this.settings.partialCredit;
+					this.setCredit(this.settings.partialCredit,'Your answer is within the allowed range, but decimal numbers are not allowed.');
 				else
-					this.credit=1;
+					this.setCredit(1,'Your answer is correct.');
 			}else{
-				this.credit=0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 			this.answered = true;
 		}else{
 			this.answered = false;
-			this.credit = 0;
+			this.setCredit(0,'You did not enter a valid number.');
 		}
 	},
 
@@ -1278,7 +1276,7 @@ MultipleResponsePart.prototype =
 	{
 		if(this.stagedAnswer==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not answer this part.');
 			return false;
 		}
 		this.ticks = util.copyarray(this.stagedAnswer);
@@ -1300,9 +1298,11 @@ MultipleResponsePart.prototype =
 		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
 
 		if(this.marks>0 && !this.wrongNumber)
-			this.credit = Math.min(partScore,this.marks)/this.marks;	//this part might have a maximum number of marks which is less then the sum of the marking matrix
+		{
+			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
+		}
 		else
-			this.credit = 0;
+			this.setCredit(0,'You selected the wrong number of choices.');
 	},
 
 	validate: function()

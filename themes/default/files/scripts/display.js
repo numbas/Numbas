@@ -561,7 +561,7 @@ display.PartDisplay.prototype =
 		}
 
 
-		c.find('#partFeedback:last #submitPart').unbind('click').click(function() {
+		c.find('#partFeedback:last #submitPart').click(function() {
 			p.display.removeWarnings();
 			p.submit();
 			if(!p.answered)
