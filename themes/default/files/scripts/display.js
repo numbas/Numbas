@@ -610,8 +610,11 @@ display.PartDisplay.prototype =
 					switch(action.op) {
 					case 'addCredit':
 						change = action.credit*maxMarks;
+						if(action.gap!=undefined)
+							change *= this.p.gaps[action.gap].marks/this.p.marks;
 						t += change;
 						break;
+					/*
 					case 'setCredit':
 						var ot = t;
 						t = action.credit*maxMarks;
@@ -624,6 +627,7 @@ display.PartDisplay.prototype =
 						change = t - ot;
 						console.log(change);
 						break;
+					*/
 					}
 
 					var message = action.message;

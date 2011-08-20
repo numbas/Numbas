@@ -548,10 +548,11 @@ Part.prototype = {
 	////////marking feedback helpers
 	setCredit: function(credit,message)
 	{
+		var oCredit = this.credit;
 		this.credit = credit;
 		this.markingFeedback.push({
-			op: 'setCredit',
-			credit: credit,
+			op: 'addCredit',
+			credit: this.credit - oCredit,
 			message: message
 		});
 	},
@@ -568,10 +569,11 @@ Part.prototype = {
 
 	multCredit: function(factor,message)
 	{
+		var oCredit = this.credit
 		this.credit *= factor;
 		this.markingFeedback.push({
-			op: 'multCredit',
-			factor: factor,
+			op: 'addCredit',
+			credit: this.credit - oCredit,
 			message: message
 		});
 	},
@@ -1373,7 +1375,13 @@ GapFillPart.prototype =
 			{
 				var gap = this.gaps[i];
 				this.credit += gap.credit*gap.marks;
-				this.markingFeedback = this.markingFeedback.concat(gap.markingFeedback);
+				this.markingComment('*Gap '+(i+1)+'*');
+				for(var j=0;j<gap.markingFeedback.length;j++)
+				{
+					var action = util.copyobj(gap.markingFeedback[j]);
+					action.gap = i;
+					this.markingFeedback.push(action);
+				}
 			}
 			this.credit/=this.marks;
 		}
