@@ -18,6 +18,8 @@ Copyright 2011 Newcastle University
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
 
+	var util = Numbas.util;
+
 var display = Numbas.display = {
 	// update progress bar when loading
 	showLoadProgress: function()
@@ -538,7 +540,7 @@ display.PartDisplay.prototype =
 		}
 		else
 		{
-			c.find('#stepsBtn').click(function() {
+			c.find('#stepsBtn:last').click(function() {
 				p.showSteps();
 			});
 		}
@@ -559,7 +561,7 @@ display.PartDisplay.prototype =
 		}
 
 
-		c.find('#partFeedback #submitPart').click(function() {
+		c.find('#partFeedback:last #submitPart').unbind('click').click(function() {
 			p.display.removeWarnings();
 			p.submit();
 			if(!p.answered)
@@ -568,11 +570,6 @@ display.PartDisplay.prototype =
 				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
 			}
 		});
-
-		for(var i=0;i<this.p.steps.length; i++)
-		{
-			this.p.steps[i].display.show();
-		}
 
 		this.showScore(this.p.answered);
 	},
@@ -602,7 +599,44 @@ display.PartDisplay.prototype =
 		{
 			if(this.p.markingFeedback.length)
 			{
-				var feedback = textile(this.p.markingFeedback.join('\n\n'));
+				var feedback = [];
+				var maxMarks = this.p.marks - (this.p.stepsShown ? this.p.settings.stepsPenalty : 0);
+				var t = 0;
+				for(var i=0;i<this.p.markingFeedback.length;i++)
+				{
+					var action = this.p.markingFeedback[i];
+					var change = 0;
+
+					switch(action.op) {
+					case 'addCredit':
+						change = action.credit*maxMarks;
+						t += change;
+						break;
+					case 'setCredit':
+						var ot = t;
+						t = action.credit*maxMarks;
+						change = t - ot;
+						break;
+					case 'multCredit':
+						var ot = t;
+						t *= action.factor;
+						console.log(action.factor);
+						change = t - ot;
+						console.log(change);
+						break;
+					}
+
+					var message = action.message;
+					marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
+
+					if(change>0)
+						message+='\nYou were awarded '+marks+'.';
+					else if(change<0)
+						message+='\n'+marks+' '+util.pluralise(change,'was','were')+' taken away.';
+					feedback.push(message);
+				}
+
+				feedback = textile(feedback.join('\n\n'));
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
 			}
 			else
@@ -1037,6 +1071,8 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 	answered = answered || score>0;
 
+	var scoreSelector = selector.find('#score:last');
+
 	if(settings.showTotalMark || settings.showActualMark)
 	{
 		if(answered)
@@ -1048,7 +1084,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			else if(settings.showTotalMark && settings.showActualMark)
 				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
 
-			selector.find('#score')
+			scoreSelector
 				.show()
 				.html(scoreDisplay);
 		}
@@ -1057,12 +1093,12 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			if(settings.showTotalMark)
 			{
 				scoreDisplay = niceNumber(marks)+' '+(marks==1 ? 'mark' : 'marks');
-				selector.find('#score')
+				scoreSelector
 					.show()
 					.html(scoreDisplay);
 			}
 			else
-				selector.find('#score').hide();
+				scoreSelector.hide();
 
 		}
 
@@ -1071,12 +1107,12 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	{
 		if(answered)
 		{
-			selector.find('#score')
+			scoreSelector
 				.show()
 				.html('Answered');
 		}
 		else
-			selector.find('#score').hide();
+			scoreSelector.hide();
 	}
 
 	if( settings.showAnswerState )
@@ -1096,22 +1132,22 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			{
 				state = 'partial';
 			}
-			selector.find('#feedback')
+			selector.find('#feedback:last')
 				.show()
 				.attr('class',state)
 			;
 		}
 		else
 		{
-			selector.find('#feedback').attr('class','').hide();
+			selector.find('#feedback:last').attr('class','').hide();
 		}
 	}
 	else
 	{
-		selector.find('#feedback').hide();
+		selector.find('#feedback:last').hide();
 	}	
 
-	selector.find('#marks').each(function(){
+	selector.find('#marks:last').each(function(){
 		if(!$(this).is(':animated'))
 			$(this).fadeOut(200).fadeIn(200);
 	});

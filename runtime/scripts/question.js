@@ -428,48 +428,47 @@ Part.prototype = {
 	},
 
 	//calculate student's score for given answer.
-	calculateScore: function(bubbling)
+	calculateScore: function()
 	{
+		Numbas.debug(this.path+' calculateScore',true);
 		if(this.steps.length && this.stepsShown)
 		{
-			this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
-			if(!this.markingFeedback.didSteps)
-			{
-				var topMarks = this.marks - this.settings.stepsPenalty;
-				this.reportMarkChange(-this.settings.stepsPenalty,'You revealed the steps. The maximum you can score for this part is now *'+topMarks+'* '+util.pluralise(topMarks,'mark','marks')+'.');
-			}
+			var oScore = this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
 
-			var stepsScore = 0;
+			var stepsScore = 0, stepsMarks=0;
 			for(var i=0; i<this.steps.length; i++)
 			{
 				stepsScore += this.steps[i].score;
+				stepsMarks += this.steps[i].marks;
 			}
 
 			var stepsFraction = Math.max(Math.min(1-this.credit,1),0);	//any credit not earned in main part can be earned back in steps
 
-			this.score += stepsScore*stepsFraction;						//add score from steps to total score
+			this.score += stepsScore;						//add score from steps to total score
 
-			if(!this.markingFeedback.didSteps)
-			{
-				console.log(stepsScore);
-				this.reportMarkChange(stepsScore,
-					util.formatString('You scored *%s* %s for the steps.',[stepsScore,util.pluralise(stepsScore,'mark','marks')])
-				);
-			}
 
 			this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)	//if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
 
 			if(this.settings.enableMinimumMarks)								//make sure awarded score is not less than minimum allowed
 				this.score = Math.max(this.score,this.settings.minimumMarks);
 
-			this.markingFeedback.didSteps = true;
+			if(stepsMarks!=0 && stepsScore!=0)
+			{
+				if(this.credit==1)
+					this.markingComment("Because you received full marks for the part, your answers to the steps aren't counted.");
+				else
+				{
+					var change = this.score - oScore;
+					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',change,util.pluralise(change,'mark','marks')));
+				}
+			}
 		}
 		else
 		{
 			this.score = this.credit * this.marks;
 		}
 
-		if(this.parentPart)
+		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();
 	},
 
@@ -481,9 +480,18 @@ Part.prototype = {
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
+		Numbas.debug(this.path+' submit',true);
 		this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
+		this.submitting = true;
+
+		if(this.stepsShown)
+		{
+			var stepsMax = this.marks - this.settings.stepsPenalty;
+			this.markingComment(util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')));
+		}
+
 		if(this.marks==0)
 			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
@@ -514,19 +522,15 @@ Part.prototype = {
 		{
 			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
-				this.markingFeedback.push('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
+				this.markingComment('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
 		}
 		else
 			this.reportStudentAnswer('');
 
-		for(var i=0;i<this.steps.length;i++)
-		{
-			this.steps[i].submit();
-		}
-
-
 		Numbas.store.partAnswered(this);
 		this.display.showScore(this.answered);
+
+		this.submitting = false;
 	},
 
 	//save the student's answer as a question variable
@@ -546,34 +550,40 @@ Part.prototype = {
 	////////marking feedback helpers
 	setCredit: function(credit,message)
 	{
-		this.addCredit(credit-this.credit,message);
+		this.credit = credit;
+		this.markingFeedback.push({
+			op: 'setCredit',
+			credit: credit,
+			message: message
+		});
 	},
 
 	addCredit: function(credit,message)
 	{
-		var marksN = credit*this.marks;
-		this.reportMarkChange(marksN,message);
 		this.credit += credit;
+		this.markingFeedback.push({
+			op: 'addCredit',
+			credit: credit,
+			message: message
+		});
 	},
 
-	reportMarkChange: function(marksN,message)
+	multCredit: function(factor,message)
 	{
-		marks = '*'+Math.abs(marksN)+'* '+util.pluralise(marksN,'mark','marks');
-
-		if(message!==undefined)
-		{
-			if(marksN>0)
-				message+='\nYou were awarded '+marks+'.';
-			else if(marksN<0)
-				message+='\n'+marks+' '+util.pluralise(marksN,'was','were')+' taken away.';
-			this.markingFeedback.push(message);
-		}
+		this.credit *= factor;
+		this.markingFeedback.push({
+			op: 'multCredit',
+			factor: factor,
+			message: message
+		});
 	},
 
-	multCredit: function(credit,message)
+	markingComment: function(message)
 	{
-		credit = this.credit*credit-1;
-		this.addCredit(credit,message);
+		this.markingFeedback.push({
+			op: 'comment',
+			message: message
+		});
 	},
 
 	//is student's answer acceptable?
@@ -1346,10 +1356,12 @@ GapFillPart.prototype =
 
 	submit: function()
 	{
+		this.submitting = true;
 		for(var i=0;i<this.gaps.length;i++)
 		{
 			this.gaps[i].submit();
 		}
+		this.submitting = false;
 	},
 
 	mark: function()

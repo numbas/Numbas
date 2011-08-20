@@ -138,13 +138,13 @@ var util = Numbas.util = {
 		return s;
 	},
 
-	formatString: function(str,args)
+	formatString: function(str)
 	{
 		var i=0;
 		var re = /%s/;
-		for(var i=0;i<args.length;i++)
+		for(var i=1;i<arguments.length;i++)
 		{
-			str=str.replace(/%s/,args[i]);
+			str=str.replace(/%s/,arguments[i]);
 		}
 		return str;
 	},
