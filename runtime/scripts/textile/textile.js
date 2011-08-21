@@ -1,5 +1,3 @@
-///aaaaaaA!
-
 var textile;
 (function() {
 	textile = function(src) {
@@ -86,9 +84,6 @@ var textile;
 				nspan[i] = this.convertGlyphs(nspan[i]);
 			}
 
-			//find HTML tags so they don't get touched
-			//span = nspan + this.convertGlyphs(span);
-
 			return nspan.join('');
 		},
 
@@ -99,7 +94,7 @@ var textile;
 			index = Math.min(index,arr1.length)
 			if(index % 2)
 			{
-				arr1[index-1] = arr2[0];
+				arr1[index-1] += arr2[0];
 				arr2 = arr2.slice(1);
 			}
 			if(arr2.length % 2 && index<arr1.length &&  arr2.length>1)
@@ -115,6 +110,13 @@ var textile;
 			{
 				txt = txt.replace(glyphRules[i][0],glyphRules[i][1]);
 			}
+			//escape < and >
+			var bits = txt.split(/(<[^<]+?>)/);
+			for(var i=0;i<bits.length;i+=2)
+			{
+				bits[i] = bits[i].replace('<','&#60;').replace('>','&#62;');
+			}
+			txt = bits.join('');
 			return txt;
 		},
 
@@ -135,7 +137,7 @@ var textile;
 
 	var para = TextileConverter.prototype.makeTag('p');
 
-	var re_simpleTag = /<.*?>/g;
+	var re_simpleTag = /<[^<]+?>/g;
 	var re_punct = /[!"#$%&\'()*+,\-./:;<=>?@[\\\]^_`{|}~]/;
 	var glyphRules = [
 		[/\n(?! )/g,'<br />\n'],															//insert HTML newlines
