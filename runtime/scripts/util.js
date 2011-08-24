@@ -348,7 +348,8 @@ textile.phraseTypes.splice(0,0,function(text) {
 		re_inlineMaths.lastIndex = 0;
 	}
 	if(out.length)
-		out[out.length-1] += text;
+		out = this.joinPhraseBits(out,[text],out.length);
+		//out[out.length-1] += text;
 	return out;
 });
 

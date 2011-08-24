@@ -22,6 +22,17 @@ import examparser
 import sys
 import os
 
+class ExamError(Exception):
+	def __init__(self,message,hint=''):
+		self.message = message
+		self.hint = hint
+	
+	def __str__(self):
+		msg = self.message
+		if self.hint:
+			msg += '\nPossible fix: '+self.hint
+		return msg
+
 #data is a DATA object. attr is either a single variable name or a list of names. obj is the object to load the data into. altname is the name of the object property to fill, if different from attr
 #if attr is in data, then obj.attr = data[attr], otherwise no change
 def tryLoad(data,attr,obj,altname=''):
@@ -441,6 +452,11 @@ class Part:
 				'gapfill': GapFillPart,
 				'information': InformationPart
 			}
+		if not kind in partConstructors:
+			raise ExamError(
+				'Invalid part type '+kind,
+				'Valid part types are '+', '.join(sorted([x for x in partConstructors]))
+			)
 		part = partConstructors[kind].fromDATA(data)
 
 		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks'],part);
@@ -673,10 +689,19 @@ class MultipleChoicePart(Part):
 		self.answers = []
 		self.matrix = []
 
+		self.distractors = []
+
 	@staticmethod
 	def fromDATA(data):
 		kind = data['type']
 		part = MultipleChoicePart(kind)
+		displayTypes = {
+				'1_n_2': 'radiogroup',
+				'm_n_2': 'checkbox',
+				'm_n_x': 'radiogroup'
+		}
+
+		part.displayType = displayTypes[kind]
 		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns'],part)
 
 		if 'minmarks' in data:
@@ -697,11 +722,16 @@ class MultipleChoicePart(Part):
 			if not isinstance(part.matrix[0],list):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
+		if 'distractors' in data:
+			part.distractors = data['distractors']
+			if not isinstance(part.distractors[0],list):
+				part.distractors = [[x] for x in part.distractors]
+
 		return part
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks']])
+		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors']])
 
 		choices = part.find('choices')
 		choices.attrib = {
@@ -732,6 +762,16 @@ class MultipleChoicePart(Part):
 					'value': str(self.matrix[i][j])
 					})
 				matrix.append(mark)
+
+		distractors = marking.find('distractors')
+		for i in range(len(self.distractors)):
+			for j in range(len(self.distractors[i])):
+				distractor = etree.Element('distractor',{
+					'choiceindex': str(i),
+					'answerindex': str(j)
+				})
+				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractors.append(distractor)
 
 		return part
 

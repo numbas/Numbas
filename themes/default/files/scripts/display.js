@@ -614,23 +614,9 @@ display.PartDisplay.prototype =
 							change *= this.p.gaps[action.gap].marks/this.p.marks;
 						t += change;
 						break;
-					/*
-					case 'setCredit':
-						var ot = t;
-						t = action.credit*maxMarks;
-						change = t - ot;
-						break;
-					case 'multCredit':
-						var ot = t;
-						t *= action.factor;
-						console.log(action.factor);
-						change = t - ot;
-						console.log(change);
-						break;
-					*/
 					}
 
-					var message = action.message;
+					var message = action.message || '';
 					marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
 
 					if(change>0)
@@ -642,6 +628,7 @@ display.PartDisplay.prototype =
 
 				feedback = textile(feedback.join('\n\n'));
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
+				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
 			}
 			else
 			{

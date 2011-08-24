@@ -658,7 +658,6 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
 	var messageNode = xml.selectSingleNode('answer/minlength/message');
-	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
 	if(messageNode)
 	{
 		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -1187,6 +1186,30 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 	}
 	settings.matrix = matrix;
+	var distractors=[];
+	var distractorNodes = this.xml.selectNodes('marking/distractors/distractor');
+	for( i=0; i<distractorNodes.length; i++ )
+	{
+		var cell = {message: ""};
+		tryGetAttribute(cell, distractorNodes[i], ['answerIndex', 'choiceIndex']);
+		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+
+		//take into account shuffling
+		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
+		cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
+
+		if(this.type == '1_n_2' || this.type == 'm_n_2')
+		{	//for some reason, possible answers are recorded as choices in the multiple choice types.
+			//switch the indices round, so we don't have to worry about this again
+			cell.answerIndex = cell.choiceIndex;
+			cell.choiceIndex = 0;
+		}
+
+		if(!distractors[cell.answerIndex])
+			distractors[cell.answerIndex]=[];
+		distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
+	}
+	settings.distractors = distractors;
 	
 	if(this.marks == 0)
 		this.marks = matrixTotal;
@@ -1270,7 +1293,7 @@ MultipleResponsePart.prototype =
 			}
 			break;
 		default:
-			this.stagedAnswer[answerIndex][choiceIndex] = this.answerList[2];
+			this.stagedAnswer[answerIndex][choiceIndex] = answerList[2];
 		}
 	},
 
@@ -1282,6 +1305,7 @@ MultipleResponsePart.prototype =
 			return false;
 		}
 		this.ticks = util.copyarray(this.stagedAnswer);
+		this.setCredit(0);
 
 		this.numTicks = 0;
 		var partScore = 0;
@@ -1293,6 +1317,9 @@ MultipleResponsePart.prototype =
 				{
 					partScore += this.settings.matrix[i][j];
 					this.numTicks += 1;
+
+					if((row = this.settings.distractors[i]) && (message=row[j]))
+						this.addCredit(this.settings.matrix[i][j]/this.marks,message);
 				}
 			}
 		}

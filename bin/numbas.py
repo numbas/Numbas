@@ -21,7 +21,7 @@ import traceback
 import shutil
 from optparse import OptionParser
 import examparser
-from exam import Exam
+from exam import Exam,ExamError
 from xml2js import xml2js
 from zipfile import ZipFile
 
@@ -121,6 +121,10 @@ def makeExam(options):
 			examXML = exam.tostring()
 			options.resources = exam.resources
 			options.extensions = exam.extensions
+		except ExamError as err:
+			print("Error constructing exam:")
+			print(err)
+			raise 
 		except examparser.ParseError as err:
 			print("Failed to compile exam due to parsing error.")
 			raise
