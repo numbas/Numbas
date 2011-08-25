@@ -487,7 +487,10 @@ Part.prototype = {
 		if(this.stepsShown)
 		{
 			var stepsMax = this.marks - this.settings.stepsPenalty;
-			this.markingComment(util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')));
+			this.markingComment(
+				this.settings.stepsPenalty>0 
+					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')) 
+					: 'You revealed the steps.');
 		}
 
 		if(this.marks==0)
