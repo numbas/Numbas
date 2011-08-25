@@ -880,11 +880,13 @@ var compileRules = jme.display.compileRules = function(rules)
 }
 
 var all=[];
+var nsimplificationRules = Numbas.jme.display.simplificationRules = {};
 for(var x in simplificationRules)
 {
-	simplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
-	all = all.concat(simplificationRules[x.toLowerCase()]);
+	nsimplificationRules[x] = nsimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+	all = all.concat(nsimplificationRules[x.toLowerCase()]);
 }
+simplificationRules = nsimplificationRules;
 simplificationRules['all']=all;
 
 var collectRuleset = jme.display.collectRuleset = function(set,sets)

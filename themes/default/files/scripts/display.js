@@ -241,7 +241,7 @@ display.ExamDisplay.prototype =
 			//the whole page was hidden at load, so user doesn't see all the nav elements briefly
 			$('body > *').show();
 			$('#loading').hide();
-			
+
 			$('#infoDisplay').getTransform(Numbas.xml.templates.frontpage,exam.xmlize());
 
 			$('#startBtn').click( Numbas.controls.beginExam );
