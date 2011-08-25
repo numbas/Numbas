@@ -130,10 +130,12 @@ Question.prototype =
 			for(var i=0;i<contents.length;i++)
 			{
 				//get all non-whitespace text nodes
-				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*').contents().filter(tnf));
+				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*:not(iframe)').contents().filter(tnf));
 
 				//filter out script nodes
-				textNodes = textNodes.filter(function(){return !$(this).parent().attr('language')});
+				textNodes = textNodes.filter(function(){
+					return !$(this).parent().attr('language')}
+				);
 
 				//run contentsubvars on the collection of text nodes
 				textNodes.each(function(){
@@ -1405,7 +1407,8 @@ GapFillPart.prototype =
 			{
 				var gap = this.gaps[i];
 				this.credit += gap.credit*gap.marks;
-				this.markingComment('*Gap '+(i+1)+'*');
+				if(this.gaps.length>1)
+					this.markingComment('*Gap '+(i+1)+'*');
 				for(var j=0;j<gap.markingFeedback.length;j++)
 				{
 					var action = util.copyobj(gap.markingFeedback[j]);
