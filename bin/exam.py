@@ -519,7 +519,7 @@ class JMEPart(Part):
 		else:	#dp or sigfig
 			part.checkingAccuracy = 5
 		#get checking accuracy from data, if defined
-		tryLoad(data,'checkingType',part)
+		tryLoad(data,'checkingaccuracy',part)
 
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
