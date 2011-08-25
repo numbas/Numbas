@@ -617,7 +617,7 @@ display.PartDisplay.prototype =
 					}
 
 					var message = action.message || '';
-					marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
+					var marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
 
 					if(change>0)
 						message+='\nYou were awarded '+marks+'.';
