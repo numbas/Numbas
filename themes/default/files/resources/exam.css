@@ -531,4 +531,7 @@ div.jqi button.jqidefaultbutton{
 		border:none;
 		border-bottom: 1px solid;
 	}
+	.btn {
+		display: none;
+	}
 }
