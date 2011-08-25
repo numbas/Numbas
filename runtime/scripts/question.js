@@ -190,6 +190,9 @@ Question.prototype =
 				var tex = jme.display.exprToLaTeX(expr);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}
+
+			//sub into question name
+			q.name = jme.contentsubvars(q.name,q.variables,q.functions);
 		});
 	},
 
