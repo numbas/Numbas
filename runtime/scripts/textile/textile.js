@@ -23,7 +23,7 @@ var textile;
 				{
 					if(blockTypes[i].match.apply(this))
 					{
-						blockTypes[i].do.apply(this);
+						blockTypes[i].doit.apply(this);
 						break;
 					}
 				}
@@ -260,7 +260,7 @@ var textile;
 	var shortPunct = '\\.,"\'?!;:';
 	function makeNormalPhraseType(start,tagName,protectContents)
 	{
-		var re = new RegExp('(?:^|\\{|\\[|(['+shortPunct+']|\\s))'+start+'(?:'+re_attr.source+' ?)?([^\\s'+start+']+|\\S[^'+start+'\\n]*[^\\s'+start+'\\n])'+start+'(?:$|[\\]}]|('+re_punct.source+'{1,2}|\\s))','g');
+		var re = new RegExp('(?:^|\\{|\\[|(['+shortPunct+']|\\s|>))'+start+'(?:'+re_attr.source+' ?)?([^\\s'+start+']+|\\S[^'+start+'\\n]*[^\\s'+start+'\\n])'+start+'(?:$|[\\]}]|('+re_punct.source+'{1,2}|\\s))','g');
 		return function(text) {
 			var out = [];
 			var m;
@@ -466,7 +466,7 @@ var textile;
 	// Contains objects of the form
 	//	{
 	//		match: function()			//returns true if source begins with this kind of block
-	//		do: function()				//perform appropriate conversion on the block
+	//		doit: function()				//perform appropriate conversion on the block
 	//	}
 	// the functions are applied in the context of the TextileConverter object, so read in from this.src and output to this.out
 	// the 'do' function should remove the block it converted from this.src
@@ -480,7 +480,7 @@ var textile;
 	var listItem = TextileConverter.prototype.makeTag('li');
 	var list = {
 		match: function() { return re_list.test(this.src); },
-		do: function() {
+		doit: function() {
 			var m;
 			var listType = '';
 			var tags = [], level=0, tag, listType='';
@@ -543,7 +543,7 @@ var textile;
 	var re_tableCell = new RegExp('^(_)?(\\^|-|~)?(?:\\\\(\\d+))?(?:/(\\d+))?'+re_attr.source+'?\\. ');
 	var table = {
 		match: function() { return re_table.test(this.src); },
-		do: function() {
+		doit: function() {
 			var m = re_table.exec(this.src);
 			if(m[1])
 			{
@@ -613,7 +613,7 @@ var textile;
 	var re_footnote = new RegExp('^fn(\\d+)'+re_attr.source+'?\\.(\\.)? ');
 	var footnote = {
 		match: function() { return re_footnote.test(this.src); },
-		do: function() {
+		doit: function() {
 			var m = this.src.match(re_footnote);
 			var n = parseInt(m[1]);
 			var attr = getAttributes(m[2]);
@@ -643,7 +643,7 @@ var textile;
 	var re_blockquote = new RegExp('^bq'+re_attr.source+'?\\.(\\.)?(?::(\\S+))? ');
 	var blockquote = {
 		match: function() { return re_blockquote.test(this.src); },
-		do: function() {
+		doit: function() {
 			var m = this.src.match(re_blockquote);
 			var attr = getAttributes(m[1]);
 			var tag = this.makeTag('p',attr);
@@ -674,7 +674,7 @@ var textile;
 	var re_blockcode = new RegExp('^bc'+re_attr.source+'?\\.(\\.)? ');
 	var blockcode = {
 		match: function() { return re_blockcode.test(this.src);},
-		do: function() {
+		doit: function() {
 			var m = this.src.match(re_blockcode);
 			var attr = getAttributes(m[1]);
 			var tag = this.makeTag('code',attr);
@@ -705,7 +705,7 @@ var textile;
 	var re_pre = new RegExp('^pre'+re_attr.source+'?\.(\.)? ');
 	var preBlock = {
 		match: function() { return re_pre.test(this.src);},
-		do: function() {
+		doit: function() {
 			var m = re_pre.exec(this.src);
 			this.src = this.src.slice(m[0].length);
 			var attr = getAttributes(m[1]);
@@ -733,7 +733,7 @@ var textile;
 	var notextile = {
 		match: function() {return re_notextile.test(this.src);},
 
-		do: function() {
+		doit: function() {
 			var m = this.src.match(re_notextile);
 			var carryon = m[2]!=undefined;
 
@@ -760,7 +760,7 @@ var textile;
 	var normalBlock = {
 		match: function() {return re_block.test(this.src);},
 
-		do: function() {
+		doit: function() {
 			var m = this.src.match(re_block);
 			var tagName = m[1];
 			var attr = getAttributes(m[2]);
@@ -788,7 +788,7 @@ var textile;
 	var re_preHTML = /^<pre((?:\s+\w+(?:\s*=\s*(?:".*?"|'.*?'|[^'">\s]+))?)+\s*|\s*)>((?:.|\n(?!\n))*)<\/pre>(?:\n\n|$)/;
 	var preHTMLBlock = {
 		match: function() { return re_preHTML.test(this.src);},
-		do: function() {
+		doit: function() {
 			var m = re_preHTML.exec(this.src);
 			this.src = this.src.slice(m[0].length);
 
@@ -808,7 +808,7 @@ var textile;
 			if(m)
 				return inlineTags.search(m[1])==-1;
 		},
-		do: function() {
+		doit: function() {
 			var html = re_html.exec(this.src)[0];
 			this.src = this.src.slice(html.length);
 			this.out += html;
@@ -818,7 +818,7 @@ var textile;
 
 	var nowrapBlock = {
 		match: function() { return this.src.match(/^ /); },
-		do: function() {
+		doit: function() {
 			var block = this.getBlock();
 			block = this.convertSpan(block);
 			this.out += block;
@@ -828,7 +828,7 @@ var textile;
 
 	var plainBlock = {
 		match: function() { return true;},
-		do: function() {
+		doit: function() {
 			var block = this.getBlock();
 			block = this.convertSpan(block);
 			this.out += para.open+block+para.close;

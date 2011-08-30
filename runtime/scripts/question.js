@@ -130,10 +130,12 @@ Question.prototype =
 			for(var i=0;i<contents.length;i++)
 			{
 				//get all non-whitespace text nodes
-				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*').contents().filter(tnf));
+				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*:not(iframe)').contents().filter(tnf));
 
 				//filter out script nodes
-				textNodes = textNodes.filter(function(){return !$(this).parent().attr('language')});
+				textNodes = textNodes.filter(function(){
+					return !$(this).parent().attr('language')}
+				);
 
 				//run contentsubvars on the collection of text nodes
 				textNodes.each(function(){
@@ -188,6 +190,9 @@ Question.prototype =
 				var tex = jme.display.exprToLaTeX(expr);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}
+
+			//sub into question name
+			q.name = jme.contentsubvars(q.name,q.variables,q.functions);
 		});
 	},
 
@@ -382,7 +387,8 @@ function Part( xml, path, question, parentPart, loading )
 		this.steps[i] = step;
 		this.stepsMarks += step.marks;
 	}
-	this.marks += this.stepsMarks;
+
+	this.markingFeedback = [];
 
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
@@ -398,6 +404,8 @@ Part.prototype = {
 	stepsMarks: 0,			//marks available in the steps, if any
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
+	markingFeedback: [],	//messages explaining awarded marks
+
 	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
 	answerList: undefined,	//student's last submitted answer
 	answered: false,		//has this part been answered
@@ -421,26 +429,42 @@ Part.prototype = {
 	//then calls the display code
 	giveWarning: function(warning)
 	{
-		warning = warning.replace('\n\n','\n<br/>\n');
-		this.display.warning(warning);
+		this.display.warning(textile(warning));
 	},
 
 	//calculate student's score for given answer.
-	calculateScore: function(answerList)
+	calculateScore: function()
 	{
 		if(this.steps.length && this.stepsShown)
 		{
-			this.score = (this.marks - this.stepsMarks) * this.credit; 	//score for main keypart
+			var oScore = this.score = (this.marks - this.settings.stepsPenalty) * this.credit; 	//score for main keypart
 
+			var stepsScore = 0, stepsMarks=0;
 			for(var i=0; i<this.steps.length; i++)
 			{
-				this.score += this.steps[i].score;
+				stepsScore += this.steps[i].score;
+				stepsMarks += this.steps[i].marks;
 			}
-			this.score -= this.settings.stepsPenalty;
 
-			if(this.settings.enableMinimumMarks && this.score < this.settings.minimumMarks)
+			var stepsFraction = Math.max(Math.min(1-this.credit,1),0);	//any credit not earned in main part can be earned back in steps
+
+			this.score += stepsScore;						//add score from steps to total score
+
+
+			this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)	//if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
+
+			if(this.settings.enableMinimumMarks)								//make sure awarded score is not less than minimum allowed
+				this.score = Math.max(this.score,this.settings.minimumMarks);
+
+			if(stepsMarks!=0 && stepsScore!=0)
 			{
-				this.score = this.settings.minimumMarks;
+				if(this.credit==1)
+					this.markingComment("Because you received full marks for the part, your answers to the steps aren't counted.");
+				else
+				{
+					var change = this.score - oScore;
+					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',change,util.pluralise(change,'mark','marks')));
+				}
 			}
 		}
 		else
@@ -448,7 +472,7 @@ Part.prototype = {
 			this.score = this.credit * this.marks;
 		}
 
-		if(this.parentPart)
+		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();
 	},
 
@@ -461,12 +485,25 @@ Part.prototype = {
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
 		this.display.removeWarnings();
+		this.credit = 0;
+		this.markingFeedback = [];
+		this.submitting = true;
+
+		if(this.stepsShown)
+		{
+			var stepsMax = this.marks - this.settings.stepsPenalty;
+			this.markingComment(
+				this.settings.stepsPenalty>0 
+					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')) 
+					: 'You revealed the steps.');
+		}
+
 		if(this.marks==0)
 			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning("No answer submitted.");
-			this.credit = 0;
+			this.setCredit(0,'You did not answer this question.');;
 			this.answered = false;
 		}
 		else
@@ -475,16 +512,31 @@ Part.prototype = {
 			this.mark();
 			this.answered = this.validate();
 		}
-		if(this.answered)
-			this.reportStudentAnswer(this.studentAnswer);
-		else
-			this.reportStudentAnswer('');
 
+		if(this.stepsShown)
+		{
+			for(var i=0;i<this.steps.length;i++)
+			{
+				this.steps[i].submit();
+			}
+		}
 
 		this.calculateScore();
 		this.question.updateScore();
+
+		if(this.answered)
+		{
+			this.reportStudentAnswer(this.studentAnswer);
+			if(!(this.parentPart && this.parentPart.type=='gapfill'))
+				this.markingComment('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
+		}
+		else
+			this.reportStudentAnswer('');
+
 		Numbas.store.partAnswered(this);
 		this.display.showScore(this.answered);
+
+		this.submitting = false;
 	},
 
 	//save the student's answer as a question variable
@@ -500,6 +552,47 @@ Part.prototype = {
 
 	//function which marks the student's answer
 	mark: function() {},
+
+	////////marking feedback helpers
+	setCredit: function(credit,message)
+	{
+		var oCredit = this.credit;
+		this.credit = credit;
+		this.markingFeedback.push({
+			op: 'addCredit',
+			credit: this.credit - oCredit,
+			message: message
+		});
+	},
+
+	addCredit: function(credit,message)
+	{
+		this.credit += credit;
+		this.markingFeedback.push({
+			op: 'addCredit',
+			credit: credit,
+			message: message
+		});
+	},
+
+	multCredit: function(factor,message)
+	{
+		var oCredit = this.credit
+		this.credit *= factor;
+		this.markingFeedback.push({
+			op: 'addCredit',
+			credit: this.credit - oCredit,
+			message: message
+		});
+	},
+
+	markingComment: function(message)
+	{
+		this.markingFeedback.push({
+			op: 'comment',
+			message: message
+		});
+	},
 
 	//is student's answer acceptable?
 	validate: function() { return true; },
@@ -518,7 +611,7 @@ Part.prototype = {
 	{
 		this.display.revealAnswer();
 		this.answered = true;
-		this.credit = 0;
+		this.setCredit(0);
 		this.showSteps();
 		for(var i=0; i<this.steps.length; i++ )
 		{
@@ -573,7 +666,6 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
 	var messageNode = xml.selectSingleNode('answer/minlength/message');
-	var doc = $.xsl.transform(Numbas.xml.templates.question,messageNode);
 	if(messageNode)
 	{
 		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -673,7 +765,7 @@ JMEPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -684,7 +776,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.credit = 0;
+			this.setCredit(0,'Your answer is not a valid mathematical expression.');
 			return;
 		}
 
@@ -699,7 +791,7 @@ JMEPart.prototype =
 		//do comparison of student's answer with correct answer
 		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
-			this.credit = 0;
+			this.setCredit(0,'Your answer is incorrect.');
 			return;
 		}
 
@@ -720,25 +812,33 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.credit = 1;
+		this.setCredit(1,'Your answer is correct.');
 
 		if(this.failMinLength)
 		{
-			this.credit *= this.settings.minLengthPC;
+			this.multCredit(this.settings.minLengthPC,this.settings.minLengthMessage);
 		}
 		if(this.failMaxLength)
 		{
-			this.credit *= this.settings.maxLengthPC;
+			this.multCredit(this.settings.maxLengthPC,this.settings.maxLengthMessage);
 		}
 
 		if(this.failMustHave)
 		{
-			this.credit *= this.settings.mustHavePC;
+			if(this.settings.mustHaveShowStrings)
+			{
+				this.addCredit(0,'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+			}
+			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
 		}
 
 		if(this.failNotAllowed)
 		{
-			this.credit *= this.settings.notAllowedPC;
+			if(this.settings.notAllowedShowStrings)
+			{
+				this.addCredit(0,'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+			}
+			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
 		}
 
 	},
@@ -838,7 +938,7 @@ PatternMatchPart.prototype = {
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -851,24 +951,24 @@ PatternMatchPart.prototype = {
 		{
 			if( caseSensitiveAnswer.test(this.studentAnswer) )
 			{
-				this.credit = 1;
+				this.setCredit(1,'Your answer is correct.');
 			}
 			else if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.credit = this.settings.partialCredit;
+				this.setCredit(this.settings.partialCredit,'Your answer is correct, except for the case.');
 			}
 			else
 			{
-				this.credit = 0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 		}else{
 			if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.credit = 1;
+				this.setCredit(1,'Your answer is correct.');
 			}
 			else
 			{
-				this.credit = 0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 		}
 	},
@@ -925,7 +1025,7 @@ NumberEntryPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not enter an answer.');
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -941,16 +1041,16 @@ NumberEntryPart.prototype =
 			if( this.studentAnswer <= this.settings.maxvalue && this.studentAnswer >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && !util.isInt(this.studentAnswer))
-					this.credit = this.settings.partialCredit;
+					this.setCredit(this.settings.partialCredit,'Your answer is within the allowed range, but decimal numbers are not allowed.');
 				else
-					this.credit=1;
+					this.setCredit(1,'Your answer is correct.');
 			}else{
-				this.credit=0;
+				this.setCredit(0,'Your answer is incorrect.');
 			}
 			this.answered = true;
 		}else{
 			this.answered = false;
-			this.credit = 0;
+			this.setCredit(0,'You did not enter a valid number.');
 		}
 	},
 
@@ -1094,6 +1194,30 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 	}
 	settings.matrix = matrix;
+	var distractors=[];
+	var distractorNodes = this.xml.selectNodes('marking/distractors/distractor');
+	for( i=0; i<distractorNodes.length; i++ )
+	{
+		var cell = {message: ""};
+		tryGetAttribute(cell, distractorNodes[i], ['answerIndex', 'choiceIndex']);
+		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+
+		//take into account shuffling
+		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
+		cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
+
+		if(this.type == '1_n_2' || this.type == 'm_n_2')
+		{	//for some reason, possible answers are recorded as choices in the multiple choice types.
+			//switch the indices round, so we don't have to worry about this again
+			cell.answerIndex = cell.choiceIndex;
+			cell.choiceIndex = 0;
+		}
+
+		if(!distractors[cell.answerIndex])
+			distractors[cell.answerIndex]=[];
+		distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
+	}
+	settings.distractors = distractors;
 	
 	if(this.marks == 0)
 		this.marks = matrixTotal;
@@ -1177,7 +1301,7 @@ MultipleResponsePart.prototype =
 			}
 			break;
 		default:
-			this.stagedAnswer[answerIndex][choiceIndex] = this.answerList[2];
+			this.stagedAnswer[answerIndex][choiceIndex] = answerList[2];
 		}
 	},
 
@@ -1185,10 +1309,11 @@ MultipleResponsePart.prototype =
 	{
 		if(this.stagedAnswer==undefined)
 		{
-			this.credit = 0;
+			this.setCredit(0,'You did not answer this part.');
 			return false;
 		}
 		this.ticks = util.copyarray(this.stagedAnswer);
+		this.setCredit(0);
 
 		this.numTicks = 0;
 		var partScore = 0;
@@ -1200,6 +1325,9 @@ MultipleResponsePart.prototype =
 				{
 					partScore += this.settings.matrix[i][j];
 					this.numTicks += 1;
+
+					if((row = this.settings.distractors[i]) && (message=row[j]))
+						this.addCredit(this.settings.matrix[i][j]/this.marks,message);
 				}
 			}
 		}
@@ -1207,9 +1335,11 @@ MultipleResponsePart.prototype =
 		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
 
 		if(this.marks>0 && !this.wrongNumber)
-			this.credit = Math.min(partScore,this.marks)/this.marks;	//this part might have a maximum number of marks which is less then the sum of the marking matrix
+		{
+			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
+		}
 		else
-			this.credit = 0;
+			this.setCredit(0,'You selected the wrong number of choices.');
 	},
 
 	validate: function()
@@ -1263,10 +1393,12 @@ GapFillPart.prototype =
 
 	submit: function()
 	{
+		this.submitting = true;
 		for(var i=0;i<this.gaps.length;i++)
 		{
 			this.gaps[i].submit();
 		}
+		this.submitting = false;
 	},
 
 	mark: function()
@@ -1277,8 +1409,15 @@ GapFillPart.prototype =
 			for(var i=0; i<this.gaps.length; i++)
 			{
 				var gap = this.gaps[i];
-				gap.mark();
 				this.credit += gap.credit*gap.marks;
+				if(this.gaps.length>1)
+					this.markingComment('*Gap '+(i+1)+'*');
+				for(var j=0;j<gap.markingFeedback.length;j++)
+				{
+					var action = util.copyobj(gap.markingFeedback[j]);
+					action.gap = i;
+					this.markingFeedback.push(action);
+				}
 			}
 			this.credit/=this.marks;
 		}

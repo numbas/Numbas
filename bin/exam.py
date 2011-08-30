@@ -22,6 +22,17 @@ import examparser
 import sys
 import os
 
+class ExamError(Exception):
+	def __init__(self,message,hint=''):
+		self.message = message
+		self.hint = hint
+	
+	def __str__(self):
+		msg = self.message
+		if self.hint:
+			msg += '\nPossible fix: '+self.hint
+		return msg
+
 #data is a DATA object. attr is either a single variable name or a list of names. obj is the object to load the data into. altname is the name of the object property to fill, if different from attr
 #if attr is in data, then obj.attr = data[attr], otherwise no change
 def tryLoad(data,attr,obj,altname=''):
@@ -40,12 +51,13 @@ def tryLoad(data,attr,obj,altname=''):
 				setattr(obj,altname,data[attr])
 
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
-def makeContentNode(s,addHTML=False):
+def makeContentNode(s,doTextile=True):
 	s=str(s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
-	s=textile(s)
-	#if addHTML:
-	#	s='<html>'+s+'</html>'
+	if doTextile:
+		s=textile(s)
+	else:
+		s='<span>'+s+'</span>'
 	return etree.fromstring('<content>'+s+'</content>')
 
 #make an XML element tree. Pass in an array of arrays or strings.
@@ -350,8 +362,8 @@ class Question:
 							])
 
 		question.attrib = {'name': self.name}
-		question.find('statement').append(makeContentNode(self.statement,True))
-		question.find('advice').append(makeContentNode(self.advice,True))
+		question.find('statement').append(makeContentNode(self.statement))
+		question.find('advice').append(makeContentNode(self.advice))
 
 		parts = question.find('parts')
 		for part in self.parts:
@@ -440,6 +452,11 @@ class Part:
 				'gapfill': GapFillPart,
 				'information': InformationPart
 			}
+		if not kind in partConstructors:
+			raise ExamError(
+				'Invalid part type '+kind,
+				'Valid part types are '+', '.join(sorted([x for x in partConstructors]))
+			)
 		part = partConstructors[kind].fromDATA(data)
 
 		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks'],part);
@@ -462,7 +479,7 @@ class Part:
 
 		part.attrib = {'type': self.kind, 'marks': str(self.marks), 'stepspenalty': str(self.stepsPenalty), 'enableminimummarks': str(self.enableMinimumMarks), 'minimummarks': str(self.minimumMarks)}
 
-		part.find('prompt').append(makeContentNode(self.prompt,True))
+		part.find('prompt').append(makeContentNode(self.prompt))
 
 		steps = part.find('steps')
 		for step in self.steps:
@@ -502,7 +519,7 @@ class JMEPart(Part):
 		else:	#dp or sigfig
 			part.checkingAccuracy = 5
 		#get checking accuracy from data, if defined
-		tryLoad(data,'checkingType',part)
+		tryLoad(data,'checkingaccuracy',part)
 
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
@@ -581,7 +598,7 @@ class Restriction:
 			string.text = s
 			restriction.append(string)
 
-		restriction.find('message').append(makeContentNode(self.message,True))
+		restriction.find('message').append(makeContentNode(self.message,doTextile=False))
 
 		return restriction
 
@@ -607,7 +624,7 @@ class PatternMatchPart(Part):
 		part = Part.toxml(self)
 		appendMany(part,['displayanswer','correctanswer','case'])
 		
-		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
+		part.find('displayanswer').append(makeContentNode(self.displayAnswer))
 
 		part.find('correctanswer').text = str(self.answer)
 
@@ -672,10 +689,19 @@ class MultipleChoicePart(Part):
 		self.answers = []
 		self.matrix = []
 
+		self.distractors = []
+
 	@staticmethod
 	def fromDATA(data):
 		kind = data['type']
 		part = MultipleChoicePart(kind)
+		displayTypes = {
+				'1_n_2': 'radiogroup',
+				'm_n_2': 'checkbox',
+				'm_n_x': 'radiogroup'
+		}
+
+		part.displayType = displayTypes[kind]
 		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns'],part)
 
 		if 'minmarks' in data:
@@ -696,11 +722,16 @@ class MultipleChoicePart(Part):
 			if not isinstance(part.matrix[0],list):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
+		if 'distractors' in data:
+			part.distractors = data['distractors']
+			if not isinstance(part.distractors[0],list):
+				part.distractors = [[x] for x in part.distractors]
+
 		return part
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks']])
+		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors']])
 
 		choices = part.find('choices')
 		choices.attrib = {
@@ -712,12 +743,12 @@ class MultipleChoicePart(Part):
 			}
 
 		for choice in self.choices:
-			choices.append(makeTree(['choice',makeContentNode(choice,True)]))
+			choices.append(makeTree(['choice',makeContentNode(choice)]))
 
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
-			answers.append(makeTree(['answer',makeContentNode(answer,True)]))
+			answers.append(makeTree(['answer',makeContentNode(answer)]))
 
 		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}
@@ -731,6 +762,16 @@ class MultipleChoicePart(Part):
 					'value': str(self.matrix[i][j])
 					})
 				matrix.append(mark)
+
+		distractors = marking.find('distractors')
+		for i in range(len(self.distractors)):
+			for j in range(len(self.distractors[i])):
+				distractor = etree.Element('distractor',{
+					'choiceindex': str(i),
+					'answerindex': str(j)
+				})
+				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractors.append(distractor)
 
 		return part
 

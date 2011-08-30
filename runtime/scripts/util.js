@@ -138,6 +138,16 @@ var util = Numbas.util = {
 		return s;
 	},
 
+	formatString: function(str)
+	{
+		var i=0;
+		var re = /%s/;
+		for(var i=1;i<arguments.length;i++)
+		{
+			str=str.replace(/%s/,arguments[i]);
+		}
+		return str;
+	},
 
 	//get rid of the % on the end of percentages and parse as float
 	unPercent: function(s)
@@ -150,6 +160,14 @@ var util = Numbas.util = {
 		if(s===undefined)
 			return '';
 		return s.replace(/\\n/g,'\n');
+	},
+
+	pluralise: function(n,singular,plural)
+	{
+		if(n==-1 || n==1)
+			return singular;
+		else
+			return plural;
 	},
 
 
@@ -330,7 +348,8 @@ textile.phraseTypes.splice(0,0,function(text) {
 		re_inlineMaths.lastIndex = 0;
 	}
 	if(out.length)
-		out[out.length-1] += text;
+		out = this.joinPhraseBits(out,[text],out.length);
+		//out[out.length-1] += text;
 	return out;
 });
 

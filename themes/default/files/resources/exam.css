@@ -154,6 +154,13 @@ html{
 	display:none;
 }
 
+#feedbackMessage {
+	clear:both;
+	text-align:center;
+	padding: 0.5em 0.5em 0 0;
+	border: 1px solid #a2d1f0;
+}
+
 
 /* column container */
 #questionContainer {
@@ -523,5 +530,8 @@ div.jqi button.jqidefaultbutton{
 	input[type="text"], input[type="number"] {
 		border:none;
 		border-bottom: 1px solid;
+	}
+	.btn {
+		display: none;
 	}
 }
