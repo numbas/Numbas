@@ -16,29 +16,30 @@ Copyright 2011 Newcastle University
 
 /*
  This extension allows you to use jsxGraph to create pretty graphs inside question content.
+ Create a graph by writing code inside a <div class="jsxgraph"> tag.
  By default, it uses JessieScript (jsxGraph's simple scripting language for creating geometric constructions).
- You can use javascript by adding the attribute language="javascript" to the <jsxgraph> tag.
+ You can use javascript by adding the attribute language="javascript" to the <div class="jsxgraph"> tag.
 
  Example Usage:
 
  notextile. 	//this line is required so textile doesn't mess anything up
- <jsxgraph>
+ <div class="jsxgraph">
  	A(1,1);
  	B(0,0);
  	[AB[;
- </jsxgraph>
+ </div>
 
  You can specify a width and height:
 
  notextile.
- <jsxgraph width="400" height="300">
+ <div class="jsxgraph" width="400" height="300">
   ....
- </jsxgraph>
+ </div>
 
  Or use javascript for more complicated constructions:
 
  notextile.
- <jsxgraph language="javascript">
+ <div class="jsxgraph" language="javascript">
 		var g1 = board.create('point', [1, -1], {style:6});
 		var g2 = board.create('point', [2.5, -2], {style:6});
 		var g3 = board.create('point', [1, -3], {style:5});
@@ -56,7 +57,7 @@ Copyright 2011 Newcastle University
 					digits:3, 
 					fontsize:function(){return math.abs(g5.y())*10+1;}
 				})
- </jsxgraph>
+ </div>
 */
 
 Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],function() {
@@ -80,7 +81,7 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 			variables[x] = question.variables[x].value;
 		}
 
-		$('jsxgraph').each(function(index) {
+		$('div.jsxgraph').each(function(index) {
 			var id ='jsxgraphboard'+index;
 			var text = $(this).text();
 			var width= $(this).attr('width') || 400;
