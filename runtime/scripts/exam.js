@@ -17,6 +17,7 @@ Copyright 2011 Newcastle University
 
 Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables','jme-display'],function() {
 
+	var job = Numbas.schedule.add;
 
 // exam object keeps track of all info we need to know while exam is running
 var Exam = Numbas.Exam = function()
@@ -188,7 +189,6 @@ Exam.prototype = {
 	//stuff to do when starting exam afresh
 	init: function()
 	{
-		var job = Numbas.schedule.add;
 		var exam = this;
 		job(function() {
 			exam.functions = Numbas.jme.variables.makeFunctions(exam.xml);
@@ -202,24 +202,30 @@ Exam.prototype = {
 	//restore previously started exam from storage
 	load: function()
 	{
-		var suspendData = Numbas.store.load();	//get saved info from storage
+		this.loading = true;
+		var suspendData = Numbas.store.load(this);	//get saved info from storage
 
-		this.timeRemaining = suspendData.timeRemaining;
-		this.questionSubset = suspendData.questionSubset;
-		this.start = new Date(suspendData.start);
-		this.score = suspendData.score;
+		job(function() {
+			this.timeRemaining = suspendData.timeRemaining;
+			this.questionSubset = suspendData.questionSubset;
+			this.numQuestions = this.questionSubset.length;
+			this.start = new Date(suspendData.start);
+			this.score = suspendData.score;
+		},this);
 
-		this.makeQuestionList(true);
+		job(this.makeQuestionList,this,true);
+		job(function() {
+			for(var i=0;i<this.numQuestions;i++)
+			{
+				var q = this.questionList[i];
+			}
+		},this);
 
-		if(suspendData.location!==undefined)
-			this.changeQuestion(suspendData.location);
-
-		for(i=0; i<this.numQuestions; i++)
-		{
-			if(this.questionList[i].visited)
-				this.questionList[i].display.showScore();
-		}
-		this.display.showScore();
+		job(function() {
+			if(suspendData.location!==undefined)
+				this.changeQuestion(suspendData.location);
+			this.loading = false;
+		},this);
 	},
 
 
@@ -274,8 +280,6 @@ Exam.prototype = {
 	//if loading, need to restore randomised variables instead of generating anew
 	makeQuestionList: function(loading)
 	{
-		var job = Numbas.schedule.add;
-
 		this.questionList = [];
 		
 		var questions = this.xml.selectNodes("questions/question");

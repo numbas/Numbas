@@ -31,6 +31,14 @@ var PretendLMS = Numbas.storage.PretendLMS = function()
 	this.objectives = [];
 	this.learner_preference = Numbas.util.copyobj(this.learner_preference);
 	this.score = Numbas.util.copyobj(this.score);
+
+	this.savePrefix = '('+window.location+') ';
+
+	Numbas.debug("Try load",true);
+	this.LoadAll();
+
+	Numbas.debug("Try save",true);
+	this.SaveAll();
 }
 PretendLMS.prototype =
 {
@@ -80,10 +88,44 @@ PretendLMS.prototype =
 
 	//methods
 	
+	Load: function() 	//load suspended data from localStorage
+	{
+		function loadCMI(path) { return window.localStorage['NumbasSCORMcmi.'+path]; }
+
+		if(loadCMI('exit') != 'suspend')
+			return;
+
+		var i,n;
+
+		//load comments from learner
+		n= loadCMI('comments_from_learner._count') || 0;
+		for(i=0;i<n;i++)
+		{
+			
+		}
+	},
+	
+	LoadValue: function( element )
+	{
+		var res = window.localStorage[this.savePrefix+element] || '';
+		if(isInt(res))
+			return parseInt(res);
+		else if(isFloat(res))
+			return parseFloat(res);
+		else
+			return res;
+	},
+	
+	SaveValue: function( element, value )
+	{
+		//Numbas.debug(element+' : '+value);
+		window.localStorage[this.savePrefix+element] = value;
+	},
+
 	SetError: function( errorCode, diagnostic )
 	{
 		if(errorCode>0)
-			//console.log("e"+errorCode,this.errorcodes[errorCode],diagnostic? ": "+diagnostic : '');
+			Numbas.debug("SCORM error: "+errorCode+' '+this.errorcodes[errorCode]+' '+(diagnostic? ": "+diagnostic : ''));
 
 		this.last_error = errorCode;
 		this.last_diagnostic = diagnostic;
@@ -91,8 +133,6 @@ PretendLMS.prototype =
 	
 	Initialize: function( parameter )
 	{
-		//console.log("Initialize");
-
 		if(parameter !== '')
 		{
 			this.SetError(201,"You must pass in an empty string as a parameter to the Initialize function.");
@@ -490,17 +530,25 @@ PretendLMS.prototype =
 		}
 
 		var path = element.split(".");
+		var result;
 		switch(path[0])
 		{
 		case 'cmi':
-			return this.SetCMI(path.slice(1), value);
+			result = this.SetCMI(path.slice(1), value);
+			break;
 		case 'adl':
 			this.SetError(402);	//unimplemented
-			return false;
+			result = false;
+			break;
 		default:
 			this.SetError(401);	//undefined data model element
-			return false;
+			result = false;
+			break;
 		}
+		if(result)
+			this.SaveValue(element,value);
+
+		return result;
 	},
 
 	SetCMI: function( path, value )
@@ -802,6 +850,7 @@ PretendLMS.prototype =
 		{
 			c = new Comment();
 			this.comments_from_learner.push(c);
+			this.SaveValue('cmi.comments_from_learner._count',this.comments_from_learner.length);
 		}
 		else
 		{
@@ -854,6 +903,7 @@ PretendLMS.prototype =
 		{
 			c = new Comment();
 			this.comments_from_lms.push(c);
+			this.SaveValue('cmi.comments_from_lms._count',this.comments_from_lms.length);
 		}
 		else
 		{
@@ -906,8 +956,9 @@ PretendLMS.prototype =
 		{
 			if(path[1]=='id')
 			{
-				i = new Interaction(this);
+				i = new Interaction(this,n);
 				this.interactions.push(i);
+				this.SaveValue('cmi.interactions._count',this.interactions.length);
 			}
 			else
 			{
@@ -1062,6 +1113,7 @@ PretendLMS.prototype =
 			{
 				o = new Objective();
 				this.objectives.push(o);
+				this.SaveValue('cmi.objectives._count',this.objectives.length);
 			}
 			else
 			{
@@ -1199,8 +1251,198 @@ PretendLMS.prototype =
 			this.SetError(143);	//instance terminated
 			return false;
 		case 'Initialized':
+			this.SaveAll();
 			return true;
 		}
+	},
+
+	//save all of data object model to localStorage
+	SaveAll: function()
+	{
+		var lms = this;
+		var save = function(element,value){ if(value !=undefined) {return lms.SaveValue(element,value);} };
+
+		save('cmi.comments_from_learner._count',this.comments_from_learner.length);
+		for(var i=0;i<this.comments_from_learner.length;i++)
+		{
+			save('cmi.comments_from_learner.'+i+'.comment',this.comments_from_learner[i].comment);
+			save('cmi.comments_from_learner.'+i+'.location',this.comments_from_learner[i].location);
+			save('cmi.comments_from_learner.'+i+'.timestamp',this.comments_from_learner[i].timestamp);
+		}
+
+		save('cmi.comments_from_lms._count',this.comments_from_lms.length);
+		for(var i=0;i<this.comments_from_lms.length;i++)
+		{
+			save('cmi.comments_from_lms.'+i+'.comment',this.comments_from_lms[i].comment);
+			save('cmi.comments_from_lms.'+i+'.location',this.comments_from_lms[i].location);
+			save('cmi.comments_from_lms.'+i+'.timestamp',this.comments_from_lms[i].timestamp);
+		}
+
+		save('cmi.completion_status',this.completion_status);
+		save('cmi.exit',this.exit);
+		
+		save('cmi.interactions._count',this.interactions.length);
+		for(var i=0;i<this.interactions._count;i++)
+		{
+			var path = 'cmi.interactions.'+i+'.';
+			var interaction = this.interactions[i];
+			save(path+'id',interaction.id);
+			save(path+'type',interaction.type);
+			save(path+'objectives._count',interaction.objectives.length);
+			for(var j=0;j<interaction.objectives.length;j++)
+			{
+				save(path+'objectives.'+j+'.id',interaction.objectives[j]);
+			}
+			save(path+'timestamp',interaction.timestamp);
+			save(path+'correct_responses._count',interaction.correct_responses.length);
+			for(var j=0;j<interaction.correct_responses.length;j++)
+			{
+				save(path+'correct_responses.'+j+'.pattern',interaction.correct_responses[j]);
+			}
+			save(path+'weighting',interaction.weighting);
+			save(path+'learner_response',interaction.learner_response);
+			save(path+'result',interaction.result);
+			save(path+'latency',interaction.latency);
+			save(path+'description',interaction.description);
+		}
+
+		save('cmi.learner_preference.audio_level',this.learner_preference.audio_level);
+		save('cmi.learner_preference.language',this.learner_preference.language);
+		save('cmi.learner_preference.delivery_speed',this.learner_preference.delivery_speed);
+		save('cmi.learner_preference.audio_captioning',this.learner_preference.audio_captioning);
+		save('cmi.location',this.location);
+
+		save('cmi.objectives._count',this.objectives.length);
+		for(var i=0;i<this.objectives.length;i++)
+		{
+			var path = 'cmi.objectives.'+i+'.';
+			var objective = this.objectives[i];
+			save(path+'id',objective.id);
+			save(path+'score.scaled',objective.score.scaled);
+			save(path+'score.raw',objective.score.raw);
+			save(path+'score.min',objective.score.min);
+			save(path+'score.max',objective.score.max);
+			save(path+'success_status',objective.success_status);
+			save(path+'completion_status',objective.completion_status);
+			save(path+'progress_measure',objective.progress_measure);
+			save(path+'description',objective.description);
+		}
+
+		save('cmi.progress_measure',this.progress_measure);
+		save('cmi.score.scaled',this.score.scaled);
+		save('cmi.score.raw',this.score.raw);
+		save('cmi.score.min',this.score.min);
+		save('cmi.score.max',this.score.max);
+		save('cmi.session_time',this.session_time);
+		save('cmi.success_status',this.success_status);
+		save('cmi.suspend_data',this.suspend_data);
+	},
+
+	LoadAll: function() 
+	{
+		var i,j,n,m;
+
+		var lms = this;
+		var get = function(element){return lms.LoadValue(element); };
+
+		if(get('cmi.exit')!='suspend')
+			return;
+
+		Numbas.debug("SCORM resuming",true);
+
+		var ostate = this.running_state;
+		this.running_state = 'Initialized';
+
+		function load(element)
+		{
+			var val = lms.LoadValue(element)+'';
+			if(val.length)
+				lms.SetValue(element,val);
+		}
+
+		this.entry = 'resume';
+
+		this.comments_from_learner = [];
+		this.comments_from_lms = [];
+		this.interactions = [];
+		this.objectives = [];
+
+		n = get('cmi.comments_from_learner._count');
+		for(i=0;i<n;i++)
+		{
+			var path = 'cmi.comments_from_learner.'+i+'.';
+			load(path+'comment');
+			load(path+'location');
+			load(path+'timestamp');
+		}
+
+		n = get('cmi.comments_from_lms._count');
+		for(i=0;i<n;i++)
+		{
+			var path = 'cmi.comments_from_lms.'+i+'.';
+			load(path+'comment');
+			load(path+'location');
+			load(path+'timestamp');
+		}
+
+		load('cmi.completion_status');
+		this.exit = 'suspend';
+
+		n = get('cmi.interactions._count');
+		for(i=0;i<n;i++)
+		{
+			var path = 'cmi.interactions.'+i+'.';
+			load(path+'id');
+			load(path+'type');
+			m = get(path+'objectives._count');
+			for(j=0;j<m;j++)
+			{
+				load(path+'objectives.'+j+'.id');
+			}
+			load(path+'timestamp');
+			m=get(path+'correct_responses._count');
+			for(j=0;j<m;j++)
+			{
+				load(path+'correct_responses.'+j+'.pattern');
+			}
+			load(path+'weighting');
+			load(path+'learner_response');
+			load(path+'result');
+			load(path+'latency');
+			load(path+'description');
+		}
+
+		load('cmi.learner_preference.audio_level');
+		load('cmi.learner_preference.language');
+		load('cmi.learner_preference.delivery_speed');
+		load('cmi.learner_preference.audio_captioning');
+		load('cmi.location');
+
+		n = get('cmi.objectives._count');
+		for(i=0;i<n;i++)
+		{
+			var path = 'cmi.objectives.'+i+'.';
+			load(path+'id');
+			load(path+'score.raw');
+			load(path+'score.min');
+			load(path+'score.max');
+			load(path+'score.scaled');
+			load(path+'success_status');
+			load(path+'completion_status');
+			load(path+'progress_measure');
+			load(path+'description');
+		}
+
+		load('cmi.progress_measure');
+		load('cmi.score.raw');
+		load('cmi.score.min');
+		load('cmi.score.max');
+		load('cmi.score.scaled');
+		load('cmi.session_time');
+		load('cmi.success_status');
+		load('cmi.suspend_data');
+
+		this.running_state = ostate;
 	},
 
 	GetLastError: function()
@@ -1270,11 +1512,12 @@ Comment.prototype =
 };
 
 
-function Interaction(lms)
+function Interaction(lms,number)
 {
 	this.lms = lms;
 	this.objectives = [];
 	this.correct_responses = [];
+	this.number = number;
 }
 Interaction.prototype = {
 	id: '',								//unique label for interaction												(RW)
@@ -1380,6 +1623,7 @@ Interaction.prototype = {
 		if(n==this.objectives.length)
 		{
 			this.objectives.push(value);
+			this.lms.SaveValue('cmi.interactions.'+this.number+'.objectives._count',this.objectives.length);
 			return true;
 		}
 		else
@@ -1491,7 +1735,7 @@ Interaction.prototype = {
 			return true;
 
 		case 'numeric':
-			var numeric_re = /^(-?\d+(?:\.\d+)?)?:(-?\d+(?:\.\d+)?)?$/;
+			var numeric_re = /^(-?\d+(?:\.\d+)?)?(:(-?\d+(?:\.\d+)?)?)?$/;
 
 			if(!numeric_re.test(value))
 			{

@@ -709,6 +709,8 @@ var jme = Numbas.jme = {
 				if(!argbrackets)
 					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
+				if(expr.search(/\[/)>=0)
+					throw(expr);
 				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;

@@ -70,6 +70,9 @@ var Question = Numbas.Question = function( xml, number, loading, gvariables, gfu
 	{
 		q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
 		q.followVariables = {};
+		
+		//initialise display - get question HTML, make menu item, etc.
+		q.display = new Numbas.display.QuestionDisplay(q);
 
 		//load parts
 		q.parts=new Array();
@@ -81,9 +84,23 @@ var Question = Numbas.Question = function( xml, number, loading, gvariables, gfu
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
-		
-		//initialise display - get question HTML, make menu item, etc.
-		q.display = new Numbas.display.QuestionDisplay(q);
+
+		if(loading)
+		{
+			var qobj = Numbas.store.loadQuestion(q);
+
+			q.adviceDisplayed = qobj.adviceDisplayed;
+			q.answered = qobj.answered;
+			q.revealed = qobj.revealed;
+			q.submitted = qobj.submitted;
+			q.visited = qobj.visited;
+			q.score = qobj.score;
+
+			if(q.revealed)
+				q.revealAnswer(true);
+			else if(q.adviceDisplayed)
+				q.getAdvice(true);
+		}
 	});
 
 }
@@ -108,6 +125,164 @@ Question.prototype =
 
 	display: undefined,		//display code
 
+	makeVariables: function(loading)
+	{
+		var q = this;
+		var myfunctions = q.functions = {};
+		var tmpFunctions = [];
+		job(function()
+		{
+			//get question's name
+			tryGetAttribute(q,'.','name');
+
+
+			q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
+
+			//work out functions
+			var functionNodes = q.xml.selectNodes('functions/function');
+
+			//first pass: get function names and types
+			for(var i=0; i<functionNodes.length; i++)
+			{
+				var name = functionNodes[i].getAttribute('name').toLowerCase();
+
+				var definition = functionNodes[i].getAttribute('definition');
+
+				var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
+				var outcons = Numbas.jme.types[outtype];
+
+				var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
+				var paramNames = [];
+				var intype = [];
+				for(var j=0; j<parameterNodes.length; j++)
+				{
+					var paramName = parameterNodes[j].getAttribute('name');
+					var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
+					paramNames.push(paramName);
+					var incons = Numbas.jme.types[paramType];
+					intype.push(incons);
+				}
+
+				var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
+				tmpfunc.definition = definition;
+				tmpfunc.paramNames = paramNames;
+
+				if(q.functions[name]===undefined)
+					q.functions[name] = [];
+				q.functions[name].push(tmpfunc);
+				tmpFunctions.push(tmpfunc);
+			}
+		});
+
+		job(function()
+		{
+			//second pass: compile functions
+			for(var i=0; i<tmpFunctions.length; i++)
+			{
+				tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,q.functions);
+
+				tmpFunctions[i].evaluate = function(args,variables,functions)
+				{
+					nvariables = Numbas.util.copyobj(variables);
+
+					for(var j=0;j<args.length;j++)
+					{
+						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+					}
+					return jme.evaluate(this.tree,nvariables,functions);
+				}
+			}
+		});
+
+		job(function()
+		{
+			//evaluate question variables
+			q.variables = {};
+			if(loading)
+			{
+				var qobj = Numbas.store.loadQuestion(q);
+				for(var x in qobj.variables)
+				{
+					q.variables[x] = qobj.variables[x];
+				}
+			}
+			else
+			{
+				var variableNodes = q.xml.selectNodes('variables/variable');	//get variable definitions out of XML
+
+				//list of variable names to ignore because they don't make sense
+				var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
+
+				//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
+				var todo = {};
+				for( var i=0; i<variableNodes.length; i++ )
+				{
+					var name = variableNodes[i].getAttribute('name').toLowerCase();
+					if(!ignoreVariables.contains(name))
+					{
+						var value = variableNodes[i].getAttribute('value');
+
+						var vars = [];
+						//get vars referred to in string definitions like "hi {name}"
+						/*
+						var stringvars = value.split(/{(\w+)}/g);
+						for(var j=1;j<stringvars.length;j+=2)
+						{
+							if(!vars.contains(stringvars[j]))
+								vars.push(stringvars[j].toLowerCase());
+						}
+						*/
+
+						var tree = jme.compile(value,q.functions);
+						vars = vars.merge(jme.findvars(tree));
+						todo[name]={
+							tree: tree,
+							vars: vars
+						};
+					}
+				}
+				function compute(name,todo,variables,path)
+				{
+					if(variables[name]!==undefined)
+						return;
+
+					if(path===undefined)
+						path=[];
+
+
+					if(path.contains(name))
+					{
+						alert("Circular variable reference in question "+name+' '+path);
+						return;
+					}
+
+					var v = todo[name];
+
+					if(v===undefined)
+						throw(new Error("Variable "+name+" not defined."));
+
+					//work out dependencies
+					for(var i=0;i<v.vars.length;i++)
+					{
+						var x=v.vars[i];
+						if(variables[x]===undefined)
+						{
+							var newpath = path.slice(0);
+							newpath.splice(0,0,name);
+							compute(x,todo,variables,newpath);
+						}
+					}
+
+					variables[name] = jme.evaluate(v.tree,variables,myfunctions);
+				}
+				for(var x in todo)
+				{
+					compute(x,todo,q.variables);
+				}
+			}
+
+		});
+	},
 
 	subvars: function()
 	{
@@ -203,34 +378,40 @@ Question.prototype =
 	},
 
 	//trigger advice
-	getAdvice: function()
+	getAdvice: function(loading)
 	{
 		this.adviceDisplayed = true;
-		this.display.showAdvice(true);
-		Numbas.store.adviceDisplayed(this);
+		if(!loading)
+		{
+			this.display.showAdvice(true);
+			Numbas.store.adviceDisplayed(this);
+		}
 	},
 
 	//reveal correct answer to student
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
 		this.revealed = true;
 		this.answered = true;
 		
 		//display advice if allowed
-		this.getAdvice();
+		this.getAdvice(loading);
 
 		//part-specific reveal code. Might want to do some logging in future? 
 		for(var i=0; i<this.parts.length; i++)
-			this.parts[i].revealAnswer();
-
-		//display revealed answers
-		this.display.revealAnswer();
+			this.parts[i].revealAnswer(loading);
 
 		this.score = 0;
 
-		this.display.showScore();
+		if(!loading)
+		{
+			//display revealed answers
+			this.display.revealAnswer();
 
-		Numbas.store.answerRevealed(this);
+			this.display.showScore();
+
+			Numbas.store.answerRevealed(this);
+		}
 
 		Numbas.exam.updateScore();
 	},
@@ -392,6 +573,12 @@ function Part( xml, path, question, parentPart, loading )
 
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
+
+	if(loading)
+	{
+		var pobj = Numbas.store.loadPart(this);
+		this.answered = pobj.answered;
+	}
 }
 
 Part.prototype = {
@@ -598,24 +785,28 @@ Part.prototype = {
 	validate: function() { return true; },
 
 	//reveal the steps
-	showSteps: function()
+	showSteps: function(loading)
 	{
 		this.stepsShown = true;
 		this.calculateScore();
-		this.display.showSteps();
-		this.question.updateScore();
+		if(!loading)
+		{
+			this.display.showSteps();
+			this.question.updateScore();
+		}
 	},
 
 	//reveal the correct answer
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
-		this.display.revealAnswer();
+		if(!loading)
+			this.display.revealAnswer();
 		this.answered = true;
 		this.setCredit(0);
-		this.showSteps();
+		this.showSteps(loading);
 		for(var i=0; i<this.steps.length; i++ )
 		{
-			this.steps[i].revealAnswer();
+			this.steps[i].revealAnswer(loading);
 		}
 	}
 
@@ -713,7 +904,9 @@ function JMEPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer];
+		if(this.answered)
+			this.submit();
 	}
 }
 
@@ -920,7 +1113,9 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer];
+		if(this.answered)
+			this.submit();
 	}
 }
 PatternMatchPart.prototype = {
@@ -1004,7 +1199,9 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	if(loading)
 	{
 		var pobj = Numbas.store.loadPart(this);
-		this.studentAnswer = pobj.studentAnswer;
+		this.stagedAnswer = [pobj.studentAnswer+''];
+		if(this.answered)
+			this.submit();
 	}
 }
 NumberEntryPart.prototype =
@@ -1248,14 +1445,17 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//restore saved choices
 	if(loading)
 	{
-		for( i=0;i<this.numAnswers;i++)
+		for( i=0;i<this.settings.numAnswers;i++)
 		{
-			for(j=0;j<this.numChoices;j++)
+			for(j=0;j<this.settings.numChoices;j++)
 			{
 				if( (flipped && (pobj.ticks[j][i])) || (!flipped && pobj.ticks[i][j]) )
-					this.ticks[i][j]=true;
+					this.stagedAnswer[i][j]=true;
+					this.stagedAnswer[i][j]=true;
 			}
 		}
+		if(this.answered)
+			this.submit();
 	}
 
 	//if this part has a minimum number of answers more than zero, then
@@ -1380,15 +1580,21 @@ function GapFillPart(xml, path, question, parentPart, loading)
 	}
 
 	this.display = new Numbas.display.GapFillPartDisplay(this);
+
+	if(loading)
+	{
+		if(this.answered)
+			this.submit();
+	}
 }	
 GapFillPart.prototype =
 {
 	stagedAnswer: 'something',
 
-	revealAnswer: function()
+	revealAnswer: function(loading)
 	{
 		for(var i=0; i<this.gaps.length; i++)
-			this.gaps[i].revealAnswer();
+			this.gaps[i].revealAnswer(loading);
 	},
 
 	submit: function()

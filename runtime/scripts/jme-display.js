@@ -541,7 +541,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 
 //turns an evaluation tree back into a JME expression
 //(used when an expression is simplified)
-function treeToJME(tree)
+var treeToJME = jme.display.treeToJME = function(tree)
 {
 	var args=tree.args, l;
 

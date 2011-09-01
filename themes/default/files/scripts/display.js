@@ -17,6 +17,8 @@ Copyright 2011 Newcastle University
 //Display code
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
+	
+	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
 	var util = Numbas.util;
 
@@ -77,10 +79,9 @@ var display = Numbas.display = {
 	{
 		try
 		{
-			var queue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
-			queue.Push(['Typeset',MathJax.Hub,elem]);
+			MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
 			if(callback)
-				queue.Push(callback);
+				MathJaxQueue.Push(callback);
 		}
 		catch(e)
 		{
@@ -264,7 +265,6 @@ display.ExamDisplay.prototype =
 			$('#infoDisplay').getTransform(Numbas.xml.templates.suspend,exam.xmlize());
 		
 			$('#resumeBtn').click( Numbas.controls.resumeExam );
-			$('#endBtn').click( Numbas.controls.endExam );
 
 			break;
 		
@@ -328,6 +328,9 @@ display.QuestionDisplay.prototype =
 
 		//hides the info page, if visible
 		$('#infoDisplay').hide();
+
+		//display the question container - content and nav bars
+		$('#questionContainer').show();
 		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
@@ -336,9 +339,6 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
 		$('#revealBtn').show().removeAttr('disabled');
-
-		//display the question container - content and nav bars
-		$('#questionContainer').show();
 
 		//display question's html
 		
@@ -374,6 +374,9 @@ display.QuestionDisplay.prototype =
 		//display advice if appropriate
 		this.showAdvice();
 
+		// make mathjax process the question text (render the maths)
+		Numbas.display.typeset($('#questionDisplay')[0],this.postTypesetF);
+
 		//show/hide reveal answer button
 		if(exam.allowRevealAnswer)
 			$('#revealBtn').show();
@@ -386,9 +389,6 @@ display.QuestionDisplay.prototype =
 		//display score if appropriate
 		this.showScore();
 		
-		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset(null,this.postTypesetF);
-
 		//make input elements report when they get and lose focus
 		$('input')	.blur( function(e) { Numbas.display.inInput = false; } )
 					.focus( function(e) { Numbas.display.inInput = true; } );
@@ -447,6 +447,11 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').attr('disabled','true');
 		//hide reveal button
 		$('#revealBtn').hide();
+
+		for(var i=0;i<this.q.parts.length;i++)
+		{
+			this.q.parts[i].display.revealAnswer();
+		}
 	},
 
 	//display question score and answer state
@@ -1178,12 +1183,13 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 		var lis = div.find('li');
 		var divHeight = div.height();
+		var maxI = 0;
 		for(var j=0;j<lis.length;j++)
 		{
 			var y = lis.eq(j).position().top - listOffset;
 			if(listHeight - y < divHeight)
 			{
-				var maxI = j;
+				maxI = j;
 				break;
 			}
 		}
