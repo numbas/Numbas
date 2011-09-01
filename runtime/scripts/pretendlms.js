@@ -34,10 +34,8 @@ var PretendLMS = Numbas.storage.PretendLMS = function()
 
 	this.savePrefix = '('+window.location+') ';
 
-	Numbas.debug("Try load",true);
 	this.LoadAll();
 
-	Numbas.debug("Try save",true);
 	this.SaveAll();
 }
 PretendLMS.prototype =
@@ -1348,7 +1346,7 @@ PretendLMS.prototype =
 		if(get('cmi.exit')!='suspend')
 			return;
 
-		Numbas.debug("SCORM resuming",true);
+		//Numbas.debug("SCORM resuming",true);
 
 		var ostate = this.running_state;
 		this.running_state = 'Initialized';

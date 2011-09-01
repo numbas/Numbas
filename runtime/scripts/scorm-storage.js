@@ -556,7 +556,7 @@ SCORMStorage.prototype = {
 			return;
 		//update total exam score and so on
 		this.set('score.raw',exam.score);
-		this.set('score.scaled',exam.score/exam.mark);
+		this.set('score.scaled',exam.score/exam.mark || 0);
 
 		var id = this.getQuestionId(question);
 		var index = this.questionIndices[id];
@@ -564,7 +564,7 @@ SCORMStorage.prototype = {
 		var prepath = 'objectives.'+index+'.';
 
 		this.set(prepath+'score.raw',question.score);
-		this.set(prepath+'score.scaled',question.score/question.marks);
+		this.set(prepath+'score.scaled',question.score/question.marks || 0);
 		this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
 		this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
 	},

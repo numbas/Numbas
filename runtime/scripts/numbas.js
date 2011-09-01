@@ -67,7 +67,7 @@ Numbas.showError = function(e)
 // - display the frontpage
 // This function is called when all the other scripts have been loaded and executed. 
 // It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
-function init()
+var init = Numbas.init = function()
 {
 	var job = Numbas.schedule.add;
 
@@ -242,7 +242,7 @@ function tryInit()
 			}
 		}
 	}
-	init();
+	Numbas.init();
 }
 
 $(document).ready(function() {

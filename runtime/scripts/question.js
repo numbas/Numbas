@@ -422,7 +422,7 @@ Question.prototype =
 		var success = true;
 		for(i=0; i<this.parts.length; i++)
 		{
-			success = success && this.parts[i].answered;
+			success = success && (this.parts[i].answered || this.parts[i].marks==0);
 		}
 		return success;
 	},
