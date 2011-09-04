@@ -48,6 +48,8 @@
       directory of a compiled exam (see \S\ref{sec:resources}). & \verb"[]" \\
       \codepropreq{questions} & An array of \codeobject{question} objects (see
       chapter~\ref{cha:question_object}). & \nodef \\
+      \codeprop{rulesets} & An object defining the user-defined rule sets 
+      to be used for simplification, rearrangement or display(see \S\ref{sec:simplification}). &\verb"{}"\\
       \hline\hline
     \end{tabular}
     \caption{\label{tab:exam_object}
@@ -409,5 +411,7 @@
   example, the path to the image is \verb"resources/graph.png".  Images and
   videos can be included in \codecontent{content} blocks, which are described
   later in chapter~\ref{cha:content_blocks}.
+ \section{\label{sec:simplification}Simplification}
+ You can use standard in-built simplification rules or user-defined rules in order to simplify, rearrange or display mathematical expressions for feedback to the users. This is particularly useful when you are supplying complete solutions. More details can be found in chapter ~\ref{cha:content_blocks}, sections ~\ref{sec:simplification}, ~\ref{sec:Rule Sets Standard} and  ~\ref{sec:New rules}.
 
 \end{chapter}
