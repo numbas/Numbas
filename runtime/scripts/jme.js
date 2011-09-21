@@ -16,6 +16,8 @@ Copyright 2011 Newcastle University
 */
 
 Numbas.queueScript('scripts/jme.js',['math','util'],function() {
+	var util = Numbas.util;
+
 var jme = Numbas.jme = {
 
 	tokenise: function(expr)
@@ -55,7 +57,7 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_bool))
 			{
-				token = new TBool(Numbas.util.parseBool(result[0]));
+				token = new TBool(util.parseBool(result[0]));
 			}
 			else if (result = expr.match(re_op))
 			{
@@ -122,7 +124,7 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_string))
 			{
 				var string = result[2] || result[4];
-				string = Numbas.util.escapeString(string);
+				string = string.replace(/\\n/g,'\n');
 				token = new TString(string);
 			}
 			else if (result = expr.match(re_special))
@@ -420,7 +422,7 @@ var jme = Numbas.jme = {
 		if(functions===undefined)
 			functions = {};
 		else
-			functions = Numbas.util.copyobj(functions);
+			functions = util.copyobj(functions);
 		for(var x in builtins)
 		{
 			if(functions[x]===undefined)
@@ -476,7 +478,7 @@ var jme = Numbas.jme = {
 		if(functions===undefined)
 			functions = {};
 		else
-			functions = Numbas.util.copyobj(functions);
+			functions = util.copyobj(functions);
 		for(var x in builtins)
 		{
 			if(functions[x]===undefined)
@@ -605,7 +607,7 @@ var jme = Numbas.jme = {
 				var errors = 0;
 				var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
 				for(var i = 0; i<rs.length; i++) {
-					Numbas.util.copyinto(variables,rs[i]);
+					util.copyinto(variables,rs[i]);
 					var r1 = evaluate(tree1,rs[i]);
 					var r2 = evaluate(tree2,rs[i]);
 					if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
@@ -630,7 +632,7 @@ var jme = Numbas.jme = {
 
 	contentsubvars: function(str, variables,functions)
 	{
-		var bits = Numbas.util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+		var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
 		var out='';
 		for(var i=0; i<bits.length; i++)
 		{
@@ -724,7 +726,7 @@ var jme = Numbas.jme = {
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
 	subvars: function(str, variables,functions,display)
 	{
-		var bits = splitbrackets(str,'{','}');
+		var bits = util.splitbrackets(str,'{','}');
 		if(bits.length==1)
 		{
 			return str;
@@ -794,7 +796,7 @@ var jme = Numbas.jme = {
 
 		var evaluate = function(variables)
 		{
-			var newvars = Numbas.util.copyobj(variables);
+			var newvars = util.copyobj(variables);
 			for(var i=0;i<this.paramtypes.length;i++)
 			{
 				var name = this.paramtypes[i][0];
@@ -1160,7 +1162,7 @@ new funcObj('re', [TNum], TNum, math.re );
 new funcObj('im', [TNum], TNum, math.im );
 new funcObj('conj', [TNum], TNum, math.conjugate );
 
-new funcObj('isint',[TNum],TBool, function(a){ return Numbas.util.isInt(a); });
+new funcObj('isint',[TNum],TBool, function(a){ return util.isInt(a); });
 
 new funcObj('sqrt', [TNum], TNum, math.sqrt );
 new funcObj('ln', [TNum], TNum, math.log );
@@ -1320,7 +1322,7 @@ funcs.maplist.evaluate = function(args,variables,functions)
 	var list = jme.evaluate(args[2],variables,functions);
 	var newlist = new TList(list.size,[]);
 	var name = args[1].tok.name;
-	variables = Numbas.util.copyobj(variables);
+	variables = util.copyobj(variables);
 	for(var i=0;i<list.value.length;i++)
 	{
 		variables[name] = list.value[i];
@@ -1335,7 +1337,7 @@ funcs.maprange.evaluate = function(args,variables,functions)
 	var range = jme.evaluate(args[2],variables,functions);
 	var name = args[1].tok.name;
 	var newlist = new TList(range.size);
-	var variables = Numbas.util.copyobj(variables);
+	var variables = util.copyobj(variables);
 	for(var i=3;i<range.value.length;i++)
 	{
 		variables[name] = new TNum(range.value[i]);
@@ -1447,56 +1449,5 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 		return r1.value == r2.value;
 	}
 };
-
-/*                    MATHS FUNCTIONS                */
-
-
-
-
-
-
-//split a string up between curly braces
-//so a{b}c -> ['a','b','c']
-var splitbrackets = jme.splitbrackets = function(t,lb,rb)
-{
-	var o=[];
-	var l=t.length;
-	var s=0;
-	var depth=0;
-	for(var i=0;i<l;i++)
-	{
-		if(t.charAt(i)==lb && !(i>0 && t.charAt(i-1)=='\\'))
-		{
-			depth+=1;
-			if(depth==1)
-			{
-				o.push(t.slice(s,i));
-				s=i+1;
-			}
-			else
-			{
-				t = t.slice(0,i)+t.slice(i+1);
-				i-=1;
-			}
-		}
-		else if(t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
-		{
-			depth-=1;
-			if(depth==0)
-			{
-				o.push(t.slice(s,i));
-				s=i+1;
-			}
-			else
-			{
-				t = t.slice(0,i)+t.slice(i+1);
-				i -= 1;
-			}
-		}
-	}
-	if(s<l)
-		o.push(t.slice(s));
-	return o;
-}
 
 });

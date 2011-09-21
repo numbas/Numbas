@@ -23,38 +23,40 @@ var jme = Numbas.jme;
 jme.display = {
 
 	//convert a JME expression to LaTeX
-	//settings can be anything accepted by jme.display.collectRuleset
-	//settings are also passed through to the texify function
+	//settings can be anything accepted by jme.display.collectRuleset, ie an array of names of rulesets or Rule objects
+	//settings are also passed through to the texify function, for things like fractionNumbers display
 	exprToLaTeX: function(expr,settings)
 	{
-		if(!settings)
+		if(!settings)		//settings argument can be omitted, in which case no simplification is applied
 			settings = [];
 
-		expr+='';
-		if(!expr.trim().length)
+		expr+='';	//make sure expr is a string
+
+		if(!expr.trim().length)	//if expr is the empty string, don't bother going through the whole compilation proces
 			return '';
-		var tree = jme.display.simplify(expr,settings);
-		var tex = texify(tree,settings);
+
+		var tree = jme.display.simplify(expr,settings);	//compile the expression to a tree and simplify it
+		var tex = texify(tree,settings);	//render the tree as TeX
 		return tex;
 	},
 
-	//simplify a JME expression and return it as a JME string
+	//simplify a JME expression string according to given ruleset and return it as a JME string
 	simplifyExpression: function(expr,ruleset)
 	{
 		return treeToJME(jme.display.simplify(expr,ruleset));
 	},
 
-	//simplify a JME expression and return it as a syntax tree
+	//simplify a JME expression string according to given ruleset and return it as a syntax tree
 	simplify: function(expr,ruleset)
 	{
-		if(!ruleset)
+		if(!ruleset)		//if ruleset is omitted, use just the basic simplification rules
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,Numbas.exam.rulesets);
+		ruleset = collectRuleset(ruleset,Numbas.exam.rulesets);		//collect the ruleset - replace set names with the appropriate Rule objects
 
 		try 
 		{
-			var exprTree = jme.compile(expr,{},true);
-			return jme.display.simplifyTree(exprTree,ruleset);
+			var exprTree = jme.compile(expr,{},true);	//compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+			return jme.display.simplifyTree(exprTree,ruleset);	// simplify the tree
 		}
 		catch(e) 
 		{
@@ -63,18 +65,22 @@ jme.display = {
 		}
 	},
 
+	//simplify a syntax tree according to given ruleset
 	simplifyTree: function(exprTree,rules)
 	{
 		var applied = true;
+
+		// apply rules until nothing can be done
 		while( applied )
 		{
-			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')
+			//the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
+			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')	
 			{
 				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0])};
 			}
 			else
 			{
-				if(exprTree.args)
+				if(exprTree.args)	//if this token is an operation with arguments, try to simplify the arguments first
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
@@ -82,15 +88,12 @@ jme.display = {
 					}
 				}
 				applied = false;
-				for( var i=0; i<rules.length;i++)
+				for( var i=0; i<rules.length;i++)	//check each rule
 				{
 					var match;
-					if(match = rules[i].match(exprTree))
+					if(match = rules[i].match(exprTree))	//if rule can be applied, apply it!
 					{
-						//Numbas.debug("match rule "+rules[i].patternString,true);
-						//Numbas.debug(treeToJME(exprTree),true);
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
-						//Numbas.debug(treeToJME(exprTree),true);
 						applied = true;
 						break;
 					}
@@ -102,7 +105,17 @@ jme.display = {
 };
 
 
-//gets the LaTeX version of an op argument - applies brackets if appropraite
+/// all private methods below here
+
+
+
+// texify turns a syntax tree into a TeX string
+//
+// data types can be converted to TeX straightforwardly, but operations and functions need a bit more care
+// the idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
+
+
+//apply brackets to an op argument if appropraite
 function texifyOpArg(thing,texArgs,i)
 {
 	var precedence = jme.precedence;
@@ -113,12 +126,13 @@ function texifyOpArg(thing,texArgs,i)
 		var op2 = thing.tok.name;			//parent op
 		var p1 = precedence[op1];	//precedence of child op
 		var p2 = precedence[op2];	//precedence of parent op
-		if( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
+
 		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
+		if( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
 			tex = '\\left ( '+tex+' \\right )';
 	}
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') )	
 	//complex numbers might need brackets round them when multiplied with something else or unary minusing
+	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') )	
 	{
 		var v = thing.args[i].tok.value;
 		if(!(v.re==0 || v.im==0))
@@ -128,16 +142,18 @@ function texifyOpArg(thing,texArgs,i)
 }
 
 // helper function for texing infix operators
+// returns a function which will convert a syntax tree with the operator at the top to TeX
+// 'code' is the TeX code for the operator
 function infixTex(code)
 {
 	return function(thing,texArgs)
 	{
 		var arity = jme.builtins[thing.tok.name][0].intype.length;
-		if( arity == 1 )
+		if( arity == 1 )	//if operation is unary, prepend argument with code
 		{
 			return code+texArgs[0];
 		}
-		else if ( arity == 2 )
+		else if ( arity == 2 )	//if operation is binary, put code in between arguments
 		{
 			return texArgs[0]+' '+code+' '+texArgs[1];
 		}
@@ -145,6 +161,7 @@ function infixTex(code)
 }
 
 //helper for texing nullary functions
+//returns a function which returns the appropriate (constant) code
 function nullaryTex(code)
 {
 	return function(thing,texArgs){ return '\\textrm{'+code+'}'; };
@@ -159,51 +176,70 @@ function funcTex(code)
 	}
 }
 
+// define how to texify each operation and function
 var texOps = {
-	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
+	//range definition. Should never really be seen
+	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
+
+	//subscript
 	'_': (function(thing,texArgs) { return texArgs[0]+'_{'+texArgs[1]+'}'; }),
-	'!': infixTex('\\neg '),
-	'+u': infixTex('+'),
-	'-u': (function(thing,texArgs) { 
+
+	//logical negation
+	'!': infixTex('\\neg '),	
+
+	//unary addition
+	'+u': infixTex('+'),	
+
+	//unary minus
+	'-u': (function(thing,texArgs) {
 		var tex = texArgs[0];
 		if( thing.args[0].tok.type=='op' )
 		{
 			var op = thing.args[0].tok.name;
-			//if(!( thing.args[0].tok.name=='*' || thing.args[0].tok.name=='/' ))
-			if(jme.precedence[op]>jme.precedence['-u'])
+			if(jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
 			{
 				tex='\\left ( '+tex+' \\right )';
 			}
 		}
 		return '-'+tex;
 	}),
-	'^': (function(thing,texArgs) { 
+
+	//exponentiation
+	'^': (function(thing,texArgs) {
 		var tex0 = texArgs[0];
+		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
 		if(thing.args[0].tok.type=='op')
-			tex0 = '\\left ( ' +tex0+' \\right )';
+			tex0 = '\\left ( ' +tex0+' \\right )';	
 		return (tex0+'^{ '+texArgs[1]+' }');
 	}),
+
+
 	'*': (function(thing,texArgs) {
 		var s = texifyOpArg(thing,texArgs,0);
 		for(var i=1; i<thing.args.length; i++ )
 		{
-			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special' || (thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='_') || (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='_'))	//specials or subscripts
+			//specials or subscripts
+			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special' || (thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='_') || (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='_'))	
 			{
 				s+=' ';
 			}
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	//anything times e^(something) or (not number)^(something)
+			//anything times e^(something) or (not number)^(something)
+			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
 			{
 				s+=' ';
 			}
-			else if (thing.args[i].tok.type=='number' && (thing.args[i].tok.value==Math.PI || thing.args[i].tok.value==Math.E || thing.args[i].tok.value.complex) && thing.args[i-1].tok.type=='number')	//number times Pi or E
+			//number times Pi or E
+			else if (thing.args[i].tok.type=='number' && (thing.args[i].tok.value==Math.PI || thing.args[i].tok.value==Math.E || thing.args[i].tok.value.complex) && thing.args[i-1].tok.type=='number')	
 			{
 				s+=' ';
 			}
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	//number times a power of i
+			//number times a power of i
+			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	
 			{
 				s+=' ';
 			}
-			else if ( thing.args[i].tok.type=='number'
+			//any other kind of number or, an operation which would be evaluated before the multiplication and has a number as its left operand, needs a times symbol
+			else if ( thing.args[i].tok.type=='number'	
 					|| (!(thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='-u') &&
 						(thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] && thing.args[i].tok.name!='-u' && (thing.args[i].args[0].tok.type=='number' && thing.args[i].args[0].tok.value!=Math.E))
 						)

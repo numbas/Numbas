@@ -17,6 +17,7 @@ Copyright 2011 Newcastle University
 
 // controls.js
 // wrappers for the various navigation actions the user can do
+// the assumption is that these should only be called in response to some event the user triggers, by clicking or whatever.
 
 Numbas.queueScript('scripts/controls.js',['schedule'],function() {
 
