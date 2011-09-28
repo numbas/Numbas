@@ -1,0 +1,210 @@
+#This file contains an informal schema for the .exam format. 
+#This isn't intended to demonstrate how to write an .exam file - it is just a reference for the general structure.
+
+#exam object
+{
+	name: string
+	duration: number
+	percentPass: number			#a percentage, so 50 instead of 0.5 for 50%
+	shuffleQuestions: boolean
+	resources: [strings]		#a list of paths to include, relative to path of .exam file. Can be individual files or directories
+	extensions: [strings]		#a list of names of extensions to include. Extensions are in NUMBAS_PATH/extensions
+
+	navigation: {
+		reverse: boolean		#allow student to move backwards to previous question
+		browse: boolean			#allow student to jump forwards or backwards to any question
+		showfrontpage: boolean	#show front page intro message if true, or got straight into first question if false
+
+		onadvance: {			#what to do when student tries to move to next question without finishing current question
+			action: string		#none, warnifunattempted, or preventifunattempted
+			message: string
+		}
+		onreverse: {			#what to do when student tries to move to previous question without finishing current question
+			action: string		#as onadvancce
+			message: string
+		}
+		onmove: {				#what to do when student tries to move to any other question without finishing current question
+			action: string		#as onadvance
+			message: string
+		}
+	}
+
+	timing: {
+		timeout: {				#what to do when time has run out
+			action: string		#none or warn
+			message: string
+		}
+		timedwarning: {			#what to do five minutes before time runs out
+			action: string
+			message: string
+		}
+	}
+
+	feedback: {
+		showactualmark: boolean		#show student their score for parts/questions?
+		showtotalmark: boolean		#show student total marks available for parts/questions?
+		showanswerstate: boolean	#show student tick/cross/question mark corresponding to how they performed in parts/questions?
+		allowrevealanswer: boolean	#allow student to reveal correct answer to questions?
+
+		advice: {
+			threshold: number		#percentage score for questions below which advice is automatically revealed
+		}
+	}
+
+	rulesets: {
+		setname: [strings, or 				#a list of either names of rulesets, or new rule definitions
+					{
+						pattern: string			#pattern to match in order to apply this rule
+						conditions: [string]	#a list of boolean conditions (in JME syntax) matched expression must satisfy
+						result: string			#expression to rewrite matched expression to
+					}]
+	}
+
+	functions: {
+		functionname: {
+			parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. Type can be any of: number, string, boolean, range, list, or the other JME types.
+			outtype: string		#the type of the value returned by the function
+			definition: string	#definition of the function, as a JME expression with respect to the parameters named in the list above
+		}
+	}
+
+	variables: {
+		variablename: string		#JME expression to define variable 'variablename'
+	}
+
+	questions: [	#an array of question objects
+		{
+			name: string
+			statement: string
+			advice: string
+
+			functions: {
+				functionname: {
+					parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. Type can be any of: number, string, boolean, range, list, or the other JME types.
+					outtype: string		#the type of the value returned by the function
+					definition: string	#definition of the function, as a JME expression with respect to the parameters named in the list above
+				}
+			}
+
+			variables: {
+				variablename: string		#JME expression to define variable 'variablename'
+			}
+
+			parts: [	#an array of part objects
+
+				#all part objects have the following properties
+				{
+					type: string	#the type of the part
+					prompt: string
+
+					stepsPenalty: number		#number of marks to take away when student clicks "Show steps"
+					minimumMarks: number		#minimum score to award student for this part
+					enableMinimumMarks: boolean	#is there a minimum score?
+
+					steps: [parts]		#a list of part objects
+				}
+
+				#jme parts also have:
+				{
+					type: jme
+
+					marks: number	#how many marks to award for getting part right
+					
+					answer: string	#jme expression the student should match
+					answerSimplification: string	#list of simplification rules to apply to answer when displaying it
+					checkingType: string	#method to use when comparing student's answer to correct answer. One of: absdiff, reldiff, dp, sigfig
+					failureRate: number		#number of times comparison can fail before marking answer as wrong
+					vsetRangePoints: number	#number of points on which to compare answers
+					vsetrange: [number,number]	#range from which to pick values for expression variables
+					checkingaccuracy: number	#how strict to be when comparing answers. Form of value depends on checkingType
+
+					maxlength: {
+						length: number
+						partialCredit: number	#percentage
+						message: string
+					}
+					minlength: {
+						length: number
+						partialCredit: number	#percentage
+						message: string
+					}
+					musthave: {
+						strings: [strings]		#list of strings which must be in student's answer
+						partialCredit: number	#percentage
+						message: string
+					}
+					notallowed: {
+						strings: [strings]		#list of strings which must NOT be in student's answer
+						partialCredit: number
+						message: string
+					}
+				}
+
+				#patternmatch parts have
+				{
+					type: patternmatch
+
+					marks: number	#how many marks to award for getting part right
+					
+					answer: string			#regular expression matching correct answers
+					displayAnswer: string	#string to display as correct answer
+					caseSensitive: boolean	#does case matter?
+					partialCredit: number	#percentage of marks to award if correct except for case, and caseSensitive = true
+				}
+
+				#numberentry parts have
+				{
+					type: numberentry
+
+					marks: number	#how many marks to award for getting part right
+					
+					#EITHER
+					answer: number or jme expression	#correct answer
+					#OR
+					minvalue: number or jme expression	#minimum correct answer
+					maxvalue: number or jme expression	#maximum correct answer
+
+					integerAnswer: boolean	#must answer be an integer?
+					partialCredit: number	#percentage of marks to award if in allowed range but not integer, and integerAnswer=true
+
+					inputStep: number	#amount to increment input by when clicking up/down arrows in input box (currently not used)
+				}
+
+				#multiple choice parts have
+				{
+					type: "1_n_2" or "m_n_2" or "m_n_x"		#choose one from a list of choices; choose any number from a list of choices; 2d grid of choices and answers
+
+					minMarks: number	#minimum score to award
+					maxMarks: number	#maximum score to award
+					minAnswers: number	#minimum answers student can select for each choice
+					maxAnswers: number	#maximum answers student can select for each choice
+					shuffleChoices: boolean	#shuffle order of choices?
+					shuffleAnswers: boolean	#shuffle order of answers?
+					displayType: string	#radiogroup or checkbox or dropdown
+					displayColumns:	number	#if type is 1_n_2 or m_n_2, how many columns to arrange choices into
+
+					choices: [string]	#list of choices
+					answers: [string]	#list of answers (only used in m_n_x parts)
+
+					#EITHER
+					matrix: [numbers]	#list of marks to award for each choice, if type is 1_n_2 or m_n_2
+					distractors: [strings]	#list of messages to display if student selects choices
+					#OR
+					matrix [ [numbers], [numbers], ... ]	#2d array of marks to award for each answer-choice pair, if m_n_x
+					distractors: [ [strings], [strings], ... ]	#2d array of messages to display if student selects choice-answer pairs
+				}
+
+				#information parts have no extra properties
+				{
+					type: information
+				}
+				
+				#gapfill parts have
+				{
+					type: gapfill
+					gaps: [parts]	#a list of part objects
+				}
+			]
+		}
+	]
+}
