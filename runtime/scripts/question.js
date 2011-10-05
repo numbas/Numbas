@@ -101,6 +101,8 @@ var Question = Numbas.Question = function( xml, number, loading, gvariables, gfu
 			else if(q.adviceDisplayed)
 				q.getAdvice(true);
 		}
+		
+		q.display.makeHTML();
 	});
 
 }

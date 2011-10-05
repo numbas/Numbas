@@ -293,8 +293,6 @@ display.QuestionDisplay = function(q)
 {
 	this.q = q;
 
-	//make html for question and advice text
-	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
@@ -320,6 +318,11 @@ display.QuestionDisplay.prototype =
 	q: undefined,					//reference back to the main question object
 	html: '',						//HTML for displaying question
 	questionSelector: '',			//jQuery selector for this question's menu entry
+
+	makeHTML: function() {
+		//make html for question and advice text
+		this.html = $.xsl.transform(Numbas.xml.templates.question, this.q.xml).string;
+	},
 
 	show: function()
 	{
