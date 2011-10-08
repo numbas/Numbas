@@ -360,6 +360,8 @@ var jme = Numbas.jme = {
 
 	substituteTree: function(tree,variables,allowUnbound)
 	{
+		if(!tree)
+			return null;
 		if(tree.tok.bound)
 			return tree;
 

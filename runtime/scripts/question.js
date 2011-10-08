@@ -1022,7 +1022,11 @@ JMEPart.prototype =
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.addCredit(0,'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+				var message = this.settings.mustHave.length==1 ?
+					'Your answer must contain <span class="monospace">'+this.settings.mustHave[0]+'</span>' 
+				: 
+					'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>';
+				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
 		}
@@ -1031,7 +1035,11 @@ JMEPart.prototype =
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.addCredit(0,'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+				var message = this.settings.notAllowed.length==1 ?
+					'Your answer must not contain <span class="monospace">'+this.settings.notAllowed[0]+'</span>'
+				:
+					'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>';
+				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
 		}
