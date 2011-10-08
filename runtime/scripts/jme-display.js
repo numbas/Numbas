@@ -41,12 +41,17 @@ jme.display = {
 	//simplify a JME expression and return it as a JME string
 	simplifyExpression: function(expr,ruleset)
 	{
+		if(expr.trim()=='')
+			return '';
 		return treeToJME(jme.display.simplify(expr,ruleset));
 	},
 
 	//simplify a JME expression and return it as a syntax tree
 	simplify: function(expr,ruleset)
 	{
+		if(expr.trim()=='')
+			return;
+
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
 		ruleset = collectRuleset(ruleset,Numbas.exam.rulesets);
@@ -543,6 +548,9 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 //(used when an expression is simplified)
 var treeToJME = jme.display.treeToJME = function(tree)
 {
+	if(!tree)
+		return '';
+
 	var args=tree.args, l;
 
 	if(args!==undefined && ((l=args.length)>0))
