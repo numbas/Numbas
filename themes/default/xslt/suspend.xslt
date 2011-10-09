@@ -19,10 +19,9 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="/">
 	<div>
-		<p>The Exam has been suspended, press Resume to continue or End to halt this session.</p>
+		<p>The Exam has been suspended. Press Resume to continue.</p>
 		<p>You will be able to resume this session the next time you start this activity.</p>
 		<input type="button" class="btn" id="resumeBtn" value="Resume"/>
-		<input type="button" class="btn" id="endBtn" value="End"/>
 	</div>
 </xsl:template>
 

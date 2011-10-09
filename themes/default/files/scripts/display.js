@@ -17,6 +17,10 @@ Copyright 2011 Newcastle University
 //Display code
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
+	
+	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
+
+	var util = Numbas.util;
 
 var display = Numbas.display = {
 	// update progress bar when loading
@@ -61,7 +65,7 @@ var display = Numbas.display = {
 	//
 
 	showAlert: function(msg) {
-		$.prompt(Numbas.util.textile(msg));
+		$.prompt(textile(msg));
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
@@ -75,10 +79,9 @@ var display = Numbas.display = {
 	{
 		try
 		{
-			var queue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
-			queue.Push(['Typeset',MathJax.Hub,elem]);
+			MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
 			if(callback)
-				queue.Push(callback);
+				MathJaxQueue.Push(callback);
 		}
 		catch(e)
 		{
@@ -239,7 +242,7 @@ display.ExamDisplay.prototype =
 			//the whole page was hidden at load, so user doesn't see all the nav elements briefly
 			$('body > *').show();
 			$('#loading').hide();
-			
+
 			$('#infoDisplay').getTransform(Numbas.xml.templates.frontpage,exam.xmlize());
 
 			$('#startBtn').click( Numbas.controls.beginExam );
@@ -262,7 +265,6 @@ display.ExamDisplay.prototype =
 			$('#infoDisplay').getTransform(Numbas.xml.templates.suspend,exam.xmlize());
 		
 			$('#resumeBtn').click( Numbas.controls.resumeExam );
-			$('#endBtn').click( Numbas.controls.endExam );
 
 			break;
 		
@@ -291,8 +293,6 @@ display.QuestionDisplay = function(q)
 {
 	this.q = q;
 
-	//make html for question and advice text
-	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
@@ -319,6 +319,11 @@ display.QuestionDisplay.prototype =
 	html: '',						//HTML for displaying question
 	questionSelector: '',			//jQuery selector for this question's menu entry
 
+	makeHTML: function() {
+		//make html for question and advice text
+		this.html = $.xsl.transform(Numbas.xml.templates.question, this.q.xml).string;
+	},
+
 	show: function()
 	{
 		var exam = Numbas.exam;
@@ -326,6 +331,9 @@ display.QuestionDisplay.prototype =
 
 		//hides the info page, if visible
 		$('#infoDisplay').hide();
+
+		//display the question container - content and nav bars
+		$('#questionContainer').show();
 		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
@@ -334,9 +342,6 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
 		$('#revealBtn').show().removeAttr('disabled');
-
-		//display the question container - content and nav bars
-		$('#questionContainer').show();
 
 		//display question's html
 		
@@ -372,6 +377,9 @@ display.QuestionDisplay.prototype =
 		//display advice if appropriate
 		this.showAdvice();
 
+		// make mathjax process the question text (render the maths)
+		Numbas.display.typeset($('#questionDisplay')[0],this.postTypesetF);
+
 		//show/hide reveal answer button
 		if(exam.allowRevealAnswer)
 			$('#revealBtn').show();
@@ -384,9 +392,6 @@ display.QuestionDisplay.prototype =
 		//display score if appropriate
 		this.showScore();
 		
-		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset(null,this.postTypesetF);
-
 		//make input elements report when they get and lose focus
 		$('input')	.blur( function(e) { Numbas.display.inInput = false; } )
 					.focus( function(e) { Numbas.display.inInput = true; } );
@@ -445,6 +450,11 @@ display.QuestionDisplay.prototype =
 		$('#submitBtn').attr('disabled','true');
 		//hide reveal button
 		$('#revealBtn').hide();
+
+		for(var i=0;i<this.q.parts.length;i++)
+		{
+			this.q.parts[i].display.revealAnswer();
+		}
 	},
 
 	//display question score and answer state
@@ -538,7 +548,7 @@ display.PartDisplay.prototype =
 		}
 		else
 		{
-			c.find('#stepsBtn').click(function() {
+			c.find('#stepsBtn:last').click(function() {
 				p.showSteps();
 			});
 		}
@@ -555,11 +565,11 @@ display.PartDisplay.prototype =
 		//hide part submit button and score feedback if there's only one part
 		if(p.parentPart==null && p.question.parts.length==1)
 		{
-			c.find('#partFeedback').hide();
+			c.find('#partFeedback:last').hide();
 		}
 
 
-		c.find('#partFeedback #submitPart').click(function() {
+		c.find('#partFeedback:last #submitPart').click(function() {
 			p.display.removeWarnings();
 			p.submit();
 			if(!p.answered)
@@ -568,11 +578,6 @@ display.PartDisplay.prototype =
 				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
 			}
 		});
-
-		for(var i=0;i<this.p.steps.length; i++)
-		{
-			this.p.steps[i].display.show();
-		}
 
 		this.showScore(this.p.answered);
 	},
@@ -596,6 +601,47 @@ display.PartDisplay.prototype =
 			if(valid===undefined)
 				valid = this.p.validate();
 			showScoreFeedback(c,valid,this.p.score,this.p.marks,Numbas.exam);
+		}
+
+		if(Numbas.exam.showAnswerState)
+		{
+			if(this.p.markingFeedback.length)
+			{
+				var feedback = [];
+				var maxMarks = this.p.marks - (this.p.stepsShown ? this.p.settings.stepsPenalty : 0);
+				var t = 0;
+				for(var i=0;i<this.p.markingFeedback.length;i++)
+				{
+					var action = this.p.markingFeedback[i];
+					var change = 0;
+
+					switch(action.op) {
+					case 'addCredit':
+						change = action.credit*maxMarks;
+						if(action.gap!=undefined)
+							change *= this.p.gaps[action.gap].marks/this.p.marks;
+						t += change;
+						break;
+					}
+
+					var message = action.message || '';
+					var marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
+
+					if(change>0)
+						message+='\nYou were awarded '+marks+'.';
+					else if(change<0)
+						message+='\n'+marks+' '+util.pluralise(change,'was','were')+' taken away.';
+					feedback.push(message);
+				}
+
+				feedback = textile(feedback.join('\n\n'));
+				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
+				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
+			}
+			else
+			{
+				c.find('#feedbackMessage:last').hide();
+			}
 		}
 	},
 
@@ -763,7 +809,7 @@ display.JMEPartDisplay.prototype =
 			if(txt!=='')
 			{
 				try {
-					var tex = Numbas.jme.display.exprToLaTeX(txt,{});
+					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification);
 					if(tex===undefined){throw('Error making maths display')};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;
@@ -1024,6 +1070,8 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 	answered = answered || score>0;
 
+	var scoreSelector = selector.find('#score:last');
+
 	if(settings.showTotalMark || settings.showActualMark)
 	{
 		if(answered)
@@ -1035,7 +1083,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			else if(settings.showTotalMark && settings.showActualMark)
 				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
 
-			selector.find('#score')
+			scoreSelector
 				.show()
 				.html(scoreDisplay);
 		}
@@ -1044,12 +1092,12 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			if(settings.showTotalMark)
 			{
 				scoreDisplay = niceNumber(marks)+' '+(marks==1 ? 'mark' : 'marks');
-				selector.find('#score')
+				scoreSelector
 					.show()
 					.html(scoreDisplay);
 			}
 			else
-				selector.find('#score').hide();
+				scoreSelector.hide();
 
 		}
 
@@ -1058,12 +1106,12 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	{
 		if(answered)
 		{
-			selector.find('#score')
+			scoreSelector
 				.show()
 				.html('Answered');
 		}
 		else
-			selector.find('#score').hide();
+			scoreSelector.hide();
 	}
 
 	if( settings.showAnswerState )
@@ -1083,22 +1131,22 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			{
 				state = 'partial';
 			}
-			selector.find('#feedback')
+			selector.find('#feedback:last')
 				.show()
 				.attr('class',state)
 			;
 		}
 		else
 		{
-			selector.find('#feedback').attr('class','').hide();
+			selector.find('#feedback:last').attr('class','').hide();
 		}
 	}
 	else
 	{
-		selector.find('#feedback').hide();
+		selector.find('#feedback:last').hide();
 	}	
 
-	selector.find('#marks').each(function(){
+	selector.find('#marks:last').each(function(){
 		if(!$(this).is(':animated'))
 			$(this).fadeOut(200).fadeIn(200);
 	});
@@ -1138,12 +1186,13 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 		var lis = div.find('li');
 		var divHeight = div.height();
+		var maxI = 0;
 		for(var j=0;j<lis.length;j++)
 		{
 			var y = lis.eq(j).position().top - listOffset;
 			if(listHeight - y < divHeight)
 			{
-				var maxI = j;
+				maxI = j;
 				break;
 			}
 		}

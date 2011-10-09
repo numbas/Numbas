@@ -25,6 +25,10 @@
 		advice: {type: onreveal, threshold: 50}
 	}
 
+	rulesets: {
+		cancelId: [unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower]
+	}
+
 	questions: [
 		{
 			name: PDFs and CDFs
@@ -259,8 +263,8 @@
 				Consider the dynamical system:
 
 				\[\begin{eqnarray}
-					\frac{dx}{dt} &=& \simplify[1111110000000000]{{alpha*x1}*x + {alpha*y1}*y} \\
-					\frac{dy}{dt} &=& \simplify[1111110000000000]{{alpha*x2}*x + {alpha*y2}*y}
+					\frac{dx}{dt} &=& \simplify[cancelId]{{alpha*x1}*x + {alpha*y1}*y} \\
+					\frac{dy}{dt} &=& \simplify[cancelId]{{alpha*x2}*x + {alpha*y2}*y}
 				\end{eqnarray}\]
 			"""
 

@@ -360,6 +360,8 @@ var jme = Numbas.jme = {
 
 	substituteTree: function(tree,variables,allowUnbound)
 	{
+		if(!tree)
+			return null;
 		if(tree.tok.bound)
 			return tree;
 
@@ -706,32 +708,12 @@ var jme = Numbas.jme = {
 				out += ' '+v+' ';
 				break;
 			case 'simplify': //a JME expression to be simplified
-				var simplificationSettings = jme.display.parseSimplificationSettings('');
-				if(/[01]+/.test(args))
-				{
-					simplificationSettings = jme.display.parseSimplificationSettings(args);
-				}
-				else if(args.length==0)
-				{
-					if(!argbrackets)
-					{
-						var simplificationNames = jme.display.simplificationNames;
-						for(var c=0;c<simplificationNames.length;c++)
-						{
-							simplificationSettings[simplificationNames[c]] = true;
-						}
-					}
-				}
-				else
-				{
-					args = args.split(',');
-					for(var c=0;c<args.length;c++)
-					{
-						simplificationSettings[args[c]]=true;
-					}
-				}
+				if(!argbrackets)
+					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
-				var tex = jme.display.exprToLaTeX(expr,simplificationSettings);
+				if(expr.search(/\[/)>=0)
+					throw(expr);
+				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;
 			}
@@ -763,6 +745,10 @@ var jme = Numbas.jme = {
 					else
 						v = '('+v+')';
 				}
+				else if(!display && v.type=='string')
+				{
+					v="'"+v.value+"'";
+				}
 				else if(v.type=='list')
 				{
 					v = '['+v.value.map(function(x){return x.value;}).join(',')+']';
@@ -773,7 +759,7 @@ var jme = Numbas.jme = {
 				}
 				if(display)
 				{
-					v = Numbas.util.textile(v);
+					v = textile(' '+v);
 				}
 				out += v;
 			}

@@ -1,3 +1,4 @@
+
 html{	
 	font-family: sans-serif;
 }
@@ -96,7 +97,7 @@ html{
 .rightNav {
 	float:right;
 }
-.menuEndBtn {
+.menuButtons {
 	text-align:center;
 }
 
@@ -151,6 +152,13 @@ html{
 }
 #marks #score {
 	display:none;
+}
+
+#feedbackMessage {
+	clear:both;
+	text-align:center;
+	padding: 0.5em 0.5em 0 0;
+	border: 1px solid #a2d1f0;
 }
 
 
@@ -488,4 +496,42 @@ div.jqi button.jqidefaultbutton{
 }
 .jqiwarning .jqi .jqibuttons{
 	background-color: #BF5E26;
+}
+
+@media print {
+	.logo img {
+		height: 50%;
+	}
+	.navBar {
+		display:none;
+	}
+	#questionContainer .colwrap {
+		width: 100%;
+		left: initial;
+	}
+	#questionContainer .col1wrap {
+		width: 100%;
+		right: auto;
+		padding: initial;
+		position:initial;
+	}
+	#questionDisplay {
+		margin:initial;
+		right:initial;
+	}
+	#partFeedback {
+		display: none;
+	}
+
+	.questionMenu {
+		display: none;
+	}
+
+	input[type="text"], input[type="number"] {
+		border:none;
+		border-bottom: 1px solid;
+	}
+	.btn {
+		display: none;
+	}
 }

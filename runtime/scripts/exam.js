@@ -15,8 +15,9 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question'],function() {
+Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables','jme-display'],function() {
 
+	var job = Numbas.schedule.add;
 
 // exam object keeps track of all info we need to know while exam is running
 var Exam = Numbas.Exam = function()
@@ -34,7 +35,7 @@ var Exam = Numbas.Exam = function()
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 
-	tryGetAttribute(this,'settings/navigation',['reverse','browse'],['navigateReverse','navigateBrowse']);
+	tryGetAttribute(this,'settings/navigation',['reverse','browse','showfrontpage'],['navigateReverse','navigateBrowse','showFrontPage']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
@@ -68,6 +69,49 @@ var Exam = Numbas.Exam = function()
 
 	this.totalQuestions = xml.selectNodes('questions/question').length;
 
+
+	//rulesets
+	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
+	this.rulesets = Numbas.util.copyobj(Numbas.jme.display.simplificationRules);
+
+	var sets = {};
+	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
+	for( i=0; i<rulesetNodes.length; i++)
+	{
+		var name = rulesetNodes[i].getAttribute('name');
+		var set = [];
+
+		//get new rule definitions
+		defNodes = rulesetNodes[i].selectNodes('ruledef');
+		for( var j=0; j<defNodes.length; j++ )
+		{
+			var pattern = defNodes[j].getAttribute('pattern');
+			var result = defNodes[j].getAttribute('result');
+			var conditions = [];
+			var conditionNodes = defNodes[j].selectNodes('conditions/condition');
+			for(var k=0; k<conditionNodes.length; k++)
+			{
+				conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
+			}
+			var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+			set.push(rule);
+		}
+
+		//get included sets
+		var includeNodes = rulesetNodes[i].selectNodes('include');
+		for(var j=0; j<includeNodes.length; j++ )
+		{
+			set.push(includeNodes[j].getAttribute('name'));
+		}
+
+		sets[name] = this.rulesets[name] = set;
+	}
+
+	for(var name in sets)
+	{
+		this.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],this.rulesets);
+	}
+
 	//initialise display
 	this.display = new Numbas.display.ExamDisplay(this);
 
@@ -88,6 +132,10 @@ Exam.prototype = {
 	percentPass: 0,				//percentage student must achieve to pass
 	percentScore: 0,			//student's score as a percentage
 	passed: false,				//did student pass the exam?
+
+	//variables and functions
+	functions: {},				//functions available to every question
+	variables: {},				//variables available to every question
 	
 	//question selection
 	totalQuestions: 0,			//how many questions are available?
@@ -141,34 +189,43 @@ Exam.prototype = {
 	//stuff to do when starting exam afresh
 	init: function()
 	{
-		var job = Numbas.schedule.add;
 		var exam = this;
+		job(function() {
+			exam.functions = Numbas.jme.variables.makeFunctions(exam.xml);
+			exam.variables = Numbas.jme.variables.makeVariables(exam.xml,exam.functions);
+		});
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
-		job(Numbas.store.init,Numbas.store,exam);	//initialise storage
+		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
 	},
 
 	//restore previously started exam from storage
 	load: function()
 	{
-		var suspendData = Numbas.store.load();	//get saved info from storage
+		this.loading = true;
+		var suspendData = Numbas.store.load(this);	//get saved info from storage
 
-		this.timeRemaining = suspendData.timeRemaining;
-		this.questionSubset = suspendData.questionSubset;
-		this.start = new Date(suspendData.start);
-		this.score = suspendData.score;
+		job(function() {
+			this.timeRemaining = suspendData.timeRemaining;
+			this.questionSubset = suspendData.questionSubset;
+			this.numQuestions = this.questionSubset.length;
+			this.start = new Date(suspendData.start);
+			this.score = suspendData.score;
+		},this);
 
-		this.makeQuestionList(true);
+		job(this.makeQuestionList,this,true);
+		job(function() {
+			for(var i=0;i<this.numQuestions;i++)
+			{
+				var q = this.questionList[i];
+			}
+		},this);
 
-		if(suspendData.location!==undefined)
-			this.changeQuestion(suspendData.location);
-
-		for(i=0; i<this.numQuestions; i++)
-		{
-			if(this.questionList[i].visited)
-				this.questionList[i].display.showScore();
-		}
-		this.display.showScore();
+		job(function() {
+			if(suspendData.location!==undefined)
+				this.changeQuestion(suspendData.location);
+			this.loading = false;
+		},this);
 	},
 
 
@@ -176,7 +233,7 @@ Exam.prototype = {
 	xmlize: function()
 	{
 		var obj = {};
-		var dontwant = ['xml','questionList','stopwatch','display','currentQuestion','navigationEvents'];
+		var dontwant = ['xml','questionList','stopwatch','display','currentQuestion','navigationEvents','rulesets','functions','variables'];
 		for( var x in this )
 		{
 			if(!(dontwant.contains(x) || typeof(this[x])=='function'))
@@ -223,8 +280,6 @@ Exam.prototype = {
 	//if loading, need to restore randomised variables instead of generating anew
 	makeQuestionList: function(loading)
 	{
-		var job = Numbas.schedule.add;
-
 		this.questionList = [];
 		
 		var questions = this.xml.selectNodes("questions/question");
@@ -232,7 +287,7 @@ Exam.prototype = {
 		{
 			job(function(i)
 			{
-				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading );
+				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading, this.variables, this.functions );
 				this.questionList.push(question);
 			},this,i);
 		}

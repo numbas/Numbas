@@ -86,16 +86,16 @@
     }
   \end{table}
 
-  \subsection{\label{sec:simplification}Simplification}
-  One of the most powerful features of \numbas\ is the ability to
-  automatically simplify and rearrange expressions according to a set of
-  ``simplification rules.''  Examples of when this might be useful include
+  \subsection{\label{sec:simplification}Simplification, Rearrangement and Display}
+One of the most powerful features of \numbas\ is the ability to feedback to the user a full and detailed solution of the questions. Most such solutions require a step-by-step format so that the explanation is comprehensive and understandable. In order to do this \numbas\ includes powerful automatic simplification, rearrangement and display functionality enabling the author of the questions to provide such detailed solutions, displayed in the best possible mathematical format and so adding clarity to the explanation.\\ 
+This functionality is provided through a set of
+  ``simplification rules.'' Note that the term simplification is used in this section to cover rearrangement and display functionality as well as standard simplification rules.\\   These include
   cancelling numerical factors in fractions, collecting numerical factors
-  together, simplifying expressions involving 0 or 1, etc.  Since you do not
+  together, simplifying expressions involving 0 or 1, etc. \\Since you do not
   necessarily know what values your random variables will take, the ability to
-  automatically simplify expressions is very useful.
+  automatically simplify expressions is very useful.\\See table 7.3 for a list of standard rules and their simplification/rearrangement/display features.
 
-  Simplification is performed in \LaTeX\ content with the \verb"\simplify{}"
+  Simplification is performed in \LaTeX\ content with the \verb"\simplify"
   command.  Simplification can also be performed on the displayed answers in a
   JME part, using the \codeprop{answersimplification} property of the JME part
   (see \S\ref{sec:jme_part} for more information on the JME part type).  The
@@ -106,26 +106,32 @@
   \end{Verbatim}
   %
   where \verb"expression" is the mathematical expression you want to simplify,
-  and the optional \verb"rules" argument further refines how the expression
-  should be simplified.
-
-  As an example, consider the code \verb"$\simplify{ ({a}*x)/({b}*y) }$".
-  Assuming $a=2$ and $b=-1$, the result will be displayed as
-  \verb"$\frac{-2x}{y}$".
-
-  The \verb"rules" argument is a string of 16 ones and zeroes, where each
-  digit specifies whether a particular simplification rule should be turned on
-  or off.  The default is for all rules to be turned on, so the example above
-  is equivalent to
+  and the optional \verb"rules" argument further refines how the expression should be simplified.\\
+  The \verb"rules" argument is a list of rules, either derived from the standard rules or by defining new rules\eg
   %
   \begin{Verbatim}
-    $\simplify[1111111111111111]{ ({a}*x)/({b}*y) }$
+    $\simplify[constantsFirst,zeroPower]{expression}$
   \end{Verbatim}
   %
-  The full list of simplification rules is given in
-  table~\ref{tab:simplification_rules}.
+  This simplifies the expression by applying only the constantsFirst and the zeroPower rules as given in the full list of standard simplification rules. The rules are applied from left to right.\\
+  If you omit the \verb"rules"  argument i.e. write \verb"$\simplify{expression}$" then this is the same as \verb"$\simplify[all]{expression}$" where \verb"all" refers to the first $15$ rules in table 7.3.\\
+  As an example, consider the code \verb"$\simplify{ ({a}*x)/({b}*y) }$".
+  Assuming $a=2$ and $b=-1$, the result will be displayed as $-\frac{2x}{y}$ according to the latex expression
+  \verb"$-\frac{2x}{y}$".\\
+  However, if you write \verb"$\simplify[]{expression}$" then none of the rules in table 7.3 is applied.\\
+  If you do not want to use a rule in \verb"all" , then include it with prefixed by an exclamation mark. \\
+  For example, if you do not want \verb"collectNumbers" switched on then you can write \verb"$\simplify[all,!collectNumbers]{expression}$"\\ 
+  As another example, you may not want to use \verb"collectNumbers", \verb"sqrtSquare" in the simplification of an expression but want to use \verb"fractionNumbers" (which is not in \verb"all") then this would be achieved by:\\
   %
-  \begin{table}[ht]
+  \begin{Verbatim}
+    \simplify[all,!collectNumbers,!sqrtSquare,fractionNumbers]{expression}
+  \end{Verbatim}
+  %
+  Note that this means that the term "standard rule" includes all those found in table 7.3 as well as all their negations.\\
+  The \verb"basic" rule found in table 7.3 is like \verb"all" in that it a collection of rules, but these are the usual "tidying up" and presentation rules which we normally use in writing mathematics and they are normally always applied.
+  You can see the collection of \verb"basic" rules in the **appendix**. It is possible to turn these off by using \verb"$\simplify[!basic]{expression}$"
+  	
+	\begin{table}[ht]
     \centering
     \begin{tabular}{ll}
       \hline
@@ -148,23 +154,56 @@
       \verb"sin(n*pi)" to \verb"0" \\
       otherNumbers     & simplify \verb"2^3" to \verb"8" \\
       fractionNumbers  & display all numbers as fractions instead of decimals \\
+      \hline
+	  	all			   			 & all of the rules above except for fractionNumbers\\
+	  	basic						 & the basic rules for the display of mathematics.\\
       \hline\hline
     \end{tabular}
     \caption{\label{tab:simplification_rules}
-      The available simplification rules, in order.  Note that the rule names
+      The available standard simplification rules, in order.  Note that the rule names
       are case-sensitive, and a rule will not be applied if it does not appear
-      exactly as in the table.
+      exactly as in the table. Also the negations of these rules are also standard.
     }
   \end{table}
-
-  An alternative to specifying the entire string of ones and zeroes is to
-  explicitly name the rules you would like to be turned on, \eg
-  %
-  \begin{Verbatim}
-    $\simplify[constantsFirst,zeroPower]{expression}$
-  \end{Verbatim}
-  %
-  Once an expression has been simplified in this way, it is converted to
-  \LaTeX\ automatically.
-
+ \subsection{\label{sec:Rule Sets Standard} Rule Sets from Standard Rules}
+ You can define your own simplification rules in an exam by using the exam property \verb"rulesets".\\
+ You can use the existing standard rules to define a new rule, very useful if you use such a rule regularly e.g.\\
+	\verb"rulesets: {	std: [all, !collectNumbers, fractionNumbers]} "\\
+	defines a new ruleset \verb"std" which you can use in subsequent questions.\\
+	This is the type of rule or a variant you would typically use in a step-by-step solution.\\
+	For example, you would use the above rule in the following:\\
+	\verb"\simplify[std]{({a}+{b})/{n}={(a+b)/n}}"\\
+	where you do not want \verb"({a}+{b})/{n}" to be evaluated to the left of the = sign, so you switch off \verb"collectNumbers", and you want \verb"{(a+b)/n}" to the right of the = sign displayed as a fraction and not a decimal so you switch on \verb" fractionNumber".\\
+	You can define as many rulesets as you like in an exam, \eg
+	%
+		\begin{Verbatim}
+rulesets: {
+std: [all, !collectNumbers, fractionNumbers]
+cancelId: [unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower]
+fracCancel: [cancelId, collectNumbers, fractionNumbers]
+}
+	\end{Verbatim}
+	%
+	The general format is:
+	 \verb"\simplify[A,B,...]{expression}" where \verb"A,B,.." are rule sets.\\
+  Note that the rules are read from left to right so that for example the following ruleset:
+  \verb"rule1: [all,!collectNumbers, fractionNumbers,collectNumbers]"\\
+  would have the \verb"collectNumbers" rule turned on.\\
+ \subsection{\label{sec:New rules} Defining non-standard Rules}
+ You can define rules which are not part of the standard set as given in table 7.3.\\
+ You use the powerful pattern-matching capability of Numbas. For example, if you want to improve the display of surds then the following rule could be used:
+ %
+ \begin{Verbatim}
+ rulesets: {
+	surdDisplay: [
+			{
+				pattern: "a/sqrt(b)"
+				result: "(sqrt(b)*a)/b"
+			}
+			]
+	}
+\end{Verbatim}
+%
+This rule will if applied to an expression such as $\frac{x+1}{\sqrt{3}}$ would display it as $\frac{\sqrt{3}(x+1)}{3}$.
+This, as with all such rules, need to be used carefully as for example $\frac{2}{\sqrt{3}}$ would be displayed as $\frac{\sqrt{3}2}{3}$ and the usual method of displaying this would be $\frac{2\sqrt{3}}{3}$. It is possible to define rules to take care of these display requirements. See **appendix** for more detail. 
 \end{chapter}

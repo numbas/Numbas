@@ -56,7 +56,7 @@ Numbas.showError = function(e)
 	{
 		message = (e || e.message)+'';
 	}
-	Numbas.debug(e.stack);
+	Numbas.debug(e.stack || message);
 	Numbas.display.showAlert(message);
 };
 
@@ -67,7 +67,7 @@ Numbas.showError = function(e)
 // - display the frontpage
 // This function is called when all the other scripts have been loaded and executed. 
 // It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
-function init()
+var init = Numbas.init = function()
 {
 	var job = Numbas.schedule.add;
 
@@ -88,21 +88,32 @@ function init()
 		case 'ab-initio':
 			job(exam.init,exam);
 			job(Numbas.display.init);
-			job(exam.display.showInfoPage,exam.display,'frontpage');	//display front page
+			job(function() {
+				if(exam.showFrontPage)
+				{
+					exam.display.showInfoPage('frontpage');
+				}
+				else
+				{
+					exam.begin();
+				}
+			});	
 			break;
 
 		case 'resume':
-			job(exam.load);
+			job(exam.load,exam);
 			job(Numbas.display.init);
 
-			if(exam.currentQuestion !== undefined)
-			{
-				job(exam.display.showInfoPage,exam.display,'suspend');
-			}
-			else
-			{
-				job(exam.display.showInfoPage,exam.display,'frontpage');
-			}
+			job(function() {
+				if(exam.currentQuestion !== undefined)
+				{
+					job(exam.display.showInfoPage,exam.display,'suspend');
+				}
+				else
+				{
+					job(exam.display.showInfoPage,exam.display,'frontpage');
+				}
+			});
 
 			break;
 		}
@@ -231,7 +242,7 @@ function tryInit()
 			}
 		}
 	}
-	init();
+	Numbas.init();
 }
 
 $(document).ready(function() {

@@ -22,6 +22,17 @@ import examparser
 import sys
 import os
 
+class ExamError(Exception):
+	def __init__(self,message,hint=''):
+		self.message = message
+		self.hint = hint
+	
+	def __str__(self):
+		msg = self.message
+		if self.hint:
+			msg += '\nPossible fix: '+self.hint
+		return msg
+
 #data is a DATA object. attr is either a single variable name or a list of names. obj is the object to load the data into. altname is the name of the object property to fill, if different from attr
 #if attr is in data, then obj.attr = data[attr], otherwise no change
 def tryLoad(data,attr,obj,altname=''):
@@ -40,12 +51,13 @@ def tryLoad(data,attr,obj,altname=''):
 				setattr(obj,altname,data[attr])
 
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
-def makeContentNode(s,addHTML=False):
+def makeContentNode(s,doTextile=True):
 	s=str(s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
-	s=textile(s)
-	#if addHTML:
-	#	s='<html>'+s+'</html>'
+	if doTextile:
+		s=textile(s)
+	else:
+		s='<span>'+s+'</span>'
 	return etree.fromstring('<content>'+s+'</content>')
 
 #make an XML element tree. Pass in an array of arrays or strings.
@@ -99,6 +111,7 @@ class Exam:
 		self.navigation = {	
 				'reverse': True,
 				'browse': True,
+				'showfrontpage': True,
 				'onadvance': Event('onadvance','none','You have not finished the current question'),
 				'onreverse': Event('onreverse','none','You have not finished the current question'),
 				'onmove': Event('onmove','none','You have not finished the current question')
@@ -108,6 +121,11 @@ class Exam:
 				'timeout': Event('timeout','none',''),
 				'timedwarning': Event('timedwarning','none','')
 			}
+
+		self.rulesets = {}
+
+		self.functions = []
+		self.variables = []
 		
 		self.questions = []
 
@@ -131,7 +149,7 @@ class Exam:
 
 		if 'navigation' in data:
 			nav = data['navigation']
-			tryLoad(nav,['reverse','browse'],exam.navigation)
+			tryLoad(nav,['reverse','browse','showfrontpage'],exam.navigation)
 			for event in ['onadvance','onreverse','onmove']:
 				if event in nav:
 					tryLoad(nav[event],['action','message'],exam.navigation[event])
@@ -149,6 +167,27 @@ class Exam:
 				tryLoad(advice,'type',exam,'adviceType')
 				tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
 
+		if 'rulesets' in data:
+			rulesets = data['rulesets']
+			for name in rulesets.keys():
+				l=[]
+				for rule in rulesets[name]:
+					if isinstance(rule,str):
+						l.append(rule)
+					else:
+						l.append(SimplificationRule.fromDATA(rule))
+				exam.rulesets[name] = l
+
+		if 'functions' in data:
+			functions = data['functions']
+			for function in functions.keys():
+				exam.functions.append(Function.fromDATA(function,functions[function]))
+
+		if 'variables' in data:
+			variables = data['variables']
+			for variable in variables.keys():
+				exam.variables.append(Variable(variable,variables[variable]))
+
 		if 'questions' in data:
 			for question in data['questions']:
 				exam.questions.append(Question.fromDATA(question))
@@ -162,8 +201,12 @@ class Exam:
 								['navigation'],
 								['timing'],
 								['feedback',
-									['advice']]
+									['advice']
+								],
+								['rulesets']
 							],
+							['functions'],
+							['variables'],
 							['questions']
 						])
 		root.attrib = {
@@ -172,21 +215,25 @@ class Exam:
 				'shuffleQuestions': str(self.shuffleQuestions),
 			}
 		
-		qg = root.find('settings')
+		settings = root.find('settings')
 
-		nav = qg.find('navigation')
-		nav.attrib = {'reverse':str(self.navigation['reverse']), 'browse': str(self.navigation['browse'])}
+		nav = settings.find('navigation')
+		nav.attrib = {
+			'reverse':str(self.navigation['reverse']), 
+			'browse': str(self.navigation['browse']),
+			'showfrontpage': str(self.navigation['showfrontpage'])
+		}
 
 		nav.append(self.navigation['onadvance'].toxml())
 		nav.append(self.navigation['onreverse'].toxml())
 		nav.append(self.navigation['onmove'].toxml())
 
-		timing = qg.find('timing')
+		timing = settings.find('timing')
 		timing.attrib = {'duration': str(self.duration)}
 		timing.append(self.timing['timeout'].toxml())
 		timing.append(self.timing['timedwarning'].toxml())
 
-		feedback = qg.find('feedback')
+		feedback = settings.find('feedback')
 		feedback.attrib = {
 				'showactualmark': str(self.showactualmark),
 				'showtotalmark': str(self.showtotalmark),
@@ -194,6 +241,24 @@ class Exam:
 				'allowrevealanswer': str(self.allowrevealanswer)
 		}
 		feedback.find('advice').attrib = {'type':self.adviceType, 'threshold': str(self.adviceGlobalThreshold)}
+
+		rules = settings.find('rulesets')
+		for name in self.rulesets.keys():
+			st = etree.Element('set',{'name':name})
+			for rule in self.rulesets[name]:
+				if isinstance(rule,str):
+					st.append(etree.Element('include',{'name':rule}))
+				else:
+					st.append(rule.toxml())
+			rules.append(st)
+
+		variables = root.find('variables')
+		for variable in self.variables:
+			variables.append(variable.toxml())
+
+		functions = root.find('functions')
+		for function in self.functions:
+			functions.append(function.toxml())
 
 		questions = root.find('questions')
 		for q in self.questions:
@@ -208,6 +273,32 @@ class Exam:
 			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
 		except etree.ParseError as err:
 			print('XML Error:',str(err))
+
+class SimplificationRule:
+	pattern = ''
+	result = ''
+
+	def __init__(self):
+		self.conditions = []
+
+	@staticmethod
+	def fromDATA(data):
+		rule=SimplificationRule()
+		tryLoad(data,['pattern','conditions','result'],rule)
+		return rule
+
+	def toxml(self):
+		rule = makeTree(['ruledef',
+							['conditions']
+						])
+		rule.attrib = {	'pattern': self.pattern,
+						'result': self.result
+						}
+		conditions = rule.find('conditions')
+		for condition in self.conditions:
+			conditions.append(etree.fromstring('<condition>'+condition+'</condition>'))
+
+		return rule
 
 
 class Event:
@@ -271,8 +362,8 @@ class Question:
 							])
 
 		question.attrib = {'name': self.name}
-		question.find('statement').append(makeContentNode(self.statement,True))
-		question.find('advice').append(makeContentNode(self.advice,True))
+		question.find('statement').append(makeContentNode(self.statement))
+		question.find('advice').append(makeContentNode(self.advice))
 
 		parts = question.find('parts')
 		for part in self.parts:
@@ -285,6 +376,7 @@ class Question:
 		functions = question.find('functions')
 		for function in self.functions:
 			functions.append(function.toxml())
+
 
 		return question
 
@@ -360,6 +452,11 @@ class Part:
 				'gapfill': GapFillPart,
 				'information': InformationPart
 			}
+		if not kind in partConstructors:
+			raise ExamError(
+				'Invalid part type '+kind,
+				'Valid part types are '+', '.join(sorted([x for x in partConstructors]))
+			)
 		part = partConstructors[kind].fromDATA(data)
 
 		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks'],part);
@@ -382,7 +479,7 @@ class Part:
 
 		part.attrib = {'type': self.kind, 'marks': str(self.marks), 'stepspenalty': str(self.stepsPenalty), 'enableminimummarks': str(self.enableMinimumMarks), 'minimummarks': str(self.minimumMarks)}
 
-		part.find('prompt').append(makeContentNode(self.prompt,True))
+		part.find('prompt').append(makeContentNode(self.prompt))
 
 		steps = part.find('steps')
 		for step in self.steps:
@@ -393,7 +490,7 @@ class Part:
 class JMEPart(Part):
 	kind = 'jme'
 	answer = ''
-	answerSimplification = '1111111011111011'
+	answerSimplification = 'unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers'
 	checkingType = 'RelDiff'
 	checkingAccuracy = 0		#real default value depends on checkingtype - 0.0001 for difference ones, 5 for no. of digits ones
 	failureRate = 1
@@ -422,7 +519,7 @@ class JMEPart(Part):
 		else:	#dp or sigfig
 			part.checkingAccuracy = 5
 		#get checking accuracy from data, if defined
-		tryLoad(data,'checkingType',part)
+		tryLoad(data,'checkingaccuracy',part)
 
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
@@ -501,7 +598,7 @@ class Restriction:
 			string.text = s
 			restriction.append(string)
 
-		restriction.find('message').append(makeContentNode(self.message,True))
+		restriction.find('message').append(makeContentNode(self.message,doTextile=False))
 
 		return restriction
 
@@ -527,7 +624,7 @@ class PatternMatchPart(Part):
 		part = Part.toxml(self)
 		appendMany(part,['displayanswer','correctanswer','case'])
 		
-		part.find('displayanswer').append(makeContentNode(self.displayAnswer,True))
+		part.find('displayanswer').append(makeContentNode(self.displayAnswer))
 
 		part.find('correctanswer').text = str(self.answer)
 
@@ -592,10 +689,19 @@ class MultipleChoicePart(Part):
 		self.answers = []
 		self.matrix = []
 
+		self.distractors = []
+
 	@staticmethod
 	def fromDATA(data):
 		kind = data['type']
 		part = MultipleChoicePart(kind)
+		displayTypes = {
+				'1_n_2': 'radiogroup',
+				'm_n_2': 'checkbox',
+				'm_n_x': 'radiogroup'
+		}
+
+		part.displayType = displayTypes[kind]
 		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns'],part)
 
 		if 'minmarks' in data:
@@ -616,11 +722,16 @@ class MultipleChoicePart(Part):
 			if not isinstance(part.matrix[0],list):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
+		if 'distractors' in data:
+			part.distractors = data['distractors']
+			if not isinstance(part.distractors[0],list):
+				part.distractors = [[x] for x in part.distractors]
+
 		return part
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks']])
+		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors']])
 
 		choices = part.find('choices')
 		choices.attrib = {
@@ -632,12 +743,12 @@ class MultipleChoicePart(Part):
 			}
 
 		for choice in self.choices:
-			choices.append(makeTree(['choice',makeContentNode(choice,True)]))
+			choices.append(makeTree(['choice',makeContentNode(choice)]))
 
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
-			answers.append(makeTree(['answer',makeContentNode(answer,True)]))
+			answers.append(makeTree(['answer',makeContentNode(answer)]))
 
 		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}
@@ -651,6 +762,16 @@ class MultipleChoicePart(Part):
 					'value': str(self.matrix[i][j])
 					})
 				matrix.append(mark)
+
+		distractors = marking.find('distractors')
+		for i in range(len(self.distractors)):
+			for j in range(len(self.distractors[i])):
+				distractor = etree.Element('distractor',{
+					'choiceindex': str(i),
+					'answerindex': str(j)
+				})
+				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractors.append(distractor)
 
 		return part
 

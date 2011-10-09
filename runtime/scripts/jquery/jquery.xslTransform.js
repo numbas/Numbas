@@ -346,7 +346,7 @@
 				// build the text error string
 				docerr = (typeof(request[what].doc) == 'object') ? '[success]' : '[failure]';
 				// include the root node if we have a doc object and it's xml
-				if( what == 'xml' && typeof(request[what].doc) == 'object' ){
+				if( what == 'xml' && typeof(request[what].doc) == 'object'  && request[what].doc.getElementsByTagName('*')[0]){
 					docerr += ' root node of "' + request[what].doc.getElementsByTagName('*')[0].nodeName + '"';
 				}
 				return docerr + ' ' + srcerr;

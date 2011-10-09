@@ -43,7 +43,12 @@ Numbas.controls = {
 
 	endExam: function()
 	{
-		job(Numbas.exam.end,Numbas.exam);
+		Numbas.display.showConfirm(
+			"Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
+			function() {
+				job(Numbas.exam.end,Numbas.exam);
+			}
+		);
 	},
 
 	exitExam: function()
