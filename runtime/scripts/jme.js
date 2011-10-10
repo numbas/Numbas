@@ -68,6 +68,7 @@ var jme = Numbas.jme = {
 						{
 						case '(':
 						case ',':
+						case '[':
 						case 'op':
 							token=result[0]+'u';		// '+u' and '-u' are the unary sign-changing operations, used if preceding token is appropriate punctuation or another operator
 						}
