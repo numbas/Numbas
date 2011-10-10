@@ -86,23 +86,6 @@ PretendLMS.prototype =
 
 	//methods
 	
-	Load: function() 	//load suspended data from localStorage
-	{
-		function loadCMI(path) { return window.localStorage['NumbasSCORMcmi.'+path]; }
-
-		if(loadCMI('exit') != 'suspend')
-			return;
-
-		var i,n;
-
-		//load comments from learner
-		n= loadCMI('comments_from_learner._count') || 0;
-		for(i=0;i<n;i++)
-		{
-			
-		}
-	},
-	
 	LoadValue: function( element )
 	{
 		var res = window.localStorage[this.savePrefix+element] || '';
@@ -470,7 +453,7 @@ PretendLMS.prototype =
 
 		var n = parseInt(path[0],10);
 				
-		if( n<0 || n>=this.interactions.length )
+		if( n<0 || n>=this.objectives.length )
 		{
 			this.SetError(301,"Index out of range");
 			return '';
