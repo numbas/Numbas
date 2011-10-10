@@ -580,6 +580,10 @@ var treeToJME = jme.display.treeToJME = function(tree)
 	case 'range':
 		return tok.value[0]+'..'+tok.value[1]+(tok.value[2]==1 ? '' : '#'+tok.value[2]);
 	case 'list':
+		if(!bits)
+		{
+			bits = tok.value.map(function(b){return treeToJME({tok:b});});
+		}
 		return '[ '+bits.join(', ')+' ]';
 	case 'special':
 		return tok.value;
