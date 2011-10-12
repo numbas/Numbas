@@ -421,11 +421,15 @@ SCORMStorage.prototype = {
 		case '1_n_2':
 		case 'm_n_2':
 		case 'm_n_x':
+			if(part.numAnswers===undefined)
+				return out;
 			var ticks = [];
-			for(var i=0;i<part.settings.numAnswers;i++)
+			var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
+			var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
+			for(var i=0;i<w;i++)
 			{
 				ticks.push([]);
-				for(var j=0;j<part.settings.numChoices;j++)
+				for(var j=0;j<h;j++)
 				{
 					ticks[i].push(false);
 				}
