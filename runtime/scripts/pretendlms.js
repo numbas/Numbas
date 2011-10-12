@@ -1502,7 +1502,7 @@ function Interaction(lms,number)
 }
 Interaction.prototype = {
 	id: '',								//unique label for interaction												(RW)
-	type: 'other',					//true-false,multiple-choice,fill-in,long-fill-in,matching,performance,		(RW)
+	type: 'other',					//true-false,choice,fill-in,long-fill-in,matching,performance,		(RW)
 										//sequencing,likert,numeric,other
 	objectives: [],
 	timestamp: '',						//time when interaction first made available to learner						(RW)
@@ -1630,7 +1630,7 @@ Interaction.prototype = {
 			}
 			break;
 
-		case 'multiple-choice':
+		case 'choice':
 			var bits = value.split('[,]');
 			for(var i=0;i<bits.length;i++)
 			{

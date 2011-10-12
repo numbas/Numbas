@@ -531,9 +531,9 @@ SCORMStorage.prototype = {
 		case 'm_n_2':
 		case 'm_n_x':
 			var s='';
-			for(var i=0;i<part.settings.numAnswers;i++)
+			for(var i=0;i<part.numAnswers;i++)
 			{
-				for( var j=0;j<part.settings.numChoices;j++ )
+				for( var j=0;j<part.numChoices;j++ )
 				{
 					if(part.ticks[i][j])
 					{
