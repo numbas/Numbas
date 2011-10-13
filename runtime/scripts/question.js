@@ -1297,13 +1297,20 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	var choiceNodes = choicesNode.selectNodes('choice');
 	this.numChoices = choiceNodes.length;
 	
-	//randomise answers?
-	var answersNode = this.xml.selectSingleNode('answers');
-	if(answersNode)
+	//get number of answers and answer order setting
+	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{
-		tryGetAttribute(settings,answersNode,'order','answerOrder');
-		var answerNodes = answersNode.selectNodes('answer');
-		this.numAnswers = answerNodes.length;
+		this.numAnswers = 1;
+	}
+	else
+	{
+		var answersNode = this.xml.selectSingleNode('answers');
+		if(answersNode)
+		{
+			tryGetAttribute(settings,answersNode,'order','answerOrder');
+			var answerNodes = answersNode.selectNodes('answer');
+			this.numAnswers = answerNodes.length;
+		}
 	}
 
 	//get warning type and message for wrong number of choices
@@ -1319,6 +1326,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		var pobj = Numbas.store.loadPart(this);
 		this.shuffleChoices = pobj.shuffleChoices;
 		this.shuffleAnswers = pobj.shuffleAnswers;
+		this.ticks = pobj.ticks;
 	}
 	else
 	{
@@ -1352,13 +1360,16 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	{
 		choicesNode.appendChild(choiceNodes[this.shuffleChoices[i]]);
 	}
-	for(i=0;i<this.numAnswers;i++)
+	if(this.type == 'm_n_x')
 	{
-		answersNode.removeChild(answerNodes[i]);
-	}
-	for(i=0;i<this.numAnswers;i++)
-	{
-		answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
+		for(i=0;i<this.numAnswers;i++)
+		{
+			answersNode.removeChild(answerNodes[i]);
+		}
+		for(i=0;i<this.numAnswers;i++)
+		{
+			answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
+		}
 	}
 
 	//invert the shuffle so we can now tell where particular choices/answers went
@@ -1438,35 +1449,46 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	else
 		var flipped=false;
 
-	//ticks array - which answers/choices are selected?
-	this.ticks=[];
-	this.stagedAnswer = [];
-	for( i=0; i<this.numAnswers; i++ )
-	{
-		this.ticks.push([]);
-		this.stagedAnswer.push([]);
-		for( var j=0; j<this.numChoices; j++ )
-		{
-			this.ticks[i].push(false);
-			this.stagedAnswer[i].push(false);
-		}
-	}
-
 	//restore saved choices
 	if(loading)
 	{
-		for( i=0;i<this.settings.numAnswers;i++)
+		this.stagedAnswer = [];
+		for( i=0; i<this.numAnswers; i++ )
 		{
-			for(j=0;j<this.settings.numChoices;j++)
+			this.stagedAnswer.push([]);
+			for( var j=0; j<this.numChoices; j++ )
 			{
-				if( (flipped && (pobj.ticks[j][i])) || (!flipped && pobj.ticks[i][j]) )
-					this.stagedAnswer[i][j]=true;
+				this.stagedAnswer[i].push(false);
+			}
+		}
+		for( i=0;i<this.numAnswers;i++)
+		{
+			for(j=0;j<this.numChoices;j++)
+			{
+				if(pobj.ticks[i][j])
 					this.stagedAnswer[i][j]=true;
 			}
 		}
 		if(this.answered)
 			this.submit();
 	}
+	else
+	{
+		//ticks array - which answers/choices are selected?
+		this.ticks=[];
+		this.stagedAnswer = [];
+		for( i=0; i<this.numAnswers; i++ )
+		{
+			this.ticks.push([]);
+			this.stagedAnswer.push([]);
+			for( var j=0; j<this.numChoices; j++ )
+			{
+				this.ticks[i].push(false);
+				this.stagedAnswer[i].push(false);
+			}
+		}
+	}
+
 
 	//if this part has a minimum number of answers more than zero, then
 	//we start in an error state
