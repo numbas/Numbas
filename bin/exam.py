@@ -524,7 +524,7 @@ class JMEPart(Part):
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
 		if 'minlength' in data:
-			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLengt)
+			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLength)
 		if 'musthave' in data:
 			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
 		if 'notallowed' in data:
