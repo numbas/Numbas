@@ -519,12 +519,12 @@ class JMEPart(Part):
 		else:	#dp or sigfig
 			part.checkingAccuracy = 5
 		#get checking accuracy from data, if defined
-		tryLoad(data,'checkingaccuracy',part)
+		tryLoad(data,'checkingAccuracy',part)
 
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
 		if 'minlength' in data:
-			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLengt)
+			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLength)
 		if 'musthave' in data:
 			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
 		if 'notallowed' in data:

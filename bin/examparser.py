@@ -137,7 +137,7 @@ class ExamParser:
 			self.cursor +=1
 			return arr
 
-		elif f=='"':	#string literal
+		elif f=='"':	#string literal - double quotes
 			if self.source[self.cursor:self.cursor+3]=='"""':	#triple-quoted  string
 				i=self.cursor+3
 				while i<len(self.source)-2 and self.source[i:i+3]!='"""':
@@ -152,6 +152,24 @@ class ExamParser:
 					i+=1
 				if i==len(self.source):
 					raise ParseError(self,'Expected " to end string literal')
+				string = self.source[self.cursor+1:i]
+				self.cursor = i+1
+			return string
+		elif f=="'":	#string literal - single quotes
+			if self.source[self.cursor:self.cursor+3]=="'''":	#triple-quoted  string
+				i=self.cursor+3
+				while i<len(self.source)-2 and self.source[i:i+3]!="'''":
+					i+=1
+				if i==len(self.source)-2:
+					raise ParseError(self,"Expected ''' to end string literal")
+				string = self.source[self.cursor+3:i]
+				self.cursor = i+3
+			else:
+				i=self.cursor+1
+				while i<len(self.source) and self.source[i]!="'":
+					i+=1
+				if i==len(self.source):
+					raise ParseError(self,"Expected ' to end string literal")
 				string = self.source[self.cursor+1:i]
 				self.cursor = i+1
 			return string

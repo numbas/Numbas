@@ -130,11 +130,13 @@
 					}
 					musthave: {
 						strings: [strings]		#list of strings which must be in student's answer
+						showStrings: boolean	#show required strings?
 						partialCredit: number	#percentage
 						message: string
 					}
 					notallowed: {
 						strings: [strings]		#list of strings which must NOT be in student's answer
+						showStrings: boolean	#show forbidden strings?
 						partialCredit: number
 						message: string
 					}
