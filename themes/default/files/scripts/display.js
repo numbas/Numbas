@@ -605,7 +605,7 @@ display.PartDisplay.prototype =
 
 		if(Numbas.exam.showAnswerState)
 		{
-			if(this.p.markingFeedback.length)
+			if(this.p.markingFeedback.length && !this.p.question.revealed)
 			{
 				var feedback = [];
 				var maxMarks = this.p.marks - (this.p.stepsShown ? this.p.settings.stepsPenalty : 0);
