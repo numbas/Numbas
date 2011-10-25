@@ -838,7 +838,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	);
 
 	settings.displaySimplification = {
-		fractionNumbers: settings.answerSimplification.fractionNumbers
+	//	fractionNumbers: settings.answerSimplification.fractionNumbers
 	};
 	
 	//get checking type, accuracy, checking range
