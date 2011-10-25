@@ -35,7 +35,7 @@ var Exam = Numbas.Exam = function()
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 
-	tryGetAttribute(this,'settings/navigation',['reverse','browse','showfrontpage'],['navigateReverse','navigateBrowse','showFrontPage']);
+	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
@@ -152,6 +152,7 @@ Exam.prototype = {
 	questionList: [],			//Question objects, in order student will see them
 		
 	//navigation
+	allowRegen: false,			//can student re-randomise a question?
 	navigateReverse: false,		//can student navigate to previous question?
 	navigateBrowse: false,		//can student jump to any question they like?
 	navigateBrowseType: '',		//dropbox or ??
@@ -473,6 +474,21 @@ Exam.prototype = {
 		}
 		this.currentQuestion.visited = true;
 		Numbas.store.changeQuestion(this.currentQuestion);
+	},
+
+	regenQuestion: function()
+	{
+		var e = this;
+		var n = e.currentQuestion.number;
+		job(e.display.startRegen,e.display);
+		job(function() {
+			e.questionList[n] = new Numbas.Question(e.xml.selectNodes('questions/question')[n], n, false, e.variables, e.functions);
+		})
+		job(function() {
+			e.changeQuestion(n);
+			e.display.showQuestion();
+		});
+		job(e.display.endRegen,e.display);
 	},
 
 	end: function()

@@ -109,6 +109,7 @@ class Exam:
 	def __init__(self,name='Untitled Exam'):
 		self.name = name
 		self.navigation = {	
+				'allowregen': False,				#allow student to re-randomise a question?
 				'reverse': True,
 				'browse': True,
 				'showfrontpage': True,
@@ -149,7 +150,7 @@ class Exam:
 
 		if 'navigation' in data:
 			nav = data['navigation']
-			tryLoad(nav,['reverse','browse','showfrontpage'],exam.navigation)
+			tryLoad(nav,['allowregen','reverse','browse','showfrontpage'],exam.navigation)
 			for event in ['onadvance','onreverse','onmove']:
 				if event in nav:
 					tryLoad(nav[event],['action','message'],exam.navigation[event])
@@ -219,6 +220,7 @@ class Exam:
 
 		nav = settings.find('navigation')
 		nav.attrib = {
+			'allowregen':str(self.navigation['allowregen']),
 			'reverse':str(self.navigation['reverse']), 
 			'browse': str(self.navigation['browse']),
 			'showfrontpage': str(self.navigation['showfrontpage'])
