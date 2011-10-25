@@ -101,6 +101,7 @@ Copyright 2011 Newcastle University
 		</span>
 		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="not(ancestor::gaps)">
+			<br/>
 			<div id="partFeedback">
 				<input class="btn" id="submitPart" value="Submit part" type="button"></input>
 				<div id="marks">

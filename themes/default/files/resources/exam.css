@@ -63,6 +63,8 @@ html{
 }
 
 #examBanner{
+	margin-left: 250px;
+	line-height:1em;
 	text-align:right;
 	font-size: 2em;
 	font-weight: bold;
@@ -354,6 +356,10 @@ div.part {
 	border: 1px solid;
 	padding: 0.5em 0.5em;
 	/*float:right;*/
+}
+
+.steps #prompt {
+	display:inline-block;
 }
 
 .advice {
