@@ -358,6 +358,10 @@ div.part {
 	/*float:right;*/
 }
 
+.steps #prompt {
+	display:inline-block;
+}
+
 .advice {
 	background: #cfc;
 	border: 1px solid;
