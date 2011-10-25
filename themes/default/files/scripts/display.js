@@ -725,7 +725,7 @@ display.JMEPartDisplay.prototype =
 				if(pd.hasFocus || pd.showAnyway)
 				{
 					inputDiv.css('z-index',1)
-							.position({my: 'left top',at: 'left bottom', of: previewDiv, offset:'0 10', collision: 'none'})
+							.position({my: 'left top',at: 'right top', of: previewDiv, offset:'0 10', collision: 'none'})
 				}
 				else
 					inputDiv.css('z-index',-1);
