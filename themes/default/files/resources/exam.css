@@ -63,6 +63,8 @@ html{
 }
 
 #examBanner{
+	margin-left: 250px;
+	line-height:1em;
 	text-align:right;
 	font-size: 2em;
 	font-weight: bold;
