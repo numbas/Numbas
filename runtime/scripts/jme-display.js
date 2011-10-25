@@ -648,7 +648,8 @@ var opBrackets = {
 	'^': {'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},
 	'and': {'or':true, 'xor':true},
 	'or': {'xor':true},
-	'xor':{}
+	'xor':{},
+	'=': {}
 };
 
 var Rule = jme.display.Rule = function(pattern,conditions,result)
