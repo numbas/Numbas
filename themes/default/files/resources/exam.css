@@ -126,6 +126,11 @@ html{
 #submitBtn {
 	width: 9em;
 }
+
+#regenBtn {
+	width: auto;
+}
+
 #marks {
 	display:inline;
 }

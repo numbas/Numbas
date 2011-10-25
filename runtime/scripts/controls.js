@@ -89,6 +89,14 @@ Numbas.controls = {
 		});
 	},
 
+	regenQuestion: function() 
+	{
+		job(function() {
+			Numbas.display.showConfirm("Would you like to re-randomise this question? If you click OK, all your answers and marks for the current question will be lost.",
+				function(){Numbas.exam.regenQuestion();}
+			);
+		});
+	},
 
 	//show the advice for this question
 	getAdvice: function()

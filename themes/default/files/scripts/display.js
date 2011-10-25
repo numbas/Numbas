@@ -141,6 +141,11 @@ display.ExamDisplay = function(e)
 	//register 'submit question' button
 	$('*').find('#submitBtn').click( Numbas.controls.submitQuestion );
 	
+	//register 'try another question like this one' button
+	if(e.allowRegen)
+		$('*').find('#regenBtn').click( Numbas.controls.regenQuestion );
+	else
+		$('*').find('#regenBtn').hide();
 
 	if(Numbas.store)
 	{
@@ -285,6 +290,14 @@ display.ExamDisplay.prototype =
 			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
 		}
+	},
+
+	startRegen: function() {
+		$('#questionDisplay').hide();
+	},
+	
+	endRegen: function() {
+		$('#questionDisplay').fadeIn(200);
 	}
 };
 
