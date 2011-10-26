@@ -278,6 +278,10 @@ html{
 	clear:both;
 }
 
+#adviceDisplay {
+	display: inline-block;
+}
+
 #adviceDisplay ol,ul {
 	margin-left:1em;
 }
@@ -422,6 +426,9 @@ input[type=text],input[type=number] {
 .mathPreview {
 	cursor: pointer; cursor: hand;
 	color: #005;
+}
+.mathPreview:hover {
+	background: #f0f0f0;
 }
 
 .jme {
