@@ -92,10 +92,10 @@ jme.display = {
 					var match;
 					if(match = rules[i].match(exprTree))
 					{
-						//Numbas.debug("match rule "+rules[i].patternString,true);
-						//Numbas.debug(treeToJME(exprTree),true);
+						Numbas.debug("match rule "+rules[i].patternString,true);
+						Numbas.debug(treeToJME(exprTree),true);
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
-						//Numbas.debug(treeToJME(exprTree),true);
+						Numbas.debug(treeToJME(exprTree),true);
 						applied = true;
 						break;
 					}
@@ -838,7 +838,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['(x-n)-y',['n isa "number"'],'(x-y)-n'],
 
 		['n*m',['n isa "number"','m isa "number"'],'eval(n*m)'],		//multiply numbers
-		['x*n',['n isa "number"','!(x isa "number")'],'n*x']								//shift numbers to left hand side
+		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x']			//shift numbers to left hand side
 	],
 
 	simplifyFractions: [
@@ -853,7 +853,7 @@ var simplificationRules = jme.display.simplificationRules = {
 	],
 
 	constantsFirst: [
-		['x*n',['n isa "number"','!(x isa "number")'],'n*x']
+		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x']
 	],
 
 	sqrtProduct: [

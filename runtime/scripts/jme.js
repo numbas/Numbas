@@ -1136,7 +1136,7 @@ new funcObj('<', [TNum,TNum], TBool, math.lt );
 new funcObj('>', [TNum,TNum], TBool, math.gt );
 new funcObj('<=', [TNum,TNum], TBool, math.leq );
 new funcObj('>=', [TNum,TNum], TBool, math.geq );
-new funcObj('<>', [TNum], TBool, math.neq );
+new funcObj('<>', [TNum,TNum], TBool, math.neq );
 new funcObj('<>', ['?','?'], TBool, function(a,b){ return a!=b; } );
 new funcObj('=', [TNum,TNum], TBool, math.eq );
 new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; });
