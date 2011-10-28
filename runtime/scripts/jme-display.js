@@ -838,7 +838,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['(x-n)-y',['n isa "number"'],'(x-y)-n'],
 
 		['n*m',['n isa "number"','m isa "number"'],'eval(n*m)'],		//multiply numbers
-		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x']			//shift numbers to left hand side
+		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x'],			//shift numbers to left hand side
+		['m*(n*x)',['m isa "number"','n isa "number"'],'eval(n*m)*x']
 	],
 
 	simplifyFractions: [
