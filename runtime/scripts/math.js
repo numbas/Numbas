@@ -355,7 +355,7 @@ var math = Numbas.math = {
 				if(n.im==-1)
 					return re+' - i';
 				else
-					return re+' - '+im+'*i';
+					return re+im+'*i';
 			}
 			else
 			{

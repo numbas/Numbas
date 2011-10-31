@@ -830,8 +830,11 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x^0',[],'1']
 	],
 
-	collectNumbers: [
+	noLeadingMinus: [
 		['-x+y',[],'y-x'],											//don't start with a unary minus
+	],
+
+	collectNumbers: [
 		['-x-y',[],'-(x+y)'],										//collect minuses
 		['n+m',['n isa "number"','m isa "number"'],'eval(n+m)'],	//add numbers
 		['n-m',['n isa "number"','m isa "number"'],'eval(n-m)'],	//subtract numbers
