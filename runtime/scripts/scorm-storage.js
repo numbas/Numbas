@@ -335,6 +335,7 @@ SCORMStorage.prototype = {
 	{
 		this.e = exam;
 		var eobj = this.getSuspendData();
+		this.set('exit','suspend');
 		
 		var location = this.get('location');
 		if(location.length)
