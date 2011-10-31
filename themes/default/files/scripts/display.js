@@ -486,8 +486,8 @@ display.QuestionDisplay.prototype =
 			{
 				$('.submitDiv > #score').show().html('Answer submitted').fadeOut(200).fadeIn(200);
 
-				if(!exam.showAnswerState)
-					$(this.questionSelector).find('#score').show().html('Submitted');
+			//	if(!exam.showAnswerState)
+			//		$(this.questionSelector).find('#score').show().html('Answered');
 
 				selector.find('#submitBtn').val('Submit again');
 			}
