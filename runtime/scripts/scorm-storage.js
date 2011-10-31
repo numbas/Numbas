@@ -157,6 +157,7 @@ SCORMStorage.prototype = {
 		this.set(prepath+'id', id);
 		this.set(prepath+'score.min',0);
 		this.set(prepath+'score.max',q.marks);
+		this.set(prepath+'score.raw',q.score || 0);
 		this.set(prepath+'success_status','unknown');
 		this.set(prepath+'completion_status','not attempted');
 		this.set(prepath+'progress_measure',0);
@@ -364,7 +365,7 @@ SCORMStorage.prototype = {
 			variables[name] = Numbas.jme.evaluate(qobj.variables[name]);
 		}
 
-		return {score: parseInt(this.get('objectives.'+index+'.score.raw'),10),
+		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
 				visited: qobj.visited,
 				answered: qobj.answered,
 				submitted: qobj.submitted,
