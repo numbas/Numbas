@@ -213,9 +213,16 @@ var texOps = {
 				s+=' ';
 			}
 			else if ( thing.args[i].tok.type=='number'
-					|| (!(thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='-u') &&
-						(thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] && thing.args[i].tok.name!='-u' && (thing.args[i].args[0].tok.type=='number' && thing.args[i].args[0].tok.value!=Math.E))
+					||
+						thing.args[i].tok.type=='op' && thing.args[i].tok.name=='-u'
+					||
+					(
+						!(thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='-u') 
+						&& (thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] 
+							&& (thing.args[i].args[0].tok.type=='number' 
+							&& thing.args[i].args[0].tok.value!=Math.E)
 						)
+					)
 			)
 			{
 				s += ' \\times ';
@@ -618,7 +625,9 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		//omit multiplication symbol when not necessary
 		if(op=='*')
 		{
-			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed) )	//number or brackets followed by name or brackets doesn't need a times symbol
+			//number or brackets followed by name or brackets doesn't need a times symbol
+			//except <anything>*(-<something>) does
+			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !(args[1].tok.type=='op' && args[1].tok.name=='-u')) )	
 			{
 				op = '';
 			}
