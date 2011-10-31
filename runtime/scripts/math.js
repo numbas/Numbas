@@ -339,9 +339,9 @@ var math = Numbas.math = {
 		{
 			var re = math.niceNumber(n.re);
 			var im = math.niceNumber(n.im);
-			if(n.im==0)
+			if(math.precround(n.im,10)==0)
 				return re+'';
-			else if(n.re==0)
+			else if(math.precround(n.re,10)==0)
 			{
 				if(n.im==1)
 					return 'i';
@@ -355,7 +355,7 @@ var math = Numbas.math = {
 				if(n.im==-1)
 					return re+' - i';
 				else
-					return re+im+'*i';
+					return re+' - '+im+'*i';
 			}
 			else
 			{
@@ -370,7 +370,7 @@ var math = Numbas.math = {
 			if((piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
-			out = math.precround(n,10)+'';
+			var	out = math.precround(n,10)+'';
 			switch(piD)
 			{
 			case 0:
