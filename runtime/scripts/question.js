@@ -448,10 +448,13 @@ Question.prototype =
 		}
 
 		var tmpScore=0;
+		var answered = true;
 		for(var i=0; i<this.parts.length; i++)
 		{
 			tmpScore += this.parts[i].score;
+			answered = answered && this.parts[i].answered;
 		}
+		this.answered = answered;
 		
 		if( uiWarning!="uwPrevent" )
 		{

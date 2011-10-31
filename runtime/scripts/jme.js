@@ -60,21 +60,17 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_op))
 			{
 				token = result[0];
-				if(result[0]=='+' || result[0]=='-') 
+				//work out if operation is being used prefix or postfix
+				var nt;
+				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || nt=='op' )
 				{
-					if(tokens.length>0) 
-					{
-						switch(tokens[tokens.length-1].type) 
-						{
-						case '(':
-						case ',':
-						case '[':
-						case 'op':
-							token=result[0]+'u';		// '+u' and '-u' are the unary sign-changing operations, used if preceding token is appropriate punctuation or another operator
-						}
-					}else{
-						token=result[0]+'u';		// + or - at start of expression are interpreted to be unary sign thingies too
-					}
+					if(token in prefixForm)
+						token = prefixForm[token];
+				}
+				else
+				{
+					if(token in postfixForm)
+						token = postfixForm[token];
 				}
 				token=new TOp(token);
 			}
@@ -957,13 +953,25 @@ TConc.prototype.type = 'conc';
 
 var arity = jme.arity = {
 	'!': 1,
+	'not': 1,
+	'fact': 1,
 	'+u': 1,
 	'-u': 1
 }
 
+//some names represent different operations when used as prefix or as postfix. This dictionary translates them
+var prefixForm = {
+	'+': '+u',
+	'-': '-u',
+	'!': 'not',
+}
+var postfixForm = {
+	'!': 'fact'
+}
+
 var precedence = jme.precedence = {
 	'_': 0,
-	'!': 1,
+	'fact': 1,
 	'not': 1,
 	'^': 2,
 	'*': 3,
@@ -992,7 +1000,6 @@ var precedence = jme.precedence = {
 };
 
 var synonyms = {
-	'not':'!',
 	'&':'&&',
 	'and':'&&',
 	'divides': '|',
@@ -1143,7 +1150,7 @@ new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; });
 new funcObj('=', ['?','?'], TBool, function(a,b){ return a==b; } );
 
 new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;} );
-new funcObj('!', [TBool], TBool, function(a){return !a;} );	
+new funcObj('not', [TBool], TBool, function(a){return !a;} );	
 new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;} );
 new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);} );
 
