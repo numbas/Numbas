@@ -53,6 +53,7 @@ def tryLoad(data,attr,obj,altname=''):
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
 def makeContentNode(s,doTextile=True):
 	s=str(s)
+	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
 	if doTextile:
 		s=textile(s)
