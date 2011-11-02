@@ -53,11 +53,11 @@ def tryLoad(data,attr,obj,altname=''):
 #convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
 def makeContentNode(s,doTextile=True):
 	s=str(s)
-	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
 	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
 	if doTextile:
 		s=textile(s)
 	else:
+		s = re.sub(r'&(?!#?\w+;)','&amp;',s)
 		s='<span>'+s+'</span>'
 	return etree.fromstring('<content>'+s+'</content>')
 
@@ -773,7 +773,7 @@ class MultipleChoicePart(Part):
 					'choiceindex': str(i),
 					'answerindex': str(j)
 				})
-				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractor.append(makeContentNode(self.distractors[i][j]))
 				distractors.append(distractor)
 
 		return part

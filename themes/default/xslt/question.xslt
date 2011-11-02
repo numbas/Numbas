@@ -134,6 +134,12 @@ Copyright 2011 Newcastle University
 	<xsl:apply-templates select="*" mode="content" />
 </xsl:template>
 
+<xsl:template match="distractor">
+	<span>
+		<xsl:apply-templates />
+	</span>
+</xsl:template>
+
 
 <xsl:template match="advice">
 	<div id="adviceContainer">
