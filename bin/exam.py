@@ -773,7 +773,7 @@ class MultipleChoicePart(Part):
 					'choiceindex': str(i),
 					'answerindex': str(j)
 				})
-				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractor.append(makeContentNode(self.distractors[i][j]))
 				distractors.append(distractor)
 
 		return part

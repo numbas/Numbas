@@ -922,6 +922,8 @@ class Textile(object):
 		return ''.join([before, self.shelve('$%s$' % text), after])
 	def fMath2(self, match):
 		before, text, after = match.groups()
+		if before == None:
+			before = ''
 		if after == None:
 			after = ''
 		# text needs to be escaped
