@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/pretendlms.js',['util','scorm-storage'],function() {
+Numbas.queueScript('extensions/pretendlms/pretendlms.js',['util','scorm-storage'],function() {
 
 var isFloat = Numbas.util.isFloat;
 var isInt = Numbas.util.isInt;

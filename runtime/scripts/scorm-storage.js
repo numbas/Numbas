@@ -16,18 +16,25 @@ Copyright 2011 Newcastle University
 
 
 Numbas.queueScript('scripts/scorm-storage.js',[],function() {
-Numbas.storage = {
-	clean: function()
-	{
-		for(x in localStorage) delete localStorage[x];
-	},
+Numbas.storage.clean = function()
+{
+	for(x in localStorage) delete localStorage[x];
+};
 
-	startLMS: function()
-	//tries to initialise the SCORM API
-	//if it isn't present, a pretend LMS is started
-	//(this could save student progress in localStorage)
+Numbas.storage.startLMS = function()
+//tries to initialise the SCORM API
+//if it isn't present, a pretend LMS is started
+//(this could save student progress in localStorage)
+{
+};
+
+//SCORM storage object - controls saving and loading of data from the LMS
+var SCORMStorage = Numbas.storage.SCORMStorage = function()
+{
+	if(!pipwerks.SCORM.init())
 	{
-		if(!pipwerks.SCORM.init())
+		//if the pretend LMS extension is loaded, we can start that up
+		if(Numbas.storage.PretendLMS)
 		{
 			if(!Numbas.storage.lms)
 			{
@@ -36,12 +43,13 @@ Numbas.storage = {
 			window.API_1484_11 = Numbas.storage.lms.API;
 			pipwerks.SCORM.init();
 		}
+		//otherwise return a blank storage object which does nothing
+		else
+		{
+			return new Numbas.storage.BlankStorage();	
+		}
 	}
-};
 
-//SCORM storage object - controls saving and loading of data from the LMS
-var SCORMStorage = Numbas.storage.SCORMStorage = function()
-{
 	this.getEntry();
 
 	//get all question-objective indices

@@ -73,8 +73,6 @@ var init = Numbas.init = function()
 
 	//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
 
-	job(Numbas.storage.startLMS);			//Initialise the LMS. In a bit, the LMS will tell us if there is a previous attempt that can be resumed
-
 	job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
 	job(function()
