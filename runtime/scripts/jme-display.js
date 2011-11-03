@@ -831,7 +831,7 @@ var simplificationRules = jme.display.simplificationRules = {
 	],
 
 	noLeadingMinus: [
-		['-x+y',[],'y-x'],											//don't start with a unary minus
+		['-x+y',[],'y-x']											//don't start with a unary minus
 	],
 
 	collectNumbers: [
