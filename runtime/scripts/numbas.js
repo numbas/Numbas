@@ -155,8 +155,8 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 
 	var script = document.createElement("script");
 	script.type = "text/javascript";
-	script.src = file;
 	script.charset="utf-8";
+	script.src = file;
 	$('head').append(script);
 }
 

@@ -1200,8 +1200,8 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
 	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
 	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.variables,this.question.functions);
-	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value;
-	settings.maxvalue = evaluate(compile(settings.maxvalue),this.question.variables,this.question.functions).value;
+	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value - 0.00000000001;
+	settings.maxvalue = evaluate(compile(settings.maxvalue),this.question.variables,this.question.functions).value + 0.00000000001;
 
 	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
 
