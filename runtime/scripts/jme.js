@@ -1386,7 +1386,7 @@ var checkingFunctions =
 	absdiff: function(r1,r2,tolerance) 
 	{
 		// finds absolute difference between values, fails if bigger than tolerance
-		return math.leq(Math.abs(math.sub(r1,r2)), tolerance);
+		return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
 	},
 
 	reldiff: function(r1,r2,tolerance) {
