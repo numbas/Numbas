@@ -503,19 +503,21 @@ Exam.prototype = {
 		this.percentScore = Math.round(100*this.score/this.mark);
 		this.passed = this.percentScore >= this.percentPass;
 
+		var niceNumber = Numbas.math.niceNumber;
+
 		//construct report object
 		var report = this.report = 
 		{	examsummary: {	name: this.name,
 							numberofquestions: this.numQuestions, 
-							mark: this.mark,
-							passpercentage: this.percentPass,
+							mark: niceNumber(this.mark),
+							passpercentage: niceNumber(this.percentPass),
 							duration: this.displayDuration 
 						 },
 			performancesummary: {	start: this.start.toGMTString(),
 									stop: this.stop.toGMTString(),
 									timespent: Numbas.timing.secsToDisplayTime(this.timeSpent),
-									score: this.score,
-									percentagescore: this.percentScore,
+									score: niceNumber(this.score),
+									percentagescore: niceNumber(this.percentScore),
 									passed: this.passed,
 									result: (this.passed ? 'Passed' :'Failed')
 								},
@@ -532,8 +534,8 @@ Exam.prototype = {
 
 			report.questions.push({question: {	number: question.number+1,
 												name: question.name,
-												marks: question.marks,
-												score: question.score } });
+												marks: niceNumber(question.marks),
+												score: niceNumber(question.score) } });
 		}
 		report.performancesummary.questionsattempted = examQuestionsAttempted;
 
