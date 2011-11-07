@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/util.js',[],function() {
+Numbas.queueScript('scripts/util.js',['math'],function() {
 var util = Numbas.util = {
 	//extend(A,B) - derive type B from A
 	//(class inheritance, really)
@@ -164,6 +164,7 @@ var util = Numbas.util = {
 
 	pluralise: function(n,singular,plural)
 	{
+		n = Numbas.math.precround(n,10);
 		if(n==-1 || n==1)
 			return singular;
 		else

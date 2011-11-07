@@ -19,6 +19,7 @@ Numbas.queueScript('scripts/question.js',['schedule','display','jme','jme-variab
 
 var util = Numbas.util;
 var jme = Numbas.jme;
+var math = Numbas.math;
 
 var job = Numbas.schedule.add;
 
@@ -655,7 +656,7 @@ Part.prototype = {
 				else
 				{
 					var change = this.score - oScore;
-					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',change,util.pluralise(change,'mark','marks')));
+					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',math.niceNumber(change),util.pluralise(change,'mark','marks')));
 				}
 			}
 		}
@@ -686,7 +687,7 @@ Part.prototype = {
 			var stepsMax = this.marks - this.settings.stepsPenalty;
 			this.markingComment(
 				this.settings.stepsPenalty>0 
-					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')) 
+					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',math.niceNumber(stepsMax),util.pluralise(stepsMax,'mark','marks')) 
 					: 'You revealed the steps.');
 		}
 
@@ -720,7 +721,7 @@ Part.prototype = {
 		{
 			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
-				this.markingComment('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
+				this.markingComment('You scored *'+math.niceNumber(this.score)+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
 		}
 		else
 			this.reportStudentAnswer('');
@@ -1205,7 +1206,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
 
-	settings.displayAnswer = Numbas.math.niceNumber((settings.minvalue + settings.maxvalue)/2);
+	settings.displayAnswer = math.niceNumber((settings.minvalue + settings.maxvalue)/2);
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
@@ -1337,21 +1338,21 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		this.shuffleChoices=[];
 		if(settings.choiceOrder=='random')
 		{
-			this.shuffleChoices = Numbas.math.deal(this.numChoices);
+			this.shuffleChoices = math.deal(this.numChoices);
 		}
 		else
 		{
-			this.shuffleChoices = Numbas.math.range(this.numChoices);
+			this.shuffleChoices = math.range(this.numChoices);
 		}
 
 		this.shuffleAnswers=[];
 		if(settings.answerOrder=='random')
 		{
-			this.shuffleAnswers = Numbas.math.deal(this.numAnswers);
+			this.shuffleAnswers = math.deal(this.numAnswers);
 		}
 		else
 		{
-			this.shuffleAnswers = Numbas.math.range(this.numAnswers);
+			this.shuffleAnswers = math.range(this.numAnswers);
 		}
 	}
 
@@ -1376,8 +1377,8 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 
 	//invert the shuffle so we can now tell where particular choices/answers went
-	this.shuffleChoices = Numbas.math.inverse(this.shuffleChoices);
-	this.shuffleAnswers = Numbas.math.inverse(this.shuffleAnswers);
+	this.shuffleChoices = math.inverse(this.shuffleChoices);
+	this.shuffleAnswers = math.inverse(this.shuffleAnswers);
 
 	//fill marks matrix
 	var matrix=[];
