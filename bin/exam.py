@@ -682,7 +682,7 @@ class MultipleChoicePart(Part):
 	shuffleChoices = False
 	shuffleAnswers = False
 	displayType = 'radiogroup'
-	displayColumns = 0
+	displayColumns = 1
 	
 	def __init__(self,kind,marks=0,prompt=''):
 		self.kind = kind
