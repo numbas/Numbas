@@ -238,7 +238,12 @@ Exam.prototype = {
 		for( var x in this )
 		{
 			if(!(dontwant.contains(x) || typeof(this[x])=='function'))
-				obj[x]=this[x];
+			{
+				var prop = this[x];
+				if(Numbas.util.isFloat(prop))
+					prop = Numbas.math.precround(prop,10);
+				obj[x]=prop;
+			}
 		}
 
 		return Sarissa.xmlize(obj,'exam');
