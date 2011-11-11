@@ -271,6 +271,8 @@ display.ExamDisplay.prototype =
 		
 			$('#resumeBtn').click( Numbas.controls.resumeExam );
 
+			Numbas.exam.display.showScore();
+
 			break;
 		
 		case "exit":
