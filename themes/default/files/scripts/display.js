@@ -529,7 +529,7 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning+'</span>');
+		$(this.warningDiv).show().find('.partwarning').append('<span>'+textile(warning.toString())+'</span>');
 		Numbas.display.typeset();
 	},
 
