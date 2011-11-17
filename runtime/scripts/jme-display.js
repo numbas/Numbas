@@ -63,7 +63,7 @@ jme.display = {
 		}
 		catch(e) 
 		{
-			e.message += '\nSimplifying expression failed. Expression was: '+expr;
+			//e.message += '\nSimplifying expression failed. Expression was: '+expr;
 			throw(e);
 		}
 	},
