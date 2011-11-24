@@ -236,6 +236,8 @@ var texOps = {
 	'/': (function(thing,texArgs) { return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }'); }),
 	'+': infixTex('+'),
 	'-': infixTex('-'),
+	'dot': infixTex('\\cdot'),
+	'cross': infixTex('\\times'),
 	'..': infixTex('\\dots'),
 	'<': infixTex('\\lt'),
 	'>': infixTex('\\gt'),
@@ -247,7 +249,20 @@ var texOps = {
 	'||': infixTex('\\vee'),
 	'xor': infixTex('\\, \\textrm{XOR} \\,'),
 	'|': infixTex('|'),
-	'abs': (function(thing,texArgs) { return ('\\left | '+texArgs[0]+' \\right |') }),
+	'abs': (function(thing,texArgs,settings) { 
+		var arg;
+		if(thing.args[0].tok.type=='vector')
+			arg = texVector(thing.args[0].tok.value,settings);
+		else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='vector')
+			arg = texVector(thing.args[0],settings);
+		else if(thing.args[0].tok.type=='matrix')
+			arg = texMatrix(thing.args[0].tok.value,settings);
+		else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='matrix')
+			arg = texMatrix(thing.args[0],settings);
+		else
+			arg = texArgs[0];
+		return ('\\left | '+arg+' \\right |');
+	}),
 	'sqrt': (function(thing,texArgs) { return ('\\sqrt{ '+texArgs[0]+' }'); }),
 	'exp': (function(thing,texArgs) { return ('e^{ '+texArgs[0]+' }'); }),
 	'fact': (function(thing,texArgs)
@@ -344,7 +359,16 @@ var texOps = {
 	'arccosh': funcTex('\\operatorname{arccosh}'),
 	'arctanh': funcTex('\\operatorname{arctanh}'),
 	'ln': funcTex('\\ln'),
-	'log': funcTex('\\log_{10}')
+	'log': funcTex('\\log_{10}'),
+	'vector': (function(thing,texArgs) {
+		return '\\begin{pmatrix} '+texArgs.join(' \\\\ ')+' \\end{pmatrix}';
+	}),
+	'matrix': (function(thing,texArgs) {
+		var rows = thing.args.map(function(x) {
+			return x.args.map(function(y){ return texify(y); }).join(' & ');
+		})
+		return '\\begin{pmatrix} ' + rows.join(' \\\\ ')+' \\end{pmatrix}';
+	})
 }
 
 function texRationalNumber(n)
@@ -464,6 +488,42 @@ function texRealNumber(n)
 	}
 }
 
+function texVector(v,settings)
+{
+	var out;
+	if(v.args)
+	{
+		out = v.args.map(function(x){return texify(x,settings)}).join(' \\\\ ');
+	}
+	else
+	{
+		var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
+		out = v.map(function(x){return texNumber(x)}).join(' \\\\ ');
+	}
+	return '\\begin{matrix} '+out+' \\end{matrix}';
+}
+
+function texMatrix(m,settings)
+{
+	var out;
+	if(m.args)
+	{
+		var rows = m.args.map(function(x) {
+			return x.args.map(function(y){ return texify(y,settings); }).join(' & ');
+		})
+		out = rows.join(' \\\\ ');
+	}
+	else
+	{
+		var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
+		var rows = tok.value.map(function(x){
+			return x.map(function(y){ return texNumber(y) }).join(' & ');
+		});
+		out = rows.join(' \\\\ ');
+	}
+	return '\\begin{matrix} '+out+' \\end{matrix}';
+}
+
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
 var texify = Numbas.jme.display.texify = function(thing,settings)
@@ -483,6 +543,8 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		}
 	}
 
+	var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
+
 	var tok = thing.tok || thing;
 	switch(tok.type)
 	{
@@ -492,14 +554,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		else if(tok.value==Math.PI)
 			return '\\pi';
 		else
-			if(settings.fractionNumbers)
-			{
-				return texRationalNumber(tok.value);
-			}
-			else
-			{
-				return texRealNumber(tok.value);
-			}
+			return texNumber(tok.value);
 	case 'string':
 		return '\\textrm{'+tok.value+'}';
 		break;
@@ -518,7 +573,13 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 				texArgs[i] = texify(tok.value[i],settings);
 			}
 		}
-		return '\\{ '+texArgs.join(', ')+' \\}';
+		return '\\left[ '+texArgs.join(', ')+' \\right]';
+	case 'vector':
+		return('\\left( ' 
+				+ texVector(tok.value,settings)
+				+ ' \\right)' );
+	case 'matrix':
+		return '\\left( '+texMatrix(tok.value,settings)+' \\right)';
 	case 'name':
 		if(greek.contains(tok.name))
 			return '\\'+tok.name;
@@ -532,12 +593,12 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		return texArgs.join(' ');
 		break;
 	case 'op':
-		return texOps[tok.name.toLowerCase()](thing,texArgs);
+		return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
 		break;
 	case 'function':
 		if(texOps[tok.name.toLowerCase()])
 		{
-			return texOps[tok.name.toLowerCase()](thing,texArgs);
+			return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
 		}
 		else
 		{
@@ -596,6 +657,8 @@ var treeToJME = jme.display.treeToJME = function(tree)
 			bits = tok.value.map(function(b){return treeToJME({tok:b});});
 		}
 		return '[ '+bits.join(', ')+' ]';
+	case 'vector':
+		return 'vector('+tok.value.map(function(i){return Numbas.math.niceNumber(i)}).join(',')+')';
 	case 'special':
 		return tok.value;
 	case 'conc':
