@@ -516,6 +516,8 @@ var jme = Numbas.jme = {
 		case 'boolean':
 		case 'range':
 		case 'list':
+		case 'vector':
+		case 'matrix':
 			tok.outtype = tok.type;
 			return true;
 		case 'name':
