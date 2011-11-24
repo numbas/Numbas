@@ -516,7 +516,7 @@ function texMatrix(m,settings)
 	else
 	{
 		var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
-		var rows = tok.value.map(function(x){
+		var rows = m.map(function(x){
 			return x.map(function(y){ return texNumber(y) }).join(' & ');
 		});
 		out = rows.join(' \\\\ ');
