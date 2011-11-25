@@ -1160,6 +1160,9 @@ new funcObj('^', [TNum,TNum], TNum, math.pow );
 new funcObj('dot',[TVector,TVector],TNum,vectormath.dot);
 new funcObj('cross',[TVector,TVector],TVector,vectormath.cross);
 
+new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
+new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+
 new funcObj('idmatrix',[TNum],TMatrix, matrixmath.id);
 
 new funcObj('..', [TNum,TNum], TRange, math.defineRange );	//define a range
@@ -1399,7 +1402,7 @@ funcs.vector.evaluate = function(args,variables,functions)
 	return new TVector(value);
 }
 
-funcs.matrix = new funcObj('matrix',['*TList'],TMatrix);
+funcs.matrix = new funcObj('matrix',['*list'],TMatrix);
 funcs.matrix.evaluate = function(args,variables,functions)
 {
 	var rows = args.length;
@@ -1414,6 +1417,20 @@ funcs.matrix.evaluate = function(args,variables,functions)
 	value.rows = rows;
 	value.columns = columns;
 	return new TMatrix(value);
+}
+
+funcs.rowvector = new funcObj('rowvector',['*number'],TMatrix);
+funcs.rowvector.evaluate = function(args,variables,functions)
+{
+	var row = [];
+	for(var i=0;i<args.length;i++)
+	{
+		row.push(jme.evaluate(args[i],variables,functions).value);
+	}
+	var matrix = [row];
+	matrix.rows = 1;
+	matrix.columns = row.length;
+	return new TMatrix(matrix);
 }
 
 function randoms(varnames,min,max,times)
