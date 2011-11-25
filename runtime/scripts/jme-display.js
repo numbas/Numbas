@@ -238,6 +238,12 @@ var texOps = {
 	'-': infixTex('-'),
 	'dot': infixTex('\\cdot'),
 	'cross': infixTex('\\times'),
+	'transpose': (function(thing,texArgs) {
+		var tex = texArgs[0];
+		if(thing.args[0].tok.type=='op')
+			tex = '\\left ( ' +tex+' \\right )';
+		return (tex+'^{\\mathrm{T}}');
+	}),
 	'..': infixTex('\\dots'),
 	'<': infixTex('\\lt'),
 	'>': infixTex('\\gt'),

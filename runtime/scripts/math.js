@@ -872,6 +872,13 @@ var vectormath = Numbas.vectormath = {
 		return m.map(function(row){
 			return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
 		});
+	},
+
+	transpose: function(v) {
+		var matrix = v.map(function(x){ return [x]; });
+		matrix.rows = 1;
+		matrix.columns = v.length;
+		return matrix;
 	}
 }
 
@@ -998,6 +1005,23 @@ var matrixmath = Numbas.matrixmath = {
 			out.push(row);
 			for(var j=0;j<n;j++)
 				row.push(j==i ? 1 : 0);
+		}
+		return out;
+	},
+
+	transpose: function(m) {
+		var out = [];
+		out.rows = m.columns;
+		out.columns = m.rows;
+
+		for(var i=0;i<m.columns;i++)
+		{
+			var row = [];
+			out.push(row);
+			for(var j=0;j<m.rows;j++)
+			{
+				row.push(m[j][i]||0);
+			}
 		}
 		return out;
 	}
