@@ -351,7 +351,7 @@ var jme = Numbas.jme = {
 		{
 			if(tree.tok.type=='name')
 			{
-				var name = tree.tok.name;
+				var name = tree.tok.name.toLowerCase();
 				if(variables[name]===undefined)
 				{
 					if(allowUnbound)
