@@ -530,6 +530,24 @@ function texMatrix(m,settings)
 	return '\\begin{matrix} '+out+' \\end{matrix}';
 }
 
+function texName(tok)
+{
+	var name = greek.contains(tok.name) ? '\\'+tok.name : tok.name;
+	switch(tok.annotation)
+	{
+	case 'v':	//vector
+	case 'vector':
+		return '\\mathbf{'+name+'}';
+
+	case 'm':	//matrix
+	case 'matrix':
+		return '\\mathrm{'+name.toUpperCase()+'}';
+
+	default:
+		return name;
+	}
+}
+
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
 var texify = Numbas.jme.display.texify = function(thing,settings)
@@ -587,10 +605,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	case 'matrix':
 		return '\\left( '+texMatrix(tok.value,settings)+' \\right)';
 	case 'name':
-		if(greek.contains(tok.name))
-			return '\\'+tok.name;
-		else
-			return tok.name;
+		return texName(tok);
 		break;
 	case 'special':
 		return tok.value;
