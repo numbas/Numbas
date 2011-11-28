@@ -32,7 +32,7 @@ var jme = Numbas.jme = {
 		var i = 0;
 		var re_bool = /^true|^false/;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
-		var re_name = /^{?(?:([a-zA-Z]+):)?((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
+		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|not|and|or|xor|isa|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!])/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
@@ -77,7 +77,7 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_name))
 			{
 				var name = result[2];
-				var annotation = result[1];
+				var annotation = result[1] ? result[1].split(':') : null;
 				if(!annotation)
 				{
 					// fill in constants here to avoid having more 'variables' than necessary
@@ -211,7 +211,7 @@ var jme = Numbas.jme = {
 			case "name":
 				if( i<tokens.length-1 && tokens[i+1].type=="(")
 				{
-						stack.push(new TFunc(tok.name));
+						stack.push(new TFunc(tok.name,tok.annotation));
 						numvars.push(0);
 						olength.push(output.length);
 				}
@@ -924,9 +924,10 @@ var TName = types.TName = types.name = function(name,annotation)
 }
 TName.prototype.type = 'name';
 
-var TFunc = types.TFunc = types['function'] = function(name)
+var TFunc = types.TFunc = types['function'] = function(name,annotation)
 {
 	this.name = name;
+	this.annotation = annotation;
 }
 TFunc.prototype.type = 'function';
 TFunc.prototype.vars = 0;
