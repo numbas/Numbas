@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/jme-display.js',['math','jme'],function() {
+Numbas.queueScript('scripts/jme-display.js',['math','jme','util'],function() {
 	
 var math = Numbas.math;
 var jme = Numbas.jme;
@@ -1032,6 +1032,7 @@ var displayFlags = ['fractionnumbers','rowvector'];
 
 var collectRuleset = jme.display.collectRuleset = function(set,sets)
 {
+	sets = Numbas.util.copyobj(sets);
 	if(typeof(set)=='string')
 	{
 		set = set.split(',');
@@ -1046,6 +1047,10 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 	}
 
 	var out = [];
+	for(var i=0;i<displayFlags.length;i++)
+	{
+		out[displayFlags[i]] = set[displayFlags[i]];
+	}
 	for(var i=0; i<set.length; i++ )
 	{
 		if(typeof(set[i])=='string')
