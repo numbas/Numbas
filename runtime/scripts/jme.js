@@ -1173,7 +1173,13 @@ new funcObj('/', [TNum,TNum], TNum, math.div );
 new funcObj('^', [TNum,TNum], TNum, math.pow );
 
 new funcObj('dot',[TVector,TVector],TNum,vectormath.dot);
+new funcObj('dot',[TMatrix,TVector],TNum,vectormath.dot);
+new funcObj('dot',[TVector,TMatrix],TNum,vectormath.dot);
+new funcObj('dot',[TMatrix,TMatrix],TNum,vectormath.dot);
 new funcObj('cross',[TVector,TVector],TVector,vectormath.cross);
+new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross);
+new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross);
+new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
 
 new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
 new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
