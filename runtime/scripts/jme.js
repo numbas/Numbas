@@ -32,7 +32,7 @@ var jme = Numbas.jme = {
 		var i = 0;
 		var re_bool = /^true|^false/;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
-		var re_name = /^{?((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
+		var re_name = /^{?(?:([a-zA-Z]+):)?((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|not|and|or|xor|isa|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!])/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
@@ -76,17 +76,19 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_name))
 			{
+				var name = result[2];
+				var annotation = result[1];
 				// fill in constants here to avoid having more 'variables' than necessary
-				if(result[1].toLowerCase()=='e') {
+				if(name.toLowerCase()=='e') {
 					token = new TNum(Math.E);
 
-				}else if (result[1].toLowerCase()=='pi' || result[1].toLowerCase()=='\\pi') {
+				}else if (name.toLowerCase()=='pi' || name.toLowerCase()=='\\pi') {
 					token = new TNum(Math.PI);
 
-				}else if (result[i].toLowerCase()=='i') {
+				}else if (name.toLowerCase()=='i') {
 					token = new TNum(math.complex(0,1));
 				}else{
-					token = new TName(result[1]);
+					token = new TName(name,annotation);
 				}
 				
 				if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
@@ -907,10 +909,11 @@ var TRange = types.TRange = types.range = function(range)
 }
 TRange.prototype.type = 'range';
 
-var TName = types.TName = types.name = function(name)
+var TName = types.TName = types.name = function(name,annotation)
 {
 	this.name = name;
 	this.value = name;
+	this.annotation = annotation;
 }
 TName.prototype.type = 'name';
 
