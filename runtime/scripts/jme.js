@@ -78,16 +78,23 @@ var jme = Numbas.jme = {
 			{
 				var name = result[2];
 				var annotation = result[1];
-				// fill in constants here to avoid having more 'variables' than necessary
-				if(name.toLowerCase()=='e') {
-					token = new TNum(Math.E);
+				if(!annotation)
+				{
+					// fill in constants here to avoid having more 'variables' than necessary
+					if(name.toLowerCase()=='e') {
+						token = new TNum(Math.E);
 
-				}else if (name.toLowerCase()=='pi' || name.toLowerCase()=='\\pi') {
-					token = new TNum(Math.PI);
+					}else if (name.toLowerCase()=='pi' || name.toLowerCase()=='\\pi') {
+						token = new TNum(Math.PI);
 
-				}else if (name.toLowerCase()=='i') {
-					token = new TNum(math.complex(0,1));
-				}else{
+					}else if (name.toLowerCase()=='i') {
+						token = new TNum(math.complex(0,1));
+					}else{
+						token = new TName(name,annotation);
+					}
+				}
+				else
+				{
 					token = new TName(name,annotation);
 				}
 				
