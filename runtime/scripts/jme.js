@@ -1361,6 +1361,22 @@ funcs.listval.evaluate = function(args,variables,functions)
 		throw(new Error("Invalid list index "+index+" on list of size "+list.value.length));
 }
 
+funcs.vectorval = new funcObj('listval',[TVector,TNum],TNum);
+funcs.vectorval.evaluate = function(args,variables,functions)
+{
+	var index = jme.evaluate(args[1],variables,functions).value;
+	var vector = jme.evaluate(args[0],variables,functions);
+	return new TNum(vector.value[index] || 0);
+}
+
+funcs.matrixval = new funcObj('listval',[TMatrix,TNum],TList)
+funcs.matrixval.evaluate = function(args,variables,functions)
+{
+	var index = jme.evaluate(args[1],variables,functions).value;
+	var matrix = jme.evaluate(args[0],variables,functions);
+	return new TVector(matrix.value[index] || []);
+}
+
 funcs.maplist = new funcObj('map',['?',TName,TList],TList);
 funcs.maplist.evaluate = function(args,variables,functions)
 {
