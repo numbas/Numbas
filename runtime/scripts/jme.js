@@ -704,8 +704,6 @@ var jme = Numbas.jme = {
 				if(!argbrackets)
 					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
-				if(expr.search(/\[/)>=0)
-					throw(expr);
 				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;
@@ -746,6 +744,12 @@ var jme = Numbas.jme = {
 				{
 					v = '['+v.value.map(function(x){return x.value;}).join(',')+']';
 				}
+				else if(v.type=='vector')
+				{
+					v = 'vector('+v.value.map(function(x){return Numbas.math.niceNumber(x)})+')';
+				}
+				else if(v.type=='matrix')
+					v = 'matrix('+v.value.map(function(row){return '['+row.map(function(x){return Numbas.math.niceNumber(x)}).join(',')+']'}).join(',')+')';
 				else
 				{
 					v = v.value;
