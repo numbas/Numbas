@@ -60,6 +60,14 @@ Numbas.showError = function(e)
 	Numbas.display.showAlert(message);
 };
 
+Numbas.Error = function(message)
+{
+	this.name="Numbas Error";
+	this.message = R(message,Array.prototype.slice.call(arguments,1));
+}
+Numbas.Error.prototype = new Error();
+Numbas.Error.prototype.constructor = Numbas.Error;
+
 // Initialise the exam:
 // - Connect to the LMS, which might have saved student answers
 // - Load the exam XML and the XSL templates

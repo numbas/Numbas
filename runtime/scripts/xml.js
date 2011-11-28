@@ -42,7 +42,7 @@ var xml = Numbas.xml = {
 		//check for errors
 		if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
 		{
-			throw(new Error("Couldn't load an XML document: "+Sarissa.getParseErrorText(doc)));
+			throw(new Numbas.Error('xml.could not load',Sarissa.getParseErrorText(doc)));
 		}
 
 		//allow XPath to be used to select nodes
@@ -145,14 +145,14 @@ var xml = Numbas.xml = {
 								value = Numbas.util.unPercent(value);
 							}
 							else
-								throw(new Error("Property "+name+" should be a number, but isn't ("+value+"), in node "+elem));
+								throw(new Numbas.Error('xml.property not number',name,value,elem));
 						}
 						else if(typeof(obj[name]) == 'boolean')
 						{
 							if(Numbas.util.isBool(value))							
 								value = Numbas.util.parseBool(value);
 							else
-								throw(new Error("Property "+name+" should be a boolean, but isn't ("+value+"), in node "+elem));
+								throw(new Numbas.Error('xml.property not boolean',name,value,elem));
 						}
 						//otherwise must be a string, so leave it alone
 					}

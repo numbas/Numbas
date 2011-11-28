@@ -179,7 +179,7 @@ var jme = Numbas.jme = {
 			if(tok.vars!==undefined)
 			{
 				if(output.length<tok.vars)
-					throw(new Error("Not enough arguments for operation "+tok.name));
+					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name));
 
 				var thing = {tok: tok,
 							 args: output.slice(-tok.vars)};
@@ -231,7 +231,7 @@ var jme = Numbas.jme = {
 
 				if( ! stack.length )
 				{
-					throw(new Error("no matching left bracket in function"));
+					throw(new Numbas.Error('jme.shunt.no left bracket in function'));
 				}
 				break;
 				
@@ -265,7 +265,7 @@ var jme = Numbas.jme = {
 				}
 				if( ! stack.length ) 
 				{
-					throw(new Error("no matching left bracket"));
+					throw(new Numbas.Error('jme.shunt.no left square bracket'));
 				}
 				else
 				{
@@ -302,7 +302,7 @@ var jme = Numbas.jme = {
 				}
 				if( ! stack.length ) 
 				{
-					throw(new Error("no matching left bracket"));
+					throw(new Numbas.Error('jme.shunt.no left bracket'));
 				}
 				else
 				{
@@ -332,7 +332,7 @@ var jme = Numbas.jme = {
 			var x = stack.pop();
 			if(x.type=="(")
 			{
-				throw(new Error( "no matching right bracket"));
+				throw(new Numbas.Error('jme.shunt.no right bracket'));
 			}
 			else
 			{
@@ -341,10 +341,10 @@ var jme = Numbas.jme = {
 		}
 
 		if(listmode.length>0)
-			throw(new Error("No matching right square bracket to end list"));
+			throw(new Numbas.Error('jme.shunt.no right square bracket'));
 
 		if(output.length>1)
-			throw(new Error("Expression can't be evaluated -- missing an operator."));
+			throw(new Numbas.Error('jme.shunt.missing operator'));
 
 		return(output[0]);
 	},
@@ -366,7 +366,7 @@ var jme = Numbas.jme = {
 					if(allowUnbound)
 						return {tok: new TName(name)};
 					else
-						throw new Error("Variable "+name+" is undefined");
+						throw new Numbas.Error('jme.substituteTree.undefined variable',name);
 				}
 				else
 				{
@@ -449,7 +449,7 @@ var jme = Numbas.jme = {
 				return variables[tok.name.toLowerCase()];
 			else
 				return tok;
-				throw(new Error("Variable "+tok.name+" not defined"));
+				throw(new Numbas.Error('jme.evaluate.undefined variable'));
 			break;
 		case 'op':
 		case 'function':
@@ -482,7 +482,7 @@ var jme = Numbas.jme = {
 		//tokenise expression
 		var tokens = jme.tokenise(expr);
 		if(tokens===undefined){
-			throw(new Error('Invalid expression: '+expr));
+			throw(new Numbas.Error('jme.compile.tokenise failed',expr));
 		}
 
 		//compile to parse tree
@@ -494,7 +494,7 @@ var jme = Numbas.jme = {
 		if(!notypecheck)
 		{
 			if(!jme.typecheck(tree,functions))
-				throw(new Error("Type error in expression "+expr));
+				throw(new Numbas.Error('jme.compile.type error'));
 		}
 
 		return(tree);
@@ -540,9 +540,9 @@ var jme = Numbas.jme = {
 			if(functions[op]===undefined)
 			{
 				if(tok.type=='function')
-					throw(new Error("Operation '"+op+"' is not defined. Did you mean \n\n'"+op+"*(...)' ?"));
+					throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
 				else
-					throw(new Error("Operation '"+op+"' is not defined"));
+					throw(new Numbas.Error('jme.typecheck.op not defined',op));
 			}
 
 			var result = undefined;
@@ -557,7 +557,7 @@ var jme = Numbas.jme = {
 					return true;
 				}
 			}
-			throw(new Error("No definition of "+op+" of correct type found."));
+			throw(new Numbas.Error('jme.typecheck.no right type definition',op));
 		}
 	},
 
@@ -665,7 +665,7 @@ var jme = Numbas.jme = {
 				while(i<s.length && s.charAt(i)!=']')
 					i++;
 				if(i==s.length)
-					throw(new Error("No matching ] in "+cmd+" args."));
+					throw(new Numbas.Error('jme.texsubvars.no right bracket',cmd));
 				else
 				{
 					args = s.slice(si,i);
@@ -675,7 +675,7 @@ var jme = Numbas.jme = {
 
 			if(s.charAt(i)!='{')
 			{
-				throw(new Error("Missing parameter in "+cmd+': '+s));
+				throw(new Numbas.Error('jme.texsubvars.missing parameter',cmd,s));
 			}
 
 			var brackets=1;
@@ -689,7 +689,7 @@ var jme = Numbas.jme = {
 					brackets--;
 			}
 			if(i == s.length-1 && brackets>0)
-				throw(new Error( "No matching } in "+cmd));
+				throw(new Numbas.Error('jme.texsubvars.no right brace'));
 
 			var expr = s.slice(si,i)
 
@@ -1329,7 +1329,7 @@ funcs.switchf.evaluate = function(args,variables,functions)
 	if(args.length % 2 == 1)
 		return jme.evaluate(args[args.length-1],variables,functions);
 	else
-		throw(new Error("No default case for Switch statement"));
+		throw(new Numbas.Error('jme.func.switch.no default case'));
 }
 
 funcs.isa = new funcObj('isa',['?',TString],TBool);
@@ -1373,7 +1373,7 @@ funcs.listval.evaluate = function(args,variables,functions)
 	if(index in list.value)
 		return list.value[index];
 	else
-		throw(new Error("Invalid list index "+index+" on list of size "+list.value.length));
+		throw(new Numbas.Error('jme.func.listval.invalid index',index,list.value.length));
 }
 
 funcs.vectorval = new funcObj('listval',[TVector,TNum],TNum);
