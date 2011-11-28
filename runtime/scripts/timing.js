@@ -130,7 +130,7 @@ var timing = Numbas.timing = {
 	{
 		var acc = timing.accs[name];
 		if(!acc)
-			throw(new Error("no timing accumulator "+name));
+			throw(new Numbas.Error('timing.no accumulator',name));
 
 		acc.go -= 1;
 		if(acc.go==0)

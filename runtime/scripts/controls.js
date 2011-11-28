@@ -44,7 +44,7 @@ Numbas.controls = {
 	endExam: function()
 	{
 		Numbas.display.showConfirm(
-			"Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
+			R('control.confirm end'),
 			function() {
 				job(Numbas.exam.end,Numbas.exam);
 			}
@@ -92,7 +92,7 @@ Numbas.controls = {
 	regenQuestion: function() 
 	{
 		job(function() {
-			Numbas.display.showConfirm("Would you like to re-randomise this question? If you click OK, all your answers and marks for the current question will be lost.",
+			Numbas.display.showConfirm(R('control.confirm regen'),
 				function(){Numbas.exam.regenQuestion();}
 			);
 		});
@@ -108,7 +108,7 @@ Numbas.controls = {
 	revealAnswer: function()
 	{
 		job(function() {
-			Numbas.display.showConfirm("Would you like to reveal the answer to this question? Any marks you have received so far will be removed and you will not be able to answer this question later.",
+			Numbas.display.showConfirm(R('control.confirm reveal'),
 				function(){ Numbas.exam.currentQuestion.revealAnswer(); }
 			);
 		});

@@ -653,7 +653,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		}
 		break;
 	default:
-		throw(new Error("Can't texify token type "+tok.type));
+		throw(new Numbas.Error('jme.display.unknown token type',tok.type));
 	}
 }
 
@@ -1043,7 +1043,7 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 	}
 	if(!sets)
 	{
-		throw(new Error('no sets!'));
+		throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
 	}
 
 	var out = [];
@@ -1066,7 +1066,7 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 			{
 				if(!(name in sets))
 				{
-					throw(new Error("Ruleset "+name+" has not been defined"));
+					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',name));
 				}
 
 				var sub = collectRuleset(sets[name],sets);

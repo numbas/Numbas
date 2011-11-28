@@ -128,14 +128,13 @@ jme.variables = {
 
 			if(path.contains(name))
 			{
-				alert("Circular variable reference in question "+name+' '+path);
-				return;
+				throw(new Numbas.Error('jme.variables.circular reference',name,path));
 			}
 
 			var v = todo[name];
 
 			if(v===undefined)
-				throw(new Error("Variable "+name+" not defined."));
+				throw(new Numbas.Error('jme.variables.variable not defined',name));
 
 			//work out dependencies
 			for(var i=0;i<v.vars.length;i++)
