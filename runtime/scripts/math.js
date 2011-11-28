@@ -831,7 +831,7 @@ var vectormath = Numbas.vectormath = {
 			else if(a.columns==1)
 				a = a.map(function(x){return x[0]});
 			else
-				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+				throw(new Numbas.Error('vectormath.dot.matrix too big'));
 		}
 		//Same check for B
 		if('rows' in b)
@@ -841,7 +841,7 @@ var vectormath = Numbas.vectormath = {
 			else if(b.columns==1)
 				b = b.map(function(x){return x[0]});
 			else
-				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+				throw(new Numbas.Error('vectormath.dot.matrix too big'));
 		}
 		if(b.length>a.length)
 		{
@@ -862,7 +862,7 @@ var vectormath = Numbas.vectormath = {
 			else if(a.columns==1)
 				a = a.map(function(x){return x[0]});
 			else
-				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+				throw(new Numbas.Error('vectormath.cross.matrix too big'));
 		}
 		//Same check for B
 		if('rows' in b)
@@ -872,7 +872,7 @@ var vectormath = Numbas.vectormath = {
 			else if(b.columns==1)
 				b = b.map(function(x){return x[0]});
 			else
-				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+				throw(new Numbas.Error('vectormath.cross.matrix too big'));
 		}
 
 		if(a.length!=3 || b.length!=3)

@@ -330,7 +330,7 @@ Question.prototype =
 		//display message about success or failure
 		if(! this.answered )
 		{
-			Numbas.display.showAlert("Can not submit answer - check for errors.");
+			Numbas.display.showAlert(R('question.can not submit'));
 			this.display.scrollToError();
 		}
 
@@ -493,11 +493,15 @@ Part.prototype = {
 			if(stepsMarks!=0 && stepsScore!=0)
 			{
 				if(this.credit==1)
-					this.markingComment("Because you received full marks for the part, your answers to the steps aren't counted.");
+					this.markingComment(R('part.marking.steps no matter'));
 				else
 				{
 					var change = this.score - oScore;
-					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',math.niceNumber(change),util.pluralise(change,'mark','marks')));
+					this.markingComment(
+						util.pluralise(change,
+							R('part.marking.steps change single',math.niceNumber(change)),
+							R('part.marking.steps change plural',math.niceNumber(change))
+					));
 				}
 			}
 		}
@@ -528,16 +532,19 @@ Part.prototype = {
 			var stepsMax = this.marks - this.settings.stepsPenalty;
 			this.markingComment(
 				this.settings.stepsPenalty>0 
-					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',math.niceNumber(stepsMax),util.pluralise(stepsMax,'mark','marks')) 
-					: 'You revealed the steps.');
+					? util.pluralise(stepsMax,
+						R('part.marking.revealed steps with penalty single',math.niceNumber(stepsMax)),
+						R('part.marking.revealed steps with penalty plural',math.niceNumber(stepsMax))
+						)
+					: R('part.marking.revealed steps no penalty'));
 		}
 
 		if(this.marks==0)
 			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
-			this.giveWarning("No answer submitted.");
-			this.setCredit(0,'You did not answer this question.');;
+			this.giveWarning(R('part.marking.not submitted'));
+			this.setCredit(0,R('part.marking.did not answer'));;
 			this.answered = false;
 		}
 		else
@@ -562,7 +569,12 @@ Part.prototype = {
 		{
 			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
-				this.markingComment('You scored *'+math.niceNumber(this.score)+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
+				this.markingComment(
+					util.pluralise(this.score,
+						R('part.marking.total score single',math.niceNumber(this.score)),
+						R('part.marking.total score plural',math.niceNumber(this.score))
+					)
+				);
 		}
 		else
 			this.reportStudentAnswer('');
@@ -700,7 +712,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 		if($(settings.maxLengthMessage).text() == '')
-			settings.maxLengthMessage = 'Your answer is too long.';
+			settings.maxLengthMessage = R('part.jme.answer too long');
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
 	var messageNode = xml.selectSingleNode('answer/minlength/message');
@@ -708,7 +720,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 		if($(settings.minLengthMessage).text() == '')
-			settings.minLengthMessage = 'Your answer is too long.';
+			settings.minLengthMessage = R('part.jme.answer too short');
 	}
 
 	//get list of 'must have' strings
@@ -805,7 +817,7 @@ JMEPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.jme.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -816,7 +828,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.setCredit(0,'Your answer is not a valid mathematical expression.');
+			this.setCredit(0,R('part.jme.answer invalid'));
 			return;
 		}
 
@@ -831,7 +843,7 @@ JMEPart.prototype =
 		//do comparison of student's answer with correct answer
 		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
-			this.setCredit(0,'Your answer is incorrect.');
+			this.setCredit(0,R('part.jme.incorrect'));
 			return;
 		}
 
@@ -852,7 +864,7 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.setCredit(1,'Your answer is correct.');
+		this.setCredit(1,R('part.jme.correct'));
 
 		if(this.failMinLength)
 		{
@@ -867,10 +879,8 @@ JMEPart.prototype =
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
-				var message = this.settings.mustHave.length==1 ?
-					'Your answer must contain <span class="monospace">'+this.settings.mustHave[0]+'</span>' 
-				: 
-					'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>';
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
@@ -880,10 +890,8 @@ JMEPart.prototype =
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
-				var message = this.settings.notAllowed.length==1 ?
-					'Your answer must not contain <span class="monospace">'+this.settings.notAllowed[0]+'</span>'
-				:
-					'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>';
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
@@ -911,7 +919,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.giveWarning("This is not a valid mathematical expression.\n\n"+e.message);
+			this.giveWarning(R('part.jme.answer invalid',e.message));
 			return false;
 		}
 

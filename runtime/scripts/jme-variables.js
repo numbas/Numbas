@@ -128,8 +128,7 @@ jme.variables = {
 
 			if(path.contains(name))
 			{
-				alert("Circular variable reference in question "+name+' '+path);
-				return;
+				throw(new Numbas.Error('jme.variables.circular reference',name,path));
 			}
 
 			var v = todo[name];

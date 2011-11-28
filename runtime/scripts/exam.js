@@ -29,7 +29,7 @@ var Exam = Numbas.Exam = function()
 	var xml = this.xml = Numbas.xml.examXML.selectSingleNode('/exam');
 	if(!xml)
 	{
-		throw(new Numbas.Error("Root element of exam XML should be 'exam'"));
+		throw(new Numbas.Error('exam.xml.bad root'));
 	}
 
 	//load settings from XML
@@ -475,7 +475,7 @@ Exam.prototype = {
 		this.currentQuestion = this.questionList[i];
 		if(!this.currentQuestion)
 		{
-			throw(new Numbas.Error('exam.changeQuestion.noquestions'));
+			throw(new Numbas.Error('exam.changeQuestion.no questions'));
 		}
 		this.currentQuestion.visited = true;
 		Numbas.store.changeQuestion(this.currentQuestion);
