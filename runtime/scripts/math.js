@@ -822,6 +822,27 @@ var vectormath = Numbas.vectormath = {
 
 	//dot product
 	dot: function(a,b) {
+
+		//check if A is a matrix object. If it's the right shape, we can use it anyway
+		if('rows' in a)
+		{
+			if(a.rows==1)
+				a = a[0];
+			else if(a.columns==1)
+				a = a.map(function(x){return x[0]});
+			else
+				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+		}
+		//Same check for B
+		if('rows' in b)
+		{
+			if(b.rows==1)
+				b = b[0];
+			else if(b.columns==1)
+				b = b.map(function(x){return x[0]});
+			else
+				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+		}
 		if(b.length>a.length)
 		{
 			var c = b;
@@ -833,6 +854,27 @@ var vectormath = Numbas.vectormath = {
 
 	//cross product
 	cross: function(a,b) {
+		//check if A is a matrix object. If it's the right shape, we can use it anyway
+		if('rows' in a)
+		{
+			if(a.rows==1)
+				a = a[0];
+			else if(a.columns==1)
+				a = a.map(function(x){return x[0]});
+			else
+				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+		}
+		//Same check for B
+		if('rows' in b)
+		{
+			if(b.rows==1)
+				b = b[0];
+			else if(b.columns==1)
+				b = b.map(function(x){return x[0]});
+			else
+				throw(new Error("Can't calculate dot product of a matrix which isn't $1 \times N$ or $N \times 1$."));
+		}
+
 		if(a.length!=3 || b.length!=3)
 			throw(new Error("Can only take the cross product of 3-dimensional vectors."));
 
