@@ -69,6 +69,8 @@ var util = Numbas.util = {
 		switch(typeof(obj))
 		{
 		case 'object':
+			if(obj===null)
+				return obj;
 			if(obj.length!==undefined)
 			{
 				return util.copyarray(obj,deep);
