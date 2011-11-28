@@ -168,7 +168,7 @@ Question.prototype =
 							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
 							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
 							{
-								throw(new Error("Error substituting content: \n"+Sarissa.getParseErrorText(newNode)+'\n\n'+newtext));
+								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newText));
 							}
 
 							//copy new content to same place as original text
@@ -276,7 +276,7 @@ Question.prototype =
 	{
 		var part = this.getPart(partRef);
 		if(!part)
-			throw(new Error("Can't find part "+partRef+"/"));
+			throw(new Numbas.Error('question.no such part',partRef));
 		part.storeAnswer(answerList);
 	},
 
@@ -367,7 +367,7 @@ function createPart(xml, path, question, parentPart, loading)
 {
 	var type = tryGetAttribute(null,'.','type',[],{xml: xml});
 	if(type==null)
-		throw(new Error("Missing part type attribute"));
+		throw(new Numbas.Error('part.missing type attribute'));
 	if(partConstructors[type])
 	{
 		var cons = partConstructors[type];
@@ -376,7 +376,7 @@ function createPart(xml, path, question, parentPart, loading)
 	}
 	else
 	{
-		throw(new Error("Unrecognised part type "+type));
+		throw(new Numbas.Error('part.unknown type',type));
 	}
 }
 
@@ -671,7 +671,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	//parse correct answer from XML
 	answerMathML = this.xml.selectSingleNode('answer/correctanswer');
 	if(!answerMathML)
-		throw(new Error("Correct answer for a JME part is missing ("+this.path+")"));
+		throw(new Numbas.Error('part.jme.answer missing',this.path));
 
 	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
 
@@ -958,7 +958,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
-		throw(new Error("Display answer is missing from a Pattern Match part ("+this.path+")"));
+		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
 	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
@@ -1136,7 +1136,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
 	if(!choicesNode)
-		throw(new Error("Definition of choices is missing from a Multiple Response part ("+this.path+")"));
+		throw(new Numbas.Error('part.mcq.choices missing',this.path));
 
 	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
 	var choiceNodes = choicesNode.selectNodes('choice');
@@ -1236,7 +1236,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		{
 			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
 			if(!util.isFloat(cell.value))
-				throw(new Error("Part "+this.path+" marking matrix cell "+cell.answerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
+				throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
 			cell.value = parseFloat(cell.value);
 		}
 		matrixTotal += cell.value;

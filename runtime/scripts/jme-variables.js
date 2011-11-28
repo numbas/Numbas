@@ -135,7 +135,7 @@ jme.variables = {
 			var v = todo[name];
 
 			if(v===undefined)
-				throw(new Error("Variable "+name+" not defined."));
+				throw(new Numbas.Error('jme.variables.variable not defined',name));
 
 			//work out dependencies
 			for(var i=0;i<v.vars.length;i++)
