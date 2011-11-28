@@ -541,7 +541,7 @@ function texName(tok)
 
 	case 'm':	//matrix
 	case 'matrix':
-		return '\\mathrm{'+name.toUpperCase()+'}';
+		return '\\mathrm{'+name+'}';
 
 	default:
 		return name;
