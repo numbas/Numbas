@@ -23,18 +23,19 @@ var jme = Numbas.jme;
 jme.display = {
 
 	//convert a JME expression to LaTeX
-	//settings can be anything accepted by jme.display.collectRuleset
+	//ruleset can be anything accepted by jme.display.collectRuleset
 	//settings are also passed through to the texify function
-	exprToLaTeX: function(expr,settings)
+	exprToLaTeX: function(expr,ruleset)
 	{
-		if(!settings)
-			settings = [];
+		if(!ruleset)
+			ruleset = simplificationRules.basic;
+		ruleset = collectRuleset(ruleset,Numbas.exam.rulesets);
 
 		expr+='';
 		if(!expr.trim().length)
 			return '';
-		var tree = jme.display.simplify(expr,settings);
-		var tex = texify(tree,settings);
+		var tree = jme.display.simplify(expr,ruleset);
+		var tex = texify(tree,ruleset);
 		return tex;
 	},
 
@@ -366,8 +367,8 @@ var texOps = {
 	'arctanh': funcTex('\\operatorname{arctanh}'),
 	'ln': funcTex('\\ln'),
 	'log': funcTex('\\log_{10}'),
-	'vector': (function(thing,texArgs) {
-		return '\\begin{pmatrix} '+texArgs.join(' \\\\ ')+' \\end{pmatrix}';
+	'vector': (function(thing,texArgs,settings) {
+		return '\\left( '+texVector(thing,settings)+' \\right)';
 	}),
 	'matrix': (function(thing,texArgs) {
 		var rows = thing.args.map(function(x) {
@@ -497,16 +498,21 @@ function texRealNumber(n)
 function texVector(v,settings)
 {
 	var out;
+	var elements;
 	if(v.args)
 	{
-		out = v.args.map(function(x){return texify(x,settings)}).join(' \\\\ ');
+		elements = v.args.map(function(x){return texify(x,settings)});
 	}
 	else
 	{
-		var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
-		out = v.map(function(x){return texNumber(x)}).join(' \\\\ ');
+		var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
+		elements = v.map(function(x){return texNumber(x)});
 	}
-	return '\\begin{matrix} '+out+' \\end{matrix}';
+	if(settings.rowvector)
+		out = elements.join(' , ');
+	else
+		out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
+	return out;
 }
 
 function texMatrix(m,settings)
@@ -521,7 +527,7 @@ function texMatrix(m,settings)
 	}
 	else
 	{
-		var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
+		var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 		var rows = m.map(function(x){
 			return x.map(function(y){ return texNumber(y) }).join(' & ');
 		});
@@ -582,7 +588,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		}
 	}
 
-	var texNumber = settings.fractionNumbers ? texRationalNumber : texRealNumber;
+	var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 
 	var tok = thing.tok || thing;
 	switch(tok.type)
@@ -695,6 +701,9 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		return '[ '+bits.join(', ')+' ]';
 	case 'vector':
 		return 'vector('+tok.value.map(function(i){return Numbas.math.niceNumber(i)}).join(',')+')';
+	case 'matrix':
+		return 'matrix('+
+			tok.value.map(function(row){return '['+row.map(function(x){return Numbas.math.niceNumber(x)}).join(',')+']'}).join(',')+')';
 	case 'special':
 		return tok.value;
 	case 'conc':
@@ -1019,6 +1028,8 @@ for(var x in simplificationRules)
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=all;
 
+var displayFlags = ['fractionnumbers','rowvector'];
+
 var collectRuleset = jme.display.collectRuleset = function(set,sets)
 {
 	if(typeof(set)=='string')
@@ -1042,9 +1053,9 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 			var m = /^(!)?(.*)$/.exec(set[i]);
 			var neg = m[1]=='!' ? true : false;
 			var name = m[2].trim().toLowerCase();
-			if(name=='fractionnumbers')
+			if(displayFlags.contains(name))
 			{
-				out.fractionNumbers = !neg;
+				out[name]= !neg;
 			}
 			else if(name.length>0)
 			{
@@ -1055,8 +1066,11 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 
 				var sub = collectRuleset(sets[name],sets);
 
-				if('fractionNumbers' in sub)
-					out.fractionNumbers = sub.fractionNumbers
+				for(var j=0;j<displayFlags.length;j++)
+				{
+					if(displayFlags[j] in sub)
+						out[displayFlags[j]] = sub[displayFlags[j]];
+				}
 
 				sets[name] = sub;
 				if(neg)
