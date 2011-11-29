@@ -79,6 +79,9 @@ R.registerLocale('en-GB',{
 	'part.marking.did not answer': "You did not answer this question.",
 	'part.marking.total score single': "You scored *%s* mark for this part.",
 	'part.marking.total score plural': "You scored *%s* marks for this part.",
+	'part.marking.nothing entered': "You did not enter an answer.",
+	'part.marking.incorrect': "Your answer is incorrect.",
+	'part.marking.correct': 'Your answer is correct.",
 
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
@@ -86,10 +89,7 @@ R.registerLocale('en-GB',{
 	'part.jme.answer missing': "Correct answer for a JME part is missing (%s)",
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",
-	'part.jme.nothing entered': "You did not enter an answer.",
 	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.",
-	'part.jme.incorrect': "Your answer is incorrect.",
-	'part.jme.correct': 'Your answer is correct.",
 	'part.jme.must-have bits': '<span class="monospace">%s</span>',
 	'part.jme.must-have one': "Your answer must contain: %s",
 	'part.jme.must-have several': "Your answer must contain all of: %s",
@@ -99,9 +99,15 @@ R.registerLocale('en-GB',{
 	'part.jme.answer invalid': "This is not a valid mathematical expression.\n\n%s",
 
 	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
+	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",
+
+	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
+	'part.numberentry.answer invalid': "You did not enter a valid number.",
 
 	'part.mcq.choices missing': "Definition of choices is missing from a Multiple Response part (%s)",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
+	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",
+	'part.mcq.no choices selected': "No choices selected.",
 	
 	'question.substituting': "Error substituting content: \n%s\n\n%s",
 	'question.no such part': "Can't find part %s",

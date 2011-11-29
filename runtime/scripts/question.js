@@ -817,7 +817,7 @@ JMEPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,R('part.jme.nothing entered'));
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -843,7 +843,7 @@ JMEPart.prototype =
 		//do comparison of student's answer with correct answer
 		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
-			this.setCredit(0,R('part.jme.incorrect'));
+			this.setCredit(0,R('part.marking.incorrect'));
 			return;
 		}
 
@@ -864,7 +864,7 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.setCredit(1,R('part.jme.correct'));
+		this.setCredit(1,R('part.marking.correct'));
 
 		if(this.failMinLength)
 		{
@@ -903,7 +903,7 @@ JMEPart.prototype =
 	{
 		if(this.studentAnswer.length===0)
 		{
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 			return false;
 		}
 
@@ -938,7 +938,9 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.giveWarning('Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				this.giveWarning(message);
 			}
 		}
 
@@ -947,7 +949,9 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.giveWarning('Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				this.giveWarning(message);
 			}
 		}
 
@@ -996,7 +1000,7 @@ PatternMatchPart.prototype = {
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1009,24 +1013,24 @@ PatternMatchPart.prototype = {
 		{
 			if( caseSensitiveAnswer.test(this.studentAnswer) )
 			{
-				this.setCredit(1,'Your answer is correct.');
+				this.setCredit(1,R('part.marking.correct'));
 			}
 			else if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.setCredit(this.settings.partialCredit,'Your answer is correct, except for the case.');
+				this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
 			}
 			else
 			{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 		}else{
 			if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.setCredit(1,'Your answer is correct.');
+				this.setCredit(1,R('part.marking.correct'));
 			}
 			else
 			{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 		}
 	},
@@ -1034,7 +1038,7 @@ PatternMatchPart.prototype = {
 	validate: function()
 	{
 		if(!this.answered)
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 
 		return this.answered;
 	}
@@ -1085,7 +1089,7 @@ NumberEntryPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1101,23 +1105,23 @@ NumberEntryPart.prototype =
 			if( this.studentAnswer <= this.settings.maxvalue && this.studentAnswer >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && !util.isInt(this.studentAnswer))
-					this.setCredit(this.settings.partialCredit,'Your answer is within the allowed range, but decimal numbers are not allowed.');
+					this.setCredit(this.settings.partialCredit,R('part.numberentry.correct except decimal'));
 				else
-					this.setCredit(1,'Your answer is correct.');
+					this.setCredit(1,R('part.marking.correct'));
 			}else{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 			this.answered = true;
 		}else{
 			this.answered = false;
-			this.setCredit(0,'You did not enter a valid number.');
+			this.setCredit(0,R('part.numberentry.answer invalid'));
 		}
 	},
 
 	validate: function()
 	{
 		if(!this.answered)
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 		
 		return this.answered;
 	}
@@ -1394,7 +1398,7 @@ MultipleResponsePart.prototype =
 	{
 		if(this.stagedAnswer==undefined)
 		{
-			this.setCredit(0,'You did not answer this part.');
+			this.setCredit(0,R('part.marking.did not answer'));
 			return false;
 		}
 		this.ticks = util.copyarray(this.stagedAnswer);
@@ -1424,7 +1428,7 @@ MultipleResponsePart.prototype =
 			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		}
 		else
-			this.setCredit(0,'You selected the wrong number of choices.');
+			this.setCredit(0,R('part.mcq.wrong number of choices'));
 	},
 
 	validate: function()
@@ -1446,7 +1450,7 @@ MultipleResponsePart.prototype =
 		if(this.numTicks>0)
 			return true;
 		else
-			this.giveWarning('No choices selected.');
+			this.giveWarning(R('part.mcq.no choices selected'));
 			return false;
 	}
 };
