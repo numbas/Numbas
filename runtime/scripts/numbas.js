@@ -65,7 +65,7 @@ Numbas.Error = function(message)
 	this.name="Numbas Error";
 	this.message = R(message,Array.prototype.slice.call(arguments,1));
 }
-Numbas.Error.prototype = new Error();
+Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
 
 // Initialise the exam:
