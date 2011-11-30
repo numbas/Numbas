@@ -776,14 +776,14 @@ var opBrackets = {
 var Rule = jme.display.Rule = function(pattern,conditions,result)
 {
 	this.patternString = pattern;
-	this.tree = jme.compile(pattern,{});
+	this.tree = jme.compile(pattern,{},true);
 
-	this.result = jme.compile(result,{});
+	this.result = jme.compile(result,{},true);
 
 	this.conditions = [];
 	for(var i=0;i<conditions.length;i++)
 	{
-		this.conditions.push(jme.compile(conditions[i],{}));
+		this.conditions.push(jme.compile(conditions[i],{},true));
 	}
 }
 

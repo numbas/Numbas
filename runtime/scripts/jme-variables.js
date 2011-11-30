@@ -109,7 +109,7 @@ jme.variables = {
 				}
 				*/
 
-				var tree = jme.compile(value,functions);
+				var tree = jme.compile(value,functions,true);
 				vars = vars.merge(jme.findvars(tree));
 				todo[name]={
 					tree: tree,
