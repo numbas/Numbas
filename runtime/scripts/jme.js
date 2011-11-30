@@ -1390,7 +1390,7 @@ funcs.vectorval.evaluate = function(args,variables,functions)
 	return new TNum(vector.value[index] || 0);
 }
 
-funcs.matrixval = new funcObj('listval',[TMatrix,TNum],TList)
+funcs.matrixval = new funcObj('listval',[TMatrix,TNum],TVector)
 funcs.matrixval.evaluate = function(args,variables,functions)
 {
 	var index = jme.evaluate(args[1],variables,functions).value;
