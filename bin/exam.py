@@ -639,6 +639,9 @@ class NumberEntryPart(Part):
 	kind = 'numberentry'
 	integerAnswer = False
 	partialCredit = 0
+	checkingType = 'range'
+	answer = 0
+	checkingAccuracy = 0
 	minvalue = 0
 	maxvalue = 0
 	inputStep = 1
@@ -649,9 +652,15 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','partialCredit','minvalue','maxvalue','inputStep'],part)
-		if 'answer' in data:
-			part.maxvalue = part.minvalue = data['answer']
+		tryLoad(data,['integerAnswer','partialCredit','checkingType','inputStep'],part)
+		if part.checkingType == 'range':
+			if 'answer' in data:
+				part.maxvalue = part.minvalue = data['answer']
+			else:
+				tryLoad(data,['minvalue','maxvalue'],part)
+		else:
+			tryLoad(data,['answer','checkingAccuracy'],part)
+
 
 		return part
 
@@ -664,10 +673,15 @@ class NumberEntryPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-				'minvalue': str(self.minvalue),
-				'maxvalue': str(self.maxvalue),
+				'checkingType': str(self.checkingType),
 				'inputstep': str(self.inputStep)
 				}
+		if self.checkingType == 'range':
+			answer.attrib['minvalue'] = str(self.minvalue)
+			answer.attrib['maxvalue'] = str(self.maxvalue)
+		else:
+			answer.attrib['answer'] = str(self.answer)
+			answer.attrib['accuracy'] = str(self.checkingAccuracy)
 		answer.find('allowonlyintegeranswers').attrib = {'value': str(self.integerAnswer), 'partialcredit': str(self.partialCredit)+'%'}
 
 		return part
