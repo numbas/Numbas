@@ -783,6 +783,7 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 	this.conditions = [];
 	for(var i=0;i<conditions.length;i++)
 	{
+		this.conditions.push(jme.compile(conditions[i],{},true));
 	}
 }
 
