@@ -1184,7 +1184,7 @@ new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
 new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
 new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
 
-new funcObj('idmatrix',[TNum],TMatrix, matrixmath.id);
+new funcObj('id',[TNum],TMatrix, matrixmath.id);
 
 new funcObj('..', [TNum,TNum], TRange, math.defineRange );	//define a range
 new funcObj('#', [TRange,TNum], TRange, math.rangeSteps );	//define step size for range
