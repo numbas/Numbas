@@ -168,7 +168,7 @@ Question.prototype =
 							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
 							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
 							{
-								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newText));
+								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newtext));
 							}
 
 							//copy new content to same place as original text
