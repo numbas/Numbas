@@ -220,8 +220,8 @@ if __name__ == '__main__':
 		options.output=os.path.join(path,'output',output)
 	
 	if not os.path.exists(options.theme):
-		ntheme = os.path.join(options.path,'themes',options.theme)
-		if os.path.exists(ntheme):
+		ntheme = os.path.join('themes',options.theme)
+		if os.path.exists(os.path.join(options.path,ntheme)):
 			options.theme = ntheme
 		else:
 			print("Couldn't find theme %s" % options.theme)

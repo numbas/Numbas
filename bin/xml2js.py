@@ -23,7 +23,7 @@ def encode(xml):
 	return xml
 
 def xml2js(options):
-	themedir = os.path.join(options.theme,'xslt')
+	themedir = os.path.join(options.path,options.theme,'xslt')
 
 	all = ''
 	files = filter(lambda x: x[-5:]=='.xslt', os.listdir(themedir))
