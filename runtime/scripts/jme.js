@@ -1281,7 +1281,6 @@ new funcObj('pdiff', ['?','?',TNum], '?');
 new funcObj('int', ['?','?'], '?');
 new funcObj('defint', ['?','?',TNum,TNum], '?');
 
-
 var funcs = {};
 
 //if needs to be a bit different because it can return any type
@@ -1425,6 +1424,16 @@ funcs.maprange.evaluate = function(args,variables,functions)
 		variables[name] = new TNum(range.value[i]);
 		newlist.value[i-3] = jme.evaluate(args[0],variables,functions);
 	}
+	return newlist;
+}
+
+funcs.sort = new funcObj('sort',[TList],TList);
+funcs.sort.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var newlist = new TList(list.vars);
+	newlist.value = list.value.slice().sort(function(a,b){ return a.value>b.value; });
+	console.log(newlist.value);
 	return newlist;
 }
 

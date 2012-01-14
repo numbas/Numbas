@@ -5,6 +5,7 @@
 	shuffleQuestions: false
 
 	navigation: {
+		allowregen: true
 		reverse: true
 		browse: true
 	}
@@ -1275,7 +1276,7 @@
 				{
 					type: gapfill
 					prompt: """
-						$\displaystyle \int \simplify{{a}xsin({b}x+{c})} dx = \phantom{{}}$[[0]]
+						$\displaystyle \int \simplify{{a}x*sin({b}x+{c})} dx = \phantom{{}}$[[0]]
 					"""
 
 					steps: [
@@ -1303,7 +1304,7 @@
 				So $\frac{du}{dx}$ = $\var{a}$ and $v = \simplify{(-1/{b})*cos({b}x+{c})}$.
 
 				Hence,
-				\[ \begin{eqnarray} \int \simplify{{a}xsin({b}x+{c})} dx &=& uv - \int v \frac{du}{dx} dx \\
+				\[ \begin{eqnarray} \int \simplify{{a}x*sin({b}x+{c})} dx &=& uv - \int v \frac{du}{dx} dx \\
 																		 &=& \simplify{(-{a}/{b})*x*cos({b}x+{c})} - \int \left( \simplify{(-{a}/{b})*cos({b}x+{c})}\right) dx \\
 																		 &=& \simplify{(-{a}/{b})*x*cos({b}x+{c}) + ({a}/{b^2})*sin({b}x+{c}) + C}
 					\end{eqnarray} \]
