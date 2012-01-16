@@ -808,11 +808,12 @@ var vectormath = Numbas.vectormath = {
 	sub: function(a,b) {
 		if(b.length>a.length)
 		{
-			var c = b;
-			b = a;
-			a = c;
+			return b.map(function(x,i){ return sub(a[i]||0,x) });
 		}
-		return a.map(function(x,i){ return sub(x,b[i]||0) });
+		else
+		{
+			return a.map(function(x,i){ return sub(x,b[i]||0) });
+		}
 	},
 
 	//scalar multiplication - a should just be a number
