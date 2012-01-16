@@ -233,6 +233,7 @@ display.ExamDisplay.prototype =
 	{
 		//hide question container, and show info container
 		$('#questionContainer').hide();
+		$('#questionDisplay').html('');
 		$('#infoDisplay').show();
 
 		var exam = this.e;
