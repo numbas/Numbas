@@ -165,7 +165,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 	script.type = "text/javascript";
 	script.charset="utf-8";
 	script.src = file;
-	$('head').append(script);
+	document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 var loadCSS = Numbas.loadCSS = function(file)
