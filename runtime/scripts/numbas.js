@@ -174,7 +174,7 @@ var loadCSS = Numbas.loadCSS = function(file)
 	link.rel = "stylesheet";
 	link.type = "text/css";
 	link.href = file;
-	$('head').append(link);
+	document.getElementsByTagName('head')[0].appendChild(link);
 }
 
 Numbas.queueScript = function(file, deps, callback)	
