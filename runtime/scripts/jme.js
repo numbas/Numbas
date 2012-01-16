@@ -1456,9 +1456,9 @@ funcs.matrix.evaluate = function(args,variables,functions)
 	var value = [];
 	for(var i=0;i<args.length;i++)
 	{
-		var column = jme.evaluate(args[i],variables,functions).value;
-		value.push(column.map(function(x){return x.value}));
-		columns = Math.max(columns,column.length);
+		var row = jme.evaluate(args[i],variables,functions).value;
+		value.push(row.map(function(x){return x.value}));
+		columns = Math.max(columns,row.length);
 	}
 	value.rows = rows;
 	value.columns = columns;
@@ -1558,28 +1558,62 @@ var findvars = jme.findvars = function(tree)
 function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 {	// first checks both expressions are of same type, then uses given checking type to compare results
 
+	var v1 = r1.value, v2 = r2.value;
+
 	if(r1.type != r2.type)
 	{
 		return false;
 	}
-	if(r1.type == 'number')
+	switch(r1.type)
 	{
-		if(r1.value.complex || r2.value.complex)
+	case 'number':
+		if(v1.complex || v2.complex)
 		{
-			if(!r1.value.complex)
-				r1.value = {re:r1.value, im:0, complex:true};
-			if(!r2.value.complex)
-				r2.value = {re:r2.value, im:0, complex:true};
-			return checkingFunction(r1.value.re, r2.value.re, checkingAccuracy) && checkingFunction(r1.value.im,r2.value.im,checkingAccuracy);
+			if(!v1.complex)
+				v1 = {re:v1, im:0, complex:true};
+			if(!v2.complex)
+				v2 = {re:v2, im:0, complex:true};
+			return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
 		}
 		else
 		{
-			return checkingFunction( r1.value, r2.value, checkingAccuracy );
+			return checkingFunction( v1, v2, checkingAccuracy );
 		}
-	}
-	else
-	{
-		return r1.value == r2.value;
+		break;
+	case 'vector':
+		if(v1.length != v2.length)
+			return false;
+		for(var i=0;i<v1.length;i++)
+		{
+			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+				return false;
+		}
+		return true;
+		break;
+	case 'matrix':
+		if(v1.rows != v2.rows || v1.columns != v2.columns)
+			return false;
+		for(var i=0;i<v1.rows;i++)
+		{
+			for(var j=0;j<v1.columns;j++)
+			{
+				if(!resultsEqual(v1[i][j]||0,v2[i][j]||0,checkingFunction,checkingAccuracy))
+					return false;
+			}
+		}
+		return true;
+		break;
+	case 'list':
+		if(v1.length != v2.length)
+			return false;
+		for(var i=0;i<v1.length;i++)
+		{
+			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+				return false;
+		}
+		return true;
+	default:
+		return v1 == v2;
 	}
 };
 
