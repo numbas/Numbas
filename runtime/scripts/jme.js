@@ -1432,8 +1432,7 @@ funcs.sort.evaluate = function(args,variables,functions)
 {
 	var list = jme.evaluate(args[0],variables,functions);
 	var newlist = new TList(list.vars);
-	newlist.value = list.value.slice().sort(function(a,b){ return a.value>b.value; });
-	console.log(newlist.value);
+	newlist.value = list.value.slice().sort(function(a,b){ return math.gt(a.value,b.value); });
 	return newlist;
 }
 

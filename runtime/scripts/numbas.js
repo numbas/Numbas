@@ -165,7 +165,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 	script.type = "text/javascript";
 	script.charset="utf-8";
 	script.src = file;
-	$('head').append(script);
+	document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 var loadCSS = Numbas.loadCSS = function(file)
@@ -174,7 +174,7 @@ var loadCSS = Numbas.loadCSS = function(file)
 	link.rel = "stylesheet";
 	link.type = "text/css";
 	link.href = file;
-	$('head').append(link);
+	document.getElementsByTagName('head')[0].appendChild(link);
 }
 
 Numbas.queueScript = function(file, deps, callback)	
