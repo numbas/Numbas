@@ -884,7 +884,7 @@ TBool.prototype.type = 'boolean';
 var TList = types.TList = types.list = function(n,value)
 {
 	this.vars = n;
-	this.value = value;
+	this.value = value || new Array(n);
 }
 TList.prototype.type = 'list';
 
