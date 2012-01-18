@@ -1180,6 +1180,7 @@ new funcObj('cross',[TVector,TVector],TVector,vectormath.cross);
 new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross);
 new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross);
 new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
+new funcObj('det', [TMatrix], TNum, matrixmath.abs);
 
 new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
 new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
@@ -1220,7 +1221,6 @@ new funcObj('abs', [TNum], TNum, math.abs );
 new funcObj('abs', [TList], TNum, function(l) { return l.length; });
 new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; });
 new funcObj('abs', [TVector], TNum, vectormath.abs);
-new funcObj('abs', [TMatrix], TNum, matrixmath.abs);
 new funcObj('arg', [TNum], TNum, math.arg );
 new funcObj('re', [TNum], TNum, math.re );
 new funcObj('im', [TNum], TNum, math.im );
@@ -1418,6 +1418,7 @@ funcs.maprange.evaluate = function(args,variables,functions)
 	var range = jme.evaluate(args[2],variables,functions);
 	var name = args[1].tok.name;
 	var newlist = new TList(range.size);
+	newlist.value = new Array(range.size);
 	var variables = Numbas.util.copyobj(variables);
 	for(var i=3;i<range.value.length;i++)
 	{
@@ -1535,12 +1536,27 @@ var checkingFunctions =
 	}
 };
 
-var findvars = jme.findvars = function(tree)
+var findvars = jme.findvars = function(tree,boundvars)
 {
+	if(boundvars===undefined)
+		boundvars = [];
+
+	if(tree.tok.type=='function' && tree.tok.name=='map')
+	{
+		boundvars = boundvars.slice();
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+
 	if(tree.args===undefined)
 	{
 		if(tree.tok.type=='name')
-			return [tree.tok.name.toLowerCase()];
+		{
+			var name = tree.tok.name.toLowerCase();
+			if(boundvars.indexOf(name)==-1)
+				return [name];
+			else
+				return [];
+		}
 		else
 			return [];
 	}
@@ -1548,7 +1564,7 @@ var findvars = jme.findvars = function(tree)
 	{
 		var vars = [];
 		for(var i=0;i<tree.args.length;i++)
-			vars = vars.merge(findvars(tree.args[i]));
+			vars = vars.merge(findvars(tree.args[i],boundvars));
 		return vars;
 	}
 }

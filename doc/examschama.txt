@@ -7,7 +7,9 @@
 	duration: number
 	percentPass: number			#a percentage, so 50 instead of 0.5 for 50%
 	shuffleQuestions: boolean
-	resources: [strings]		#a list of paths to include, relative to path of .exam file. Can be individual files or directories
+	resources: [strings]		#a list of paths to include, relative to path of .exam file. 
+								#Can be individual files or directories
+								
 	extensions: [strings]		#a list of names of extensions to include. Extensions are in NUMBAS_PATH/extensions
 
 	navigation: {
@@ -53,19 +55,23 @@
 	}
 
 	rulesets: {
-		setname: [strings, or 				#a list of either names of rulesets, or new rule definitions
+		setname: [strings, or 					#a list of either names of rulesets, or new rule definitions
 					{
 						pattern: string			#pattern to match in order to apply this rule
-						conditions: [string]	#a list of boolean conditions (in JME syntax) matched expression must satisfy
+						conditions: [string]	#a list of boolean conditions (in JME syntax) matched 
+												# expression must satisfy
 						result: string			#expression to rewrite matched expression to
 					}]
 	}
 
 	functions: {
 		functionname: {
-			parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. Type can be any of: number, string, boolean, range, list, or the other JME types.
+			parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. 
+												#Type can be any of: 
+												#number, string, boolean, range, list, or the other JME types.
 			outtype: string		#the type of the value returned by the function
-			definition: string	#definition of the function, as a JME expression with respect to the parameters named in the list above
+			definition: string	#definition of the function, as a JME expression with respect to the 
+								#parameters named in the list above
 		}
 	}
 
@@ -81,9 +87,12 @@
 
 			functions: {
 				functionname: {
-					parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. Type can be any of: number, string, boolean, range, list, or the other JME types.
+					parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. 
+														#Type can be any of: 
+														#number, string, boolean, range, list, or the other JME types.
 					outtype: string		#the type of the value returned by the function
-					definition: string	#definition of the function, as a JME expression with respect to the parameters named in the list above
+					definition: string	#definition of the function, as a JME expression with respect to the 
+										#parameters named in the list above
 				}
 			}
 
@@ -111,13 +120,15 @@
 
 					marks: number	#how many marks to award for getting part right
 					
-					answer: string	#jme expression the student should match
+					answer: string					#jme expression the student's answer should match
 					answerSimplification: string	#list of simplification rules to apply to answer when displaying it
-					checkingType: string	#method to use when comparing student's answer to correct answer. One of: absdiff, reldiff, dp, sigfig
-					failureRate: number		#number of times comparison can fail before marking answer as wrong
-					vsetRangePoints: number	#number of points on which to compare answers
-					vsetrange: [number,number]	#range from which to pick values for expression variables
-					checkingaccuracy: number	#how strict to be when comparing answers. Form of value depends on checkingType
+					checkingType: string			#method to use when comparing student's answer to correct answer. 
+													#One of: absdiff, reldiff, dp, sigfig
+					failureRate: number				#number of times comparison can fail before marking answer as wrong
+					vsetRangePoints: number			#number of points on which to compare answers
+					vsetrange: [number,number]		#range from which to pick values for expression variables
+					checkingaccuracy: number		#how strict to be when comparing answers. 
+													#Form of value depends on checkingType
 
 					maxlength: {
 						length: number
@@ -147,12 +158,13 @@
 				{
 					type: patternmatch
 
-					marks: number	#how many marks to award for getting part right
+					marks: number			#how many marks to award for getting part right
 					
 					answer: string			#regular expression matching correct answers
 					displayAnswer: string	#string to display as correct answer
 					caseSensitive: boolean	#does case matter?
-					partialCredit: number	#percentage of marks to award if correct except for case, and caseSensitive = true
+					partialCredit: number	#percentage of marks to award if correct except for case, and 
+											#caseSensitive = true
 				}
 
 				#numberentry parts have
@@ -168,14 +180,17 @@
 					maxvalue: number or jme expression	#maximum correct answer
 
 					integerAnswer: boolean	#must answer be an integer?
-					partialCredit: number	#percentage of marks to award if in allowed range but not integer, and integerAnswer=true
+					partialCredit: number	#percentage of marks to award if in allowed range but not integer, 
+											#and integerAnswer=true
 
-					inputStep: number	#amount to increment input by when clicking up/down arrows in input box (currently not used)
+					inputStep: number	#amount to increment input by when clicking up/down arrows in input box
+										#(currently not used)
 				}
 
 				#multiple choice parts have
 				{
-					type: "1_n_2" or "m_n_2" or "m_n_x"		#choose one from a list of choices; choose any number from a list of choices; 2d grid of choices and answers
+					type: "1_n_2" or "m_n_2" or "m_n_x"		#choose one from a list of choices; choose any number from
+															#a list of choices; 2d grid of choices and answers
 
 					minMarks: number	#minimum score to award
 					maxMarks: number	#maximum score to award
@@ -193,8 +208,10 @@
 					matrix: [numbers]	#list of marks to award for each choice, if type is 1_n_2 or m_n_2
 					distractors: [strings]	#list of messages to display if student selects choices
 					#OR
-					matrix [ [numbers], [numbers], ... ]	#2d array of marks to award for each answer-choice pair, if m_n_x
-					distractors: [ [strings], [strings], ... ]	#2d array of messages to display if student selects choice-answer pairs
+					matrix [ [numbers], [numbers], ... ]	#2d array of marks to award for each answer-choice 
+															#pair, if this part is m_n_x type
+					distractors: [ [strings], [strings], ... ]	#2d array of messages to display if student selects 
+																#choice-answer pairs
 				}
 
 				#information parts have no extra properties
