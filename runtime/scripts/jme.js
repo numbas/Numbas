@@ -1180,6 +1180,7 @@ new funcObj('cross',[TVector,TVector],TVector,vectormath.cross);
 new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross);
 new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross);
 new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
+new funcObj('det', [TMatrix], TNum, matrixmath.abs);
 
 new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
 new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
@@ -1220,7 +1221,6 @@ new funcObj('abs', [TNum], TNum, math.abs );
 new funcObj('abs', [TList], TNum, function(l) { return l.length; });
 new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; });
 new funcObj('abs', [TVector], TNum, vectormath.abs);
-new funcObj('abs', [TMatrix], TNum, matrixmath.abs);
 new funcObj('arg', [TNum], TNum, math.arg );
 new funcObj('re', [TNum], TNum, math.re );
 new funcObj('im', [TNum], TNum, math.im );
