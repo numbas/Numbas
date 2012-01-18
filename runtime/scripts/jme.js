@@ -884,7 +884,7 @@ TBool.prototype.type = 'boolean';
 var TList = types.TList = types.list = function(n,value)
 {
 	this.vars = n;
-	this.value = value || new Array(n);
+	this.value = value;
 }
 TList.prototype.type = 'list';
 
@@ -1418,6 +1418,7 @@ funcs.maprange.evaluate = function(args,variables,functions)
 	var range = jme.evaluate(args[2],variables,functions);
 	var name = args[1].tok.name;
 	var newlist = new TList(range.size);
+	newlist.value = new Array(range.size);
 	var variables = Numbas.util.copyobj(variables);
 	for(var i=3;i<range.value.length;i++)
 	{
@@ -1536,12 +1537,27 @@ var checkingFunctions =
 	}
 };
 
-var findvars = jme.findvars = function(tree)
+var findvars = jme.findvars = function(tree,boundvars)
 {
+	if(boundvars===undefined)
+		boundvars = [];
+
+	if(tree.tok.type=='function' && tree.tok.name=='map')
+	{
+		boundvars = boundvars.slice();
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+
 	if(tree.args===undefined)
 	{
 		if(tree.tok.type=='name')
-			return [tree.tok.name.toLowerCase()];
+		{
+			var name = tree.tok.name.toLowerCase();
+			if(boundvars.indexOf(name)==-1)
+				return [name];
+			else
+				return [];
+		}
 		else
 			return [];
 	}
@@ -1549,7 +1565,7 @@ var findvars = jme.findvars = function(tree)
 	{
 		var vars = [];
 		for(var i=0;i<tree.args.length;i++)
-			vars = vars.merge(findvars(tree.args[i]));
+			vars = vars.merge(findvars(tree.args[i],boundvars));
 		return vars;
 	}
 }
