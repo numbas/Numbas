@@ -17,9 +17,19 @@ R.registerLocale('en-GB',{
 	'control.confirm end': "Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
 	'control.confirm regen': "Would you like to re-randomise this question? If you click OK, all your answers and marks for the current question will be lost.",
 	'control.confirm reveal': "Would you like to reveal the answer to this question? Any marks you have received so far will be removed and you will not be able to answer this question later.",
+	'control.submit answer': "Submit answer",
+	'control.submit all parts': "Submit all parts",
+	'control.submit again': "Submit again",
+	'control.submit': "Submit",
+
+	'display.part.jme.error making maths': "Error making maths display",
 	
 	'exam.xml.bad root': "Root element of exam XML should be 'exam'",
 	'exam.changeQuestion.no questions': "This exam contains no questions! Check the .exam file for errors.",
+
+	'feedback.marks': "*%s* %s",
+	'feedback.you were awarded': "You were awarded %s.",
+	'feedback.taken away': "%s %s taken away.",
 
 	'jme.compile.tokenise failed': "Invalid expression: %s",
 	'jme.compile.type error': "Type error in expression %s",
@@ -112,8 +122,10 @@ R.registerLocale('en-GB',{
 	'question.substituting': "Error substituting content: \n%s\n\n%s",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
+	'question.answer submitted': "Answer submitted",
 	
 	'timing.no accumulator': "no timing accumulator %s",
+	'timing.time remaining': "Time remaining: %s",
 	
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
