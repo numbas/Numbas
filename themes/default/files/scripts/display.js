@@ -641,7 +641,7 @@ display.PartDisplay.prototype =
 					}
 
 					var message = action.message || '';
-					var marks = R('feedback.marks',math.nicenumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
+					var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
 
 					if(change>0)
 						message+='\n'+R('feedback.you were awarded',marks);
@@ -684,6 +684,7 @@ display.PartDisplay.prototype =
 	revealAnswer: function() 
 	{
 		var c = this.htmlContext();
+		this.removeWarnings();
 		c.find('input[type=text],input[type=number]').each(resizeF);
 		c.find('#submitPart').attr('disabled',true);
 		this.showScore();
