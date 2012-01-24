@@ -508,6 +508,9 @@ Part.prototype = {
 		else
 		{
 			this.score = this.credit * this.marks;
+			//make sure awarded score is not less than minimum allowed
+			if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
+				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
 
 		if(this.parentPart && !this.parentPart.submitting)
