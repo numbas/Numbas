@@ -508,6 +508,9 @@ Part.prototype = {
 		else
 		{
 			this.score = this.credit * this.marks;
+			//make sure awarded score is not less than minimum allowed
+			if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
+				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
 
 		if(this.parentPart && !this.parentPart.submitting)
@@ -1462,6 +1465,7 @@ MultipleResponsePart.prototype =
 
 		this.numTicks = 0;
 		var partScore = 0;
+		var row,message;
 		for( i=0; i<this.numAnswers; i++ )
 		{
 			for(var j=0; j<this.numChoices; j++ )
@@ -1508,8 +1512,24 @@ MultipleResponsePart.prototype =
 		else
 			this.giveWarning(R('part.mcq.no choices selected'));
 			return false;
+	},
+
+	revealAnswer: function()
+	{
+		var row,message;
+		for(var i=0;i<this.numAnswers;i++)
+		{
+			for(var j=0;j<this.numChoices;j++)
+			{
+				if((row = this.settings.distractors[i]) && (message=row[j]))
+				{
+					this.markingComment(message);
+				}
+			}
+		}
 	}
 };
+MultipleResponsePart.prototype.revealAnswer = util.extend(MultipleResponsePart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
 function GapFillPart(xml, path, question, parentPart, loading)
 {

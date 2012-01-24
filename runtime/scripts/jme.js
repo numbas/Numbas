@@ -646,14 +646,16 @@ var jme = Numbas.jme = {
 		return out;
 	},
 
-	texsubvars: function(s,variables,functions)
+	texsplit: function(s)
 	{
 		var cmdre = /(.*?)\\((?:var)|(?:simplify))/;
-		var out = ''
+		var out = [];
 		while( m = s.match(cmdre) )
 		{
-			out += m[1];
+			out.push(m[1]);
 			var cmd = m[2];
+			out.push(cmd);
+
 			var i = m[0].length;
 
 			var args = '';
@@ -672,6 +674,9 @@ var jme = Numbas.jme = {
 					i++;
 				}
 			}
+			if(!argbrackets)
+				args='all';
+			out.push(args);
 
 			if(s.charAt(i)!='{')
 			{
@@ -691,7 +696,24 @@ var jme = Numbas.jme = {
 			if(i == s.length-1 && brackets>0)
 				throw(new Numbas.Error('jme.texsubvars.no right brace'));
 
-			var expr = s.slice(si,i)
+			var expr = s.slice(si,i);
+			s = s.slice(i+1);
+			out.push(expr);
+		}
+		out.push(s);
+		return out;
+	},
+
+	texsubvars: function(s,variables,functions)
+	{
+		var bits = jme.texsplit(s);
+		var out = '';
+		for(var i=0;i<bits.length-3;i+=4)
+		{
+			out+=bits[i];
+			var cmd = bits[i+1],
+				args = bits[i+2],
+				expr = bits[i+3];
 
 			switch(cmd)
 			{
@@ -701,17 +723,13 @@ var jme = Numbas.jme = {
 				out += ' '+v+' ';
 				break;
 			case 'simplify': //a JME expression to be simplified
-				if(!argbrackets)
-					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
 				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;
 			}
-			s = s.slice(i+1);
 		}
-
-		return out+s;
+		return out+bits[bits.length-1];
 	},
 
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
@@ -1549,16 +1567,42 @@ var findvars = jme.findvars = function(tree,boundvars)
 
 	if(tree.args===undefined)
 	{
-		if(tree.tok.type=='name')
+		switch(tree.tok.type)
 		{
+		case 'name':
 			var name = tree.tok.name.toLowerCase();
 			if(boundvars.indexOf(name)==-1)
 				return [name];
 			else
 				return [];
-		}
-		else
+			break;
+		case 'string':
+			var bits = jme.texsplit(tree.tok.value);
+			var out = [];
+			for(var i=0;i<bits.length-3;i+=4)
+			{
+				var cmd = bits[i+1];
+				var expr = bits[i+3];
+				switch(cmd)
+				{
+				case 'var':
+					var tree2 = jme.compile(expr,{},true);
+					out = out.merge(findvars(tree2,boundvars));
+					break;
+				case 'simplify':
+					var sbits = splitbrackets(str,'{','}');
+					for(var i=1;i<sbits.length-1;i+=2)
+					{
+						var tree2 = jme.compile(sbits[i],{},true);
+						out = out.merge(findvars(tree2,boundvars));
+					}
+					break;
+				}
+			}
+			return out;
+		default:
 			return [];
+		}
 	}
 	else
 	{
