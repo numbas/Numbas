@@ -1236,7 +1236,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//fill marks matrix
 	var matrix=[];
 	var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
-	var matrixTotal = 0;
 	for( i=0; i<matrixNodes.length; i++ )
 	{
 		var cell = {value: ""};
@@ -1251,7 +1250,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 				throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
 			cell.value = parseFloat(cell.value);
 		}
-		matrixTotal += cell.value;
 
 		//take into account shuffling
 		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
@@ -1293,9 +1291,61 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
 	}
 	settings.distractors = distractors;
+
+	if(settings.maxAnswers==0)
+	{
+		if(this.type=='1_n_2')
+			settings.maxAnswers = 1;
+		else
+			settings.maxAnswers = this.numAnswers * this.numChoices;
+	}
 	
-	if(this.marks == 0)
-		this.marks = matrixTotal;
+	if(this.marks == 0)	//if marks not set explicitly
+	{
+		var flat = [];
+		switch(this.type)
+		{
+		case '1_n_2':
+			for(var i=0;i<matrix.length;i++)
+			{
+				flat.push(matrix[i][0]);
+			}
+			break;
+		case 'm_n_2':
+			for(var i=0;i<matrix.length;i++)
+			{
+				flat.push(matrix[i][0]);
+			}
+			break;
+		case 'm_n_x':
+			if(settings.displayType=='radiogroup')
+			{
+				for(var i=0;i<this.numChoices;i++)
+				{
+					var row = [];
+					for(var j=0;j<this.numAnswers;j++)
+					{
+						row.push(matrix[j][i]);
+					}
+					row.sort();
+					flat.push(row[row.length-1]);
+				}
+			}
+			else
+			{
+				for(var i=0;i<matrix.length;i++)
+				{
+					flat = flat.concat(matrix[i]);
+				}
+			}
+			break;
+		}
+		flat.sort();
+		for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--)
+		{
+			this.marks+=flat[i];
+		}
+	}
 
 	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{	//because we swapped answers and choices round in the marking matrix
@@ -1357,6 +1407,8 @@ MultipleResponsePart.prototype =
 {
 	ticks: [],						//store student's responses here - array to say if each response has been selected or not
 	wrongNumber: false,				//has student given the wrong number of responses?
+	numChoices: 0,					//number of choices
+	numAnswers: 0,					//number of possible answers
 
 	settings:
 	{
@@ -1367,8 +1419,6 @@ MultipleResponsePart.prototype =
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
 		displayType: '',			//how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-		numChoices: 0,				//number of choices
-		numAnswers: 0,				//number of possible answers
 		warningType: '',			//what to do if wrong number of responses
 		warningMessage: ''			//message to display if wrong number of responses
 	},
