@@ -641,16 +641,20 @@ display.PartDisplay.prototype =
 					}
 
 					var message = action.message || '';
-					var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
+					if(message.trim().length)
+					{
+						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
 
-					if(change>0)
-						message+='\n'+R('feedback.you were awarded',marks);
-					else if(change<0)
-						message+='\n'+R('feedback.taken away',marks,util.pluralise(change,'was','were'));
-					feedback.push(message);
+						if(change>0)
+							message+='\n\n'+R('feedback.you were awarded',marks);
+						else if(change<0)
+							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,'was','were'));
+					}
+					if(message.trim().length)
+						feedback.push(message);
 				}
 
-				feedback = textile(feedback.join('\n\n'));
+				feedback = textile(feedback.join('\n\n<hr/>'));
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
 				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
 			}
