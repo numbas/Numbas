@@ -1151,6 +1151,12 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		throw(new Numbas.Error('part.mcq.choices missing',this.path));
 
 	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
+
+	settings.minAnswers = jme.subvars(settings.minAnswers, question.variables);
+	settings.minAnswers = jme.evaluate(jme.compile(settings.minAnswers),this.question.variables,this.question.functions).value;
+	settings.maxAnswers = jme.subvars(settings.maxAnswers, question.variables);
+	settings.maxAnswers = jme.evaluate(jme.compile(settings.maxAnswers),this.question.variables,this.question.functions).value;
+
 	var choiceNodes = choicesNode.selectNodes('choice');
 	this.numChoices = choiceNodes.length;
 	
@@ -1413,8 +1419,8 @@ MultipleResponsePart.prototype =
 	settings:
 	{
 		maxMarksEnabled: false,		//is there a maximum number of marks the student can get?
-		minAnswers: 0,				//minimum number of responses student must select
-		maxAnswers: 0,				//maximum ditto
+		minAnswers: '0',				//minimum number of responses student must select
+		maxAnswers: '0',				//maximum ditto
 		choiceOrder: '',			//order in which to display choices
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
