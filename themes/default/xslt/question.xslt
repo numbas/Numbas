@@ -135,9 +135,7 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="distractor">
-	<span>
-		<xsl:apply-templates />
-	</span>
+	<span><xsl:apply-templates /></span>
 </xsl:template>
 
 
