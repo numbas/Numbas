@@ -674,6 +674,8 @@ var jme = Numbas.jme = {
 					i++;
 				}
 			}
+			if(!argbrackets)
+				args='all';
 			out.push(args);
 
 			if(s.charAt(i)!='{')
@@ -721,8 +723,6 @@ var jme = Numbas.jme = {
 				out += ' '+v+' ';
 				break;
 			case 'simplify': //a JME expression to be simplified
-				if(!argbrackets)
-					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
 				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
