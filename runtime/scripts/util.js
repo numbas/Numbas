@@ -371,6 +371,22 @@ textile.phraseTypes.splice(0,0,function(text) {
 	return out;
 });
 
+var re_subvar = /\{.*?\}/g;
+textile.phraseTypes.splice(0,0,function(text) {
+	var out = [];
+	var m;
+	while(m=re_subvar.exec(text))
+	{
+		var bit = [text.slice(0,m.index),m[0]];
+		out = this.joinPhraseBits(out,bit,out.length);
+		text = text.slice(re_subvar.lastIndex);
+		re_subvar.lastIndex = 0;
+	}
+	if(out.length)
+		out = this.joinPhraseBits(out,[text],out.length);
+	return out;
+});
+
 
 cbSplit._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
 cbSplit._nativeSplit = String.prototype.split;

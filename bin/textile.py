@@ -903,12 +903,24 @@ class Textile(object):
 		return ''.join(out)
 
 	def code(self, text):
+		text = self.doSpecial(text, '{', '}', self.fSubvar)
 		text = self.doSpecial(text, '$', '$', self.fMath)
 		text = self.doSpecial(text, r'\[', r'\]', self.fMath2)
 		text = self.doSpecial(text, '<code>', '</code>', self.fCode)
 		text = self.doSpecial(text, '@', '@', self.fCode)
 		text = self.doSpecial(text, '<pre>', '</pre>', self.fPre)
 		return text
+
+	def fSubvar(self, match):
+		before, text, after = match.groups()
+		if after == None:
+			after = ''
+		if before == None:
+			before = ''
+		# text needs to be escaped
+		if not self.restricted:
+			text = self.encode_html(text)
+		return ''.join([before, self.shelve('{%s}' % text), after])
 
 	def fMath(self, match):
 		before, text, after = match.groups()
@@ -920,6 +932,7 @@ class Textile(object):
 		if not self.restricted:
 			text = self.encode_html(text)
 		return ''.join([before, self.shelve('$%s$' % text), after])
+
 	def fMath2(self, match):
 		before, text, after = match.groups()
 		if before == None:
