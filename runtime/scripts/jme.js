@@ -648,7 +648,7 @@ var jme = Numbas.jme = {
 
 	texsplit: function(s)
 	{
-		var cmdre = /(.*?)\\((?:var)|(?:simplify))/;
+		var cmdre = /((?:.|\n)*?)\\((?:var)|(?:simplify))/m;
 		var out = [];
 		while( m = s.match(cmdre) )
 		{
@@ -774,7 +774,7 @@ var jme = Numbas.jme = {
 				}
 				if(display)
 				{
-					v = textile(' '+v);
+					v = textile(v,{nowrapPlainBlocks:true});
 				}
 				out += v;
 			}
@@ -1590,7 +1590,7 @@ var findvars = jme.findvars = function(tree,boundvars)
 					out = out.merge(findvars(tree2,boundvars));
 					break;
 				case 'simplify':
-					var sbits = splitbrackets(str,'{','}');
+					var sbits = splitbrackets(expr,'{','}');
 					for(var i=1;i<sbits.length-1;i+=2)
 					{
 						var tree2 = jme.compile(sbits[i],{},true);

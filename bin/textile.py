@@ -729,6 +729,7 @@ class Textile(object):
 		if not self.lite:
 			text = self.noTextile(text)
 			text = self.code(text)
+			text = self.subvar(text)
 
 		text = self.links(text)
 
@@ -903,13 +904,16 @@ class Textile(object):
 		return ''.join(out)
 
 	def code(self, text):
-		text = self.doSpecial(text, '{', '}', self.fSubvar)
 		text = self.doSpecial(text, '$', '$', self.fMath)
 		text = self.doSpecial(text, r'\[', r'\]', self.fMath2)
 		text = self.doSpecial(text, '<code>', '</code>', self.fCode)
 		text = self.doSpecial(text, '@', '@', self.fCode)
 		text = self.doSpecial(text, '<pre>', '</pre>', self.fPre)
 		return text
+	
+	def subvar(self, text):
+		pattern = re.compile(r'(^|\s|[\[(])\{(.*?)\}(\s|$|[\])])', re.M|re.S)
+		return pattern.sub(self.fSubvar,text)
 
 	def fSubvar(self, match):
 		before, text, after = match.groups()
