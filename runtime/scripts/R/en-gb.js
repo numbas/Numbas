@@ -100,6 +100,7 @@ R.registerLocale('en-GB',{
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",
 	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.",
+	'part.jme.marking.correct': "Your answer is numerically correct.",
 	'part.jme.must-have bits': '<span class="monospace">%s</span>',
 	'part.jme.must-have one': "Your answer must contain: %s",
 	'part.jme.must-have several': "Your answer must contain all of: %s",
