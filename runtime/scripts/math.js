@@ -645,7 +645,7 @@ var math = Numbas.math = {
 	//if all the values in the range are appended to the list, eg [min,max,step,v1,v2,v3,...], just pick randomly from the values
 	random: function(range)
 	{
-		if(range.length>3)	//if values in range are given
+		if(range.length>3)	//if values in range are given after [min,max,step]
 		{
 			return math.choose(range.slice(3));
 		}
