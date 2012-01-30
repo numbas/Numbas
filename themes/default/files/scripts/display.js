@@ -387,6 +387,8 @@ display.QuestionDisplay.prototype =
 		}
 		$('.navBar #submitBtn').val(submitMsg);
 
+		$('#regenBtn').val(R('control.regen'));
+
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
 

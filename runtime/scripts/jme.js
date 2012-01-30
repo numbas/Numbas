@@ -1278,7 +1278,12 @@ new funcObj('radians', [TNum], TNum, math.radians );
 new funcObj('round', [TNum], TNum, math.round );
 new funcObj('sign', [TNum], TNum, math.sign );
 new funcObj('random', [TRange], TNum, math.random );
-arbrandom = new funcObj( 'random',[],'?');			//pick at random from a list of any data type
+var listrandom = new funcObj('random',[TList],'?');
+listrandom.evaluate = function(args,variables,functions) {
+	var l = jme.evaluate(args[0],variables,functions);
+	return math.choose(l.value);
+};
+var arbrandom = new funcObj( 'random',[],'?');			//pick at random from a list of any data type
 arbrandom.typecheck = function() { return true; }
 arbrandom.evaluate = function(args,variables,functions) { return jme.evaluate(math.choose(args),variables,functions);};
 new funcObj('mod', [TNum,TNum], TNum, function(a,b){return a%b;} );

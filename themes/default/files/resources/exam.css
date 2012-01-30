@@ -189,6 +189,10 @@ body {
 	background:#A2D1F0;
 }
 
+#questionContainer p {
+	line-height: 1.3em;
+}
+
 /* 2 column left menu settings */
 #questionContainer .colwrap {
 	float:left;

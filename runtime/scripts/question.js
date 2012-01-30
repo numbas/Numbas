@@ -867,7 +867,7 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.setCredit(1,R('part.marking.correct'));
+		this.setCredit(1,R('part.jme.correct'));
 
 		if(this.failMinLength)
 		{
