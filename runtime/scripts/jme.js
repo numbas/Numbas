@@ -1456,7 +1456,14 @@ funcs.sort.evaluate = function(args,variables,functions)
 {
 	var list = jme.evaluate(args[0],variables,functions);
 	var newlist = new TList(list.vars);
-	newlist.value = list.value.slice().sort(function(a,b){ return math.gt(a.value,b.value); });
+	newlist.value = list.value.slice().sort(function(a,b){ 
+		if(math.gt(a.value,b.value))
+			return 1;
+		else if(math.lt(a.value,b.value))
+			return -1;
+		else
+			return 0;
+	});
 	return newlist;
 }
 
