@@ -293,10 +293,6 @@ body {
 	clear:both;
 }
 
-#adviceDisplay {
-	display: inline-block;
-}
-
 #adviceDisplay ol,ul {
 	margin-left:1em;
 }
