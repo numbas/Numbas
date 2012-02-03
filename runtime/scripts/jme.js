@@ -59,8 +59,8 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_op))
 			{
-				if(result[1])		//if word-ish operator
-					result[0] = result[1];
+				if(result[2])		//if word-ish operator
+					result[0] = result[2];
 				token = result[0];
 				//work out if operation is being used prefix or postfix
 				var nt;
