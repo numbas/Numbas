@@ -756,24 +756,18 @@ var jme = Numbas.jme = {
 					else
 						v = '('+v+')';
 				}
-				else if(!display && v.type=='string')
+				else if(v.type=='string')
 				{
-					v="'"+v.value+"'";
+					if(display)
+						v = v.value;
+					else
+						v = "'"+v.value+"'";
 				}
-				else if(v.type=='list')
-				{
-					v = '['+v.value.map(function(x){return x.value;}).join(',')+']';
-				}
-				else if(v.type=='vector')
-				{
-					v = 'vector('+v.value.map(function(x){return Numbas.math.niceNumber(x)})+')';
-				}
-				else if(v.type=='matrix')
-					v = 'matrix('+v.value.map(function(row){return '['+row.map(function(x){return Numbas.math.niceNumber(x)}).join(',')+']'}).join(',')+')';
 				else
 				{
-					v = v.value;
+					v = jme.display.treeToJME({tok:v});
 				}
+
 				if(display)
 				{
 					v = textile(v,{nowrapPlainBlocks:true});
