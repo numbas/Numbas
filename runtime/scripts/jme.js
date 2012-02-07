@@ -1163,12 +1163,34 @@ builtins['eval'] = [{name: 'eval',
 					typecheck: function(){return true;}
 	}];
 
+var funcs = {};
+
 new funcObj('_', ['?','?'], function(){return new TNum(0);});
 
 new funcObj('+u', [TNum], TNum, function(a){return a;});	//unary plus
 new funcObj('-u', [TNum], TNum, math.negate);	//unary minus
 
 new funcObj('+', [TNum,TNum], TNum, math.add );				//'number + number' is addition
+
+funcs.listadd = new funcObj('+', [TList,TList], TList);
+funcs.listadd.evaluate = function(args,variables,functions)
+{
+	var list0 = jme.evaluate(args[0],variables,functions);
+	var list1 = jme.evaluate(args[1],variables,functions);
+	var value = list0.value.concat(list1.value);
+	return new TList(value.length,value);
+}
+
+funcs.listpush = new funcObj('+',[TList,'?'],TList);
+funcs.listpush.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var item = jme.evaluate(args[1],variables,functions);
+	var value = list.value.slice();
+	value.push(item);
+	return new TList(value.length,value);
+}
+
 var fconc = function(a,b) { return a+b; };					//'string + anything' is concatenation
 new funcObj('+', [TString,'?'], TString, fconc );
 new funcObj('+', ['?',TString], TString, fconc );
@@ -1300,8 +1322,6 @@ new funcObj('pdiff', ['?','?',TNum], '?');
 new funcObj('int', ['?','?'], '?');
 new funcObj('defint', ['?','?',TNum,TNum], '?');
 
-var funcs = {};
-
 //if needs to be a bit different because it can return any type
 funcs.iff = new funcObj('if', [TBool,'?','?'], '?');
 funcs.iff.evaluate = function(args,variables,functions)
@@ -1398,6 +1418,22 @@ funcs.listval.evaluate = function(args,variables,functions)
 		return list.value[index];
 	else
 		throw(new Numbas.Error('jme.func.listval.invalid index',index,list.value.length));
+}
+
+funcs.listslice = new funcObj('listval',[TList,TRange],TList);
+funcs.listslice.evaluate = function(args,variables,functions)
+{
+	var range = jme.evaluate(args[1],variables,functions).value;
+	var list = jme.evaluate(args[0],variables,functions);
+	var start = range[0];
+	var end = range[1];
+	var size = list.vars;
+	if(start<0)
+		start += size;
+	if(end<0)
+		end += size;
+	var value = list.value.slice(start,end);
+	return new TList(value.length,value);
 }
 
 funcs.vectorval = new funcObj('listval',[TVector,TNum],TNum);
