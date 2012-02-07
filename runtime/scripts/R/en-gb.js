@@ -42,7 +42,7 @@ R.registerLocale('en-GB',{
 	'jme.evaluate.undefined variable': "Variable %s is undefined",
 
 	'jme.func.switch.no default case': "No default case for Switch statement",
-	'jme.func.listval.invalid index': "Invalid list index %s on list of size %s",
+	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
 
 	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
 	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",

@@ -63,7 +63,7 @@ Numbas.showError = function(e)
 Numbas.Error = function(message)
 {
 	this.name="Numbas Error";
-	this.message = R(message,Array.prototype.slice.call(arguments,1));
+	this.message = R.apply(this,arguments);
 }
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;

@@ -1414,6 +1414,8 @@ funcs.listval.evaluate = function(args,variables,functions)
 {
 	var index = jme.evaluate(args[1],variables,functions).value;
 	var list = jme.evaluate(args[0],variables,functions);
+	if(index<0)
+		index += list.vars;
 	if(index in list.value)
 		return list.value[index];
 	else
