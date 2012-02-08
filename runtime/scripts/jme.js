@@ -1512,6 +1512,14 @@ funcs.vector.evaluate = function(args,variables,functions)
 	return new TVector(value);
 }
 
+funcs.vectorFromList = new funcObj('vector',[TList],TVector);
+funcs.vectorFromList.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var value = list.value.map(function(x){return x.value});
+	return new TVector(value);
+}
+
 funcs.matrix = new funcObj('matrix',['*list'],TMatrix);
 funcs.matrix.evaluate = function(args,variables,functions)
 {
