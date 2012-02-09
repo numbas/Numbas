@@ -230,5 +230,4 @@ if __name__ == '__main__':
 	try:
 		makeExam(options)
 	except:
-		pass
-
+		exit(1)
