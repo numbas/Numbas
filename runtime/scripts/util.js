@@ -236,7 +236,7 @@ var util = Numbas.util = {
 		if(s<l)
 			o.push(t.slice(s));
 		return o;
-	}
+	},
 
 	//split content text up by TeX maths delimiters
 	//includes delimiters, since there are two kinds
