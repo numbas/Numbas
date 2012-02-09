@@ -16,18 +16,25 @@ Copyright 2011 Newcastle University
 
 
 Numbas.queueScript('scripts/scorm-storage.js',[],function() {
-Numbas.storage = {
-	clean: function()
-	{
-		for(x in localStorage) delete localStorage[x];
-	},
+Numbas.storage.clean = function()
+{
+	for(x in localStorage) delete localStorage[x];
+};
 
-	startLMS: function()
-	//tries to initialise the SCORM API
-	//if it isn't present, a pretend LMS is started
-	//(this could save student progress in localStorage)
+Numbas.storage.startLMS = function()
+//tries to initialise the SCORM API
+//if it isn't present, a pretend LMS is started
+//(this could save student progress in localStorage)
+{
+};
+
+//SCORM storage object - controls saving and loading of data from the LMS
+var SCORMStorage = Numbas.storage.SCORMStorage = function()
+{
+	if(!pipwerks.SCORM.init())
 	{
-		if(!pipwerks.SCORM.init())
+		//if the pretend LMS extension is loaded, we can start that up
+		if(Numbas.storage.PretendLMS)
 		{
 			if(!Numbas.storage.lms)
 			{
@@ -36,12 +43,13 @@ Numbas.storage = {
 			window.API_1484_11 = Numbas.storage.lms.API;
 			pipwerks.SCORM.init();
 		}
+		//otherwise return a blank storage object which does nothing
+		else
+		{
+			return new Numbas.storage.BlankStorage();	
+		}
 	}
-};
 
-//SCORM storage object - controls saving and loading of data from the LMS
-var SCORMStorage = Numbas.storage.SCORMStorage = function()
-{
 	this.getEntry();
 
 	//get all question-objective indices
@@ -157,6 +165,7 @@ SCORMStorage.prototype = {
 		this.set(prepath+'id', id);
 		this.set(prepath+'score.min',0);
 		this.set(prepath+'score.max',q.marks);
+		this.set(prepath+'score.raw',q.score || 0);
 		this.set(prepath+'success_status','unknown');
 		this.set(prepath+'completion_status','not attempted');
 		this.set(prepath+'progress_measure',0);
@@ -334,6 +343,7 @@ SCORMStorage.prototype = {
 	{
 		this.e = exam;
 		var eobj = this.getSuspendData();
+		this.set('exit','suspend');
 		
 		var location = this.get('location');
 		if(location.length)
@@ -364,7 +374,7 @@ SCORMStorage.prototype = {
 			variables[name] = Numbas.jme.evaluate(qobj.variables[name]);
 		}
 
-		return {score: parseInt(this.get('objectives.'+index+'.score.raw'),10),
+		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
 				visited: qobj.visited,
 				answered: qobj.answered,
 				submitted: qobj.submitted,
@@ -421,11 +431,15 @@ SCORMStorage.prototype = {
 		case '1_n_2':
 		case 'm_n_2':
 		case 'm_n_x':
+			if(part.numAnswers===undefined)
+				return out;
 			var ticks = [];
-			for(var i=0;i<part.settings.numAnswers;i++)
+			var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
+			var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
+			for(var i=0;i<w;i++)
 			{
 				ticks.push([]);
-				for(var j=0;j<part.settings.numChoices;j++)
+				for(var j=0;j<h;j++)
 				{
 					ticks[i].push(false);
 				}
@@ -531,9 +545,9 @@ SCORMStorage.prototype = {
 		case 'm_n_2':
 		case 'm_n_x':
 			var s='';
-			for(var i=0;i<part.settings.numAnswers;i++)
+			for(var i=0;i<part.numAnswers;i++)
 			{
-				for( var j=0;j<part.settings.numChoices;j++ )
+				for( var j=0;j<part.numChoices;j++ )
 				{
 					if(part.ticks[i][j])
 					{

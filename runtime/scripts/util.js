@@ -17,7 +17,7 @@ Copyright 2011 Newcastle University
 // utility.js
 // convenience functions, extensions to javascript built-ins, etc.
 
-Numbas.queueScript('scripts/util.js',[],function() {
+Numbas.queueScript('scripts/util.js',['math'],function() {
 var util = Numbas.util = {
 
 	// extend(A,B) - derive type B from A
@@ -80,6 +80,8 @@ var util = Numbas.util = {
 		switch(typeof(obj))
 		{
 		case 'object':
+			if(obj===null)
+				return obj;
 			if(obj.length!==undefined)
 			{
 				return util.copyarray(obj,deep);
@@ -182,6 +184,7 @@ var util = Numbas.util = {
 	//if n is not unity, return plural, else return singular
 	pluralise: function(n,singular,plural)
 	{
+		n = Numbas.math.precround(n,10);
 		if(n==-1 || n==1)
 			return singular;
 		else
@@ -400,6 +403,56 @@ cbSplit = function (str, separator, limit) {
 };
 
 
+//add inline and display maths phrase types to textile convertor, so their contents don't get touched
+
+var re_inlineMaths = /\$.*?\$/g;
+textile.phraseTypes.splice(0,0,function(text) {
+	var out = [];
+	var m;
+	while(m=re_inlineMaths.exec(text))
+	{
+		var bit = [text.slice(0,m.index),m[0]];
+		out = this.joinPhraseBits(out,bit,out.length);
+		text = text.slice(re_inlineMaths.lastIndex);
+		re_inlineMaths.lastIndex = 0;
+	}
+	if(out.length)
+		out = this.joinPhraseBits(out,[text],out.length);
+	return out;
+});
+
+var re_displayMaths = /\\\[.*?\\\]/g;
+textile.phraseTypes.splice(0,0,function(text) {
+	var out = [];
+	var m;
+	while(m=re_displayMaths.exec(text))
+	{
+		var bit = [text.slice(0,m.index),m[0]];
+		out = this.joinPhraseBits(out,bit,out.length);
+		text = text.slice(re_displayMaths.lastIndex);
+		re_displayMaths.lastIndex = 0;
+	}
+	if(out.length)
+		out = this.joinPhraseBits(out,[text],out.length);
+	return out;
+});
+
+var re_subvar = /\{.*?\}/g;
+textile.phraseTypes.splice(0,0,function(text) {
+	var out = [];
+	var m;
+	while(m=re_subvar.exec(text))
+	{
+		var bit = [text.slice(0,m.index),m[0]];
+		out = this.joinPhraseBits(out,bit,out.length);
+		text = text.slice(re_subvar.lastIndex);
+		re_subvar.lastIndex = 0;
+	}
+	if(out.length)
+		out = this.joinPhraseBits(out,[text],out.length);
+	return out;
+});
+
 
 cbSplit._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
 cbSplit._nativeSplit = String.prototype.split;
@@ -445,38 +498,31 @@ if (!Array.prototype.map)
   };
 }
 
-//add inline and display maths phrase types to textile convertor, so their contents don't get touched
-var re_inlineMaths = /\$.*?\$/g;
-textile.phraseTypes.splice(0,0,function(text) {
-	var out = [];
-	var m;
-	while(m=re_inlineMaths.exec(text))
-	{
-		var bit = [text.slice(0,m.index),m[0]];
-		out = this.joinPhraseBits(out,bit,out.length);
-		text = text.slice(re_inlineMaths.lastIndex);
-		re_inlineMaths.lastIndex = 0;
-	}
-	if(out.length)
-		out = this.joinPhraseBits(out,[text],out.length);
-	return out;
-});
+//from https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/Reduce 
+if ( !Array.prototype.reduce ) {
+  Array.prototype.reduce = function reduce(accumulator){
+        var i, l = this.length, curr;
+        
+        if(typeof accumulator !== "function") // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."
+          throw new TypeError("First argument is not callable");
 
-var re_displayMaths = /\\\[.*?\\\]/g;
-textile.phraseTypes.splice(0,0,function(text) {
-	var out = [];
-	var m;
-	while(m=re_displayMaths.exec(text))
-	{
-		var bit = [text.slice(0,m.index),m[0]];
-		out = this.joinPhraseBits(out,bit,out.length);
-		text = text.slice(re_displayMaths.lastIndex);
-		re_displayMaths.lastIndex = 0;
-	}
-	if(out.length)
-		out = this.joinPhraseBits(out,[text],out.length);
-	return out;
-});
-
-
+        if((l == 0 || l === null) && (arguments.length <= 1))// == on purpose to test 0 and false.
+          throw new TypeError("Array length is 0 and no second argument");
+        
+        if(arguments.length <= 1){
+          curr = this[0]; // Increase i to start searching the secondly defined element in the array
+          i = 1; // start accumulating at the second element
+        }
+        else{
+          curr = arguments[1];
+        }
+        
+        for(i = i || 0 ; i < l ; ++i){
+          if(i in this)
+            curr = accumulator.call(undefined, curr, this[i], i, this);
+        }
+        
+        return curr;
+      };
+  }
 });

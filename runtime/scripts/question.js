@@ -19,6 +19,7 @@ Numbas.queueScript('scripts/question.js',['schedule','display','jme','jme-variab
 
 var util = Numbas.util;
 var jme = Numbas.jme;
+var math = Numbas.math;
 
 var job = Numbas.schedule.add;
 
@@ -101,6 +102,8 @@ var Question = Numbas.Question = function( xml, number, loading, gvariables, gfu
 			else if(q.adviceDisplayed)
 				q.getAdvice(true);
 		}
+		
+		q.display.makeHTML();
 	});
 
 }
@@ -124,165 +127,6 @@ Question.prototype =
 	partDictionary: {},		//dictionary mapping part addresses to objects
 
 	display: undefined,		//display code
-
-	makeVariables: function(loading)
-	{
-		var q = this;
-		var myfunctions = q.functions = {};
-		var tmpFunctions = [];
-		job(function()
-		{
-			//get question's name
-			tryGetAttribute(q,'.','name');
-
-
-			q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
-
-			//work out functions
-			var functionNodes = q.xml.selectNodes('functions/function');
-
-			//first pass: get function names and types
-			for(var i=0; i<functionNodes.length; i++)
-			{
-				var name = functionNodes[i].getAttribute('name').toLowerCase();
-
-				var definition = functionNodes[i].getAttribute('definition');
-
-				var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-				var outcons = Numbas.jme.types[outtype];
-
-				var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-				var paramNames = [];
-				var intype = [];
-				for(var j=0; j<parameterNodes.length; j++)
-				{
-					var paramName = parameterNodes[j].getAttribute('name');
-					var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
-					paramNames.push(paramName);
-					var incons = Numbas.jme.types[paramType];
-					intype.push(incons);
-				}
-
-				var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
-				tmpfunc.definition = definition;
-				tmpfunc.paramNames = paramNames;
-
-				if(q.functions[name]===undefined)
-					q.functions[name] = [];
-				q.functions[name].push(tmpfunc);
-				tmpFunctions.push(tmpfunc);
-			}
-		});
-
-		job(function()
-		{
-			//second pass: compile functions
-			for(var i=0; i<tmpFunctions.length; i++)
-			{
-				tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,q.functions);
-
-				tmpFunctions[i].evaluate = function(args,variables,functions)
-				{
-					nvariables = Numbas.util.copyobj(variables);
-
-					for(var j=0;j<args.length;j++)
-					{
-						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
-					}
-					return jme.evaluate(this.tree,nvariables,functions);
-				}
-			}
-		});
-
-		job(function()
-		{
-			//evaluate question variables
-			q.variables = {};
-			if(loading)
-			{
-				var qobj = Numbas.store.loadQuestion(q);
-				for(var x in qobj.variables)
-				{
-					q.variables[x] = qobj.variables[x];
-				}
-			}
-			else
-			{
-				var variableNodes = q.xml.selectNodes('variables/variable');	//get variable definitions out of XML
-
-				//list of variable names to ignore because they don't make sense
-				var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
-
-				//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-				var todo = {};
-				for( var i=0; i<variableNodes.length; i++ )
-				{
-					var name = variableNodes[i].getAttribute('name').toLowerCase();
-					if(!ignoreVariables.contains(name))
-					{
-						var value = variableNodes[i].getAttribute('value');
-
-						var vars = [];
-						//get vars referred to in string definitions like "hi {name}"
-						/*
-						var stringvars = value.split(/{(\w+)}/g);
-						for(var j=1;j<stringvars.length;j+=2)
-						{
-							if(!vars.contains(stringvars[j]))
-								vars.push(stringvars[j].toLowerCase());
-						}
-						*/
-
-						var tree = jme.compile(value,q.functions);
-						vars = vars.merge(jme.findvars(tree));
-						todo[name]={
-							tree: tree,
-							vars: vars
-						};
-					}
-				}
-				function compute(name,todo,variables,path)
-				{
-					if(variables[name]!==undefined)
-						return;
-
-					if(path===undefined)
-						path=[];
-
-
-					if(path.contains(name))
-					{
-						alert("Circular variable reference in question "+name+' '+path);
-						return;
-					}
-
-					var v = todo[name];
-
-					if(v===undefined)
-						throw(new Error("Variable "+name+" not defined."));
-
-					//work out dependencies
-					for(var i=0;i<v.vars.length;i++)
-					{
-						var x=v.vars[i];
-						if(variables[x]===undefined)
-						{
-							var newpath = path.slice(0);
-							newpath.splice(0,0,name);
-							compute(x,todo,variables,newpath);
-						}
-					}
-
-					variables[name] = jme.evaluate(v.tree,variables,myfunctions);
-				}
-				for(var x in todo)
-				{
-					compute(x,todo,q.variables);
-				}
-			}
-
-		});
-	},
 
 	subvars: function()
 	{
@@ -324,7 +168,7 @@ Question.prototype =
 							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
 							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
 							{
-								throw(new Error("Error substituting content: \n"+Sarissa.getParseErrorText(newNode)+'\n\n'+newtext));
+								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newtext));
 							}
 
 							//copy new content to same place as original text
@@ -432,7 +276,7 @@ Question.prototype =
 	{
 		var part = this.getPart(partRef);
 		if(!part)
-			throw(new Error("Can't find part "+partRef+"/"));
+			throw(new Numbas.Error('question.no such part',partRef));
 		part.storeAnswer(answerList);
 	},
 
@@ -446,10 +290,13 @@ Question.prototype =
 		}
 
 		var tmpScore=0;
+		var answered = true;
 		for(var i=0; i<this.parts.length; i++)
 		{
 			tmpScore += this.parts[i].score;
+			answered = answered && this.parts[i].answered;
 		}
+		this.answered = answered;
 		
 		if( uiWarning!="uwPrevent" )
 		{
@@ -483,7 +330,7 @@ Question.prototype =
 		//display message about success or failure
 		if(! this.answered )
 		{
-			Numbas.display.showAlert("Can not submit answer - check for errors.");
+			Numbas.display.showAlert(R('question.can not submit'));
 			this.display.scrollToError();
 		}
 
@@ -520,7 +367,7 @@ function createPart(xml, path, question, parentPart, loading)
 {
 	var type = tryGetAttribute(null,'.','type',[],{xml: xml});
 	if(type==null)
-		throw(new Error("Missing part type attribute"));
+		throw(new Numbas.Error('part.missing type attribute'));
 	if(partConstructors[type])
 	{
 		var cons = partConstructors[type];
@@ -529,7 +376,7 @@ function createPart(xml, path, question, parentPart, loading)
 	}
 	else
 	{
-		throw(new Error("Unrecognised part type "+type));
+		throw(new Numbas.Error('part.unknown type',type));
 	}
 }
 
@@ -646,17 +493,24 @@ Part.prototype = {
 			if(stepsMarks!=0 && stepsScore!=0)
 			{
 				if(this.credit==1)
-					this.markingComment("Because you received full marks for the part, your answers to the steps aren't counted.");
+					this.markingComment(R('part.marking.steps no matter'));
 				else
 				{
 					var change = this.score - oScore;
-					this.markingComment(util.formatString('You were awarded *%s* %s for your answers to the steps.',change,util.pluralise(change,'mark','marks')));
+					this.markingComment(
+						util.pluralise(change,
+							R('part.marking.steps change single',math.niceNumber(change)),
+							R('part.marking.steps change plural',math.niceNumber(change))
+					));
 				}
 			}
 		}
 		else
 		{
 			this.score = this.credit * this.marks;
+			//make sure awarded score is not less than minimum allowed
+			if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
+				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
 
 		if(this.parentPart && !this.parentPart.submitting)
@@ -681,16 +535,19 @@ Part.prototype = {
 			var stepsMax = this.marks - this.settings.stepsPenalty;
 			this.markingComment(
 				this.settings.stepsPenalty>0 
-					? util.formatString('You revealed the steps. The maximum you can score for this part is *%s* %s. Your scores will be scaled down accordingly.',stepsMax,util.pluralise(stepsMax,'mark','marks')) 
-					: 'You revealed the steps.');
+					? util.pluralise(stepsMax,
+						R('part.marking.revealed steps with penalty single',math.niceNumber(stepsMax)),
+						R('part.marking.revealed steps with penalty plural',math.niceNumber(stepsMax))
+						)
+					: R('part.marking.revealed steps no penalty'));
 		}
 
 		if(this.marks==0)
 			return;
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
-			this.giveWarning("No answer submitted.");
-			this.setCredit(0,'You did not answer this question.');;
+			this.giveWarning(R('part.marking.not submitted'));
+			this.setCredit(0,R('part.marking.did not answer'));;
 			this.answered = false;
 		}
 		else
@@ -715,7 +572,12 @@ Part.prototype = {
 		{
 			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
-				this.markingComment('You scored *'+this.score+'* '+util.pluralise(this.score,'mark','marks')+' for this part.');
+				this.markingComment(
+					util.pluralise(this.score,
+						R('part.marking.total score single',math.niceNumber(this.score)),
+						R('part.marking.total score plural',math.niceNumber(this.score))
+					)
+				);
 		}
 		else
 			this.reportStudentAnswer('');
@@ -824,7 +686,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	//parse correct answer from XML
 	answerMathML = this.xml.selectSingleNode('answer/correctanswer');
 	if(!answerMathML)
-		throw(new Error("Correct answer for a JME part is missing ("+this.path+")"));
+		throw(new Numbas.Error('part.jme.answer missing',this.path));
 
 	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
 
@@ -836,7 +698,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	);
 
 	settings.displaySimplification = {
-		fractionNumbers: settings.answerSimplification.fractionNumbers
+	//	fractionnumbers: settings.answerSimplification.fractionnumbers
 	};
 	
 	//get checking type, accuracy, checking range
@@ -853,7 +715,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 		if($(settings.maxLengthMessage).text() == '')
-			settings.maxLengthMessage = 'Your answer is too long.';
+			settings.maxLengthMessage = R('part.jme.answer too long');
 	}
 	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
 	var messageNode = xml.selectSingleNode('answer/minlength/message');
@@ -861,7 +723,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 		if($(settings.minLengthMessage).text() == '')
-			settings.minLengthMessage = 'Your answer is too long.';
+			settings.minLengthMessage = R('part.jme.answer too short');
 	}
 
 	//get list of 'must have' strings
@@ -958,7 +820,7 @@ JMEPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -969,7 +831,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.setCredit(0,'Your answer is not a valid mathematical expression.');
+			this.setCredit(0,R('part.jme.answer invalid'));
 			return;
 		}
 
@@ -984,7 +846,7 @@ JMEPart.prototype =
 		//do comparison of student's answer with correct answer
 		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
 		{
-			this.setCredit(0,'Your answer is incorrect.');
+			this.setCredit(0,R('part.marking.incorrect'));
 			return;
 		}
 
@@ -1005,7 +867,7 @@ JMEPart.prototype =
 
 		//calculate how many marks will be given for a correct answer
 		//(can be modified if answer wrong length or fails string restrictions)
-		this.setCredit(1,'Your answer is correct.');
+		this.setCredit(1,R('part.jme.marking.correct'));
 
 		if(this.failMinLength)
 		{
@@ -1020,7 +882,9 @@ JMEPart.prototype =
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.addCredit(0,'Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
 		}
@@ -1029,7 +893,9 @@ JMEPart.prototype =
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.addCredit(0,'Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
 		}
@@ -1040,7 +906,7 @@ JMEPart.prototype =
 	{
 		if(this.studentAnswer.length===0)
 		{
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 			return false;
 		}
 
@@ -1056,7 +922,7 @@ JMEPart.prototype =
 		}
 		catch(e)
 		{
-			this.giveWarning("This is not a valid mathematical expression.\n\n"+e.message);
+			this.giveWarning(R('part.jme.answer invalid',e.message));
 			return false;
 		}
 
@@ -1075,7 +941,9 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				this.giveWarning('Your answer must contain all of: <span class="monospace">'+this.settings.mustHave.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				this.giveWarning(message);
 			}
 		}
 
@@ -1084,7 +952,9 @@ JMEPart.prototype =
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				this.giveWarning('Your answer must not contain any of: <span class="monospace">'+this.settings.notAllowed.join('</span>, <span class="monospace">')+'</span>');
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				this.giveWarning(message);
 			}
 		}
 
@@ -1103,7 +973,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
-		throw(new Error("Display answer is missing from a Pattern Match part ("+this.path+")"));
+		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
 	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
@@ -1133,7 +1003,7 @@ PatternMatchPart.prototype = {
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1146,24 +1016,24 @@ PatternMatchPart.prototype = {
 		{
 			if( caseSensitiveAnswer.test(this.studentAnswer) )
 			{
-				this.setCredit(1,'Your answer is correct.');
+				this.setCredit(1,R('part.marking.correct'));
 			}
 			else if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.setCredit(this.settings.partialCredit,'Your answer is correct, except for the case.');
+				this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
 			}
 			else
 			{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 		}else{
 			if(caseInsensitiveAnswer.test(this.studentAnswer))
 			{
-				this.setCredit(1,'Your answer is correct.');
+				this.setCredit(1,R('part.marking.correct'));
 			}
 			else
 			{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 		}
 	},
@@ -1171,7 +1041,7 @@ PatternMatchPart.prototype = {
 	validate: function()
 	{
 		if(!this.answered)
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 
 		return this.answered;
 	}
@@ -1187,12 +1057,12 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
 	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
 	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.variables,this.question.functions);
-	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value;
-	settings.maxvalue = evaluate(compile(settings.maxvalue),this.question.variables,this.question.functions).value;
+	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value - 0.00000000001;
+	settings.maxvalue = evaluate(compile(settings.maxvalue),this.question.variables,this.question.functions).value + 0.00000000001;
 
 	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
 
-	settings.displayAnswer = Numbas.math.niceNumber((settings.minvalue + settings.maxvalue)/2);
+	settings.displayAnswer = math.niceNumber((settings.minvalue + settings.maxvalue)/2);
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
@@ -1222,7 +1092,7 @@ NumberEntryPart.prototype =
 	{
 		if(this.answerList==undefined)
 		{
-			this.setCredit(0,'You did not enter an answer.');
+			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		this.studentAnswer = this.answerList[0];
@@ -1238,23 +1108,23 @@ NumberEntryPart.prototype =
 			if( this.studentAnswer <= this.settings.maxvalue && this.studentAnswer >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && !util.isInt(this.studentAnswer))
-					this.setCredit(this.settings.partialCredit,'Your answer is within the allowed range, but decimal numbers are not allowed.');
+					this.setCredit(this.settings.partialCredit,R('part.numberentry.correct except decimal'));
 				else
-					this.setCredit(1,'Your answer is correct.');
+					this.setCredit(1,R('part.marking.correct'));
 			}else{
-				this.setCredit(0,'Your answer is incorrect.');
+				this.setCredit(0,R('part.marking.incorrect'));
 			}
 			this.answered = true;
 		}else{
 			this.answered = false;
-			this.setCredit(0,'You did not enter a valid number.');
+			this.setCredit(0,R('part.numberentry.answer invalid'));
 		}
 	},
 
 	validate: function()
 	{
 		if(!this.answered)
-			this.giveWarning("No answer submitted.");
+			this.giveWarning(R('part.marking.not submitted'));
 		
 		return this.answered;
 	}
@@ -1281,19 +1151,32 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
 	if(!choicesNode)
-		throw(new Error("Definition of choices is missing from a Multiple Response part ("+this.path+")"));
+		throw(new Numbas.Error('part.mcq.choices missing',this.path));
 
 	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
+
+	settings.minAnswers = jme.subvars(settings.minAnswers, question.variables);
+	settings.minAnswers = jme.evaluate(jme.compile(settings.minAnswers),this.question.variables,this.question.functions).value;
+	settings.maxAnswers = jme.subvars(settings.maxAnswers, question.variables);
+	settings.maxAnswers = jme.evaluate(jme.compile(settings.maxAnswers),this.question.variables,this.question.functions).value;
+
 	var choiceNodes = choicesNode.selectNodes('choice');
 	this.numChoices = choiceNodes.length;
 	
-	//randomise answers?
-	var answersNode = this.xml.selectSingleNode('answers');
-	if(answersNode)
+	//get number of answers and answer order setting
+	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{
-		tryGetAttribute(settings,answersNode,'order','answerOrder');
-		var answerNodes = answersNode.selectNodes('answer');
-		this.numAnswers = answerNodes.length;
+		this.numAnswers = 1;
+	}
+	else
+	{
+		var answersNode = this.xml.selectSingleNode('answers');
+		if(answersNode)
+		{
+			tryGetAttribute(settings,answersNode,'order','answerOrder');
+			var answerNodes = answersNode.selectNodes('answer');
+			this.numAnswers = answerNodes.length;
+		}
 	}
 
 	//get warning type and message for wrong number of choices
@@ -1309,6 +1192,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		var pobj = Numbas.store.loadPart(this);
 		this.shuffleChoices = pobj.shuffleChoices;
 		this.shuffleAnswers = pobj.shuffleAnswers;
+		this.ticks = pobj.ticks;
 	}
 	else
 	{
@@ -1316,21 +1200,21 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		this.shuffleChoices=[];
 		if(settings.choiceOrder=='random')
 		{
-			this.shuffleChoices = Numbas.math.deal(this.numChoices);
+			this.shuffleChoices = math.deal(this.numChoices);
 		}
 		else
 		{
-			this.shuffleChoices = Numbas.math.range(this.numChoices);
+			this.shuffleChoices = math.range(this.numChoices);
 		}
 
 		this.shuffleAnswers=[];
 		if(settings.answerOrder=='random')
 		{
-			this.shuffleAnswers = Numbas.math.deal(this.numAnswers);
+			this.shuffleAnswers = math.deal(this.numAnswers);
 		}
 		else
 		{
-			this.shuffleAnswers = Numbas.math.range(this.numAnswers);
+			this.shuffleAnswers = math.range(this.numAnswers);
 		}
 	}
 
@@ -1342,23 +1226,25 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	{
 		choicesNode.appendChild(choiceNodes[this.shuffleChoices[i]]);
 	}
-	for(i=0;i<this.numAnswers;i++)
+	if(this.type == 'm_n_x')
 	{
-		answersNode.removeChild(answerNodes[i]);
-	}
-	for(i=0;i<this.numAnswers;i++)
-	{
-		answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
+		for(i=0;i<this.numAnswers;i++)
+		{
+			answersNode.removeChild(answerNodes[i]);
+		}
+		for(i=0;i<this.numAnswers;i++)
+		{
+			answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
+		}
 	}
 
 	//invert the shuffle so we can now tell where particular choices/answers went
-	this.shuffleChoices = Numbas.math.inverse(this.shuffleChoices);
-	this.shuffleAnswers = Numbas.math.inverse(this.shuffleAnswers);
+	this.shuffleChoices = math.inverse(this.shuffleChoices);
+	this.shuffleAnswers = math.inverse(this.shuffleAnswers);
 
 	//fill marks matrix
 	var matrix=[];
 	var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
-	var matrixTotal = 0;
 	for( i=0; i<matrixNodes.length; i++ )
 	{
 		var cell = {value: ""};
@@ -1370,10 +1256,9 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		{
 			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
 			if(!util.isFloat(cell.value))
-				throw(new Error("Part "+this.path+" marking matrix cell "+cell.answerIndex+","+cell.choiceIndex+" does not evaluate to a number"));
+				throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
 			cell.value = parseFloat(cell.value);
 		}
-		matrixTotal += cell.value;
 
 		//take into account shuffling
 		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
@@ -1415,9 +1300,61 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
 	}
 	settings.distractors = distractors;
+
+	if(settings.maxAnswers==0)
+	{
+		if(this.type=='1_n_2')
+			settings.maxAnswers = 1;
+		else
+			settings.maxAnswers = this.numAnswers * this.numChoices;
+	}
 	
-	if(this.marks == 0)
-		this.marks = matrixTotal;
+	if(this.marks == 0)	//if marks not set explicitly
+	{
+		var flat = [];
+		switch(this.type)
+		{
+		case '1_n_2':
+			for(var i=0;i<matrix.length;i++)
+			{
+				flat.push(matrix[i][0]);
+			}
+			break;
+		case 'm_n_2':
+			for(var i=0;i<matrix.length;i++)
+			{
+				flat.push(matrix[i][0]);
+			}
+			break;
+		case 'm_n_x':
+			if(settings.displayType=='radiogroup')
+			{
+				for(var i=0;i<this.numChoices;i++)
+				{
+					var row = [];
+					for(var j=0;j<this.numAnswers;j++)
+					{
+						row.push(matrix[j][i]);
+					}
+					row.sort();
+					flat.push(row[row.length-1]);
+				}
+			}
+			else
+			{
+				for(var i=0;i<matrix.length;i++)
+				{
+					flat = flat.concat(matrix[i]);
+				}
+			}
+			break;
+		}
+		flat.sort();
+		for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--)
+		{
+			this.marks+=flat[i];
+		}
+	}
 
 	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{	//because we swapped answers and choices round in the marking matrix
@@ -1428,35 +1365,46 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	else
 		var flipped=false;
 
-	//ticks array - which answers/choices are selected?
-	this.ticks=[];
-	this.stagedAnswer = [];
-	for( i=0; i<this.numAnswers; i++ )
-	{
-		this.ticks.push([]);
-		this.stagedAnswer.push([]);
-		for( var j=0; j<this.numChoices; j++ )
-		{
-			this.ticks[i].push(false);
-			this.stagedAnswer[i].push(false);
-		}
-	}
-
 	//restore saved choices
 	if(loading)
 	{
-		for( i=0;i<this.settings.numAnswers;i++)
+		this.stagedAnswer = [];
+		for( i=0; i<this.numAnswers; i++ )
 		{
-			for(j=0;j<this.settings.numChoices;j++)
+			this.stagedAnswer.push([]);
+			for( var j=0; j<this.numChoices; j++ )
 			{
-				if( (flipped && (pobj.ticks[j][i])) || (!flipped && pobj.ticks[i][j]) )
-					this.stagedAnswer[i][j]=true;
+				this.stagedAnswer[i].push(false);
+			}
+		}
+		for( i=0;i<this.numAnswers;i++)
+		{
+			for(j=0;j<this.numChoices;j++)
+			{
+				if(pobj.ticks[i][j])
 					this.stagedAnswer[i][j]=true;
 			}
 		}
 		if(this.answered)
 			this.submit();
 	}
+	else
+	{
+		//ticks array - which answers/choices are selected?
+		this.ticks=[];
+		this.stagedAnswer = [];
+		for( i=0; i<this.numAnswers; i++ )
+		{
+			this.ticks.push([]);
+			this.stagedAnswer.push([]);
+			for( var j=0; j<this.numChoices; j++ )
+			{
+				this.ticks[i].push(false);
+				this.stagedAnswer[i].push(false);
+			}
+		}
+	}
+
 
 	//if this part has a minimum number of answers more than zero, then
 	//we start in an error state
@@ -1468,18 +1416,18 @@ MultipleResponsePart.prototype =
 {
 	ticks: [],						//store student's responses here - array to say if each response has been selected or not
 	wrongNumber: false,				//has student given the wrong number of responses?
+	numChoices: 0,					//number of choices
+	numAnswers: 0,					//number of possible answers
 
 	settings:
 	{
 		maxMarksEnabled: false,		//is there a maximum number of marks the student can get?
-		minAnswers: 0,				//minimum number of responses student must select
-		maxAnswers: 0,				//maximum ditto
+		minAnswers: '0',				//minimum number of responses student must select
+		maxAnswers: '0',				//maximum ditto
 		choiceOrder: '',			//order in which to display choices
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
 		displayType: '',			//how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-		numChoices: 0,				//number of choices
-		numAnswers: 0,				//number of possible answers
 		warningType: '',			//what to do if wrong number of responses
 		warningMessage: ''			//message to display if wrong number of responses
 	},
@@ -1509,7 +1457,7 @@ MultipleResponsePart.prototype =
 	{
 		if(this.stagedAnswer==undefined)
 		{
-			this.setCredit(0,'You did not answer this part.');
+			this.setCredit(0,R('part.marking.did not answer'));
 			return false;
 		}
 		this.ticks = util.copyarray(this.stagedAnswer);
@@ -1517,6 +1465,7 @@ MultipleResponsePart.prototype =
 
 		this.numTicks = 0;
 		var partScore = 0;
+		var row,message;
 		for( i=0; i<this.numAnswers; i++ )
 		{
 			for(var j=0; j<this.numChoices; j++ )
@@ -1539,7 +1488,7 @@ MultipleResponsePart.prototype =
 			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		}
 		else
-			this.setCredit(0,'You selected the wrong number of choices.');
+			this.setCredit(0,R('part.mcq.wrong number of choices'));
 	},
 
 	validate: function()
@@ -1561,10 +1510,26 @@ MultipleResponsePart.prototype =
 		if(this.numTicks>0)
 			return true;
 		else
-			this.giveWarning('No choices selected.');
+			this.giveWarning(R('part.mcq.no choices selected'));
 			return false;
+	},
+
+	revealAnswer: function()
+	{
+		var row,message;
+		for(var i=0;i<this.numAnswers;i++)
+		{
+			for(var j=0;j<this.numChoices;j++)
+			{
+				if((row = this.settings.distractors[i]) && (message=row[j]))
+				{
+					this.markingComment(message);
+				}
+			}
+		}
 	}
 };
+MultipleResponsePart.prototype.revealAnswer = util.extend(MultipleResponsePart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
 function GapFillPart(xml, path, question, parentPart, loading)
 {

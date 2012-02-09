@@ -729,6 +729,7 @@ class Textile(object):
 		if not self.lite:
 			text = self.noTextile(text)
 			text = self.code(text)
+			text = self.subvar(text)
 
 		text = self.links(text)
 
@@ -909,6 +910,21 @@ class Textile(object):
 		text = self.doSpecial(text, '@', '@', self.fCode)
 		text = self.doSpecial(text, '<pre>', '</pre>', self.fPre)
 		return text
+	
+	def subvar(self, text):
+		pattern = re.compile(r'(^|\s|[\[(])\{(.*?)\}(\s|$|[\])])', re.M|re.S)
+		return pattern.sub(self.fSubvar,text)
+
+	def fSubvar(self, match):
+		before, text, after = match.groups()
+		if after == None:
+			after = ''
+		if before == None:
+			before = ''
+		# text needs to be escaped
+		if not self.restricted:
+			text = self.encode_html(text)
+		return ''.join([before, self.shelve('{%s}' % text), after])
 
 	def fMath(self, match):
 		before, text, after = match.groups()
@@ -920,8 +936,11 @@ class Textile(object):
 		if not self.restricted:
 			text = self.encode_html(text)
 		return ''.join([before, self.shelve('$%s$' % text), after])
+
 	def fMath2(self, match):
 		before, text, after = match.groups()
+		if before == None:
+			before = ''
 		if after == None:
 			after = ''
 		# text needs to be escaped

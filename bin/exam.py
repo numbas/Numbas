@@ -57,6 +57,7 @@ def makeContentNode(s,doTextile=True):
 	if doTextile:
 		s=textile(s)
 	else:
+		s = re.sub(r'&(?!#?\w+;)','&amp;',s)
 		s='<span>'+s+'</span>'
 	return etree.fromstring('<content>'+s+'</content>')
 
@@ -109,6 +110,7 @@ class Exam:
 	def __init__(self,name='Untitled Exam'):
 		self.name = name
 		self.navigation = {	
+				'allowregen': False,				#allow student to re-randomise a question?
 				'reverse': True,
 				'browse': True,
 				'showfrontpage': True,
@@ -149,7 +151,7 @@ class Exam:
 
 		if 'navigation' in data:
 			nav = data['navigation']
-			tryLoad(nav,['reverse','browse','showfrontpage'],exam.navigation)
+			tryLoad(nav,['allowregen','reverse','browse','showfrontpage'],exam.navigation)
 			for event in ['onadvance','onreverse','onmove']:
 				if event in nav:
 					tryLoad(nav[event],['action','message'],exam.navigation[event])
@@ -219,6 +221,7 @@ class Exam:
 
 		nav = settings.find('navigation')
 		nav.attrib = {
+			'allowregen':str(self.navigation['allowregen']),
 			'reverse':str(self.navigation['reverse']), 
 			'browse': str(self.navigation['browse']),
 			'showfrontpage': str(self.navigation['showfrontpage'])
@@ -519,12 +522,12 @@ class JMEPart(Part):
 		else:	#dp or sigfig
 			part.checkingAccuracy = 5
 		#get checking accuracy from data, if defined
-		tryLoad(data,'checkingaccuracy',part)
+		tryLoad(data,'checkingAccuracy',part)
 
 		if 'maxlength' in data:
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
 		if 'minlength' in data:
-			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLengt)
+			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLength)
 		if 'musthave' in data:
 			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
 		if 'notallowed' in data:
@@ -636,6 +639,9 @@ class NumberEntryPart(Part):
 	kind = 'numberentry'
 	integerAnswer = False
 	partialCredit = 0
+	checkingType = 'range'
+	answer = 0
+	checkingAccuracy = 0
 	minvalue = 0
 	maxvalue = 0
 	inputStep = 1
@@ -646,9 +652,15 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','partialCredit','minvalue','maxvalue','inputStep'],part)
-		if 'answer' in data:
-			part.maxvalue = part.minvalue = data['answer']
+		tryLoad(data,['integerAnswer','partialCredit','checkingType','inputStep'],part)
+		if part.checkingType == 'range':
+			if 'answer' in data:
+				part.maxvalue = part.minvalue = data['answer']
+			else:
+				tryLoad(data,['minvalue','maxvalue'],part)
+		else:
+			tryLoad(data,['answer','checkingAccuracy'],part)
+
 
 		return part
 
@@ -661,10 +673,15 @@ class NumberEntryPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-				'minvalue': str(self.minvalue),
-				'maxvalue': str(self.maxvalue),
+				'checkingType': str(self.checkingType),
 				'inputstep': str(self.inputStep)
 				}
+		if self.checkingType == 'range':
+			answer.attrib['minvalue'] = str(self.minvalue)
+			answer.attrib['maxvalue'] = str(self.maxvalue)
+		else:
+			answer.attrib['answer'] = str(self.answer)
+			answer.attrib['accuracy'] = str(self.checkingAccuracy)
 		answer.find('allowonlyintegeranswers').attrib = {'value': str(self.integerAnswer), 'partialcredit': str(self.partialCredit)+'%'}
 
 		return part
@@ -679,7 +696,7 @@ class MultipleChoicePart(Part):
 	shuffleChoices = False
 	shuffleAnswers = False
 	displayType = 'radiogroup'
-	displayColumns = 0
+	displayColumns = 1
 	
 	def __init__(self,kind,marks=0,prompt=''):
 		self.kind = kind
@@ -770,7 +787,7 @@ class MultipleChoicePart(Part):
 					'choiceindex': str(i),
 					'answerindex': str(j)
 				})
-				distractor.append(makeContentNode(self.distractors[i][j],doTextile=False))
+				distractor.append(makeContentNode(self.distractors[i][j]))
 				distractors.append(distractor)
 
 		return part

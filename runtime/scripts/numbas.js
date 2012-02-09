@@ -60,6 +60,14 @@ Numbas.showError = function(e)
 	Numbas.display.showAlert(message);
 };
 
+Numbas.Error = function(message)
+{
+	this.name="Numbas Error";
+	this.message = R.apply(this,arguments);
+}
+Numbas.Error.prototype = Error.prototype;
+Numbas.Error.prototype.constructor = Numbas.Error;
+
 // Initialise the exam:
 // - Connect to the LMS, which might have saved student answers
 // - Load the exam XML and the XSL templates
@@ -72,8 +80,6 @@ var init = Numbas.init = function()
 	var job = Numbas.schedule.add;
 
 	//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
-
-	job(Numbas.storage.startLMS);			//Initialise the LMS. In a bit, the LMS will tell us if there is a previous attempt that can be resumed
 
 	job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
@@ -157,9 +163,9 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 
 	var script = document.createElement("script");
 	script.type = "text/javascript";
-	script.src = file;
 	script.charset="utf-8";
-	$('head').append(script);
+	script.src = file;
+	document.getElementsByTagName('head')[0].appendChild(script);
 }
 
 var loadCSS = Numbas.loadCSS = function(file)
@@ -168,7 +174,7 @@ var loadCSS = Numbas.loadCSS = function(file)
 	link.rel = "stylesheet";
 	link.type = "text/css";
 	link.href = file;
-	$('head').append(link);
+	document.getElementsByTagName('head')[0].appendChild(link);
 }
 
 Numbas.queueScript = function(file, deps, callback)	

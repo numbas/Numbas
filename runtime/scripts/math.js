@@ -339,9 +339,9 @@ var math = Numbas.math = {
 		{
 			var re = math.niceNumber(n.re);
 			var im = math.niceNumber(n.im);
-			if(n.im==0)
+			if(math.precround(n.im,10)==0)
 				return re+'';
-			else if(n.re==0)
+			else if(math.precround(n.re,10)==0)
 			{
 				if(n.im==1)
 					return 'i';
@@ -370,7 +370,7 @@ var math = Numbas.math = {
 			if((piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
-			out = math.precround(n,10)+'';
+			var	out = math.precround(n,10)+'';
 			switch(piD)
 			{
 			case 0:
@@ -426,13 +426,28 @@ var math = Numbas.math = {
 
 	precround: function(a,b) {
 		if(b.complex)
-			throw(new Error("Can't round to a complex number of decimal places"));
+			throw(new Numbas.Error('math.precround.complex'));
 		if(a.complex)
 			return math.complex(math.precround(a.re,b),math.precround(a.im,b));
 		else
 		{
 			b = Math.pow(10,b);
 			return Math.round(a*b)/b;
+		}
+	},
+
+	siground: function(a,b) {
+		if(b.complex)
+			throw(new Numbas.Error('math.siground.complex'));
+		if(a.complex)
+			return math.complex(math.siground(a.re,b),math.siground(a.im,b));
+		else
+		{
+			var s = math.sign(a);
+			a = Math.abs(a);
+			if(a==0) { return s*a; }
+			b = Math.pow(10,Math.ceil(Math.log(a)/Math.log(10))-b);
+			return s*Math.round(a/b)*b;
 		}
 	},
 
@@ -630,7 +645,7 @@ var math = Numbas.math = {
 	//if all the values in the range are appended to the list, eg [min,max,step,v1,v2,v3,...], just pick randomly from the values
 	random: function(range)
 	{
-		if(range.length>3)	//if values in range are given
+		if(range.length>3)	//if values in range are given after [min,max,step]
 		{
 			return math.choose(range.slice(3));
 		}
@@ -672,7 +687,7 @@ var math = Numbas.math = {
 	 
 	combinations: function(n,k) {
 		if(n.complex || k.complex)
-			throw(new Error("Can't compute combinations of complex numbers"));
+			throw(new Numbas.Error('math.combinations.complex'));
 
 		k=Math.max(k,n-k);
 		return math.productRange(k+1,n)/math.productRange(1,n-k);
@@ -680,7 +695,7 @@ var math = Numbas.math = {
 
 	permutations: function(n,k) {
 		if(n.complex || k.complex)
-			throw(new Error("Can't compute permutations of complex numbers"));
+			throw(new Numbas.Error('math.permutations.complex'));
 
 		return math.productRange(k+1,n);
 	},
@@ -694,7 +709,7 @@ var math = Numbas.math = {
 
 	gcf: function(a,b) {
 		if(a.complex || b.complex)
-			throw(new Error("Can't compute GCF of complex numbers"));
+			throw(new Numbas.Error('math.gcf.complex'));
 
 		if(Math.floor(a)!=a || Math.floor(b)!=b)
 			return 1;
@@ -716,7 +731,7 @@ var math = Numbas.math = {
 
 	lcm: function(a,b) {
 		if(a.complex || b.complex)
-			throw(new Error("Can't compute LCM of complex numbers"));
+			throw(new Numbas.Error('math.lcm.complex'));
 		a = Math.floor(Math.abs(a));
 		b = Math.floor(Math.abs(b));
 		
@@ -724,21 +739,6 @@ var math = Numbas.math = {
 		return a*b/c;
 	},
 
-
-	siground: function(a,b) {
-		if(b.complex)
-			throw(new Error("Can't round to a complex number of sig figs"));
-		if(a.complex)
-			return math.complex(math.siground(a.re,b),math.siground(a.im,b));
-		else
-		{
-			var s = math.sign(a);
-			a = Math.abs(a);
-			if(a==0) { return s*a; }
-			b = Math.pow(10,Math.ceil(Math.log(a)/Math.log(10))-b);
-			return s*Math.round(a/b)*b;
-		}
-	},
 
 	defineRange: function(a,b)
 	{
@@ -790,6 +790,284 @@ var math = Numbas.math = {
 	}
 };
 
-var add = math.add, sub = math.sub, mul = math.mul, div = math.div;
+var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq;
+
+//vector operations
+//these operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of vectors don't line up exactly
+var vectormath = Numbas.vectormath = {
+	add: function(a,b) {
+		if(b.length>a.length)
+		{
+			var c = b;
+			b = a;
+			a = c;
+		}
+		return a.map(function(x,i){ return add(x,b[i]||0) });
+	},
+
+	sub: function(a,b) {
+		if(b.length>a.length)
+		{
+			return b.map(function(x,i){ return sub(a[i]||0,x) });
+		}
+		else
+		{
+			return a.map(function(x,i){ return sub(x,b[i]||0) });
+		}
+	},
+
+	//scalar multiplication - a should just be a number
+	mul: function(k,v) {
+		return v.map(function(x){ return mul(k,x) });
+	},
+
+	//dot product
+	dot: function(a,b) {
+
+		//check if A is a matrix object. If it's the right shape, we can use it anyway
+		if('rows' in a)
+		{
+			if(a.rows==1)
+				a = a[0];
+			else if(a.columns==1)
+				a = a.map(function(x){return x[0]});
+			else
+				throw(new Numbas.Error('vectormath.dot.matrix too big'));
+		}
+		//Same check for B
+		if('rows' in b)
+		{
+			if(b.rows==1)
+				b = b[0];
+			else if(b.columns==1)
+				b = b.map(function(x){return x[0]});
+			else
+				throw(new Numbas.Error('vectormath.dot.matrix too big'));
+		}
+		if(b.length>a.length)
+		{
+			var c = b;
+			b = a;
+			a = c;
+		}
+		return a.reduce(function(s,x,i){ return add(s,mul(x,b[i]||0)) },0);
+	},
+
+	//cross product
+	cross: function(a,b) {
+		//check if A is a matrix object. If it's the right shape, we can use it anyway
+		if('rows' in a)
+		{
+			if(a.rows==1)
+				a = a[0];
+			else if(a.columns==1)
+				a = a.map(function(x){return x[0]});
+			else
+				throw(new Numbas.Error('vectormath.cross.matrix too big'));
+		}
+		//Same check for B
+		if('rows' in b)
+		{
+			if(b.rows==1)
+				b = b[0];
+			else if(b.columns==1)
+				b = b.map(function(x){return x[0]});
+			else
+				throw(new Numbas.Error('vectormath.cross.matrix too big'));
+		}
+
+		if(a.length!=3 || b.length!=3)
+			throw(new Numbas.Error('vectormath.cross.not 3d'));
+
+		return [
+				sub( mul(a[1],b[2]), mul(a[2],b[1]) ),
+				sub( mul(a[2],b[0]), mul(a[0],b[2]) ),
+				sub( mul(a[0],b[1]), mul(a[1],b[0]) )
+				];
+	},
+
+	abs: function(a) {
+		return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
+	},
+
+	eq: function(a,b) {
+		if(b.length>a.length)
+		{
+			var c = b;
+			b = a;
+			a = c;
+		}
+		return a.reduce(function(s,x,i){return s && eq(x,b[i]||0)},true);
+	},
+
+	neq: function(a,b) {
+		if(b.length>a.length)
+		{
+			var c = b;
+			b = a;
+			a = c;
+		}
+		return a.reduce(function(s,x,i){return s || neq(x,b[i]||0)},false);
+	},
+
+	//multiply vector v by matrix m
+	matrixmul: function(m,v) {
+		return m.map(function(row){
+			return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
+		});
+	},
+
+	transpose: function(v) {
+		var matrix = v.map(function(x){ return [x]; });
+		matrix.rows = 1;
+		matrix.columns = v.length;
+		return matrix;
+	}
+}
+
+//matrix operations
+//again, these operations are lax about the sizes of things
+var matrixmath = Numbas.matrixmath = {
+	add: function(a,b) {
+		var rows = Math.max(a.rows,b.rows);
+		var columns = Math.max(a.columns,b.columns);
+		var matrix = [];
+		for(var i=0;i<rows;i++)
+		{
+			var row = [];
+			matrix.push(row);
+			for(var j=0;j<columns;j++)
+			{
+				row[j] = add(a[i][j]||0,b[i][j]||0);
+			}
+		}
+		matrix.rows = rows;
+		matrix.columns = columns;
+		return matrix;
+	},
+	sub: function(a,b) {
+		var rows = Math.max(a.rows,b.rows);
+		var columns = Math.max(a.columns,b.columns);
+		var matrix = [];
+		for(var i=0;i<rows;i++)
+		{
+			var row = [];
+			matrix.push(row);
+			for(var j=0;j<columns;j++)
+			{
+				row[j] = sub(a[i][j]||0,b[i][j]||0);
+			}
+		}
+		matrix.rows = rows;
+		matrix.columns = columns;
+		return matrix;
+	},
+	
+	//determinant
+	//it pains me, but I'm only going to do up to 3x3 matrices here
+	//maybe later I will do the LU-decomposition thing
+	abs: function(m) {
+		if(m.rows!=m.columns)
+			throw(new Numbas.Error('matrixmath.abs.non-square'));
+
+		//abstraction failure!
+		switch(m.rows)
+		{
+		case 1:
+			return m[0][0];
+		case 2:
+			return sub( mul(m[0][0],m[1][1]), mul(m[0][1],m[1][0]) );
+		case 3:
+			return add( sub(
+							mul(m[0][0],sub(mul(m[1][1],m[2][2]),mul(m[1][2],m[2][1]))),
+							mul(m[0][1],sub(mul(m[1][0],m[2][2]),mul(m[1][2],m[2][0])))
+						),
+						mul(m[0][2],sub(mul(m[1][0],m[2][1]),mul(m[1][1],m[2][0])))
+					);
+		default:
+			throw(new Numbas.Error('matrixmath.abs.too big'));
+		}
+	},
+
+	scalarmul: function(k,m) {
+		var out = m.map(function(row){ return row.map(function(x){ return mul(k,x); }); });
+		out.rows = m.rows;
+		out.columns = m.columns;
+		return out;
+	},
+
+	mul: function(a,b) {
+		if(a.columns!=b.rows)
+			throw(new Numbas.Error('matrixmath.mul.different sizes'));
+
+		var out = [];
+		out.rows = a.rows;
+		out.columns = b.columns;
+		for(var i=0;i<a.rows;i++)
+		{
+			var row = [];
+			out.push(row);
+			for(var j=0;j<b.columns;j++)
+			{
+				var s = 0;
+				for(var k=0;k<a.columns;k++)
+				{
+					s = add(s,mul(a[i][k],b[k][j]));
+				}
+				row.push(s);
+			}
+		}
+		return out;
+	},
+
+	eq: function(a,b) {
+		var rows = Math.max(a.rows,b.rows);
+		var columns = Math.max(a.columns,b.columns);
+		for(var i=0;i<rows;i++)
+		{
+			var rowA = a[i] || [];
+			var rowB = b[i] || [];
+			for(var j=0;j<rows;j++)
+			{
+				if(!eq(rowA[j]||0,rowB[j]||0))
+					return false;
+			}
+		}
+		return true;
+	},
+	neq: function(a,b) {
+		return !matrixmath.eq(a,b);
+	},
+
+	id: function(n) {
+		var out = [];
+		out.rows = out.columns = n;
+		for(var i=0;i<n;i++)
+		{
+			var row = [];
+			out.push(row);
+			for(var j=0;j<n;j++)
+				row.push(j==i ? 1 : 0);
+		}
+		return out;
+	},
+
+	transpose: function(m) {
+		var out = [];
+		out.rows = m.columns;
+		out.columns = m.rows;
+
+		for(var i=0;i<m.columns;i++)
+		{
+			var row = [];
+			out.push(row);
+			for(var j=0;j<m.rows;j++)
+			{
+				row.push(m[j][i]||0);
+			}
+		}
+		return out;
+	}
+}
 
 });

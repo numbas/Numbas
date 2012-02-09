@@ -19,8 +19,12 @@ Numbas.queueScript('scripts/storage.js',[],function() {
 
 Numbas.store = {};
 
-Numbas.Storage = function() {}
-Numbas.Storage.prototype = {
+Numbas.storage = {};
+
+//a blank storage object which does nothing
+//any real storage object needs to implement the methods in this object's prototype
+Numbas.storage.BlankStorage = function() {}
+Numbas.storage.BlankStorage.prototype = {
 
 	//when starting a new exam, must initialise storage
 	//pass in ref to exam object because global var will not be set yet
@@ -54,7 +58,9 @@ Numbas.Storage.prototype = {
 	end: function() {},
 
 	//get entry state: 'ab-initio' or 'resume'
-	getEntry: function() {},
+	getEntry: function() { 
+		return 'ab-initio';
+	},
 
 	//get viewing mode: 
 	// 'browse' - see exam info, not questions

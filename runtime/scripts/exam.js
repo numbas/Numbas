@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','scorm-storage','pretendlms','math','question','jme-variables','jme-display'],function() {
+Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display'],function() {
 
 	var job = Numbas.schedule.add;
 
@@ -29,13 +29,13 @@ var Exam = Numbas.Exam = function()
 	var xml = this.xml = Numbas.xml.examXML.selectSingleNode('/exam');
 	if(!xml)
 	{
-		throw(new Error("Root element of exam XML should be 'exam'"));
+		throw(new Numbas.Error('exam.xml.bad root'));
 	}
 
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 
-	tryGetAttribute(this,'settings/navigation',['reverse','browse','showfrontpage'],['navigateReverse','navigateBrowse','showFrontPage']);
+	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
@@ -152,6 +152,7 @@ Exam.prototype = {
 	questionList: [],			//Question objects, in order student will see them
 		
 	//navigation
+	allowRegen: false,			//can student re-randomise a question?
 	navigateReverse: false,		//can student navigate to previous question?
 	navigateBrowse: false,		//can student jump to any question they like?
 	navigateBrowseType: '',		//dropbox or ??
@@ -237,7 +238,12 @@ Exam.prototype = {
 		for( var x in this )
 		{
 			if(!(dontwant.contains(x) || typeof(this[x])=='function'))
-				obj[x]=this[x];
+			{
+				var prop = this[x];
+				if(Numbas.util.isFloat(prop))
+					prop = Numbas.math.precround(prop,10);
+				obj[x]=prop;
+			}
 		}
 
 		return Sarissa.xmlize(obj,'exam');
@@ -469,10 +475,25 @@ Exam.prototype = {
 		this.currentQuestion = this.questionList[i];
 		if(!this.currentQuestion)
 		{
-			throw(new Error("This exam contains no questions! Check the .exam file for errors."));
+			throw(new Numbas.Error('exam.changeQuestion.no questions'));
 		}
 		this.currentQuestion.visited = true;
 		Numbas.store.changeQuestion(this.currentQuestion);
+	},
+
+	regenQuestion: function()
+	{
+		var e = this;
+		var n = e.currentQuestion.number;
+		job(e.display.startRegen,e.display);
+		job(function() {
+			e.questionList[n] = new Numbas.Question(e.xml.selectNodes('questions/question')[n], n, false, e.variables, e.functions);
+		})
+		job(function() {
+			e.changeQuestion(n);
+			e.display.showQuestion();
+		});
+		job(e.display.endRegen,e.display);
 	},
 
 	end: function()
@@ -487,19 +508,21 @@ Exam.prototype = {
 		this.percentScore = Math.round(100*this.score/this.mark);
 		this.passed = this.percentScore >= this.percentPass;
 
+		var niceNumber = Numbas.math.niceNumber;
+
 		//construct report object
 		var report = this.report = 
 		{	examsummary: {	name: this.name,
 							numberofquestions: this.numQuestions, 
-							mark: this.mark,
-							passpercentage: this.percentPass,
+							mark: niceNumber(this.mark),
+							passpercentage: niceNumber(this.percentPass),
 							duration: this.displayDuration 
 						 },
 			performancesummary: {	start: this.start.toGMTString(),
 									stop: this.stop.toGMTString(),
 									timespent: Numbas.timing.secsToDisplayTime(this.timeSpent),
-									score: this.score,
-									percentagescore: this.percentScore,
+									score: niceNumber(this.score),
+									percentagescore: niceNumber(this.percentScore),
 									passed: this.passed,
 									result: (this.passed ? 'Passed' :'Failed')
 								},
@@ -516,8 +539,8 @@ Exam.prototype = {
 
 			report.questions.push({question: {	number: question.number+1,
 												name: question.name,
-												marks: question.marks,
-												score: question.score } });
+												marks: niceNumber(question.marks),
+												score: niceNumber(question.score) } });
 		}
 		report.performancesummary.questionsattempted = examQuestionsAttempted;
 

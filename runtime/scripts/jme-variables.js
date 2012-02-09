@@ -99,17 +99,8 @@ jme.variables = {
 				var value = variableNodes[i].getAttribute('value');
 
 				var vars = [];
-				//get vars referred to in string definitions like "hi {name}"
-				/*
-				var stringvars = value.split(/{(\w+)}/g);
-				for(var j=1;j<stringvars.length;j+=2)
-				{
-					if(!vars.contains(stringvars[j]))
-						vars.push(stringvars[j].toLowerCase());
-				}
-				*/
 
-				var tree = jme.compile(value,functions);
+				var tree = jme.compile(value,functions,true);
 				vars = vars.merge(jme.findvars(tree));
 				todo[name]={
 					tree: tree,
@@ -128,14 +119,13 @@ jme.variables = {
 
 			if(path.contains(name))
 			{
-				alert("Circular variable reference in question "+name+' '+path);
-				return;
+				throw(new Numbas.Error('jme.variables.circular reference',name,path));
 			}
 
 			var v = todo[name];
 
 			if(v===undefined)
-				throw(new Error("Variable "+name+" not defined."));
+				throw(new Numbas.Error('jme.variables.variable not defined',name));
 
 			//work out dependencies
 			for(var i=0;i<v.vars.length;i++)

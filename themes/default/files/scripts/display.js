@@ -141,6 +141,11 @@ display.ExamDisplay = function(e)
 	//register 'submit question' button
 	$('*').find('#submitBtn').click( Numbas.controls.submitQuestion );
 	
+	//register 'try another question like this one' button
+	if(e.allowRegen)
+		$('*').find('#regenBtn').click( Numbas.controls.regenQuestion );
+	else
+		$('*').find('#regenBtn').hide();
 
 	if(Numbas.store)
 	{
@@ -161,7 +166,7 @@ display.ExamDisplay.prototype =
 
 	showTiming: function()
 	{
-		$('#stopWatch').html("Time remaining: "+Numbas.timing.secsToDisplayTime(this.e.timeRemaining));
+		$('#stopWatch').html(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.e.timeRemaining)));
 	},
 
 	hideTiming: function()
@@ -228,6 +233,7 @@ display.ExamDisplay.prototype =
 	{
 		//hide question container, and show info container
 		$('#questionContainer').hide();
+		$('#questionDisplay').html('');
 		$('#infoDisplay').show();
 
 		var exam = this.e;
@@ -266,6 +272,8 @@ display.ExamDisplay.prototype =
 		
 			$('#resumeBtn').click( Numbas.controls.resumeExam );
 
+			Numbas.exam.display.showScore();
+
 			break;
 		
 		case "exit":
@@ -285,6 +293,14 @@ display.ExamDisplay.prototype =
 			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
 		}
+	},
+
+	startRegen: function() {
+		$('#questionDisplay').hide();
+	},
+	
+	endRegen: function() {
+		$('#questionDisplay').fadeIn(200);
 	}
 };
 
@@ -293,8 +309,6 @@ display.QuestionDisplay = function(q)
 {
 	this.q = q;
 
-	//make html for question and advice text
-	this.html = $.xsl.transform(Numbas.xml.templates.question, q.xml).string;
 
 	//make question selector for menu
 	var qs = $('#questionSelector').clone();
@@ -320,6 +334,11 @@ display.QuestionDisplay.prototype =
 	q: undefined,					//reference back to the main question object
 	html: '',						//HTML for displaying question
 	questionSelector: '',			//jQuery selector for this question's menu entry
+
+	makeHTML: function() {
+		//make html for question and advice text
+		this.html = $.xsl.transform(Numbas.xml.templates.question, this.q.xml).string;
+	},
 
 	show: function()
 	{
@@ -360,13 +379,15 @@ display.QuestionDisplay.prototype =
 		var submitMsg;
 		if(q.parts.length<=1)
 		{
-			submitMsg = 'Submit answer';
+			submitMsg = R('control.submit answer');
 		}
 		else
 		{
-			submitMsg = 'Submit all parts';
+			submitMsg = R('control.submit all parts');
 		}
 		$('.navBar #submitBtn').val(submitMsg);
+
+		$('#regenBtn').val(R('control.regen'));
 
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
@@ -468,16 +489,16 @@ display.QuestionDisplay.prototype =
 		{
 			if(q.answered)
 			{
-				$('.submitDiv > #score').show().html('Answer submitted').fadeOut(200).fadeIn(200);
+				$('.submitDiv > #score').show().html(R('question.answer submitted')).fadeOut(200).fadeIn(200);
 
-				if(!exam.showAnswerState)
-					$(this.questionSelector).find('#score').show().html('Submitted');
+			//	if(!exam.showAnswerState)
+			//		$(this.questionSelector).find('#score').show().html('Answered');
 
-				selector.find('#submitBtn').val('Submit again');
+				selector.find('#submitBtn').val(R('control.submit again'));
 			}
 			else
 			{
-				selector.find('#submitBtn').val('Submit');
+				selector.find('#submitBtn').val(R('control.submit'));
 			}
 		}
 		var anyAnswered = false;
@@ -511,7 +532,7 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning+'</span>');
+		$(this.warningDiv).show().find('.partwarning').append('<span>'+textile(warning.toString())+'</span>');
 		Numbas.display.typeset();
 	},
 
@@ -571,7 +592,7 @@ display.PartDisplay.prototype =
 			p.submit();
 			if(!p.answered)
 			{
-				Numbas.display.showAlert("Can not submit answer - check for errors.");
+				Numbas.display.showAlert(R('question.can not submit'));
 				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
 			}
 		});
@@ -602,7 +623,7 @@ display.PartDisplay.prototype =
 
 		if(Numbas.exam.showAnswerState)
 		{
-			if(this.p.markingFeedback.length)
+			if(this.p.markingFeedback.length && !this.p.question.revealed)
 			{
 				var feedback = [];
 				var maxMarks = this.p.marks - (this.p.stepsShown ? this.p.settings.stepsPenalty : 0);
@@ -622,16 +643,20 @@ display.PartDisplay.prototype =
 					}
 
 					var message = action.message || '';
-					var marks = '*'+Math.abs(change)+'* '+util.pluralise(change,'mark','marks');
+					if(message.trim().length)
+					{
+						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
 
-					if(change>0)
-						message+='\nYou were awarded '+marks+'.';
-					else if(change<0)
-						message+='\n'+marks+' '+util.pluralise(change,'was','were')+' taken away.';
-					feedback.push(message);
+						if(change>0)
+							message+='\n\n'+R('feedback.you were awarded',marks);
+						else if(change<0)
+							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,'was','were'));
+					}
+					if(message.trim().length)
+						feedback.push(message);
 				}
 
-				feedback = textile(feedback.join('\n\n'));
+				feedback = textile(feedback.join('\n\n<hr/>'));
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
 				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
 			}
@@ -665,6 +690,7 @@ display.PartDisplay.prototype =
 	revealAnswer: function() 
 	{
 		var c = this.htmlContext();
+		this.removeWarnings();
 		c.find('input[type=text],input[type=number]').each(resizeF);
 		c.find('#submitPart').attr('disabled',true);
 		this.showScore();
@@ -709,7 +735,7 @@ display.JMEPartDisplay.prototype =
 				if(pd.hasFocus || pd.showAnyway)
 				{
 					inputDiv.css('z-index',1)
-							.position({my: 'left top',at: 'left bottom', of: previewDiv, offset:'0 10', collision: 'none'})
+							.position({my: 'left top',at: 'right top', of: previewDiv, offset:'0 10', collision: 'none'})
 				}
 				else
 					inputDiv.css('z-index',-1);
@@ -807,7 +833,7 @@ display.JMEPartDisplay.prototype =
 			{
 				try {
 					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification);
-					if(tex===undefined){throw('Error making maths display')};
+					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;
 					Numbas.display.typeset(previewDiv[0], function(){pp.inputPositionF();});

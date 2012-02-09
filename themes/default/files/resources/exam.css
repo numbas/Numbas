@@ -3,6 +3,10 @@ html{
 	font-family: sans-serif;
 }
 
+body {
+	padding: 1em;
+}
+
 /*main template */
 .mainDiv{ 
 	clear: both;
@@ -63,6 +67,8 @@ html{
 }
 
 #examBanner{
+	margin-left: 250px;
+	line-height:1em;
 	text-align:right;
 	font-size: 2em;
 	font-weight: bold;
@@ -126,6 +132,11 @@ html{
 #submitBtn {
 	width: 9em;
 }
+
+#regenBtn {
+	width: auto;
+}
+
 #marks {
 	display:inline;
 }
@@ -157,8 +168,15 @@ html{
 #feedbackMessage {
 	clear:both;
 	text-align:center;
-	padding: 0.5em 0.5em 0 0;
+	padding: 0.5em 0.5em 0 0.5em;
 	border: 1px solid #a2d1f0;
+}
+
+#feedbackMessage hr {
+	max-width: 30em;
+	border: none;
+	height:1px;
+	background: #a2d1f0;
 }
 
 
@@ -169,6 +187,10 @@ html{
 	float:left;
 	width:100%;			/* width of whole page */
 	background:#A2D1F0;
+}
+
+#questionContainer p {
+	line-height: 1.3em;
 }
 
 /* 2 column left menu settings */
@@ -351,6 +373,10 @@ div.part {
 	/*float:right;*/
 }
 
+.steps #prompt {
+	display:inline-block;
+}
+
 .advice {
 	background: #cfc;
 	border: 1px solid;
@@ -411,6 +437,9 @@ input[type=text],input[type=number] {
 .mathPreview {
 	cursor: pointer; cursor: hand;
 	color: #005;
+}
+.mathPreview:hover {
+	background: #f0f0f0;
 }
 
 .jme {

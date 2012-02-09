@@ -34,8 +34,8 @@ var jme = Numbas.jme = {
 		var i = 0;
 		var re_bool = /^true|^false/;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
-		var re_name = /^{?((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
-		var re_op = /^(_|\.\.|#|not|and|or|xor|isa|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!])/i;
+		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
+		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa)([^a-zA-Z0-9])))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
@@ -61,56 +61,49 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_op))
 			{
+				if(result[2])		//if word-ish operator
+					result[0] = result[2];
 				token = result[0];
-				if(result[0]=='+' || result[0]=='-') 
+				//work out if operation is being used prefix or postfix
+				var nt;
+				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || nt=='op' )
 				{
-					if(tokens.length>0) 
-					{
-						switch(tokens[tokens.length-1].type) 
-						{
-						case '(':
-						case ',':
-						case 'op':
-							token=result[0]+'u';		// '+u' and '-u' are the unary sign-changing operations, used if preceding token is appropriate punctuation or another operator
-						}
-					}else{
-						token=result[0]+'u';		// + or - at start of expression are interpreted to be unary sign thingies too
-					}
+					if(token in prefixForm)
+						token = prefixForm[token];
+				}
+				else
+				{
+					if(token in postfixForm)
+						token = postfixForm[token];
 				}
 				token=new TOp(token);
 			}
 			else if (result = expr.match(re_name))
 			{
-				//see if this is something like xsin, i.e. a single-letter variable name concatenated with a function name
-				var bit = result[1].match(builtinsre);
-				if(bit && bit[0].length==result[1].length-1)
-					{result[1] = result[1].substring(0,result[1].length-bit[0].length);}
+				var name = result[2];
+				var annotation = result[1] ? result[1].split(':') : null;
+				if(!annotation)
+				{
+					// fill in constants here to avoid having more 'variables' than necessary
+					if(name.toLowerCase()=='e') {
+						token = new TNum(Math.E);
+
+					}else if (name.toLowerCase()=='pi' || name.toLowerCase()=='\\pi') {
+						token = new TNum(Math.PI);
+
+					}else if (name.toLowerCase()=='i') {
+						token = new TNum(math.complex(0,1));
+					}else{
+						token = new TName(name,annotation);
+					}
+				}
 				else
-					{bit=null;}
-
-				// fill in constants here to avoid having more 'variables' than necessary
-				if(result[1].toLowerCase()=='e') {
-					token = new TNum(Math.E);
-
-				}else if (result[1].toLowerCase()=='pi' || result[1].toLowerCase()=='\\pi') {
-					token = new TNum(Math.PI);
-
-				}else if (result[i].toLowerCase()=='i') {
-					token = new TNum(math.complex(0,1));
-				}else{
-					token = new TName(result[1]);
+				{
+					token = new TName(name,annotation);
 				}
 				
 				if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
 					tokens.push(new TOp('*'));
-				}
-
-				// if this was something like xsin, put 'x','*' tokens on stack, then 'sin' token is what we say we read
-				if( bit )
-				{
-					tokens.push(new TName(result[1]));
-					tokens.push(new TOp('*'));
-					token=new TName(bit[0]);
 				}
 			}
 			else if (result = expr.match(re_punctuation))
@@ -190,7 +183,7 @@ var jme = Numbas.jme = {
 			if(tok.vars!==undefined)
 			{
 				if(output.length<tok.vars)
-					throw(new Error("Not enough arguments for operation "+tok.name));
+					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name));
 
 				var thing = {tok: tok,
 							 args: output.slice(-tok.vars)};
@@ -222,7 +215,7 @@ var jme = Numbas.jme = {
 			case "name":
 				if( i<tokens.length-1 && tokens[i+1].type=="(")
 				{
-						stack.push(new TFunc(tok.name));
+						stack.push(new TFunc(tok.name,tok.annotation));
 						numvars.push(0);
 						olength.push(output.length);
 				}
@@ -242,7 +235,7 @@ var jme = Numbas.jme = {
 
 				if( ! stack.length )
 				{
-					throw(new Error("no matching left bracket in function"));
+					throw(new Numbas.Error('jme.shunt.no left bracket in function'));
 				}
 				break;
 				
@@ -276,7 +269,7 @@ var jme = Numbas.jme = {
 				}
 				if( ! stack.length ) 
 				{
-					throw(new Error("no matching left bracket"));
+					throw(new Numbas.Error('jme.shunt.no left square bracket'));
 				}
 				else
 				{
@@ -313,7 +306,7 @@ var jme = Numbas.jme = {
 				}
 				if( ! stack.length ) 
 				{
-					throw(new Error("no matching left bracket"));
+					throw(new Numbas.Error('jme.shunt.no left bracket'));
 				}
 				else
 				{
@@ -343,7 +336,7 @@ var jme = Numbas.jme = {
 			var x = stack.pop();
 			if(x.type=="(")
 			{
-				throw(new Error( "no matching right bracket"));
+				throw(new Numbas.Error('jme.shunt.no right bracket'));
 			}
 			else
 			{
@@ -352,16 +345,18 @@ var jme = Numbas.jme = {
 		}
 
 		if(listmode.length>0)
-			throw(new Error("No matching right square bracket to end list"));
+			throw(new Numbas.Error('jme.shunt.no right square bracket'));
 
 		if(output.length>1)
-			throw(new Error("Expression can't be evaluated -- missing an operator."));
+			throw(new Numbas.Error('jme.shunt.missing operator'));
 
 		return(output[0]);
 	},
 
 	substituteTree: function(tree,variables,allowUnbound)
 	{
+		if(!tree)
+			return null;
 		if(tree.tok.bound)
 			return tree;
 
@@ -369,13 +364,13 @@ var jme = Numbas.jme = {
 		{
 			if(tree.tok.type=='name')
 			{
-				var name = tree.tok.name;
+				var name = tree.tok.name.toLowerCase();
 				if(variables[name]===undefined)
 				{
 					if(allowUnbound)
 						return {tok: new TName(name)};
 					else
-						throw new Error("Variable "+name+" is undefined");
+						throw new Numbas.Error('jme.substituteTree.undefined variable',name);
 				}
 				else
 				{
@@ -458,7 +453,7 @@ var jme = Numbas.jme = {
 				return variables[tok.name.toLowerCase()];
 			else
 				return tok;
-				throw(new Error("Variable "+tok.name+" not defined"));
+				throw(new Numbas.Error('jme.evaluate.undefined variable'));
 			break;
 		case 'op':
 		case 'function':
@@ -491,7 +486,7 @@ var jme = Numbas.jme = {
 		//tokenise expression
 		var tokens = jme.tokenise(expr);
 		if(tokens===undefined){
-			throw(new Error('Invalid expression: '+expr));
+			throw(new Numbas.Error('jme.compile.tokenise failed',expr));
 		}
 
 		//compile to parse tree
@@ -503,7 +498,7 @@ var jme = Numbas.jme = {
 		if(!notypecheck)
 		{
 			if(!jme.typecheck(tree,functions))
-				throw(new Error("Type error in expression "+expr));
+				throw(new Numbas.Error('jme.compile.type error'));
 		}
 
 		return(tree);
@@ -534,6 +529,8 @@ var jme = Numbas.jme = {
 		case 'boolean':
 		case 'range':
 		case 'list':
+		case 'vector':
+		case 'matrix':
 			tok.outtype = tok.type;
 			return true;
 		case 'name':
@@ -547,9 +544,9 @@ var jme = Numbas.jme = {
 			if(functions[op]===undefined)
 			{
 				if(tok.type=='function')
-					throw(new Error("Operation '"+op+"' is not defined. Did you mean \n\n'"+op+"*(...)' ?"));
+					throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
 				else
-					throw(new Error("Operation '"+op+"' is not defined"));
+					throw(new Numbas.Error('jme.typecheck.op not defined',op));
 			}
 
 			var result = undefined;
@@ -564,7 +561,7 @@ var jme = Numbas.jme = {
 					return true;
 				}
 			}
-			throw(new Error("No definition of "+op+" of correct type found."));
+			throw(new Numbas.Error('jme.typecheck.no right type definition',op));
 		}
 	},
 
@@ -653,14 +650,16 @@ var jme = Numbas.jme = {
 		return out;
 	},
 
-	texsubvars: function(s,variables,functions)
+	texsplit: function(s)
 	{
-		var cmdre = /(.*?)\\((?:var)|(?:simplify))/;
-		var out = ''
+		var cmdre = /((?:.|\n)*?)\\((?:var)|(?:simplify))/m;
+		var out = [];
 		while( m = s.match(cmdre) )
 		{
-			out += m[1];
+			out.push(m[1]);
 			var cmd = m[2];
+			out.push(cmd);
+
 			var i = m[0].length;
 
 			var args = '';
@@ -672,17 +671,20 @@ var jme = Numbas.jme = {
 				while(i<s.length && s.charAt(i)!=']')
 					i++;
 				if(i==s.length)
-					throw(new Error("No matching ] in "+cmd+" args."));
+					throw(new Numbas.Error('jme.texsubvars.no right bracket',cmd));
 				else
 				{
 					args = s.slice(si,i);
 					i++;
 				}
 			}
+			if(!argbrackets)
+				args='all';
+			out.push(args);
 
 			if(s.charAt(i)!='{')
 			{
-				throw(new Error("Missing parameter in "+cmd+': '+s));
+				throw(new Numbas.Error('jme.texsubvars.missing parameter',cmd,s));
 			}
 
 			var brackets=1;
@@ -696,9 +698,26 @@ var jme = Numbas.jme = {
 					brackets--;
 			}
 			if(i == s.length-1 && brackets>0)
-				throw(new Error( "No matching } in "+cmd));
+				throw(new Numbas.Error('jme.texsubvars.no right brace'));
 
-			var expr = s.slice(si,i)
+			var expr = s.slice(si,i);
+			s = s.slice(i+1);
+			out.push(expr);
+		}
+		out.push(s);
+		return out;
+	},
+
+	texsubvars: function(s,variables,functions)
+	{
+		var bits = jme.texsplit(s);
+		var out = '';
+		for(var i=0;i<bits.length-3;i+=4)
+		{
+			out+=bits[i];
+			var cmd = bits[i+1],
+				args = bits[i+2],
+				expr = bits[i+3];
 
 			switch(cmd)
 			{
@@ -708,19 +727,13 @@ var jme = Numbas.jme = {
 				out += ' '+v+' ';
 				break;
 			case 'simplify': //a JME expression to be simplified
-				if(!argbrackets)
-					args = 'all';
 				expr = jme.subvars(expr,variables,functions);
-				if(expr.search(/\[/)>=0)
-					throw(expr);
 				var tex = jme.display.exprToLaTeX(expr,args);
 				out += ' '+tex+' ';
 				break;
 			}
-			s = s.slice(i+1);
 		}
-
-		return out+s;
+		return out+bits[bits.length-1];
 	},
 
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
@@ -745,21 +758,21 @@ var jme = Numbas.jme = {
 					else
 						v = '('+v+')';
 				}
-				else if(!display && v.type=='string')
+				else if(v.type=='string')
 				{
-					v="'"+v.value+"'";
-				}
-				else if(v.type=='list')
-				{
-					v = '['+v.value.map(function(x){return x.value;}).join(',')+']';
+					if(display)
+						v = v.value;
+					else
+						v = "'"+v.value+"'";
 				}
 				else
 				{
-					v = v.value;
+					v = jme.display.treeToJME({tok:v});
 				}
+
 				if(display)
 				{
-					v = textile(' '+v);
+					v = textile(v,{nowrapPlainBlocks:true});
 				}
 				out += v;
 			}
@@ -891,6 +904,18 @@ var TList = types.TList = types.list = function(n,value)
 }
 TList.prototype.type = 'list';
 
+var TVector = types.TVector = types.vector = function(value)
+{
+	this.value = value;
+}
+TVector.prototype.type = 'vector';
+
+var TMatrix = types.TMatrix = types.matrix = function(value)
+{
+	this.value = value;
+}
+TMatrix.prototype.type = 'matrix';
+
 var TRange = types.TRange = types.range = function(range)
 {
 	this.value = range;
@@ -898,6 +923,7 @@ var TRange = types.TRange = types.range = function(range)
 	{
 		var start = this.value[0], end = this.value[1], step = this.value[2];
 
+		//if step is discrete, store all values in range so they don't need to be computed each time
 		if(step > 0)
 		{
 			var n = this.size = (end-start)/step+1;
@@ -910,16 +936,18 @@ var TRange = types.TRange = types.range = function(range)
 }
 TRange.prototype.type = 'range';
 
-var TName = types.TName = types.name = function(name)
+var TName = types.TName = types.name = function(name,annotation)
 {
 	this.name = name;
 	this.value = name;
+	this.annotation = annotation;
 }
 TName.prototype.type = 'name';
 
-var TFunc = types.TFunc = types['function'] = function(name)
+var TFunc = types.TFunc = types['function'] = function(name,annotation)
 {
 	this.name = name;
+	this.annotation = annotation;
 }
 TFunc.prototype.type = 'function';
 TFunc.prototype.vars = 0;
@@ -956,13 +984,25 @@ TConc.prototype.type = 'conc';
 
 var arity = jme.arity = {
 	'!': 1,
+	'not': 1,
+	'fact': 1,
 	'+u': 1,
 	'-u': 1
 }
 
+//some names represent different operations when used as prefix or as postfix. This dictionary translates them
+var prefixForm = {
+	'+': '+u',
+	'-': '-u',
+	'!': 'not',
+}
+var postfixForm = {
+	'!': 'fact'
+}
+
 var precedence = jme.precedence = {
 	'_': 0,
-	'!': 1,
+	'fact': 1,
 	'not': 1,
 	'^': 2,
 	'*': 3,
@@ -991,7 +1031,6 @@ var precedence = jme.precedence = {
 };
 
 var synonyms = {
-	'not':'!',
 	'&':'&&',
 	'and':'&&',
 	'divides': '|',
@@ -1023,6 +1062,7 @@ var commutative = jme.commutative =
 //function object - for doing type checking away from the evaluator
 //intype is a list of data type constructors (TNum, etc.) for function's parameters' types
 //use the string '?' to match any type
+//put a * in front of the type name to 
 //outtype is the type constructor corresponding to the value the function returns
 //fn is the function to be evaluated
 var funcObj = jme.funcObj = function(name,intype,outcons,fn,nobuiltin)
@@ -1030,7 +1070,17 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,nobuiltin)
 	for(var i=0;i<intype.length;i++)
 	{
 		if(intype[i]!='?')
-			intype[i]=new intype[i]().type;
+		{
+			if(intype[i][0]=='*')
+			{
+				var type = types[intype[i].slice(1)];
+				intype[i] = '*'+(new type()).type;
+			}
+			else
+			{
+				intype[i]=new intype[i]().type;
+			}
+		}
 	}
 
 	name = name.toLowerCase();
@@ -1103,6 +1153,8 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,nobuiltin)
 }
 
 var math = Numbas.math;
+var vectormath = Numbas.vectormath;
+var matrixmath = Numbas.matrixmath;
 
 // the built-in operations and functions
 var builtins = jme.builtins = {};
@@ -1113,20 +1165,65 @@ builtins['eval'] = [{name: 'eval',
 					typecheck: function(){return true;}
 	}];
 
+var funcs = {};
+
 new funcObj('_', ['?','?'], function(){return new TNum(0);});
 
 new funcObj('+u', [TNum], TNum, function(a){return a;});	//unary plus
 new funcObj('-u', [TNum], TNum, math.negate);	//unary minus
 
 new funcObj('+', [TNum,TNum], TNum, math.add );				//'number + number' is addition
+
+funcs.listadd = new funcObj('+', [TList,TList], TList);
+funcs.listadd.evaluate = function(args,variables,functions)
+{
+	var list0 = jme.evaluate(args[0],variables,functions);
+	var list1 = jme.evaluate(args[1],variables,functions);
+	var value = list0.value.concat(list1.value);
+	return new TList(value.length,value);
+}
+
+funcs.listpush = new funcObj('+',[TList,'?'],TList);
+funcs.listpush.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var item = jme.evaluate(args[1],variables,functions);
+	var value = list.value.slice();
+	value.push(item);
+	return new TList(value.length,value);
+}
+
 var fconc = function(a,b) { return a+b; };					//'string + anything' is concatenation
 new funcObj('+', [TString,'?'], TString, fconc );
 new funcObj('+', ['?',TString], TString, fconc );
+new funcObj('+', [TVector,TVector], TVector, vectormath.add);
+new funcObj('+', [TMatrix,TMatrix], TMatrix, matrixmath.add);
 
 new funcObj('-', [TNum,TNum], TNum, math.sub );
+new funcObj('-', [TVector,TVector], TVector, vectormath.sub);
+new funcObj('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub);
 new funcObj('*', [TNum,TNum], TNum, math.mul );
+new funcObj('*', [TNum,TVector], TVector, vectormath.mul);
+new funcObj('*', [TMatrix,TVector], TVector, vectormath.matrixmul);
+new funcObj('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul);
+new funcObj('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul);
 new funcObj('/', [TNum,TNum], TNum, math.div );
 new funcObj('^', [TNum,TNum], TNum, math.pow );
+
+new funcObj('dot',[TVector,TVector],TNum,vectormath.dot);
+new funcObj('dot',[TMatrix,TVector],TNum,vectormath.dot);
+new funcObj('dot',[TVector,TMatrix],TNum,vectormath.dot);
+new funcObj('dot',[TMatrix,TMatrix],TNum,vectormath.dot);
+new funcObj('cross',[TVector,TVector],TVector,vectormath.cross);
+new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross);
+new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross);
+new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
+new funcObj('det', [TMatrix], TNum, matrixmath.abs);
+
+new funcObj('transpose',[TVector],TMatrix, vectormath.transpose);
+new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+
+new funcObj('id',[TNum],TMatrix, matrixmath.id);
 
 new funcObj('..', [TNum,TNum], TRange, math.defineRange );	//define a range
 new funcObj('#', [TRange,TNum], TRange, math.rangeSteps );	//define step size for range
@@ -1135,14 +1232,18 @@ new funcObj('<', [TNum,TNum], TBool, math.lt );
 new funcObj('>', [TNum,TNum], TBool, math.gt );
 new funcObj('<=', [TNum,TNum], TBool, math.leq );
 new funcObj('>=', [TNum,TNum], TBool, math.geq );
-new funcObj('<>', [TNum], TBool, math.neq );
+new funcObj('<>', [TNum,TNum], TBool, math.neq );
+new funcObj('<>', [TVector,TVector], TVector, vectormath.neq );
+new funcObj('<>', [TMatrix,TMatrix], TBool, matrixmath.neq);
 new funcObj('<>', ['?','?'], TBool, function(a,b){ return a!=b; } );
 new funcObj('=', [TNum,TNum], TBool, math.eq );
+new funcObj('=', [TVector,TVector], TBool, vectormath.eq);
+new funcObj('=', [TMatrix,TMatrix], TBool, matrixmath.eq);
 new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; });
 new funcObj('=', ['?','?'], TBool, function(a,b){ return a==b; } );
 
 new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;} );
-new funcObj('!', [TBool], TBool, function(a){return !a;} );	
+new funcObj('not', [TBool], TBool, function(a){return !a;} );	
 new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;} );
 new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);} );
 
@@ -1157,6 +1258,7 @@ new funcObj('dayofweek', [], TNum, date.getDay );
 new funcObj('abs', [TNum], TNum, math.abs );
 new funcObj('abs', [TList], TNum, function(l) { return l.length; });
 new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; });
+new funcObj('abs', [TVector], TNum, vectormath.abs);
 new funcObj('arg', [TNum], TNum, math.arg );
 new funcObj('re', [TNum], TNum, math.re );
 new funcObj('im', [TNum], TNum, math.im );
@@ -1196,7 +1298,12 @@ new funcObj('radians', [TNum], TNum, math.radians );
 new funcObj('round', [TNum], TNum, math.round );
 new funcObj('sign', [TNum], TNum, math.sign );
 new funcObj('random', [TRange], TNum, math.random );
-arbrandom = new funcObj( 'random',[],'?');			//pick at random from a list of any data type
+var listrandom = new funcObj('random',[TList],'?');
+listrandom.evaluate = function(args,variables,functions) {
+	var l = jme.evaluate(args[0],variables,functions);
+	return math.choose(l.value);
+};
+var arbrandom = new funcObj( 'random',[],'?');			//pick at random from a list of any data type
 arbrandom.typecheck = function() { return true; }
 arbrandom.evaluate = function(args,variables,functions) { return jme.evaluate(math.choose(args),variables,functions);};
 new funcObj('mod', [TNum,TNum], TNum, function(a,b){return a%b;} );
@@ -1216,8 +1323,6 @@ new funcObj('diff', ['?','?',TNum], '?');
 new funcObj('pdiff', ['?','?',TNum], '?');
 new funcObj('int', ['?','?'], '?');
 new funcObj('defint', ['?','?',TNum,TNum], '?');
-
-var funcs = {};
 
 //if needs to be a bit different because it can return any type
 funcs.iff = new funcObj('if', [TBool,'?','?'], '?');
@@ -1270,10 +1375,10 @@ funcs.switchf.evaluate = function(args,variables,functions)
 	if(args.length % 2 == 1)
 		return jme.evaluate(args[args.length-1],variables,functions);
 	else
-		throw(new Error("No default case for Switch statement"));
+		throw(new Numbas.Error('jme.func.switch.no default case'));
 }
 
-funcs.isa = new funcObj('isa',['?',TString],TBool)
+funcs.isa = new funcObj('isa',['?',TString],TBool);
 funcs.isa.evaluate = function(args,variables,functions)
 {
 	var kind = jme.evaluate(args[1],variables,functions).value;
@@ -1293,7 +1398,8 @@ funcs.isa.evaluate = function(args,variables,functions)
 	return new TBool(match);
 };
 
-funcs.repeat = new funcObj('repeat',['?',TNum],TList)
+// repeat(expr,n) evaluates expr n times and returns a list of the results
+funcs.repeat = new funcObj('repeat',['?',TNum],TList);
 funcs.repeat.evaluate = function(args,variables,functions)
 {
 	var size = jme.evaluate(args[1],variables,functions).value;
@@ -1305,18 +1411,52 @@ funcs.repeat.evaluate = function(args,variables,functions)
 	return l;
 }
 
-funcs.listval = new funcObj('listval',[TList,TNum],'?')
+funcs.listval = new funcObj('listval',[TList,TNum],'?');
 funcs.listval.evaluate = function(args,variables,functions)
 {
 	var index = jme.evaluate(args[1],variables,functions).value;
 	var list = jme.evaluate(args[0],variables,functions);
+	if(index<0)
+		index += list.vars;
 	if(index in list.value)
 		return list.value[index];
 	else
-		throw(new Error("Invalid list index "+index+" on list of size "+list.value.length));
+		throw(new Numbas.Error('jme.func.listval.invalid index',index,list.value.length));
 }
 
-funcs.maplist = new funcObj('map',['?',TName,TList],TList)
+funcs.listslice = new funcObj('listval',[TList,TRange],TList);
+funcs.listslice.evaluate = function(args,variables,functions)
+{
+	var range = jme.evaluate(args[1],variables,functions).value;
+	var list = jme.evaluate(args[0],variables,functions);
+	var start = range[0];
+	var end = range[1];
+	var size = list.vars;
+	if(start<0)
+		start += size;
+	if(end<0)
+		end += size;
+	var value = list.value.slice(start,end);
+	return new TList(value.length,value);
+}
+
+funcs.vectorval = new funcObj('listval',[TVector,TNum],TNum);
+funcs.vectorval.evaluate = function(args,variables,functions)
+{
+	var index = jme.evaluate(args[1],variables,functions).value;
+	var vector = jme.evaluate(args[0],variables,functions);
+	return new TNum(vector.value[index] || 0);
+}
+
+funcs.matrixval = new funcObj('listval',[TMatrix,TNum],TVector)
+funcs.matrixval.evaluate = function(args,variables,functions)
+{
+	var index = jme.evaluate(args[1],variables,functions).value;
+	var matrix = jme.evaluate(args[0],variables,functions);
+	return new TVector(matrix.value[index] || []);
+}
+
+funcs.maplist = new funcObj('map',['?',TName,TList],TList);
 funcs.maplist.evaluate = function(args,variables,functions)
 {
 	var list = jme.evaluate(args[2],variables,functions);
@@ -1331,19 +1471,86 @@ funcs.maplist.evaluate = function(args,variables,functions)
 	return newlist;
 }
 
-funcs.maprange = new funcObj('map',['?',TName,TRange],TList)
+funcs.maprange = new funcObj('map',['?',TName,TRange],TList);
 funcs.maprange.evaluate = function(args,variables,functions)
 {
 	var range = jme.evaluate(args[2],variables,functions);
 	var name = args[1].tok.name;
 	var newlist = new TList(range.size);
-	var variables = util.copyobj(variables);
+	newlist.value = new Array(range.size);
+	var variables = Numbas.util.copyobj(variables);
 	for(var i=3;i<range.value.length;i++)
 	{
 		variables[name] = new TNum(range.value[i]);
 		newlist.value[i-3] = jme.evaluate(args[0],variables,functions);
 	}
 	return newlist;
+}
+
+funcs.sort = new funcObj('sort',[TList],TList);
+funcs.sort.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var newlist = new TList(list.vars);
+	newlist.value = list.value.slice().sort(function(a,b){ 
+		if(math.gt(a.value,b.value))
+			return 1;
+		else if(math.lt(a.value,b.value))
+			return -1;
+		else
+			return 0;
+	});
+	return newlist;
+}
+
+funcs.vector = new funcObj('vector',['*TNum'],TVector);
+funcs.vector.evaluate = function(args,variables,functions)
+{
+	var value = [];
+	for(var i=0;i<args.length;i++)
+	{
+		value.push(jme.evaluate(args[i],variables,functions).value);
+	}
+	return new TVector(value);
+}
+
+funcs.vectorFromList = new funcObj('vector',[TList],TVector);
+funcs.vectorFromList.evaluate = function(args,variables,functions)
+{
+	var list = jme.evaluate(args[0],variables,functions);
+	var value = list.value.map(function(x){return x.value});
+	return new TVector(value);
+}
+
+funcs.matrix = new funcObj('matrix',['*list'],TMatrix);
+funcs.matrix.evaluate = function(args,variables,functions)
+{
+	var rows = args.length;
+	var columns = 0;
+	var value = [];
+	for(var i=0;i<args.length;i++)
+	{
+		var row = jme.evaluate(args[i],variables,functions).value;
+		value.push(row.map(function(x){return x.value}));
+		columns = Math.max(columns,row.length);
+	}
+	value.rows = rows;
+	value.columns = columns;
+	return new TMatrix(value);
+}
+
+funcs.rowvector = new funcObj('rowvector',['*number'],TMatrix);
+funcs.rowvector.evaluate = function(args,variables,functions)
+{
+	var row = [];
+	for(var i=0;i<args.length;i++)
+	{
+		row.push(jme.evaluate(args[i],variables,functions).value);
+	}
+	var matrix = [row];
+	matrix.rows = 1;
+	matrix.columns = row.length;
+	return new TMatrix(matrix);
 }
 
 function randoms(varnames,min,max,times)
@@ -1378,7 +1585,7 @@ var checkingFunctions =
 	absdiff: function(r1,r2,tolerance) 
 	{
 		// finds absolute difference between values, fails if bigger than tolerance
-		return math.leq(Math.abs(math.sub(r1,r2)), tolerance);
+		return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
 	},
 
 	reldiff: function(r1,r2,tolerance) {
@@ -1403,20 +1610,61 @@ var checkingFunctions =
 	}
 };
 
-var findvars = jme.findvars = function(tree)
+var findvars = jme.findvars = function(tree,boundvars)
 {
+	if(boundvars===undefined)
+		boundvars = [];
+
+	if(tree.tok.type=='function' && tree.tok.name=='map')
+	{
+		boundvars = boundvars.slice();
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+
 	if(tree.args===undefined)
 	{
-		if(tree.tok.type=='name')
-			return [tree.tok.name.toLowerCase()];
-		else
+		switch(tree.tok.type)
+		{
+		case 'name':
+			var name = tree.tok.name.toLowerCase();
+			if(boundvars.indexOf(name)==-1)
+				return [name];
+			else
+				return [];
+			break;
+		case 'string':
+			var bits = jme.texsplit(tree.tok.value);
+			var out = [];
+			for(var i=0;i<bits.length-3;i+=4)
+			{
+				var cmd = bits[i+1];
+				var expr = bits[i+3];
+				switch(cmd)
+				{
+				case 'var':
+					var tree2 = jme.compile(expr,{},true);
+					out = out.merge(findvars(tree2,boundvars));
+					break;
+				case 'simplify':
+					var sbits = splitbrackets(expr,'{','}');
+					for(var i=1;i<sbits.length-1;i+=2)
+					{
+						var tree2 = jme.compile(sbits[i],{},true);
+						out = out.merge(findvars(tree2,boundvars));
+					}
+					break;
+				}
+			}
+			return out;
+		default:
 			return [];
+		}
 	}
 	else
 	{
 		var vars = [];
 		for(var i=0;i<tree.args.length;i++)
-			vars = vars.merge(findvars(tree.args[i]));
+			vars = vars.merge(findvars(tree.args[i],boundvars));
 		return vars;
 	}
 }
@@ -1425,28 +1673,62 @@ var findvars = jme.findvars = function(tree)
 function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 {	// first checks both expressions are of same type, then uses given checking type to compare results
 
+	var v1 = r1.value, v2 = r2.value;
+
 	if(r1.type != r2.type)
 	{
 		return false;
 	}
-	if(r1.type == 'number')
+	switch(r1.type)
 	{
-		if(r1.value.complex || r2.value.complex)
+	case 'number':
+		if(v1.complex || v2.complex)
 		{
-			if(!r1.value.complex)
-				r1.value = {re:r1.value, im:0, complex:true};
-			if(!r2.value.complex)
-				r2.value = {re:r2.value, im:0, complex:true};
-			return checkingFunction(r1.value.re, r2.value.re, checkingAccuracy) && checkingFunction(r1.value.im,r2.value.im,checkingAccuracy);
+			if(!v1.complex)
+				v1 = {re:v1, im:0, complex:true};
+			if(!v2.complex)
+				v2 = {re:v2, im:0, complex:true};
+			return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
 		}
 		else
 		{
-			return checkingFunction( r1.value, r2.value, checkingAccuracy );
+			return checkingFunction( v1, v2, checkingAccuracy );
 		}
-	}
-	else
-	{
-		return r1.value == r2.value;
+		break;
+	case 'vector':
+		if(v1.length != v2.length)
+			return false;
+		for(var i=0;i<v1.length;i++)
+		{
+			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+				return false;
+		}
+		return true;
+		break;
+	case 'matrix':
+		if(v1.rows != v2.rows || v1.columns != v2.columns)
+			return false;
+		for(var i=0;i<v1.rows;i++)
+		{
+			for(var j=0;j<v1.columns;j++)
+			{
+				if(!resultsEqual(v1[i][j]||0,v2[i][j]||0,checkingFunction,checkingAccuracy))
+					return false;
+			}
+		}
+		return true;
+		break;
+	case 'list':
+		if(v1.length != v2.length)
+			return false;
+		for(var i=0;i<v1.length;i++)
+		{
+			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+				return false;
+		}
+		return true;
+	default:
+		return v1 == v2;
 	}
 };
 

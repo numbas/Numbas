@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/pretendlms.js',['util','scorm-storage'],function() {
+Numbas.queueScript('extensions/pretendlms/pretendlms.js',['util','scorm-storage'],function() {
 
 var isFloat = Numbas.util.isFloat;
 var isInt = Numbas.util.isInt;
@@ -85,23 +85,6 @@ PretendLMS.prototype =
 
 
 	//methods
-	
-	Load: function() 	//load suspended data from localStorage
-	{
-		function loadCMI(path) { return window.localStorage['NumbasSCORMcmi.'+path]; }
-
-		if(loadCMI('exit') != 'suspend')
-			return;
-
-		var i,n;
-
-		//load comments from learner
-		n= loadCMI('comments_from_learner._count') || 0;
-		for(i=0;i<n;i++)
-		{
-			
-		}
-	},
 	
 	LoadValue: function( element )
 	{
@@ -470,7 +453,7 @@ PretendLMS.prototype =
 
 		var n = parseInt(path[0],10);
 				
-		if( n<0 || n>=this.interactions.length )
+		if( n<0 || n>=this.objectives.length )
 		{
 			this.SetError(301,"Index out of range");
 			return '';
@@ -1519,7 +1502,7 @@ function Interaction(lms,number)
 }
 Interaction.prototype = {
 	id: '',								//unique label for interaction												(RW)
-	type: 'other',					//true-false,multiple-choice,fill-in,long-fill-in,matching,performance,		(RW)
+	type: 'other',					//true-false,choice,fill-in,long-fill-in,matching,performance,		(RW)
 										//sequencing,likert,numeric,other
 	objectives: [],
 	timestamp: '',						//time when interaction first made available to learner						(RW)
@@ -1647,7 +1630,7 @@ Interaction.prototype = {
 			}
 			break;
 
-		case 'multiple-choice':
+		case 'choice':
 			var bits = value.split('[,]');
 			for(var i=0;i<bits.length;i++)
 			{
