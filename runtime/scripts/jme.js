@@ -1155,6 +1155,8 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 
 		return new this.outcons(result);
 	}	
+
+	this.description = options.description || '';
 }
 
 var math = Numbas.math;
@@ -1172,24 +1174,35 @@ builtins['eval'] = [{name: 'eval',
 
 var funcs = {};
 
-new funcObj('_', ['?','?'], function(){return new TNum(0);});
+new funcObj('_', ['?','?'], function(){return new TNum(0);},
+	{description: "Special character to create subscripts (deprecated)"}
+);
 
-new funcObj('+u', [TNum], TNum, function(a){return a;});	//unary plus
-new funcObj('-u', [TNum], TNum, math.negate);	//unary minus
+new funcObj('+u', [TNum], TNum, function(a){return a;},
+	{description: "Unary addition"}
+);	
 
-new funcObj('+', [TNum,TNum], TNum, math.add );				//'number + number' is addition
+new funcObj('-u', [TNum], TNum, math.negate,
+	{description: "Negation"}
+);
 
-new funcObj('+', [TList,TList], TList, {
+new funcObj('+', [TNum,TNum], TNum, math.add,
+	{description: "Add two numbers together"}
+);
+
+new funcObj('+', [TList,TList], TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list0 = jme.evaluate(args[0],variables,functions);
 		var list1 = jme.evaluate(args[1],variables,functions);
 		var value = list0.value.concat(list1.value);
 		return new TList(value.length,value);
-	}
+	},
+
+	description: "Concatenate two lists"
 });
 
-new funcObj('+',[TList,'?'],TList, {
+new funcObj('+',[TList,'?'],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list = jme.evaluate(args[0],variables,functions);
@@ -1197,18 +1210,35 @@ new funcObj('+',[TList,'?'],TList, {
 		var value = list.value.slice();
 		value.push(item);
 		return new TList(value.length,value);
-	}
+	},
+
+	description: "Add an item to a list"
 });
 
-var fconc = function(a,b) { return a+b; };					//'string + anything' is concatenation
-new funcObj('+', [TString,'?'], TString, fconc );
-new funcObj('+', ['?',TString], TString, fconc );
-new funcObj('+', [TVector,TVector], TVector, vectormath.add);
-new funcObj('+', [TMatrix,TMatrix], TMatrix, matrixmath.add);
+var fconc = function(a,b) { return a+b; }
 
-new funcObj('-', [TNum,TNum], TNum, math.sub );
-new funcObj('-', [TVector,TVector], TVector, vectormath.sub);
-new funcObj('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub);
+new funcObj('+', [TString,'?'], TString, fconc,
+	{description: '_string_ + _anything else_ is string concatenation.'}
+);
+new funcObj('+', ['?',TString], TString, fconc,
+	{description: '_string_ + _anything else_ is string concatenation.'}
+);
+new funcObj('+', [TVector,TVector], TVector, vectormath.add,
+	{description: 'Add two vectors.'}		
+);
+new funcObj('+', [TMatrix,TMatrix], TMatrix, matrixmath.add,
+	{description: 'Add two matrices.'}
+);
+
+new funcObj('-', [TNum,TNum], TNum, math.sub,
+	{description: 'Subtract one number from another.'}
+);
+new funcObj('-', [TVector,TVector], TVector, vectormath.sub,
+	{description: 'Subtract one vector from another.'}
+);
+new funcObj('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub,
+	{description: 'Subtract one matrix from another.'}
+);
 new funcObj('*', [TNum,TNum], TNum, math.mul );
 new funcObj('*', [TNum,TVector], TVector, vectormath.mul);
 new funcObj('*', [TMatrix,TVector], TVector, vectormath.matrixmul);

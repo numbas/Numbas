@@ -1,6 +1,8 @@
 var textile;
 (function() {
 	textile = function(src,options) {
+		if(!src)
+			return '';
 		tc = new TextileConverter(src,options);
 		return tc.convert();
 	};
