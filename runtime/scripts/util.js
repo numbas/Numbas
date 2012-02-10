@@ -14,11 +14,18 @@ Copyright 2011 Newcastle University
    limitations under the License.
 */
 
+// utility.js
+// convenience functions, extensions to javascript built-ins, etc.
 
 Numbas.queueScript('scripts/util.js',['math'],function() {
 var util = Numbas.util = {
-	//extend(A,B) - derive type B from A
-	//(class inheritance, really)
+
+	// extend(A,B) - derive type B from A
+	// (class inheritance, really)
+	// A should be the constructor for the parent class
+	// B should be a constructor to be called after A's constructor is done.
+	// B's prototype supercedes A's.
+	// returns a constructor for the derived class
 	extend: function(a,b,extendMethods)
 	{ 
 		var c = function() 
@@ -49,7 +56,10 @@ var util = Numbas.util = {
 		return c;
 	},
 
-	//shallow copy of array
+	//clone an array, with array elements copied too
+	//Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
+	//This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
+	//If 'deep' is true, do a deep copy of each element -- see util.copyobj
 	copyarray: function(arr,deep)
 	{
 		arr = arr.slice();
@@ -63,7 +73,8 @@ var util = Numbas.util = {
 		return arr;
 	},
 
-	//copy of object (shallow copy unless deep == true)
+	//clone an object
+	//if 'deep' is true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
 	copyobj: function(obj,deep)
 	{
 		switch(typeof(obj))
@@ -93,6 +104,7 @@ var util = Numbas.util = {
 	},
 
 	//shallow copy object into already existing object
+	//add all src's properties to dest
 	copyinto: function(src,dest)
 	{
 		for(var x in src)
@@ -114,6 +126,8 @@ var util = Numbas.util = {
 		return parseFloat(f)==f;
 	},
 
+	//test if parameter is a boolean
+	//returns if parameter is a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive
 	isBool: function(b)
 	{
 		if(b==null) { return false; }
@@ -124,6 +138,7 @@ var util = Numbas.util = {
 	},
 
 	//parse parameter as a boolean
+	//the boolean value true and the strings 'true' and 'yes' are parsed as the value true, everything else is false.
 	parseBool: function(b)
 	{
 		if(!b)
@@ -132,14 +147,18 @@ var util = Numbas.util = {
 		return( b=='true' || b=='yes' );
 	},
 
-	//pad a string s on the left with a character p until it is n characters long
+	//pad string s on the left with a character p until it is n characters long
 	lpad: function(s,n,p)
 	{
 		s=s.toString();
-		while(s.length<n) { s=p[0]+s; }
+		p=p[0];
+		while(s.length<n) { s=p+s; }
 		return s;
 	},
 
+	//replace occurences of '%s' with the extra arguments of the function
+	//ie.
+	// formatString('hello %s %s','Mr.','Perfect') => 'hello Mr. Perfect'
 	formatString: function(str)
 	{
 		var i=0;
@@ -151,19 +170,18 @@ var util = Numbas.util = {
 		return str;
 	},
 
-	//get rid of the % on the end of percentages and parse as float
+	//get rid of the % on the end of percentages and parse as float, then divide by 100
+	//ie.
+	// unPercent('50%') => 0.5
+	// unPercent('50') => 0.5
 	unPercent: function(s)
 	{
 		return (parseFloat(s.replace(/%/,''))/100);
 	},
 
-	escapeString: function(s)
-	{
-		if(s===undefined)
-			return '';
-		return s.replace(/\\n/g,'\n');
-	},
 
+	//pluralise a word
+	//if n is not unity, return plural, else return singular
 	pluralise: function(n,singular,plural)
 	{
 		n = Numbas.math.precround(n,10);
@@ -173,8 +191,57 @@ var util = Numbas.util = {
 			return plural;
 	},
 
+	//split a string up according to brackets
+	//strips out nested brackets
+	//
+	//so 
+	// splitbrackets('a{{b}}c','{','}') => ['a','b','c']
+	splitbrackets: function(t,lb,rb)
+	{
+		var o=[];
+		var l=t.length;
+		var s=0;
+		var depth=0;
+		for(var i=0;i<l;i++)
+		{
+			if(t.charAt(i)==lb && !(i>0 && t.charAt(i-1)=='\\'))
+			{
+				depth+=1;
+				if(depth==1)
+				{
+					o.push(t.slice(s,i));
+					s=i+1;
+				}
+				else
+				{
+					t = t.slice(0,i)+t.slice(i+1);
+					i-=1;
+				}
+			}
+			else if(t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
+			{
+				depth-=1;
+				if(depth==0)
+				{
+					o.push(t.slice(s,i));
+					s=i+1;
+				}
+				else
+				{
+					t = t.slice(0,i)+t.slice(i+1);
+					i -= 1;
+				}
+			}
+		}
+		if(s<l)
+			o.push(t.slice(s));
+		return o;
+	},
 
-	//split content text up by TeX delimiters
+	//split content text up by TeX maths delimiters
+	//includes delimiters, since there are two kinds
+	//ie.
+	// contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
 	contentsplitbrackets: function(t)
 	{
 		var o=[];
@@ -200,10 +267,10 @@ var util = Numbas.util = {
 		return o;
 	},
 
+	//because XML doesn't like having ampersands hanging about, replace them with escape codes
 	escapeHTML: function(str)
 	{
 		return str.replace(/&/g,'&amp;');
-		//return $('<div/>').text(str).html();
 	}
 
 };
@@ -338,7 +405,6 @@ cbSplit = function (str, separator, limit) {
 
 //add inline and display maths phrase types to textile convertor, so their contents don't get touched
 
-
 var re_inlineMaths = /\$.*?\$/g;
 textile.phraseTypes.splice(0,0,function(text) {
 	var out = [];
@@ -393,7 +459,7 @@ cbSplit._nativeSplit = String.prototype.split;
 
 } // end `if (!cbSplit)`
 
-// for convenience...
+// for convenience, override the builtin split function with the cross-browser version...
 if(!String.prototype.split)
 {
 	String.prototype.split = function (separator, limit) {
@@ -401,6 +467,7 @@ if(!String.prototype.split)
 	};
 }
 
+//add String.trim when not present
 //from http://stackoverflow.com/questions/2308134/trim-in-javascript-not-working-in-ie
 if(typeof String.prototype.trim !== 'function') {
   String.prototype.trim = function() {
@@ -408,7 +475,8 @@ if(typeof String.prototype.trim !== 'function') {
   }
 }
 
-
+//add Array.map when not present
+//Array.map applies the given function to every element in the given array
 //from http://www.tutorialspoint.com/javascript/array_map.htm
 if (!Array.prototype.map)
 {

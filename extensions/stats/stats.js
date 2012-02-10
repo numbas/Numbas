@@ -39,6 +39,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	}
 	new funcObj('randomNormal',[TNum,TNum], TNum, math.randomNormal);
 
+	//sum of a list of numbers
 	math.sum = function(values)
 	{
 		var t = 0;
@@ -53,6 +54,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 	new funcObj('sum',[TList],TNum, math.sum);
 
+	//mean of a list of numbers
 	math.mean = function(values)
 	{
 		if(values.length==0)
@@ -63,6 +65,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 	new funcObj('mean',[TList],TNum, math.mean);
 
+	//variance of a list of numbers
 	math.variance = function(values)
 	{
 		var s = 0;
@@ -76,16 +79,18 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	}
 	new funcObj('variance',[TList],TNum, math.variance);
 	
+	//standard deviation of a list of numbers
 	math.standardDev = function(values)
 	{
-		return Math.sqrt(math.varience(values));
+		return Math.sqrt(math.variance(values));
 	}
 	
 	new funcObj('standardDev',[TList],TNum,math.standardDev);
 
-	var cdfconst = Math.sqrt(Math.PI/8);
 
+	//Cumulative Distribution Function of the Normal(0,1) distribution.
 	//based on "A Note on Approximating the Normal Distribution Function", K. M. Aludaat and M. T. Alodat, Applied Mathematical Sciences 2008
+	var cdfconst = Math.sqrt(Math.PI/8);
 	math.normalCDF = function(z)
 	{
 		return 0.5+0.5*Math.sqrt(1-Math.exp(-cdfconst*z*z));
@@ -93,10 +98,18 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 	new funcObj('cdfNormal',[TNum],TNum,math.normalCDF);
 
-	math.zTest = function(sample,mu)
+	//the PDF function for a normal distribution
+	math.pdfNormal = function(x,mu,sigma)
+	{
+		return ((1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp((-1/2)*Math.pow((x-mu)/sigma,2)));
+	}
+	
+	new funcObj('pdfNormal',[TNum,TNum,TNum],TNum,math.pdfNormal);
+	
+	//z-test of a sample; returns p-value of sample mean assuming given distribution mean and variance
+	math.zTest = function(sample,mean,variance)
 	{
 		var mean = math.mean(sample);
-		var variance = math.variance(sample);
 		var n = sample.length;
 		var z = (mean-mu)/(Math.sqrt(variance/n));
 		return math.normalCDF(z);
@@ -124,6 +137,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	//
 	//new funcObj('tTest',[TList,TNum],TNum,math.tTest);
 	
+	//random value from Poisson(lambda) distribution
 	math.randomPoisson = function(lambda)
 	{
 		if(lambda>500)
@@ -147,14 +161,6 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	}
 
 	new funcObj('randomPoisson',[TNum],TNum,math.randomPoisson);
-	
-	//the PDF function for a normal distribution
-	math.pdfNormal = function(x,mu,sigma)
-	{
-		return ((1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp((-1/2)*Math.pow((x-mu)/sigma,2)));
-	}
-	
-	new funcObj('pdfNormal',[TNum,TNum,TNum],TNum,math.pdfNormal);
 	
 	//simulating a Bernoulli random variable
 	math.randomBernoulli = function(p)
@@ -343,14 +349,4 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	}
 	
 	new funcObj('regression',[TList,TList,TNum],TNum,math.regression);
-	
-	//Random Uniform (a,b) variable
-	math.randomUniform = function(a,b)
-	{
-		var U = Math.random()
-		
-		return ((b-a)*U) + a
-	}
-	
-	new funcObj('randomUniform',[TNum,TNum],TNum,math.randomUniform);
 });
