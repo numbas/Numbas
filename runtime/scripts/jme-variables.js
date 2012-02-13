@@ -35,6 +35,7 @@ jme.variables = {
 			var name = functionNodes[i].getAttribute('name').toLowerCase();
 
 			var definition = functionNodes[i].getAttribute('definition');
+			var javascript = functionNodes[i].getAttribute('javascript');
 
 			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
 			var outcons = Numbas.jme.types[outtype];
@@ -53,6 +54,8 @@ jme.variables = {
 
 			var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
 			tmpfunc.definition = definition;
+			tmpfunc.javascript = javascript;
+			tmpfunc.outcons = outcons;
 			tmpfunc.paramNames = paramNames;
 
 			if(functions[name]===undefined)
@@ -64,17 +67,43 @@ jme.variables = {
 		//second pass: compile functions
 		for(var i=0; i<tmpFunctions.length; i++)
 		{
-			tmpFunctions[i].tree = jme.compile(tmpFunctions[i].definition,functions);
-
-			tmpFunctions[i].evaluate = function(args,variables,functions)
+			var fn = tmpFunctions[i];
+			if(fn.definition.length)
 			{
-				nvariables = Numbas.util.copyobj(variables);
+				fn.tree = jme.compile(tmpFunctions[i].definition,functions);
 
-				for(var j=0;j<args.length;j++)
+				fn.evaluate = function(args,variables,functions)
 				{
-					nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+					nvariables = Numbas.util.copyobj(variables);
+
+					for(var j=0;j<args.length;j++)
+					{
+						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+					}
+					return jme.evaluate(this.tree,nvariables,functions);
 				}
-				return jme.evaluate(this.tree,nvariables,functions);
+			}
+			else
+			{
+				var preamble='(function('+fn.paramNames.join(',')+'){';
+				var math = Numbas.math, 
+					util = Numbas.util;
+				var jfn = eval(preamble+fn.javascript+'})');
+				var outcons = fn.outcons;
+				fn.evaluate = function(args,variables,functions)
+				{
+					args = args.map(function(a){return jme.evaluate(a,variables,functions).value});
+					try {
+						var val = jfn.apply(this,args);
+						if(!val.type)
+							val = new outcons(val);
+						return val;
+					}
+					catch(e)
+					{
+						throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
+					}
+				}
 			}
 		}
 		return functions;

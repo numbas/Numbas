@@ -893,10 +893,20 @@ var TBool = types.TBool = types.boolean = function(b)
 }
 TBool.prototype.type = 'boolean';
 
-var TList = types.TList = types.list = function(n,value)
+var TList = types.TList = types.list = function(value)
 {
-	this.vars = n;
-	this.value = value;
+	switch(typeof(value))
+	{
+	case 'number':
+		this.vars = value;
+		break;
+	case 'array':
+		this.value = value;
+		this.vars = value.length;
+		break;
+	default:
+		this.vars = 0;
+	}
 }
 TList.prototype.type = 'list';
 
@@ -1182,7 +1192,7 @@ new funcObj('+', [TList,TList], TList, null, {
 		var list0 = jme.evaluate(args[0],variables,functions);
 		var list1 = jme.evaluate(args[1],variables,functions);
 		var value = list0.value.concat(list1.value);
-		return new TList(value.length,value);
+		return new TList(value);
 	},
 
 	usage: ['list1+list2','[1,2,3]+[4,5,6]'],
@@ -1196,7 +1206,7 @@ new funcObj('+',[TList,'?'],TList, null, {
 		var item = jme.evaluate(args[1],variables,functions);
 		var value = list.value.slice();
 		value.push(item);
-		return new TList(value.length,value);
+		return new TList(value);
 	},
 
 	usage: ['list+3','[1,2] + 3'],
@@ -1428,7 +1438,8 @@ new funcObj('repeat',['?',TNum],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var size = jme.evaluate(args[1],variables,functions).value;
-		var l = new TList(size,[]);
+		var l = new TList(size);
+		l.value = [];
 		for(var i=0;i<size;i++)
 		{
 			l.value[i] = jme.evaluate(args[0],variables,functions);
@@ -1470,7 +1481,7 @@ new funcObj('listval',[TList,TRange],TList, null, {
 		if(end<0)
 			end += size;
 		var value = list.value.slice(start,end);
-		return new TList(value.length,value);
+		return new TList(value);
 	},
 
 	usage: ['list[1..3]','[0,1,2,3,4][1..3]'],
@@ -1505,7 +1516,8 @@ new funcObj('map',['?',TName,TList],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list = jme.evaluate(args[2],variables,functions);
-		var newlist = new TList(list.size,[]);
+		var newlist = new TList(list.size);
+		newlist.value = [];
 		var name = args[1].tok.name;
 		variables = util.copyobj(variables);
 		for(var i=0;i<list.value.length;i++)
@@ -1526,7 +1538,7 @@ new funcObj('map',['?',TName,TRange],TList, null, {
 		var range = jme.evaluate(args[2],variables,functions);
 		var name = args[1].tok.name;
 		var newlist = new TList(range.size);
-		newlist.value = new Array(range.size);
+		newlist.value = [];
 		var variables = Numbas.util.copyobj(variables);
 		for(var i=3;i<range.value.length;i++)
 		{
@@ -1624,6 +1636,17 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 
 	usage: 'rowvector(1,2,3)',
 	description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.'
+});
+
+new funcObj('list',[TVector],TList,null, {
+	evaluate: function(args,variables,functions)
+	{
+		var vector = jme.evaluate(args[0],variables,functions);
+		var value = vector.value.map(function(n){ return new TNum(n)});
+		return new TList(value);
+	},
+	usage: ['list(vector(0,1,2))','list(vector)'],
+	description: 'Cast a vector to a list.'
 });
 
 function randoms(varnames,min,max,times)

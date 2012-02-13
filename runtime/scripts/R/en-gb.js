@@ -62,6 +62,8 @@ R.registerLocale('en-GB',{
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
+	'jme.user javascript error': "Error in user-defined javascript function @%s@\n\n%s",
+
 	'jme.variables.variable not defined': "Variable %s not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 
