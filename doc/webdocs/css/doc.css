@@ -1,0 +1,33 @@
+body {
+	font-size: 100%;
+}
+
+.functions, .defs {
+	list-style-type: none;
+}
+
+.function {
+	margin-bottom: 1em;
+}
+
+.def {
+	margin-bottom: .5em;
+	line-height: 1.4em;
+}
+
+.function .name {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+.def code {
+	font-size: 1.25em;
+	background: #eee;
+	font-family: monospace;
+	padding-left: 0.3em;
+	padding-right: 0.3em;
+}
+
+.function .description {
+	margin-left: 1em;
+}
