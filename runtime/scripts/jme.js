@@ -900,7 +900,7 @@ var TList = types.TList = types.list = function(value)
 	case 'number':
 		this.vars = value;
 		break;
-	case 'array':
+	case 'object':
 		this.value = value;
 		this.vars = value.length;
 		break;
