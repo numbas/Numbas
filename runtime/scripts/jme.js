@@ -1611,6 +1611,17 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 	}
 });
 
+new funcObj('list',[TVector],TList,null, {
+	evaluate: function(args,variables,functions)
+	{
+		var vector = jme.evaluate(args[0],variables,functions);
+		var value = vector.value.map(function(n){ return new TNum(n)});
+		return new TList(value.length,value);
+	},
+	usage: ['list(vector(0,1,2))','list(vector)'],
+	description: 'Cast a vector to a list.'
+});
+
 function randoms(varnames,min,max,times)
 {
 	times *= varnames.length;
