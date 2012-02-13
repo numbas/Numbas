@@ -121,20 +121,37 @@ $(document).ready(function() {
 
 		try {
 			var tree = Numbas.jme.compile(expr,{},true);
-			var tex = Numbas.jme.display.texify(tree);
-			var result = Numbas.jme.evaluate(tree);
-			result = Numbas.jme.display.treeToJME({tok:result});
-			$('#tryJME')
-				.find('#display')
+			try {
+				var tex = Numbas.jme.display.texify(tree);
+				$('#tryJME #display')
+					.removeClass('error')
 					.html('\\['+tex+'\\]')
-				.end()
-				.find('#evaluate')
+				;
+				MathJaxQueue.Push(['Typeset',MathJax.Hub,$('#tryJME #display')[0]]);
+			}
+			catch(e) {
+				$('#tryJME #display')
+					.addClass('error')
+					.append(e.message)
+				;
+			}
+			try {
+				var result = Numbas.jme.evaluate(tree);
+				result = Numbas.jme.display.treeToJME({tok:result});
+				$('#tryJME #evaluate')
+					.removeClass(error)
 					.html(result)
-			;
-			MathJaxQueue.Push(['Typeset',MathJax.Hub,$('#tryJME #display')[0]]);
+				;
+			}
+			catch(e) {
+				$('#tryJME #evaluate')
+					.addClass('error').
+					append(e.message)
+				;
+			}
 		}
 		catch(e) {
-			$('#tryJME #error').show().html(e.message);
+			$('#tryJME #error').show().append(e.message);
 		}
 	}
 	$('#tryJME #expression').keyup(tryJME);

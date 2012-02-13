@@ -21,7 +21,7 @@ body {
 #tryJME #display {
 }
 
-#tryJME #error {
+#tryJME .error {
 	color: red;
 	font-style: italic;
 }
