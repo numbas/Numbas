@@ -2,7 +2,11 @@ body {
 	font-size: 100%;
 }
 
-.functions, .defs {
+#functions {
+	font-size: .9em;
+}
+
+#functions .list,#functions .defs {
 	list-style-type: none;
 }
 
@@ -10,17 +14,12 @@ body {
 	margin-bottom: 1em;
 }
 
-.def {
-	margin-bottom: .5em;
-	line-height: 1.4em;
-}
-
 .function .name {
-	font-size: 1.5em;
+	font-size: 1.2em;
 	font-weight: bold;
 }
 
-.def code {
+.function code {
 	font-size: 1.25em;
 	background: #eee;
 	font-family: monospace;
@@ -30,4 +29,5 @@ body {
 
 .function .description {
 	margin-left: 1em;
+	display:inline-block;
 }

@@ -1,3 +1,4 @@
+var vm = {};
 $(document).ready(function() {
 	Handlebars.registerHelper('textile',function(text) {
 		return textile(text);
@@ -26,10 +27,76 @@ $(document).ready(function() {
 
 		for(var name in Numbas.jme.builtins)
 		{
-			functions.push({name: name, defs: Numbas.jme.builtins[name]});
+			var defs = Numbas.jme.builtins[name];
+			for(var i=0;i<defs.length;i++)
+			{
+				var def = defs[i];
+				var fn = {
+					name: name, 
+					intype: def.intype || [],
+					outtype: def.outtype || '?',
+					usage: def.usage || [],
+					description: def.description || ''
+				};
+				fn.searchText = [fn.name,fn.intype.join(', '),fn.outtype,fn.usage,fn.description].join('\n');
+				functions.push(fn);
+			}
 		}
 		functions.sort();
-		$('body').html( templates['functions'](functions) );
+		vm.functions = functions;
 	};
 	Numbas.tryInit();
+
+	function compare()
+	{
+		var keys = Array.prototype.slice.apply(arguments);
+		return function(a,b) {
+			for(var i=0;i<keys.length;i++)
+			{
+				var key = keys[i];
+				switch(typeof(a[key]))
+				{
+				case 'number':
+					if(a[key]>=0 && b[key]>=0)
+					{
+						if(a[key]!=b[key])
+							return a[key]-b[key];
+					}
+					else if(a[key]>=0)
+						return -1;
+					else if(b[key]>=0)
+						return 1;
+					break;
+				case 'string':
+					if(a[key].length==b[key].length)
+					{
+						if(a[key]>b[key])
+							return 1;
+						else if(b[key]>a[key])
+							return -1;
+					}
+					else
+						return a[key].length - b[key].length;
+				}
+			}
+			return 0;
+		};
+	}
+
+	function findFunctions() {
+		var search = $('#functions #search').val().toLowerCase().split(' ');
+		var found = vm.functions.slice();
+		for(var i=0;i<search.length;i++)
+		{
+			var word = search[i];
+			found = found.filter(function(def) {
+				def.searchIndex = def.searchText.toLowerCase().indexOf(word);
+				if(def.searchIndex >= 0)
+					return true;
+			});
+		}
+		found.sort(compare('searchIndex','name'));
+		$('#functions .list').html( templates['functions-template'](found) );
+	}
+	$('#functions #search').keyup(findFunctions);
 });

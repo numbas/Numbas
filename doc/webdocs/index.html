@@ -60,33 +60,29 @@ Copyright 2012 Newcastle University
 		<link rel="stylesheet" type="text/css" href="css/doc.css" />
 
 		<!-- handlebars templates -->
-		<script class="template" id="functions" type="text/x-handlebars-template">
-			<ul class="functions">
-				{{#each this}}
-				<li class="function">
-					<div class="name">{{name}}</div>
-					<ul class="defs">
-						{{#each defs}}
-						<li class="def">
-							<div class="type"> 
-								<strong>Type: </strong> ({{#join intype ", "}}<code class="intype">{{this}}</code>{{/join}})
-								=>
-								<code class="outtype">{{outtype}}</code>
-							</div>
-							<div class="usages">
-								<strong>Example usage: </strong> {{#join usage ", "}}<code class="usage">{{this}}</code>{{/join}}
-							</div>
-							<strong>Description:</strong> 
-							<div class="description">{{{textile description}}}</div>
-							</li>
-						{{/each}}
-					</ul>
-				</li>
-				{{/each}}
-			</ul>
+		<script class="template" id="functions-template" type="text/x-handlebars-template">
+			{{#each this}}
+			<li class="function">
+				<div class="name">
+					{{name}} :: 
+					({{#join intype ", "}}<code class="intype">{{this}}</code>{{/join}})
+					=>
+					<code class="outtype">{{outtype}}</code>
+				</div>
+				<div class="usages">
+					<strong>Example usage: </strong> {{#join usage ", "}}<code class="usage">{{this}}</code>{{/join}}
+				</div>
+				<div class="description">{{{textile description}}}</div>
+			</li>
+			{{/each}}
 		</script>
 	</head>
 
 	<body>
+		<div id="functions">
+			<input type="text" id="search"></input>
+			<ul class="list">
+			</ul>
+		</div>
 	</body>
 </html>
