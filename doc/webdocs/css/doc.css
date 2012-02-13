@@ -1,0 +1,59 @@
+body {
+	font-size: 100%;
+}
+
+.area {
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	padding: 0 1em;
+}
+
+#tryJME {
+	float: left;
+	width: 50%;
+}
+
+#tryJME #expression {
+	font-family: monospace;
+}
+
+#tryJME #display {
+}
+
+#tryJME #error {
+	color: red;
+	font-style: italic;
+}
+
+#functions {
+	font-size: .9em;
+	float: left;
+	width: 50%;
+}
+
+#functions .list,#functions .defs {
+	list-style-type: none;
+}
+
+.function {
+	margin-bottom: 1em;
+}
+
+.function .name {
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.function code {
+	font-size: 1.25em;
+	background: #eee;
+	font-family: monospace;
+	padding-left: 0.3em;
+	padding-right: 0.3em;
+}
+
+.function .description {
+	margin-left: 1em;
+	display:inline-block;
+}
