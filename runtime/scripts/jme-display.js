@@ -724,7 +724,7 @@ var treeToJME = jme.display.treeToJME = function(tree)
 	case 'string':
 		return '"'+tok.value+'"';
 	case 'boolean':
-		return (tok.value ? 'true' : false);
+		return (tok.value ? 'true' : 'false');
 	case 'range':
 		return tok.value[0]+'..'+tok.value[1]+(tok.value[2]==1 ? '' : '#'+tok.value[2]);
 	case 'list':
