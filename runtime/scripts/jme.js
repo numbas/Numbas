@@ -1514,7 +1514,7 @@ new funcObj('map',['?',TName,TList],TList, null, {
 			newlist.value[i] = jme.evaluate(args[0],variables,functions);
 		}
 		return newlist;
-	}
+	},
 	
 	usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
 	description: 'Apply the given expression to every value in a list.'
@@ -1534,7 +1534,7 @@ new funcObj('map',['?',TName,TRange],TList, null, {
 			newlist.value[i-3] = jme.evaluate(args[0],variables,functions);
 		}
 		return newlist;
-	}
+	},
 
 	usage: ['map(expr,x,range)','map(x^2,x,0..5)'],
 	description: 'Apply the given expression to every value in a range.'
@@ -1554,7 +1554,7 @@ new funcObj('sort',[TList],TList, null, {
 				return 0;
 		});
 		return newlist;
-	}
+	},
 
 	usage: 'sort(list)',
 	apply: 'Sort a list.'
@@ -1569,9 +1569,10 @@ new funcObj('vector',['*TNum'],TVector, null, {
 			value.push(jme.evaluate(args[i],variables,functions).value);
 		}
 		return new TVector(value);
-	}
+	},
 
-	
+	usage: ['vector(1,2,3)','vector(a,b)'],
+	description: 'Create a vector with the given components.'
 });
 
 new funcObj('vector',[TList],TVector, null, {
@@ -1580,7 +1581,10 @@ new funcObj('vector',[TList],TVector, null, {
 		var list = jme.evaluate(args[0],variables,functions);
 		var value = list.value.map(function(x){return x.value});
 		return new TVector(value);
-	}
+	},
+
+	usage: ['vector([1,2,3])','vector(list)'],
+	description: 'Create a vector from a list of numbers.'
 });
 
 new funcObj('matrix',['*list'],TMatrix, null, {
@@ -1598,7 +1602,10 @@ new funcObj('matrix',['*list'],TMatrix, null, {
 		value.rows = rows;
 		value.columns = columns;
 		return new TMatrix(value);
-	}
+	},
+
+	usage: ['matrix([1,0],[0,1])','matrix(row1,row2,row3)'],
+	description: 'Create a matrix. The arguments are lists of numbers, representing the rows.'
 });
 
 new funcObj('rowvector',['*number'],TMatrix, null, {
@@ -1613,7 +1620,10 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 		matrix.rows = 1;
 		matrix.columns = row.length;
 		return new TMatrix(matrix);
-	}
+	},
+
+	usage: 'rowvector(1,2,3)',
+	description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.'
 });
 
 function randoms(varnames,min,max,times)
