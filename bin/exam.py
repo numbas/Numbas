@@ -402,6 +402,7 @@ class Function:
 	name = ''
 	type = ''
 	definition = ''
+	javascript = ''
 
 	def __init__(self,name):
 		self.name = name
@@ -410,7 +411,7 @@ class Function:
 	@staticmethod
 	def fromDATA(name,data):
 		function = Function(name)
-		tryLoad(data,['parameters','type','definition'],function)
+		tryLoad(data,['parameters','type','definition','javascript'],function)
 		return function
 	
 	def toxml(self):
@@ -419,7 +420,8 @@ class Function:
 							])
 		function.attrib = { 'name': self.name,
 							'outtype': self.type,
-							'definition': self.definition
+							'definition': self.definition,
+							'javascript': self.javascript
 							}
 		
 		parameters = function.find('parameters')
