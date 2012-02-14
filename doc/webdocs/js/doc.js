@@ -1,5 +1,12 @@
 var vm = {};
 $(document).ready(function() {
+	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
+	$.fn.mathjax = function() {
+		$(this).each(function() {
+			MathJaxQueue.Push(['Typeset',MathJax.Hub,this]);
+		});
+	}
+
 	Handlebars.registerHelper('textile',function(text) {
 		return textile(text);
 	});
@@ -37,9 +44,10 @@ $(document).ready(function() {
 					intype: def.intype || [],
 					outtype: def.outtype || '?',
 					usage: def.usage || [],
-					description: def.description || ''
+					description: def.description || '',
+					tags: def.tags || []
 				};
-				fn.searchText = [fn.name,fn.intype.join(', '),fn.outtype,fn.usage,fn.description].join('\n');
+				fn.searchText = [fn.name,fn.tags.join(', '),fn.intype.join(', '),fn.outtype,fn.usage,fn.description].join('\n');
 				functions.push(fn);
 			}
 		}
@@ -86,7 +94,12 @@ $(document).ready(function() {
 
 	function findFunctions() {
 		var search = $('#functions #search').val().toLowerCase().split(' ');
-		var found = vm.functions.slice();
+		if(!(search[0].length))
+		{
+			$('#functions .list').html('');
+			return;
+		}
+		var found = vm.foundFunctions = vm.functions.slice();
 		for(var i=0;i<search.length;i++)
 		{
 			var word = search[i];
@@ -98,10 +111,11 @@ $(document).ready(function() {
 		}
 		found.sort(compare('searchIndex','name'));
 		$('#functions .list').html( templates['functions-template'](found) );
-	}
-	$('#functions #search').keyup(findFunctions);
+		$('#functions .list').mathjax();
 
-	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
+	}
+	$('#functions #search').keyup(findFunctions).change(findFunctions);
+
 
 	function tryJME() {
 		var expr = $('#tryJME #expression').val();
@@ -127,7 +141,7 @@ $(document).ready(function() {
 					.removeClass('error')
 					.html('\\['+tex+'\\]')
 				;
-				MathJaxQueue.Push(['Typeset',MathJax.Hub,$('#tryJME #display')[0]]);
+				$('#tryJME #display').mathjax();
 			}
 			catch(e) {
 				$('#tryJME #display')
@@ -154,5 +168,10 @@ $(document).ready(function() {
 			$('#tryJME #error').show().append(e.message);
 		}
 	}
-	$('#tryJME #expression').keyup(tryJME);
+	$('#tryJME #expression').keyup(tryJME).change(tryJME);
+
+	$('#functions .list').on({click: function() {
+		var expr = $(this).text();
+		$('#tryJME #expression').val(expr).change();
+	}},'.example');
 });

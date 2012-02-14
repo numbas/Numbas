@@ -57,3 +57,7 @@ body {
 	margin-left: 1em;
 	display:inline-block;
 }
+
+.example:hover {
+	cursor: pointer;
+}
