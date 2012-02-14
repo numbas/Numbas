@@ -1522,7 +1522,7 @@ new funcObj('map',['?',TName,TList],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list = jme.evaluate(args[2],variables,functions);
-		var newlist = new TList(list.size);
+		var newlist = new TList(list.vars);
 		newlist.value = [];
 		var name = args[1].tok.name;
 		variables = util.copyobj(variables);
