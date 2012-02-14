@@ -131,7 +131,13 @@ $(document).ready(function() {
 		;
 
 		if(!expr.length)
+		{
+			$('#tryJME').find('#display,#result')
+				.removeClass('error')
+				.html('')
+			;
 			return;
+		}
 
 		try {
 			var tree = Numbas.jme.compile(expr,{},true);
@@ -151,14 +157,24 @@ $(document).ready(function() {
 			}
 			try {
 				var result = Numbas.jme.evaluate(tree);
-				result = Numbas.jme.display.treeToJME({tok:result});
-				$('#tryJME #evaluate')
-					.removeClass(error)
-					.html(result)
-				;
+				if(!((result.type=='number' && isNaN(result.value)) || result.value==undefined || result.value==null))
+				{
+					result = Numbas.jme.display.treeToJME({tok:result});
+					$('#tryJME #result')
+						.removeClass(error)
+						.html(result)
+					;
+				}
+				else
+				{
+					$('#tryJME #result')
+						.addClass('error')
+						.html('Can\'t evaluate this expression.')
+					;
+				}
 			}
 			catch(e) {
-				$('#tryJME #evaluate')
+				$('#tryJME #result')
 					.addClass('error').
 					append(e.message)
 				;

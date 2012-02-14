@@ -14,6 +14,14 @@ body {
 	width: 50%;
 }
 
+#tryJME .expression {
+	text-align:center;
+}
+
+#tryJME .output {
+	text-align: center;
+}
+
 #tryJME #expression {
 	font-family: monospace;
 }
