@@ -28,6 +28,7 @@ Copyright 2012 Newcastle University
 
 		<!--jQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="js/jquery.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="js/jquery-ui.js"></script>
 
 		<!-- textile markup -->
 		<script charset="UTF-8" type="text/javascript" src="../../runtime/scripts/textile/textile.js"></script>
@@ -58,9 +59,14 @@ Copyright 2012 Newcastle University
 		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
 		<link rel="stylesheet" type="text/css" href="css/typography.css" />
 		<link rel="stylesheet" type="text/css" href="css/doc.css" />
+		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
 
 		<!-- handlebars templates -->
-		<script class="template" id="functions-template" type="text/x-handlebars-template">
+		<script class="template" id="usage-partial" type="text/x-handlebars-partial">
+			{{#join usage ", "}}<code class="example">{{this}}</code>{{/join}}
+		</script>
+
+		<script id="functions-template" type="text/x-handlebars-template">
 			{{#each this}}
 			<li class="function">
 				<div class="name">
@@ -70,7 +76,21 @@ Copyright 2012 Newcastle University
 					<code class="outtype">{{outtype}}</code>
 				</div>
 				<div class="usages">
-					<strong>Example usage: </strong> {{#join usage ", "}}<code class="example">{{this}}</code>{{/join}}
+					<strong>Example usage: </strong> {{> usage-partial}}
+				</div>
+				<div class="description">{{{textile description}}}</div>
+			</li>
+			{{/each}}
+		</script>
+
+		<script id="types-template" type="text/x-handlebars-template">
+			{{#each this}}
+			<li class="type">
+				<div class="name">
+					{{name}}
+				</div>
+				<div class="usages">
+					<strong>Example usage: </strong> {{> usage-partial}}
 				</div>
 				<div class="description">{{{textile description}}}</div>
 			</li>
@@ -79,14 +99,25 @@ Copyright 2012 Newcastle University
 	</head>
 
 	<body>
-		<div id="functions" class="area">
-			<h1>Function search</h1>
-			<input type="text" id="search"></input>
-			<ul class="list">
+		<div id="documentation" class="area lefthalf">
+			<ul>
+				<li><a href="#functions">Functions</a></li>
+				<li><a href="#datatypes">Data types</a></li>
 			</ul>
+			<div id="functions" class="tab">
+				<h1>Function search</h1>
+				<p><label for="search">Enter the name of a function or a description of what you want it to do.</label></p>
+				<input type="text" id="search"></input>
+				<ul class="list">
+				</ul>
+			</div>
+			<div id="datatypes" class="tab">
+				<h1>Data types</h1>
+			</div>
 		</div>
-		<div id="tryJME" class="area">
+		<div id="tryJME" class="area righthalf">
 			<h1>JME Test Area</h1>
+			<p><label for="expression">Enter a JME expression to see how it is displayed and evaluated.</label></p>
 			<div class="expression">
 				<input type="text" id="expression"></input>
 			</div>

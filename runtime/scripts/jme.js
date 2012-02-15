@@ -880,18 +880,33 @@ var TNum = types.TNum = types.number = function(num)
 	this.value = num.complex ? num : parseFloat(num);
 }
 TNum.prototype.type = 'number';
+TNum.doc = {
+	name: 'number',
+	usage: ['0','1','0.234','i','e','pi'],
+	description: "@i@, @e@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm and $\pi$, respectively."
+};
 
 var TString = types.TString = types.string = function(s)
 {
 	this.value = s;
 }
 TString.prototype.type = 'string';
+TString.doc = {
+	name: 'string',
+	usage: ['\'hello\'','"hello"],
+	description: "Use strings to create non-mathematical text."
+};
 
 var TBool = types.TBool = types.boolean = function(b)
 {
 	this.value = b;
 }
 TBool.prototype.type = 'boolean';
+TBool.doc = {
+	name: 'boolean',
+	usage: ['true','false'],
+	description: "Booleans represent either truth or falsity. The logical operations @and@, @or@ and @xor@ operate on and return booleans."
+}
 
 var TList = types.TList = types.list = function(value)
 {
@@ -909,18 +924,33 @@ var TList = types.TList = types.list = function(value)
 	}
 }
 TList.prototype.type = 'list';
+TList.doc = {
+	name: 'list',
+	usage: ['[0,1,2,3]','[a,b,c]','[true,false,false]'],
+	description: "A list of elements of any data type."
+};
 
 var TVector = types.TVector = types.vector = function(value)
 {
 	this.value = value;
 }
 TVector.prototype.type = 'vector';
+TVector.doc = {
+	name: 'vector',
+	usage: ['vector(1,2)','vector([1,2,3,4])'],
+	description: 'The components of a vector must be numbers.\n\n When combining vectors of different dimensions, the smaller vector is padded with zeroes to make up the difference.'
+}
 
 var TMatrix = types.TMatrix = types.matrix = function(value)
 {
 	this.value = value;
 }
 TMatrix.prototype.type = 'matrix';
+TMatrix.doc = {
+	name: 'matrix',
+	usage: ['matrix([1,2,3],[4,5,6])','matrix(row1,row2)'],
+	description: "Matrices are constructed from lists of numbers, representing the rows.\n\n When combining matrices of different dimensions, the smaller matrix is padded with zeroes to make up the difference."
+}
 
 var TRange = types.TRange = types.range = function(range)
 {
@@ -941,6 +971,11 @@ var TRange = types.TRange = types.range = function(range)
 	}
 }
 TRange.prototype.type = 'range';
+TRange.doc = {
+	name: 'range',
+	usage: ['1..3','1..3#0.1',';1..3#0'],
+	description: 'A range @a..b#c@ represents the set of numbers $\{a+nc | 0 \leq n \leq \frac{b-a}{c} \}$. If the step size is zero, then the range is the continuous interval $\[a,b\]$.'
+}
 
 var TName = types.TName = types.name = function(name,annotation)
 {
@@ -1162,9 +1197,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 		return new this.outcons(result);
 	}	
 
-	this.description = options.description || '';
-	this.usage = options.usage || '';
-	this.tags = options.tags || [];
+	this.doc = options.doc;
 }
 
 var math = Numbas.math;
@@ -1182,10 +1215,10 @@ builtins['eval'] = [{name: 'eval',
 
 var funcs = {};
 
-new funcObj('_', ['?','?'], function(){return new TNum(0);}, {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']});
-new funcObj('+u', [TNum], TNum, function(a){return a;}, {usage: '+x', description: "Unary addition.", tags: ['plus','positive']});	
-new funcObj('-u', [TNum], TNum, math.negate, {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']});
-new funcObj('+', [TNum,TNum], TNum, math.add, {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']});
+new funcObj('_', ['?','?'], function(){return new TNum(0);}, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
+new funcObj('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});	
+new funcObj('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
+new funcObj('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
 
 new funcObj('+', [TList,TList], TList, null, {
 	evaluate: function(args,variables,functions)
@@ -1196,9 +1229,11 @@ new funcObj('+', [TList,TList], TList, null, {
 		return new TList(value);
 	},
 
-	usage: ['list1+list2','[1,2,3]+[4,5,6]'],
-	description: "Concatenate two lists.",
-	tags: ['join','append','concatenation']
+	doc: {
+		usage: ['list1+list2','[1,2,3]+[4,5,6]'],
+		description: "Concatenate two lists.",
+		tags: ['join','append','concatenation']
+	}
 });
 
 new funcObj('+',[TList,'?'],TList, null, {
@@ -1211,110 +1246,112 @@ new funcObj('+',[TList,'?'],TList, null, {
 		return new TList(value);
 	},
 
-	usage: ['list+3','[1,2] + 3'],
-	description: "Add an item to a list",
-	tags: ['push','append','insert']
+	doc: {
+		usage: ['list+3','[1,2] + 3'],
+		description: "Add an item to a list",
+		tags: ['push','append','insert']
+	}
 });
 
 var fconc = function(a,b) { return a+b; }
-new funcObj('+', [TString,'?'], TString, fconc, {usage: '\'Hello \' + name', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']});
-new funcObj('+', ['?',TString], TString, fconc, {usage: 'name + \' is OK.\'', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']});
+new funcObj('+', [TString,'?'], TString, fconc, {doc: {usage: '\'Hello \' + name', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
+new funcObj('+', ['?',TString], TString, fconc, {doc: {usage: 'name + \' is OK.\'', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
 
-new funcObj('+', [TVector,TVector], TVector, vectormath.add, {usage: 'vector(1,2) + vector(0,1)', description: 'Add two vectors.', tags: ['addition','plus']});
-new funcObj('+', [TMatrix,TMatrix], TMatrix, matrixmath.add, {usage: 'matrix([1,0],[0,1]) + matrix([2,2],[2,2])', description: 'Add two matrices.', tags: ['addition','plus']});
-new funcObj('-', [TNum,TNum], TNum, math.sub, {usage: ['x-y','2 - 1'], description: 'Subtract one number from another.', tags: ['minus','take away','subtraction']});
-new funcObj('-', [TVector,TVector], TVector, vectormath.sub, {usage: 'vector(1,2) - vector(2,3)', description: 'Subtract one vector from another.', tags: ['subtraction','minus','take away']});
-new funcObj('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub, {usage: 'matrix([1,1],[2,3]) - matrix([3,3],[2,2])', description: 'Subtract one matrix from another.', tags: ['subtraction','minus','take away']});
-new funcObj('*', [TNum,TNum], TNum, math.mul, {usage: ['3x','3*x','x*y','x*3'], description: 'Multiply two numbers.', tags: ['multiplication','compose','composition','times']} );
-new funcObj('*', [TNum,TVector], TVector, vectormath.mul, {usage: '3*vector(1,2,3)', description: 'Multiply a vector on the left by a scalar.', tags: ['multiplication','composition','compose','times']});
-new funcObj('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)}, {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']});
-new funcObj('*', [TMatrix,TVector], TVector, vectormath.matrixmul, {usage: 'matrix([1,0],[0,1]) * vector(1,2)', description: 'Multiply a matrix by a vector.', tags: ['multiplication','composition','compose','times']});
-new funcObj('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul, {usage: '3*matrix([1,0],[0,1])', description: 'Multiply a matrix on the left by a scalar.', tags: ['multiplication','composition','compose','times']} );
-new funcObj('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); }, {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']} );
-new funcObj('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul, {usage: 'matrix([1,0],[1,1]) * matrix([2,3],[3,4])', description: 'Multiply two matrices.', tags: ['multiplication','composition','compose','times']});
-new funcObj('/', [TNum,TNum], TNum, math.div, {usage: ['x/y','3/2'], description: 'Divide two numbers.', tags: ['division','quotient','fraction']} );
-new funcObj('^', [TNum,TNum], TNum, math.pow, {usage: ['x^y','x^2','2^x','e^x'], description: 'Exponentiation.', tags: ['power','exponentiate','raise']} );
+new funcObj('+', [TVector,TVector], TVector, vectormath.add, {doc: {usage: 'vector(1,2) + vector(0,1)', description: 'Add two vectors.', tags: ['addition','plus']}});
+new funcObj('+', [TMatrix,TMatrix], TMatrix, matrixmath.add, {doc: {usage: 'matrix([1,0],[0,1]) + matrix([2,2],[2,2])', description: 'Add two matrices.', tags: ['addition','plus']}});
+new funcObj('-', [TNum,TNum], TNum, math.sub, {doc: {usage: ['x-y','2 - 1'], description: 'Subtract one number from another.', tags: ['minus','take away','subtraction']}});
+new funcObj('-', [TVector,TVector], TVector, vectormath.sub, {doc: {usage: 'vector(1,2) - vector(2,3)', description: 'Subtract one vector from another.', tags: ['subtraction','minus','take away']}});
+new funcObj('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub, {doc: {usage: 'matrix([1,1],[2,3]) - matrix([3,3],[2,2])', description: 'Subtract one matrix from another.', tags: ['subtraction','minus','take away']}});
+new funcObj('*', [TNum,TNum], TNum, math.mul, {doc: {usage: ['3x','3*x','x*y','x*3'], description: 'Multiply two numbers.', tags: ['multiplication','compose','composition','times']}} );
+new funcObj('*', [TNum,TVector], TVector, vectormath.mul, {doc: {usage: '3*vector(1,2,3)', description: 'Multiply a vector on the left by a scalar.', tags: ['multiplication','composition','compose','times']}});
+new funcObj('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
+new funcObj('*', [TMatrix,TVector], TVector, vectormath.matrixmul, {doc: {usage: 'matrix([1,0],[0,1]) * vector(1,2)', description: 'Multiply a matrix by a vector.', tags: ['multiplication','composition','compose','times']}});
+new funcObj('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul, {doc: {usage: '3*matrix([1,0],[0,1])', description: 'Multiply a matrix on the left by a scalar.', tags: ['multiplication','composition','compose','times']}} );
+new funcObj('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
+new funcObj('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul, {doc: {usage: 'matrix([1,0],[1,1]) * matrix([2,3],[3,4])', description: 'Multiply two matrices.', tags: ['multiplication','composition','compose','times']}});
+new funcObj('/', [TNum,TNum], TNum, math.div, {doc: {usage: ['x/y','3/2'], description: 'Divide two numbers.', tags: ['division','quotient','fraction']}} );
+new funcObj('^', [TNum,TNum], TNum, math.pow, {doc: {usage: ['x^y','x^2','2^x','e^x'], description: 'Exponentiation.', tags: ['power','exponentiate','raise']}} );
 
-new funcObj('dot',[TVector,TVector],TNum,vectormath.dot, {usage: 'dot( vector(1,2,3), vector(2,3,4) )', description: 'Dot product of two vectors', tags: ['projection','project']});
-new funcObj('dot',[TMatrix,TVector],TNum,vectormath.dot, {usage: 'dot( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']});
-new funcObj('dot',[TVector,TMatrix],TNum,vectormath.dot, {usage: 'dot( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']});
-new funcObj('dot',[TMatrix,TMatrix],TNum,vectormath.dot, {usage: 'dot( matrix([1],[2],[3]), matrix( [1],[2],[3] )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the dot product.', tags: ['projection','project']});
-new funcObj('cross',[TVector,TVector],TVector,vectormath.cross, {usage: 'cross( vector(1,2,3), vector(1,2,3) )', description: 'Cross product of two vectors.'});
-new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross, {usage: 'cross( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the cross product with another vector.'});
-new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross, {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'});
-new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'});
-new funcObj('det', [TMatrix], TNum, matrixmath.abs, {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'});
+new funcObj('dot',[TVector,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), vector(2,3,4) )', description: 'Dot product of two vectors', tags: ['projection','project']}});
+new funcObj('dot',[TMatrix,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
+new funcObj('dot',[TVector,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
+new funcObj('dot',[TMatrix,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), matrix( [1],[2],[3] )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the dot product.', tags: ['projection','project']}});
+new funcObj('cross',[TVector,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), vector(1,2,3) )', description: 'Cross product of two vectors.'}});
+new funcObj('cross',[TMatrix,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the cross product with another vector.'}});
+new funcObj('cross',[TVector,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'}});
+new funcObj('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'}});
+new funcObj('det', [TMatrix], TNum, matrixmath.abs, {doc: {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'}});
 
-new funcObj('transpose',[TVector],TMatrix, vectormath.transpose, {usage: 'transpose( vector(1,2,3) )', description: 'Transpose of a vector.'});
-new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose, {usage: 'transpose( matrix([1,2,3],[4,5,6]) )', description: 'Transpose of a matrix.'});
+new funcObj('transpose',[TVector],TMatrix, vectormath.transpose, {doc: {usage: 'transpose( vector(1,2,3) )', description: 'Transpose of a vector.'}});
+new funcObj('transpose',[TMatrix],TMatrix, matrixmath.transpose, {doc: {usage: 'transpose( matrix([1,2,3],[4,5,6]) )', description: 'Transpose of a matrix.'}});
 
-new funcObj('id',[TNum],TMatrix, matrixmath.id, {usage: 'id(3)', description: 'Identity matrix with $n$ rows and columns.'});
+new funcObj('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', description: 'Identity matrix with $n$ rows and columns.'}});
 
-new funcObj('..', [TNum,TNum], TRange, math.defineRange, {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']});
-new funcObj('#', [TRange,TNum], TRange, math.rangeSteps, {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}); 
+new funcObj('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
+new funcObj('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}}); 
 
-new funcObj('<', [TNum,TNum], TBool, math.lt, {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']});
-new funcObj('>', [TNum,TNum], TBool, math.gt, {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']} );
-new funcObj('<=', [TNum,TNum], TBool, math.leq, {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']} );
-new funcObj('>=', [TNum,TNum], TBool, math.geq, {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']} );
-new funcObj('<>', [TNum,TNum], TBool, math.neq, {usage: 'x<>y', description: 'Numerical inequality.', tags: ['not equal','comparison','numbers']} );
-new funcObj('<>', [TVector,TVector], TVector, vectormath.neq, {usage: 'vector(1,2) <> vector(2,2)', description: 'Vector inequality.', tags: ['comparison','not equal','vectors']} );
-new funcObj('<>', [TMatrix,TMatrix], TBool, matrixmath.neq, {usage: 'matrix([1,2],[3,4]) <> matrix([1,2,3],[4,5,6])', description: 'Matrix inequality.', tags: ['matrices','comparison','not equal']});
-new funcObj('<>', ['?','?'], TBool, function(a,b){ return a!=b; }, {usage: '\'this string\' <> \'that string\'', description: 'General inequality - uses the built-in Javascript comparison operation.', tags: ['comparison','not equal','strings']} );
-new funcObj('=', [TNum,TNum], TBool, math.eq, {usage: 'x=y', description: 'Numerical equality.', tags: ['comparison','same','numbers','identical']} );
-new funcObj('=', [TVector,TVector], TBool, vectormath.eq, {usage: 'vector(1,2)=vector(1,2)', description: 'Vector equality.', tags: ['comparison','same','vectors','identical']});
-new funcObj('=', [TMatrix,TMatrix], TBool, matrixmath.eq, {usage: 'matrix([1,0],[0,1])=matrix([1,0],[0,1])', description: 'Matrix equality.', tags: ['comparison','same','vectors','identical']});
-new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; }, {usage: 'x=x', description: 'Compare variable names. Returns @true@ if they are the same.', tags: ['variables','comparison','same','identical']});
-new funcObj('=', ['?','?'], TBool, function(a,b){ return a==b; }, {usage: '\'this string\'=\'this string\'', description: 'General equality - uses the built-in Javascript comparison operation.', tags: ['same','comparison','strings','identical']} );
+new funcObj('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
+new funcObj('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
+new funcObj('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
+new funcObj('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
+new funcObj('<>', [TNum,TNum], TBool, math.neq, {doc: {usage: 'x<>y', description: 'Numerical inequality.', tags: ['not equal','comparison','numbers']}} );
+new funcObj('<>', [TVector,TVector], TVector, vectormath.neq, {doc: {usage: 'vector(1,2) <> vector(2,2)', description: 'Vector inequality.', tags: ['comparison','not equal','vectors']}} );
+new funcObj('<>', [TMatrix,TMatrix], TBool, matrixmath.neq, {doc: {usage: 'matrix([1,2],[3,4]) <> matrix([1,2,3],[4,5,6])', description: 'Matrix inequality.', tags: ['matrices','comparison','not equal']}});
+new funcObj('<>', ['?','?'], TBool, function(a,b){ return a!=b; }, {doc: {usage: '\'this string\' <> \'that string\'', description: 'General inequality - uses the built-in Javascript comparison operation.', tags: ['comparison','not equal','strings']}} );
+new funcObj('=', [TNum,TNum], TBool, math.eq, {doc: {usage: 'x=y', description: 'Numerical equality.', tags: ['comparison','same','numbers','identical']}} );
+new funcObj('=', [TVector,TVector], TBool, vectormath.eq, {doc: {usage: 'vector(1,2)=vector(1,2)', description: 'Vector equality.', tags: ['comparison','same','vectors','identical']}});
+new funcObj('=', [TMatrix,TMatrix], TBool, matrixmath.eq, {doc: {usage: 'matrix([1,0],[0,1])=matrix([1,0],[0,1])', description: 'Matrix equality.', tags: ['comparison','same','vectors','identical']}});
+new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; }, {doc: {usage: 'x=x', description: 'Compare variable names. Returns @true@ if they are the same.', tags: ['variables','comparison','same','identical']}});
+new funcObj('=', ['?','?'], TBool, function(a,b){ return a==b; }, {doc: {usage: '\'this string\'=\'this string\'', description: 'General equality - uses the built-in Javascript comparison operation.', tags: ['same','comparison','strings','identical']}} );
 
-new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;}, {usage: ['true && true','true and true'], description: 'Logical AND.'} );
-new funcObj('not', [TBool], TBool, function(a){return !a;}, {usage: ['not x','!x'], description: 'Logical NOT.'} );	
-new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;}, {usage: ['x || y','x or y'], description: 'Logical OR.'} );
-new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']} );
+new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
+new funcObj('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );	
+new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
+new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
 
-new funcObj('abs', [TNum], TNum, math.abs, {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm']} );
-new funcObj('abs', [TList], TNum, function(l) { return l.length; }, {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']});
-new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; }, {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']});
-new funcObj('abs', [TVector], TNum, vectormath.abs, {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']});
-new funcObj('arg', [TNum], TNum, math.arg, {usage: 'arg(vector(1,2,3))', description: 'Argument of a vector.', tags: ['angle','direction']} );
-new funcObj('re', [TNum], TNum, math.re, {usage: 're(1 + 2i)', description: 'Real part of a complex number.'} );
-new funcObj('im', [TNum], TNum, math.im, {usage: 'im(1 + 2i)', description: 'Imaginary part of a complex number.'} );
-new funcObj('conj', [TNum], TNum, math.conjugate, {usage: 'conj(1 + 2i)', description: 'Conjugate of a complex number.'} );
+new funcObj('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
+new funcObj('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
+new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
+new funcObj('abs', [TVector], TNum, vectormath.abs, {doc: {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']}});
+new funcObj('arg', [TNum], TNum, math.arg, {doc: {usage: 'arg(1+i)', description: 'Argument of a complex number.', tags: ['angle','direction']}} );
+new funcObj('re', [TNum], TNum, math.re, {doc: {usage: 're(1 + 2i)', description: 'Real part of a complex number.'}} );
+new funcObj('im', [TNum], TNum, math.im, {doc: {usage: 'im(1 + 2i)', description: 'Imaginary part of a complex number.'}} );
+new funcObj('conj', [TNum], TNum, math.conjugate, {doc: {usage: 'conj(1 + 2i)', description: 'Conjugate of a complex number.'}} );
 
-new funcObj('isint',[TNum],TBool, function(a){ return util.isInt(a); }, {usage: 'isint(1)', description: 'Returns @true@ if the argument is an integer.', tags: ['test','whole number']});
+new funcObj('isint',[TNum],TBool, function(a){ return util.isInt(a); }, {doc: {usage: 'isint(1)', description: 'Returns @true@ if the argument is an integer.', tags: ['test','whole number']}});
 
-new funcObj('sqrt', [TNum], TNum, math.sqrt, {usage: 'sqrt(x)', description: 'Square root.'} );
-new funcObj('ln', [TNum], TNum, math.log, {usage: 'ln(x)', description: 'Natural logarithm.', tags: ['base e']} );
-new funcObj('log', [TNum], TNum, math.log10, {usage: 'log(x)', description: 'Logarithm with base $10$.'} );
-new funcObj('exp', [TNum], TNum, math.exp, {usage: 'exp(x)', description: 'Exponentiation. Equivalent to @e^x@. ', tags: ['exponential']} );
-new funcObj('fact', [TNum], TNum, math.factorial, {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']} );
-new funcObj('sin', [TNum], TNum, math.sin, {usage: 'sin(x)', description: 'Sine.', tags: ['trigonometric','trigonometry']} );
-new funcObj('cos', [TNum], TNum, math.cos, {usage: 'cos(x)', description: 'Cosine.', tags: ['trigonometric','trigonometry']} );
-new funcObj('tan', [TNum], TNum, math.tan, {usage: 'tan(x)', description: 'Tangent.', tags: ['trigonometric','trigonometry']} );
-new funcObj('cosec', [TNum], TNum, math.cosec, {usage: 'cosec(x)', description: 'Cosecant.', tags: ['trigonometric','trigonometry']} );
-new funcObj('sec', [TNum], TNum, math.sec, {usage: 'sec(x)', description: 'Secant.', tags: ['trigonometric','trigonometry']} );
-new funcObj('cot', [TNum], TNum, math.cot, {usage: 'cot(x)', description: 'Cotangent.', tags: ['trigonometric','trigonometry']} );
-new funcObj('arcsin', [TNum], TNum, math.arcsin, {usage: 'arcsin(x)', description: 'Inverse sine.', tags: ['arcsine']} );
-new funcObj('arccos', [TNum], TNum, math.arccos, {usage: 'arccos(x)', description: 'Inverse cosine.', tags: ['arccosine']} );
-new funcObj('arctan', [TNum], TNum, math.arctan, {usage: 'arctan(x)', description: 'Inverse tangent.', tags: ['arctangent']} );
-new funcObj('sinh', [TNum], TNum, math.sinh, {usage: 'sinh(x)', description: 'Hyperbolic sine.'} );
-new funcObj('cosh', [TNum], TNum, math.cosh, {usage: 'cosh(x)', description: 'Hyperbolic cosine.'} );
-new funcObj('tanh', [TNum], TNum, math.tanh, {usage: 'tanh(x)', description: 'Hyperbolic tangent.'} );
-new funcObj('cosech', [TNum], TNum, math.cosech, {usage: 'cosech(x)', description: 'Hyperbolic cosecant.'} );
-new funcObj('sech', [TNum], TNum, math.sech, {usage: 'sech(x)', description: 'Hyperbolic secant.'} );
-new funcObj('coth', [TNum], TNum, math.coth, {usage: 'coth(x)', description: 'Hyperbolic cotangent.'} );
-new funcObj('arcsinh', [TNum], TNum, math.arcsinh, {usage: 'arcsinh(x)', description: 'Inverse hyperbolic sine.'} );
-new funcObj('arccosh', [TNum], TNum, math.arccosh, {usage: 'arccosh(x)', description: 'Inverse hyperbolic cosine.'} );
-new funcObj('arctanh', [TNum], TNum, math.arctanh, {usage: 'arctanh(x)', description: 'Inverse hyperbolic tangent.'} );
-new funcObj('ceil', [TNum], TNum, math.ceil, {usage: 'ceil(x)', description: 'Round up to nearest integer.', tags: ['ceiling']} );
-new funcObj('floor', [TNum], TNum, math.floor, {usage: 'floor(x)', description: 'Round down to nearest integer.'} );
-new funcObj('trunc', [TNum], TNum, math.trunc, {usage: 'trunc(x)', description: 'If the argument is positive, round down to the nearest integer; if it is negative, round up to the nearest integer.', tags: ['truncate','integer part']} );
-new funcObj('fract', [TNum], TNum, math.fract, {usage: 'fract(x)', description: 'Fractional part of a number. Equivalent to @x-trunc(x)@.'} );
-new funcObj('degrees', [TNum], TNum, math.degrees, {usage: 'degrees(pi/2)', description: 'Convert radians to degrees.'} );
-new funcObj('radians', [TNum], TNum, math.radians, {usage: 'radians(90)', description: 'Convert degrees to radians.'} );
-new funcObj('round', [TNum], TNum, math.round, {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']} );
-new funcObj('sign', [TNum], TNum, math.sign, {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']} );
-new funcObj('random', [TRange], TNum, math.random, {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']} );
+new funcObj('sqrt', [TNum], TNum, math.sqrt, {doc: {usage: 'sqrt(x)', description: 'Square root.'}} );
+new funcObj('ln', [TNum], TNum, math.log, {doc: {usage: 'ln(x)', description: 'Natural logarithm.', tags: ['base e']}} );
+new funcObj('log', [TNum], TNum, math.log10, {doc: {usage: 'log(x)', description: 'Logarithm with base $10$.'}} );
+new funcObj('exp', [TNum], TNum, math.exp, {doc: {usage: 'exp(x)', description: 'Exponentiation. Equivalent to @e^x@. ', tags: ['exponential']}} );
+new funcObj('fact', [TNum], TNum, math.factorial, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
+new funcObj('sin', [TNum], TNum, math.sin, {doc: {usage: 'sin(x)', description: 'Sine.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('cos', [TNum], TNum, math.cos, {doc: {usage: 'cos(x)', description: 'Cosine.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('tan', [TNum], TNum, math.tan, {doc: {usage: 'tan(x)', description: 'Tangent.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('cosec', [TNum], TNum, math.cosec, {doc: {usage: 'cosec(x)', description: 'Cosecant.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('sec', [TNum], TNum, math.sec, {doc: {usage: 'sec(x)', description: 'Secant.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('cot', [TNum], TNum, math.cot, {doc: {usage: 'cot(x)', description: 'Cotangent.', tags: ['trigonometric','trigonometry']}} );
+new funcObj('arcsin', [TNum], TNum, math.arcsin, {doc: {usage: 'arcsin(x)', description: 'Inverse sine.', tags: ['arcsine']}} );
+new funcObj('arccos', [TNum], TNum, math.arccos, {doc: {usage: 'arccos(x)', description: 'Inverse cosine.', tags: ['arccosine']}} );
+new funcObj('arctan', [TNum], TNum, math.arctan, {doc: {usage: 'arctan(x)', description: 'Inverse tangent.', tags: ['arctangent']}} );
+new funcObj('sinh', [TNum], TNum, math.sinh, {doc: {usage: 'sinh(x)', description: 'Hyperbolic sine.'}} );
+new funcObj('cosh', [TNum], TNum, math.cosh, {doc: {usage: 'cosh(x)', description: 'Hyperbolic cosine.'}} );
+new funcObj('tanh', [TNum], TNum, math.tanh, {doc: {usage: 'tanh(x)', description: 'Hyperbolic tangent.'}} );
+new funcObj('cosech', [TNum], TNum, math.cosech, {doc: {usage: 'cosech(x)', description: 'Hyperbolic cosecant.'}} );
+new funcObj('sech', [TNum], TNum, math.sech, {doc: {usage: 'sech(x)', description: 'Hyperbolic secant.'}} );
+new funcObj('coth', [TNum], TNum, math.coth, {doc: {usage: 'coth(x)', description: 'Hyperbolic cotangent.'}} );
+new funcObj('arcsinh', [TNum], TNum, math.arcsinh, {doc: {usage: 'arcsinh(x)', description: 'Inverse hyperbolic sine.'}} );
+new funcObj('arccosh', [TNum], TNum, math.arccosh, {doc: {usage: 'arccosh(x)', description: 'Inverse hyperbolic cosine.'}} );
+new funcObj('arctanh', [TNum], TNum, math.arctanh, {doc: {usage: 'arctanh(x)', description: 'Inverse hyperbolic tangent.'}} );
+new funcObj('ceil', [TNum], TNum, math.ceil, {doc: {usage: 'ceil(x)', description: 'Round up to nearest integer.', tags: ['ceiling']}} );
+new funcObj('floor', [TNum], TNum, math.floor, {doc: {usage: 'floor(x)', description: 'Round down to nearest integer.'}} );
+new funcObj('trunc', [TNum], TNum, math.trunc, {doc: {usage: 'trunc(x)', description: 'If the argument is positive, round down to the nearest integer; if it is negative, round up to the nearest integer.', tags: ['truncate','integer part']}} );
+new funcObj('fract', [TNum], TNum, math.fract, {doc: {usage: 'fract(x)', description: 'Fractional part of a number. Equivalent to @x-trunc(x)@.'}} );
+new funcObj('degrees', [TNum], TNum, math.degrees, {doc: {usage: 'degrees(pi/2)', description: 'Convert radians to degrees.'}} );
+new funcObj('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', description: 'Convert degrees to radians.'}} );
+new funcObj('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
+new funcObj('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
+new funcObj('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
 
 new funcObj('random',[TList],'?',null, {
 	evaluate: function(args,variables,functions) 
@@ -1322,9 +1359,12 @@ new funcObj('random',[TList],'?',null, {
 		var l = jme.evaluate(args[0],variables,functions);
 		return math.choose(l.value);
 	},
-	usage: 'random([1,1,2,3,5])',
-	description: 'Choose a random item from a list.',
-	tags: ['pick','select']
+
+	doc: {
+		usage: 'random([1,1,2,3,5])',
+		description: 'Choose a random item from a list.',
+		tags: ['pick','select']
+	}
 });
 
 new funcObj( 'random',[],'?', null, {
@@ -1335,23 +1375,23 @@ new funcObj( 'random',[],'?', null, {
 	tags: ['pick','select']
 });
 
-new funcObj('mod', [TNum,TNum], TNum, function(a,b){return a%b;}, {usage: 'mod(a,b)', description: 'Modulus, i.e. $a \\bmod{b}.$', tags: ['remainder','modulo']} );
-new funcObj('max', [TNum,TNum], TNum, math.max, {usage: 'max(x,y)', description: 'Maximum of two numbers.', tags: ['supremum','biggest','largest','greatest']} );
-new funcObj('min', [TNum,TNum], TNum, math.min, {usage: 'min(x,y)', description: 'Minimum of two numbers.', tags: ['smallest','least']} );
-new funcObj('precround', [TNum,TNum], TNum, math.precround, {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']} );
-new funcObj('siground', [TNum,TNum], TNum, math.siground, {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']} );
-new funcObj('perm', [TNum,TNum], TNum, math.permutations, {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']} );
-new funcObj('comb', [TNum,TNum], TNum, math.combinations , {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']});
-new funcObj('root', [TNum,TNum], TNum, math.root, {usage: 'root(x,3)', description: '$n$<sup>th</sup> root.', tags: ['cube']} );
-new funcObj('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {usage: ['award(a,b)','award(5,x=y'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']} );
-new funcObj('gcd', [TNum,TNum], TNum, math.gcf, {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']} );
-new funcObj('lcm', [TNum,TNum], TNum, math.lcm, {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']} );
-new funcObj('|', [TNum,TNum], TBool, math.divides, {usage: 'x|y', description: 'Returns @true@ if @y@ divides @x@.', tags: ['multiple of']} );
+new funcObj('mod', [TNum,TNum], TNum, function(a,b){return a%b;}, {doc: {usage: 'mod(a,b)', description: 'Modulus, i.e. $a \\bmod{b}.$', tags: ['remainder','modulo']}} );
+new funcObj('max', [TNum,TNum], TNum, math.max, {doc: {usage: 'max(x,y)', description: 'Maximum of two numbers.', tags: ['supremum','biggest','largest','greatest']}} );
+new funcObj('min', [TNum,TNum], TNum, math.min, {doc: {usage: 'min(x,y)', description: 'Minimum of two numbers.', tags: ['smallest','least']}} );
+new funcObj('precround', [TNum,TNum], TNum, math.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
+new funcObj('siground', [TNum,TNum], TNum, math.siground, {doc: {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']}} );
+new funcObj('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
+new funcObj('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
+new funcObj('root', [TNum,TNum], TNum, math.root, {doc: {usage: 'root(x,3)', description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
+new funcObj('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
+new funcObj('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
+new funcObj('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
+new funcObj('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @y@ divides @x@.', tags: ['multiple of']}} );
 
-new funcObj('diff', ['?','?',TNum], '?', null, {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']});
-new funcObj('pdiff', ['?',TName,TNum], '?', null, {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']});
-new funcObj('int', ['?','?'], '?', null, {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'});
-new funcObj('defint', ['?','?',TNum,TNum], '?', null, {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'});
+new funcObj('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
+new funcObj('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
+new funcObj('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
+new funcObj('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
 
 //if needs to be a bit different because it can return any type
 new funcObj('if', [TBool,'?','?'], '?',null, {
@@ -1365,9 +1405,11 @@ new funcObj('if', [TBool,'?','?'], '?',null, {
 			return jme.evaluate(args[2],variables,functions);
 	},
 
-	usage: 'if(test,a,b)',
-	description: 'If @test@ is true, return @a@, otherwise return @b@.',
-	tags: ['test','decide']
+	doc: {
+		usage: 'if(test,a,b)',
+		description: 'If @test@ is true, return @a@, otherwise return @b@.',
+		tags: ['test','decide']
+	}
 });
 
 new funcObj('switch',[],'?', null, {
@@ -1411,9 +1453,11 @@ new funcObj('switch',[],'?', null, {
 			throw(new Numbas.Error('jme.func.switch.no default case'));
 	},
 
-	usage: 'switch(test1,a1,test2,a2,b)',
-	description: 'Select cases. Alternating boolean expressions with values to return, with the final argument representing the default case.',
-	tags: ['choose','test']
+	doc: {
+		usage: 'switch(test1,a1,test2,a2,b)',
+		description: 'Select cases. Alternating boolean expressions with values to return, with the final argument representing the default case.',
+		tags: ['choose','test']
+	}
 });
 
 new funcObj('isa',['?',TString],TBool, null, {
@@ -1436,9 +1480,11 @@ new funcObj('isa',['?',TString],TBool, null, {
 		return new TBool(match);
 	},
 
-	usage: 'x isa \'number\'',
-	description: 'Determine the data-type of an expression.',
-	tags: ['typeof','test','is a']
+	doc: {
+		usage: 'x isa \'number\'',
+		description: 'Determine the data-type of an expression.',
+		tags: ['typeof','test','is a']
+	}
 });
 
 // repeat(expr,n) evaluates expr n times and returns a list of the results
@@ -1455,8 +1501,10 @@ new funcObj('repeat',['?',TNum],TList, null, {
 		return l;
 	},
 
-	usage: ['repeat(expr,n)','repeat( random(1..3), 5)'],
-	description: 'Evaluate the given expression $n$ times, returning the results in a list.'
+	doc: {
+		usage: ['repeat(expr,n)','repeat( random(1..3), 5)'],
+		description: 'Evaluate the given expression $n$ times, returning the results in a list.'
+	}
 });
 
 new funcObj('listval',[TList,TNum],'?', null, {
@@ -1472,9 +1520,11 @@ new funcObj('listval',[TList,TNum],'?', null, {
 			throw(new Numbas.Error('jme.func.listval.invalid index',index,list.value.length));
 	},
 
-	usage: ['list[i]','[0,1,2,3][2]'],
-	description: 'Return a particular element of a list.',
-	tags: ['index','item','access']
+	doc: {
+		usage: ['list[i]','[0,1,2,3][2]'],
+		description: 'Return a particular element of a list.',
+		tags: ['index','item','access']
+	}
 });
 
 new funcObj('listval',[TList,TRange],TList, null, {
@@ -1493,9 +1543,11 @@ new funcObj('listval',[TList,TRange],TList, null, {
 		return new TList(value);
 	},
 
-	usage: ['list[1..3]','[0,1,2,3,4][1..3]'],
-	description: 'Slice a list - return the elements with indices in the given range.',
-	tags: ['range','section','part']
+	doc: {
+		usage: ['list[1..3]','[0,1,2,3,4][1..3]'],
+		description: 'Slice a list - return the elements with indices in the given range.',
+		tags: ['range','section','part']
+	}
 });
 
 new funcObj('listval',[TVector,TNum],TNum, null, {
@@ -1506,9 +1558,11 @@ new funcObj('listval',[TVector,TNum],TNum, null, {
 		return new TNum(vector.value[index] || 0);
 	},
 
-	usage: ['vec[1]','vector(0,1,2)[1]'],
-	description: 'Return a particular component of a vector.',
-	tags: ['index','item','access']
+	doc: {
+		usage: ['vec[1]','vector(0,1,2)[1]'],
+		description: 'Return a particular component of a vector.',
+		tags: ['index','item','access']
+	}
 });
 
 new funcObj('listval',[TMatrix,TNum],TVector, null, {
@@ -1519,9 +1573,11 @@ new funcObj('listval',[TMatrix,TNum],TVector, null, {
 		return new TVector(matrix.value[index] || []);
 	},
 
-	usage: ['mat[1]','matrix([1,0],[0,1])[1]'],
-	description: 'Return a particular row of a matrix.',
-	tags: ['index','item','access','element','cell']
+	doc: {
+		usage: ['mat[1]','matrix([1,0],[0,1])[1]'],
+		description: 'Return a particular row of a matrix.',
+		tags: ['index','item','access','element','cell']
+	}
 });
 
 new funcObj('map',['?',TName,TList],TList, null, {
@@ -1540,8 +1596,10 @@ new funcObj('map',['?',TName,TList],TList, null, {
 		return newlist;
 	},
 	
-	usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
-	description: 'Apply the given expression to every value in a list.'
+	doc: {
+		usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
+		description: 'Apply the given expression to every value in a list.'
+	}
 });
 
 new funcObj('map',['?',TName,TRange],TList, null, {
@@ -1560,8 +1618,10 @@ new funcObj('map',['?',TName,TRange],TList, null, {
 		return newlist;
 	},
 
-	usage: ['map(expr,x,range)','map(x^2,x,0..5)'],
-	description: 'Apply the given expression to every value in a range.'
+	doc: {
+		usage: ['map(expr,x,range)','map(x^2,x,0..5)'],
+		description: 'Apply the given expression to every value in a range.'
+	}
 });
 
 new funcObj('sort',[TList],TList, null, {
@@ -1580,8 +1640,10 @@ new funcObj('sort',[TList],TList, null, {
 		return newlist;
 	},
 
-	usage: 'sort(list)',
-	apply: 'Sort a list.'
+	doc: {
+		usage: 'sort(list)',
+		apply: 'Sort a list.'
+	}
 });
 
 new funcObj('vector',['*TNum'],TVector, null, {
@@ -1595,9 +1657,11 @@ new funcObj('vector',['*TNum'],TVector, null, {
 		return new TVector(value);
 	},
 
-	usage: ['vector(1,2,3)','vector(a,b)'],
-	description: 'Create a vector with the given components.',
-	tags: ['constructor','new']
+	doc: {
+		usage: ['vector(1,2,3)','vector(a,b)'],
+		description: 'Create a vector with the given components.',
+		tags: ['constructor','new']
+	}
 });
 
 new funcObj('vector',[TList],TVector, null, {
@@ -1608,9 +1672,11 @@ new funcObj('vector',[TList],TVector, null, {
 		return new TVector(value);
 	},
 
-	usage: ['vector([1,2,3])','vector(list)'],
-	description: 'Create a vector from a list of numbers.',
-	tags: ['constructor','new','convert','cast']
+	doc: {
+		usage: ['vector([1,2,3])','vector(list)'],
+		description: 'Create a vector from a list of numbers.',
+		tags: ['constructor','new','convert','cast']
+	}
 });
 
 new funcObj('matrix',['*list'],TMatrix, null, {
@@ -1630,9 +1696,11 @@ new funcObj('matrix',['*list'],TMatrix, null, {
 		return new TMatrix(value);
 	},
 
-	usage: ['matrix([1,0],[0,1])','matrix(row1,row2,row3)'],
-	description: 'Create a matrix. The arguments are lists of numbers, representing the rows.',
-	tags: ['constructor', 'new']
+	doc: {
+		usage: ['matrix([1,0],[0,1])','matrix(row1,row2,row3)'],
+		description: 'Create a matrix. The arguments are lists of numbers, representing the rows.',
+		tags: ['constructor', 'new']
+	}
 });
 
 new funcObj('rowvector',['*number'],TMatrix, null, {
@@ -1649,9 +1717,11 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 		return new TMatrix(matrix);
 	},
 
-	usage: 'rowvector(1,2,3)',
-	description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
-	tags: ['constructor','new']
+	doc: {
+		usage: 'rowvector(1,2,3)',
+		description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
+		tags: ['constructor','new']
+	}
 });
 
 new funcObj('list',[TVector],TList,null, {
@@ -1661,9 +1731,12 @@ new funcObj('list',[TVector],TList,null, {
 		var value = vector.value.map(function(n){ return new TNum(n)});
 		return new TList(value);
 	},
-	usage: ['list(vector(0,1,2))','list(vector)'],
-	description: 'Cast a vector to a list.',
-	tags: ['convert']
+
+	doc: {
+		usage: ['list(vector(0,1,2))','list(vector)'],
+		description: 'Cast a vector to a list.',
+		tags: ['convert']
+	}
 });
 
 function randoms(varnames,min,max,times)
