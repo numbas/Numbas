@@ -89,11 +89,19 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 
 	//Cumulative Distribution Function of the Normal(0,1) distribution.
-	//based on "A Note on Approximating the Normal Distribution Function", K. M. Aludaat and M. T. Alodat, Applied Mathematical Sciences 2008
-	var cdfconst = Math.sqrt(Math.PI/8);
+	//Based on Abramowitz and Stegun;" Handbook of Mathematical Functions." 1964,(formula: 26.2.17) as implemented below
+
 	math.normalCDF = function(z)
 	{
-		return 0.5+0.5*Math.sqrt(1-Math.exp(-cdfconst*z*z));
+		var p = 0.2316419;
+		var a1=0.319381530;
+		var a2=-0.356563782;
+		var a3=1.781477937;
+		var a4=-1.821255978;
+		var a5= 1.330274429;
+
+		var t = 1/(1+p*z);
+		return 1-math.pdfNormal(z,0,1)*(a1*t+a2*Math.pow(t,2)+a3*Math.pow(t,3)+a4*Math.pow(t,4)+a5*Math.pow(t,5));
 	}
 
 	new funcObj('cdfNormal',[TNum],TNum,math.normalCDF);
