@@ -2,6 +2,10 @@ body {
 	font-size: 100%;
 }
 
+a:hover {
+	color: #666;;
+}
+
 .area {
 	box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -9,7 +13,12 @@ body {
 	padding: 0 1em;
 }
 
-#tryJME {
+.area.lefthalf {
+	float: left;
+	width:50%;
+}
+
+.area.righthalf {
 	float: left;
 	width: 50%;
 }
@@ -34,10 +43,12 @@ body {
 	font-style: italic;
 }
 
-#functions {
+#documentation > .tab {
 	font-size: .9em;
-	float: left;
-	width: 50%;
+}
+
+#functions .list {
+	margin-top: 1.5em;
 }
 
 #functions .list,#functions .defs {

@@ -26,6 +26,11 @@ $(document).ready(function() {
 		var name = $(this).attr('id');
 		templates[name] = Handlebars.compile(source);
 	});
+	$('script[type="text/x-handlebars-partial"]').each(function() {
+		var source = $(this).html();
+		var name = $(this).attr('id');
+		Handlebars.registerPartial(name,source);
+	});
 
 	Numbas.loadScript('scripts/jme-display.js');
 	Numbas.loadScript('scripts/jme.js');
@@ -39,13 +44,14 @@ $(document).ready(function() {
 			for(var i=0;i<defs.length;i++)
 			{
 				var def = defs[i];
+				var doc = def.doc || {};
 				var fn = {
 					name: name, 
 					intype: def.intype || [],
 					outtype: def.outtype || '?',
-					usage: def.usage || [],
-					description: def.description || '',
-					tags: def.tags || []
+					usage: doc.usage || [],
+					description: doc.description || '',
+					tags: doc.tags || []
 				};
 				fn.searchText = [fn.name,fn.tags.join(', '),fn.intype.join(', '),fn.outtype,fn.usage,fn.description].join('\n');
 				functions.push(fn);
@@ -53,6 +59,16 @@ $(document).ready(function() {
 		}
 		functions.sort();
 		vm.functions = functions;
+
+		var types = vm.types = [];
+		for(var name in Numbas.jme.types)
+		{
+			var type = Numbas.jme.types[name];
+			if(type.doc && types.indexOf(type)==-1)
+			{
+				types.push(type);
+			}
+		}
 	};
 	Numbas.tryInit();
 
@@ -157,7 +173,7 @@ $(document).ready(function() {
 			}
 			try {
 				var result = Numbas.jme.evaluate(tree);
-				if(!((result.type=='number' && isNaN(result.value)) || result.value==undefined || result.value==null))
+				if(!((result.type=='number' && !result.value.complex && isNaN(result.value)) || result.value==undefined || result.value==null))
 				{
 					result = Numbas.jme.display.treeToJME({tok:result});
 					$('#tryJME #result')
@@ -190,4 +206,6 @@ $(document).ready(function() {
 		var expr = $(this).text();
 		$('#tryJME #expression').val(expr).change();
 	}},'.example');
+
+	$('#documentation').tabs();
 });
