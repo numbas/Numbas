@@ -126,7 +126,7 @@ $(document).ready(function() {
 			.find('#display')
 				.html('')
 			.end()
-			.find('#evaluate')
+			.find('#result')
 				.html('')
 		;
 
