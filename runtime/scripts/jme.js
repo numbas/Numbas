@@ -1049,7 +1049,8 @@ var synonyms = {
 	'gcf': 'gcd',
 	'sgn':'sign',
 	'len': 'abs',
-	'length': 'abs'
+	'length': 'abs',
+	'verb': 'verbatim'
 };
 	
 
