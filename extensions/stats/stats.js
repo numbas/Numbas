@@ -107,7 +107,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	new funcObj('pdfNormal',[TNum,TNum,TNum],TNum,math.pdfNormal);
 	
 	//z-test of a sample; returns p-value of sample mean assuming given distribution mean and variance
-	math.zTest = function(sample,mean,variance)
+	math.zTest = function(sample,mu,variance)
 	{
 		var mean = math.mean(sample);
 		var n = sample.length;
@@ -115,7 +115,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return math.normalCDF(z);
 	}
 
-	new funcObj('zTest',[TList,TNum],TNum,math.zTest);
+	new funcObj('zTest',[TList,TNum,TNum],TNum,math.zTest);
 	
 	//attempt at a T-test
 	//math.tTest = function(sample,mu)
@@ -324,7 +324,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	new funcObj('pdfGamma',[TNum,TNum,TNum],TNum,math.pdfGamma);
 	
 	//calculate a regression  line
-	math.regression = function(x,y,z)
+	math.regression = function(x,y)
 	{
 		var meanx = math.mean(x)
 		var meany = math.mean(y)
@@ -342,11 +342,14 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		var beta = Sxy/Sxx
 		var alpha = meany -(beta*meanx)
 		
-		if(z==1) 
-			return alpha
-		else 
-			return beta
+		return [alpha,beta];
 	}
 	
-	new funcObj('regression',[TList,TList,TNum],TNum,math.regression);
+	new funcObj('regressionAlpha',[TList,TList],TNum,function(l1,l2){
+		return math.regression(l1,l2)[0];
+	});
+
+	new funcObj('regressionBeta',[TList,TList],TNum,function(l1,l2){
+		return math.regression(l1,l2)[1];
+	});
 });
