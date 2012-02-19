@@ -44,9 +44,9 @@
       \verb"randomExponential(lambda)" & number & number & Random Exponential variable, parameter $\lambda$ \\
       \verb"pdfExponential(x,lambda)" & number, number & number & Exponential distribution PDF, parameter $\lambda$ \\
       \verb"cdfExponential(x,lambda)" & number, number & number & Exponential distribution CDF, parameter $\lambda$ \\
-      \verb"randomNormal(mu,sigma)" & number, number & number & Random Normal variable, mean $\mu$, variance $\sigma^2$ \\
-      \verb"pdfNormal(z,mu,sigma)" & number, number, number & number & Normal distribution PDF, mean $\mu$, variance $\sigma^2$ \\
-  		\verb"cdfNormal(z)" & number & number & Normal distribution CDF, mean $\mu$, varience $\sigma^2$ \\
+      \verb"randomNormal(mu,sigma)" & number, number & number & Random Normal variable, mean $\mu$, standard deviation $\sigma$ \\
+      \verb"pdfNormal(z,mu,sigma)" & number, number, number & number & Normal distribution PDF, mean $\mu$, standard deviation $\sigma$ \\
+  		\verb"cdfNormal(z)" & number & number & Normal distribution CDF, mean $0$, variance $1$ \\
       \verb"randomGamma(n,lambda)" & number, number & number & Random Gamma variable, parameters $n$, $\lambda$ \\
       \verb"pdfGamma(x,n,lambda)" & number, number, number & number & Gamma distribution PDF, parameters $n$, $\lambda$ \\
       \hline\hline
@@ -62,12 +62,12 @@
   		\hline
   		Function & Argument type & Result type & Meaning \\
   		\hline
-      \verb"mean([])"	& list & number	& Mean of a list of values \\
-      \verb"variance([])" & list & number & Variance of a list of values \\
-      \verb"standardDev([])" & list & number & Standard deviation of a list of values \\
-      \verb"regression([],[],z)" & list, list, number & number & Uses \emph{Method of Least Squares} to find a line of best fit. 
+      \verb"mean(data)"	& list & number	& Mean of a list of values \\
+      \verb"variance(data)" & list & number & Variance of a list of values \\
+      \verb"standardDev(data)" & list & number & Standard deviation of a list of values \\
+      \verb"regression(data1,data2,z)" & list, list, number & number & Uses \emph{Method of Least Squares} to find a line of best fit. 
       $z = 1$ returns intersect, $z = 2$ returns gradient. \\ 
-      \verb"zTest([],mu)" & list, number & number & Z-test for a sample of variables from a Normal distribution with mean $\mu$.\\
+      \verb"zTest(data,mu,v)" & list, number, number & number & Z-test for a sample of variables from a Normal distribution with mean $\mu$ and variance $v$.\\
       \hline\hline
   	\end{tabular}
   	\caption{\label{tab:statsfunctions2}
@@ -81,7 +81,6 @@
   %
   \begin{Verbatim}
     variables: {
-      p: "random(0..1#0.01)"
       X: "randomBernoulli(p)"
     }
   \end{Verbatim}

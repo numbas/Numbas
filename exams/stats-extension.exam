@@ -1,0 +1,171 @@
+{
+  name: Stats Exam
+
+	navigation: {
+		showfrontpage: false
+		allowregen: true
+	}
+
+  extensions: [stats]
+
+  questions: [
+    {
+		name: Normal variables and z-tests
+		  
+		variables: {
+			mu: random(0.1..1#0.1)
+			sigma: 1
+			n: "random(100..400)"
+			sample: "repeat(randomNormal(mu,sigma^2),n)"
+			z: "(mean(sample)-mu)/(sigma/sqr(n))"
+		}
+		  
+		statement: """	 
+			Here, we generate $n = \var{n}$ samples from the distribution $N(\var{mu},\var{sigma^2})$, stored in the variable @sample@.
+			
+			We then use the @mean@ and @variance@ functions to calculate @mean(sample)@ $ = \hat{\mu} = \var{precround(mean(sample),3)}$ and @variance(sample)@ $ = \hat \sigma^2 = \var{precround(variance(sample),3)}$.
+				
+			We can calculate a test statistic $z = \var{precround(z,3)}$ and use that to calculate @cdfNormal(z)@ $ = P(Z \leq \var{precround(z,3)} | Z \sim N(\var{mu},\var{sigma^2})) = \var{precround(cdfNormal(z),3)}$
+			
+			Alternatively, we can use the @zTest@ function directly on @sample@ to get the same number: @zTest(sample,mu,sigma^2)@ $ = \var{precround(zTest(sample,mu,sigma^2),3)}$
+		"""
+    }
+	{
+		name: Normal pdf
+		
+		variables: {
+			mu: "random(10,30,50)"
+			sigma: "10"
+			x: "random(0..30#0.5)"
+			y: "pdfNormal(x,mu,sigma)"
+		}
+		
+		statement: """
+			For a normal distribution with parameters $\mu = \var{mu}$ and $\sigma = \var{sigma}$ the pdfNormal command gives $P(X \leq \var{x}) = \var{y}$.
+		"""
+	}
+	{
+		name: Simulating a Bernoulli Random Variable
+		
+		variables: {
+			p: "random(0..1#0.01)"
+			X: "randomBernoulli(p)"
+		}
+		
+		statement: """
+			For probability $p = \var{p}$ we generate the following Bernoulli random variable using the randomBernoulli command. $X = \var{X}$.
+		"""
+	}
+	{
+		name: Simulating a Binomial Random Variable and Calculating pmfs.
+		
+		variables: {
+			p: "random(0..1#0.01)"
+			n: "random(1..10#1)"
+			X: "randomBinomial(n,p)"
+			y: "random(1..n#1)"
+			d: "pmfBinomial(y,n,p)"
+		}
+		
+		statement: """
+			For $n = \var{n}$ and $p = \var{p}$ we have the following Binomial random variable, generated using the randomBinomial command. $X = \var{X}$.
+			
+			For $x = \var{y}$ the pmf is $\var{d}$.
+		"""
+	}
+	{
+		name: Stimulating a Geometric Random Variable
+		
+		variables: {
+			p: "random(0..1#0.01)"
+			X: "randomGeometric(p)"
+			y: "random(1..10#1)"
+			d: "pmfGeometric(y,p)"
+			c: "cdfGeometric(y,p)"
+		}
+		
+		statement: """
+			For probability $p = \var{p}$ we generate the following Geometric random variable using the randomGeometric command. $X = \var{X}$.
+			
+			For $x = \var{y}$ the pmf is $\var{d}$ and cdf is $\var{c}$.
+		"""
+	}
+	{
+		name: Stimulating a Poisson Random Variable
+		
+		variables: {
+			lambda: "random(1..5#1)"
+			X: "randomPoisson(lambda)"
+			y: "random(1..5#1)"
+			d: "pmfPoisson(x,lambda)"
+		}
+		
+		statement: """
+			For $\lambda = \var{lambda}$ we generate $X = \var{X}$, a Poisson randon variable. For $x = \var{y}$ the pmf is $\var{d}$.
+		"""
+	}		
+	{
+		name: Uniform pdf and cdf
+		
+		variables: {
+			a: "random(0..5#1)"
+			b: "random(6..10#1)"
+			x: "random(0..10#1)"
+			d: "pdfUniform(x,a,b)"
+			c: "cdfUniform(x,a,b)"
+		}
+		
+		statement: """
+			For $a = \var{a}$, $b = \var{b}$ and $x = \var{x}$ the pdf is $\var{d}$ and the cdf is $\var{c}$.
+		"""
+	}
+	{
+		name: Stimulating an Exponential random variable
+		
+		variables: {
+			lambda: "random(-5..5#1)"
+			x: "random(-1..1#1)"
+			y: "randomExponential(lambda)"
+			d: "pdfExponential(x,lambda)"
+			c: "cdfExponential(x,lambda)"
+		}
+		
+		statement: """
+			For $\lambda = \var{lambda}$ we generate the following random Exponential variables using the randomExponential command; $X = \var{y}$.
+			
+			For $x = \var{x}$, the pdf is $\var{d}$ and the cdf is $\var{c}$.
+		"""
+	}
+	{
+		name: Stimulating a Gamma random variable
+		
+		variables: {
+			n: "random(1..4#1)"
+			lambda: "random(3..7#1)"
+			x: "random(1..2#1)"
+			y: "randomGamma(n,lambda)"
+			d: "pdfGamma(x,n,lambda)"
+		}
+		
+		statement: """
+			For $n = \var{n}$ and $\lambda = \var{lambda}$  we generate the following Gamma random variable using the randomGamma command $X = \var{y}$.
+			
+			For $x= \var{x}$, the pdf is $\var{d}$.
+		"""
+	}
+	{
+		name: Linear regression
+		
+		variables: {
+			x: [1,3,7,19,36]
+			y: [3,12,23,34,40]
+			a: "precround(regressionAlpha(x,y),3)"
+			b: "precround(regressionBeta(x,y),3)"
+		}
+		
+		statement: """
+			The line of best fit for data set $(1,3), (3,12), (7,23), (19,34), (36,40)$ is $y = \var{a} + \var{b}x$.
+		"""
+	}
+  ]
+}
