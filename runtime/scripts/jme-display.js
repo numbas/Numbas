@@ -411,7 +411,7 @@ var texOps = {
 		return '\\begin{pmatrix} ' + rows.join(' \\\\ ')+' \\end{pmatrix}';
 	}),
 	'listval': (function(thing,texArgs) {
-		return texArgs[0]+' ['+texArgs[1]+']';
+		return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
 	}),
 	'verbatim': (function(thing,texArgs) {
 		return thing.args[0].tok.value;
