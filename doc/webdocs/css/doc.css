@@ -43,6 +43,19 @@ a:hover {
 	font-style: italic;
 }
 
+#documentation > ul {
+    list-style-type: none;
+    padding-left: 0;
+    background: #eee;
+}
+#documentation > ul li {
+    display:  inline-block;
+    background: #a2d1f0;
+    padding: 0.1em 0.3em;
+    margin-right: 0.5em;
+    font-size: 1.3em;
+}
+
 #documentation > .tab {
 	font-size: .9em;
 }
