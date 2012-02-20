@@ -984,6 +984,16 @@ var TName = types.TName = types.name = function(name,annotation)
 	this.annotation = annotation;
 }
 TName.prototype.type = 'name';
+TName.doc = {
+	name: 'name',
+	usage: ['x','X','x1','longName','vec:x'],
+	description: 'A variable or function name. Names are case-insensitive, so @x@ represents the same thing as @X@. \
+		\n\n\
+		@e@, @i@ and @pi@ are reserved names representing mathematical constants. They are rewritten by the interpreter to their respective numerical values before evaluation. \
+		\n\n\
+		Names can be given _annotations_ to change how they are displayed. The following annotations are \
+	'
+};
 
 var TFunc = types.TFunc = types['function'] = function(name,annotation)
 {

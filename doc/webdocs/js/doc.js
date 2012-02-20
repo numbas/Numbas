@@ -63,14 +63,18 @@ $(document).ready(function() {
 		vm.functions = functions;
 
 		var types = vm.types = [];
+		var got = {};
 		for(var name in Numbas.jme.types)
 		{
 			var type = Numbas.jme.types[name];
-			if(type.doc && types.indexOf(type)==-1)
+			if(type.doc && !(type.doc.name in got))
 			{
-				types.push(type);
+				types.push(type.doc);
+				got[type.doc.name] = true;
 			}
 		}
+		types.sort(function(a,b){return a.name>b.name ? 1 : (a.name<b.name ? -1 : 0)});
+		$('#types .list').html( templates['types-template'](vm.types) );
 	};
 	Numbas.tryInit();
 

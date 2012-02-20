@@ -68,7 +68,7 @@ Copyright 2012 Newcastle University
 
 		<script id="functions-template" type="text/x-handlebars-template">
 			{{#each this}}
-			<li class="function">
+			<li class="function def">
 				<div class="name">
 					{{name}} :: 
 					({{#join intype ", "}}<code class="intype">{{this}}</code>{{/join}})
@@ -85,7 +85,7 @@ Copyright 2012 Newcastle University
 
 		<script id="types-template" type="text/x-handlebars-template">
 			{{#each this}}
-			<li class="type">
+			<li class="type def">
 				<div class="name">
 					{{name}}
 				</div>
@@ -102,7 +102,7 @@ Copyright 2012 Newcastle University
 		<div id="documentation" class="area lefthalf">
 			<ul>
 				<li><a href="#functions">Functions</a></li>
-				<li><a href="#datatypes">Data types</a></li>
+				<li><a href="#types">Data types</a></li>
 			</ul>
 			<div id="functions" class="tab">
 				<h1>Function search</h1>
@@ -111,8 +111,10 @@ Copyright 2012 Newcastle University
 				<ul class="list">
 				</ul>
 			</div>
-			<div id="datatypes" class="tab">
+			<div id="types" class="tab">
 				<h1>Data types</h1>
+				<ul class="list">
+				</ul>
 			</div>
 		</div>
 		<div id="tryJME" class="area righthalf">
