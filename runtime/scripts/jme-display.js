@@ -409,6 +409,12 @@ var texOps = {
 			return x.args.map(function(y){ return texify(y); }).join(' & ');
 		})
 		return '\\begin{pmatrix} ' + rows.join(' \\\\ ')+' \\end{pmatrix}';
+	}),
+	'listval': (function(thing,texArgs) {
+		return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
+	}),
+	'verbatim': (function(thing,texArgs) {
+		return thing.args[0].tok.value;
 	})
 }
 
@@ -580,6 +586,12 @@ function texName(name,annotation)
 	{
 		switch(annotation[i])
 		{
+		case 'verb':	//verbatim - use to get round things like i and e being interpreted as constants
+		case 'verbatim':
+			break;
+		case 'op':	//operator name - use non-italic font
+			name = '\\operatorname{'+name+'}';
+			break;
 		case 'v':	//vector
 		case 'vector':
 			name = '\\boldsymbol{'+name+'}';

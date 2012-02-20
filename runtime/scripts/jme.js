@@ -1080,7 +1080,8 @@ var synonyms = {
 	'gcf': 'gcd',
 	'sgn':'sign',
 	'len': 'abs',
-	'length': 'abs'
+	'length': 'abs',
+	'verb': 'verbatim'
 };
 	
 
@@ -1679,6 +1680,26 @@ new funcObj('vector',[TList],TVector, null, {
 	}
 });
 
+//create matrix from list of lists
+new funcObj('matrix',[TList],TMatrix,null, {
+	evaluate: function(args,variables,functions)
+	{
+		var list = jme.evaluate(args[0],variables,functions);
+		var rows = list.vars;
+		var columns = 0;
+		var value = [];
+		for(var i=0;i<rows;i++)
+		{
+			var row = list.value[i].value;
+			value.push(row.map(function(x){return x.value}));
+			columns = Math.max(columns,row.length);
+		}
+		value.rows = rows;
+		value.columns = columns;
+		return new TMatrix(value);
+	}
+});
+
 new funcObj('matrix',['*list'],TMatrix, null, {
 	evaluate: function(args,variables,functions)
 	{
@@ -1724,6 +1745,7 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 	}
 });
 
+//cast vector to list
 new funcObj('list',[TVector],TList,null, {
 	evaluate: function(args,variables,functions)
 	{
@@ -1736,6 +1758,21 @@ new funcObj('list',[TVector],TList,null, {
 		usage: ['list(vector(0,1,2))','list(vector)'],
 		description: 'Cast a vector to a list.',
 		tags: ['convert']
+	}
+});
+
+//cast matrix to list of lists
+new funcObj('list',[TMatrix],TList,null, {
+	evaluate: function(args,variables,functions)
+	{
+		var matrix = jme.evaluate(args[0],variables,functions);
+		var value = [];
+		for(var i=0;i<matrix.value.rows;i++)
+		{
+			var row = new TList(matrix.value[i].map(function(n){return new TNum(n)}));
+			value.push(row);
+		}
+		return new TList(value);
 	}
 });
 
