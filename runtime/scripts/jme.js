@@ -893,7 +893,7 @@ var TString = types.TString = types.string = function(s)
 TString.prototype.type = 'string';
 TString.doc = {
 	name: 'string',
-	usage: ['\'hello\'','"hello"],
+	usage: ['\'hello\'','"hello"'],
 	description: "Use strings to create non-mathematical text."
 };
 
@@ -1208,15 +1208,20 @@ var matrixmath = Numbas.matrixmath;
 // the built-in operations and functions
 var builtins = jme.builtins = {};
 
-builtins['eval'] = [{name: 'eval',
-					intype: ['?'],
-					outtype: '?',
-					typecheck: function(){return true;}
-	}];
+builtins['eval'] = [{
+	name: 'eval',
+	intype: ['?'],
+	outtype: '?',
+	typecheck: function(){return true;},
+	doc: {
+		usage: ['eval(x+2)'],
+		description: 'Dummy function used by simplification rules to evaluate an expression.'
+	}
+}];
 
 var funcs = {};
 
-new funcObj('_', ['?','?'], function(){return new TNum(0);}, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
+new funcObj('_', ['?','?'], '?', null, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
 new funcObj('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});	
 new funcObj('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
 new funcObj('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
@@ -1371,9 +1376,11 @@ new funcObj('random',[TList],'?',null, {
 new funcObj( 'random',[],'?', null, {
 	typecheck: function() { return true; },
 	evaluate: function(args,variables,functions) { return jme.evaluate(math.choose(args),variables,functions);},
-	usage: 'random(1,2,3,4,5)',
-	description: 'Choose at random from the given arguments.',
-	tags: ['pick','select']
+	doc: {
+		usage: 'random(1,2,3,4,5)',
+		description: 'Choose at random from the given arguments.',
+		tags: ['pick','select']
+	}
 });
 
 new funcObj('mod', [TNum,TNum], TNum, function(a,b){return a%b;}, {doc: {usage: 'mod(a,b)', description: 'Modulus, i.e. $a \\bmod{b}.$', tags: ['remainder','modulo']}} );
@@ -1643,7 +1650,7 @@ new funcObj('sort',[TList],TList, null, {
 
 	doc: {
 		usage: 'sort(list)',
-		apply: 'Sort a list.'
+		description: 'Sort a list.'
 	}
 });
 
@@ -1680,7 +1687,6 @@ new funcObj('vector',[TList],TVector, null, {
 	}
 });
 
-//create matrix from list of lists
 new funcObj('matrix',[TList],TMatrix,null, {
 	evaluate: function(args,variables,functions)
 	{
@@ -1697,6 +1703,12 @@ new funcObj('matrix',[TList],TMatrix,null, {
 		value.rows = rows;
 		value.columns = columns;
 		return new TMatrix(value);
+	},
+
+	doc: {
+		usage: ['matrix([ [1,2], [3,4] ])', 'matrix([ row1, row2 ])'],
+		tags: ['convert','cast','constructor','new'],
+		description: 'Create a matrix from a list of rows. This constructor is useful if the number of rows is not a constant.'
 	}
 });
 
@@ -1773,6 +1785,12 @@ new funcObj('list',[TMatrix],TList,null, {
 			value.push(row);
 		}
 		return new TList(value);
+	},
+
+	doc: {
+		usage: ['list(matrix([0,1],[2,3]))'],
+		tags: ['convert','cast'],
+		description: 'Cast a matrix to a list of its rows.'
 	}
 });
 

@@ -53,6 +53,8 @@ $(document).ready(function() {
 					description: doc.description || '',
 					tags: doc.tags || []
 				};
+				if(!doc.description.length)
+					Numbas.debug('Function '+name+' has not been documented.',true);
 				fn.searchText = [fn.name,fn.tags.join(', '),fn.intype.join(', '),fn.outtype,fn.usage,fn.description].join('\n');
 				functions.push(fn);
 			}
@@ -208,4 +210,5 @@ $(document).ready(function() {
 	}},'.example');
 
 	$('#documentation').tabs();
+
 });
