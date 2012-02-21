@@ -83,7 +83,6 @@ class ExamParser:
 				thing = self.getthing()
 				obj[name] = thing
 
-				oc = self.cursor
 				self.stripspace()
 
 				if self.source[self.cursor]=='\n':
