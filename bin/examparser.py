@@ -178,7 +178,7 @@ class ExamParser:
 			return string
 		else:	#undelimited literal
 			i=self.cursor
-			while i<len(self.source) and self.source[i] not in ']}\n,' and self.source[i:i+2]!='//':
+			while i<len(self.source) and self.source[i] not in ']}\n,:' and self.source[i:i+2]!='//':
 				i+=1
 			
 			v=self.source[self.cursor:i].strip()
