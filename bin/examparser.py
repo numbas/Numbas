@@ -86,10 +86,6 @@ class ExamParser:
 				oc = self.cursor
 				self.stripspace()
 
-				if i==len(self.source):
-					self.cursor=oc
-					raise ParseError(self,"Couldn't find anything to assign as object property '%s'" % name,"check for unmatched brackets")
-
 				if self.source[self.cursor]=='\n':
 					self.cursor +=1
 					self.lstripcomments()
