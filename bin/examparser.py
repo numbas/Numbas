@@ -33,6 +33,9 @@ class ExamParser:
 
 	#parse a string into a data structure
 	def parse(self,source):
+		if len(source)==0:
+			raise ParseError(self,"Empty source string")
+
 		self.source = source
 		self.cursor = 0
 		self.data = self.getthing()
