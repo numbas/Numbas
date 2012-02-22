@@ -186,8 +186,8 @@ var jme = Numbas.jme = {
 					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name));
 
 				var thing = {tok: tok,
-							 args: output.slice(-tok.vars)};
-				output = output.slice(0,-tok.vars);
+							 args: output.slice(output.length-tok.vars)};
+				output = output.slice(0,output.length-tok.vars);
 				output.push(thing);
 			}
 			else
