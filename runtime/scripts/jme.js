@@ -183,11 +183,11 @@ var jme = Numbas.jme = {
 			if(tok.vars!==undefined)
 			{
 				if(output.length<tok.vars)
-					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name));
+					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name || tok.type));
 
 				var thing = {tok: tok,
-							 args: output.slice(-tok.vars)};
-				output = output.slice(0,-tok.vars);
+							 args: output.slice(output.length-tok.vars)};
+				output = output.slice(0,output.length-tok.vars);
 				output.push(thing);
 			}
 			else
