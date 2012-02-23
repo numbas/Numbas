@@ -1303,10 +1303,21 @@ new funcObj('second', [], TNum, date.getSeconds );
 new funcObj('msecond', [], TNum, date.getMilliseconds );
 new funcObj('dayofweek', [], TNum, date.getDay );
 
-new funcObj('abs', [TNum], TNum, math.abs );
-new funcObj('abs', [TList], TNum, function(l) { return l.length; });
-new funcObj('abs', [TRange], TNum, function(r) { return (r[1]-r[0])/r[2]+1; });
-new funcObj('abs', [TVector], TNum, vectormath.abs);
+new funcObj('abs',['?'],TNum, function(e) {
+	switch(e.type)
+	{
+	case 'number':
+		return math.abs(e);
+	case 'list':
+		return e.length;
+	case 'range':
+		return (r[1]-r[0])/r[2]+1;
+	case 'vector':
+		return vectormath.abs(e);
+	default:
+		return e.length || Math.abs(e);
+	}
+});
 new funcObj('arg', [TNum], TNum, math.arg );
 new funcObj('re', [TNum], TNum, math.re );
 new funcObj('im', [TNum], TNum, math.im );
