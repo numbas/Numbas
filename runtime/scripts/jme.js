@@ -1385,6 +1385,12 @@ new funcObj('gcd', [TNum,TNum], TNum, math.gcf );
 new funcObj('lcm', [TNum,TNum], TNum, math.lcm );
 new funcObj('|', [TNum,TNum], TBool, math.divides );
 
+new funcObj('deal',[TNum],TList, function(n) {
+	return math.deal(n).map(function(i) {
+		return new TNum(i);
+	});
+});
+
 new funcObj('diff', ['?','?',TNum], '?');
 new funcObj('pdiff', ['?','?',TNum], '?');
 new funcObj('int', ['?','?'], '?');
