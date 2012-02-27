@@ -738,7 +738,7 @@ class MultipleChoicePart(Part):
 	
 		if 'matrix' in data:
 			part.matrix = data['matrix']
-			if not isinstance(part.matrix[0],list):	#so you can give just one row without wrapping it in another array
+			if isinstance(part.matrix,list) and (not isinstance(part.matrix[0],list)):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
 		if 'distractors' in data:
@@ -773,14 +773,17 @@ class MultipleChoicePart(Part):
 		marking.find('maxmarks').attrib = {'enabled': str(self.maxMarksEnabled), 'value': str(self.maxMarks)}
 		marking.find('minmarks').attrib = {'enabled': str(self.minMarksEnabled), 'value': str(self.minMarks)}
 		matrix = marking.find('matrix')
-		for i in range(len(self.matrix)):
-			for j in range(len(self.matrix[i])):
-				mark = etree.Element('mark',{
-					'answerindex': str(j), 
-					'choiceindex': str(i), 
-					'value': str(self.matrix[i][j])
-					})
-				matrix.append(mark)
+		if isinstance(self.matrix,str):
+			matrix.attrib = {'def':self.matrix}
+		else:
+			for i in range(len(self.matrix)):
+				for j in range(len(self.matrix[i])):
+					mark = etree.Element('mark',{
+						'answerindex': str(j), 
+						'choiceindex': str(i), 
+						'value': str(self.matrix[i][j])
+						})
+					matrix.append(mark)
 
 		distractors = marking.find('distractors')
 		for i in range(len(self.distractors)):

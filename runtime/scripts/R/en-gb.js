@@ -122,6 +122,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
 	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",
 	'part.mcq.no choices selected': "No choices selected.",
+	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
 	
 	'question.substituting': "Error substituting content: \n%s\n\n%s",
 	'question.no such part': "Can't find part %s",

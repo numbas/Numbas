@@ -1244,36 +1244,60 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	//fill marks matrix
 	var matrix=[];
-	var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
-	for( i=0; i<matrixNodes.length; i++ )
+	var def;
+	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def'))
 	{
-		var cell = {value: ""};
-		tryGetAttribute(cell, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
-
-		if(util.isFloat(cell.value))
-			cell.value = parseFloat(cell.value);
+		matrix = jme.evaluate(def,this.question.variables,this.question.functions);
+		if(matrix.type!='list')
+		{
+			throw(new Numbas.Error('part.mcq.matrix not a list'));
+		}
+		if(matrix.value[0].type=='list')
+		{
+			matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
+				return row.map(function(e){return e.value;});
+			});
+		}
 		else
 		{
-			cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
-			if(!util.isFloat(cell.value))
-				throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
-			cell.value = parseFloat(cell.value);
+			matrix = matrix.value.map(function(e) {
+				return [e.value];
+			});
 		}
+	}
+	else
+	{
+		var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
+		for( i=0; i<matrixNodes.length; i++ )
+		{
+			var cell = {value: ""};
+			tryGetAttribute(cell, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
 
-		//take into account shuffling
-		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
-		cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
+			if(util.isFloat(cell.value))
+				cell.value = parseFloat(cell.value);
+			else
+			{
+				cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
+				if(!util.isFloat(cell.value))
+					throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
+				cell.value = parseFloat(cell.value);
+			}
 
-		if(this.type == '1_n_2' || this.type == 'm_n_2')
-		{	//for some reason, possible answers are recorded as choices in the multiple choice types.
-			//switch the indices round, so we don't have to worry about this again
-			cell.answerIndex = cell.choiceIndex;
-			cell.choiceIndex = 0;
+			//take into account shuffling
+			cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
+			cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
+
+			if(this.type == '1_n_2' || this.type == 'm_n_2')
+			{	//for some reason, possible answers are recorded as choices in the multiple choice types.
+				//switch the indices round, so we don't have to worry about this again
+				cell.answerIndex = cell.choiceIndex;
+				cell.choiceIndex = 0;
+			}
+
+			if(!matrix[cell.answerIndex])
+				matrix[cell.answerIndex]=[];
+			matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 		}
-
-		if(!matrix[cell.answerIndex])
-			matrix[cell.answerIndex]=[];
-		matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 	}
 	settings.matrix = matrix;
 	var distractors=[];

@@ -1781,7 +1781,7 @@ var findvars = jme.findvars = function(tree,boundvars)
 					out = out.merge(findvars(tree2,boundvars));
 					break;
 				case 'simplify':
-					var sbits = splitbrackets(expr,'{','}');
+					var sbits = util.splitbrackets(expr,'{','}');
 					for(var i=1;i<sbits.length-1;i+=2)
 					{
 						var tree2 = jme.compile(sbits[i],{},true);
