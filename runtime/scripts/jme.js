@@ -183,11 +183,11 @@ var jme = Numbas.jme = {
 			if(tok.vars!==undefined)
 			{
 				if(output.length<tok.vars)
-					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name));
+					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name || tok.type));
 
 				var thing = {tok: tok,
-							 args: output.slice(-tok.vars)};
-				output = output.slice(0,-tok.vars);
+							 args: output.slice(output.length-tok.vars)};
+				output = output.slice(0,output.length-tok.vars);
 				output.push(thing);
 			}
 			else
@@ -1411,6 +1411,19 @@ new funcObj('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x
 new funcObj('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
 new funcObj('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
 
+new funcObj('deal',[TNum],TList, 
+	function(n) {
+		return math.deal(n).map(function(i) {
+			return new TNum(i);
+		});
+	},
+	{doc: {
+		usage: ['deal(n)','deal(5)'],
+		description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
+		tags: ['permutation','order','shuffle']
+	}}
+);
+
 //if needs to be a bit different because it can return any type
 new funcObj('if', [TBool,'?','?'], '?',null, {
 	evaluate: function(args,variables,functions)
@@ -1510,13 +1523,12 @@ new funcObj('repeat',['?',TNum],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var size = jme.evaluate(args[1],variables,functions).value;
-		var l = new TList(size);
-		l.value = [];
+		var value = [];
 		for(var i=0;i<size;i++)
 		{
-			l.value[i] = jme.evaluate(args[0],variables,functions);
+			value[i] = jme.evaluate(args[0],variables,functions);
 		}
-		return l;
+		return new TList(value);
 	},
 
 	doc: {
@@ -1602,16 +1614,15 @@ new funcObj('map',['?',TName,TList],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list = jme.evaluate(args[2],variables,functions);
-		var newlist = new TList(list.vars);
-		newlist.value = [];
+		var value = [];
 		var name = args[1].tok.name;
 		variables = util.copyobj(variables);
 		for(var i=0;i<list.value.length;i++)
 		{
 			variables[name] = list.value[i];
-			newlist.value[i] = jme.evaluate(args[0],variables,functions);
+			value[i] = jme.evaluate(args[0],variables,functions);
 		}
-		return newlist;
+		return new TList(value);
 	},
 	
 	doc: {
@@ -1897,7 +1908,7 @@ var findvars = jme.findvars = function(tree,boundvars)
 					out = out.merge(findvars(tree2,boundvars));
 					break;
 				case 'simplify':
-					var sbits = splitbrackets(expr,'{','}');
+					var sbits = util.splitbrackets(expr,'{','}');
 					for(var i=1;i<sbits.length-1;i+=2)
 					{
 						var tree2 = jme.compile(sbits[i],{},true);

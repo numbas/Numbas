@@ -175,7 +175,7 @@ Copyright 2011 Newcastle University
 				<xsl:apply-templates select="choice" mode="checkbox">
 					<xsl:with-param name="path" select="$path"/>
 				</xsl:apply-templates>
-			</ul>
+			</ul><br style="clear:left;"/>
 			</form>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">

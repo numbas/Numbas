@@ -33,6 +33,9 @@ class ExamParser:
 
 	#parse a string into a data structure
 	def parse(self,source):
+		if len(source)==0:
+			raise ParseError(self,"Empty source string")
+
 		self.source = source
 		self.cursor = 0
 		self.data = self.getthing()
@@ -80,12 +83,7 @@ class ExamParser:
 				thing = self.getthing()
 				obj[name] = thing
 
-				oc = self.cursor
 				self.stripspace()
-
-				if i==len(self.source):
-					self.cursor=oc
-					raise ParseError(self,"Couldn't find anything to assign as object property '%s'" % name,"check for unmatched brackets")
 
 				if self.source[self.cursor]=='\n':
 					self.cursor +=1
@@ -175,7 +173,7 @@ class ExamParser:
 			return string
 		else:	#undelimited literal
 			i=self.cursor
-			while i<len(self.source) and self.source[i] not in ']}\n,' and self.source[i:i+2]!='//':
+			while i<len(self.source) and self.source[i] not in ']}\n,:' and self.source[i:i+2]!='//':
 				i+=1
 			
 			v=self.source[self.cursor:i].strip()
