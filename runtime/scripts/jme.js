@@ -1477,13 +1477,12 @@ new funcObj('repeat',['?',TNum],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var size = jme.evaluate(args[1],variables,functions).value;
-		var l = new TList(size);
-		l.value = [];
+		var value = [];
 		for(var i=0;i<size;i++)
 		{
-			l.value[i] = jme.evaluate(args[0],variables,functions);
+			value[i] = jme.evaluate(args[0],variables,functions);
 		}
-		return l;
+		return new TList(value);
 	}
 });
 
@@ -1540,16 +1539,15 @@ new funcObj('map',['?',TName,TList],TList, null, {
 	evaluate: function(args,variables,functions)
 	{
 		var list = jme.evaluate(args[2],variables,functions);
-		var newlist = new TList(list.vars);
-		newlist.value = [];
+		var value = [];
 		var name = args[1].tok.name;
 		variables = util.copyobj(variables);
 		for(var i=0;i<list.value.length;i++)
 		{
 			variables[name] = list.value[i];
-			newlist.value[i] = jme.evaluate(args[0],variables,functions);
+			value[i] = jme.evaluate(args[0],variables,functions);
 		}
-		return newlist;
+		return new TList(value);
 	}
 });
 
