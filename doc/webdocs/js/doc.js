@@ -213,6 +213,23 @@ $(document).ready(function() {
 		$('#tryJME #expression').val(expr).change();
 	}},'.example');
 
-	$('#documentation').tabs();
+	$('#documentation').tabs({
+		select: function(e,ui) {
+			location.href = ui.tab.href;
+		}
+	});
 
+	Sammy('#documentation',function() {
+		this.get('#functions',function() {
+			$('#documentation').tabs('select',0);
+		});
+		this.get('#functions/:query',function(context) {
+			$('#documentation').tabs('select',0);
+			$('#functions #search').val(context.params.query);
+			findFunctions();
+		});
+		this.get('#types',function() {
+			$('#documentation').tabs('select',1);
+		});
+	}).run();
 });

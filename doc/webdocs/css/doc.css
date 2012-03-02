@@ -72,9 +72,13 @@ a:hover {
 	margin-bottom: 1em;
 }
 
-.def .name {
+.function.def .name {
 	font-size: 1.2em;
 	font-weight: bold;
+}
+
+.type.def .name {
+	margin-bottom: .3em;
 }
 
 .def code {

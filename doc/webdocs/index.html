@@ -30,6 +30,10 @@ Copyright 2012 Newcastle University
 		<script charset="UTF-8" type="text/javascript" src="js/jquery.js"></script>
 		<script charset="UTF-8" type="text/javascript" src="js/jquery-ui.js"></script>
 
+		<!-- sammy.js - routing with hashes -->
+		<script charset="UTF-8" type="text/javascript" src="js/sammy.js"></script>
+
+
 		<!-- textile markup -->
 		<script charset="UTF-8" type="text/javascript" src="../../runtime/scripts/textile/textile.js"></script>
 
@@ -86,9 +90,9 @@ Copyright 2012 Newcastle University
 		<script id="types-template" type="text/x-handlebars-template">
 			{{#each this}}
 			<li class="type def">
-				<div class="name">
+				<h3 class="name">
 					{{name}}
-				</div>
+				</h3>
 				<div class="usages">
 					<strong>Example usage: </strong> {{> usage-partial}}
 				</div>
