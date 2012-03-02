@@ -16,7 +16,7 @@ $(document).ready(function() {
 			$('#documentation').tabs('select',0);
 			$('#functions #search').val(context.params.query);
 			findFunctions();
-			changeTitle(search+' - Functions');
+			changeTitle(context.params.query+' - Functions');
 		});
 		this.get('#types',function() {
 			$('#documentation').tabs('select',1);
@@ -142,16 +142,16 @@ $(document).ready(function() {
 	}
 
 	function findFunctions() {
-		var search = $('#functions #search').val().toLowerCase().split(' ');
-		if(!(search[0].length))
+		var query = $('#functions #search').val().toLowerCase().split(' ');
+		if(!(query[0].length))
 		{
 			$('#functions .list').html('');
 			return;
 		}
 		var found = vm.foundFunctions = vm.functions.slice();
-		for(var i=0;i<search.length;i++)
+		for(var i=0;i<query.length;i++)
 		{
-			var word = search[i];
+			var word = query[i];
 			found = found.filter(function(def) {
 				def.searchIndex = def.searchText.toLowerCase().indexOf(word);
 				if(def.searchIndex >= 0)
@@ -163,12 +163,12 @@ $(document).ready(function() {
 		$('#functions .list').mathjax();
 	}
 	function enterSearch() {
-		var search = $('#functions #search').val().toLowerCase();
+		var query = $('#functions #search').val().toLowerCase();
 		if(history.replaceState)
-			history.replaceState(null,'','#functions/'+search);
+			history.replaceState(null,'','#functions/'+query);
 		findFunctions();
 	}
-	$('#functions #search').keyup(enterSearch).change(enterSearch);
+	$('#functions #search').keyup(findFunctions).change(enterSearch);
 
 
 	function tryJME() {
