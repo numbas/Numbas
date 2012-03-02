@@ -1,5 +1,30 @@
 var vm = {};
 $(document).ready(function() {
+	function changeTitle(title) {
+		if(title.length)
+			document.title = title+' - Numbas Documentation';
+		else
+			document.title = 'Numbas Documentation';
+	}
+
+	var app = Sammy('#documentation',function() {
+		this.get('#functions',function() {
+			$('#documentation').tabs('select',0);
+			changeTitle('Functions');
+		});
+		this.get('#functions/:query',function(context) {
+			$('#documentation').tabs('select',0);
+			$('#functions #search').val(context.params.query);
+			findFunctions();
+			changeTitle(search+' - Functions');
+		});
+		this.get('#types',function() {
+			$('#documentation').tabs('select',1);
+			changeTitle('Data types');
+		});
+	});
+
+
 	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 	$.fn.mathjax = function() {
 		$(this).each(function() {
@@ -75,6 +100,8 @@ $(document).ready(function() {
 		}
 		types.sort(function(a,b){return a.name>b.name ? 1 : (a.name<b.name ? -1 : 0)});
 		$('#types .list').html( templates['types-template'](vm.types) );
+
+		app.run();
 	};
 	Numbas.tryInit();
 
@@ -134,9 +161,14 @@ $(document).ready(function() {
 		found.sort(compare('searchIndex','name'));
 		$('#functions .list').html( templates['functions-template'](found) );
 		$('#functions .list').mathjax();
-
 	}
-	$('#functions #search').keyup(findFunctions).change(findFunctions);
+	function enterSearch() {
+		var search = $('#functions #search').val().toLowerCase();
+		if(history.replaceState)
+			history.replaceState(null,'','#functions/'+search);
+		findFunctions();
+	}
+	$('#functions #search').keyup(enterSearch).change(enterSearch);
 
 
 	function tryJME() {
@@ -219,17 +251,4 @@ $(document).ready(function() {
 		}
 	});
 
-	Sammy('#documentation',function() {
-		this.get('#functions',function() {
-			$('#documentation').tabs('select',0);
-		});
-		this.get('#functions/:query',function(context) {
-			$('#documentation').tabs('select',0);
-			$('#functions #search').val(context.params.query);
-			findFunctions();
-		});
-		this.get('#types',function() {
-			$('#documentation').tabs('select',1);
-		});
-	}).run();
 });
