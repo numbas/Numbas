@@ -47,11 +47,16 @@ a:hover {
 	font-style: italic;
 }
 
+#documentation {
+	line-height: 1.5em;
+}
+
 #documentation > ul {
     list-style-type: none;
     padding-left: 0;
     background: #eee;
 }
+
 #documentation > ul li {
     display:  inline-block;
     background: #a2d1f0;
@@ -62,6 +67,10 @@ a:hover {
 
 #documentation > .tab {
 	font-size: .9em;
+}
+
+#documentation ul {
+	margin: 0 0 1em;
 }
 
 #functions .list, #types .list {
