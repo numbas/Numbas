@@ -8,19 +8,18 @@ $(document).ready(function() {
 	}
 
 	var app = Sammy('#documentation',function() {
-		this.get('#functions',function() {
-			$('#documentation').tabs('select',0);
-			changeTitle('Functions');
-		});
 		this.get('#functions/:query',function(context) {
-			$('#documentation').tabs('select',0);
+			$('#documentation').tabs('select',1);
 			$('#functions #search').val(context.params.query);
 			findFunctions();
 			changeTitle(context.params.query+' - Functions');
 		});
-		this.get('#types',function() {
-			$('#documentation').tabs('select',1);
-			changeTitle('Data types');
+		this.get('#:section',function(context) {
+			var section = context.params.section;
+			var index = $('#documentation div#'+section).prevAll('div').length;
+			$('#documentation').tabs('select',index);
+			var title = $('#documentation > ul li').eq(index).text();
+			changeTitle(title)
 		});
 	});
 
@@ -215,7 +214,7 @@ $(document).ready(function() {
 				{
 					result = Numbas.jme.display.treeToJME({tok:result});
 					$('#tryJME #result')
-						.removeClass(error)
+						.removeClass('error')
 						.html(result)
 					;
 				}
@@ -240,7 +239,7 @@ $(document).ready(function() {
 	}
 	$('#tryJME #expression').keyup(tryJME).change(tryJME);
 
-	$('#functions .list').on({click: function() {
+	$('#documentation').on({click: function() {
 		var expr = $(this).text();
 		$('#tryJME #expression').val(expr).change();
 	}},'.example');

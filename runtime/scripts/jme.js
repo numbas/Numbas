@@ -986,12 +986,21 @@ var TName = types.TName = types.name = function(name,annotation)
 TName.prototype.type = 'name';
 TName.doc = {
 	name: 'name',
-	usage: ['x','X','x1','longName','vec:x'],
+	usage: ['x','X','x1','longName','dot:x','vec:x'],
 	description: 'A variable or function name. Names are case-insensitive, so @x@ represents the same thing as @X@. \
-		\n\n\
-		@e@, @i@ and @pi@ are reserved names representing mathematical constants. They are rewritten by the interpreter to their respective numerical values before evaluation. \
-		\n\n\
-		Names can be given _annotations_ to change how they are displayed. The following annotations are \
+\n\n\
+@e@, @i@ and @pi@ are reserved names representing mathematical constants. They are rewritten by the interpreter to their respective numerical values before evaluation. \
+\n\n\
+Names can be given _annotations_ to change how they are displayed. The following annotations are built-in:\
+\n\n\
+* @verb@ - does nothing, but names like @i@, @pi@ and @e@ are not interpreted as the famous mathematical constants.\n\
+* @op@ - denote the name as the name of an operator -- wraps the name in the LaTeX @\\operatorname@ command when displayed\n\
+* @v@ or @vector@ - denote the name as representing a vector -- the name is displayed in boldface\n\
+* @unit@ - denote the name as representing a unit vector -- places a hat above the name when displayed\n\
+* @dot@ - places a dot above the name when displayed, for example when representing a derivative\n\
+* @m@ or @matrix@ - denote the name as representing a matrix -- displayed using a non-italic font\
+\n\n\
+Any other annotation is taken to be a LaTeX command. For example, a name @vec:x@ is rendered in LaTeX as <code>\\vec{x}</code>, which places an arrow above the name.\
 	'
 };
 

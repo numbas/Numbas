@@ -38,6 +38,10 @@ a:hover {
 #tryJME #display {
 }
 
+#tryJME #result {
+	font: 1.3em monospace;
+}
+
 #tryJME .error {
 	color: red;
 	font-style: italic;
