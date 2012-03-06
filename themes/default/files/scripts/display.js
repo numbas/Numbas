@@ -215,7 +215,7 @@ display.ExamDisplay.prototype =
 		//enable or disable 'previous question' button
 		if(exam.currentQuestion.number === 0)
 			$('*').find('#prevBtn').attr('disabled','true').hide();
-		else
+		else if(exam.navigateReverse)
 			$('*').find('#prevBtn').removeAttr('disabled').show();
 
 		//enable or disable 'next question' button

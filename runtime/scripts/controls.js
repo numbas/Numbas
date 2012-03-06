@@ -81,8 +81,8 @@ Numbas.controls = {
 				return;
 
 			if( Numbas.exam.navigateBrowse || 											// is browse navigation enabled?
-				(questionList[jumpTo].visited && Numbas.exam.navigateReverse) ||		// if not, we can still move backwards to questions already seen if reverse navigation is enabled
-				(jumpTo>Numbas.exam.currentQuestion.number && questionList[jumpTo-1].visited)// or you can always move to the next question
+				(Numbas.exam.questionList[jumpTo].visited && Numbas.exam.navigateReverse) ||		// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+				(jumpTo>Numbas.exam.currentQuestion.number && Numbas.exam.questionList[jumpTo-1].visited)// or you can always move to the next question
 			)
 			{
 				Numbas.exam.tryChangeQuestion( jumpTo );
