@@ -662,8 +662,12 @@ display.PartDisplay.prototype =
 			}
 			else
 			{
-				c.find('#feedbackMessage:last').hide();
+				c.find('#feedbackMessage').hide();
 			}
+		}
+		else
+		{
+			c.find('#feedbackMessage').hide();
 		}
 	},
 
