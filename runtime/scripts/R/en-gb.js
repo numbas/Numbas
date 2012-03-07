@@ -128,11 +128,17 @@ R.registerLocale('en-GB',{
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",
+
+	'question.score feedback.answered total actual': "Score: %(score)/%(marks)",
+	'question.score feedback.answered total': "%(marksString). Answered.",
+	'question.score feedback.answered actual': "Score: %(scoreString)",
+	'question.score feedback.answered': "Answered.",
+	'question.score feedback.unanswered total': "%(marksString).",
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Time remaining: %s",
 	
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
-	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
+	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s"
 });

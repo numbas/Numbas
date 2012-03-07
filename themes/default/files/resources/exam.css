@@ -151,11 +151,12 @@ body {
 
 .questionSelector #name {
 	float:left;
-	width: 12em;
+	width: 15em;
 }
 
 .questionSelector #marks {
-	float:right;
+	float: right;
+	clear: left;
 }
 
 #marks #feedback img {

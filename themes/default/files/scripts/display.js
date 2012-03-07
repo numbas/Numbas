@@ -487,19 +487,7 @@ display.QuestionDisplay.prototype =
 
 		if(!exam.showTotalMark && !exam.showActualMark)
 		{
-			if(q.answered)
-			{
-				$('.submitDiv > #score').show().html(R('question.answer submitted')).fadeOut(200).fadeIn(200);
-
-			//	if(!exam.showAnswerState)
-			//		$(this.questionSelector).find('#score').show().html('Answered');
-
-				selector.find('#submitBtn').val(R('control.submit again'));
-			}
-			else
-			{
-				selector.find('#submitBtn').val(R('control.submit'));
-			}
+			selector.find('#submitBtn').val(R(q.answered ? 'control.submit again' : 'control.submit'));
 		}
 		var anyAnswered = false;
 		for(var i=0;i<q.parts.length;i++)
@@ -1099,6 +1087,33 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 	var scoreSelector = selector.find('#score:last');
 
+	var scoreobj = {
+		marks: niceNumber(marks),
+		score: niceNumber(score),
+		marksString: niceNumber(marks)+' '+util.pluralise(marks,'mark','marks'),
+		scoreString: niceNumber(marks)+' '+util.pluralise(marks,'mark','marks')
+	};
+	if(answered)
+	{
+		var str = 'question.score feedback.answered'
+					+ (settings.showTotalMark ? ' total' : '')
+					+ (settings.showActualMark ? ' actual' : '')
+		scoreSelector
+			.show()
+			.html(R(str,scoreobj));
+	}
+	else
+	{
+		if(settings.showTotalMark)
+		{
+			scoreSelector
+				.show()
+				.html(R('question.score feedback.unanswered total',scoreobj));
+		}
+		else
+			scoreSelector.hide();
+	}
+/*
 	if(settings.showTotalMark || settings.showActualMark)
 	{
 		if(answered)
@@ -1106,7 +1121,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 			if(!settings.showTotalMark && settings.showActualMark)
 				scoreDisplay = niceNumber(score);
 			else if(settings.showTotalMark && !settings.showActualMark)
-				scoreDisplay = '('+niceNumber(marks)+')';
+				scoreDisplay = 'Answered ('+niceNumber(marks)+')';
 			else if(settings.showTotalMark && settings.showActualMark)
 				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
 
@@ -1140,6 +1155,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		else
 			scoreSelector.hide();
 	}
+*/
 
 	if( settings.showAnswerState )
 	{
