@@ -3,6 +3,11 @@
 {% block title %}Displaying maths{% endblock title %}
 
 {% block content %}
-<p>Maths is displayed using LaTeX. A good place to learn LaTeX is the <a href="http://www.artofproblemsolving.com/Wiki/index.php/LaTeX:About">Art of Problem Solving LateX Guide</a>.</p>
-<p>
+<p>Maths is displayed using LaTeX. A good place to learn LaTeX is the <a href="http://www.artofproblemsolving.com/Wiki/index.php/LaTeX:Commands">Art of Problem Solving LateX Guide</a>.</p>
+<p>Write in-line maths between dollar signs, like so:</p>
+<p style="text-align: center"><code>$e^{\pi i} + 1 = 0$</code></p>
+<p>Which produces: $e^{\pi i} + 1 = 0$.</p>
+<p>Larger formulae and equations should be written in <em>display mode</em>, like so:</p>
+<p style="text-align:center"><code>\[ \int_0^1 e^{-x^2} dx \]</code></p>
+<p>Which produces: \[ \int_0^1 e^{-x^2} dx \]</p>
 {% endblock content %}

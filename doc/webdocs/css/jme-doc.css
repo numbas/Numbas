@@ -48,6 +48,9 @@
 #documentation > ul .thing:hover {
 	background: #a2d1f0;
 }
+#documentation > ul .thing a:hover {
+	text-decoration: none;
+}
 
 #documentation > ul li.ui-tabs-selected .thing {
 	background: #a2d1f0;
