@@ -61,14 +61,21 @@ Copyright 2012 Newcastle University
 		<link rel="stylesheet" type="text/css" href="css/doc.css" />
 		<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
 	
-		{% block head %}{% endblock %}
+		
 	</head>
 
 	<body>
-		{% include "layouts/header.html" %}
+		<div class="header">
+	<ul>
+		<li><a href="index.html">Home</a></li>
+		<li><a href="displaymaths.html">Displaying Maths</a></li>
+		<li><a href="jme.html">JME</a></li>
+	</ul>
+</div>
+
 		<div class="content">
-			{% block content %}
-			{% endblock %}
+			
+
 		</div>
 	</body>
 </html>

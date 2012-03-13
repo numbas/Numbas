@@ -4,6 +4,8 @@
 	<!-- documentation -->
 	<script charset="UTF-8" type="text/javascript" src="js/jme-doc.js" charset="utf-8"></script>
 
+	<link rel="stylesheet" href="css/jme-doc.css" />
+
 	{% autoescape true %}
 	<!-- handlebars templates -->
 	<script class="template" id="usage-partial" type="text/x-handlebars-partial">
@@ -43,7 +45,7 @@
 	{% endautoescape %}
 {% endblock head %}
 
-{%block body %}
+{%block content %}
 	<div id="documentation" class="area lefthalf">
 		<ul>
 			<li><a href="#intro">Introduction</a></li>
@@ -264,4 +266,4 @@
 			<div id="result" class="output"></div>
 		</div>
 	</div>
-{% endblock body %}
+{% endblock content %}
