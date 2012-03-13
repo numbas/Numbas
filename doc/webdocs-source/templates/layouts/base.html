@@ -65,10 +65,14 @@ Copyright 2012 Newcastle University
 	</head>
 
 	<body>
-		{% include "layouts/header.html" %}
-		<div class="content">
-			{% block content %}
-			{% endblock %}
+		<div class="allcontainer">
+			{% include "layouts/header.html" %}
+			<div class="content">
+				{% block content %}
+				{% endblock %}
+				<div style="clear:both;"></div>
+			</div>
+			{% include "layouts/footer.html" %}
 		</div>
 	</body>
 </html>

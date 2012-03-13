@@ -1,5 +1,18 @@
+html, body {
+	height: 100%;
+}
+
 body {
 	font-size: 100%;
+}
+
+.allcontainer {
+	min-height: 100%;
+	position: relative;
+}
+
+.content {
+	padding-bottom: 1em;
 }
 
 .header {
@@ -18,6 +31,15 @@ body {
     padding: 0.1em 0.3em;
     margin-right: 0.5em;
     font-size: 1.5em;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	margin-top: 2em;
+	background: #a2d1f0;
+	width: 100%;
+	padding: 0.5em 1em 0.1em;
 }
 
 a:hover {
