@@ -424,6 +424,14 @@ Exam.prototype = {
 		if(i<0 || i>=this.numQuestions)
 			return;
 
+		if( ! (this.navigateBrowse 	// is browse navigation enabled?
+			|| (this.questionList[i].visited && this.navigateReverse)	// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+			|| (i>this.currentQuestion.number && this.questionList[i-1].visited)	// or you can always move to the next question
+		))
+		{
+			return;
+		}
+
 		var currentQuestion = this.currentQuestion;
 		if(!currentQuestion)
 			return;
