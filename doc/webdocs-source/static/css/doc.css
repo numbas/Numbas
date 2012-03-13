@@ -9,17 +9,26 @@ body {
 .allcontainer {
 	min-height: 100%;
 	position: relative;
+	text-align: center;
 }
 
 .content {
 	padding-bottom: 1em;
+	display: inline-block;
+	text-align: left;
 }
 
 .header {
 	margin-bottom: 1em;
 	background: #a2d1f0;
-	border-bottom: 0.15em solid #999;
+	border-bottom: 1px solid #999;
+	text-align: left;
 }
+.header h1 {
+	margin: 0;
+	text-align: center;
+}
+
 .header > ul {
     list-style-type: none;
     padding-left: 1em;
@@ -40,6 +49,7 @@ body {
 	background: #a2d1f0;
 	width: 100%;
 	padding: 0.5em 1em 0.1em;
+	border-top: 1px solid #999;
 }
 
 a:hover {

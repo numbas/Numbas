@@ -1,3 +1,7 @@
+.content {
+	width: 100%;
+}
+
 #tryJME .expression {
 	text-align:center;
 }
@@ -34,12 +38,26 @@
 
 #documentation > ul li {
     display:  inline-block;
+}
+
+#documentation > ul .thing {
     padding: 0.1em 0.3em;
     margin-right: 0.5em;
     font-size: 1.2em;
 }
-#documentation > ul li.ui-tabs-selected {
+#documentation > ul .thing:hover {
 	background: #a2d1f0;
+}
+
+#documentation > ul li.ui-tabs-selected .thing {
+	background: #a2d1f0;
+}
+
+#documentation > ul li:last-child:after {
+	content: "";
+}
+#documentation > ul li:after {
+	content: "|";
 }
 
 #documentation > .tab {

@@ -66,13 +66,24 @@ Copyright 2012 Newcastle University
 
 	<body>
 		<div class="allcontainer">
-			{% include "layouts/header.html" %}
+			<div class="header">
+				<h1>{% block title %}Numbas Documentation{% endblock title %}</h1>
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="displaymaths.html">Displaying Maths</a></li>
+					<li><a href="jme.html">Evaluating maths</a></li>
+				</ul>
+			</div>
 			<div class="content">
 				{% block content %}
 				{% endblock %}
 				<div style="clear:both;"></div>
 			</div>
-			{% include "layouts/footer.html" %}
+			<div class="footer">
+				<span class="item"><a href="http://www.ncl.ac.uk/maths/numbas/">Numbas © 2012 Newcastle University</a>.</span>
+				<span class="item">Released under an <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache 2.0 licence</a>.</span>
+				<span class="item"><a href="mailto:numbas@ncl.ac.uk">Email support</a>.</span>
+			</div>
 		</div>
 	</body>
 </html>

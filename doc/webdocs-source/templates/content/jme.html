@@ -1,5 +1,7 @@
 {% extends "layouts/base.html" %}
 
+{% block title %}Evaluating maths{% endblock title %}
+
 {% block head %}
 	<!-- documentation -->
 	<script charset="UTF-8" type="text/javascript" src="js/jme-doc.js" charset="utf-8"></script>
@@ -48,10 +50,10 @@
 {%block content %}
 	<div id="documentation" class="area lefthalf">
 		<ul>
-			<li><a href="#intro">Introduction</a></li>
-			<li><a href="#functions">Functions</a></li>
-			<li><a href="#types">Data types</a></li>
-			<li><a href="#technical">Technical information</a></li>
+			<li><span class="thing"><a href="#intro">Introduction</a></span></li>
+			<li><span class="thing"><a href="#functions">Functions</a></span></li>
+			<li><span class="thing"><a href="#types">Data types</a></span></li>
+			<li><span class="thing"><a href="#technical">Technical information</a></span></li>
 		</ul>
 		<div id="intro" class="tab">
 			<h1>Introduction</h1>
