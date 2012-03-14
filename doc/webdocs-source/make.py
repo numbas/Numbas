@@ -12,8 +12,7 @@ shutil.copytree('static',outputPath)
 shutil.copytree(os.path.join('..','..','runtime','scripts'),os.path.join(outputPath,'js','numbas'))
 
 for fname in os.listdir(os.path.join('templates','content')):
-	if os.path.splitext(fname)[1]=='html':
-		print(fname)
+	if os.path.splitext(fname)[1]=='.html':
 		template = env.get_template('content/'+fname)
 		open(os.path.join(outputPath,fname),'w',encoding='utf-8').write(template.render())
 
