@@ -12,7 +12,9 @@ shutil.copytree('static',outputPath)
 shutil.copytree(os.path.join('..','..','runtime','scripts'),os.path.join(outputPath,'js','numbas'))
 
 for fname in os.listdir(os.path.join('templates','content')):
-	template = env.get_template('content/'+fname)
-	open(os.path.join(outputPath,fname),'w',encoding='utf-8').write(template.render())
+	if os.path.splitext(fname)[1]=='html':
+		print(fname)
+		template = env.get_template('content/'+fname)
+		open(os.path.join(outputPath,fname),'w',encoding='utf-8').write(template.render())
 
 print("Webdocs created in "+outputPath)
