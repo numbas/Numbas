@@ -14,3 +14,5 @@ shutil.copytree(os.path.join('..','..','runtime','scripts'),os.path.join(outputP
 for fname in os.listdir(os.path.join('templates','content')):
 	template = env.get_template('content/'+fname)
 	open(os.path.join(outputPath,fname),'w',encoding='utf-8').write(template.render())
+
+print("Webdocs created in "+outputPath)
