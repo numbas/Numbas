@@ -24,12 +24,6 @@ $(document).ready(function() {
 	});
 
 
-	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
-	$.fn.mathjax = function() {
-		$(this).each(function() {
-			MathJaxQueue.Push(['Typeset',MathJax.Hub,this]);
-		});
-	}
 
 	Handlebars.registerHelper('textile',function(text) {
 		return textile(text);
@@ -44,17 +38,6 @@ $(document).ready(function() {
 			return array.map(fn).join(delimiter);
 	});
 
-	var templates = window.templates = {};
-	$('script[type="text/x-handlebars-template"]').each(function() {
-		var source = $(this).html();
-		var name = $(this).attr('id');
-		templates[name] = Handlebars.compile(source);
-	});
-	$('script[type="text/x-handlebars-partial"]').each(function() {
-		var source = $(this).html();
-		var name = $(this).attr('id');
-		Handlebars.registerPartial(name,source);
-	});
 
 	Numbas.loadScript('scripts/jme-display.js');
 	Numbas.loadScript('scripts/jme.js');
@@ -178,17 +161,15 @@ $(document).ready(function() {
 			.end()
 			.find('#display')
 				.html('')
+				.removeClass('error')
 			.end()
 			.find('#result')
 				.html('')
+				.removeClass('error')
 		;
 
 		if(!expr.length)
 		{
-			$('#tryJME').find('#display,#result')
-				.removeClass('error')
-				.html('')
-			;
 			return;
 		}
 
@@ -197,10 +178,9 @@ $(document).ready(function() {
 			try {
 				var tex = Numbas.jme.display.texify(tree);
 				$('#tryJME #display')
-					.removeClass('error')
 					.html('\\['+tex+'\\]')
+					.mathjax();
 				;
-				$('#tryJME #display').mathjax();
 			}
 			catch(e) {
 				$('#tryJME #display')
@@ -214,7 +194,6 @@ $(document).ready(function() {
 				{
 					result = Numbas.jme.display.treeToJME({tok:result});
 					$('#tryJME #result')
-						.removeClass('error')
 						.html(result)
 					;
 				}
@@ -239,10 +218,14 @@ $(document).ready(function() {
 	}
 	$('#tryJME #expression').keyup(tryJME).change(tryJME);
 
-	$('#documentation').on({click: function() {
-		var expr = $(this).text();
-		$('#tryJME #expression').val(expr).change();
-	}},'.example');
+	$('#documentation').on(
+		{click: function() {
+			var expr = $(this).text();
+			$('#tryJME #expression').val(expr).change();
+			scrollTo($('#tryJME')[0]);
+		}},
+		'.example'
+	);
 
 	$('#documentation').tabs({
 		select: function(e,ui) {

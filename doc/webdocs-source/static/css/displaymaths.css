@@ -1,0 +1,40 @@
+#tryDisplay .expression {
+	text-align:center;
+}
+
+#tryDisplay #expression {
+	font-family: monospace;
+	font-size: 1.3em;
+	min-width: 80%;
+}
+
+#tryDisplay #display .MathJax_Display {
+	position: inherit;
+}
+
+#tryDisplay .error {
+	color: red;
+	font-style: italic;
+}
+
+#tryDisplay #variables {
+	display: none;
+	float: right;
+}
+
+#tryDisplay li.variable {
+	list-style-type: none;
+}
+
+#tryDisplay .variable label {
+	font-family: monospace;
+	font-size: 1.5em;
+}
+#tryDisplay .variable input {
+	font-size: 1.5em;
+	font-family: monospace;
+}
+
+.example:hover {
+	cursor: pointer;
+}
