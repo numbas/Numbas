@@ -1,0 +1,110 @@
+.content {
+	width: 100%;
+}
+
+#tryJME .expression {
+	text-align:center;
+}
+
+#tryJME .output {
+	text-align: center;
+}
+
+#tryJME #expression {
+	font-family: monospace;
+}
+
+#tryJME #display {
+}
+
+#tryJME #result {
+	font: 1.3em monospace;
+}
+
+#tryJME .error {
+	color: red;
+	font-style: italic;
+}
+
+#documentation {
+	line-height: 1.5em;
+}
+
+#documentation > ul {
+    list-style-type: none;
+    padding-left: 0;
+    background: #eee;
+}
+
+#documentation > ul li {
+    display:  inline-block;
+}
+
+#documentation > ul .thing {
+    padding: 0.1em 0.3em;
+    margin-right: 0.5em;
+    font-size: 1.2em;
+}
+#documentation > ul .thing:hover {
+	background: #a2d1f0;
+}
+#documentation > ul .thing a:hover {
+	text-decoration: none;
+}
+
+#documentation > ul li.ui-tabs-selected .thing {
+	background: #a2d1f0;
+}
+
+#documentation > ul li:last-child:after {
+	content: "";
+}
+#documentation > ul li:after {
+	content: "|";
+}
+
+#documentation > .tab {
+	font-size: .9em;
+}
+
+#documentation ul {
+	margin: 0 0 1em;
+}
+
+#functions .list, #types .list {
+	margin-top: 1.5em;
+}
+
+#functions .list, #types .list, #functions .defs {
+	list-style-type: none;
+}
+
+.def {
+	margin-bottom: 1em;
+}
+
+.function.def .name {
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.type.def .name {
+	margin-bottom: .3em;
+}
+
+.def code {
+	font-size: 1.25em;
+	background: #eee;
+	font-family: monospace;
+	padding-left: 0.3em;
+	padding-right: 0.3em;
+}
+
+.def .description {
+	margin-left: 1em;
+	display:inline-block;
+}
+
+.example:hover {
+	cursor: pointer;
+}

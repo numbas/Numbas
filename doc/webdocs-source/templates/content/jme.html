@@ -1,0 +1,271 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Evaluating maths{% endblock title %}
+
+{% block head %}
+	<!-- documentation -->
+	<script charset="UTF-8" type="text/javascript" src="js/jme-doc.js" charset="utf-8"></script>
+
+	<link rel="stylesheet" href="css/jme-doc.css" />
+
+	{% autoescape true %}
+	<!-- handlebars templates -->
+	<script class="template" id="usage-partial" type="text/x-handlebars-partial">
+		{{ '{{' }}#join usage ", "{{ '}}' }}<code class="example">{{ '{{' }}this{{ '}}' }}</code>{{ '{{' }}/join{{ '}}' }}
+	</script>
+
+	<script id="functions-template" type="text/x-handlebars-template">
+		{{ '{{' }}#each this}}
+		<li class="function def">
+			<div class="name">
+				{{ '{{' }}name}} :: 
+				({{ '{{' }}#join intype ", "}}<code class="intype">{{ '{{' }}this}}</code>{{ '{{' }}/join}})
+				=>
+				<code class="outtype">{{ '{{' }}outtype}}</code>
+			</div>
+			<div class="usages">
+				<strong>Example usage: </strong> {{ '{{' }}> usage-partial}}
+			</div>
+			<div class="description">{{ '{{' }}{textile description}}}</div>
+		</li>
+		{{ '{{' }}/each}}
+	</script>
+
+	<script id="types-template" type="text/x-handlebars-template">
+		{{ '{{' }}#each this}}
+		<li class="type def">
+			<h3 class="name">
+				{{ '{{' }}name}}
+			</h3>
+			<div class="usages">
+				<strong>Example usage: </strong> {{ '{{' }}> usage-partial}}
+			</div>
+			<div class="description">{{ '{{' }}{textile description}}}</div>
+		</li>
+		{{ '{{' }}/each}}
+	</script>
+	{% endautoescape %}
+{% endblock head %}
+
+{%block content %}
+	<div id="documentation" class="area lefthalf">
+		<ul>
+			<li><span class="thing"><a href="#intro">Introduction</a></span></li>
+			<li><span class="thing"><a href="#functions">Functions</a></span></li>
+			<li><span class="thing"><a href="#types">Data types</a></span></li>
+			<li><span class="thing"><a href="#technical">Technical information</a></span></li>
+		</ul>
+		<div id="intro" class="tab">
+			<h1>Introduction</h1>
+			<p>This part of the documentation is about Numbas’ <acronym title="Judged Mathematical Expression"><span class="caps">JME</span></acronym> system.</p>
+			<p><span class="caps">JME</span> expressions are used by students to enter answers to algebraic questions, and by question authors to define variables.</p>
+			<p><span class="caps">JME</span> syntax is similar to what you’d type on a calculator.</p>
+		</div>
+		<div id="functions" class="tab">
+			<h1>Function search</h1>
+			<p><label for="search">Enter the name of a function or a description of what you want it to do.</label></p>
+			<input type="text" id="search"></input>
+			<ul class="list">
+			</ul>
+		</div>
+		<div id="types" class="tab">
+			<h1>Data types</h1>
+			<ul class="list">
+			</ul>
+		</div>
+
+		<div id="technical" class="tab">
+			<h1>Technical information</h1>
+
+			<p>This section describes the various algorithms used in the process of interpreting, manipulating and evaluating mathematical expressions written in <span class="caps">JME</span> syntax, as a reference for those extending or modifying the system. There is also be some discussion of the design decisions made about data structures and interfaces.</p>
+
+			<h2>Parsing a <span class="caps">JME</span> expression</h2>
+
+			<p><code>Numbas.jme.compile</code> takes a string representing a mathematical expression and returns a syntax tree.</p>
+
+			<p>Compilation consists of:</p>
+
+			<ol>
+			<li><code>tokenize</code> the string (convert string of characters to a list of tokens representing syntactical elements)</li>
+			<li><code>shunt</code> the tokens into an evaluation tree corresponding to the expression</li>
+			<li><code>typecheck</code> all operations in the tree, if required</li>
+			</ol>
+
+
+
+			<h3>Tokenizing step</h3>
+
+			<p>Tokenizing an expression string consists of scanning across it, recognising substrings as tokens, and storing them in a list in the same order as they were found.</p>
+
+			<p>The algorithm: (parameter: <code>expr</code> – a string representing the expression)</p>
+
+			<p>While <code>expr</code> is not the empty string:</p>
+
+			<ul>
+			<li>trim whitespace off the beginning of <code>expr</code></li>
+			<li>test the string against regular expressions for each type of token. They match only from the beginning of the string, and are greedy (they match as long a string as possible)</li>
+			<li>create a token object of the appropriate type, and add in any implicit tokens (e.g. a multiplication operation between adjacent variable names)</li>
+			<li>chop the matched string off the start of <code>expr</code></li>
+			</ul>
+
+
+
+			<p>Every token object has a <code>type</code> property. Additionally, data types (string, number, etc.) have a <code>value</code> property, while operations, functions and variables have a <code>name</code> property.</p>
+
+			<p>The objects used to represent tokens are the same as the data objects used when evaluating expressions, in order to avoid a conversion step.</p>
+
+
+
+			<p>The recognised token types are these:</p>
+
+			<ul>
+			<li><code>number</code>: a number, real or complex.</li>
+			<li><code>string</code>: a string of characters.</li>
+			<li><code>boolean</code>: true or false.</li>
+			<li><code>list</code>: an array of data objects of any type.</li>
+			<li><code>range</code>: a closed range of numbers, either continuous or discrete.</li>
+			<li><code>name</code>: a variable name. Function names are first tokenised as this type of object, before the shunt phase.</li>
+			<li><code>function</code>: a function. This type can not be produced by the tokenizer, but is created during the shunt phase.</li>
+			<li><code>op</code>: a binary or unary operation.</li>
+			<li><code>special</code>: a special character. (I think this is just a relic from i-assess, in order to produce things like greek symbols. MathJax and unicode are used now instead)</li>
+			<li><code>conc</code>: a virtual operation representing concatenation of two special characters. Again, no longer used.</li>
+			<li><code>(</code> <code>)</code>  <code>,</code> <code>[</code> <code>]</code>: punctuation characters.</li>
+			</ul>
+
+
+
+			<p>The constructors for these data types are stored in <code>Numbas.jme.types</code></p>
+
+
+
+			<p>Here is a (potentially incomplete) list of the extra fiddling that <code>tokenize</code> does with expressions, to be more accepting of student input:</p>
+
+			<ul>
+			<li>extraneous whitespace is removed, so you can put as many spaces between operators and operands as you like</li>
+			<li>right bracket followed by a number, eg <code>)3</code>, has a multiplication operator inserted in the middle: <code>)*3</code></li>
+			<li>number or right bracket followed by a left bracket has a multiplication operator inserted in the middle</li>
+			<li><code>+</code> preceded by <code>(</code> <code>,</code> or another operator, or at the start of an expression, is interpreted as unary plus.</li>
+			<li>the name of a builtin function prepended with a single-letter variable name, eg <code>xsin</code>, is interpreted as a multiplication, like <code>x*sin</code></li>
+			<li>built-in constants <code>e</code>, <code>pi</code> and <code>i</code> are replaced with their respective number values.</li>
+			</ul>
+
+
+
+			<p>Syntactical errors are caught at this stage — invalid characters, etc. cause the tokenising process to fail. Grammatical errors, such as unmatched brackets, are not caught yet.</p>
+
+
+
+			<h3>Shunting step</h3>
+
+			<p>Once the expression has been converted into a list of tokens, it is “shunted” into an abstract syntax tree.</p>
+
+			<p>The algorithm began life as the <a href="http://en.wikipedia.org/wiki/Shunting-yard_algorithm">shunting yard algorithm</a>, which produces an expression in <span class="caps">RPN</span>, but I eventually decided it was better just to go straight to a tree structure.</p>
+
+
+
+			<p>The output of the <code>shunt</code> algorithm is an “expression tree” object with two properties: <code>tok</code> and <code>args</code>.</p>
+
+			<p><code>tok</code> is the corresponding token object created in the tokenising step, so either a primitive data type (eg number), or an operation or function.</p>
+
+			<p><code>args</code> is a list of arguments, if the token is an operation or function. The arguments are also expression tree objects, of the same form.</p>
+
+
+
+			<h3>Typecheck step</h3>
+
+			<p>The final step is to check whether the expression can be evaluated. This consists of looking at every operation and function call in the expression, checking that there is a corresponding definition taking the right number and type of arguments.</p>
+
+			<p>As a side effect of this process, the relevant javascript code is attached to the nodes on the tree, so they don’t have to be looked up for each evaluation.</p>
+
+			<p>If there are free variables in the expression, they are marked as <em>unbound</em>, which makes substituting in values a bit quicker when the expression finally does get evaluated.</p>
+
+			<p>The <code>typecheck</code> step is optional – if the compiled expression is only ever going to be displayed and not evaluated, it is unnecessary.</p>
+
+
+
+			<h2>Substituting values into a <span class="caps">JME</span> expression</h2>
+
+			<p>The function <code>Numbas.jme.substituteTree</code> takes a compiled <span class="caps">JME</span> syntax tree and a dictionary of variable values to substitute in, and returns a copy of the tree with the given values substituted in appropriately.</p>
+
+			<p>The values to be substituted should be either syntax trees themselves, or single data objects created from <code>Numbas.jme.types</code>.</p>
+
+			<p>A deep copy of the tree is made, so that the original can be re-used, and then the copy is traversed depth-first. Whenever an object of type <code>name</code> is encountered, the corresponding value from the dictionary of values is inserted at that point.</p>
+
+			<p>If the dictionary does not contain a value for a particular variable, the operation fails, unless the parameter <code>allowUnbound</code> is <code>true</code>, in which case the <code>name</code> token is left in place.</p>
+
+
+
+			<h2>Evaluating a <span class="caps">JME</span> expression</h2>
+
+			<p><code>Numbas.jme.evaluate</code> takes either a string expression or a syntax tree, and dictionaries of variables and functions to substitute into the expression.</p>
+
+			<p>If the given expression is a string, it is compiled to a syntax tree. The <code>variables</code> and <code>functions</code> parameters can be omitted if not needed.</p>
+
+			<p>First of all, the given variables are subsituted into the tree, as described above. Then, <code>Numbas.jme.bind</code> is run on the tree to attach any new functions or operations substituted in.</p>
+
+			<p>Finally, the tree is evaluated to a single value. The token at the top of the tree is inspected, and what happens depends on what type it is.</p>
+
+			<ul>
+			<li>Tokens of type <code>number</code>, <code>boolean</code> and <code>range</code> are returned without modification.</li>
+			<li><code>string</code> tokens are passed through <code>Numbas.jme.contentsubvars</code> before being returned. Since <code>contentsubvars</code> applies the Textile parser, you might want to remove this step if you just want to deal with mathematical expressions.</li>
+			<li><code>list</code> tokens have each item evaluated before being returned.</li>
+			<li>If the top of the tree is an <code>op</code> or a <code>function</code> token, the relevant bit of code is evaluated, and should return a token object from <code>Numbas.jme.types</code>. Note that the arguments to the operation are <strong>not</strong> evaluated in advance; this allows for “lazy evaluation” of things like conditional statements or recursive algorithms.</li>
+			</ul>
+
+			<p>The function which evaluates an operation should take three arguments: <code>args</code>, <code>variables</code> and <code>functions</code>. The <code>args</code> are the arguments of the operation, and the other two parameters are needed in case some string substitution needs to happen.</p>
+
+			<p>Functions are free to evaluate all, some, or none of their arguments, using <code>Numbas.jme.evaluate</code>.</p>
+
+
+
+			<h2>Extending and customising the <span class="caps">JME</span> system</h2>
+
+			<p>The <span class="caps">JME</span> system has been designed to be fairly easily customised. In particular, new functions can be added very easily. It should also be quite straightforward to add new data types.</p>
+
+
+
+			<h3>Adding a new function</h3>
+
+			<p>Exam authors can define new functions in the .exam file using <span class="caps">JME</span> syntax. These are passed through to the <code>compile</code> and <code>evaluate</code> steps by the Numbas runtime.</p>
+
+			<p>When writing an extension, however, it’s easier just to write a function in pure javascript and add it to the list of builtin functions. To do that, write your function in javascript, and then create a <code>funcObj</code> object to go with it:</p>
+
+			<p><code>function addtwo(n) { return n+2; }</code></p>
+
+			<p><code>new Numbas.jme.funcObj('addtwo', [TNum], TNum, addtwo);</code></p>
+
+			<p>The arguments for the <code>funcObj</code> constructor are:</p>
+
+			<ul>
+			<li><code>name</code> – the name used to call the function in <span class="caps">JME</span> expressions</li>
+			<li><code>intype</code> – an array of <code>Numbas.jme.types</code> constructors, saying which types the arguments to the function must be. You can use the string <code>'?'</code> instead of a type constructor if an argument can be of any type, or if you want to do your own typechecking.</li>
+			<li><code>outcons</code> – the constructor to use on the value your function returns. Again, this should be one of the constructors from <code>Numbas.jme.types</code>.</li>
+			<li><code>fn</code> – your javascript function</li>
+			</ul>
+
+
+
+			<h3>Adding a new data type</h3>
+
+			<p>The constructors for data types are stored in <code>Numbas.jme.types</code>. They’re just normal javascript object constructors (see <a href="https://developer.mozilla.org/en/JavaScript/Reference/Operators/Special/new">the <span class="caps">MDN</span> page on the new operation</a>), with an extra property called <code>type</code>. Normally, a data element’s value is stored in a property called <code>value</code>, though this is not required: for example, <code>TFunc</code> elements have a property called <code>name</code>.</p>
+
+			<p>Once you’ve created a new data type, you can add functions to construct and use elements of that type. If you’re adventurous, you could add some code to the tokeniser to parse literals of your new type.</p>
+		</div>
+	</div>
+	<div id="tryJME" class="area righthalf">
+		<h1>JME Test Area</h1>
+		<p><label for="expression">Enter a JME expression to see how it is displayed and evaluated.</label></p>
+		<div class="expression">
+			<input type="text" id="expression"></input>
+		</div>
+		<div id="error" class="error"></div>
+		<div class="display">
+			<h2>LaTeX display</h2>
+			<div id="display" class="output"></div>
+		</div>
+		<div class="result">
+			<h2>Evaluation result</h2>
+			<div id="result" class="output"></div>
+		</div>
+	</div>
+{% endblock content %}

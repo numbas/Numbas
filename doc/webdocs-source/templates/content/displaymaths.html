@@ -1,0 +1,82 @@
+{% extends "layouts/base.html" %}
+{% block title %}Displaying maths{% endblock title %}
+{% block head %}
+	<script type="text/javascript" src="js/displaymaths.js"></script>
+	<link rel="stylesheet" href="css/displaymaths.css" />
+
+	<script id="variable-template" type="text/x-handlebars-template">
+		<li class="variable">
+			<label>{{ '{{' }}name}}:</label> <input type="text" class="value" data-name="{{ '{{' }}name}}"/>
+		</li>
+	</script>
+{% endblock head %}
+
+
+{% block content %}
+<div id="documentation" class="area lefthalf">
+	<p>Maths is displayed using LaTeX. A good place to learn LaTeX is the <a href="http://www.artofproblemsolving.com/Wiki/index.php/LaTeX:Commands">Art of Problem Solving LaTeX Guide</a>.</p>
+	<p>Write in-line maths between dollar signs, like so:</p>
+	<p style="text-align:center;"><code class="example">$e^{\pi i} + 1 = 0$</code></p>
+	<p>Which produces: $e^{\pi i} + 1 = 0$.</p>
+	<p>Larger formulae and equations should be written in <em>display mode</em>, like so:</p>
+	<p style="text-align:center;"><code class="example">\[ \int_0^1 e^{-x^2} dx \]</code></p>
+	<p>Which produces:</p>
+	<p>\[ \int_0^1 e^{-x^2} dx \]</p>
+	<p>LaTeX is purely a typesetting language and is ill-suited for representing <em>meaning</em> in addition to <em>layout</em>. For this reason, dynamic or randomised maths expressions must be written in <a href="jme.html"><span class="caps">JME</span></a> syntax and converted to LaTeX. Numbas provides two new LaTeX commands to do this for you.</p>
+
+	<p>To <em>substitute</em> the result of an expression into a LaTeX expression, use the <code>\var</code> command. Its parameter is a <span class="caps">JME</span> expression, which is evaluated and then converted to LaTeX.</p>
+	<p>For example,</p>
+	<p style="text-align:center;"><code class="example">\[ \var{2^3} \]</code></p>
+	<p>produces</p>
+	<p style="text-align:center;"><code class="example">\[ 8 \]</code></p>
+	<p>and if a variable called <code>x</code> has been defined to have the value <code>3</code>,</p>
+	<p style="text-align:center;"><code class="example">\[ 2^{\var{x}} \]</code></p>
+	<p>produces</p>
+	<p style="text-align:center;"><code class="example">\[ 2^{3} \]</code></p>
+
+	<p>This simple substitution doesn’t always produce attractive results, for example when substituted variables might have negative values. If $y = -4$,</p>
+	<p style="text-align:center;"><code class="example">\[ \var{x} + \var{y} \]</code></p>
+	<p>produces</p>
+	<p style="text-align:center;"><code class="example">\[ 3 + -4 \]</code></p>
+	<p>To deal with this, and other more complicated substitutions, there is the <code>\simplify</code> command.</p>
+	<p>The main parameter of the <code>\simplify</code> command is a <span class="caps">JME</span> expression. It is not evaluated – it is converted into LaTeX as it stands. For example,</p>
+	<p style="text-align:center;"><code class="example">\[ \simplify{ x + (-1/y) } \]</code></p>
+	<p>produces</p>
+	<p style="text-align:center;"><code class="example">\[ x - \frac{1}{y} \]</code></p>
+	<p>Variables can be substituted in by enclosing them in curly braces. For example,</p>
+	<p style="text-align:center;"><code class="example">\[ \simplify{ {x} + {y} } \]</code></p>
+	<p>produces</p>
+	<p style="text-align:center;"><code class="example">\[ 3 - 4 \]</code></p>
+
+	<p>The <code>\simplify</code> command automatically rearranges expressions, according to a set of <em>simplification rules</em>, to make them look more natural. Sometimes you might not want this to happen, for example while writing out the steps in a worked solution.</p>
+	<p>The set of rules to be used is defined in a list enclosed in square brackets before the main argument of the <code>\simplify</code> command. You can control the <code>\simplify</code> command’s behaviour by switching rules on or off.</p>
+	<p>For example, in</p>
+	<p style="text-align:center;"><code class="example">\[ \simplify{ 1*x } \]</code></p>
+	<p>I have not given a list of rules to use, so they are all switched on. The <code>unitFactor</code> rule cancels the redundant factor of $1$ to produce</p>
+	<p style="text-align:center;"><code class="example">\[ x \]</code></p>
+	<p>while in</p>
+	<p style="text-align:center;"><code class="example">\[ \simplify[!unitFactor]{ 1*x } \]</code></p>
+	<p>I have turned off the <code>unitFactor</code> rule, leaving the expression as it was:</p>
+	<p style="text-align:center;"><code class="example">\[ 1 x \]</code></p>
+
+	<p>When a list of rules is given, the list is processed frim left to right. Initially, no rules are switched on. When a rule’s name is read, that rule is switched on, or if it has an exclamation mark in front of it, that rule is switched off.</p>
+	<p>Sets of rules can be given names in the exam’s <em>rulesets</em> section, so they can be turned on or off in one go.</p>
+</div>
+<div id="tryDisplay" class="area righthalf">
+	<h1>Display maths test area</h1>
+	<p><label for="expression">Enter a line of text, including LaTeX maths, to see how it is displayed.</label></p>
+	<div class="expression">
+		<input type="text" id="expression"></input>
+	</div>
+	<div id="variables">
+		<h2>Variables</h2>
+		<ul>
+		</ul>
+	</div>
+	<div id="error" class="error"></div>
+	<div class="display">
+		<h2>Display</h2>
+		<div id="display" class="output"></div>
+	</div>
+</div>
+{% endblock content %}
