@@ -367,6 +367,9 @@ var math = Numbas.math = {
 		}
 		else	
 		{
+			if(n==Infinity)
+				return 'infinity';
+
 			if((piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
@@ -446,6 +449,7 @@ var math = Numbas.math = {
 			var s = math.sign(a);
 			a = Math.abs(a);
 			if(a==0) { return s*a; }
+			if(a==Infinity) { return s*a; }
 			b = Math.pow(10,Math.ceil(Math.log(a)/Math.log(10))-b);
 			return s*Math.round(a/b)*b;
 		}

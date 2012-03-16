@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Exams{% endblock title %}
+
+{% block head %}
+{% endblock head %}
+
+{% block content %}
+	<p>This chapter describes all the properties associated with an exam.</p>
+
+	<section>
+		<h2>Navigation</h2>
+		<p>It is possible to control how and when students are allowed to move between questions: for example, whether they are allowed to return to a question once they have completed it, whether they can jump between questions at will, or whether they must complete a question before moving on to another one.</p>
+		<table>
+			<tr><th>Property</th><th>Description</th><th>Default value</th></tr>
+			<tr>
+				<td><code>allowregen</code></td>
+				<td>Allow the student to re-randomise questions?</td>
+				<td><code>false</code></td>
+			</tr>
+			<tr>
+				<td><code>reverse</code></td>
+				<td>Allow the student to move back to the previous question?</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td><code>browse</code></td>
+				<td>Allow the student to jump to any question at any time?</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td><code>showfrontpage</code></td>
+				<td>Show an introduction page before starting the exam?</td>
+				<td><code>true</code></td>
+			</tr>
+			<tr>
+				<td><code>onadvance</code></td>
+				<td>What to do when the </td>
+				<td><code></code></td>
+			</tr>
+			<tr>
+				<td><code></code></td>
+				<td></td>
+				<td><code></code></td>
+			</tr>
+			<tr>
+				<td><code></code></td>
+				<td></td>
+				<td><code></code></td>
+			</tr>
+		</table>
+	</section>
+{% endblock content %}
+

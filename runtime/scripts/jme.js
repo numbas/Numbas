@@ -16,9 +16,23 @@ Copyright 2011 Newcastle University
 */
 
 Numbas.queueScript('scripts/jme.js',['math','util'],function() {
-	var util = Numbas.util;
+
+var util = Numbas.util;
+var math = Numbas.math;
+var vectormath = Numbas.vectormath;
+var matrixmath = Numbas.matrixmath;
 
 var jme = Numbas.jme = {
+
+	constants: {
+		'e': Math.E,
+		'pi': Math.PI,
+		'\\pi': Math.PI,
+		'i': math.complex(0,1),
+		'infinity': Infinity,
+		'infty': Infinity,
+		'\\infty': Infinity
+	},
 
 	tokenise: function(expr)
 	//takes a string in and returns a list of tokens 
@@ -84,15 +98,10 @@ var jme = Numbas.jme = {
 				var annotation = result[1] ? result[1].split(':') : null;
 				if(!annotation)
 				{
+					var lname = name.toLowerCase();
 					// fill in constants here to avoid having more 'variables' than necessary
-					if(name.toLowerCase()=='e') {
-						token = new TNum(Math.E);
-
-					}else if (name.toLowerCase()=='pi' || name.toLowerCase()=='\\pi') {
-						token = new TNum(Math.PI);
-
-					}else if (name.toLowerCase()=='i') {
-						token = new TNum(math.complex(0,1));
+					if(lname in jme.constants) {
+						token = new TNum(jme.constants[lname]);
 					}else{
 						token = new TName(name,annotation);
 					}
@@ -890,7 +899,7 @@ TNum.prototype.type = 'number';
 TNum.doc = {
 	name: 'number',
 	usage: ['0','1','0.234','i','e','pi'],
-	description: "@i@, @e@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm and $\pi$, respectively."
+	description: "@i@, @e@, @infinity@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm, $\\infty$ and $\\pi$, respectively."
 };
 
 var TString = types.TString = types.string = function(s)
@@ -1226,10 +1235,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 
 	this.doc = options.doc;
 }
-
-var math = Numbas.math;
-var vectormath = Numbas.vectormath;
-var matrixmath = Numbas.matrixmath;
 
 // the built-in operations and functions
 var builtins = jme.builtins = {};
