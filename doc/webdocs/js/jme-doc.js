@@ -18,6 +18,7 @@ $(document).ready(function() {
 			var section = context.params.section;
 			var index = $('#documentation div#'+section).prevAll('div').length;
 			$('#documentation').tabs('select',index);
+			$('#documentation .tab:visible').mathjax();
 			var title = $('#documentation > ul li').eq(index).text();
 			changeTitle(title)
 		});

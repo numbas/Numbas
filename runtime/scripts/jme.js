@@ -899,7 +899,7 @@ TNum.prototype.type = 'number';
 TNum.doc = {
 	name: 'number',
 	usage: ['0','1','0.234','i','e','pi'],
-	description: "@i@, @e@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm and $\pi$, respectively."
+	description: "@i@, @e@, @infinity@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm, $\\infty$ and $\\pi$, respectively."
 };
 
 var TString = types.TString = types.string = function(s)
