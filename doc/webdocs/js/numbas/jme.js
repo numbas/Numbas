@@ -411,6 +411,8 @@ var jme = Numbas.jme = {
 	{
 		if( typeof(tree)=='string' )
 			tree = jme.compile(tree,functions);
+		if(!tree)
+			return null;
 
 		if(variables===undefined)
 			variables = {};
@@ -717,19 +719,24 @@ var jme = Numbas.jme = {
 				args = bits[i+2],
 				expr = bits[i+3];
 
-			switch(cmd)
+			if(expr.length)
 			{
-			case 'var':	//substitute a variable
-				var v = jme.evaluate(jme.compile(expr,functions),variables,functions);
-				v = jme.display.texify({tok: v});
-				out += ' '+v+' ';
-				break;
-			case 'simplify': //a JME expression to be simplified
-				expr = jme.subvars(expr,variables,functions);
-				var tex = jme.display.exprToLaTeX(expr,args);
-				out += ' '+tex+' ';
-				break;
+				switch(cmd)
+				{
+				case 'var':	//substitute a variable
+					var v = jme.evaluate(jme.compile(expr,functions),variables,functions);
+					v = jme.display.texify({tok: v});
+					out += ' '+v+' ';
+					break;
+				case 'simplify': //a JME expression to be simplified
+					expr = jme.subvars(expr,variables,functions);
+					var tex = jme.display.exprToLaTeX(expr,args);
+					out += ' '+tex+' ';
+					break;
+				}
 			}
+			else
+				out+=' ';
 		}
 		return out+bits[bits.length-1];
 	},
