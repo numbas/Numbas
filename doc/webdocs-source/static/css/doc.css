@@ -50,6 +50,7 @@ code {
 .header > ul {
     list-style-type: none;
     padding-left: 1em;
+	margin-top: 0.3em;
 }
 
 .header > ul li {
