@@ -1,3 +1,8 @@
+.content {
+	width: 100%;
+	max-width: inherit;
+}
+
 #tryDisplay .expression {
 	text-align:center;
 }

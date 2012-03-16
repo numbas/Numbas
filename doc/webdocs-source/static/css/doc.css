@@ -26,9 +26,19 @@ code {
 }
 
 .content {
-	padding-bottom: 1em;
+	padding: 0 1em 2em 1em;
 	display: inline-block;
 	text-align: left;
+	max-width: 1000px;
+}
+
+.content table {
+	width: auto;
+	text-align: center;
+	margin: 0.2em auto;
+}
+.content th, .content td {
+	padding: 0.2em 1em;
 }
 
 .header {

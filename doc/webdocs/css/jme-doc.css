@@ -1,5 +1,6 @@
 .content {
 	width: 100%;
+	max-width: inherit;
 }
 
 #tryJME .expression {
