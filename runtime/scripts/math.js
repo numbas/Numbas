@@ -129,33 +129,21 @@ var math = Numbas.math = {
 
 	pow: function(a,b)
 	{
-		if(a.complex)
+		if(a.complex || b.complex || a<0)
 		{
-			if(b.complex)
-			{
-				var ss = a.re*a.re + a.im*a.im;
-				var arg1 = math.arg(a);
-				var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
-				var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
-				return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-			}
-			else
-			{
-				var mag = Math.pow( math.abs(a), b);
-				var arg = math.arg(a) * b;
-				return math.complex( mag*Math.cos(arg), mag*Math.sin(arg) );
-			}
+			if(!a.complex)
+				a = {re: a, im: 0, complex: true};
+			if(!b.complex)
+				b = {re: b, im: 0, complex: true};
+			var ss = a.re*a.re + a.im*a.im;
+			var arg1 = math.arg(a);
+			var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
+			var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
+			return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
 		}
 		else
 		{
-			if(b.complex)
-			{
-				var mag = Math.pow(a,b.re);
-				var arg = b.im * Math.log(a);
-				return math.complex( mag*Math.cos(arg), mag*Math.sin(arg) );
-			}
-			else
-				return Math.pow(a,b);
+			return Math.pow(a,b);
 		}
 	},
 
