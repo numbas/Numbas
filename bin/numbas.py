@@ -28,7 +28,7 @@ from zipfile import ZipFile
 def collectFiles(options):
 	dirs=[('runtime','.')]
 
-	resources = [os.path.join(os.path.dirname(options.source),x) for x in options.resources]
+	resources = [os.path.join(options.sourcedir,x) for x in options.resources]
 	dirs += [(os.path.join(os.getcwd(),x),os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
 
 	extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
@@ -110,14 +110,13 @@ def compileToZip(options):
 	f.close()
 
 def makeExam(options):
-	data = open(options.source,encoding='utf-8').read()
 	if(options.xml):
-		examXML = data
+		examXML = options.source
 		options.resources=[]
 		options.extensions=[]
 	else:
 		try:
-			exam = Exam.fromstring(data)
+			exam = Exam.fromstring(options.source)
 			examXML = exam.tostring()
 			options.resources = exam.resources
 			options.extensions = exam.extensions
@@ -207,11 +206,27 @@ if __name__ == '__main__':
 						dest='output',
 						help='The target path'
 		)
+	parser.add_option('--pipein',
+						dest='pipein',
+						action='store_true',
+						default=False,
+						help="Read .exam from stdin")
 
 	(options,args) = parser.parse_args()
-	options.source = args[0]
-	if not os.path.exists(options.source):
-		options.source = os.path.join(path,options.source)
+
+	if options.pipein:
+		options.source = sys.stdin.read()
+		options.sourcedir = os.getcwd()
+	else:
+		source_path = args[0]
+		if not os.path.exists(source_path):
+			osource = source_path
+			source_path = os.path.join(path,source_path)
+			if not os.path.exists(source_path):
+				print("Couldn't find source file %s" % osource)
+				exit(1)
+		options.source=open(source_path,encoding='utf-8').read()
+		options.sourcedir = os.path.dirname(source_path)
 
 	if not options.output:
 		output = os.path.basename(os.path.splitext(options.source)[0])
@@ -229,5 +244,6 @@ if __name__ == '__main__':
 
 	try:
 		makeExam(options)
-	except:
+	except Exception as err:
+		print(err)
 		exit(1)
