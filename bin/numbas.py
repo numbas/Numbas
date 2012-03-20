@@ -217,6 +217,8 @@ if __name__ == '__main__':
 	if options.pipein:
 		options.source = sys.stdin.read()
 		options.sourcedir = os.getcwd()
+		if not options.output:
+			options.output = os.path.join(path,'output','exam')
 	else:
 		source_path = args[0]
 		if not os.path.exists(source_path):
@@ -228,11 +230,11 @@ if __name__ == '__main__':
 		options.source=open(source_path,encoding='utf-8').read()
 		options.sourcedir = os.path.dirname(source_path)
 
-	if not options.output:
-		output = os.path.basename(os.path.splitext(options.source)[0])
-		if options.zip:
-			output += '.zip'
-		options.output=os.path.join(path,'output',output)
+		if not options.output:
+			output = os.path.basename(os.path.splitext(source_path)[0])
+			if options.zip:
+				output += '.zip'
+			options.output=os.path.join(path,'output',output)
 	
 	if not os.path.exists(options.theme):
 		ntheme = os.path.join('themes',options.theme)
@@ -242,6 +244,7 @@ if __name__ == '__main__':
 			print("Couldn't find theme %s" % options.theme)
 			options.theme = os.path.join(options.path,'themes','default')
 
+	print(options.output)
 	try:
 		makeExam(options)
 	except Exception as err:
