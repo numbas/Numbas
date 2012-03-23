@@ -227,7 +227,7 @@ def printdata(data,tabs=''):
 			s='['+s+']'
 		return s
 	else:
-		if type(data)==str and ('\n' in data or '}' in data or ']' in data or ',' in data):
+		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data):
 			if '"' in data:
 				return '"""'+data+'"""'
 			else:

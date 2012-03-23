@@ -244,7 +244,6 @@ if __name__ == '__main__':
 			print("Couldn't find theme %s" % options.theme)
 			options.theme = os.path.join(options.path,'themes','default')
 
-	print(options.output)
 	try:
 		makeExam(options)
 	except Exception as err:
