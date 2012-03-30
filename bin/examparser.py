@@ -229,7 +229,7 @@ def printdata(data,tabs=''):
 	else:
 		if '"' in str(data) and not (isinstance(data,unicode) or isinstance(data,str)):
 			print(str)
-        if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or ':' in data):
+		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or ':' in data):
 			if '"' in data:
 				return '"""'+data+'"""'
 			else:
