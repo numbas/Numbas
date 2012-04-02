@@ -35,7 +35,7 @@ jme.variables = {
 			var name = functionNodes[i].getAttribute('name').toLowerCase();
 
 			var definition = functionNodes[i].getAttribute('definition');
-			var javascript = functionNodes[i].getAttribute('javascript');
+			var language = functionNodes[i].getAttribute('language');
 
 			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
 			var outcons = Numbas.jme.types[outtype];
@@ -54,7 +54,7 @@ jme.variables = {
 
 			var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
 			tmpfunc.definition = definition;
-			tmpfunc.javascript = javascript;
+			tmpfunc.language = language;
 			tmpfunc.outcons = outcons;
 			tmpfunc.paramNames = paramNames;
 
@@ -68,8 +68,9 @@ jme.variables = {
 		for(var i=0; i<tmpFunctions.length; i++)
 		{
 			var fn = tmpFunctions[i];
-			if(fn.definition.length)
+			switch(fn.language)
 			{
+			case 'jme':
 				fn.tree = jme.compile(tmpFunctions[i].definition,functions);
 
 				fn.evaluate = function(args,variables,functions)
@@ -82,13 +83,12 @@ jme.variables = {
 					}
 					return jme.evaluate(this.tree,nvariables,functions);
 				}
-			}
-			else
-			{
+				break;
+			case 'javascript':
 				var preamble='(function('+fn.paramNames.join(',')+'){';
 				var math = Numbas.math, 
 					util = Numbas.util;
-				var jfn = eval(preamble+fn.javascript+'})');
+				var jfn = eval(preamble+fn.definition+'})');
 				var outcons = fn.outcons;
 				fn.evaluate = function(args,variables,functions)
 				{
@@ -104,6 +104,7 @@ jme.variables = {
 						throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
 					}
 				}
+				break;
 			}
 		}
 		return functions;
