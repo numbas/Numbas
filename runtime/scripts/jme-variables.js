@@ -62,6 +62,7 @@ jme.variables = {
 	compileFunctions: function(tmpFunctions) 
 	{
 		var functions = {};
+		var tmpFunctions2 = [];
 		for(var i=0;i<tmpFunctions.length;i++)
 		{
 			var tmpfn = tmpFunctions[i];
@@ -78,10 +79,28 @@ jme.variables = {
 
 			var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
 
-			switch(tmpfn.language)
+			fn.outcons = outcons;
+			fn.intype = intype;
+			fn.paramNames = paramNames;
+			fn.definition = tmpfn.definition;
+			fn.name = tmpfn.name;
+			fn.language = tmpfn.language;
+
+			if(functions[tmpfn.name]===undefined)
+				functions[tmpfn.name] = [];
+			functions[tmpfn.name].push(fn);
+
+			tmpFunctions2.push(fn);
+		}
+
+		for(var i=0;i<tmpFunctions2.length;i++)
+		{
+			var fn = tmpFunctions2[i];
+
+			switch(fn.language)
 			{
 			case 'jme':
-				fn.tree = jme.compile(tmpfn.definition,functions);
+				fn.tree = jme.compile(fn.definition,functions);
 
 				fn.evaluate = function(args,variables,functions)
 				{
@@ -89,36 +108,33 @@ jme.variables = {
 
 					for(var j=0;j<args.length;j++)
 					{
-						nvariables[paramNames[j]] = jme.evaluate(args[j],variables,functions);
+						nvariables[fn.paramNames[j]] = jme.evaluate(args[j],variables,functions);
 					}
 					return jme.evaluate(this.tree,nvariables,functions);
 				}
 				break;
 			case 'javascript':
-				var preamble='(function('+paramNames.join(',')+'){';
+				var preamble='(function('+fn.paramNames.join(',')+'){';
 				var math = Numbas.math, 
 					util = Numbas.util;
-				var jfn = eval(preamble+tmpfn.definition+'})');
+				var jfn = eval(preamble+fn.definition+'})');
 				fn.evaluate = function(args,variables,functions)
 				{
 					args = args.map(function(a){return jme.evaluate(a,variables,functions).value});
 					try {
 						var val = jfn.apply(this,args);
 						if(!val.type)
-							val = new outcons(val);
+							val = new fn.outcons(val);
 						return val;
 					}
 					catch(e)
 					{
-						throw(new Numbas.Error('jme.user javascript error',tmpfn.name,e.message));
+						throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
 					}
 				}
 				break;
 			}
 
-			if(functions[name]===undefined)
-				functions[name] = [];
-			functions[name].push(fn);
 		}
 		return functions;
 	},
