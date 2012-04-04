@@ -29,8 +29,7 @@ Copyright 2011 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<xsl:variable name="questionnum" select="count(preceding-sibling::question)"/>
-	<div class="question" id="question-{$questionnum}">
+	<div class="question" id="question-{@number}">
 		<xsl:apply-templates />
 	</div>
 </xsl:template>
