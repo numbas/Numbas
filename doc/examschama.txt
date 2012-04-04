@@ -69,7 +69,8 @@
 			parameters: [ [string,string] ]		#a list of name-type pairs for the parameters of the function. 
 												#Type can be any of: 
 												#number, string, boolean, range, list, or the other JME types.
-			outtype: string		#the type of the value returned by the function
+			type: string		#the type of the value returned by the function
+			language: string	#language of definition. Either 'jme' or 'javascript'
 			definition: string	#definition of the function, as a JME expression with respect to the 
 								#parameters named in the list above
 		}

@@ -21,7 +21,6 @@ var job = Numbas.schedule.add;
 jme.variables = {
 	makeFunctions: function(xml)
 	{
-		var functions = {};
 		var tmpFunctions = [];
 
 		//work out functions
@@ -35,42 +34,54 @@ jme.variables = {
 			var name = functionNodes[i].getAttribute('name').toLowerCase();
 
 			var definition = functionNodes[i].getAttribute('definition');
-			var javascript = functionNodes[i].getAttribute('javascript');
+			var language = functionNodes[i].getAttribute('language');
 
 			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-			var outcons = Numbas.jme.types[outtype];
 
 			var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-			var paramNames = [];
-			var intype = [];
+			var parameters = [];
 			for(var j=0; j<parameterNodes.length; j++)
 			{
-				var paramName = parameterNodes[j].getAttribute('name');
-				var paramType = parameterNodes[j].getAttribute('type').toLowerCase();
-				paramNames.push(paramName);
-				var incons = Numbas.jme.types[paramType];
-				intype.push(incons);
+				parameters.push({
+					name: parameterNodes[j].getAttribute('name'),
+					type: parameterNodes[j].getAttribute('type').toLowerCase()
+				});
 			}
+			tmpFunctions.push({
+				name: name,
+				definition: definition,
+				language: language,
+				outtype: outtype,
+				parameters: parameters
+			});
 
-			var tmpfunc = new jme.funcObj(name,intype,outcons,null,true);
-			tmpfunc.definition = definition;
-			tmpfunc.javascript = javascript;
-			tmpfunc.outcons = outcons;
-			tmpfunc.paramNames = paramNames;
-
-			if(functions[name]===undefined)
-				functions[name] = [];
-			functions[name].push(tmpfunc);
-			tmpFunctions.push(tmpfunc);
 		}
-
-		//second pass: compile functions
-		for(var i=0; i<tmpFunctions.length; i++)
+		return jme.variables.compileFunctions(tmpFunctions);
+	},
+	
+	compileFunctions: function(tmpFunctions) 
+	{
+		var functions = {};
+		for(var i=0;i<tmpFunctions.length;i++)
 		{
-			var fn = tmpFunctions[i];
-			if(fn.definition.length)
+			var tmpfn = tmpFunctions[i];
+
+			var intype = [],
+				paramNames = [];
+
+			tmpfn.parameters.map(function(p) {
+				intype.push(jme.types[p.type]);
+				paramNames.push(p.name);
+			});
+
+			var outcons = jme.types[tmpfn.outtype];
+
+			var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
+
+			switch(tmpfn.language)
 			{
-				fn.tree = jme.compile(tmpFunctions[i].definition,functions);
+			case 'jme':
+				fn.tree = jme.compile(tmpfn.definition,functions);
 
 				fn.evaluate = function(args,variables,functions)
 				{
@@ -78,18 +89,16 @@ jme.variables = {
 
 					for(var j=0;j<args.length;j++)
 					{
-						nvariables[this.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+						nvariables[paramNames[j]] = jme.evaluate(args[j],variables,functions);
 					}
 					return jme.evaluate(this.tree,nvariables,functions);
 				}
-			}
-			else
-			{
-				var preamble='(function('+fn.paramNames.join(',')+'){';
+				break;
+			case 'javascript':
+				var preamble='(function('+paramNames.join(',')+'){';
 				var math = Numbas.math, 
 					util = Numbas.util;
-				var jfn = eval(preamble+fn.javascript+'})');
-				var outcons = fn.outcons;
+				var jfn = eval(preamble+tmpfn.definition+'})');
 				fn.evaluate = function(args,variables,functions)
 				{
 					args = args.map(function(a){return jme.evaluate(a,variables,functions).value});
@@ -101,10 +110,15 @@ jme.variables = {
 					}
 					catch(e)
 					{
-						throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
+						throw(new Numbas.Error('jme.user javascript error',tmpfn.name,e.message));
 					}
 				}
+				break;
 			}
+
+			if(functions[name]===undefined)
+				functions[name] = [];
+			functions[name].push(fn);
 		}
 		return functions;
 	},

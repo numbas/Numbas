@@ -4,7 +4,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -227,7 +227,9 @@ def printdata(data,tabs=''):
 			s='['+s+']'
 		return s
 	else:
-		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data):
+		if '"' in str(data) and not (isinstance(data,unicode) or isinstance(data,str)):
+			print(str)
+		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or ':' in data):
 			if '"' in data:
 				return '"""'+data+'"""'
 			else:
@@ -239,11 +241,11 @@ def printdata(data,tabs=''):
 #utility functions
 
 def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+	try:
+		float(s)
+		return True
+	except ValueError:
+		return False
 
 def is_int(s):
 	try:
@@ -260,7 +262,7 @@ def __demo():
 		a: """ "hi"	//comment
 	said the man"""	//comment
 		b: howdy, c: there	//comment
-		d: "sailor,man"    //comment asd 
+		d: "sailor,man"	//comment asd 
 
 		e: geoff		//comment
 		f: [eggs , beans,{a:hi}]
