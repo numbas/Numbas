@@ -1212,7 +1212,8 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 }
 
 // the built-in operations and functions
-var builtins = jme.builtins = {};
+var builtinScope = jme.builtinScope = new Scope({functions: builtins});
+var builtins = jme.builtins = builtinScope.functions;
 
 builtins['eval'] = [{
 	name: 'eval',
@@ -1912,7 +1913,6 @@ new funcObj('list',[TMatrix],TList,null, {
 	}
 });
 
-var builtinScope = jme.builtinScope = new Scope({functions: builtins});
 
 ///end of builtins
 
