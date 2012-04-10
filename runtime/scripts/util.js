@@ -114,6 +114,40 @@ var util = Numbas.util = {
 		}
 	},
 
+	//generic equality test on JME types
+	eq: function(a,b) {
+		if(a.type != b.type)
+			return false;
+		switch(a.type) {
+			case 'number':
+				return Numbas.math.eq(a.value,b.value);
+			case 'vector': 
+				return Numbas.vectormath.eq(a.value,b.value);
+			case 'matrix':
+				return Numbas.matrixmath.eq(a.value,b.value);
+			default:
+				return a.value==b.value;
+		}
+	},
+
+	//and the corresponding not-equal test
+	neq: function(a,b) {
+		return !util.eq(a,b);
+	},
+
+	//filter out values in `exclude` from the list `list`
+	//`exclude` and `list` are understood to be Numbas TLists, so values are Numbas types
+	//that means, look at element types to decide which equality test to use
+	except: function(list,exclude) {
+		return list.filter(function(l) {
+			for(var i=0;i<exclude.length;i++) {
+				if(util.eq(l,exclude[i]))
+					return false;
+			}
+			return true;
+		});
+	},
+
 	//test if parameter is an integer
 	isInt: function(i)
 	{

@@ -280,6 +280,7 @@ var texOps = {
 		return (tex+'^{\\mathrm{T}}');
 	}),
 	'..': infixTex('\\dots'),
+	'except': infixTex('\\operatorname{except}'),
 	'<': infixTex('\\lt'),
 	'>': infixTex('\\gt'),
 	'<=': infixTex('\\leq'),
