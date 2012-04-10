@@ -657,6 +657,18 @@ var math = Numbas.math = {
 		}
 	},
 
+	//removes all the values in the list `exclude` from the list `range`
+	except: function(range,exclude) {
+		range = range.filter(function(r) {
+			for(var i=0;i<exclude.length;i++) {
+				if(math.eq(r,exclude[i]))
+					return false;
+			}
+			return true;
+		});
+		return range;
+	},
+
 	//choose one item from an array
 	choose: function(variables)
 	{
@@ -893,13 +905,7 @@ var vectormath = Numbas.vectormath = {
 	},
 
 	neq: function(a,b) {
-		if(b.length>a.length)
-		{
-			var c = b;
-			b = a;
-			a = c;
-		}
-		return a.reduce(function(s,x,i){return s || neq(x,b[i]||0)},false);
+		return !vectormath.eq(a,b);
 	},
 
 	//multiply vector v by matrix m

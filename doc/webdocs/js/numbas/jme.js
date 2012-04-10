@@ -49,7 +49,7 @@ var jme = Numbas.jme = {
 		var re_bool = /^true|^false/;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
-		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa)([^a-zA-Z0-9])))/i;
+		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9])))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
@@ -1089,6 +1089,7 @@ var precedence = jme.precedence = {
 	'-': 4,
 	'..': 5,
 	'#':6,
+	'except': 6.5,
 	'<': 7,
 	'>': 7,
 	'<=': 7,
@@ -1327,19 +1328,120 @@ new funcObj('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', descripti
 new funcObj('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
 new funcObj('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}}); 
 
+
+//the next three versions of the `except` operator
+//exclude numbers from a range, given either as a range, a list or a single value
+new funcObj('except', [TRange,TRange], TList,
+	function(range,except) {
+		range = range.slice(3);
+		except = except.slice(3);
+		return math.except(range,except).map(function(i){return new TNum(i)});
+	},
+
+	{doc: {
+		usage: '-9..9 except -1..1',
+		description: 'Exclude a range of numbers from a larger range.',
+		tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
+	}}
+);
+
+new funcObj('except', [TRange,TList], TList,
+	function(range,except) {
+		range = range.slice(3);
+		except = except.map(function(i){ return i.value; });
+		return math.except(range,except).map(function(i){return new TNum(i)});
+	},
+
+	{doc: {
+		usage: '-9..9 except [-1,1]',
+		description: 'Exclude a list of numbers from a range.',
+		tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
+	}}
+);
+
+new funcObj('except', [TRange,TNum], TList,
+	function(range,except) {
+		range = range.slice(3);
+		return math.except(range,[except]).map(function(i){return new TNum(i)});
+	},
+
+	{doc: {
+		usage: '-9..9 except 0',
+		description: 'Exclude a number from a range.',
+		tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
+	}}
+);
+
+//exclude numbers from a list, so use the math.except function
+new funcObj('except', [TList,TRange], TList,
+	function(range,except) {
+		range = range.map(function(i){ return i.value; });
+		except = except.slice(3);
+		return math.except(range,except).map(function(i){return new TNum(i)});
+	},
+
+	{doc: {
+		usage: '[1,4,9,16,25,36] except 10..30',
+		description: 'Exclude a range of numbers from a list.',
+		tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
+	}}
+);
+
+//exclude values of any type from a list containing values of any type, so use the util.except function
+new funcObj('except', [TList,TList], TList,
+	function(list,except) {
+		return util.except(list,except);
+	},
+
+	{doc: {
+		usage: ["['a','b','c'] except ['b','d']",'[vector(0,1),vector(1,0),vector(1,1)] except [vector(1,1),vector(2,2)]'],
+		description: 'Remove elements of the second list from the first.',
+		tags: ['except', 'exclude', 'filter', 'remove']
+	}}
+);
+
+new funcObj('except',[TList,'?'], TList, null, {
+	evaluate: function(args,variables,functions) {
+		var list = jme.evaluate(args[0],variables,functions).value;
+		var except = jme.evaluate(args[1],variables,functions);
+		return new TList(util.except(list,[except]));
+	},
+
+  	doc: {
+		usage: '[a,b,c,d] except b',
+		description: 'Exclude a value from a list.',
+		tags: ['except', 'exclude', 'filter', 'remove']
+	}
+});
+
 new funcObj('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 new funcObj('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
 new funcObj('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
 new funcObj('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
-new funcObj('<>', [TNum,TNum], TBool, math.neq, {doc: {usage: 'x<>y', description: 'Numerical inequality.', tags: ['not equal','comparison','numbers']}} );
-new funcObj('<>', [TVector,TVector], TVector, vectormath.neq, {doc: {usage: 'vector(1,2) <> vector(2,2)', description: 'Vector inequality.', tags: ['comparison','not equal','vectors']}} );
-new funcObj('<>', [TMatrix,TMatrix], TBool, matrixmath.neq, {doc: {usage: 'matrix([1,2],[3,4]) <> matrix([1,2,3],[4,5,6])', description: 'Matrix inequality.', tags: ['matrices','comparison','not equal']}});
-new funcObj('<>', ['?','?'], TBool, function(a,b){ return a!=b; }, {doc: {usage: '\'this string\' <> \'that string\'', description: 'General inequality - uses the built-in Javascript comparison operation.', tags: ['comparison','not equal','strings']}} );
-new funcObj('=', [TNum,TNum], TBool, math.eq, {doc: {usage: 'x=y', description: 'Numerical equality.', tags: ['comparison','same','numbers','identical']}} );
-new funcObj('=', [TVector,TVector], TBool, vectormath.eq, {doc: {usage: 'vector(1,2)=vector(1,2)', description: 'Vector equality.', tags: ['comparison','same','vectors','identical']}});
-new funcObj('=', [TMatrix,TMatrix], TBool, matrixmath.eq, {doc: {usage: 'matrix([1,0],[0,1])=matrix([1,0],[0,1])', description: 'Matrix equality.', tags: ['comparison','same','vectors','identical']}});
-new funcObj('=', [TName,TName], TBool, function(a,b){ return a==b; }, {doc: {usage: 'x=x', description: 'Compare variable names. Returns @true@ if they are the same.', tags: ['variables','comparison','same','identical']}});
-new funcObj('=', ['?','?'], TBool, function(a,b){ return a==b; }, {doc: {usage: '\'this string\'=\'this string\'', description: 'General equality - uses the built-in Javascript comparison operation.', tags: ['same','comparison','strings','identical']}} );
+new funcObj('<>', ['?','?'], TBool, null, {
+	evaluate: function(args,variables,functions) {
+		var a = jme.evaluate(args[0],variables,functions);
+		var b = jme.evaluate(args[1],variables,functions);
+		return new TBool(util.neq(a,b));
+	},
+	doc: {
+		usage: ['\'this string\' <> \'that string\'', 'a <> b', '1<>2','sin(90)<>1'], 
+		description: 'Inequality test.', 
+		tags: ['comparison','not equal']
+	}
+});
+new funcObj('=', ['?','?'], TBool, null, {
+	evaluate: function(args,variables,functions) {
+		var a = jme.evaluate(args[0],variables,functions);
+		var b = jme.evaluate(args[1],variables,functions);
+		return new TBool(util.eq(a,b));
+	},
+	doc: {
+		usage: ['x=y','vector(1,2)=vector(1,2,0)','0.1=0.2'], 
+		description: 'Equality test.', 
+		tags: ['comparison','same','identical']
+	}
+});
 
 new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
 new funcObj('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );	
