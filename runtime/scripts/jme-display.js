@@ -25,38 +25,38 @@ jme.display = {
 	//convert a JME expression to LaTeX
 	//ruleset can be anything accepted by jme.display.collectRuleset
 	//settings are also passed through to the texify function
-	exprToLaTeX: function(expr,ruleset)
+	exprToLaTeX: function(expr,ruleset,scope)
 	{
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,Numbas.exam ? Numbas.exam.rulesets : simplificationRules);
+		ruleset = collectRuleset(ruleset,scope);
 
 		expr+='';	//make sure expr is a string
 
 		if(!expr.trim().length)	//if expr is the empty string, don't bother going through the whole compilation proces
 			return '';
-		var tree = jme.display.simplify(expr,ruleset); //compile the expression to a tree and simplify it
+		var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
 		var tex = texify(tree,ruleset); //render the tree as TeX
 		return tex;
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a JME string
-	simplifyExpression: function(expr,ruleset)
+	simplifyExpression: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
 			return '';
-		return treeToJME(jme.display.simplify(expr,ruleset));
+		return treeToJME(jme.display.simplify(expr,ruleset,scope));
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a syntax tree
-	simplify: function(expr,ruleset)
+	simplify: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
 			return;
 
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,Numbas.exam ? Numbas.exam.rulesets : simplificationRules);		//collect the ruleset - replace set names with the appropriate Rule objects
+		ruleset = collectRuleset(ruleset,scope);		//collect the ruleset - replace set names with the appropriate Rule objects
 
 		try 
 		{
@@ -98,7 +98,7 @@ jme.display = {
 					var match;
 					if(match = rules[i].match(exprTree))	//if rule can be applied, apply it!
 					{
-						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope({variables:match}));
 						applied = true;
 						break;
 					}
@@ -858,7 +858,7 @@ Rule.prototype = {
 		for(var i=0;i<this.conditions.length;i++)
 		{
 			var c = Numbas.util.copyobj(this.conditions[i],true);
-			c = jme.substituteTree(c,match);
+			c = jme.substituteTree(c,new jme.Scope({variables:match}));
 			try
 			{
 				var result = jme.evaluate(c,{});
@@ -1080,9 +1080,10 @@ simplificationRules['all']=all;
 
 var displayFlags = ['fractionnumbers','rowvector'];
 
-var collectRuleset = jme.display.collectRuleset = function(set,sets)
+var collectRuleset = jme.display.collectRuleset = function(set,scope)
 {
-	sets = Numbas.util.copyobj(sets);
+	scope = new jme.Scope(scope);
+	var sets = scope.rulesets;
 	if(typeof(set)=='string')
 	{
 		set = set.split(',');
@@ -1119,7 +1120,7 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',name));
 				}
 
-				var sub = collectRuleset(sets[name],sets);
+				var sub = collectRuleset(sets[name],scope);
 
 				for(var j=0;j<displayFlags.length;j++)
 				{

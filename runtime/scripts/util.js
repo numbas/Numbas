@@ -338,6 +338,9 @@ if(!Array.prototype.merge)
 {
 	Array.prototype.merge = function(arr)
 	{
+		if(this.length==0)
+			return arr.slice();
+
 		var out = this.slice();
 		for(var i=0;i<arr.length;i++)
 		{

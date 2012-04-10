@@ -179,7 +179,7 @@ var jme = Numbas.jme = {
 		return(tokens);
 	},
 
-	shunt: function(tokens,functions)
+	shunt: function(tokens,scope)
 	// turns tokenised infix expression into a parse tree (shunting yard algorithm, wikipedia has a good description)
 	{
 		var output = [];
@@ -362,7 +362,8 @@ var jme = Numbas.jme = {
 		return(output[0]);
 	},
 
-	substituteTree: function(tree,variables,allowUnbound)
+
+	substituteTree: function(tree,scope,allowUnbound)
 	{
 		if(!tree)
 			return null;
@@ -374,7 +375,7 @@ var jme = Numbas.jme = {
 			if(tree.tok.type=='name')
 			{
 				var name = tree.tok.name.toLowerCase();
-				if(variables[name]===undefined)
+				if(scope.variables[name]===undefined)
 				{
 					if(allowUnbound)
 						return {tok: new TName(name)};
@@ -383,10 +384,10 @@ var jme = Numbas.jme = {
 				}
 				else
 				{
-					if(variables[name].tok)
-						return variables[name];
+					if(scope.variables[name].tok)
+						return scope.variables[name];
 					else
-						return {tok: variables[name]};
+						return {tok: scope.variables[name]};
 				}
 			}
 			else
@@ -397,48 +398,38 @@ var jme = Numbas.jme = {
 			tree = {tok: tree.tok,
 					args: tree.args.slice()};
 			for(var i=0;i<tree.args.length;i++)
-				tree.args[i] = jme.substituteTree(tree.args[i],variables,allowUnbound);
+				tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
 			return tree;
 		}
 	},
 
-	bind: function(tree,variables,functions)
+	bind: function(tree,scope)
 	{
 		if(tree.bound)
 			return
 		if(tree.args)
 		{
 			for(var i=0;i<tree.args.length;i++)
-				jme.bind(tree.args[i],variables,functions);
+				jme.bind(tree.args[i],scope);
 		}
 
-		jme.typecheck(tree,functions);
+		jme.typecheck(tree,scope);
 		tree.tok.bound = true;
 	},
 
-	evaluate: function(tree,variables,functions)
+	evaluate: function(tree,scope)
 	{
 		if( typeof(tree)=='string' )
-			tree = jme.compile(tree,functions);
+			tree = jme.compile(tree,scope);
 		if(!tree)
 			return null;
 
-		if(variables===undefined)
-			variables = {};
-		if(functions===undefined)
-			functions = {};
-		else
-			functions = util.copyobj(functions);
-		for(var x in builtins)
-		{
-			if(functions[x]===undefined)
-				functions[x]=builtins[x];
-			else
-				functions[x]=functions[x].concat(builtins[x]);
-		}
+		//make the scope.
+		//If the scope parameter is not given to this function, we will end up with a good scope object anyway
+		scope = new Scope(builtinScope,scope);
 
-		tree = jme.substituteTree(tree,variables,true);
-		jme.bind(tree,variables,functions);	//
+		tree = jme.substituteTree(tree,scope,true);
+		jme.bind(tree,scope);
 
 		var tok = tree.tok;
 		switch(tok.type)
@@ -453,46 +444,35 @@ var jme = Numbas.jme = {
 				tok.value = [];
 				for(var i=0;i<tree.args.length;i++)
 				{
-					tok.value[i] = jme.evaluate(tree.args[i],variables,functions);
+					tok.value[i] = jme.evaluate(tree.args[i],scope);
 				}
 			}
 			return tok;
 		case 'string':
-			return new TString(jme.contentsubvars(tok.value,variables,functions));
+			return new TString(jme.contentsubvars(tok.value,scope));
 		case 'name':
-			if(variables[tok.name.toLowerCase()])
-				return variables[tok.name.toLowerCase()];
+			if(tok.name.toLowerCase() in scope.variables)
+				return scope.variables[tok.name.toLowerCase()];
 			else
 				return tok;
 				throw(new Numbas.Error('jme.evaluate.undefined variable'));
 			break;
 		case 'op':
 		case 'function':
-			return tok.fn.evaluate(tree.args,variables,functions);
+			return tok.fn.evaluate(tree.args,scope);
 		default:
 			return tok;
 		}
 	},
 
-	compile: function(expr,functions,notypecheck) 
+	compile: function(expr,scope,notypecheck) 
 	{
 		expr+='';	//make sure expression is a string and not a number or anything like that
 
 		if(!expr.trim().length)
 			return null;
 		//typecheck
-		if(functions===undefined)
-			functions = {};
-		else
-			functions = util.copyobj(functions);
-		for(var x in builtins)
-		{
-			if(functions[x]===undefined)
-				functions[x]=builtins[x];
-			else
-				functions[x]=functions[x].concat(builtins[x]);
-		}
-
+		scope = new Scope(scope);
 
 		//tokenise expression
 		var tokens = jme.tokenise(expr);
@@ -501,21 +481,21 @@ var jme = Numbas.jme = {
 		}
 
 		//compile to parse tree
-		var tree = jme.shunt(tokens,functions);
+		var tree = jme.shunt(tokens,scope);
 
 		if(tree===null)
 			return;
 
 		if(!notypecheck)
 		{
-			if(!jme.typecheck(tree,functions))
+			if(!jme.typecheck(tree,scope))
 				throw(new Numbas.Error('jme.compile.type error'));
 		}
 
 		return(tree);
 	},
 
-	typecheck: function(tree,functions)
+	typecheck: function(tree,scope)
 	{
 		if(tree.bound)
 			return true;
@@ -526,7 +506,7 @@ var jme = Numbas.jme = {
 		{
 			for(var i=0;i<tree.args.length;i++)
 			{
-				jme.typecheck(tree.args[i],functions);
+				jme.typecheck(tree.args[i],scope);
 				if(!tree.args[i].tok.bound)
 					tree.tok.bound = false;
 			}
@@ -552,7 +532,7 @@ var jme = Numbas.jme = {
 		case 'function':
 			var op = tok.name.toLowerCase();
 
-			if(functions[op]===undefined)
+			if(scope.functions[op]===undefined)
 			{
 				if(tok.type=='function')
 					throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
@@ -562,9 +542,9 @@ var jme = Numbas.jme = {
 
 			var result = undefined;
 
-			for(var j=0;j<functions[op].length; j++)
+			for(var j=0;j<scope.functions[op].length; j++)
 			{
-				var fn = functions[op][j];
+				var fn = scope.functions[op][j];
 				if(fn.typecheck(tree.args))
 				{
 					tok.fn = fn;
@@ -576,7 +556,7 @@ var jme = Numbas.jme = {
 		}
 	},
 
-	compare: function(expr1,expr2,settings,variables) {
+	compare: function(expr1,expr2,settings,scope) {
 		expr1 += '';
 		expr2 += '';
 
@@ -597,7 +577,7 @@ var jme = Numbas.jme = {
 			var vars1 = findvars(tree1);
 			var vars2 = findvars(tree2);
 
-			for(var v in variables)
+			for(var v in scope.variables)
 			{
 				delete vars1[v];
 				delete vars2[v];
@@ -613,7 +593,7 @@ var jme = Numbas.jme = {
 				var errors = 0;
 				var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
 				for(var i = 0; i<rs.length; i++) {
-					util.copyinto(variables,rs[i]);
+					util.copyinto(scope.variables,rs[i]);
 					var r1 = evaluate(tree1,rs[i]);
 					var r2 = evaluate(tree2,rs[i]);
 					if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
@@ -625,8 +605,8 @@ var jme = Numbas.jme = {
 				}
 			} else {
 				//if no variables used, can just evaluate both expressions once and compare
-				r1 = evaluate(tree1,variables);
-				r2 = evaluate(tree2,variables);
+				r1 = evaluate(tree1,scope.variables);
+				r2 = evaluate(tree2,scope.variables);
 				return resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy);
 			}
 		}
@@ -636,7 +616,7 @@ var jme = Numbas.jme = {
 
 	},
 
-	contentsubvars: function(str, variables,functions)
+	contentsubvars: function(str, scope)
 	{
 		var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
 		var out='';
@@ -645,10 +625,10 @@ var jme = Numbas.jme = {
 			switch(i % 4)
 			{
 			case 0:	//plain text - variables inserted by expressions in curly braces
-				out += jme.subvars(bits[i],variables,functions,true);
+				out += jme.subvars(bits[i],scope,true);
 				break;
 			case 2:	//a TeX expression - variables inserted with \var and \simplify commands
-				out += jme.texsubvars(bits[i],variables,functions)
+				out += jme.texsubvars(bits[i],scope)
 				break;
 			case 1:	//a TeX delimiter
 			case 3:
@@ -717,7 +697,7 @@ var jme = Numbas.jme = {
 		return out;
 	},
 
-	texsubvars: function(s,variables,functions)
+	texsubvars: function(s,scope)
 	{
 		var bits = jme.texsplit(s);
 		var out = '';
@@ -733,13 +713,13 @@ var jme = Numbas.jme = {
 				switch(cmd)
 				{
 				case 'var':	//substitute a variable
-					var v = jme.evaluate(jme.compile(expr,functions),variables,functions);
+					var v = jme.evaluate(jme.compile(expr,scope),scope);
 					v = jme.display.texify({tok: v});
 					out += ' '+v+' ';
 					break;
 				case 'simplify': //a JME expression to be simplified
-					expr = jme.subvars(expr,variables,functions);
-					var tex = jme.display.exprToLaTeX(expr,args);
+					expr = jme.subvars(expr,scope);
+					var tex = jme.display.exprToLaTeX(expr,args,scope);
 					out += ' '+tex+' ';
 					break;
 				}
@@ -751,7 +731,7 @@ var jme = Numbas.jme = {
 	},
 
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
-	subvars: function(str, variables,functions,display)
+	subvars: function(str, scope,display)
 	{
 		var bits = util.splitbrackets(str,'{','}');
 		if(bits.length==1)
@@ -763,7 +743,7 @@ var jme = Numbas.jme = {
 		{
 			if(i % 2)
 			{
-				var v = jme.evaluate(jme.compile(bits[i],functions),variables,functions);
+				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
 				if(v.type=='number')
 				{
 					v = Numbas.math.niceNumber(v.value);
@@ -797,45 +777,39 @@ var jme = Numbas.jme = {
 		}
 		return out;
 	},
+};
 
-	plot: function(eqn,settings)
-	{
-		var tree = compile(eqn,settings.functions);
-		var varname = findvars(tree)[0];
-		var points=[];
-		for(var x = settings.min; x<=settings.max; x+=(settings.max-settings.min)/settings.steps)
-		{
-			var variables={};
-			variables[varname]=new TNum(x);
-			var y = evaluate(tree,variables).value;
-			points.push([x,y]);
-		}
-		return points;
-	},
+//evaluation environment
+//if called with a list of scopes, they will be combined into this new one
+var Scope = jme.Scope = function() {
+	this.variables = {};
+	this.functions = {};
+	this.rulesets = {};
 
-	userFunction: function(name,outtype,definition,parameters)
-	{
-		var intype=[];
-		for(var i=0;i<parameters.length;i++)
-			intype.push(parameters[i][1]);
-
-		var tree = jme.compile(definition);
-
-		var evaluate = function(variables)
-		{
-			var newvars = util.copyobj(variables);
-			for(var i=0;i<this.paramtypes.length;i++)
-			{
-				var name = this.paramtypes[i][0];
-				newvars[name] = jme.evaluate(variables[i],variables)
+	for(var i=0;i<arguments.length;i++) {
+		var scope = arguments[i];
+		if(scope) {
+			if('variables' in scope) {
+				for(var x in scope.variables) {
+					this.variables[x] = scope.variables[x];
+				}
+			}
+			if('functions' in scope) {
+				for(var x in scope.functions) {
+					if(!(x in this.functions)) {
+						this.functions[x] = [];
+					}
+					this.functions[x] = this.functions[x].merge(scope.functions[x]);
+				}
+			}
+			if('rulesets' in scope) {
+				for(var x in scope.rulesets) {
+					this.rulesets[x] = scope.rulesets[x];
+				}
 			}
 		}
-
-		var func = funcObj(name,intype,outtype,evaluate,true);
-		func.typecheck = typecheck;
-		func.paramtypes = parameters;
 	}
-};
+}
 
 //dictionary mapping numbas symbols to LaTeX symbols
 //symbols \\x not in this dictionary will be mapped to \x.
@@ -1223,11 +1197,11 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 			return true;
 	};
 
-	this.evaluate = options.evaluate || function(args,variables,functions)
+	this.evaluate = options.evaluate || function(args,scope)
 	{
 		var nargs = [];
 		for(var i=0; i<args.length; i++)
-			nargs.push(jme.evaluate(args[i],variables,functions).value);
+			nargs.push(jme.evaluate(args[i],scope).value);
 
 		var result = this.fn.apply(null,nargs);
 
@@ -1259,10 +1233,10 @@ new funcObj('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "N
 new funcObj('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
 
 new funcObj('+', [TList,TList], TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list0 = jme.evaluate(args[0],variables,functions);
-		var list1 = jme.evaluate(args[1],variables,functions);
+		var list0 = jme.evaluate(args[0],scope);
+		var list1 = jme.evaluate(args[1],scope);
 		var value = list0.value.concat(list1.value);
 		return new TList(value);
 	},
@@ -1275,10 +1249,10 @@ new funcObj('+', [TList,TList], TList, null, {
 });
 
 new funcObj('+',[TList,'?'],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],variables,functions);
-		var item = jme.evaluate(args[1],variables,functions);
+		var list = jme.evaluate(args[0],scope);
+		var item = jme.evaluate(args[1],scope);
 		var value = list.value.slice();
 		value.push(item);
 		return new TList(value);
@@ -1401,9 +1375,9 @@ new funcObj('except', [TList,TList], TList,
 );
 
 new funcObj('except',[TList,'?'], TList, null, {
-	evaluate: function(args,variables,functions) {
-		var list = jme.evaluate(args[0],variables,functions).value;
-		var except = jme.evaluate(args[1],variables,functions);
+	evaluate: function(args,scope) {
+		var list = jme.evaluate(args[0],scope).value;
+		var except = jme.evaluate(args[1],scope);
 		return new TList(util.except(list,[except]));
 	},
 
@@ -1419,9 +1393,9 @@ new funcObj('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], descr
 new funcObj('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
 new funcObj('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
 new funcObj('<>', ['?','?'], TBool, null, {
-	evaluate: function(args,variables,functions) {
-		var a = jme.evaluate(args[0],variables,functions);
-		var b = jme.evaluate(args[1],variables,functions);
+	evaluate: function(args,scope) {
+		var a = jme.evaluate(args[0],scope);
+		var b = jme.evaluate(args[1],scope);
 		return new TBool(util.neq(a,b));
 	},
 	doc: {
@@ -1431,9 +1405,9 @@ new funcObj('<>', ['?','?'], TBool, null, {
 	}
 });
 new funcObj('=', ['?','?'], TBool, null, {
-	evaluate: function(args,variables,functions) {
-		var a = jme.evaluate(args[0],variables,functions);
-		var b = jme.evaluate(args[1],variables,functions);
+	evaluate: function(args,scope) {
+		var a = jme.evaluate(args[0],scope);
+		var b = jme.evaluate(args[1],scope);
 		return new TBool(util.eq(a,b));
 	},
 	doc: {
@@ -1493,9 +1467,9 @@ new funcObj('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', descriptio
 new funcObj('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
 
 new funcObj('random',[TList],'?',null, {
-	evaluate: function(args,variables,functions) 
+	evaluate: function(args,scope) 
 	{
-		var l = jme.evaluate(args[0],variables,functions);
+		var l = jme.evaluate(args[0],scope);
 		return math.choose(l.value);
 	},
 
@@ -1508,7 +1482,7 @@ new funcObj('random',[TList],'?',null, {
 
 new funcObj( 'random',[],'?', null, {
 	typecheck: function() { return true; },
-	evaluate: function(args,variables,functions) { return jme.evaluate(math.choose(args),variables,functions);},
+	evaluate: function(args,scope) { return jme.evaluate(math.choose(args),scope);},
 	doc: {
 		usage: 'random(1,2,3,4,5)',
 		description: 'Choose at random from the given arguments.',
@@ -1549,14 +1523,14 @@ new funcObj('deal',[TNum],TList,
 
 //if needs to be a bit different because it can return any type
 new funcObj('if', [TBool,'?','?'], '?',null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var test = jme.evaluate(args[0],variables,functions).value;
+		var test = jme.evaluate(args[0],scope).value;
 
 		if(test)
-			return jme.evaluate(args[1],variables,functions);
+			return jme.evaluate(args[1],scope);
 		else
-			return jme.evaluate(args[2],variables,functions);
+			return jme.evaluate(args[2],scope);
 	},
 
 	doc: {
@@ -1593,16 +1567,16 @@ new funcObj('switch',[],'?', null, {
 		}
 		return true;
 	},
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
 		for(var i=0; i<args.length-1; i+=2 )
 		{
-			var result = jme.evaluate(args[i],variables,functions).value;
+			var result = jme.evaluate(args[i],scope).value;
 			if(result)
-				return jme.evaluate(args[i+1],variables,functions);
+				return jme.evaluate(args[i+1],scope);
 		}
 		if(args.length % 2 == 1)
-			return jme.evaluate(args[args.length-1],variables,functions);
+			return jme.evaluate(args[args.length-1],scope);
 		else
 			throw(new Numbas.Error('jme.func.switch.no default case'));
 	},
@@ -1615,10 +1589,10 @@ new funcObj('switch',[],'?', null, {
 });
 
 new funcObj('isa',['?',TString],TBool, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var kind = jme.evaluate(args[1],variables,functions).value;
-		if(args[0].tok.type=='name' && variables[args[0].tok.name.toLowerCase()]==undefined )
+		var kind = jme.evaluate(args[1],scope).value;
+		if(args[0].tok.type=='name' && scope.variables[args[0].tok.name.toLowerCase()]==undefined )
 			return new TBool(kind=='name');
 
 		var match = false;
@@ -1643,13 +1617,13 @@ new funcObj('isa',['?',TString],TBool, null, {
 
 // repeat(expr,n) evaluates expr n times and returns a list of the results
 new funcObj('repeat',['?',TNum],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var size = jme.evaluate(args[1],variables,functions).value;
+		var size = jme.evaluate(args[1],scope).value;
 		var value = [];
 		for(var i=0;i<size;i++)
 		{
-			value[i] = jme.evaluate(args[0],variables,functions);
+			value[i] = jme.evaluate(args[0],scope);
 		}
 		return new TList(value);
 	},
@@ -1661,10 +1635,10 @@ new funcObj('repeat',['?',TNum],TList, null, {
 });
 
 new funcObj('listval',[TList,TNum],'?', null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],variables,functions).value;
-		var list = jme.evaluate(args[0],variables,functions);
+		var index = jme.evaluate(args[1],scope).value;
+		var list = jme.evaluate(args[0],scope);
 		if(index<0)
 			index += list.vars;
 		if(index in list.value)
@@ -1681,10 +1655,10 @@ new funcObj('listval',[TList,TNum],'?', null, {
 });
 
 new funcObj('listval',[TList,TRange],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var range = jme.evaluate(args[1],variables,functions).value;
-		var list = jme.evaluate(args[0],variables,functions);
+		var range = jme.evaluate(args[1],scope).value;
+		var list = jme.evaluate(args[0],scope);
 		var start = range[0];
 		var end = range[1];
 		var size = list.vars;
@@ -1704,10 +1678,10 @@ new funcObj('listval',[TList,TRange],TList, null, {
 });
 
 new funcObj('listval',[TVector,TNum],TNum, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],variables,functions).value;
-		var vector = jme.evaluate(args[0],variables,functions);
+		var index = jme.evaluate(args[1],scope).value;
+		var vector = jme.evaluate(args[0],scope);
 		return new TNum(vector.value[index] || 0);
 	},
 
@@ -1719,10 +1693,10 @@ new funcObj('listval',[TVector,TNum],TNum, null, {
 });
 
 new funcObj('listval',[TMatrix,TNum],TVector, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],variables,functions).value;
-		var matrix = jme.evaluate(args[0],variables,functions);
+		var index = jme.evaluate(args[1],scope).value;
+		var matrix = jme.evaluate(args[0],scope);
 		return new TVector(matrix.value[index] || []);
 	},
 
@@ -1734,16 +1708,16 @@ new funcObj('listval',[TMatrix,TNum],TVector, null, {
 });
 
 new funcObj('map',['?',TName,TList],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[2],variables,functions);
+		var list = jme.evaluate(args[2],scope);
 		var value = [];
 		var name = args[1].tok.name;
-		variables = util.copyobj(variables);
+		scope = new Scope(scope);
 		for(var i=0;i<list.value.length;i++)
 		{
-			variables[name] = list.value[i];
-			value[i] = jme.evaluate(args[0],variables,functions);
+			scope.variables[name] = list.value[i];
+			value[i] = jme.evaluate(args[0],scope);
 		}
 		return new TList(value);
 	},
@@ -1755,17 +1729,17 @@ new funcObj('map',['?',TName,TList],TList, null, {
 });
 
 new funcObj('map',['?',TName,TRange],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var range = jme.evaluate(args[2],variables,functions);
+		var range = jme.evaluate(args[2],scope);
 		var name = args[1].tok.name;
 		var newlist = new TList(range.size);
 		newlist.value = [];
-		var variables = Numbas.util.copyobj(variables);
+		scope = new Scope(scope);
 		for(var i=3;i<range.value.length;i++)
 		{
-			variables[name] = new TNum(range.value[i]);
-			newlist.value[i-3] = jme.evaluate(args[0],variables,functions);
+			scope.variables[name] = new TNum(range.value[i]);
+			newlist.value[i-3] = jme.evaluate(args[0],scope);
 		}
 		return newlist;
 	},
@@ -1777,9 +1751,9 @@ new funcObj('map',['?',TName,TRange],TList, null, {
 });
 
 new funcObj('sort',[TList],TList, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],variables,functions);
+		var list = jme.evaluate(args[0],scope);
 		var newlist = new TList(list.vars);
 		newlist.value = list.value.slice().sort(function(a,b){ 
 			if(math.gt(a.value,b.value))
@@ -1799,12 +1773,12 @@ new funcObj('sort',[TList],TList, null, {
 });
 
 new funcObj('vector',['*TNum'],TVector, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
 		var value = [];
 		for(var i=0;i<args.length;i++)
 		{
-			value.push(jme.evaluate(args[i],variables,functions).value);
+			value.push(jme.evaluate(args[i],scope).value);
 		}
 		return new TVector(value);
 	},
@@ -1817,9 +1791,9 @@ new funcObj('vector',['*TNum'],TVector, null, {
 });
 
 new funcObj('vector',[TList],TVector, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],variables,functions);
+		var list = jme.evaluate(args[0],scope);
 		var value = list.value.map(function(x){return x.value});
 		return new TVector(value);
 	},
@@ -1832,9 +1806,9 @@ new funcObj('vector',[TList],TVector, null, {
 });
 
 new funcObj('matrix',[TList],TMatrix,null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],variables,functions);
+		var list = jme.evaluate(args[0],scope);
 		var rows = list.vars;
 		var columns = 0;
 		var value = [];
@@ -1857,14 +1831,14 @@ new funcObj('matrix',[TList],TMatrix,null, {
 });
 
 new funcObj('matrix',['*list'],TMatrix, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
 		var rows = args.length;
 		var columns = 0;
 		var value = [];
 		for(var i=0;i<args.length;i++)
 		{
-			var row = jme.evaluate(args[i],variables,functions).value;
+			var row = jme.evaluate(args[i],scope).value;
 			value.push(row.map(function(x){return x.value}));
 			columns = Math.max(columns,row.length);
 		}
@@ -1881,12 +1855,12 @@ new funcObj('matrix',['*list'],TMatrix, null, {
 });
 
 new funcObj('rowvector',['*number'],TMatrix, null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
 		var row = [];
 		for(var i=0;i<args.length;i++)
 		{
-			row.push(jme.evaluate(args[i],variables,functions).value);
+			row.push(jme.evaluate(args[i],scope).value);
 		}
 		var matrix = [row];
 		matrix.rows = 1;
@@ -1903,9 +1877,9 @@ new funcObj('rowvector',['*number'],TMatrix, null, {
 
 //cast vector to list
 new funcObj('list',[TVector],TList,null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var vector = jme.evaluate(args[0],variables,functions);
+		var vector = jme.evaluate(args[0],scope);
 		var value = vector.value.map(function(n){ return new TNum(n)});
 		return new TList(value);
 	},
@@ -1919,9 +1893,9 @@ new funcObj('list',[TVector],TList,null, {
 
 //cast matrix to list of lists
 new funcObj('list',[TMatrix],TList,null, {
-	evaluate: function(args,variables,functions)
+	evaluate: function(args,scope)
 	{
-		var matrix = jme.evaluate(args[0],variables,functions);
+		var matrix = jme.evaluate(args[0],scope);
 		var value = [];
 		for(var i=0;i<matrix.value.rows;i++)
 		{
@@ -1937,6 +1911,12 @@ new funcObj('list',[TMatrix],TList,null, {
 		description: 'Cast a matrix to a list of its rows.'
 	}
 });
+
+var builtinScope = jme.builtinScope = new Scope({functions: builtins});
+
+///end of builtins
+
+
 
 function randoms(varnames,min,max,times)
 {

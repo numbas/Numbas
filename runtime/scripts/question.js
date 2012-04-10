@@ -25,44 +25,36 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-var Question = Numbas.Question = function( xml, number, loading, gvariables, gfunctions )
+var Question = Numbas.Question = function( xml, number, loading, gscope )
 {
 	var q = this;
 	q.xml = xml;
 	q.originalXML = q.xml;
 	q.number = number;
+	q.scope = new jme.Scope(gscope);
 
 	//get question's name
 	tryGetAttribute(q,'.','name');
 
 	job(function() {
-		q.functions = Numbas.jme.variables.makeFunctions(q.xml);
-		for(var f in gfunctions)
-		{
-			if(!(f in q.functions))
-				q.functions[f] = gfunctions[f];
-		}
+		q.scope.functions = Numbas.jme.variables.makeFunctions(q.xml,q.scope);
 	});
 
 	job(function() {
 		if(loading)
 		{
-			q.variables = {};
 			var qobj = Numbas.store.loadQuestion(q);
 			for(var x in qobj.variables)
 			{
-				q.variables[x] = qobj.variables[x];
+				q.scope.variables[x] = qobj.variables[x];
 			}
 		}
 		else
 		{
-			q.variables = Numbas.jme.variables.makeVariables(q.xml,q.functions);
+			q.scope.variables = Numbas.jme.variables.makeVariables(q.xml,q.scope);
 		}
-		for(var v in gvariables)
-		{
-			if(!(v in q.variables))
-				q.variables[v] = gvariables[v];
-		}
+
+		q.scope = new jme.Scope(gscope,q.scope);
 	});
 
 	job(this.subvars,this);
@@ -160,8 +152,7 @@ Question.prototype =
 				//run contentsubvars on the collection of text nodes
 				textNodes.each(function(){
 						var old = this.nodeValue;
-						//this.nodeValue = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
-						var newtext = jme.contentsubvars(this.nodeValue, q.variables, q.functions);
+						var newtext = jme.contentsubvars(this.nodeValue, q.scope);
 						newtext = util.escapeHTML(newtext);
 						if(newtext!=old)
 						{
@@ -198,7 +189,7 @@ Question.prototype =
 			for( i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-				expr = jme.subvars(expr,q.variables,q.functions);
+				expr = jme.subvars(expr,q.scope);
 				Numbas.xml.setTextContent(mathsNodes[i],expr);
 			}
 			//turn content maths into LaTeX
@@ -206,13 +197,13 @@ Question.prototype =
 			for( i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-				expr = jme.subvars(expr,q.variables,q.functions);
+				expr = jme.subvars(expr,q.scope);
 				var tex = jme.display.exprToLaTeX(expr);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}
 
 			//sub into question name
-			q.name = jme.contentsubvars(q.name,q.variables,q.functions);
+			q.name = jme.contentsubvars(q.name,q.scope);
 		});
 	},
 
@@ -691,11 +682,12 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
 
-	settings.answerSimplification = Numbas.jme.display.collectRuleset(settings.answerSimplification,Numbas.exam.rulesets);
+	settings.answerSimplification = Numbas.jme.display.collectRuleset(settings.answerSimplification,this.question.scope);
 
 	settings.correctAnswer = jme.display.simplifyExpression(
 		Numbas.xml.getTextContent(answerMathML).trim(),
-		settings.answerSimplification
+		settings.answerSimplification,
+		this.question.scope
 	);
 
 	settings.displaySimplification = {
@@ -912,14 +904,15 @@ JMEPart.prototype =
 		}
 
 		try{
-			var tree = jme.compile(this.studentAnswer);
+			var scope = new jme.Scope(this.question.scope);
+
+			var tree = jme.compile(this.studentAnswer,scope);
 			var varnames = jme.findvars(tree);
-			var vars = {}
 			for(i=0;i<varnames.length;i++)
 			{
-				vars[varnames[i]]=jme.types.TNum(0);
+				scope.variables[varnames[i]]=jme.types.TNum(0);
 			}
-			jme.evaluate(tree,vars,this.question.functions);
+			jme.evaluate(tree,scope);
 		}
 		catch(e)
 		{
@@ -970,7 +963,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
 	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
-	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.variables);
+	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.scope);
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
@@ -1056,10 +1049,10 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{xml: this.xml, string:true});
 	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
-	settings.minvalue = jme.subvars(settings.minvalue,this.question.variables,this.question.functions);
-	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.variables,this.question.functions);
-	settings.minvalue = evaluate(compile(settings.minvalue),this.question.variables,this.question.functions).value - 0.00000000001;
-	settings.maxvalue = evaluate(compile(settings.maxvalue),this.question.variables,this.question.functions).value + 0.00000000001;
+	settings.minvalue = jme.subvars(settings.minvalue,this.question.scope);
+	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.scope);
+	settings.minvalue = evaluate(settings.minvalue,this.question.scope).value - 0.00000000001;
+	settings.maxvalue = evaluate(settings.maxvalue,this.question.scope).value + 0.00000000001;
 
 	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
 
@@ -1156,10 +1149,10 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
 
-	settings.minAnswers = jme.subvars(settings.minAnswers, question.variables);
-	settings.minAnswers = jme.evaluate(jme.compile(settings.minAnswers),this.question.variables,this.question.functions).value;
-	settings.maxAnswers = jme.subvars(settings.maxAnswers, question.variables);
-	settings.maxAnswers = jme.evaluate(jme.compile(settings.maxAnswers),this.question.variables,this.question.functions).value;
+	settings.minAnswers = jme.subvars(settings.minAnswers, question.scope);
+	settings.minAnswers = jme.evaluate(settings.minAnswers,this.question.scope).value;
+	settings.maxAnswers = jme.subvars(settings.maxAnswers, question.scope);
+	settings.maxAnswers = jme.evaluate(settings.maxAnswers,this.question.scope).value;
 
 	var choiceNodes = choicesNode.selectNodes('choice');
 	this.numChoices = choiceNodes.length;
@@ -1248,7 +1241,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	var def;
 	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def'))
 	{
-		matrix = jme.evaluate(def,this.question.variables,this.question.functions);
+		matrix = jme.evaluate(def,this.question.scope);
 		if(matrix.type!='list')
 		{
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
@@ -1278,7 +1271,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 				cell.value = parseFloat(cell.value);
 			else
 			{
-				cell.value = jme.evaluate(jme.compile(cell.value),this.question.variables,this.question.functions).value;
+				cell.value = jme.evaluate(cell.value,this.question.scope).value;
 				if(!util.isFloat(cell.value))
 					throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
 				cell.value = parseFloat(cell.value);

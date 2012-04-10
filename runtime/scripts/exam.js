@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display'],function() {
+Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme'],function() {
 
 	var job = Numbas.schedule.add;
 
@@ -69,10 +69,11 @@ var Exam = Numbas.Exam = function()
 
 	this.totalQuestions = xml.selectNodes('questions/question').length;
 
+	this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
 
 	//rulesets
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
-	this.rulesets = Numbas.util.copyobj(Numbas.jme.display.simplificationRules);
+	this.scope.rulesets = Numbas.util.copyobj(Numbas.jme.display.simplificationRules);
 
 	var sets = {};
 	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
@@ -104,12 +105,12 @@ var Exam = Numbas.Exam = function()
 			set.push(includeNodes[j].getAttribute('name'));
 		}
 
-		sets[name] = this.rulesets[name] = set;
+		sets[name] = this.scope.rulesets[name] = set;
 	}
 
 	for(var name in sets)
 	{
-		this.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],this.rulesets);
+		this.scope.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],this.scope);
 	}
 
 	//initialise display
@@ -133,9 +134,8 @@ Exam.prototype = {
 	percentScore: 0,			//student's score as a percentage
 	passed: false,				//did student pass the exam?
 
-	//variables and functions
-	functions: {},				//functions available to every question
-	variables: {},				//variables available to every question
+	//JME evaluation environment
+	scope: undefined,
 	
 	//question selection
 	totalQuestions: 0,			//how many questions are available?
@@ -192,8 +192,10 @@ Exam.prototype = {
 	{
 		var exam = this;
 		job(function() {
-			exam.functions = Numbas.jme.variables.makeFunctions(exam.xml);
-			exam.variables = Numbas.jme.variables.makeVariables(exam.xml,exam.functions);
+			exam.scope = new Numbas.jme.Scope(exam.scope, {
+				functions: Numbas.jme.variables.makeFunctions(exam.xml,exam.scope),
+				variables: Numbas.jme.variables.makeVariables(exam.xml,exam.scope)
+			});
 		});
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
@@ -293,7 +295,7 @@ Exam.prototype = {
 		{
 			job(function(i)
 			{
-				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading, this.variables, this.functions );
+				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading, this.scope );
 				this.questionList.push(question);
 			},this,i);
 		}
@@ -495,7 +497,7 @@ Exam.prototype = {
 		var n = e.currentQuestion.number;
 		job(e.display.startRegen,e.display);
 		job(function() {
-			e.questionList[n] = new Numbas.Question(e.xml.selectNodes('questions/question')[n], n, false, e.variables, e.functions);
+			e.questionList[n] = new Numbas.Question(e.xml.selectNodes('questions/question')[n], n, false, e.scope);
 		})
 		job(function() {
 			e.changeQuestion(n);

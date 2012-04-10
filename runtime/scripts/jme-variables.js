@@ -19,7 +19,7 @@ var jme = Numbas.jme;
 var job = Numbas.schedule.add;
 
 jme.variables = {
-	makeFunctions: function(xml)
+	makeFunctions: function(xml,scope)
 	{
 		var tmpFunctions = [];
 
@@ -56,12 +56,13 @@ jme.variables = {
 			});
 
 		}
-		return jme.variables.compileFunctions(tmpFunctions);
+		return jme.variables.compileFunctions(tmpFunctions,scope);
 	},
 	
-	compileFunctions: function(tmpFunctions) 
+	compileFunctions: function(tmpFunctions,scope)
 	{
-		var functions = {};
+		scope = new jme.Scope(scope);
+		var functions = scope.functions;
 		var tmpFunctions2 = [];
 		for(var i=0;i<tmpFunctions.length;i++)
 		{
@@ -93,6 +94,7 @@ jme.variables = {
 			tmpFunctions2.push(fn);
 		}
 
+
 		for(var i=0;i<tmpFunctions2.length;i++)
 		{
 			var fn = tmpFunctions2[i];
@@ -100,17 +102,18 @@ jme.variables = {
 			switch(fn.language)
 			{
 			case 'jme':
-				fn.tree = jme.compile(fn.definition,functions);
+				fn.tree = jme.compile(fn.definition,scope);
 
-				fn.evaluate = function(args,variables,functions)
+				fn.evaluate = function(args,scope)
 				{
-					nvariables = Numbas.util.copyobj(variables);
+					var oscope = scope;
+					scope = new jme.Scope(scope);
 
 					for(var j=0;j<args.length;j++)
 					{
-						nvariables[fn.paramNames[j]] = jme.evaluate(args[j],variables,functions);
+						scope.variables[fn.paramNames[j]] = jme.evaluate(args[j],oscope);
 					}
-					return jme.evaluate(this.tree,nvariables,functions);
+					return jme.evaluate(this.tree,scope);
 				}
 				break;
 			case 'javascript':
@@ -118,9 +121,9 @@ jme.variables = {
 				var math = Numbas.math, 
 					util = Numbas.util;
 				var jfn = eval(preamble+fn.definition+'})');
-				fn.evaluate = function(args,variables,functions)
+				fn.evaluate = function(args,scope)
 				{
-					args = args.map(function(a){return jme.evaluate(a,variables,functions).value});
+					args = args.map(function(a){return jme.evaluate(a,scope).value});
 					try {
 						var val = jfn.apply(this,args);
 						if(!val.type)
@@ -139,7 +142,7 @@ jme.variables = {
 		return functions;
 	},
 
-	makeVariables: function(xml,functions)
+	makeVariables: function(xml,scope)
 	{
 		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
 		if(!variableNodes)
@@ -159,7 +162,7 @@ jme.variables = {
 
 				var vars = [];
 
-				var tree = jme.compile(value,functions,true);
+				var tree = jme.compile(value,scope,true);
 				vars = vars.merge(jme.findvars(tree));
 				todo[name]={
 					tree: tree,
@@ -167,9 +170,9 @@ jme.variables = {
 				};
 			}
 		}
-		function compute(name,todo,variables,path)
+		function compute(name,todo,scope,path)
 		{
-			if(variables[name]!==undefined)
+			if(scope.variables[name]!==undefined)
 				return;
 
 			if(path===undefined)
@@ -190,22 +193,22 @@ jme.variables = {
 			for(var i=0;i<v.vars.length;i++)
 			{
 				var x=v.vars[i];
-				if(variables[x]===undefined)
+				if(scope.variables[x]===undefined)
 				{
 					var newpath = path.slice(0);
 					newpath.splice(0,0,name);
-					compute(x,todo,variables,newpath);
+					compute(x,todo,scope,newpath);
 				}
 			}
 
-			variables[name] = jme.evaluate(v.tree,variables,functions);
+			scope.variables[name] = jme.evaluate(v.tree,scope);
 		}
-		variables = {};
+		scope = new jme.Scope(scope);
 		for(var x in todo)
 		{
-			compute(x,todo,variables);
+			compute(x,todo,scope);
 		}
-		return variables;
+		return scope.variables;
 	}
 };
 
