@@ -331,6 +331,7 @@ class Question:
 		self.parts = []
 		self.variables = []
 		self.functions = []
+		self.rulesets = {}
 
 	@staticmethod
 	def fromDATA(data):
@@ -352,6 +353,17 @@ class Question:
 			for function in functions.keys():
 				question.functions.append(Function.fromDATA(function,functions[function]))
 
+		if 'rulesets' in data:
+			rulesets = data['rulesets']
+			for name in rulesets.keys():
+				l=[]
+				for rule in rulesets[name]:
+					if isinstance(rule,str):
+						l.append(rule)
+					else:
+						l.append(SimplificationRule.fromDATA(rule))
+				question.rulesets[name] = l
+
 		return question
 
 	def toxml(self):
@@ -361,7 +373,8 @@ class Question:
 								['advice'],
 								['notes'],
 								['variables'],
-								['functions']
+								['functions'],
+								['rulesets']
 							])
 
 		question.attrib = {'name': self.name}
@@ -380,6 +393,15 @@ class Question:
 		for function in self.functions:
 			functions.append(function.toxml())
 
+		rules = question.find('rulesets')
+		for name in self.rulesets.keys():
+			st = etree.Element('set',{'name':name})
+			for rule in self.rulesets[name]:
+				if isinstance(rule,str):
+					st.append(etree.Element('include',{'name':rule}))
+				else:
+					st.append(rule.toxml())
+			rules.append(st)
 
 		return question
 

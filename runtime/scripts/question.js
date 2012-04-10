@@ -38,6 +38,46 @@ var Question = Numbas.Question = function( xml, number, loading, gscope )
 
 	job(function() {
 		q.scope.functions = Numbas.jme.variables.makeFunctions(q.xml,q.scope);
+		//make rulesets
+		var rulesetNodes = q.xml.selectNodes('rulesets/set');
+
+		var sets = {};
+		sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
+		for( i=0; i<rulesetNodes.length; i++)
+		{
+			var name = rulesetNodes[i].getAttribute('name');
+			var set = [];
+
+			//get new rule definitions
+			defNodes = rulesetNodes[i].selectNodes('ruledef');
+			for( var j=0; j<defNodes.length; j++ )
+			{
+				var pattern = defNodes[j].getAttribute('pattern');
+				var result = defNodes[j].getAttribute('result');
+				var conditions = [];
+				var conditionNodes = defNodes[j].selectNodes('conditions/condition');
+				for(var k=0; k<conditionNodes.length; k++)
+				{
+					conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
+				}
+				var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+				set.push(rule);
+			}
+
+			//get included sets
+			var includeNodes = rulesetNodes[i].selectNodes('include');
+			for(var j=0; j<includeNodes.length; j++ )
+			{
+				set.push(includeNodes[j].getAttribute('name'));
+			}
+
+			sets[name] = set;
+		}
+
+		for(var name in sets)
+		{
+			q.scope.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],q.scope);
+		}
 	});
 
 	job(function() {
@@ -198,7 +238,7 @@ Question.prototype =
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
 				expr = jme.subvars(expr,q.scope);
-				var tex = jme.display.exprToLaTeX(expr);
+				var tex = jme.display.exprToLaTeX(expr,null,q.scope);
 				Numbas.xml.setTextContent( mathsNodes[i], tex );
 			}
 
@@ -820,7 +860,7 @@ JMEPart.prototype =
 
 		try
 		{
-			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer);
+			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'all',this.question.rulesets);
 		}
 		catch(e)
 		{
