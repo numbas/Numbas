@@ -95,6 +95,36 @@ jme.variables = {
 		}
 
 
+		function makeJMEFunction(fn) {
+			return function(args,scope) {
+				var oscope = scope;
+				scope = new jme.Scope(scope);
+
+				for(var j=0;j<args.length;j++)
+				{
+					scope.variables[fn.paramNames[j]] = jme.evaluate(args[j],oscope);
+				}
+				Numbas.debug(fn.name,true);
+				return jme.evaluate(this.tree,scope);
+			}
+		}
+		function makeJavascriptFunction(fn) {
+			return function(args,scope) {
+				args = args.map(function(a){return jme.evaluate(a,scope).value});
+				try {
+					var val = jfn.apply(this,args);
+					if(!val.type)
+						val = new fn.outcons(val);
+					return val;
+				}
+				catch(e)
+				{
+					throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
+				}
+			}
+		}
+
+
 		for(var i=0;i<tmpFunctions2.length;i++)
 		{
 			var fn = tmpFunctions2[i];
@@ -104,37 +134,15 @@ jme.variables = {
 			case 'jme':
 				fn.tree = jme.compile(fn.definition,scope);
 
-				fn.evaluate = function(args,scope)
-				{
-					var oscope = scope;
-					scope = new jme.Scope(scope);
+				fn.evaluate = makeJMEFunction(fn);
 
-					for(var j=0;j<args.length;j++)
-					{
-						scope.variables[fn.paramNames[j]] = jme.evaluate(args[j],oscope);
-					}
-					return jme.evaluate(this.tree,scope);
-				}
 				break;
 			case 'javascript':
 				var preamble='(function('+fn.paramNames.join(',')+'){';
 				var math = Numbas.math, 
 					util = Numbas.util;
 				var jfn = eval(preamble+fn.definition+'})');
-				fn.evaluate = function(args,scope)
-				{
-					args = args.map(function(a){return jme.evaluate(a,scope).value});
-					try {
-						var val = jfn.apply(this,args);
-						if(!val.type)
-							val = new fn.outcons(val);
-						return val;
-					}
-					catch(e)
-					{
-						throw(new Numbas.Error('jme.user javascript error',fn.name,e.message));
-					}
-				}
+				fn.evaluate = makeJavascriptFunction(fn);
 				break;
 			}
 
