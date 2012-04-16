@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!--
+Copyright 2011 Newcastle University
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+	<head>
+		<title>Main Exam Window</title>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+
+		<!--Sarissa XML handling-->
+		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/R/en-gb.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery-ui.custom.min.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.mousewheel.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.xslTransform.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
+
+		<!-- textile markup -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/textile/textile.js"></script>
+
+		<!-- pipwerks SCORM wrapper -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/numbas.js" charset="utf-8"></script>
+
+		<!-- mathjax stuff -->
+    	<!--<SCRIPT SRC="https://d3eoax9i5htok0.cloudfront.net/mathjax/latest/MathJax.js">-->
+	    <SCRIPT SRC="http://cdn.mathjax.org/mathjax/latest/MathJax.js">
+		  MathJax.Hub.Config({
+			extensions: ['tex2jax.js',"MathMenu.js","TeX/AMSmath.js"],
+			tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+			jax: ["input/TeX","output/HTML-CSS"],
+			displayAlign: "center",
+			displayIndent: "0.1em"
+		  });
+		</SCRIPT>
+
+
+		<!-- CSS -->
+		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="resources/typography.css" />
+		<link rel="stylesheet" type="text/css" href="resources/exam.css" />
+	</head>
+	
+	<body>
+
+		<div id="loading">
+			<div id="progressbar">
+				<p>Loading...</p>
+				<div id="completed"><p>Loading...</p></div>
+			</div>
+		</div>
+
+		<div id="everything" style="display:none">
+		<!-- top bar - logo, exam title, timing -->
+		<div class="mainDiv titleBar">
+			<div class="logo">
+				<img src="resources/numbas-logo.gif"/>
+			</div>
+			<div id="examBanner">exam name</div>
+		</div>
+
+		<!-- main content area - info pages or questions go in here -->
+		<div class="mainDisplay">
+			<div id="infoDisplay">
+			</div>
+
+			<ol id="questionDisplay">
+			</ol>
+
+			<div id="warningDisplay">
+				<div class="errorBar">
+					<h1>Alert</h1>
+				</div>
+				<div id="warningMessage"></div>
+				<div class="errorBar" id="alert">
+					<input type="button" id="warningOK" value="Ok">
+				</div>
+				<div class="errorBar" id="confirm">
+					<input type="button" id="warningOK" value="OK">
+					<input type="button" id="warningCancel" value="Cancel">
+				</div>
+			</div>
+
+		</div>
+		</div>
+
+	</body>
+
+</html>
