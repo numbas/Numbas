@@ -441,11 +441,12 @@ var jme = Numbas.jme = {
 		case 'list':
 			if(tok.value===undefined)
 			{
-				tok.value = [];
+				var value = [];
 				for(var i=0;i<tree.args.length;i++)
 				{
-					tok.value[i] = jme.evaluate(tree.args[i],scope);
+					value[i] = jme.evaluate(tree.args[i],scope);
 				}
+				tok = new TList(value);
 			}
 			return tok;
 		case 'string':

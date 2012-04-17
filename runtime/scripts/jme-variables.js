@@ -104,7 +104,6 @@ jme.variables = {
 				{
 					scope.variables[fn.paramNames[j]] = jme.evaluate(args[j],oscope);
 				}
-				Numbas.debug(fn.name,true);
 				return jme.evaluate(this.tree,scope);
 			}
 		}

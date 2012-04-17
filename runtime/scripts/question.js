@@ -192,7 +192,7 @@ Question.prototype =
 				//run contentsubvars on the collection of text nodes
 				textNodes.each(function(){
 						var old = this.nodeValue;
-						var newtext = jme.contentsubvars(this.nodeValue, q.scope);
+						var newtext = jme.contentsubvars(old, q.scope);
 						newtext = util.escapeHTML(newtext);
 						if(newtext!=old)
 						{
