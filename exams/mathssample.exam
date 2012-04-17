@@ -26,10 +26,6 @@
 		advice: {type: onreveal, threshold: 50}
 	}
 
-	rulesets: {
-		cancelId: [unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower]
-	}
-
 	questions: [
 		{
 			name: PDFs and CDFs
@@ -268,6 +264,10 @@
 					\frac{dy}{dt} &=& \simplify[cancelId]{{alpha*x2}*x + {alpha*y2}*y}
 				\end{eqnarray}\]
 			"""
+
+			rulesets: {
+				cancelId: [unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower]
+			}
 
 			variables: {
 				x1: "random(1..9)*random(-1,1)"		//matrix cells
