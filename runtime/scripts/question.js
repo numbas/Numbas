@@ -860,7 +860,7 @@ JMEPart.prototype =
 
 		try
 		{
-			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'all',this.question.rulesets);
+			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'all',this.question.scope);
 		}
 		catch(e)
 		{
@@ -877,7 +877,7 @@ JMEPart.prototype =
 		this.answered = this.studentAnswer.length > 0;
 		
 		//do comparison of student's answer with correct answer
-		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.followVariables))
+		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.scope))
 		{
 			this.setCredit(0,R('part.marking.incorrect'));
 			return;
@@ -950,7 +950,7 @@ JMEPart.prototype =
 			var varnames = jme.findvars(tree);
 			for(i=0;i<varnames.length;i++)
 			{
-				scope.variables[varnames[i]]=jme.types.TNum(0);
+				scope.variables[varnames[i]]=new jme.types.TNum(0);
 			}
 			jme.evaluate(tree,scope);
 		}
