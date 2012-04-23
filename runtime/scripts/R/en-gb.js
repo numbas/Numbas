@@ -32,7 +32,7 @@ R.registerLocale('en-GB',{
 	'feedback.you were awarded': "You were awarded %s.",
 	'feedback.taken away': "%s %s taken away.",
 
-	'jme.compile.tokenise failed': "Invalid expression: %s",
+	'jme.tokenise.invalid': "Invalid expression: %s",
 
 	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
 	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",
@@ -42,31 +42,27 @@ R.registerLocale('en-GB',{
 	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
 	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
 
-	'jme.compile.type error': "Type error in expression %s",
-
-	'jme.display.unknown token type': "Can't texify token type %s",
-	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
-	'jme.display.collectRuleset.set not defined': "Ruleset %s has not been defined",
+	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n'%s*(...)' ?",
+	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
+	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
 	'jme.evaluate.undefined variable': "Variable %s is undefined",
 
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
 
-	'jme.substituteTree.undefined variable': "Variable %s is undefined",
-
 	'jme.texsubvars.no right bracket': "No matching ] in %s arguments.",
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
 	'jme.texsubvars.no right brace': "No matching } in %s",
-
-	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n'%s*(...)' ?",
-	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
-	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
 	'jme.user javascript error': "Error in user-defined javascript function @%s@\n\n%s",
 
 	'jme.variables.variable not defined': "Variable %s not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
+
+	'jme.display.unknown token type': "Can't texify token type %s",
+	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
+	'jme.display.collectRuleset.set not defined': "Ruleset %s has not been defined",
 
 	'math.precround.complex': "Can't round to a complex number of decimal places",
 	'math.siground.complex': "Can't round to a complex number of sig figs",

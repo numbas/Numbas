@@ -1,13 +1,14 @@
 var textile;
 (function() {
-	textile = function(src) {
-		var tc = new TextileConverter(src);
+	textile = function(src,options) {
+		var tc = new TextileConverter(src,options);
 		return tc.convert();
 	};
 
-	function TextileConverter(src)
+	function TextileConverter(src,options)
 	{
 		this.osrc = this.src = src;
+		this.options = options || {};
 		this.out = '';
 		this.footnotes = [];
 	}
@@ -847,7 +848,10 @@ var textile;
 		run: function() {
 			var block = this.getBlock();
 			block = this.convertSpan(block);
-			this.out += para.open+block+para.close;
+			if(!this.options.nowrapPlainBlocks)
+				block = para.open + block + para.close;
+			this.options.nowrapPlainBlocks = false;
+			this.out += block;
 		}
 	}
 	blockTypes.push(plainBlock);

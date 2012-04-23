@@ -157,7 +157,7 @@ var jme = Numbas.jme = {
 			else
 			{
 				//invalid character or not able to match a token
-				throw(new Numbas.Error('jme.compile.tokenise failed',oexpr));
+				throw(new Numbas.Error('jme.tokenise.invalid',oexpr));
 			}
 			
 			expr=expr.slice(result[0].length);	//chop found token off the expression
@@ -419,14 +419,16 @@ var jme = Numbas.jme = {
 
 	evaluate: function(tree,scope)
 	{
+		//make the scope.
+		//If the scope parameter is not given to this function, we will end up with a good scope object anyway
+		scope = new Scope(builtinScope,scope);
+
+		//if a string is given instead of an expression tree, compile it to a tree
 		if( typeof(tree)=='string' )
 			tree = jme.compile(tree,scope);
 		if(!tree)
 			return null;
 
-		//make the scope.
-		//If the scope parameter is not given to this function, we will end up with a good scope object anyway
-		scope = new Scope(builtinScope,scope);
 
 		tree = jme.substituteTree(tree,scope,true);
 		jme.bind(tree,scope);
@@ -456,7 +458,6 @@ var jme = Numbas.jme = {
 				return scope.variables[tok.name.toLowerCase()];
 			else
 				return tok;
-				throw(new Numbas.Error('jme.evaluate.undefined variable'));
 			break;
 		case 'op':
 		case 'function':
@@ -477,9 +478,6 @@ var jme = Numbas.jme = {
 
 		//tokenise expression
 		var tokens = jme.tokenise(expr);
-		if(tokens===undefined){
-			throw(new Numbas.Error('jme.compile.tokenise failed',expr));
-		}
 
 		//compile to parse tree
 		var tree = jme.shunt(tokens,scope);
@@ -488,12 +486,9 @@ var jme = Numbas.jme = {
 			return;
 
 		if(!notypecheck)
-		{
-			if(!jme.typecheck(tree,scope))
-				throw(new Numbas.Error('jme.compile.type error',expr));
-		}
+			jme.typecheck(tree,scope);	//will throw an error if there is a type problem
 
-		return(tree);
+		return(tree);nop
 	},
 
 	typecheck: function(tree,scope)
