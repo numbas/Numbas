@@ -74,7 +74,7 @@ Numbas.Error.prototype.constructor = Numbas.Error;
 //
 
 var scriptreqs = {};
-var startOK = false;
+Numbas.startOK = false;
 
 function RequireScript(file)
 {
@@ -141,13 +141,13 @@ Numbas.queueScript = function(file, deps, callback)
 	
 	req.loaded = true;
 
-	if(startOK)
+	if(Numbas.startOK)
 	{
-		tryInit();
+		Numbas.tryInit();
 	}
 }
 
-function tryInit()
+Numbas.tryInit = function()
 //called when all files have been requested, will try to execute all queued code if all script files have been loaded
 {
 
@@ -191,12 +191,6 @@ function tryInit()
 	Numbas.init();
 }
 
-$(document).ready(function() {
-	loadScript('settings.js');
-	loadScript('scripts/exam.js');
-	startOK = true;
-	tryInit();
-});
 
 
 })();
