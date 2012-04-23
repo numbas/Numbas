@@ -27,11 +27,9 @@ var jme = Numbas.jme = {
 	constants: {
 		'e': Math.E,
 		'pi': Math.PI,
-		'\\pi': Math.PI,
 		'i': math.complex(0,1),
 		'infinity': Infinity,
 		'infty': Infinity,
-		'\\infty': Infinity
 	},
 
 	tokenise: function(expr)
@@ -39,8 +37,10 @@ var jme = Numbas.jme = {
 	{
 		if(!expr)
 			return [];
-	
+
 		expr += '';
+		
+		var oexpr = expr;
 
 		expr = expr.replace(/^\s+|\s+$/g, '');	//get rid of whitespace
 
@@ -103,7 +103,7 @@ var jme = Numbas.jme = {
 					if(lname in jme.constants) {
 						token = new TNum(jme.constants[lname]);
 					}else{
-						token = new TName(name,annotation);
+						token = new TName(name);
 					}
 				}
 				else
@@ -157,7 +157,7 @@ var jme = Numbas.jme = {
 			else
 			{
 				//invalid character or not able to match a token
-				return undefined;
+				throw(new Numbas.Error('jme.compile.tokenise failed',oexpr));
 			}
 			
 			expr=expr.slice(result[0].length);	//chop found token off the expression
@@ -490,7 +490,7 @@ var jme = Numbas.jme = {
 		if(!notypecheck)
 		{
 			if(!jme.typecheck(tree,scope))
-				throw(new Numbas.Error('jme.compile.type error'));
+				throw(new Numbas.Error('jme.compile.type error',expr));
 		}
 
 		return(tree);
