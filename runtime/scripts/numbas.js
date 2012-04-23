@@ -117,12 +117,15 @@ var loadCSS = Numbas.loadCSS = function(file)
 	document.getElementsByTagName('head')[0].appendChild(link);
 }
 
+Numbas.scriptPrefix = 'scripts/';
+
 Numbas.queueScript = function(file, deps, callback)	
 //queue up a file's code to be executed
 //file is the path of this file
 //deps is a list of other files which need to be run before this one can be
 //callback is a function wrapping up this file's code
 {
+	file = file.replace(/^scripts\//,Numbas.scriptPrefix);
 	var req = scriptreqs[file];
 
 	if(typeof(deps)=='string')
@@ -131,7 +134,7 @@ Numbas.queueScript = function(file, deps, callback)
 	{
 		var dep = deps[i];
 		if(!dep.match('/'))				//so can refer to built-in scripts just by name
-			dep = 'scripts/'+deps[i]+'.js';
+			dep = Numbas.scriptPrefix+deps[i]+'.js';
 		deps[i] = dep;
 		loadScript(dep);
 		scriptreqs[dep].backdeps.push(file);
