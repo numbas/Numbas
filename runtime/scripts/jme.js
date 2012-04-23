@@ -46,7 +46,7 @@ var jme = Numbas.jme = {
 
 		var tokens = [];
 		var i = 0;
-		var re_bool = /^true|^false/;
+		var re_bool = /^true|^false/i;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9])))/i;
