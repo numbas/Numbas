@@ -33,6 +33,15 @@ R.registerLocale('en-GB',{
 	'feedback.taken away': "%s %s taken away.",
 
 	'jme.compile.tokenise failed': "Invalid expression: %s",
+
+	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
+	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",
+	'jme.shunt.no left square bracket': "No matching left bracket",
+	'jme.shunt.no left bracket': "No matching left bracket",
+	'jme.shunt.no right bracket': "No matching right bracket",
+	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
+	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
+
 	'jme.compile.type error': "Type error in expression %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
@@ -43,14 +52,6 @@ R.registerLocale('en-GB',{
 
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
-
-	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
-	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",
-	'jme.shunt.no left square bracket': "No matching left bracket",
-	'jme.shunt.no left bracket': "No matching left bracket",
-	'jme.shunt.no right bracket': "No matching right bracket",
-	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
-	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
 
 	'jme.substituteTree.undefined variable': "Variable %s is undefined",
 

@@ -287,8 +287,8 @@ var texOps = {
 	'>=': infixTex('\\geq'),
 	'<>': infixTex('\neq'),
 	'=': infixTex('='),
-	'&&': infixTex('\\wedge'),
-	'||': infixTex('\\vee'),
+	'and': infixTex('\\wedge'),
+	'or': infixTex('\\vee'),
 	'xor': infixTex('\\, \\textrm{XOR} \\,'),
 	'|': infixTex('|'),
 	'abs': (function(thing,texArgs,settings) { 
@@ -799,6 +799,14 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		case '-u':
 			op='-';
 			break;
+		case 'and':
+		case 'or':
+		case 'isa':
+		case 'except':
+			op=' '+op+' ';
+			break;
+		case 'not':
+			op = 'not ';
 		}
 
 		if(l==1)

@@ -49,7 +49,7 @@ var jme = Numbas.jme = {
 		var re_bool = /^true|^false/i;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
-		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9])))/i;
+		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
@@ -1084,10 +1084,10 @@ var precedence = jme.precedence = {
 };
 
 var synonyms = {
-	'&':'&&',
-	'and':'&&',
+	'&':'and',
+	'&&':'and',
 	'divides': '|',
-	'or':'||',
+	'||':'or',
 	'sqr':'sqrt',
 	'gcf': 'gcd',
 	'sgn':'sign',
@@ -1109,7 +1109,7 @@ var commutative = jme.commutative =
 {
 	'*': true,
 	'+': true,
-	'&&': true
+	'and': true
 };
 
 
@@ -1420,7 +1420,7 @@ new funcObj('=', ['?','?'], TBool, null, {
 	}
 });
 
-new funcObj('&&', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
+new funcObj('and', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
 new funcObj('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );	
 new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
 new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
