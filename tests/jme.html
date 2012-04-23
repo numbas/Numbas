@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+                    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+		<script src="qunit.js"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/R/R.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/R/en-gb.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
+
+		<!-- textile markup -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/textile/textile.js"></script>
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+
+
+		<script>
+			$(document).ready(function(){
+				Numbas.init = function() {
+
+					var types = Numbas.jme.types;
+					var tokenise = Numbas.jme.tokenise;
+
+					function raisesNumbasError(fn,error,description) {
+						raises(fn,function(e){return e.originalMessage == error},description);
+					}
+
+					module('jme.tokenise');
+
+					test('Booleans', function() {
+						deepEqual(tokenise('true'),[new types.TBool(true)],'true');
+						deepEqual(tokenise('TRUE'),[new types.TBool(true)],'TRUE');
+						deepEqual(tokenise('True'),[new types.TBool(true)],'True');
+						equal(tokenise('true')[0].value,true,'value is true');
+
+						deepEqual(tokenise('false'),[new types.TBool(false)],'false');
+						deepEqual(tokenise('FALSE'),[new types.TBool(false)],'FALSE');
+						deepEqual(tokenise('False'),[new types.TBool(false)],'False');
+						equal(tokenise('false')[0].value,false,'value is false');
+					});
+					test('Numbers', function() {
+						deepEqual(tokenise('0'),[new types.TNum(0)],'0');
+						deepEqual(tokenise('0.0'),[new types.TNum(0)],'0.0');
+
+						raisesNumbasError(function(){ tokenise('.1')},'jme.compile.tokenise failed','Invalid: .1');
+
+						deepEqual(tokenise('1'),[new types.TNum(1)],'1');
+						deepEqual(tokenise('1.0023'),[new types.TNum(1.0023)],'1.0023');
+
+						deepEqual(tokenise('e'),[new types.TNum(Math.E)],'e');
+
+						deepEqual(tokenise('pi'),[new types.TNum(Math.PI)],'pi');
+						deepEqual(tokenise('PI'),[new types.TNum(Math.PI)],'PI');
+
+						equal(tokenise('\\\\pi')[0].type,'name','compile "\\pi" returns a TName');
+
+						deepEqual(tokenise('i'),[new types.TNum(Numbas.math.complex(0,1))],'i');
+
+						deepEqual(tokenise('infinity'),[new types.TNum(Infinity)],'infinity');
+						deepEqual(tokenise('infty'),[new types.TNum(Infinity)],'infinity');
+					});
+
+					test('Names',function() {
+						deepEqual(tokenise('x'),[new types.TName('x')],'x');
+						deepEqual(tokenise('arg123'),[new types.TName('arg123')],'arg123');
+						deepEqual(tokenise('a1b2'),[new types.TName('a1b2')],'a1b2');
+						deepEqual(tokenise('X'),[new types.TName('X')],'X');
+						deepEqual(tokenise('xyz'),[new types.TName('xyz')],'xyz');
+						deepEqual(tokenise('$x'),[new types.TName('$x')],'$x');
+						deepEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
+					});
+
+					test('Operators', function() {
+						deepEqual(tokenise('_'),[new types.TOp('_')],'_');
+						deepEqual(tokenise('..'),[new types.TOp('..')],'..');
+						deepEqual(tokenise('#'),[new types.TOp('#')],'#');
+						deepEqual(tokenise('<='),[new types.TOp('<=')],'<=');
+						deepEqual(tokenise('>='),[new types.TOp('>=')],'>=');
+						deepEqual(tokenise('<>'),[new types.TOp('<>')],'<>');
+						deepEqual(tokenise('&&'),[new types.TOp('and')],'^^');
+						deepEqual(tokenise('||'),[new types.TOp('or')],'||');
+						deepEqual(tokenise('|'),[new types.TOp('|')],'|');
+						deepEqual(tokenise('*'),[new types.TOp('*')],'*');
+						deepEqual(tokenise('+'),[new types.TOp('+u')],'+');
+						deepEqual(tokenise('-'),[new types.TOp('-u')],'-');
+						deepEqual(tokenise('/'),[new types.TOp('/')],'/');
+						deepEqual(tokenise('^'),[new types.TOp('^')],'^');
+						deepEqual(tokenise('<'),[new types.TOp('<')],'<');
+						deepEqual(tokenise('>'),[new types.TOp('>')],'>');
+						deepEqual(tokenise('='),[new types.TOp('=')],'=');
+						deepEqual(tokenise('!'),[new types.TOp('not')],'!');
+						deepEqual(tokenise('not'),[new types.TOp('not')],'not');
+						deepEqual(tokenise('and'),[new types.TOp('and')],'and');
+						deepEqual(tokenise('or'),[new types.TOp('or')],'or');
+						deepEqual(tokenise('isa'),[new types.TOp('isa')],'isa');
+						deepEqual(tokenise('except'),[new types.TOp('except')],'except');
+					});
+
+					test('Punctuation',function() {
+						deepEqual(tokenise('('),[new types.TPunc('(')],'(');
+						deepEqual(tokenise(')'),[new types.TPunc(')')],')');
+						deepEqual(tokenise(','),[new types.TPunc(',')],',');
+						deepEqual(tokenise('['),[new types.TPunc('[')],']');
+						deepEqual(tokenise(']'),[new types.TPunc(']')],']');
+					});
+
+					test('String',function() {
+						deepEqual(tokenise('"hi"'),[new types.TString('hi')],'"hi"');
+						deepEqual(tokenise("'hi'"),[new types.TString('hi')],"'hi'");
+
+						raisesNumbasError(function() {tokenise('"hi')},'jme.compile.tokenise failed','Invalid: "hi');
+						raisesNumbasError(function() {tokenise('hi"')},'jme.compile.tokenise failed','Invalid: "hi');
+					});
+
+					test('Invalid expressions',function() {
+						raisesNumbasError(function(){tokenise('x.1')},'jme.compile.tokenise failed','Invalid: x.1');
+					});
+
+					module('jme.shunt');
+
+					var compile = function(s){ return Numbas.jme.compile(s,Numbas.jme.builtinScope) };
+
+					test('Errors',function() {
+						raisesNumbasError(function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
+						raisesNumbasError(function(){ compile('!') },'jme.shunt.not enough arguments','not enough arguments: !')
+						raisesNumbasError(function(){ compile('f x,y')},'jme.shunt.no left bracket in function','no left bracket in function: f x,y');
+						raisesNumbasError(function(){ compile('x]') },'jme.shunt.no left square bracket','no left square bracket: x]');
+						raisesNumbasError(function(){ compile('x)') },'jme.shunt.no left bracket','no left bracket: x)');
+						raisesNumbasError(function(){ compile('(x') },'jme.shunt.no right bracket','no right bracket: (x');
+						raisesNumbasError(function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
+						raisesNumbasError(function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
+					})
+				}
+
+
+
+
+				Numbas.scriptPrefix = '../runtime/scripts/';
+				Numbas.loadScript('../runtime/scripts/jme-display.js');
+				Numbas.loadScript('../runtime/scripts/jme.js');
+				Numbas.startOK = true;
+				Numbas.tryInit();
+			});
+		</script>
+	</head>
+	<body>
+		<h1 id="qunit-header">Numbas JME unit tests</h1>
+		<h2 id="qunit-banner"></h2>
+		<div id="qunit-testrunner-toolbar"></div>
+		<h2 id="qunit-userAgent"></h2>
+		<ol id="qunit-tests"></ol>
+		<div id="qunit-fixture">test markup, will be hidden</div>
+	</body>
+</html>
