@@ -21,6 +21,11 @@
 
 		<script>
 			$(document).ready(function(){
+
+
+				//The vast majority of these tests are semi-useless "tiny case behaves as expected tests".
+				//I'll add tests corresponding to real world errors as I encounter them
+
 				Numbas.init = function() {
 
 					var types = Numbas.jme.types;
@@ -30,7 +35,7 @@
 						raises(fn,function(e){return e.originalMessage == error},description);
 					}
 
-					module('jme.tokenise');
+					module('Compiling');
 
 					test('Booleans', function() {
 						deepEqual(tokenise('true'),[new types.TBool(true)],'true');
@@ -47,7 +52,7 @@
 						deepEqual(tokenise('0'),[new types.TNum(0)],'0');
 						deepEqual(tokenise('0.0'),[new types.TNum(0)],'0.0');
 
-						raisesNumbasError(function(){ tokenise('.1')},'jme.compile.tokenise failed','Invalid: .1');
+						raisesNumbasError(function(){ tokenise('.1')},'jme.tokenise.invalid','Invalid: .1');
 
 						deepEqual(tokenise('1'),[new types.TNum(1)],'1');
 						deepEqual(tokenise('1.0023'),[new types.TNum(1.0023)],'1.0023');
@@ -113,19 +118,17 @@
 						deepEqual(tokenise('"hi"'),[new types.TString('hi')],'"hi"');
 						deepEqual(tokenise("'hi'"),[new types.TString('hi')],"'hi'");
 
-						raisesNumbasError(function() {tokenise('"hi')},'jme.compile.tokenise failed','Invalid: "hi');
-						raisesNumbasError(function() {tokenise('hi"')},'jme.compile.tokenise failed','Invalid: "hi');
+						raisesNumbasError(function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
+						raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: "hi');
 					});
 
 					test('Invalid expressions',function() {
-						raisesNumbasError(function(){tokenise('x.1')},'jme.compile.tokenise failed','Invalid: x.1');
+						raisesNumbasError(function(){tokenise('x.1')},'jme.tokenise.invalid','Invalid: x.1');
 					});
-
-					module('jme.shunt');
 
 					var compile = function(s){ return Numbas.jme.compile(s,Numbas.jme.builtinScope) };
 
-					test('Errors',function() {
+					test('jme.shunt',function() {
 						raisesNumbasError(function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
 						raisesNumbasError(function(){ compile('!') },'jme.shunt.not enough arguments','not enough arguments: !')
 						raisesNumbasError(function(){ compile('f x,y')},'jme.shunt.no left bracket in function','no left bracket in function: f x,y');
@@ -135,6 +138,35 @@
 						raisesNumbasError(function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
 						raisesNumbasError(function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
 					})
+
+					test('jme.typecheck',function() {
+						raisesNumbasError(function(){ compile('x()') },'jme.typecheck.function not defined','function not defined: x()');
+						raisesNumbasError(function(){ Numbas.jme.compile('x+y',new Numbas.jme.Scope()) },'jme.typecheck.op not defined','op not defined with empty scope: x+y');
+						raisesNumbasError(function(){ compile('gcd(2)') },'jme.typecheck.no right type definition','no right type definition: gcd(2)');
+					});
+
+					module('Evaluating');
+
+					var evaluate = function(t,scope) { return Numbas.jme.evaluate(t,scope) };
+
+					test('Variables',function() {
+						var scope = {variables: {
+							x: new types.TNum(1),
+							name: new types.TString('Bob')
+						}};
+						equals(evaluate('y',scope).type,'name','undefined variable remains a TName')
+						equals(evaluate('x',scope).value,1,'substitute variable x=1')
+						equals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
+					});
+
+					test('Literals',function() {
+						equals(evaluate('1').value,1,'1');
+						equals(evaluate('true').value,true,'true');
+						deepEqual(evaluate('1..3').value,[1,3,1,1,2,3],'1..3');
+						deepEqual(evaluate('[1,2]').value.map(function(i){return i.value}),[1,2],'[1,2]');
+						deepEqual(evaluate('[1,"hi",true]').value.map(function(i){return i.value}),[1,"hi",true],'[1,"hi",true]');
+						
+					});
 				}
 
 
