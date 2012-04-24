@@ -28,8 +28,9 @@
 
 				Numbas.init = function() {
 
-					var types = Numbas.jme.types;
-					var tokenise = Numbas.jme.tokenise;
+					var jme = Numbas.jme;
+					var types = jme.types;
+					var tokenise = jme.tokenise;
 
 					function raisesNumbasError(fn,error,description) {
 						raises(fn,function(e){return e.originalMessage == error},description);
@@ -126,7 +127,7 @@
 						raisesNumbasError(function(){tokenise('x.1')},'jme.tokenise.invalid','Invalid: x.1');
 					});
 
-					var compile = function(s){ return Numbas.jme.compile(s,Numbas.jme.builtinScope) };
+					var compile = function(s){ return jme.compile(s,jme.builtinScope) };
 
 					test('jme.shunt',function() {
 						raisesNumbasError(function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
@@ -139,15 +140,18 @@
 						raisesNumbasError(function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
 					})
 
+
 					test('jme.typecheck',function() {
 						raisesNumbasError(function(){ compile('x()') },'jme.typecheck.function not defined','function not defined: x()');
-						raisesNumbasError(function(){ Numbas.jme.compile('x+y',new Numbas.jme.Scope()) },'jme.typecheck.op not defined','op not defined with empty scope: x+y');
+						raisesNumbasError(function(){ jme.compile('x+y',new jme.Scope()) },'jme.typecheck.op not defined','op not defined with empty scope: x+y');
 						raisesNumbasError(function(){ compile('gcd(2)') },'jme.typecheck.no right type definition','no right type definition: gcd(2)');
 					});
 
+				
+					
 					module('Evaluating');
 
-					var evaluate = function(t,scope) { return Numbas.jme.evaluate(t,scope) };
+					var evaluate = function(t,scope) { return jme.evaluate(t,scope) };
 
 					test('Variables',function() {
 						var scope = {variables: {
@@ -165,11 +169,69 @@
 						deepEqual(evaluate('1..3').value,[1,3,1,1,2,3],'1..3');
 						deepEqual(evaluate('[1,2]').value.map(function(i){return i.value}),[1,2],'[1,2]');
 						deepEqual(evaluate('[1,"hi",true]').value.map(function(i){return i.value}),[1,"hi",true],'[1,"hi",true]');
+						equals(evaluate('"hi"').value,'hi','"hi"');
+						equals(evaluate("'hi'").value,'hi',"'hi'");
+						equals(evaluate('x').type,'name','x');
+					});
+
+					test('Operator precedence',function() {
+						equals(evaluate('2*3!').value,12,'factorial highest: 2*3! = 2*(3!)');
+						equals(evaluate('(2*3)!').value,6*5*4*3*2,'brackets work: (2*3)! = 6!');
+						equals(evaluate('2^1^2').value,2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
+						equals(evaluate('2*3^2').value,18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
+						equals(evaluate('5*4+3*2').value,26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
+						equals(evaluate('5/4+3/2').value,2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
+						equals(evaluate('5*4/3-5/3*4').value,0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
+						equals(evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
+						equals(evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
+						equals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
+						equals(evaluate('1+2..5').value[0],3,'arithmetic before range .. operator: 1+2..5 = (1+2)..5');
+						equals(evaluate('1..5#2').value[2],2,'range step operator');
+						ok(evaluate('1..2 except 3'),'except operator');
+						equals(evaluate('1+2<2+3').value,true,'comparison operator lower than arithmetic: 1+2<2+3 = (1+2)<(2+3)');
+						equals(evaluate('1<2=2<3').value,true,'equality after inequality');
+					});
+
+					test('Mathematical operations',function() {
 						
 					});
-				}
+					
+					module('Scopes');
 
+					test('Variables',function() {
+						deepEqual(jme.builtinScope.variables,{},'builtin scope has no variables');
+						deepEqual(new jme.Scope().variables,{},'scope from constructor has no variables');
+						var scope = new jme.Scope({
+							variables: {
+								x: new types.TNum(1),
+								y: new types.TString('hi')
+							}
+						});
+						ok(scope.variables.x,'add variables in scope constructor')
+						var scope2 = new jme.Scope(scope,{variables: {x: new types.TNum(2)}});
+						equals(scope2.variables.x.value,2,'override variable in old scope with new value');
+						equals(scope2.variables.y.value,'hi','but other variables retained if not defined in later scope');
+					});
 
+					test('Functions',function() {
+						ok(jme.builtinScope.functions['+'],'builtin scope has functions in it.');
+						deepEqual(new jme.Scope().functions,{},'scope from constructor has no functions');
+						var scope = new jme.Scope(jme.builtinScope,{
+							functions: {
+								'+':[(new jme.funcObj('+',[types.TBool,types.TBool],types.TBool,null,{nobuiltin:true}))]
+							}
+						});
+						equals(scope.functions['+'].length,jme.builtinScope.functions['+'].length+1,'add overloaded function to old scope');
+						equals(new Numbas.jme.Scope(scope,jme.builtinScope).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
+					});
+
+					test('Rulesets',function() {
+						deepEqual(new jme.Scope().rulesets,{},'scope from constructor has no rulesets');
+						var scope = new jme.Scope({rulesets: jme.display.simplificationRules});
+						ok(scope.rulesets.basic,'extend scope with some rulesets');
+					});
+
+				};
 
 
 				Numbas.scriptPrefix = '../runtime/scripts/';

@@ -793,15 +793,16 @@ var Scope = jme.Scope = function() {
 			}
 			if('functions' in scope) {
 				for(var x in scope.functions) {
-					if(!(x in this.functions)) {
+					if(!(x in this.functions))
 						this.functions[x] = [];
-					}
 					this.functions[x] = this.functions[x].merge(scope.functions[x]);
 				}
 			}
 			if('rulesets' in scope) {
 				for(var x in scope.rulesets) {
-					this.rulesets[x] = scope.rulesets[x];
+					if(!(x in this.rulesets))
+						this.rulesets[x] = [];
+					this.rulesets[x] = this.rulesets[x].merge(scope.rulesets[x]);
 				}
 			}
 		}
