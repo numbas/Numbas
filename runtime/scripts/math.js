@@ -120,7 +120,7 @@ var math = Numbas.math = {
 			if(b.complex)
 			{
 				var q = b.re*b.re + b.im*b.im;
-				return math.complex(b.re/q, -b.im/q);
+				return math.complex(a*b.re/q, -a*b.im/q);
 			}
 			else
 				return a/b;

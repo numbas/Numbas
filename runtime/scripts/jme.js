@@ -49,7 +49,7 @@ var jme = Numbas.jme = {
 		var re_bool = /^true|^false/i;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
-		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
+		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^("([^"]*)")|^('([^']*)')/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
@@ -1059,6 +1059,7 @@ var precedence = jme.precedence = {
 	'-u': 3.5,
 	'+': 4,
 	'-': 4,
+	'|': 5,
 	'..': 5,
 	'#':6,
 	'except': 6.5,
@@ -1068,12 +1069,7 @@ var precedence = jme.precedence = {
 	'>=': 7,
 	'<>': 8,
 	'=': 8,
-	'|': 9,
-	'&': 11,
-	'&&': 11,
 	'and': 11,
-	'|': 12,
-	'||': 12,
 	'or': 12,
 	'xor': 13,
 	'isa': 0
@@ -1418,7 +1414,7 @@ new funcObj('=', ['?','?'], TBool, null, {
 
 new funcObj('and', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
 new funcObj('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );	
-new funcObj('||', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
+new funcObj('or', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
 new funcObj('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
 
 new funcObj('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
@@ -1811,11 +1807,23 @@ new funcObj('matrix',[TList],TMatrix,null, {
 		var rows = list.vars;
 		var columns = 0;
 		var value = [];
-		for(var i=0;i<rows;i++)
+		switch(list.value[0].type)
 		{
-			var row = list.value[i].value;
-			value.push(row.map(function(x){return x.value}));
-			columns = Math.max(columns,row.length);
+		case 'number':
+			value = [list.value.map(function(e){return e.value})];
+			rows = 1;
+			columns = list.vars;
+			break;
+		case 'list':
+			for(var i=0;i<rows;i++)
+			{
+				var row = list.value[i].value;
+				value.push(row.map(function(x){return x.value}));
+				columns = Math.max(columns,row.length);
+			}
+			break;
+		default:
+			throw(new Numbas.Error('jme.func.matrix.invalid row type',list.value[0].type));
 		}
 		value.rows = rows;
 		value.columns = columns;
