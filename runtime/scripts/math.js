@@ -129,6 +129,26 @@ var math = Numbas.math = {
 
 	pow: function(a,b)
 	{
+		if(a.complex && Numbas.util.isInt(b))
+		{
+			if(b<0)
+				return math.div(1,math.pow(a,-b));
+			if(b==0)
+				return 1;
+			var coeffs = math.binomialCoefficients(b);
+
+			var re = 0;
+			var im = 0;
+			var sign = 1;
+			for(var i=0;i<b;i+=2) {
+				re += coeffs[i]*Math.pow(a.re,b-i)*Math.pow(a.im,i)*sign;
+				im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
+				sign = -sign;
+			}
+			if(b%2==0)
+				re += Math.pow(a.im,b)*sign;
+			return math.complex(re,im);
+		}
 		if(a.complex || b.complex || a<0)
 		{
 			if(!a.complex)
@@ -145,6 +165,17 @@ var math = Numbas.math = {
 		{
 			return Math.pow(a,b);
 		}
+	},
+
+	//return the nth row of Pascal's triangle
+	binomialCoefficients: function(n) {
+		var b = [1];
+		var f = 1;
+
+		for(var i=1;i<=n;i++) { 
+			b.push( f*=(n+1-i)/i );
+		}
+		return b;
 	},
 
 	root: function(a,b)
