@@ -947,11 +947,12 @@ var TRange = types.TRange = types.range = function(range)
 	{
 		var start = this.value[0], end = this.value[1], step = this.value[2];
 
-		//if step is discrete, store all values in range so they don't need to be computed each time
-		if(step > 0)
+		//if range is discrete, store all values in range so they don't need to be computed each time
+		if(step != 0)
 		{
-			var n = this.size = (end-start)/step+1;
-			for(var i=0;i<n;i++)
+			var n = (end-start)/step;
+			this.size = n+1;
+			for(var i=0;i<=n;i++)
 			{
 				this.value[i+3] = start+i*step;
 			}
@@ -1302,9 +1303,18 @@ new funcObj('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c'
 //exclude numbers from a range, given either as a range, a list or a single value
 new funcObj('except', [TRange,TRange], TList,
 	function(range,except) {
+		if(range[2]==0)
+			throw(new Numbas.Error("jme.func.except.continuous range"));
 		range = range.slice(3);
-		except = except.slice(3);
-		return math.except(range,except).map(function(i){return new TNum(i)});
+		if(except[2]==0)
+		{
+			return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new TNum(i)});
+		}
+		else
+		{
+			except = except.slice(3);
+			return math.except(range,except).map(function(i){return new TNum(i)});
+		}
 	},
 
 	{doc: {
@@ -1316,6 +1326,8 @@ new funcObj('except', [TRange,TRange], TList,
 
 new funcObj('except', [TRange,TList], TList,
 	function(range,except) {
+		if(range[2]==0)
+			throw(new Numbas.Error("jme.func.except.continuous range"));
 		range = range.slice(3);
 		except = except.map(function(i){ return i.value; });
 		return math.except(range,except).map(function(i){return new TNum(i)});
@@ -1330,6 +1342,8 @@ new funcObj('except', [TRange,TList], TList,
 
 new funcObj('except', [TRange,TNum], TList,
 	function(range,except) {
+		if(range[2]==0)
+			throw(new Numbas.Error("jme.func.except.continuous range"));
 		range = range.slice(3);
 		return math.except(range,[except]).map(function(i){return new TNum(i)});
 	},

@@ -129,7 +129,7 @@ var math = Numbas.math = {
 
 	pow: function(a,b)
 	{
-		if(a.complex && Numbas.util.isInt(b))
+		if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100)
 		{
 			if(b<0)
 				return math.div(1,math.pow(a,-b));
@@ -787,7 +787,7 @@ var math = Numbas.math = {
 	{
 		if(b.complex)
 			b=b.re;
-		return [a[0],a[1],Math.abs(b)];
+		return [a[0],a[1],b];
 	},
 
 	//Get a rational approximation to a real number by the continued fractions method

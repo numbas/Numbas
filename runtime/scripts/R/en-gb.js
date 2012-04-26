@@ -51,6 +51,7 @@ R.registerLocale('en-GB',{
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
 	'jme.func.matrix.invalid row type': "Can't construct a matrix from rows of type %s",
+	'jme.func.except.continuous range': "Can't use the 'except' operator on continuous ranges.",
 
 	'jme.texsubvars.no right bracket': "No matching ] in %s arguments.",
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
