@@ -125,8 +125,18 @@ var util = Numbas.util = {
 				return Numbas.vectormath.eq(a.value,b.value);
 			case 'matrix':
 				return Numbas.matrixmath.eq(a.value,b.value);
-			default:
+			case 'list':
+				return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+			case 'range':
+				return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
+			case 'name':
+				return a.name == b.name;
+			case 'number':
+			case 'string':
+			case 'boolean':
 				return a.value==b.value;
+			default:
+				throw(new Numbas.Error('util.equality not defined for type %s',a.type));
 		}
 	},
 

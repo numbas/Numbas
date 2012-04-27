@@ -265,40 +265,31 @@ var math = Numbas.math = {
 	},
 
 	//Ordering relations
-	//could go with lexicographic order on complex numbers, but that isn't that useful anyway, so just compare real parts
 	lt: function(a,b)
 	{
-		if(a.complex)
-			a=a.re;
-		if(b.complex)
-			b=b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return a<b;
 	},
 
 	gt: function(a,b)
 	{
-		if(a.complex)
-			a=a.re;
-		if(b.complex)
-			b=b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return a>b;
 	},
 
 	leq: function(a,b)
 	{
-		if(a.complex)
-			a=a.re;
-		if(b.complex)
-			b=b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return a<=b;
 	},
 	
 	geq: function(a,b)
 	{
-		if(a.complex)
-			a=a.re;
-		if(b.complex)
-			b=b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return a>=b;
 	},
 
@@ -322,19 +313,15 @@ var math = Numbas.math = {
 
 	max: function(a,b)
 	{
-		if(a.complex)
-			a = a.re;
-		if(b.complex)
-			b = b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return Math.max(a,b);
 	},
 
 	min: function(a,b)
 	{
-		if(a.complex)
-			a = a.re;
-		if(b.complex)
-			b = b.re;
+		if(a.complex || b.complex)
+			throw(new Numbas.Error('math.lt.order complex numbers'));
 		return Math.min(a,b);
 	},
 	
