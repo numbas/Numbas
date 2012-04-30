@@ -207,6 +207,8 @@ var math = Numbas.math = {
 			var arg = math.arg(n);
 			return math.complex(Math.log(mag), arg);
 		}
+		else if(n<0)
+			return math.complex(Math.log(-n),Math.PI);
 		else
 			return Math.log(n);
 	},
@@ -334,6 +336,7 @@ var math = Numbas.math = {
 	piDegree: function(n)
 	{
 		n=Math.abs(n);
+		var degree,a;
 		for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && Math.abs(a-math.round(a))>0.00000001; degree++) {}
 		return( a>=1 ? degree : 0 );
 	},
@@ -376,6 +379,7 @@ var math = Numbas.math = {
 			if(n==Infinity)
 				return 'infinity';
 
+			var piD;
 			if((piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
@@ -463,15 +467,50 @@ var math = Numbas.math = {
 
 	factorial: function(n)
 	{
-		if(n<=1) {
-			return 1;
-		}else{
-			var j=1;
-			for(var i=2;i<=n;i++)
-			{
-				j*=i;
+		if( Numbas.util.isInt(n) && n>=0 )
+		{
+			if(n<=1) {
+				return 1;
+			}else{
+				var j=1;
+				for(var i=2;i<=n;i++)
+				{
+					j*=i;
+				}
+				return j;
 			}
-			return j;
+		}
+		else	//gamma function extends factorial to non-ints and negative numbers
+		{
+			return math.gamma(n);
+		}
+	},
+
+	//Lanczos approximation to the gamma function http://en.wikipedia.org/wiki/Lanczos_approximation#Simple_implementation
+	gamma: function(n)
+	{
+		var g = 7;
+		var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+		
+		var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI, im = math.complex(0,1);
+		
+		if((n.complex && n.re<0.5) || (!n.complex && n<0.5))
+		{
+			console.log('flip ',n.toString());
+			console.log(math.gamma(sub(1,n)).toString());
+			console.log('sin(pi*n)',sin(mul(pi,n)).toString());
+			return div(pi,mul(sin(mul(pi,n)),math.gamma(sub(1,n))));
+		}
+		else
+		{
+			n = sub(n,1);			//n -= 1
+			var x = p[0];
+			for(var i=1;i<g+2;i++)
+			{
+				x = add(x, div(p[i],add(n,i)));	// x += p[i]/(n+i)
+			}
+			var t = add(n,add(g,0.5));		// t = n+g+0.5
+			return mul(sqrt(2*pi),mul(pow(t,add(n,0.5)),mul(exp(neg(t)),x)));	// return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
 		}
 	},
 
@@ -497,7 +536,7 @@ var math = Numbas.math = {
 	sin: function(x) {
 		if(x.complex)
 		{
-			return math.complex(Math.sin(x.re)*math.cosh(x.im), -Math.cos(x.re)*math.sinh(x.im));
+			return math.complex(Math.sin(x.re)*math.cosh(x.im), Math.cos(x.re)*math.sinh(x.im));
 		}
 		else
 			return Math.sin(x);
