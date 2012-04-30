@@ -554,21 +554,24 @@ var math = Numbas.math = {
 		return div(1,math.tan(x));
 	},
 	arcsin: function(x) {
-		if(x.complex)
+		if(x.complex || math.abs(x)>1)
 		{
 			var i = math.complex(0,1), ni = math.complex(0,-1);
-			var ex = add(mul(x,i),math.sqrt(sub(1,mul(x,x))));
+			var ex = add(mul(x,i),math.sqrt(sub(1,mul(x,x)))); //ix+sqrt(1-x^2)
 			return mul(ni,math.log(ex));
 		}
 		else
 			return Math.asin(x);
 	},
 	arccos: function(x) {
-		if(x.complex)
+		if(x.complex || math.abs(x)>1)
 		{
 			var i = math.complex(0,1), ni = math.complex(0,-1);
-			var ex = add(x, mul(i, math.sqrt( sub(1, mul(x,x)) ) ) );
-			return mul(ni,math.log(ex));
+			var ex = add(x, math.sqrt( sub(mul(x,x),1) ) );	//x+sqrt(x^2-1)
+			var result = mul(ni,math.log(ex));
+			if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
+				result = math.negate(result);
+			return result;
 		}
 		else
 			return Math.acos(x);
