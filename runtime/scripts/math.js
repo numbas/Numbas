@@ -596,7 +596,7 @@ var math = Numbas.math = {
 		if(x.complex)
 			return div(add(math.exp(x), math.exp(math.negate(x))),2);
 		else
-			return (Math.exp(x)-Math.exp(-x))/2
+			return (Math.exp(x)+Math.exp(-x))/2
 	},
 	tanh: function(x) {
 		return math.sinh(x)/math.cosh(x);
