@@ -581,7 +581,7 @@ var math = Numbas.math = {
 		{
 			var i = math.complex(0,1);
 			var ex = div(add(i,x),sub(i,x));
-			return mul(math.complex(0,0,5), math.log(ex));
+			return mul(math.complex(0,0.5), math.log(ex));
 		}
 		else
 			return Math.atan(x);
