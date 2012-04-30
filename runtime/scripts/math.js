@@ -496,9 +496,6 @@ var math = Numbas.math = {
 		
 		if((n.complex && n.re<0.5) || (!n.complex && n<0.5))
 		{
-			console.log('flip ',n.toString());
-			console.log(math.gamma(sub(1,n)).toString());
-			console.log('sin(pi*n)',sin(mul(pi,n)).toString());
 			return div(pi,mul(sin(mul(pi,n)),math.gamma(sub(1,n))));
 		}
 		else
