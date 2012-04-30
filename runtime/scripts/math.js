@@ -599,7 +599,7 @@ var math = Numbas.math = {
 			return (Math.exp(x)+Math.exp(-x))/2
 	},
 	tanh: function(x) {
-		return math.sinh(x)/math.cosh(x);
+		return div(math.sinh(x),math.cosh(x));
 	},
 	cosech: function(x) {
 		return div(1,math.sinh(x));
