@@ -297,7 +297,7 @@ Exam.prototype = {
 	xmlize: function()
 	{
 		var obj = {};
-		var dontwant = ['xml','questionList','stopwatch','display','currentQuestion','navigationEvents','rulesets','functions','variables'];
+		var dontwant = ['xml','questionList','stopwatch','display','currentQuestion','navigationEvents','scope'];
 		for( var x in this )
 		{
 			if(!(dontwant.contains(x) || typeof(this[x])=='function'))
