@@ -346,6 +346,94 @@
 						closeEquals(evaluate('isint(-431)').value,true,'isint(-431)');
 						closeEquals(evaluate('isint(4/3)').value,false,'isint(4/3)');
 						closeEquals(evaluate('isint(-43.1)').value,false,'isint(-43.1)');
+						closeEquals(evaluate('isint(5i)').value,false,'isint(5i)');
+
+						closeEquals(evaluate('degrees(0)').value,0,'degrees(0)');
+						closeEquals(evaluate('degrees(pi)').value,180,'degrees(pi)');
+						closeEquals(evaluate('degrees(1)').value,57.29577951308232,'degrees(1)');
+						closeEquals(evaluate('degrees(5.5*pi)').value,990,'degrees(5.5*pi)');
+						deepCloseEqual(evaluate('degrees(pi*i)').value,math.complex(0,180),'degrees(pi*i)');
+					});
+
+					test('Number theory/combinatorics',function() {
+						closeEquals(evaluate('').value,0,'');
+						closeEquals(evaluate('').value,0,'');
+						closeEquals(evaluate('').value,0,'');
+						closeEquals(evaluate('').value,0,'');
+					});
+
+					test('Rounding',function() {
+						closeEquals(evaluate('radians(0)').value,0,'radians(0)');
+						closeEquals(evaluate('radians(180)').value,Math.PI,'radians(180)');
+						closeEquals(evaluate('radians(1080)').value,6*Math.PI,'radians(1080)');
+						deepCloseEqual(evaluate('radians(90+360i)').value,math.complex(Math.PI/2,2*Math.PI),'radians(90+360i)');
+
+						closeEquals(evaluate('ceil(0.1)').value,1,'ceil(0.1)');
+						closeEquals(evaluate('ceil(532.9)').value,533,'cei(532.9)');
+						closeEquals(evaluate('ceil(0)').value,0,'ceil(0)');
+						closeEquals(evaluate('ceil(-14.6)').value,-14,'ceil(-14.6)');
+						deepCloseEqual(evaluate('ceil(1.7-2.3i)').value,math.complex(2,-2),'ceil(1.7-2.3i)');
+
+						closeEquals(evaluate('floor(0.1)').value,0,'floor(0.1)');
+						closeEquals(evaluate('floor(532.9)').value,532,'cei(532.9)');
+						closeEquals(evaluate('floor(0)').value,0,'floor(0)');
+						closeEquals(evaluate('floor(-14.6)').value,-15,'floor(-14.6)');
+						deepCloseEqual(evaluate('floor(1.2i)').value,math.complex(0,1),'floor(1.2i)');
+
+						closeEquals(evaluate('trunc(0)').value,0,'trunc(0)');
+						closeEquals(evaluate('trunc(5)').value,5,'trunc(5)');
+						closeEquals(evaluate('trunc(14.3)').value,14,'trunc(14.3)');
+						closeEquals(evaluate('trunc(-4.76)').value,-4,'trunc(-4.76)');
+						deepCloseEqual(evaluate('trunc(0.5+4.75i)').value,math.complex(0,4),'trunc(0.5+4.75i)');
+
+						closeEquals(evaluate('fract(0)').value,0,'fract(0)');
+						closeEquals(evaluate('fract(5)').value,0,'fract(5)');
+						closeEquals(evaluate('fract(14.3)').value,0.3,'fract(14.3)');
+						closeEquals(evaluate('fract(-4.76)').value,-0.76,'fract(-4.76)');
+						deepCloseEqual(evaluate('fract(0.5+4.75i)').value,math.complex(0.5,0.75),'fract(0.5+4.75i)');
+
+						closeEquals(evaluate('round(0)').value,0,'round(0)');
+						closeEquals(evaluate('round(12321)').value,12321,'round(12321)');
+						closeEquals(evaluate('round(1.4)').value,1,'round(1.4)');
+						closeEquals(evaluate('round(4.9)').value,5,'round(4.5)');
+						closeEquals(evaluate('round(11.5)').value,12,'round(11.5)');
+						closeEquals(evaluate('round(-3.2)').value,-3,'round(-3.2)');
+						closeEquals(evaluate('round(-3.5)').value,-3,'round(-3.5)');
+						closeEquals(evaluate('round(-50)').value,-50,'round(-50)');
+						deepCloseEqual(evaluate('round(1.4-6.7i)').value,math.complex(1,-7),'round(1.4-6.7i)');
+
+						closeEquals(evaluate('sign(54)').value,1,'sign(54)');
+						closeEquals(evaluate('sign(0.5)').value,1,'sign(0.5)');
+						closeEquals(evaluate('sign(0)').value,0,'sign(0)');
+						closeEquals(evaluate('sign(-43)').value,-1,'sign(-43)');
+						deepCloseEqual(evaluate('sign(4-i)').value,math.complex(1,-1),'sign(4-i)');
+
+					});
+
+					test('Random numbers',function() {
+						var acc = true;
+						for(var i=0;i<10;i++) {
+							acc &= [1,2,3,4,5].contains(evaluate('random(1..5)').value);
+						}
+						equals(acc,true,'random(1..5) in [1,2,3,4,5]');
+						equals(evaluate('random(1..1)').value,1,'random(1..1) = 1');
+						raisesNumbasError(function(){ evaluate('random([])') },'math.choose.empty selection','empty selection: random([])');
+						acc = true;
+						for(i=0;i<10;i++) {
+							acc &= ['a','b','c'].contains(evaluate('random(["a","b","c"])').value);
+						}
+						equals(acc,true,'random(["a","b","c"]) in ["a","b","c"]');
+
+						acc = true;
+						for(var i=0;i<10;i++) {
+							acc &= [1,2,'a'].contains(evaluate('random(1,2,"a")').value);
+						}
+						equals(acc,true,'random(1,2,"a") in [1,2,"a"]');
+
+						raisesNumbasError(function(){ evaluate('random()') },'math.choose.empty selection','empty selection: random()');
+					});
+
+					test('Exponentials',function() {
 						closeEquals(evaluate('sqrt(2)').value,Math.sqrt(2),'sqrt(2)');
 						deepCloseEqual(evaluate('sqrt(-1)').value,math.complex(0,1),'sqrt(-1)');
 						deepCloseEqual(evaluate('sqrt(-49)').value,math.complex(0,7),'sqrt(-49');
@@ -367,7 +455,9 @@
 						closeEquals(evaluate('fact(1/2)').value,1.7724538509055157,'fact(1/2)');
 						closeEquals(evaluate('fact(-3/2)').value,2.363271801207352,'fact(-3/2)');
 						deepCloseEqual(evaluate('fact(i)').value,math.complex(-0.15494982830181037,-0.49801566811835596),'fact(i)');
+					});
 
+					test('Trigonometry',function() {
 						closeEquals(evaluate('sin(0)').value,0,'sin(0)');
 						closeEquals(evaluate('sin(pi/2)').value,1,'sin(pi/2)');
 						deepCloseEqual(evaluate('sin(i)').value,math.complex(0,1.175201193643801456882381),'sin(i)');
@@ -407,6 +497,8 @@
 						closeEquals(evaluate('sech(ln(2))').value,4/5,'');
 						closeEquals(evaluate('coth(5)').value,1.000090803982019,'coth(5)');
 						closeEquals(evaluate('arcsinh(7)').value,2.644120761058629075,'arcsinh(7)');
+						closeEquals(evaluate('arccosh(8)').value,2.7686593833135738,'arccosh(8)');
+						deepCloseEqual(evaluate('arctanh(1+i)').value,math.complex(0.40235947810852507,1.0172219678978514),'arctanh(1+i)');
 					});
 
 
