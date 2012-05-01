@@ -648,7 +648,7 @@ var math = Numbas.math = {
 	//round to nearest integer
 	round: function(x) {
 		if(x.complex)
-			return math.complex(math.round(x.re),math.round(x.im));
+			return math.complex(Math.round(x.re),Math.round(x.im));
 		else
 			return Math.round(x);
 	},
@@ -656,7 +656,7 @@ var math = Numbas.math = {
 	//chop off decimal part
 	trunc: function(x) {
 		if(x.complex)
-			x=x.re;
+			return math.complex(math.trunc(x.re),math.trunc(x.im));
 
 		if(x>0) {
 			return Math.floor(x);
@@ -666,13 +666,13 @@ var math = Numbas.math = {
 	},
 	fract: function(x) {
 		if(x.complex)
-			x=x.re;
+			return math.complex(math.fract(x.re),math.fract(x.im));
 
 		return x-math.trunc(x);
 	},
 	sign: function(x) {
 		if(x.complex)
-			x=x.re;
+			return math.complex(math.sign(x.re),math.sign(x.im));
 
 		if(x==0) {
 			return 0;
@@ -727,10 +727,12 @@ var math = Numbas.math = {
 	},
 
 	//choose one item from an array
-	choose: function(variables)
+	choose: function(selection)
 	{
-		var n = Math.floor(math.randomrange(0,variables.length));
-		return variables[n];
+		if(selection.length==0)
+			throw(new Numbas.Error('math.choose.empty selection'));
+		var n = Math.floor(math.randomrange(0,selection.length));
+		return selection[n];
 	},
 
 

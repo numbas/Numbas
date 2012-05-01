@@ -1473,6 +1473,7 @@ new funcObj('degrees', [TNum], TNum, math.degrees, {doc: {usage: 'degrees(pi/2)'
 new funcObj('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', description: 'Convert degrees to radians.'}} );
 new funcObj('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
 new funcObj('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
+
 new funcObj('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
 
 new funcObj('random',[TList],'?',null, {
