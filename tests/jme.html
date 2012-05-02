@@ -229,6 +229,16 @@
 						closeEquals(jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
 					});
 
+					test('Types (isa)',function() {
+						closeEquals(evaluate('1 isa "number"').value,true,'1 isa "number"');
+						closeEquals(evaluate('1 isa "complex"').value,false,'1 isa "complex"');
+						closeEquals(evaluate('1+i isa "complex"').value,true,'1+i isa "complex"');
+						closeEquals(evaluate('"1" isa "number"').value,false,'"1" isa "number"');
+						closeEquals(evaluate('"1" isa "string"').value,true,'"1" isa "string"');
+						closeEquals(evaluate('[] isa "list"').value,true,'[] isa "list"');
+						closeEquals(evaluate('xy isa "name"').value,true,'xy isa "name"');
+					});
+
 					test('Arithmetic',function() {
 						closeEquals(evaluate('+2').value,2,'+2');
 						closeEquals(evaluate('-2').value,-2,'-2');
@@ -274,10 +284,10 @@
 						closeEquals(evaluate('2>0').value,true,'2>0');
 						closeEquals(evaluate('0>-0').value,false,'0>0');
 
-						raisesNumbasError(function(){ evaluate('1<i') },'math.lt.order complex numbers',"can't order complex numbers");
-						raisesNumbasError(function(){ evaluate('i>1') },'math.lt.order complex numbers',"can't order complex numbers");
-						raisesNumbasError(function(){ evaluate('i<=1') },'math.lt.order complex numbers',"can't order complex numbers");
-						raisesNumbasError(function(){ evaluate('1>=i') },'math.lt.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('1<i') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('i>1') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('i<=1') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('1>=i') },'math.order complex numbers',"can't order complex numbers");
 
 						closeEquals(evaluate('1=1').value,true,'1=1');
 						closeEquals(evaluate('1/5=0.2').value,true,'1/5=0.2');
@@ -353,13 +363,67 @@
 						closeEquals(evaluate('degrees(1)').value,57.29577951308232,'degrees(1)');
 						closeEquals(evaluate('degrees(5.5*pi)').value,990,'degrees(5.5*pi)');
 						deepCloseEqual(evaluate('degrees(pi*i)').value,math.complex(0,180),'degrees(pi*i)');
+
+						closeEquals(evaluate('sign(54)').value,1,'sign(54)');
+						closeEquals(evaluate('sign(0.5)').value,1,'sign(0.5)');
+						closeEquals(evaluate('sign(0)').value,0,'sign(0)');
+						closeEquals(evaluate('sign(-43)').value,-1,'sign(-43)');
+						deepCloseEqual(evaluate('sign(4-i)').value,math.complex(1,-1),'sign(4-i)');
+
+						closeEquals(evaluate('award(5,true)').value,5,'award(5,true)');
+						closeEquals(evaluate('award(5,false)').value,0,'award(5,true)');
 					});
 
 					test('Number theory/combinatorics',function() {
-						closeEquals(evaluate('').value,0,'');
-						closeEquals(evaluate('').value,0,'');
-						closeEquals(evaluate('').value,0,'');
-						closeEquals(evaluate('').value,0,'');
+						deepCloseEqual(evaluate('mod(0,0)').value,NaN,'mod(0,0)');
+						deepCloseEqual(evaluate('mod(5,0)').value,NaN,'mod(5,0)');
+						closeEquals(evaluate('mod(13,2)').value,1,'mod(13,2)');
+						closeEquals(evaluate('mod(4.765,3)').value,1.765,'mod(4.765,3)');
+						closeEquals(evaluate('mod(-13,6)').value,-1,'mod(-13,6)');
+						closeEquals(evaluate('mod(2.4,1.1)').value,0.2,'mod(2.4,1.1)');
+
+						closeEquals(evaluate('max(3,5)').value,5,'max(3,5)');
+						closeEquals(evaluate('max(54,1.5654)').value,54,'max(54,1.5654)');
+						closeEquals(evaluate('max(-32,4)').value,4,'max(-32,4)');
+						raisesNumbasError(function(){ evaluate('max(i,1+i)') },'math.order complex numbers',"can't order complex numbers: max(i,1+i)");
+
+						closeEquals(evaluate('min(3,5)').value,3,'min(3,5)');
+						closeEquals(evaluate('min(54,1.5654)').value,1.5654,'min(54,1.5654)');
+						closeEquals(evaluate('min(-32,4)').value,-32,'min(-32,4)');
+						raisesNumbasError(function(){ evaluate('min(i,1+i)') },'math.order complex numbers',"can't order complex numbers: min(i,1+i)");
+
+						closeEquals(evaluate('perm(5,4)').value,5,'perm(5,4)');
+						closeEquals(evaluate('perm(6,1)').value,720,'perm(6,1)');
+						closeEquals(evaluate('perm(2,3)').value,1,'perm(2,3)');
+						closeEquals(evaluate('perm(-2,1)').value,1,'perm(-2,1)');
+						raisesNumbasError(function() {evaluate('perm(i,1)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(i,1)");
+						raisesNumbasError(function() {evaluate('perm(1,i)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(1,i)");
+
+						closeEquals(evaluate('comb(5,4)').value,5,'comb(5,4)');
+						closeEquals(evaluate('comb(6,1)').value,6,'comb(6,1)');
+						closeEquals(evaluate('comb(7,3)').value,35,'comb(6,1)');
+						closeEquals(evaluate('comb(2,3)').value,1,'comb(2,3)');
+						closeEquals(evaluate('comb(-2,1)').value,1,'comb(-2,1)');
+						raisesNumbasError(function() {evaluate('comb(i,1)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(i,1)");
+						raisesNumbasError(function() {evaluate('comb(1,i)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(1,i)");
+
+						closeEquals(evaluate('gcd(36,15)').value,3,'gcd(36,15)');
+						closeEquals(evaluate('gcd(1.1,15)').value,1,'gcd(1.1,15)');
+						closeEquals(evaluate('gcd(-60,18)').value,6,'gcd(-60,18)');
+						closeEquals(evaluate('gcd(60,-18)').value,6,'gcd(60,-18)');
+						raisesNumbasError(function(){ evaluate('gcd(2i,4)') },'math.gcf.complex',"can't take gcf of complex numbers: gcf(2i,4)");
+
+						closeEquals(evaluate('lcm(3,7)').value,21,'lcm(3,7)');
+						closeEquals(evaluate('lcm(4,6)').value,12,'lcm(4,12)');
+						closeEquals(evaluate('lcm(-10,35)').value,70,'lcm(-10,35)');
+						raisesNumbasError(function(){ evaluate('lcm(2,i)') },'math.lcm.complex',"can't find lcm of complex numbers: lcm(2,i)");
+
+						closeEquals(evaluate('5|25').value,true,'5|25');
+						closeEquals(evaluate('6|42').value,true,'6|42');
+						closeEquals(evaluate('4|42').value,false,'4|42');
+						closeEquals(evaluate('-4|40').value,true,'-4|40');
+						closeEquals(evaluate('4|-40').value,true,'4|-40');
+						closeEquals(evaluate('i|2i').value,false,'i|2i');
 					});
 
 					test('Rounding',function() {
@@ -402,12 +466,17 @@
 						closeEquals(evaluate('round(-50)').value,-50,'round(-50)');
 						deepCloseEqual(evaluate('round(1.4-6.7i)').value,math.complex(1,-7),'round(1.4-6.7i)');
 
-						closeEquals(evaluate('sign(54)').value,1,'sign(54)');
-						closeEquals(evaluate('sign(0.5)').value,1,'sign(0.5)');
-						closeEquals(evaluate('sign(0)').value,0,'sign(0)');
-						closeEquals(evaluate('sign(-43)').value,-1,'sign(-43)');
-						deepCloseEqual(evaluate('sign(4-i)').value,math.complex(1,-1),'sign(4-i)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,0)').value,1,'precround(1.1234567891011121314151617181920,0)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,1)').value,1.1,'precround(1.1234567891011121314151617181920,1)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,5)').value,1.12346,'precround(1.1234567891011121314151617181920,5)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,20)').value,1.12345678910111213142,'precround(1.1234567891011121314151617181920,20)');
+						closeEquals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3)');
+						closeEquals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3)');
 
+						closeEquals(evaluate('siground(0.123,2)').value,0.12,'siground(0.123,2)');
+						closeEquals(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');
+						closeEquals(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
+						closeEquals(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
 					});
 
 					test('Random numbers',function() {
@@ -431,6 +500,8 @@
 						equals(acc,true,'random(1,2,"a") in [1,2,"a"]');
 
 						raisesNumbasError(function(){ evaluate('random()') },'math.choose.empty selection','empty selection: random()');
+
+						deepCloseEqual(evaluate('deal(4)').value.map(getValue).sort(),[0,1,2,3],'deal(4)');
 					});
 
 					test('Exponentials',function() {
@@ -455,6 +526,11 @@
 						closeEquals(evaluate('fact(1/2)').value,1.7724538509055157,'fact(1/2)');
 						closeEquals(evaluate('fact(-3/2)').value,2.363271801207352,'fact(-3/2)');
 						deepCloseEqual(evaluate('fact(i)').value,math.complex(-0.15494982830181037,-0.49801566811835596),'fact(i)');
+
+						closeEquals(evaluate('root(8,3)').value,2,'root(8,3)');
+						deepCloseEqual(evaluate('root(-81,4)').value,math.complex(2.121320343559643,2.121320343559643),'root(-81,4)');
+						closeEquals(evaluate('root(4,1.2)').value,3.174802103936399,'root(4,1.2)');
+						deepCloseEqual(evaluate('root(i,-2)').value,math.complex(0.7071067811865476,-0.7071067811865476),'root(i,-2)');
 					});
 
 					test('Trigonometry',function() {
@@ -550,6 +626,19 @@
 					test('List operations',function() {
 						deepCloseEqual(evaluate('["a","b","c"] except "a"').value.map(getValue),['b','c'],'["a","b","c"] except "a"');
 						deepCloseEqual(evaluate('["a","b","c"] except ["a","c","f"]').value.map(getValue),['b'],'["a","b","c"] except ["a","c","f"]');
+					});
+
+					test('Branching',function() {
+						closeEquals(evaluate('if(true,1,0)').value,1,'if(true,1,0)');
+						closeEquals(evaluate('if(false,1,0)').value,0,'if(false,1,0,)');
+						closeEquals(evaluate('if(true,1,1<i)').value,1,'lazy evaluation: if(true,1,1<i)');
+						closeEquals(evaluate('if(false,1<i,1)').value,1,'lazy evaluation: if(false,1<i,1)');
+
+						closeEquals(evaluate('switch(true,1,0)').value,1,'switch(true,1,0)');
+						closeEquals(evaluate('switch(false,1,true,2,3)').value,2,'switch(false,1,true,2,3)');
+						closeEquals(evaluate('switch(false,1,false,2,3)').value,3,'switch(false,1,false,1,3)');
+						closeEquals(evaluate('switch(false,1,true,0)').value,0,'switch(false,1,true,0)');
+						raisesNumbasError(function(){ evaluate('switch(false,1,false,0)') },'jme.func.switch.no default case','no default case: switch(false,1,false,0)');
 					});
 					
 					module('Scopes');
