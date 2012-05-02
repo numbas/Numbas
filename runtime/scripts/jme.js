@@ -1070,10 +1070,10 @@ var precedence = jme.precedence = {
 	'>=': 7,
 	'<>': 8,
 	'=': 8,
+	'isa': 9,
 	'and': 11,
 	'or': 12,
 	'xor': 13,
-	'isa': 0
 };
 
 var synonyms = {
@@ -1608,12 +1608,13 @@ new funcObj('isa',['?',TString],TBool, null, {
 		var match = false;
 		if(kind=='complex')
 		{
-			if(args[0].tok.type=='number' && v.value.complex)
+			var v = jme.evaluate(args[0],scope);
+			if(v.type=='number' && v.value.complex)
 				match = true
 		}
 		else
 		{
-			var match = args[0].tok.type == kind;
+			var match = args[0].tok.outtype == kind;
 		}
 		return new TBool(match);
 	},
