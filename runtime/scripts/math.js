@@ -180,10 +180,7 @@ var math = Numbas.math = {
 
 	root: function(a,b)
 	{
-		if(a.complex || b.complex)
-			return math.pow(b,div(1,a));
-		else
-			return Math.pow(b,1/a);
+		return math.pow(a,div(1,b));
 	},
 
 	sqrt: function(n)
