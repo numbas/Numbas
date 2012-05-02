@@ -270,28 +270,28 @@ var math = Numbas.math = {
 	lt: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return a<b;
 	},
 
 	gt: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return a>b;
 	},
 
 	leq: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return a<=b;
 	},
 	
 	geq: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return a>=b;
 	},
 
@@ -316,14 +316,14 @@ var math = Numbas.math = {
 	max: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return Math.max(a,b);
 	},
 
 	min: function(a,b)
 	{
 		if(a.complex || b.complex)
-			throw(new Numbas.Error('math.lt.order complex numbers'));
+			throw(new Numbas.Error('math.order complex numbers'));
 		return Math.min(a,b);
 	},
 	
@@ -457,11 +457,10 @@ var math = Numbas.math = {
 		else
 		{
 			var s = math.sign(a);
-			a = Math.abs(a);
-			if(a==0) { return s*a; }
-			if(a==Infinity) { return s*a; }
-			b = Math.pow(10,Math.ceil(Math.log(a)/Math.log(10))-b);
-			return s*Math.round(a/b)*b;
+			if(a==0) { return 0; }
+			if(a==Infinity || a==-Infinity) { return a; }
+			b = Math.pow(10,Math.ceil(math.log10(s*a))-b);
+			return Math.round(a/b)*b;
 		}
 	},
 
