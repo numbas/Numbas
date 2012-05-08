@@ -170,7 +170,7 @@
 					
 					module('Evaluating');
 
-					var evaluate = function(t,scope) { return jme.evaluate(t,scope) };
+					var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
 
 					function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
 

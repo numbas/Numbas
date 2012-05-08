@@ -419,10 +419,6 @@ var jme = Numbas.jme = {
 
 	evaluate: function(tree,scope)
 	{
-		//make the scope.
-		//If the scope parameter is not given to this function, we will end up with a good scope object anyway
-		scope = new Scope(builtinScope,scope);
-
 		//if a string is given instead of an expression tree, compile it to a tree
 		if( typeof(tree)=='string' )
 			tree = jme.compile(tree,scope);
@@ -778,6 +774,8 @@ var jme = Numbas.jme = {
 
 //evaluation environment
 //if called with a list of scopes, they will be combined into this new one
+var fnSort = util.sortBy('id');
+var ruleSort = util.sortBy('patternString');
 var Scope = jme.Scope = function() {
 	this.variables = {};
 	this.functions = {};
@@ -794,15 +792,17 @@ var Scope = jme.Scope = function() {
 			if('functions' in scope) {
 				for(var x in scope.functions) {
 					if(!(x in this.functions))
-						this.functions[x] = [];
-					this.functions[x] = this.functions[x].merge(scope.functions[x]);
+						this.functions[x] = scope.functions[x].slice();
+					else 
+						this.functions[x] = this.functions[x].merge(scope.functions[x],fnSort);
 				}
 			}
 			if('rulesets' in scope) {
 				for(var x in scope.rulesets) {
 					if(!(x in this.rulesets))
-						this.rulesets[x] = [];
-					this.rulesets[x] = this.rulesets[x].merge(scope.rulesets[x]);
+						this.rulesets[x] = scope.rulesets[x].slice();
+					else
+						this.rulesets[x] = this.rulesets[x].merge(scope.rulesets[x],ruleSort);
 				}
 			}
 		}
@@ -1117,8 +1117,10 @@ var commutative = jme.commutative =
 //	nobuiltin: don't add this funcObj to the list of builtins
 //	typecheck: a function which checks whether the funcObj can be applied to the given arguments 
 //  evaluate: a function which performs the funcObj on given arguments and variables. Arguments are passed as expression trees, i.e. unevaluated
+var funcObjAcc = 0;	//accumulator for ids for funcObjs, so they can be sorted
 var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 {
+	this.id = funcObjAcc++;
 	options = options || {};
 	for(var i=0;i<intype.length;i++)
 	{

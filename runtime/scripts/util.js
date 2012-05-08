@@ -315,6 +315,18 @@ var util = Numbas.util = {
 	escapeHTML: function(str)
 	{
 		return str.replace(/&/g,'&amp;');
+	},
+
+	//create a comparison function which sorts objects by a particular property
+	sortBy: function(prop) {
+		return function(a,b) {
+			if(a[prop]>b[prop])
+				return 1;
+			else if(a[prop]<b[prop])
+				return -1;
+			else
+				return 0;
+		}
 	}
 
 };
@@ -346,17 +358,35 @@ if(!Array.prototype.contains)
 //merge one array into another, only adding elements which aren't already present
 if(!Array.prototype.merge)
 {
-	Array.prototype.merge = function(arr)
+	Array.prototype.merge = function(arr,sortfn)
 	{
 		if(this.length==0)
 			return arr.slice();
 
-		var out = this.slice();
-		for(var i=0;i<arr.length;i++)
+		var out = this.concat(arr);
+		if(sortfn)
+			out.sort(sortfn);
+		else
+			out.sort();
+		if(sortfn) 
 		{
-			if(!out.contains(arr[i]))
-				out.push(arr[i]);
+			for(var i=1; i<out.length;) {
+				if(sortfn(out[i-1],out[i])==0)	//duplicate elements, so remove latest
+					out.splice(i,1);
+				else
+					i++;
+			}
 		}
+		else
+		{
+			for(var i=1;i<out.length;) {
+				if(out[i-1]==out[i])
+					out.splice(i,1);
+				else
+					i++;
+			}
+		}
+
 		return out;
 	};
 }
