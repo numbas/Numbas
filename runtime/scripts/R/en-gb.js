@@ -72,6 +72,8 @@ R.registerLocale('en-GB',{
 	'math.permutations.complex': "Can't compute permutations of complex numbers",
 	'math.gcf.complex': "Can't compute GCF of complex numbers",
 	'math.lcm.complex': "Can't compute LCM of complex numbers",
+	'math.lt.order complex numbers': "Can't order complex numbers",
+	'math.choose.empty selection': "Empty selection given to random function",
 
 	'matrixmath.abs.non-square': "Can't compute the determinant of a matrix which isn't square.",
 	'matrixmath.abs.too big': "Sorry, can't compute the determinant of a matrix bigger than 3x3 yet.",

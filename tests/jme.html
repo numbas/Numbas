@@ -37,88 +37,106 @@
 						raises(fn,function(e){return e.originalMessage == error},description);
 					}
 
+					function closeEquals(value,expect,message) {
+						if(typeof(expect)=='number' || expect.complex)
+						{
+							value = Numbas.math.precround(value,10);
+							expect = Numbas.math.precround(expect,10);
+						}
+						return equals(value,expect,message);
+					}
+
+					function deepCloseEqual(value,expect,message) {
+						if(typeof(expect)=='number' || expect.complex)
+						{
+							value = Numbas.math.precround(value,10);
+							expect = Numbas.math.precround(expect,10);
+						}
+						return deepEqual(value,expect,message);
+					}
+
 					module('Compiling');
 
 					test('Booleans', function() {
-						deepEqual(tokenise('true'),[new types.TBool(true)],'true');
-						deepEqual(tokenise('TRUE'),[new types.TBool(true)],'TRUE');
-						deepEqual(tokenise('True'),[new types.TBool(true)],'True');
+						deepCloseEqual(tokenise('true'),[new types.TBool(true)],'true');
+						deepCloseEqual(tokenise('TRUE'),[new types.TBool(true)],'TRUE');
+						deepCloseEqual(tokenise('True'),[new types.TBool(true)],'True');
 						equal(tokenise('true')[0].value,true,'value is true');
 
-						deepEqual(tokenise('false'),[new types.TBool(false)],'false');
-						deepEqual(tokenise('FALSE'),[new types.TBool(false)],'FALSE');
-						deepEqual(tokenise('False'),[new types.TBool(false)],'False');
+						deepCloseEqual(tokenise('false'),[new types.TBool(false)],'false');
+						deepCloseEqual(tokenise('FALSE'),[new types.TBool(false)],'FALSE');
+						deepCloseEqual(tokenise('False'),[new types.TBool(false)],'False');
 						equal(tokenise('false')[0].value,false,'value is false');
 					});
 					test('Numbers', function() {
-						deepEqual(tokenise('0'),[new types.TNum(0)],'0');
-						deepEqual(tokenise('0.0'),[new types.TNum(0)],'0.0');
+						deepCloseEqual(tokenise('0'),[new types.TNum(0)],'0');
+						deepCloseEqual(tokenise('0.0'),[new types.TNum(0)],'0.0');
 
 						raisesNumbasError(function(){ tokenise('.1')},'jme.tokenise.invalid','Invalid: .1');
 
-						deepEqual(tokenise('1'),[new types.TNum(1)],'1');
-						deepEqual(tokenise('1.0023'),[new types.TNum(1.0023)],'1.0023');
+						deepCloseEqual(tokenise('1'),[new types.TNum(1)],'1');
+						deepCloseEqual(tokenise('1.0023'),[new types.TNum(1.0023)],'1.0023');
 
-						deepEqual(tokenise('e'),[new types.TNum(Math.E)],'e');
+						deepCloseEqual(tokenise('e'),[new types.TNum(Math.E)],'e');
 
-						deepEqual(tokenise('pi'),[new types.TNum(Math.PI)],'pi');
-						deepEqual(tokenise('PI'),[new types.TNum(Math.PI)],'PI');
+						deepCloseEqual(tokenise('pi'),[new types.TNum(Math.PI)],'pi');
+						deepCloseEqual(tokenise('PI'),[new types.TNum(Math.PI)],'PI');
 
 						equal(tokenise('\\\\pi')[0].type,'name','compile "\\pi" returns a TName');
 
-						deepEqual(tokenise('i'),[new types.TNum(math.complex(0,1))],'i');
+						deepCloseEqual(tokenise('i'),[new types.TNum(math.complex(0,1))],'i');
 
-						deepEqual(tokenise('infinity'),[new types.TNum(Infinity)],'infinity');
-						deepEqual(tokenise('infty'),[new types.TNum(Infinity)],'infinity');
+						deepCloseEqual(tokenise('infinity'),[new types.TNum(Infinity)],'infinity');
+						deepCloseEqual(tokenise('infty'),[new types.TNum(Infinity)],'infinity');
 					});
 
 					test('Names',function() {
-						deepEqual(tokenise('x'),[new types.TName('x')],'x');
-						deepEqual(tokenise('arg123'),[new types.TName('arg123')],'arg123');
-						deepEqual(tokenise('a1b2'),[new types.TName('a1b2')],'a1b2');
-						deepEqual(tokenise('X'),[new types.TName('X')],'X');
-						deepEqual(tokenise('xyz'),[new types.TName('xyz')],'xyz');
-						deepEqual(tokenise('$x'),[new types.TName('$x')],'$x');
-						deepEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
+						deepCloseEqual(tokenise('x'),[new types.TName('x')],'x');
+						deepCloseEqual(tokenise('arg123'),[new types.TName('arg123')],'arg123');
+						deepCloseEqual(tokenise('a1b2'),[new types.TName('a1b2')],'a1b2');
+						deepCloseEqual(tokenise('X'),[new types.TName('X')],'X');
+						deepCloseEqual(tokenise('xyz'),[new types.TName('xyz')],'xyz');
+						deepCloseEqual(tokenise('$x'),[new types.TName('$x')],'$x');
+						deepCloseEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
 					});
 
 					test('Operators', function() {
-						deepEqual(tokenise('_'),[new types.TOp('_')],'_');
-						deepEqual(tokenise('..'),[new types.TOp('..')],'..');
-						deepEqual(tokenise('#'),[new types.TOp('#')],'#');
-						deepEqual(tokenise('<='),[new types.TOp('<=')],'<=');
-						deepEqual(tokenise('>='),[new types.TOp('>=')],'>=');
-						deepEqual(tokenise('<>'),[new types.TOp('<>')],'<>');
-						deepEqual(tokenise('&&'),[new types.TOp('and')],'^^');
-						deepEqual(tokenise('||'),[new types.TOp('or')],'||');
-						deepEqual(tokenise('|'),[new types.TOp('|')],'|');
-						deepEqual(tokenise('*'),[new types.TOp('*')],'*');
-						deepEqual(tokenise('+'),[new types.TOp('+u')],'+');
-						deepEqual(tokenise('-'),[new types.TOp('-u')],'-');
-						deepEqual(tokenise('/'),[new types.TOp('/')],'/');
-						deepEqual(tokenise('^'),[new types.TOp('^')],'^');
-						deepEqual(tokenise('<'),[new types.TOp('<')],'<');
-						deepEqual(tokenise('>'),[new types.TOp('>')],'>');
-						deepEqual(tokenise('='),[new types.TOp('=')],'=');
-						deepEqual(tokenise('!'),[new types.TOp('not')],'!');
-						deepEqual(tokenise('not'),[new types.TOp('not')],'not');
-						deepEqual(tokenise('and'),[new types.TOp('and')],'and');
-						deepEqual(tokenise('or'),[new types.TOp('or')],'or');
-						deepEqual(tokenise('isa'),[new types.TOp('isa')],'isa');
-						deepEqual(tokenise('except'),[new types.TOp('except')],'except');
+						deepCloseEqual(tokenise('_'),[new types.TOp('_')],'_');
+						deepCloseEqual(tokenise('..'),[new types.TOp('..')],'..');
+						deepCloseEqual(tokenise('#'),[new types.TOp('#')],'#');
+						deepCloseEqual(tokenise('<='),[new types.TOp('<=')],'<=');
+						deepCloseEqual(tokenise('>='),[new types.TOp('>=')],'>=');
+						deepCloseEqual(tokenise('<>'),[new types.TOp('<>')],'<>');
+						deepCloseEqual(tokenise('&&'),[new types.TOp('and')],'^^');
+						deepCloseEqual(tokenise('||'),[new types.TOp('or')],'||');
+						deepCloseEqual(tokenise('|'),[new types.TOp('|')],'|');
+						deepCloseEqual(tokenise('*'),[new types.TOp('*')],'*');
+						deepCloseEqual(tokenise('+'),[new types.TOp('+u')],'+');
+						deepCloseEqual(tokenise('-'),[new types.TOp('-u')],'-');
+						deepCloseEqual(tokenise('/'),[new types.TOp('/')],'/');
+						deepCloseEqual(tokenise('^'),[new types.TOp('^')],'^');
+						deepCloseEqual(tokenise('<'),[new types.TOp('<')],'<');
+						deepCloseEqual(tokenise('>'),[new types.TOp('>')],'>');
+						deepCloseEqual(tokenise('='),[new types.TOp('=')],'=');
+						deepCloseEqual(tokenise('!'),[new types.TOp('not')],'!');
+						deepCloseEqual(tokenise('not'),[new types.TOp('not')],'not');
+						deepCloseEqual(tokenise('and'),[new types.TOp('and')],'and');
+						deepCloseEqual(tokenise('or'),[new types.TOp('or')],'or');
+						deepCloseEqual(tokenise('isa'),[new types.TOp('isa')],'isa');
+						deepCloseEqual(tokenise('except'),[new types.TOp('except')],'except');
 					});
 
 					test('Punctuation',function() {
-						deepEqual(tokenise('('),[new types.TPunc('(')],'(');
-						deepEqual(tokenise(')'),[new types.TPunc(')')],')');
-						deepEqual(tokenise(','),[new types.TPunc(',')],',');
-						deepEqual(tokenise('['),[new types.TPunc('[')],']');
-						deepEqual(tokenise(']'),[new types.TPunc(']')],']');
+						deepCloseEqual(tokenise('('),[new types.TPunc('(')],'(');
+						deepCloseEqual(tokenise(')'),[new types.TPunc(')')],')');
+						deepCloseEqual(tokenise(','),[new types.TPunc(',')],',');
+						deepCloseEqual(tokenise('['),[new types.TPunc('[')],']');
+						deepCloseEqual(tokenise(']'),[new types.TPunc(']')],']');
 					});
 
 					test('String',function() {
-						deepEqual(tokenise('"hi"'),[new types.TString('hi')],'"hi"');
-						deepEqual(tokenise("'hi'"),[new types.TString('hi')],"'hi'");
+						deepCloseEqual(tokenise('"hi"'),[new types.TString('hi')],'"hi"');
+						deepCloseEqual(tokenise("'hi'"),[new types.TString('hi')],"'hi'");
 
 						raisesNumbasError(function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
 						raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: "hi');
@@ -152,141 +170,482 @@
 					
 					module('Evaluating');
 
-					var evaluate = function(t,scope) { return jme.evaluate(t,scope) };
+					var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
+
+					function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
 
 					test('Variables',function() {
 						var scope = {variables: {
 							x: new types.TNum(1),
 							name: new types.TString('Bob')
 						}};
-						equals(evaluate('y',scope).type,'name','undefined variable remains a TName')
-						equals(evaluate('x',scope).value,1,'substitute variable x=1')
-						equals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
+						closeEquals(evaluate('y',scope).type,'name','undefined variable remains a TName')
+						closeEquals(evaluate('x',scope).value,1,'substitute variable x=1')
+						closeEquals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
 					});
 
 					test('Literals',function() {
-						equals(evaluate('1').value,1,'1');
-						equals(evaluate('true').value,true,'true');
-						deepEqual(evaluate('1..3').value,[1,3,1,1,2,3],'1..3');
-						deepEqual(evaluate('[1,2]').value.map(function(i){return i.value}),[1,2],'[1,2]');
-						deepEqual(evaluate('[1,"hi",true]').value.map(function(i){return i.value}),[1,"hi",true],'[1,"hi",true]');
-						equals(evaluate('"hi"').value,'hi','"hi"');
-						equals(evaluate("'hi'").value,'hi',"'hi'");
-						equals(evaluate('x').type,'name','x');
+						closeEquals(evaluate('1').value,1,'1');
+						closeEquals(evaluate('true').value,true,'true');
+						deepCloseEqual(evaluate('1..3').value,[1,3,1,1,2,3],'1..3');
+						deepCloseEqual(evaluate('[1,2]').value.map(getValue),[1,2],'[1,2]');
+						deepCloseEqual(evaluate('[1,"hi",true]').value.map(getValue),[1,"hi",true],'[1,"hi",true]');
+						closeEquals(evaluate('"hi"').value,'hi','"hi"');
+						closeEquals(evaluate("'hi'").value,'hi',"'hi'");
+						closeEquals(evaluate('x').type,'name','x');
 					});
 
 					test('Operator precedence',function() {
-						equals(evaluate('2*3!').value,12,'factorial highest: 2*3! = 2*(3!)');
-						equals(evaluate('(2*3)!').value,6*5*4*3*2,'brackets work: (2*3)! = 6!');
-						equals(evaluate('2^1^2').value,2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
-						equals(evaluate('2*3^2').value,18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
-						equals(evaluate('5*4+3*2').value,26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
-						equals(evaluate('5/4+3/2').value,2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
-						equals(evaluate('5*4/3-5/3*4').value,0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
-						equals(evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
-						equals(evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
-						equals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
+						closeEquals(evaluate('2*3!').value,12,'factorial highest: 2*3! = 2*(3!)');
+						closeEquals(evaluate('(2*3)!').value,6*5*4*3*2,'brackets work: (2*3)! = 6!');
+						closeEquals(evaluate('2^1^2').value,2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
+						closeEquals(evaluate('2*3^2').value,18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
+						closeEquals(evaluate('5*4+3*2').value,26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
+						closeEquals(evaluate('5/4+3/2').value,2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
+						closeEquals(evaluate('5*4/3-5/3*4').value,0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
+						closeEquals(evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
+						closeEquals(evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
+						closeEquals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
 						ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
-						equals(evaluate('1+2..5').value[0],3,'arithmetic before range .. operator: 1+2..5 = (1+2)..5');
-						equals(evaluate('1..5#2').value[2],2,'range step operator');
+						closeEquals(evaluate('1+2..5').value[0],3,'arithmetic before range .. operator: 1+2..5 = (1+2)..5');
+						closeEquals(evaluate('1..5#2').value[2],2,'range step operator');
 						ok(evaluate('1..2 except 3'),'except operator');
 						ok(evaluate('1+2<2+3'),'comparison operator lower than arithmetic: 1+2<2+3 = (1+2)<(2+3)');
 						ok(evaluate('1<2=2<3'),'equality after inequality');
 						ok(evaluate('1<2 && 3<4'),'AND after comparisons');
-						equals(evaluate('true or false and false').value,true,'OR after AND');
-						equals(evaluate('true xor true or true').value,false,'XOR after OR');
+						closeEquals(evaluate('true or false and false').value,true,'OR after AND');
+						closeEquals(evaluate('true xor true or true').value,false,'XOR after OR');
 					});
 
 					test('Synonyms',function() {
-						equals(evaluate('5!=fact(5)').value,true,'x! == fact(x)');
-						equals(evaluate('true and true = true & true = true && true').value,true,'true == & == &&');
-						equals(evaluate('1|5 = divides(1,5)').value,true,'x|y == divides(x,y)');
-						equals(evaluate('true||false = true or false').value,true,'x||y == x or y');
-						equals(evaluate('sqr(2) = sqrt(2)').value,true,'sqr == sqrt');
-						equals(evaluate('gcf(2,3) = gcd(2,3)').value,true,'gcf == gcd');
-						equals(evaluate('sgn(4) = sign(4)').value,true,'sgn == sign');
-						equals(evaluate('len(32) = abs(32) and length(32) = abs(32)').value,true,'len == length == abs');
-						equals(jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
+						closeEquals(evaluate('5!=fact(5)').value,true,'x! == fact(x)');
+						closeEquals(evaluate('true and true = true & true = true && true').value,true,'true == & == &&');
+						closeEquals(evaluate('1|5 = divides(1,5)').value,true,'x|y == divides(x,y)');
+						closeEquals(evaluate('true||false = true or false').value,true,'x||y == x or y');
+						closeEquals(evaluate('sqr(2) = sqrt(2)').value,true,'sqr == sqrt');
+						closeEquals(evaluate('gcf(2,3) = gcd(2,3)').value,true,'gcf == gcd');
+						closeEquals(evaluate('sgn(4) = sign(4)').value,true,'sgn == sign');
+						closeEquals(evaluate('len(32) = abs(32) and length(32) = abs(32)').value,true,'len == length == abs');
+						closeEquals(jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
+					});
+
+					test('Types (isa)',function() {
+						closeEquals(evaluate('1 isa "number"').value,true,'1 isa "number"');
+						closeEquals(evaluate('1 isa "complex"').value,false,'1 isa "complex"');
+						closeEquals(evaluate('1+i isa "complex"').value,true,'1+i isa "complex"');
+						closeEquals(evaluate('"1" isa "number"').value,false,'"1" isa "number"');
+						closeEquals(evaluate('"1" isa "string"').value,true,'"1" isa "string"');
+						closeEquals(evaluate('[] isa "list"').value,true,'[] isa "list"');
+						closeEquals(evaluate('xy isa "name"').value,true,'xy isa "name"');
 					});
 
 					test('Arithmetic',function() {
-						equals(evaluate('+2').value,2,'+2');
-						equals(evaluate('-2').value,-2,'-2');
-						equals(evaluate('1+2').value,3,'1+2');
-						deepEqual(evaluate('i+1').value,math.complex(1,1),'i+1');
-						deepEqual(evaluate('[1,2]+[3,4]').value.map(function(e){return e.value}),[1,2,3,4],'[1,2]+[3,4]');
-						deepEqual(evaluate('[1,2]+3').value.map(function(e){return e.value}),[1,2,3],'[1,2]+3');
-						deepEqual(evaluate('["x","y"]+"z"').value.map(function(e){return e.value}),['x','y','z'],'["x","y"]+"z"');
-						equals(evaluate('"hi "+"there"').value,'hi there','"hi"+" there"');
-						equals(evaluate('"n: "+1').value,'n: 1','"n: "+1');
-						equals(evaluate('2+" things"').value,'2 things','2+" things"');
-						deepEqual(evaluate('vector(1,2)+vector(2,3)').value,[3,5],'vector(1,2)+vector(2,3)');
-						deepEqual(evaluate('matrix([1,0],[0,1])+matrix([0,1],[1,0])').value,[[1,1],[1,1]],'matrix([1,0],[0,1])+matrix([0,1],[1,0])');
-						equals(evaluate('3-13').value,-10,'3-13');
-						deepEqual(evaluate('vector(1,2)-vector(5,5)').value,[-4,-3],'vector(1,2)-vector(5,5)');
-						deepEqual(evaluate('matrix([1,0],[0,1])-matrix([2,1],[2,1])').value,[[-1,-1],[-2,0]],'matrix([1,0],[0,1])-matrix([2,1],[2,1])');
-						equals(evaluate('5*4').value,20,'5*4');
-						equals(evaluate('i*i').value,-1,'i*i');
-						deepEqual(evaluate('5*vector(1,2)').value,[5,10],'5*vector(1,2)');
-						deepEqual(evaluate('vector(1,2)*5').value,[5,10],'vector(1,2)*5');
-						deepEqual(evaluate('matrix([1,1],[3,2])*vector(1,2)').value,[3,7],'matrix([1,1],[3,2])*vector(1,2)');
-						deepEqual(evaluate('5*matrix([1,0],[0,1])').value,[[5,0],[0,5]],'5*matrix([1,0],[0,1])');
-						deepEqual(evaluate('matrix([1,0],[0,1])*5').value,[[5,0],[0,5]],'matrix([1,0],[0,1])*5');
-						deepEqual(evaluate('matrix([1,2],[1,1])*matrix([2,3],[4,5])').value,[[10,13],[6,8]],'matrix([1,2],[1,1])*matrix([2,3],[4,5])');
-						equals(evaluate('5/2').value,2.5,'5/2');
-						deepEqual(evaluate('5/(1+i)').value,math.complex(2.5,-2.5),'5/(1+i)');
-						deepEqual(evaluate('(1+i)/5').value,math.complex(0.2,0.2),'(1+i)/5');
-						deepEqual(evaluate('(1+i)/(2-i)').value,math.complex(0.2,0.6),'(1+i)/(2+i)');
-						equals(evaluate('2^4').value,16,'2^4');
-						deepEqual(evaluate('(1+i)^0').value,1,'(1+i)^0');
-						deepEqual(evaluate('(1+i)^5').value,math.complex(-4,-4),'(1+i)^5');
-						deepEqual(evaluate('(1+i)^6').value,math.complex(0,-8),'(1+i)^6');
-						deepEqual(evaluate('(1+i)^(-2)').value,math.complex(0,-0.5),'(1+i)^(-2)');
-						deepEqual(evaluate('(1+i)^(-3)').value,math.complex(-0.25,-0.25),'(1+i)^(-3)');
-						deepEqual(evaluate('2^i').value,math.complex(0.7692389013639721,0.6389612763136348),'2^i');
+						closeEquals(evaluate('+2').value,2,'+2');
+						closeEquals(evaluate('-2').value,-2,'-2');
+						closeEquals(evaluate('1+2').value,3,'1+2');
+						deepCloseEqual(evaluate('i+1').value,math.complex(1,1),'i+1');
+						deepCloseEqual(evaluate('[1,2]+[3,4]').value.map(getValue),[1,2,3,4],'[1,2]+[3,4]');
+						deepCloseEqual(evaluate('[1,2]+3').value.map(getValue),[1,2,3],'[1,2]+3');
+						deepCloseEqual(evaluate('["x","y"]+"z"').value.map(getValue),['x','y','z'],'["x","y"]+"z"');
+						closeEquals(evaluate('"hi "+"there"').value,'hi there','"hi"+" there"');
+						closeEquals(evaluate('"n: "+1').value,'n: 1','"n: "+1');
+						closeEquals(evaluate('2+" things"').value,'2 things','2+" things"');
+						deepCloseEqual(evaluate('vector(1,2)+vector(2,3)').value,[3,5],'vector(1,2)+vector(2,3)');
+						deepCloseEqual(evaluate('matrix([1,0],[0,1])+matrix([0,1],[1,0])').value,[[1,1],[1,1]],'matrix([1,0],[0,1])+matrix([0,1],[1,0])');
+						closeEquals(evaluate('3-13').value,-10,'3-13');
+						deepCloseEqual(evaluate('vector(1,2)-vector(5,5)').value,[-4,-3],'vector(1,2)-vector(5,5)');
+						deepCloseEqual(evaluate('matrix([1,0],[0,1])-matrix([2,1],[2,1])').value,[[-1,-1],[-2,0]],'matrix([1,0],[0,1])-matrix([2,1],[2,1])');
+						closeEquals(evaluate('5*4').value,20,'5*4');
+						closeEquals(evaluate('i*i').value,-1,'i*i');
+						deepCloseEqual(evaluate('5*vector(1,2)').value,[5,10],'5*vector(1,2)');
+						deepCloseEqual(evaluate('vector(1,2)*5').value,[5,10],'vector(1,2)*5');
+						deepCloseEqual(evaluate('matrix([1,1],[3,2])*vector(1,2)').value,[3,7],'matrix([1,1],[3,2])*vector(1,2)');
+						deepCloseEqual(evaluate('5*matrix([1,0],[0,1])').value,[[5,0],[0,5]],'5*matrix([1,0],[0,1])');
+						deepCloseEqual(evaluate('matrix([1,0],[0,1])*5').value,[[5,0],[0,5]],'matrix([1,0],[0,1])*5');
+						deepCloseEqual(evaluate('matrix([1,2],[1,1])*matrix([2,3],[4,5])').value,[[10,13],[6,8]],'matrix([1,2],[1,1])*matrix([2,3],[4,5])');
+						closeEquals(evaluate('5/2').value,2.5,'5/2');
+						deepCloseEqual(evaluate('5/(1+i)').value,math.complex(2.5,-2.5),'5/(1+i)');
+						deepCloseEqual(evaluate('(1+i)/5').value,math.complex(0.2,0.2),'(1+i)/5');
+						deepCloseEqual(evaluate('(1+i)/(2-i)').value,math.complex(0.2,0.6),'(1+i)/(2+i)');
+						closeEquals(evaluate('2^4').value,16,'2^4');
+						deepCloseEqual(evaluate('(1+i)^0').value,1,'(1+i)^0');
+						deepCloseEqual(evaluate('(1+i)^5').value,math.complex(-4,-4),'(1+i)^5');
+						deepCloseEqual(evaluate('(1+i)^6').value,math.complex(0,-8),'(1+i)^6');
+						deepCloseEqual(evaluate('(1+i)^(-2)').value,math.complex(0,-0.5),'(1+i)^(-2)');
+						deepCloseEqual(evaluate('(1+i)^(-3)').value,math.complex(-0.25,-0.25),'(1+i)^(-3)');
+						deepCloseEqual(evaluate('2^i').value,math.complex(0.7692389013639721,0.6389612763136348),'2^i');
 					});
 
+					test('Logic',function() {
+						closeEquals(evaluate('0<2').value,true,'0<2');
+						closeEquals(evaluate('2<0').value,false,'2<0');
+						closeEquals(evaluate('0<-0').value,false,'0<0');
+						closeEquals(evaluate('0>2').value,false,'0>2');
+						closeEquals(evaluate('2>0').value,true,'2>0');
+						closeEquals(evaluate('0>-0').value,false,'0>0');
+
+						raisesNumbasError(function(){ evaluate('1<i') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('i>1') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('i<=1') },'math.order complex numbers',"can't order complex numbers");
+						raisesNumbasError(function(){ evaluate('1>=i') },'math.order complex numbers',"can't order complex numbers");
+
+						closeEquals(evaluate('1=1').value,true,'1=1');
+						closeEquals(evaluate('1/5=0.2').value,true,'1/5=0.2');
+						closeEquals(evaluate('"abcdef"=\'abcdef\'').value,true,'"abcdef"=\'abcdef\'');
+						closeEquals(evaluate('"abcdef"=" abcdef "').value,false,'"abcdef"=" abcdef "');
+						closeEquals(evaluate('"abcdef"="ABCDEF"').value,false,'"abcdef"="ABCDEF"');
+						closeEquals(evaluate('"<b>abcdef</b>"="*abcdef*"').value,false,'"<b>abcdef</b>="*abcdef*"');
+						closeEquals(evaluate('true=true').value,true,'true=true');
+						closeEquals(evaluate('false=false').value,true,'false=false');
+						closeEquals(evaluate('true=false').value,false,'true=false');
+						closeEquals(evaluate('[0,1,2]=[0,1,2]').value,true,'[0,1,2]=[0,1,2]');
+						closeEquals(evaluate('[0,4,2]=[0,1,2]').value,false,'[0,4,2]=[0,1,2]');
+						closeEquals(evaluate('[0,1,2]=[0,1,2,3]').value,false,'[0,1,2]=[0,1,2,3]');
+						closeEquals(evaluate('0..4=0..4#1').value,true,'0..4=0..4#1');
+						closeEquals(evaluate('0..4=0..4#2').value,false,'0..4=0..4#2');
+						closeEquals(evaluate('0="0"').value,false,'0="0"');
+						closeEquals(evaluate('a=a').value,true,'a=a');
+						closeEquals(evaluate('0<>1').value,true,'0<>1');
+						closeEquals(evaluate('1<>1').value,false,'0<>1');
+
+						closeEquals(evaluate('not true').value,false,'not true');
+						closeEquals(evaluate('not false').value,true,'not false');
+
+						closeEquals(evaluate('true and false').value,false,'true and false');
+						closeEquals(evaluate('false and true').value,false,'false and true');
+						closeEquals(evaluate('true and true').value,true,'true and true');
+						closeEquals(evaluate('false and false').value,false,'false and false');
+
+						closeEquals(evaluate('true or false').value,true,'true or false');
+						closeEquals(evaluate('false or true').value,true,'false or true');
+						closeEquals(evaluate('true or true').value,true,'true or true');
+						closeEquals(evaluate('false or false').value,false,'false or false');
+
+						closeEquals(evaluate('true xor false').value,true,'true xor false');
+						closeEquals(evaluate('false xor true').value,true,'false xor true');
+						closeEquals(evaluate('true xor true').value,false,'true xor true');
+						closeEquals(evaluate('false xor false').value,false,'false xor false');
+					});
+
+					test('Number functions',function() {
+						closeEquals(evaluate('abs(-5.4)').value,5.4,'abs(-5.4)');
+						closeEquals(evaluate('abs(1+i)').value,Math.sqrt(2),'abs(1+i)');
+						closeEquals(evaluate('abs([1,2,3,4])').value,4,'abs([1,2,3,4])');
+						closeEquals(evaluate('abs(1..5)').value,5,'abs(1..5)');
+						closeEquals(evaluate('abs(1..5#1.2)').value,4,'abs(1..5#1.2)');
+						closeEquals(evaluate('abs(1..4#0)').value,3,'abs(1..4#0)');
+						closeEquals(evaluate('abs(vector(3,4))').value,5,'abs(vector(3,4))');
+						closeEquals(evaluate('abs(vector(3,4,5,5,5))').value,10,'abs(vector(3,4,5,5,5))');
+						closeEquals(evaluate('arg(1+i)').value,Math.PI/4,'arg(1+i)');
+						closeEquals(evaluate('arg(-1-i)').value,-3*Math.PI/4,'arg(1+i)');
+						closeEquals(evaluate('arg(0)').value,0,'arg(0)');
+						closeEquals(evaluate('arg(1)').value,0,'arg(1)');
+
+						closeEquals(evaluate('re(1)').value,1,'re(1)');
+						closeEquals(evaluate('re(i)').value,0,'re(i)');
+						closeEquals(evaluate('re(5+6i)').value,5,'re(5+6i)');
+						closeEquals(evaluate('im(1)').value,0,'im(1)');
+						closeEquals(evaluate('im(i)').value,1,'im(i)');
+						closeEquals(evaluate('im(5+6i)').value,6,'im(5+6i)');
+						closeEquals(evaluate('conj(1)').value,1,'conj(1)');
+						deepCloseEqual(evaluate('conj(i)').value,math.complex(0,-1),'conj(i)');
+						deepCloseEqual(evaluate('conj(5+6i)').value,math.complex(5,-6),'conj(5+6i)');
+
+						closeEquals(evaluate('isint(0)').value,true,'isint(0)');
+						closeEquals(evaluate('isint(542)').value,true,'isint(542)');
+						closeEquals(evaluate('isint(-431)').value,true,'isint(-431)');
+						closeEquals(evaluate('isint(4/3)').value,false,'isint(4/3)');
+						closeEquals(evaluate('isint(-43.1)').value,false,'isint(-43.1)');
+						closeEquals(evaluate('isint(5i)').value,false,'isint(5i)');
+
+						closeEquals(evaluate('degrees(0)').value,0,'degrees(0)');
+						closeEquals(evaluate('degrees(pi)').value,180,'degrees(pi)');
+						closeEquals(evaluate('degrees(1)').value,57.29577951308232,'degrees(1)');
+						closeEquals(evaluate('degrees(5.5*pi)').value,990,'degrees(5.5*pi)');
+						deepCloseEqual(evaluate('degrees(pi*i)').value,math.complex(0,180),'degrees(pi*i)');
+
+						closeEquals(evaluate('sign(54)').value,1,'sign(54)');
+						closeEquals(evaluate('sign(0.5)').value,1,'sign(0.5)');
+						closeEquals(evaluate('sign(0)').value,0,'sign(0)');
+						closeEquals(evaluate('sign(-43)').value,-1,'sign(-43)');
+						deepCloseEqual(evaluate('sign(4-i)').value,math.complex(1,-1),'sign(4-i)');
+
+						closeEquals(evaluate('award(5,true)').value,5,'award(5,true)');
+						closeEquals(evaluate('award(5,false)').value,0,'award(5,true)');
+					});
+
+					test('Number theory/combinatorics',function() {
+						deepCloseEqual(evaluate('mod(0,0)').value,NaN,'mod(0,0)');
+						deepCloseEqual(evaluate('mod(5,0)').value,NaN,'mod(5,0)');
+						closeEquals(evaluate('mod(13,2)').value,1,'mod(13,2)');
+						closeEquals(evaluate('mod(4.765,3)').value,1.765,'mod(4.765,3)');
+						closeEquals(evaluate('mod(-13,6)').value,-1,'mod(-13,6)');
+						closeEquals(evaluate('mod(2.4,1.1)').value,0.2,'mod(2.4,1.1)');
+
+						closeEquals(evaluate('max(3,5)').value,5,'max(3,5)');
+						closeEquals(evaluate('max(54,1.5654)').value,54,'max(54,1.5654)');
+						closeEquals(evaluate('max(-32,4)').value,4,'max(-32,4)');
+						raisesNumbasError(function(){ evaluate('max(i,1+i)') },'math.order complex numbers',"can't order complex numbers: max(i,1+i)");
+
+						closeEquals(evaluate('min(3,5)').value,3,'min(3,5)');
+						closeEquals(evaluate('min(54,1.5654)').value,1.5654,'min(54,1.5654)');
+						closeEquals(evaluate('min(-32,4)').value,-32,'min(-32,4)');
+						raisesNumbasError(function(){ evaluate('min(i,1+i)') },'math.order complex numbers',"can't order complex numbers: min(i,1+i)");
+
+						closeEquals(evaluate('perm(5,4)').value,5,'perm(5,4)');
+						closeEquals(evaluate('perm(6,1)').value,720,'perm(6,1)');
+						closeEquals(evaluate('perm(2,3)').value,1,'perm(2,3)');
+						closeEquals(evaluate('perm(-2,1)').value,1,'perm(-2,1)');
+						raisesNumbasError(function() {evaluate('perm(i,1)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(i,1)");
+						raisesNumbasError(function() {evaluate('perm(1,i)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(1,i)");
+
+						closeEquals(evaluate('comb(5,4)').value,5,'comb(5,4)');
+						closeEquals(evaluate('comb(6,1)').value,6,'comb(6,1)');
+						closeEquals(evaluate('comb(7,3)').value,35,'comb(6,1)');
+						closeEquals(evaluate('comb(2,3)').value,1,'comb(2,3)');
+						closeEquals(evaluate('comb(-2,1)').value,1,'comb(-2,1)');
+						raisesNumbasError(function() {evaluate('comb(i,1)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(i,1)");
+						raisesNumbasError(function() {evaluate('comb(1,i)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(1,i)");
+
+						closeEquals(evaluate('gcd(36,15)').value,3,'gcd(36,15)');
+						closeEquals(evaluate('gcd(1.1,15)').value,1,'gcd(1.1,15)');
+						closeEquals(evaluate('gcd(-60,18)').value,6,'gcd(-60,18)');
+						closeEquals(evaluate('gcd(60,-18)').value,6,'gcd(60,-18)');
+						raisesNumbasError(function(){ evaluate('gcd(2i,4)') },'math.gcf.complex',"can't take gcf of complex numbers: gcf(2i,4)");
+
+						closeEquals(evaluate('lcm(3,7)').value,21,'lcm(3,7)');
+						closeEquals(evaluate('lcm(4,6)').value,12,'lcm(4,12)');
+						closeEquals(evaluate('lcm(-10,35)').value,70,'lcm(-10,35)');
+						raisesNumbasError(function(){ evaluate('lcm(2,i)') },'math.lcm.complex',"can't find lcm of complex numbers: lcm(2,i)");
+
+						closeEquals(evaluate('5|25').value,true,'5|25');
+						closeEquals(evaluate('6|42').value,true,'6|42');
+						closeEquals(evaluate('4|42').value,false,'4|42');
+						closeEquals(evaluate('-4|40').value,true,'-4|40');
+						closeEquals(evaluate('4|-40').value,true,'4|-40');
+						closeEquals(evaluate('i|2i').value,false,'i|2i');
+					});
+
+					test('Rounding',function() {
+						closeEquals(evaluate('radians(0)').value,0,'radians(0)');
+						closeEquals(evaluate('radians(180)').value,Math.PI,'radians(180)');
+						closeEquals(evaluate('radians(1080)').value,6*Math.PI,'radians(1080)');
+						deepCloseEqual(evaluate('radians(90+360i)').value,math.complex(Math.PI/2,2*Math.PI),'radians(90+360i)');
+
+						closeEquals(evaluate('ceil(0.1)').value,1,'ceil(0.1)');
+						closeEquals(evaluate('ceil(532.9)').value,533,'cei(532.9)');
+						closeEquals(evaluate('ceil(0)').value,0,'ceil(0)');
+						closeEquals(evaluate('ceil(-14.6)').value,-14,'ceil(-14.6)');
+						deepCloseEqual(evaluate('ceil(1.7-2.3i)').value,math.complex(2,-2),'ceil(1.7-2.3i)');
+
+						closeEquals(evaluate('floor(0.1)').value,0,'floor(0.1)');
+						closeEquals(evaluate('floor(532.9)').value,532,'cei(532.9)');
+						closeEquals(evaluate('floor(0)').value,0,'floor(0)');
+						closeEquals(evaluate('floor(-14.6)').value,-15,'floor(-14.6)');
+						deepCloseEqual(evaluate('floor(1.2i)').value,math.complex(0,1),'floor(1.2i)');
+
+						closeEquals(evaluate('trunc(0)').value,0,'trunc(0)');
+						closeEquals(evaluate('trunc(5)').value,5,'trunc(5)');
+						closeEquals(evaluate('trunc(14.3)').value,14,'trunc(14.3)');
+						closeEquals(evaluate('trunc(-4.76)').value,-4,'trunc(-4.76)');
+						deepCloseEqual(evaluate('trunc(0.5+4.75i)').value,math.complex(0,4),'trunc(0.5+4.75i)');
+
+						closeEquals(evaluate('fract(0)').value,0,'fract(0)');
+						closeEquals(evaluate('fract(5)').value,0,'fract(5)');
+						closeEquals(evaluate('fract(14.3)').value,0.3,'fract(14.3)');
+						closeEquals(evaluate('fract(-4.76)').value,-0.76,'fract(-4.76)');
+						deepCloseEqual(evaluate('fract(0.5+4.75i)').value,math.complex(0.5,0.75),'fract(0.5+4.75i)');
+
+						closeEquals(evaluate('round(0)').value,0,'round(0)');
+						closeEquals(evaluate('round(12321)').value,12321,'round(12321)');
+						closeEquals(evaluate('round(1.4)').value,1,'round(1.4)');
+						closeEquals(evaluate('round(4.9)').value,5,'round(4.5)');
+						closeEquals(evaluate('round(11.5)').value,12,'round(11.5)');
+						closeEquals(evaluate('round(-3.2)').value,-3,'round(-3.2)');
+						closeEquals(evaluate('round(-3.5)').value,-3,'round(-3.5)');
+						closeEquals(evaluate('round(-50)').value,-50,'round(-50)');
+						deepCloseEqual(evaluate('round(1.4-6.7i)').value,math.complex(1,-7),'round(1.4-6.7i)');
+
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,0)').value,1,'precround(1.1234567891011121314151617181920,0)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,1)').value,1.1,'precround(1.1234567891011121314151617181920,1)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,5)').value,1.12346,'precround(1.1234567891011121314151617181920,5)');
+						closeEquals(evaluate('precround(1.1234567891011121314151617181920,20)').value,1.12345678910111213142,'precround(1.1234567891011121314151617181920,20)');
+						closeEquals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3)');
+						closeEquals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3)');
+
+						closeEquals(evaluate('siground(0.123,2)').value,0.12,'siground(0.123,2)');
+						closeEquals(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');
+						closeEquals(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
+						closeEquals(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
+					});
+
+					test('Random numbers',function() {
+						var acc = true;
+						for(var i=0;i<10;i++) {
+							acc &= [1,2,3,4,5].contains(evaluate('random(1..5)').value);
+						}
+						equals(acc,true,'random(1..5) in [1,2,3,4,5]');
+						equals(evaluate('random(1..1)').value,1,'random(1..1) = 1');
+						raisesNumbasError(function(){ evaluate('random([])') },'math.choose.empty selection','empty selection: random([])');
+						acc = true;
+						for(i=0;i<10;i++) {
+							acc &= ['a','b','c'].contains(evaluate('random(["a","b","c"])').value);
+						}
+						equals(acc,true,'random(["a","b","c"]) in ["a","b","c"]');
+
+						acc = true;
+						for(var i=0;i<10;i++) {
+							acc &= [1,2,'a'].contains(evaluate('random(1,2,"a")').value);
+						}
+						equals(acc,true,'random(1,2,"a") in [1,2,"a"]');
+
+						raisesNumbasError(function(){ evaluate('random()') },'math.choose.empty selection','empty selection: random()');
+
+						deepCloseEqual(evaluate('deal(4)').value.map(getValue).sort(),[0,1,2,3],'deal(4)');
+					});
+
+					test('Exponentials',function() {
+						closeEquals(evaluate('sqrt(2)').value,Math.sqrt(2),'sqrt(2)');
+						deepCloseEqual(evaluate('sqrt(-1)').value,math.complex(0,1),'sqrt(-1)');
+						deepCloseEqual(evaluate('sqrt(-49)').value,math.complex(0,7),'sqrt(-49');
+						deepCloseEqual(evaluate('sqrt(1+2i)').value,math.complex(1.272019649514068964,0.786151377757423286069),'sqrt(1+2i)');
+
+						closeEquals(evaluate('ln(e)').value,1,'ln(e)');
+						closeEquals(evaluate('ln(1)').value,0,'ln(1)');
+						deepCloseEqual(evaluate('ln(-2)').value,math.complex(Math.log(2),Math.PI),'ln(-2)');
+						deepCloseEqual(evaluate('ln(2+i)').value,math.complex(Math.log(Math.sqrt(5)),Math.atan(0.5)),'ln(2+i)');
+						closeEquals(evaluate('log(10)').value,1,'');
+						deepCloseEqual(evaluate('log(2+i)').value,math.complex(Math.LOG10E*Math.log(Math.sqrt(5)),Math.LOG10E*Math.atan(0.5)),'log(2+i)');
+						closeEquals(evaluate('exp(5)').value,Math.exp(5),'exp(5)');
+						closeEquals(evaluate('exp(-2)').value,Math.exp(-2),'exp(-2)');
+						deepCloseEqual(evaluate('exp(4-i)').value,math.complex(Math.exp(4)*Math.cos(-1),Math.exp(4)*Math.sin(-1)),'exp(4-i)');
+
+						closeEquals(evaluate('fact(0)').value,1,'fact(0)');
+						closeEquals(evaluate('fact(1)').value,1,'fact(1)');
+						closeEquals(evaluate('fact(6)').value,720,'fact(6)');
+						closeEquals(evaluate('fact(1/2)').value,1.7724538509055157,'fact(1/2)');
+						closeEquals(evaluate('fact(-3/2)').value,2.363271801207352,'fact(-3/2)');
+						deepCloseEqual(evaluate('fact(i)').value,math.complex(-0.15494982830181037,-0.49801566811835596),'fact(i)');
+
+						closeEquals(evaluate('root(8,3)').value,2,'root(8,3)');
+						deepCloseEqual(evaluate('root(-81,4)').value,math.complex(2.121320343559643,2.121320343559643),'root(-81,4)');
+						closeEquals(evaluate('root(4,1.2)').value,3.174802103936399,'root(4,1.2)');
+						deepCloseEqual(evaluate('root(i,-2)').value,math.complex(0.7071067811865476,-0.7071067811865476),'root(i,-2)');
+					});
+
+					test('Trigonometry',function() {
+						closeEquals(evaluate('sin(0)').value,0,'sin(0)');
+						closeEquals(evaluate('sin(pi/2)').value,1,'sin(pi/2)');
+						deepCloseEqual(evaluate('sin(i)').value,math.complex(0,1.175201193643801456882381),'sin(i)');
+						closeEquals(evaluate('cos(0)').value,1,'cos(0)');
+						closeEquals(evaluate('cos(pi/2)').value,0,'cos(pi/2)');
+						deepCloseEqual(evaluate('cos(i)').value,1.5430806348152437784779,'cos(i)');
+
+						closeEquals(evaluate('tan(0)').value,0,'tan(0)');
+						closeEquals(evaluate('tan(pi/4)').value,1,'tan(pi/4)');
+						deepCloseEqual(evaluate('tan(i)').value,math.complex(0,0.761594155955764888),'tan(i)');
+
+						closeEquals(evaluate('cosec(pi/4)').value,Math.sqrt(2),'cosec(pi/4)');
+						deepCloseEqual(evaluate('cosec(i)').value,math.complex(0,-0.850918128239321545133),'cosec(i)');
+						closeEquals(evaluate('sec(pi/4)').value,Math.sqrt(2),'sec(pi/4)');
+						closeEquals(evaluate('sec(i)').value,1/1.5430806348152437784779,'sec(i)');
+						closeEquals(evaluate('cot(1)').value,0.6420926159343307,'cot(1)');
+						deepCloseEqual(evaluate('cot(i)').value,math.complex(0,-1.313035285499331303),'cot(i)');
+
+						closeEquals(evaluate('arcsin(0.5)').value,Math.PI/6,'arcsin(0.5)');
+						deepCloseEqual(evaluate('arcsin(i*sinh(1))').value,math.complex(0,1),'arcsin(i*sinh(1))');
+						deepCloseEqual(evaluate('arcsin(2)').value,math.complex(1.5707963267948966,-1.31695789692481),'arcsin(2)');
+						closeEquals(evaluate('arccos(0.5)').value,Math.PI/3,'arccos(0.5)');
+						deepCloseEqual(evaluate('arccos(cosh(1))').value,math.complex(0,1),'arccos(cosh(1))');
+						closeEquals(evaluate('arctan(1/sqrt(3))').value,Math.PI/6,'arctan(1/sqrt(3))');
+						deepCloseEqual(evaluate('arctan(i*tanh(1))').value,math.complex(0,1),'arctan(i*tanh(1))');
+
+						closeEquals(evaluate('sinh(1)').value,Math.E/2-1/(2*Math.E),'sinh(1)');
+						closeEquals(evaluate('sinh(ln(2))').value,3/4,'sinh(ln(2))');
+						deepCloseEqual(evaluate('sinh(2i)').value,math.complex(0,Math.sin(2)),'sinh(2i)');
+						closeEquals(evaluate('cosh(1)').value,Math.E/2+1/(2*Math.E),'cosh(1)');
+						closeEquals(evaluate('cosh(ln(3))').value,5/3,'cosh(ln(3))');
+						closeEquals(evaluate('cosh(-i)').value,Math.cos(1),'cosh(-i)');
+						closeEquals(evaluate('tanh(1)').value,0.7615941559557648,'tanh(1)');
+						closeEquals(evaluate('tanh(ln(5))').value,12/13,'tanh(ln(5))');
+						deepCloseEqual(evaluate('tanh(1+i)').value,math.complex(1.08392332733869454,0.27175258531951171652),'tanh(1+i)');
+						closeEquals(evaluate('cosech(ln(3))').value,3/4,'cosech(ln(3))');
+						closeEquals(evaluate('sech(ln(2))').value,4/5,'');
+						closeEquals(evaluate('coth(5)').value,1.000090803982019,'coth(5)');
+						closeEquals(evaluate('arcsinh(7)').value,2.644120761058629075,'arcsinh(7)');
+						closeEquals(evaluate('arccosh(8)').value,2.7686593833135738,'arccosh(8)');
+						deepCloseEqual(evaluate('arctanh(1+i)').value,math.complex(0.40235947810852507,1.0172219678978514),'arctanh(1+i)');
+					});
+
+
 					test('Vector and Matrix operations',function() {
-						equals(evaluate('dot(vector(1,2),vector(2,3))').value,8,'dot(vector(1,2),vector(2,3))');
-						equals(evaluate('dot(matrix([1],[2],[3]),vector(6,5,4))').value,28,'dot(matrix([1],[2],[3]),vector(6,5,4))');
-						equals(evaluate('dot(vector(6,5,4),matrix([1],[2],[3]))').value,28,'dot(vector(6,5,4),matrix([1],[2],[3]))');
-						equals(evaluate('dot(matrix([1],[2],[3]),matrix([1],[2],[3]))').value,14,'dot(matrix([1],[2],[3]),matrix([1],[2],[3]))');
-						deepEqual(evaluate('cross(vector(1,2,3),vector(5,6,7))').value,[-4,8,-4],'cross(vector(1,2,3),vector(5,6,7))');
-						deepEqual(evaluate('cross(vector(1,2,3),matrix([5,6,7]))').value,[-4,8,-4],'cross(vector(1,2,3),matrix([5,6,7]))');
-						deepEqual(evaluate('cross(matrix([1,2,3]),vector(5,6,7))').value,[-4,8,-4],'cross(matrix([1,2,3]),vector(5,6,7))');
-						equals(evaluate('det(matrix([2,4],[3,5]))').value,-2,'det(matrix([2,4],[3,5]))');
+						closeEquals(evaluate('dot(vector(1,2),vector(2,3))').value,8,'dot(vector(1,2),vector(2,3))');
+						closeEquals(evaluate('dot(matrix([1],[2],[3]),vector(6,5,4))').value,28,'dot(matrix([1],[2],[3]),vector(6,5,4))');
+						closeEquals(evaluate('dot(vector(6,5,4),matrix([1],[2],[3]))').value,28,'dot(vector(6,5,4),matrix([1],[2],[3]))');
+						closeEquals(evaluate('dot(matrix([1],[2],[3]),matrix([1],[2],[3]))').value,14,'dot(matrix([1],[2],[3]),matrix([1],[2],[3]))');
+						deepCloseEqual(evaluate('cross(vector(1,2,3),vector(5,6,7))').value,[-4,8,-4],'cross(vector(1,2,3),vector(5,6,7))');
+						deepCloseEqual(evaluate('cross(vector(1,2,3),matrix([5,6,7]))').value,[-4,8,-4],'cross(vector(1,2,3),matrix([5,6,7]))');
+						deepCloseEqual(evaluate('cross(matrix([1,2,3]),vector(5,6,7))').value,[-4,8,-4],'cross(matrix([1,2,3]),vector(5,6,7))');
+						closeEquals(evaluate('det(matrix([2,4],[3,5]))').value,-2,'det(matrix([2,4],[3,5]))');
 						raisesNumbasError(function(){ evaluate('det(matrix([2,4,6],[3,5,7]))') },'matrixmath.abs.non-square','error on non-square matrix: det(matrix([2,4,6],[3,5,7]))');
 						raisesNumbasError(function(){ evaluate('det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))') },'matrixmath.abs.too big',"can't work out determinants of big matrices: det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))");
-						deepEqual(evaluate('transpose(vector(1,2,3))').value,[[1],[2],[3]],'transpose(vector(1,2,3))');
-						deepEqual(evaluate('transpose(matrix([1,2,3]))').value,[[1],[2],[3]],'transpose(matrix([1,2,3]))');
-						deepEqual(evaluate('transpose(matrix([1],[2],[3]))').value,[[1,2,3]],'transpose(matrix([1],[2],[3]))');
-						deepEqual(evaluate('transpose(transpose(matrix([1,2,3])))').value,[[1,2,3]],'transpose(transpose(matrix([1,2,3])))');
-						deepEqual(evaluate('id(1)').value,[[1]],'id(1)');
-						deepEqual(evaluate('id(2)').value,[[1,0],[0,1]],'id(2)');
-						deepEqual(evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
-						deepEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
+						deepCloseEqual(evaluate('transpose(vector(1,2,3))').value,[[1],[2],[3]],'transpose(vector(1,2,3))');
+						deepCloseEqual(evaluate('transpose(matrix([1,2,3]))').value,[[1],[2],[3]],'transpose(matrix([1,2,3]))');
+						deepCloseEqual(evaluate('transpose(matrix([1],[2],[3]))').value,[[1,2,3]],'transpose(matrix([1],[2],[3]))');
+						deepCloseEqual(evaluate('transpose(transpose(matrix([1,2,3])))').value,[[1,2,3]],'transpose(transpose(matrix([1,2,3])))');
+						deepCloseEqual(evaluate('id(1)').value,[[1]],'id(1)');
+						deepCloseEqual(evaluate('id(2)').value,[[1,0],[0,1]],'id(2)');
+						deepCloseEqual(evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
+						deepCloseEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
 					});
 
 					test('Range operations',function() {
-						deepEqual(evaluate('1..5').value,[1,5,1,1,2,3,4,5],'1..5');
-						deepEqual(evaluate('1..7#2').value,[1,7,2,1,3,5,7],'1..#7#2');
-						deepEqual(evaluate('-2..3#2').value,[-2,3,2,-2,0,2],'-2..3#2');
-						deepEqual(evaluate('100..102#1/3').value,[100,102,1/3,100,100+1/3,100+2/3,101,101+1/3,101+2/3,102],'100..102#1/3');
-						deepEqual(evaluate('6..1#-1').value,[6,1,-1,6,5,4,3,2,1],'6..1#-1');
-						deepEqual(evaluate('1..2#0').value,[1,2,0],'1..2#0');
-						deepEqual(evaluate('-3..7 except 0..3').value.map(function(e){return e.value}),[-3,-2,-1,4,5,6,7],'-3..7 except 0..3');
-						deepEqual(evaluate('-3..7 except 0.5..3.5').value.map(function(e){return e.value}),[-3,-2,-1,0,1,2,3,4,5,6,7],'-3..7 except 0.5..3.5');
-						deepEqual(evaluate('-3..7 except 0.5..3.5#0').value.map(function(e){return e.value}),[-3,-2,-1,0,4,5,6,7],'-3..7 except 0.5..3.5#0');
-						deepEqual(evaluate('-3..7 except 4').value.map(function(e){return e.value}),[-3,-2,-1,0,1,2,3,5,6,7],'-3..7 except 4');
-						deepEqual(evaluate('-3..7 except 4.5').value.map(function(e){return e.value}),[-3,-2,-1,0,1,2,3,4,5,6,7],'-3..7 except 4.5');
+						deepCloseEqual(evaluate('1..5').value,[1,5,1,1,2,3,4,5],'1..5');
+						deepCloseEqual(evaluate('1..7#2').value,[1,7,2,1,3,5,7],'1..#7#2');
+						deepCloseEqual(evaluate('-2..3#2').value,[-2,3,2,-2,0,2],'-2..3#2');
+						deepCloseEqual(evaluate('100..102#1/3').value,[100,102,1/3,100,100+1/3,100+2/3,101,101+1/3,101+2/3,102],'100..102#1/3');
+						deepCloseEqual(evaluate('6..1#-1').value,[6,1,-1,6,5,4,3,2,1],'6..1#-1');
+						deepCloseEqual(evaluate('1..2#0').value,[1,2,0],'1..2#0');
+
+						deepCloseEqual(evaluate('-3..7 except 0..3').value.map(getValue),[-3,-2,-1,4,5,6,7],'-3..7 except 0..3');
+						deepCloseEqual(evaluate('-3..7 except 0.5..3.5').value.map(getValue),[-3,-2,-1,0,1,2,3,4,5,6,7],'-3..7 except 0.5..3.5');
+						deepCloseEqual(evaluate('-3..7 except 0.5..3.5#0').value.map(getValue),[-3,-2,-1,0,4,5,6,7],'-3..7 except 0.5..3.5#0');
+						raisesNumbasError(function(){ evaluate('0..5#0 except 1..3') },'jme.func.except.continuous range',"can't use except on continuous range: 0..5#0 except 1..3");
+
+						deepCloseEqual(evaluate('-3..7 except 4').value.map(getValue),[-3,-2,-1,0,1,2,3,5,6,7],'-3..7 except 4');
+						deepCloseEqual(evaluate('-3..7 except 4.5').value.map(getValue),[-3,-2,-1,0,1,2,3,4,5,6,7],'-3..7 except 4.5');
 						raisesNumbasError(function(){ evaluate('0..1#0 except 0.5') },'jme.func.except.continuous range',"can't use except on continuous range: 0..1#0 except 0.5");
+
+						deepCloseEqual(evaluate('-2..11 except [1,2,3,5,8]').value.map(getValue),[-2,-1,0,4,6,7,9,10,11],'-2..11 except [1,2,3,5,8]');
+						deepCloseEqual(evaluate('-2..11 except []').value.map(getValue),[-2,-1,0,1,2,3,4,5,6,7,8,9,10,11],'-2..11 except []');
+						deepCloseEqual(evaluate('-2..2 except [1,"a",0]').value.map(getValue),[-2,-1,2],'-2..2 except [1,"a",0]');
+						raisesNumbasError(function(){ evaluate('0..5#0 except 1..3') },'jme.func.except.continuous range',"can't use except on continuous range: 0..5#0 except 1..3");
+					});
+
+
+					test('List operations',function() {
+						deepCloseEqual(evaluate('["a","b","c"] except "a"').value.map(getValue),['b','c'],'["a","b","c"] except "a"');
+						deepCloseEqual(evaluate('["a","b","c"] except ["a","c","f"]').value.map(getValue),['b'],'["a","b","c"] except ["a","c","f"]');
+					});
+
+					test('Branching',function() {
+						closeEquals(evaluate('if(true,1,0)').value,1,'if(true,1,0)');
+						closeEquals(evaluate('if(false,1,0)').value,0,'if(false,1,0,)');
+						closeEquals(evaluate('if(true,1,1<i)').value,1,'lazy evaluation: if(true,1,1<i)');
+						closeEquals(evaluate('if(false,1<i,1)').value,1,'lazy evaluation: if(false,1<i,1)');
+
+						closeEquals(evaluate('switch(true,1,0)').value,1,'switch(true,1,0)');
+						closeEquals(evaluate('switch(false,1,true,2,3)').value,2,'switch(false,1,true,2,3)');
+						closeEquals(evaluate('switch(false,1,false,2,3)').value,3,'switch(false,1,false,1,3)');
+						closeEquals(evaluate('switch(false,1,true,0)').value,0,'switch(false,1,true,0)');
+						raisesNumbasError(function(){ evaluate('switch(false,1,false,0)') },'jme.func.switch.no default case','no default case: switch(false,1,false,0)');
 					});
 					
 					module('Scopes');
 
 					test('Variables',function() {
-						deepEqual(jme.builtinScope.variables,{},'builtin scope has no variables');
-						deepEqual(new jme.Scope().variables,{},'scope from constructor has no variables');
+						deepCloseEqual(jme.builtinScope.variables,{},'builtin scope has no variables');
+						deepCloseEqual(new jme.Scope().variables,{},'scope from constructor has no variables');
 						var scope = new jme.Scope({
 							variables: {
 								x: new types.TNum(1),
@@ -295,24 +654,24 @@
 						});
 						ok(scope.variables.x,'add variables in scope constructor')
 						var scope2 = new jme.Scope(scope,{variables: {x: new types.TNum(2)}});
-						equals(scope2.variables.x.value,2,'override variable in old scope with new value');
-						equals(scope2.variables.y.value,'hi','but other variables retained if not defined in later scope');
+						closeEquals(scope2.variables.x.value,2,'override variable in old scope with new value');
+						closeEquals(scope2.variables.y.value,'hi','but other variables retained if not defined in later scope');
 					});
 
 					test('Functions',function() {
 						ok(jme.builtinScope.functions['+'],'builtin scope has functions in it.');
-						deepEqual(new jme.Scope().functions,{},'scope from constructor has no functions');
+						deepCloseEqual(new jme.Scope().functions,{},'scope from constructor has no functions');
 						var scope = new jme.Scope(jme.builtinScope,{
 							functions: {
 								'+':[(new jme.funcObj('+',[types.TBool,types.TBool],types.TBool,null,{nobuiltin:true}))]
 							}
 						});
-						equals(scope.functions['+'].length,jme.builtinScope.functions['+'].length+1,'add overloaded function to old scope');
-						equals(new Numbas.jme.Scope(scope,jme.builtinScope).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
+						closeEquals(scope.functions['+'].length,jme.builtinScope.functions['+'].length+1,'add overloaded function to old scope');
+						closeEquals(new Numbas.jme.Scope(scope,jme.builtinScope).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
 					});
 
 					test('Rulesets',function() {
-						deepEqual(new jme.Scope().rulesets,{},'scope from constructor has no rulesets');
+						deepCloseEqual(new jme.Scope().rulesets,{},'scope from constructor has no rulesets');
 						var scope = new jme.Scope({rulesets: jme.display.simplificationRules});
 						ok(scope.rulesets.basic,'extend scope with some rulesets');
 					});
