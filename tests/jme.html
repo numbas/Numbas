@@ -268,6 +268,7 @@
 						deepCloseEqual(evaluate('(1+i)/5').value,math.complex(0.2,0.2),'(1+i)/5');
 						deepCloseEqual(evaluate('(1+i)/(2-i)').value,math.complex(0.2,0.6),'(1+i)/(2+i)');
 						closeEquals(evaluate('2^4').value,16,'2^4');
+						closeEquals(evaluate('(-6)^2').value,36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
 						deepCloseEqual(evaluate('(1+i)^0').value,1,'(1+i)^0');
 						deepCloseEqual(evaluate('(1+i)^5').value,math.complex(-4,-4),'(1+i)^5');
 						deepCloseEqual(evaluate('(1+i)^6').value,math.complex(0,-8),'(1+i)^6');
