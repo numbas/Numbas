@@ -149,7 +149,7 @@ var math = Numbas.math = {
 				re += Math.pow(a.im,b)*sign;
 			return math.complex(re,im);
 		}
-		if(a.complex || b.complex || a<0)
+		if(a.complex || b.complex || (a<0 && math.fract(b)!=0))
 		{
 			if(!a.complex)
 				a = {re: a, im: 0, complex: true};
