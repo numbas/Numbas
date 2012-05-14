@@ -479,58 +479,6 @@ cbSplit = function (str, separator, limit) {
     return output.length > limit ? output.slice(0, limit) : output;
 };
 
-
-//add inline and display maths phrase types to textile convertor, so their contents don't get touched
-
-var re_inlineMaths = /\$.*?\$/g;
-textile.phraseTypes.splice(0,0,function(text) {
-	var out = [];
-	var m;
-	while(m=re_inlineMaths.exec(text))
-	{
-		var bit = [text.slice(0,m.index),m[0]];
-		out = this.joinPhraseBits(out,bit,out.length);
-		text = text.slice(re_inlineMaths.lastIndex);
-		re_inlineMaths.lastIndex = 0;
-	}
-	if(out.length)
-		out = this.joinPhraseBits(out,[text],out.length);
-	return out;
-});
-
-var re_displayMaths = /\\\[.*?\\\]/g;
-textile.phraseTypes.splice(0,0,function(text) {
-	var out = [];
-	var m;
-	while(m=re_displayMaths.exec(text))
-	{
-		var bit = [text.slice(0,m.index),m[0]];
-		out = this.joinPhraseBits(out,bit,out.length);
-		text = text.slice(re_displayMaths.lastIndex);
-		re_displayMaths.lastIndex = 0;
-	}
-	if(out.length)
-		out = this.joinPhraseBits(out,[text],out.length);
-	return out;
-});
-
-var re_subvar = /\{.*?\}/g;
-textile.phraseTypes.splice(0,0,function(text) {
-	var out = [];
-	var m;
-	while(m=re_subvar.exec(text))
-	{
-		var bit = [text.slice(0,m.index),m[0]];
-		out = this.joinPhraseBits(out,bit,out.length);
-		text = text.slice(re_subvar.lastIndex);
-		re_subvar.lastIndex = 0;
-	}
-	if(out.length)
-		out = this.joinPhraseBits(out,[text],out.length);
-	return out;
-});
-
-
 cbSplit._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
 cbSplit._nativeSplit = String.prototype.split;
 

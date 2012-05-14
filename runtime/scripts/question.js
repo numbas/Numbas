@@ -495,7 +495,7 @@ Part.prototype = {
 	//then calls the display code
 	giveWarning: function(warning)
 	{
-		this.display.warning(textile(warning));
+		this.display.warning(warning);
 	},
 
 	//calculate student's score for given answer.

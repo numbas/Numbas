@@ -757,10 +757,6 @@ var jme = Numbas.jme = {
 					v = jme.display.treeToJME({tok:v});
 				}
 
-				if(display)
-				{
-					v = textile(v,{nowrapPlainBlocks:true});
-				}
 				out += v;
 			}
 			else

@@ -28,7 +28,7 @@ R.registerLocale('en-GB',{
 	'exam.xml.bad root': "Root element of exam XML should be 'exam'",
 	'exam.changeQuestion.no questions': "This exam contains no questions! Check the .exam file for errors.",
 
-	'feedback.marks': "*%s* %s",
+	'feedback.marks': "<strong>%s</strong> %s",
 	'feedback.you were awarded': "You were awarded %s.",
 	'feedback.taken away': "%s %s taken away.",
 
@@ -42,7 +42,7 @@ R.registerLocale('en-GB',{
 	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
 	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
 
-	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n'%s*(...)' ?",
+	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n<code>%s*(...)</code>' ?",
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
@@ -53,11 +53,11 @@ R.registerLocale('en-GB',{
 	'jme.func.matrix.invalid row type': "Can't construct a matrix from rows of type %s",
 	'jme.func.except.continuous range': "Can't use the 'except' operator on continuous ranges.",
 
-	'jme.texsubvars.no right bracket': "No matching ] in %s arguments.",
+	'jme.texsubvars.no right bracket': "No matching <code>]</code> in %s arguments.",
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
-	'jme.texsubvars.no right brace': "No matching } in %s",
+	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
-	'jme.user javascript error': "Error in user-defined javascript function @%s@\n\n%s",
+	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code>\n\n%s",
 
 	'jme.variables.variable not defined': "Variable %s not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
@@ -84,15 +84,15 @@ R.registerLocale('en-GB',{
 	'vectormath.cross.matrix too big': "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 
 	'part.marking.steps no matter': "Because you received full marks for the part, your answers to the steps aren't counted.",
-	'part.marking.steps change single': "You were awarded *%s* mark for your answers to the steps",
-	'part.marking.steps change plural': "You were awarded *%s* marks for your answers to the steps",
-	'part.marking.revealed steps with penalty single': "You revealed the steps. The maximum you can score for this part is *%s% mark. Your scores will be scaled down accordingly.",
-	'part.marking.revealed steps with penalty plural': "You revealed the steps. The maximum you can score for this part is *%s% marks. Your scores will be scaled down accordingly.",
+	'part.marking.steps change single': "You were awarded <strong>%s</strong> mark for your answers to the steps",
+	'part.marking.steps change plural': "You were awarded <strong>%s</strong> marks for your answers to the steps",
+	'part.marking.revealed steps with penalty single': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> mark. Your scores will be scaled down accordingly.",
+	'part.marking.revealed steps with penalty plural': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> marks. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps no penalty': "You revealed the steps.",
 	'part.marking.not submitted': "No answer submitted",
 	'part.marking.did not answer': "You did not answer this question.",
-	'part.marking.total score single': "You scored *%s* mark for this part.",
-	'part.marking.total score plural': "You scored *%s* marks for this part.",
+	'part.marking.total score single': "You scored <strong>%s</strong> mark for this part.",
+	'part.marking.total score plural': "You scored <strong>%s</strong> marks for this part.",
 	'part.marking.nothing entered': "You did not enter an answer.",
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
