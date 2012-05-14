@@ -2,49 +2,58 @@
 	name: Medics Test
 	duration: 0
 	percentpass: 0
-	shufflequestions: false
-	
+	shufflequestions: False
 	navigation: {
-		reverse: true
-		browse: true
+		reverse: True
+		browse: True
 	}
 	
 	questions: [
-		{	name: Question 1
-			
-			variables: {
-				a: "random(1..100#0.01)"
-			}
+		{
+			name: Question 1
+			variables: {a: random(1..100#0.01)}
 			
 			parts: [
-				{	type: numberentry
+				{
+					type: numberentry
 					marks: 1
-					prompt: "Convert $\var{a}$ km into metres (give your answer to $3$ decimal places)."
+					prompt: "	<p>Convert $\var{a}$ km into metres (give your answer to $3$ decimal places).</p>"
 					answer: "{a*1000}"
+					
 					steps: [
-						{	type: information
+						{
+							type: information
 							prompt: "Recall: $1$ km = $1000$ m."
 						}
-					]		
+					]
 				}
 			]
-		}
-		{	name: Question 2
-		
+		}, 
+		{
+			name: Question 2
+			
 			parts: [
 				{
 					type: numberentry
 					marks: 2
-					prompt: "Find $x$ where $15 + 3x = 42$."
-					answer: "9"
+					prompt: 	<p>Find $x$ where $15 + 3x = 42$.</p>
+					answer: 9
+					
 					steps: [
 						{
 							type: gapfill
-							prompt: "Rearrange the equation and the solve for $x$.
-									So, $3x =$ [[0]]. You should now be able to enter 
-									your final answer."
+							prompt: "
+							Rearrange the equation and the solve for $x$.
+																So, $3x =$ [[0]]. You should now be able to enter 
+																your final answer.
+							"
+							
 							gaps: [
-								{ type: numberentry, answer: "27", marks: 0.5 }
+								{
+									type: numberentry
+									answer: 27
+									marks: 0.5
+								}
 							]
 						}
 					]
@@ -53,4 +62,4 @@
 			]
 		}
 	]
-}	
+}

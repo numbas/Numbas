@@ -1,566 +1,659 @@
 {
 	name: Maths Sample Questions
 	duration: 0
-	percentPass: 50
-	shuffleQuestions: false
-
+	percentpass: 50
+	shufflequestions: False
 	navigation: {
-		allowregen: true
-		reverse: true
-		browse: true
+		allowregen: True
+		reverse: True
+		browse: True
 	}
-
 	timing: {
 		timeout: {
 			action: warn
-			message: "You have run out of time. The exam is now over."
+			message: 	<p>You have run out of time. The exam is now over.</p>
 		}
 		timedwarning: {
 			action: warn
-			message: "**Uh oh!**"
+			message: 	<p><b>Uh oh!</b></p>
 		}
 	}
-
 	feedback: {
-		showtotalmark: true
-		advice: {type: onreveal, threshold: 50}
+		showtotalmark: True
+		advice: {
+			type: onreveal
+			threshold: 50
+		}
 	}
-
+	
 	questions: [
 		{
 			name: PDFs and CDFs
-			statement: "Suppose $X$ is a continuous uniform random variable defined on $[\var{a},\var{b}]$."
-
+			statement: "	<p>Suppose $X$ is a continuous uniform random variable defined on $[\var{a},\var{b}]$.</p>"
 			variables: {
 				a: random(-5..5)
 				b: a+random(3..6)
 				c: random(a+1..b-1)
 			}
-
+			
 			parts: [
 				{
 					type: GapFill
 					prompt: """
-						What is the PDF of $X$?
-
-						|/3. $f_X(x) = \left \{ \begin{array}{l} \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \end{array} \right .$|<. [[0]]$,$ | $\var{a} \leq x \leq \var{b},$ |
-						|||
-						|<. [[1]]$,$|$\textrm{otherwise.}$|
+						<p>What is the <span class="caps">PDF</span> of $X$?</p>
+					
+						<table>
+							<tr>
+								<td rowspan="3">$f_X(x) = \left \{ \begin{array}{l} \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \end{array} \right .$</td>
+								<td style="text-align:left;">[[0]]$,$ </td>
+								<td> $\var{a} \leq x \leq \var{b},$ </td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td style="text-align:left;">[[1]]$,$</td>
+								<td>$\textrm{otherwise.}$</td>
+							</tr>
+						</table>
 					"""
+					
 					gaps: [
-						{ type: jme, answer: "1/{b-a}", marks: 1 }
-						{ type: jme, answer: "0", marks: 1 }
+						{
+							type: jme
+							answer: "1/{b-a}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: 0
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: GapFill
 					prompt: """
-						Compute the CDF of $X$.
-
-						|/5. $F_X(x) = \left \{ \begin{array}{l} \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \end{array} \right .$ |<. [[0]] | $x \lt \var{a},$ |
-						|||
-						|<. [[1]]| $\var{a} \leq x \leq \var{b},$ |
-						|||
-						|<. [[2]]| $x \gt \var{b}.$ |
+						<p>Compute the <span class="caps">CDF</span> of $X$.</p>
+					
+						<table>
+							<tr>
+								<td rowspan="5">$F_X(x) = \left \{ \begin{array}{l} \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \\ \phantom{{.}} \end{array} \right .$ </td>
+								<td style="text-align:left;">[[0]] </td>
+								<td> $x \lt \var{a},$ </td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td style="text-align:left;">[[1]]</td>
+								<td> $\var{a} \leq x \leq \var{b},$ </td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td style="text-align:left;">[[2]]</td>
+								<td> $x \gt \var{b}.$ </td>
+							</tr>
+						</table>
 					"""
+					
 					gaps: [
-						{ type: jme, answer: 0, marks: 1 }
-						{ type: jme, answer: "(x-{a})/{b-a}", marks: 1 }
-						{ type: jme, answer: 1, marks: 1 }
+						{
+							type: jme
+							answer: 0
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "(x-{a})/{b-a}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: 1
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: GapFill
-					prompt: """
-						Calculate:
-
-						$P(X \geq \var{c}) = \phantom{{}}$[[0]] 
-					"""
+					prompt: "
+						<p>Calculate:</p>
+					
+						<p>$P(X \geq \var{c}) = \phantom{{}}$[[0]]</p>
+					"
+					
 					gaps: [
-						{ type: jme, answer: "{b-c}/{b-a}", marks: 1 }
+						{
+							type: jme
+							answer: "{b-c}/{b-a}"
+							marks: 1
+						}
 					]
 				}
 			]
-
 			advice: """
-				h4. a)
-
-				The PDF is given by
+				<h4>a)</h4>
 			
-				\[f_X(x) = \begin{cases} \simplify{1/({b-a})} & \var{a} \leq x \leq \var{b}, \\ \\ 0 & \textrm{otherwise}. \end{cases} \]
-
-				<hr/>
-				
-				h4. b)
-
-				The CDF is given by
-
-				\[F_X(x) = \begin{cases} 0 & x \lt \var{a}, \\ \simplify{(x-{a})/({b-a})} & \var{a} \leq x \leq \var{b}, \\ 1 & x \gt \var{b}. \end{cases}\]
-
-				<hr/>
-
-				h4. c)
-
-				\[P(X \geq \var{c}) = 1 - F_X(\var{c}) = 1 - \simplify{({c-a})/({b-a})} = \simplify{{b-c}/{b-a}}\]
+				<p>The <span class="caps">PDF</span> is given by</p>
+			
+				<p>\[f_X(x) = \begin{cases} \simplify{1/({b-a})} &#38; \var{a} \leq x \leq \var{b}, \\ \\ 0 &#38; \textrm{otherwise}. \end{cases} \]</p>
+			
+			<hr/>
+			
+				<h4>b)</h4>
+			
+				<p>The <span class="caps">CDF</span> is given by</p>
+			
+				<p>\[F_X(x) = \begin{cases} 0 &#38; x \lt \var{a}, \\ \simplify{(x-{a})/({b-a})} &#38; \var{a} \leq x \leq \var{b}, \\ 1 &#38; x \gt \var{b}. \end{cases}\]</p>
+			
+			<hr/>
+			
+				<h4>c)</h4>
+			
+				<p>\[P(X \geq \var{c}) = 1 - F_X(\var{c}) = 1 - \simplify{({c-a})/({b-a})} = \simplify{{b-c}/{b-a}}\]</p>
 			"""
-		}
+		}, 
 		{
 			name: Confidence intervals
-			statement: """
-				Suppose $X_1, \dots, X_n$ is a random sample from an $\operatorname{Exponential}(\lambda)$ distribution.
-
-				Let $\bar{x}$ denote the mean of this sample.
-
-				If $n = \var{n}$ and $\bar{x} = \var{xbar}$,
-			"""
+			statement: "
+				<p>Suppose $X_1, \dots, X_n$ is a random sample from an $\operatorname{Exponential}(\lambda)$ distribution.</p>
+			
+				<p>Let $\bar{x}$ denote the mean of this sample.</p>
+			
+				<p>If $n = \var{n}$ and $\bar{x} = \var{xbar}$,</p>
+			"
 			variables: {
-				n: "random(25..40)"	//size of sample
-
-				//sample mean
+				n: random(25..40)
 				xbar: "precround(random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001)+random(0..1#0.001),1)"
-
-				mle: "precround(1/xbar, 2)"		//maximum likelihood estimate
-				inf: "precround(n*xbar^2, 2)"		//expected information
-
-				per: "random(95,99,99.9)"		//size of confidence interval
-				z: "switch(per=95,1.96,per=99,2.58,per=99.9,3.29)"	//corresponding z-value from tables
+				mle: "precround(1/xbar, 2)"
+				inf: "precround(n*xbar^2, 2)"
+				per: "random(95,99,99.9)"
+				z: "switch(per=95,1.96,per=99,2.58,per=99.9,3.29)"
 				llim: "precround(1/xbar-z*sqrt(1/(n*xbar^2)), 2)"
 				ulim: "precround(1/xbar+z*sqrt(1/(n*xbar^2)), 2)"
 			}
-
+			
 			parts: [
-				{ 
-					type: gapfill
-					prompt: """ What is $\hat{\lambda}$, the m.l.e. for $\lambda$?
-
-					$\hat{\lambda} = \phantom{{}}$[[0]] (to $2$ decimal places) """
-
-					gaps: [
-						{ type: numberentry, answer: "{mle}", marks: 1 }
-					]
-				}
 				{
 					type: gapfill
-					prompt: """
-						Calculate an estimate of the expected information $I(\lambda)$
-
-						$I(\lambda) = \phantom{{}}$[[0]] (to $2$ decimal places)
-					"""
-
+					prompt: "
+						<p>What is $\hat{\lambda}$, the m.l.e. for $\lambda$?</p>
+					
+						<p>$\hat{\lambda} = \phantom{{}}$[[0]] (to $2$ decimal places)</p>
+					"
+					
 					gaps: [
-						{ type: numberentry, answer: "{inf}", marks: 1 }
+						{
+							type: numberentry
+							answer: "{mle}"
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-					prompt: """
-						Calculate a $\var{per} \%$ confidence interval $(a,b)$ for $\lambda$:
-
-						$a = \phantom{{}}$[[0]] (to $2$ decimal places)
-
-						$b = \phantom{{}}$[[1]] (to $2$ decimal places)
-					"""
-
+					prompt: "
+						<p>Calculate an estimate of the expected information $I(\lambda)$</p>
+					
+						<p>$I(\lambda) = \phantom{{}}$[[0]] (to $2$ decimal places)</p>
+					"
+					
 					gaps: [
-						{type: numberentry, answer: "{llim}", marks: 1}
-						{type: numberentry, answer: "{ulim}", marks: 1}
+						{
+							type: numberentry
+							answer: "{inf}"
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: gapfill
+					prompt: "
+						<p>Calculate a $\var{per} \%$ confidence interval $(a,b)$ for $\lambda$:</p>
+					
+						<p>$a = \phantom{{}}$[[0]] (to $2$ decimal places)</p>
+					
+						<p>$b = \phantom{{}}$[[1]] (to $2$ decimal places)</p>
+					"
+					
+					gaps: [
+						{
+							type: numberentry
+							answer: "{llim}"
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: "{ulim}"
+							marks: 1
+						}
 					]
 				}
 			]
-
-			advice: """
-				h4. a)
-
-				The maximum likelihood estimator is, in this case,
-				\[\hat{\lambda} = \frac{1}{\bar{x}} = \frac{1}{\var{xbar}} = \var{mle},\]
-				to two decimal places.
-
-				h4. b)
-
-				The expected information in this case is
-				\[ I(\lambda) = \frac{n}{\hat{\lambda}^2} = n\bar{x}^2 = \simplify[]{{n}*{xbar}^2} = \var{inf}\]
-				to two decimal places.
-
-				h4. c)
-
-				The $\var{per} \%$ confidence interval for $\lambda$ in this case is given by $(a,b)$, where
-
-				\[\begin{eqnarray}
-					a &=& \frac{1}{\bar{x}} - z \sqrt{\frac{1}{n\bar{x}^2}}, \\
-					b &=& \frac{1}{\bar{x}} + z \sqrt{\frac{1}{n\bar{x}^2}}.
-				\end{eqnarray}\]
-
-				and $z = \var{z}$.
-
-				Doing these calculations gives $a = \var{llim}$, $b = \var{ulim}$, to two decimal places.
-			"""
-		}
+			advice: "
+				<h4>a)</h4>
+			
+				<p>The maximum likelihood estimator is, in this case,<br />\[\hat{\lambda} = \frac{1}{\bar{x}} = \frac{1}{\var{xbar}} = \var{mle},\]<br />to two decimal places.</p>
+			
+				<h4>b)</h4>
+			
+				<p>The expected information in this case is<br />\[ I(\lambda) = \frac{n}{\hat{\lambda}^2} = n\bar{x}^2 = \simplify[]{{n}*{xbar}^2} = \var{inf}\]<br />to two decimal places.</p>
+			
+				<h4>c)</h4>
+			
+				<p>The $\var{per} \%$ confidence interval for $\lambda$ in this case is given by $(a,b)$, where</p>
+			
+				<p>\[\begin{eqnarray}
+			a &#38;=&#38; \frac{1}{\bar{x}} - z \sqrt{\frac{1}{n\bar{x}^2}}, \\
+			b &#38;=&#38; \frac{1}{\bar{x}} + z \sqrt{\frac{1}{n\bar{x}^2}}.
+			\end{eqnarray}\]</p>
+			
+				<p>and $z = \var{z}$.</p>
+			
+				<p>Doing these calculations gives $a = \var{llim}$, $b = \var{ulim}$, to two decimal places.</p>
+			"
+		}, 
 		{
 			name: Quadratic number ring
-			statement: """
-				In the quadratic number ring $Z[i]$, find the remainder $r = a+bi$, where $a \gt 0$, $b \gt 0$, on dividing $\var{z1}$ by $\var{z2}$.
-			"""
+			statement: "	<p>In the quadratic number ring $Z[i]$, find the remainder $r = a+bi$, where $a \gt 0$, $b \gt 0$, on dividing $\var{z1}$ by $\var{z2}$.</p>"
 			variables: {
 				p: random(2..4)
-
 				a: random(1..5)
 				bb: random(1..4)
-				b: "if(bb>=a,bb+1,bb)"	//so b is anything from 1..5, excluding a.
-
+				b: "if(bb>=a,bb+1,bb)"
 				c: random(1..4)
 				d: random(1..4)
-
 				re2: (b+a)*p
 				im2: (b-a)*p
 				re1: re2*c - im2*d + a
 				im1: im2*c + re2*d + b
-
 				z1: re1 + im1*i
 				z2: re2 + im2*i
-
 				z: c + d*i
 				r: a + b*i
 			}
-
+			
 			parts: [
 				{
 					type: gapfill
-					prompt: """
-						Find $z = c+di$ such that $\var{z1} = (\var{z2})z+r$:
-
-						$z = \phantom{{}}$[[1]]
-
-						Now, find the remainder:
-						
-						$r = \phantom{{}}$[[0]]
-					"""
-
+					prompt: "
+						<p>Find $z = c+di$ such that $\var{z1} = (\var{z2})z+r$:</p>
+					
+						<p>$z = \phantom{{}}$[[1]]</p>
+					
+						<p>Now, find the remainder:</p>
+					
+						<p>$r = \phantom{{}}$[[0]]</p>
+					"
+					
 					gaps: [
-						{ type: jme, answer: "{r}", marks: 1 }
-						{ type: jme, answer: "{z}", marks: 1 }
+						{
+							type: jme
+							answer: "{r}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "{z}"
+							marks: 1
+						}
 					]
 				}
 			]
+			advice: "
+				<p>We have<br />\[\simplify[]{{z1}/{z2} = ({z1}*{conj(z2)})/({z2}*{conj(z2)})} = \simplify{{z1/z2}} \approx c + di,\]</p>
 			
-			advice: """
-				We have
-				\[\simplify[]{{z1}/{z2} = ({z1}*{conj(z2)})/({z2}*{conj(z2)})} = \simplify{{z1/z2}} \approx c + di,\]
-
-				where $c$ takes the nearest integer value $\var{c}$, and $d$ takes the nearest integer value $\var{d}$.
-
-				So take $z = \var{z}$ and on calculating we find:
-
-				\[\simplify[]{{z1} = {z2}*{z} + {r}}\]
-			"""
-		}
-
+				<p>where $c$ takes the nearest integer value $\var{c}$, and $d$ takes the nearest integer value $\var{d}$.</p>
+			
+				<p>So take $z = \var{z}$ and on calculating we find:</p>
+			
+				<p>\[\simplify[]{{z1} = {z2}*{z} + {r}}\]</p>
+			"
+		}, 
 		{
 			name: Dynamical system
-			statement: """
-				Consider the dynamical system:
-
-				\[\begin{eqnarray}
-					\frac{dx}{dt} &=& \simplify[cancelId]{{alpha*x1}*x + {alpha*y1}*y} \\
-					\frac{dy}{dt} &=& \simplify[cancelId]{{alpha*x2}*x + {alpha*y2}*y}
-				\end{eqnarray}\]
-			"""
-
+			statement: "
+				<p>Consider the dynamical system:</p>
+			
+				<p>\[\begin{eqnarray}
+			\frac{dx}{dt} &#38;=&#38; \simplify[cancelId]{{alpha*x1}*x + {alpha*y1}*y} \\
+			\frac{dy}{dt} &#38;=&#38; \simplify[cancelId]{{alpha*x2}*x + {alpha*y2}*y}
+			\end{eqnarray}\]</p>
+			"
 			rulesets: {
-				cancelId: [unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower]
-			}
-
-			variables: {
-				x1: "random(1..9)*random(-1,1)"		//matrix cells
-				y1: "1"
-				x2: "x1*y2 - delta/alpha^2"
-				y2: "tau/alpha - x1"
-
-				delta: "(tau^2+x^2)/4"				//determinant
-				tau: "2*alpha*random(1..9)"			//trace
-
-				alpha: "random(1..4)"
-				x: "2*alpha*random(1..9)"
-
-				lambda1: "tau/2 + (sqr(4*delta-tau^2)/2)*i"			//eigenvalues
-				lambda2: "tau/2 - (sqr(4*delta-tau^2)/2)*i"	
-
-				vec1: "(re(lambda1)-x1*alpha)/(y1*alpha) + im(lambda1)/(y1*alpha)*i"		//eigenvectors
-				vec2: "(re(lambda2)-x1*alpha)/(y1*alpha) + im(lambda2)/(y1*alpha)*i"
-			}
-			parts: [
-				{
-					type: gapfill
-					prompt: """
-						The system can be written in the form $\frac{d\mathbf{x}}{dt} = A \mathbf{x}$, where $\mathbf{x} = \begin{pmatrix} x\\y \end{pmatrix}$.
-
-						Identify the components of the matrix $A$:
-
-						|/2. $A = \Bigg($| [[0]] | [[1]] |/2. $\Bigg)$ |
-						|[[2]] | [[3]] |
-					"""
-
-					gaps: [
-						{ type: numberentry, answer: "x1*alpha", marks: 1 }
-						{ type: numberentry, answer: "y1*alpha", marks: 1 }
-						{ type: numberentry, answer: "x2*alpha", marks: 1 }
-						{ type: numberentry, answer: "y2*alpha", marks: 1 }
-					]
-				}
-				{
-					type: gapfill
-					prompt: """
-						Calculate the trace, $\tau$, and the determinant, $\delta$, of the matrix $A$:
-
-						$\tau = \phantom{{}}$[[0]] ,
-						$\delta = \phantom{{}}$[[1]] .
-					"""
-
-					gaps: [
-						{ type: numberentry, answer: "tau", marks: 1 }
-						{ type: numberentry, answer: "delta", marks: 1 }
-					]
-				}
-				{
-					type: gapfill
-					prompt: """
-						Enter the eigenvalues, $\lambda_1$ and $\lambda_2$, of the matrix $A$:
-
-						If the eigenvalues have *zero imaginary part*, enter the eigenvalue with the *largest real part* first.
-						
-						If the eigenvalues have *non-zero imaginary part*, enter the eigenvalue with the *largest imaginary part* first.
-
-						$\lambda_1 = \phantom{{}}$[[0]]
-						$\lambda_2 = \phantom{{}}$[[1]]
-					"""
-
-					gaps: [
-						{ type: jme, answer: "{lambda1}", marks: 1 }
-						{ type: jme, answer: "{lambda2}", marks: 1 }
-					]
-				}
-				{
-					type: gapfill
-					prompt: """
-						Assuming that the $x$-component of each eigenvector is $1$, find the $y$-components of the eigenvectors corresponding to the eigenvalues $\lambda_1$ and $\lambda_2$.
-
-						$y$-component of eigenvector corresponding to $\lambda_1$: [[0]]
-						$y$-component of eigenvector corresponding to $\lambda_2$: [[1]]
-					"""
-
-					gaps: [
-						{ type: jme, answer: "{vec1}", marks: 1 }
-						{ type: jme, answer: "{vec2}", marks: 1 }
-					]
-				}
-				{
-					type: 1_n_2
-
-					marks: 1
-					choices: [ "Unstable spiral", "Saddle point", "Star node", "Degenerate node", "Stable node", "Unstable node", "Centre", "Stable spiral" ]
-					matrix: [1,0,0,0,0,0,0,0]
-
-					shuffleChoices: true
-					displayColumns: 4
-				}
-			]
-
-			advice: """
-				h4. a)
-
-				In the first part of the question the elements of the matrix $A$ are simply the coefficients of $x$ and $y$ in the system of equations. Therefore,
-				\[A = \begin{pmatrix} \var{x1*alpha} & \var{y1*alpha} \\ \var{x2*alpha} & \var{y2*alpha} \end{pmatrix} \]
-
-				<hr/>
-
-				h4. b)
-
-				The trace, $\tau$, and determinant, $\delta$, of a matrix
-				\[A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}\]
-
-				are given by $\tau = a+d$ and $\delta = ad - bc$.
-
-				A straightforward substitution for $a,b,c,$ and then $d$ reveals that
-
-				$\tau = \var{tau}$, and $\delta = \var{delta}$.
-
-				<hr/>
-
-				h4. c)
-
-				The eigenvalues of the matrix $A$ can be calculated from the expression
-				\[A\mathbf{x}= \lambda \mathbf{x},\]
-				which is equivalent to
-				\[(A - \lambda I)\mathbf{x} = 0,\]
-				where $I$ is the identity matrix. This linear system has a solution only when
-				\[\det (A - \lambda I) = 0,\]
-				i.e. when $(a- \lambda)(d - \lambda) - bc = 0$.
-
-				This leads to $\lambda^2 - (a+d)\lambda + ad-bc = 0$, which is the same as
-				\[\lambda^2 - \tau \lambda + \delta = 0.\]
-
-				The eigenvalues, $\lambda_1$ and $\lambda_2$, of $A$ are then given by:
-				\[ \lambda_1 = \frac{\tau + \sqrt{\tau^2 - 4\delta}}{2} \]
-				and
-				\[ \lambda_1 = \frac{\tau - \sqrt{\tau^2 - 4\delta}}{2} \]
-
-				So, in this case, $\lambda_1 = \var{lambda1}$ and $\lambda_2 = \var{lambda2}$, and they are both complex.
-
-				<hr/>
-
-				h4. d)
-
-				To find the eigenvectors corresponding to the eigenvalues you simply need to solve the system of equations given by
-
-				\[A\mathbf{x} = \lambda\mathbf{x},\]
-
-				substituting in each value of $\lambda$ separately, i.e. solve
-
-				\[\begin{eqnarray}
-					ax + by &=& \lambda x \\
-					cx + dy &=& \lambda y
-				\end{eqnarray}\]
-
-				where $\lambda$ is either $\lambda_1$ or $\lambda_2$.
-
-				Because this is an eigenvalue problem, we can arbitrarily choose one of the eigenvector components to be $1$, in this case the $x$-component. The $y$-component can then easily be found from 
-				\[y = \frac{x(\lambda-a)}{b},\]
-				or
-				\[y=\frac{cx}{\lambda-d}.\] 
-				These are equivalent expressions.
-
-				A straightforward substitution reveals that the $y$-component of the eigenvector corresponding to $\lambda_1$ is $\var{vec1}$, 
 				
-				and the $y$-component of the eigenvector corresponding to $\lambda_2$ is $\var{vec2}$.
-
-				<hr/>
-
-				h4. e)
-
-				The nature of the fixed point at the origin can always be determined by looking at a combination of the signs of $\tau, \delta, \lambda_1$ and $\lambda_2$.
-
-				In this case, because $\delta \gt 0, \tau^2 - 4\delta \lt 0$, and $\tau \gt 0$, the fixed point is an *unstable spiral*.
-			"""
-		}
-		{
-			name: Contour integral
-
-			statement: """
-				For the function $f(z) = \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z^2-{d}*z}}$, identify the poles (singular points), find the corresponding residues, and evaluate the integral
-				\[I = \oint_C f(z) dz, \]
-				where $C$ is the contour $|z| = 5$, mapped counter-clockwise.
-			"""
-
-			variables: {
-				a: "random(1..4)"
-				b: "random(0..3)"
-				c: "random(1..4)"
-				d: "random(1..4)"
+				cancelid: [unitFactor, unitPower, unitDenominator, zeroFactor, zeroTerm, zeroPower]
 			}
-
+			variables: {
+				x1: "random(1..9)*random(-1,1)"
+				y1: 1
+				x2: x1*y2 - delta/alpha^2
+				y2: tau/alpha - x1
+				delta: (tau^2+x^2)/4
+				tau: 2*alpha*random(1..9)
+				alpha: random(1..4)
+				x: 2*alpha*random(1..9)
+				lambda1: tau/2 + (sqr(4*delta-tau^2)/2)*i
+				lambda2: tau/2 - (sqr(4*delta-tau^2)/2)*i
+				vec1: (re(lambda1)-x1*alpha)/(y1*alpha) + im(lambda1)/(y1*alpha)*i
+				vec2: (re(lambda2)-x1*alpha)/(y1*alpha) + im(lambda2)/(y1*alpha)*i
+			}
+			
 			parts: [
 				{
 					type: gapfill
 					prompt: """
-						Pole with least real part at $z = \phantom{{}}$[[0]].
-
-						Pole with greatest real part at $z = \phantom{{}}$[[1]].
-
-					"""
-
-					gaps: [
-						{type: jme, answer: 0, marks: 1}
-						{type: jme, answer: "{d}", marks: 1}
-					]
-				}
-				{
-					type: gapfill
-					prompt: """
-						Residue corresponding to the pole with the least real part $= \phantom{{}}$[[0]].
-
-						Residue corresponding to the pole with the greatest real part $= \phantom{{}}$[[1]].
+						<p>The system can be written in the form $\frac{d\mathbf{x}}{dt} = A \mathbf{x}$, where $\mathbf{x} = \begin{pmatrix} x\\y \end{pmatrix}$.</p>
+					
+						<p>Identify the components of the matrix $A$:</p>
+					
+						<table>
+							<tr>
+								<td rowspan="2">$A = \Bigg($</td>
+								<td> [[0]] </td>
+								<td> [[1]] </td>
+								<td rowspan="2">$\Bigg)$ </td>
+							</tr>
+							<tr>
+								<td>[[2]] </td>
+								<td> [[3]] </td>
+							</tr>
+						</table>
 					"""
 					
 					gaps: [
-						{type: jme, answer: "{a}/{d}", marks: 1}
-						{type: jme, answer: "{a+b*d+c*d^2}/{d}", marks: 1}
+						{
+							type: numberentry
+							answer: x1*alpha
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: y1*alpha
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: x2*alpha
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: y2*alpha
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-					prompt: """
-						Now evaluate the integral:
-
-						$I = \phantom{{}}$[[0]].
-					"""
+					prompt: "
+						<p>Calculate the trace, $\tau$, and the determinant, $\delta$, of the matrix $A$:</p>
+					
+						<p>$\tau = \phantom{{}}$[[0]] ,<br />$\delta = \phantom{{}}$[[1]] .</p>
+					"
+					
 					gaps: [
-						{type: jme, answer: "{2*(b+c*d)}*pi*i", marks: 1}
+						{
+							type: numberentry
+							answer: tau
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: delta
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: gapfill
+					prompt: "
+						<p>Enter the eigenvalues, $\lambda_1$ and $\lambda_2$, of the matrix $A$:</p>
+					
+						<p>If the eigenvalues have <strong>zero imaginary part</strong>, enter the eigenvalue with the <strong>largest real part</strong> first.</p>
+					
+						<p>If the eigenvalues have <strong>non-zero imaginary part</strong>, enter the eigenvalue with the <strong>largest imaginary part</strong> first.</p>
+					
+						<p>$\lambda_1 = \phantom{{}}$[[0]]<br />$\lambda_2 = \phantom{{}}$[[1]]</p>
+					"
+					
+					gaps: [
+						{
+							type: jme
+							answer: "{lambda1}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "{lambda2}"
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: gapfill
+					prompt: "
+						<p>Assuming that the $x$-component of each eigenvector is $1$, find the $y$-components of the eigenvectors corresponding to the eigenvalues $\lambda_1$ and $\lambda_2$.</p>
+					
+						<p>$y$-component of eigenvector corresponding to $\lambda_1$: [[0]]<br />$y$-component of eigenvector corresponding to $\lambda_2$: [[1]]</p>
+					"
+					
+					gaps: [
+						{
+							type: jme
+							answer: "{vec1}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "{vec2}"
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: 1_n_2
+					marks: 1
+					
+					choices: [	<p>Unstable spiral</p>, 	<p>Saddle point</p>, 	<p>Star node</p>, 	<p>Degenerate node</p>, 	<p>Stable node</p>, 	<p>Unstable node</p>, 	<p>Centre</p>, 	<p>Stable spiral</p>]
+					
+					matrix: [1, 0, 0, 0, 0, 0, 0, 0]
+					shufflechoices: True
+					displaycolumns: 4
+				}
+			]
+			advice: "
+				<h4>a)</h4>
+			
+				<p>In the first part of the question the elements of the matrix $A$ are simply the coefficients of $x$ and $y$ in the system of equations. Therefore,<br />\[A = \begin{pmatrix} \var{x1*alpha} &#38; \var{y1*alpha} \\ \var{x2*alpha} &#38; \var{y2*alpha} \end{pmatrix} \]</p>
+			
+			<hr/>
+			
+				<h4>b)</h4>
+			
+				<p>The trace, $\tau$, and determinant, $\delta$, of a matrix<br />\[A = \begin{pmatrix} a &#38; b \\ c &#38; d \end{pmatrix}\]</p>
+			
+				<p>are given by $\tau = a+d$ and $\delta = ad - bc$.</p>
+			
+				<p>A straightforward substitution for $a,b,c,$ and then $d$ reveals that</p>
+			
+				<p>$\tau = \var{tau}$, and $\delta = \var{delta}$.</p>
+			
+			<hr/>
+			
+				<h4>c)</h4>
+			
+				<p>The eigenvalues of the matrix $A$ can be calculated from the expression<br />\[A\mathbf{x}= \lambda \mathbf{x},\]<br />which is equivalent to<br />\[(A - \lambda I)\mathbf{x} = 0,\]<br />where $I$ is the identity matrix. This linear system has a solution only when<br />\[\det (A - \lambda I) = 0,\]<br />i.e. when $(a- \lambda)(d - \lambda) - bc = 0$.</p>
+			
+				<p>This leads to $\lambda^2 - (a+d)\lambda + ad-bc = 0$, which is the same as<br />\[\lambda^2 - \tau \lambda + \delta = 0.\]</p>
+			
+				<p>The eigenvalues, $\lambda_1$ and $\lambda_2$, of $A$ are then given by:<br />\[ \lambda_1 = \frac{\tau + \sqrt{\tau^2 - 4\delta}}{2} \]<br />and<br />\[ \lambda_1 = \frac{\tau - \sqrt{\tau^2 - 4\delta}}{2} \]</p>
+			
+				<p>So, in this case, $\lambda_1 = \var{lambda1}$ and $\lambda_2 = \var{lambda2}$, and they are both complex.</p>
+			
+			<hr/>
+			
+				<h4>d)</h4>
+			
+				<p>To find the eigenvectors corresponding to the eigenvalues you simply need to solve the system of equations given by</p>
+			
+				<p>\[A\mathbf{x} = \lambda\mathbf{x},\]</p>
+			
+				<p>substituting in each value of $\lambda$ separately, i.e. solve</p>
+			
+				<p>\[\begin{eqnarray}
+			ax + by &#38;=&#38; \lambda x \\
+			cx + dy &#38;=&#38; \lambda y
+			\end{eqnarray}\]</p>
+			
+				<p>where $\lambda$ is either $\lambda_1$ or $\lambda_2$.</p>
+			
+				<p>Because this is an eigenvalue problem, we can arbitrarily choose one of the eigenvector components to be $1$, in this case the $x$-component. The $y$-component can then easily be found from <br />\[y = \frac{x(\lambda-a)}{b},\]<br />or<br />\[y=\frac{cx}{\lambda-d}.\] <br />These are equivalent expressions.</p>
+			
+				<p>A straightforward substitution reveals that the $y$-component of the eigenvector corresponding to $\lambda_1$ is $\var{vec1}$,</p>
+			
+				<p>and the $y$-component of the eigenvector corresponding to $\lambda_2$ is $\var{vec2}$.</p>
+			
+			<hr/>
+			
+				<h4>e)</h4>
+			
+				<p>The nature of the fixed point at the origin can always be determined by looking at a combination of the signs of $\tau, \delta, \lambda_1$ and $\lambda_2$.</p>
+			
+				<p>In this case, because $\delta \gt 0, \tau^2 - 4\delta \lt 0$, and $\tau \gt 0$, the fixed point is an <strong>unstable spiral</strong>.</p>
+			"
+		}, 
+		{
+			name: Contour integral
+			statement: "	<p>For the function $f(z) = \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z^2-{d}*z}}$, identify the poles (singular points), find the corresponding residues, and evaluate the integral<br />\[I = \oint_C f(z) dz, \]<br />where $C$ is the contour $|z| = 5$, mapped counter-clockwise.</p>"
+			variables: {
+				a: random(1..4)
+				b: random(0..3)
+				c: random(1..4)
+				d: random(1..4)
+			}
+			
+			parts: [
+				{
+					type: gapfill
+					prompt: "
+						<p>Pole with least real part at $z = \phantom{{}}$[[0]].</p>
+					
+						<p>Pole with greatest real part at $z = \phantom{{}}$[[1]].</p>
+					
+					
+					"
+					
+					gaps: [
+						{
+							type: jme
+							answer: 0
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "{d}"
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: gapfill
+					prompt: "
+						<p>Residue corresponding to the pole with the least real part $= \phantom{{}}$[[0]].</p>
+					
+						<p>Residue corresponding to the pole with the greatest real part $= \phantom{{}}$[[1]].</p>
+					"
+					
+					gaps: [
+						{
+							type: jme
+							answer: "{a}/{d}"
+							marks: 1
+						}, 
+						{
+							type: jme
+							answer: "{a+b*d+c*d^2}/{d}"
+							marks: 1
+						}
+					]
+				}, 
+				{
+					type: gapfill
+					prompt: "
+						<p>Now evaluate the integral:</p>
+					
+						<p>$I = \phantom{{}}$[[0]].</p>
+					"
+					
+					gaps: [
+						{
+							type: jme
+							answer: "{2*(b+c*d)}*pi*i"
+							marks: 1
+						}
 					]
 				}
 			]
-
-			advice: """
-				h4. a)
-
-				The function $f(z) = \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z^2-{d}*z}}$ has two simple poles, at $z = 0$ and $z = \var{d}$.
-
-				<hr/>
-
-				h4. b)
-
-				For a simple pole $z = z_0$ the residue can be calculated using the formula
-				\[ \operatorname{Res}_{z = z_0} = \lim_{z \to z_0}(z - z_0)f(z). \]
-
-				So, in this case, the residue corresponding to the pole at $z = 0$ is given by
-				\[\operatorname{Res}_{z = 0} = \lim_{z \to 0} \left( z f(z) \right ) = \lim_{z \to 0} \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z-{d}}} = \simplify{-({a}/{d})}\]
-
-				and the residue corresponding to the pole at $z = \var{d}$ is given by
-				\[\operatorname{Res}_{z = \var{d}} = \lim_{z \to \var{d}} (\simplify{z - {d}})f(z) = \lim_{z \to \var{d}} \frac{\simplify{{a}+{b}*z+{c}*z^2}}{z} = \simplify{({a}+{b}*{d}+{c}*({d})^2)/({d})} \]
-
-				<hr/>
-
-				h4. c)
-
-				Now use the Residue Theorem to calculate the integral $I$.
-
-				Let $f(z)$ be analytic inside a closed path $C$ and on $C$, except for finitely many singular points $z_1, z_2, \dots, z_k$ inside $C$. Then the integral of $f(z)$ taken counter-clockwise around $C$ equals $2 \pi i$ times the sum of the residues of $f(z)$ at $z_1,z_2,\dots,z_k$.
-
-				Applying this formula to this question we then obtain
-				\[I = 2 \pi i (\simplify{-({a}/{d})} + \simplify{({a}+{b}*{d}+{c}*({d})^2)/({d})}) = \var{2*(b+c*d)} \pi i \]
-			"""
-		}
+			advice: "
+				<h4>a)</h4>
+			
+				<p>The function $f(z) = \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z^2-{d}*z}}$ has two simple poles, at $z = 0$ and $z = \var{d}$.</p>
+			
+			<hr/>
+			
+				<h4>b)</h4>
+			
+				<p>For a simple pole $z = z_0$ the residue can be calculated using the formula<br />\[ \operatorname{Res}_{z = z_0} = \lim_{z \to z_0}(z - z_0)f(z). \]</p>
+			
+				<p>So, in this case, the residue corresponding to the pole at $z = 0$ is given by<br />\[\operatorname{Res}_{z = 0} = \lim_{z \to 0} \left( z f(z) \right ) = \lim_{z \to 0} \frac{\simplify{{a}+{b}*z+{c}*z^2}}{\simplify{z-{d}}} = \simplify{-({a}/{d})}\]</p>
+			
+				<p>and the residue corresponding to the pole at $z = \var{d}$ is given by<br />\[\operatorname{Res}_{z = \var{d}} = \lim_{z \to \var{d}} (\simplify{z - {d}})f(z) = \lim_{z \to \var{d}} \frac{\simplify{{a}+{b}*z+{c}*z^2}}{z} = \simplify{({a}+{b}*{d}+{c}*({d})^2)/({d})} \]</p>
+			
+			<hr/>
+			
+				<h4>c)</h4>
+			
+				<p>Now use the Residue Theorem to calculate the integral $I$.</p>
+			
+				<p>Let $f(z)$ be analytic inside a closed path $C$ and on $C$, except for finitely many singular points $z_1, z_2, \dots, z_k$ inside $C$. Then the integral of $f(z)$ taken counter-clockwise around $C$ equals $2 \pi i$ times the sum of the residues of $f(z)$ at $z_1,z_2,\dots,z_k$.</p>
+			
+				<p>Applying this formula to this question we then obtain<br />\[I = 2 \pi i (\simplify{-({a}/{d})} + \simplify{({a}+{b}*{d}+{c}*({d})^2)/({d})}) = \var{2*(b+c*d)} \pi i \]</p>
+			"
+		}, 
 		{
 			name: Hypothesis test
-
 			variables: {
-				//generate frequency data
-				a: "random(15..35)"
-				b: "random(20..35)"
-				c: "random(10..22)"
-				d: "random(20..30)"
-				f: "random(15..25)"
-				t: "random(15..25)"
-				a1: "random(10..20)"
-				b1: "random(10..22)"
-				c1: "random(10..24)"
-				d1: "random(12..20)"
-				f1: "random(10..18)"
-				t1: "random(10..20)"
-				a2: "random(20..35)"
-				b2: "random(10..20)"
-				c2: "random(5..15)"
-				r1: "a+b+c"
-				r2: "d+f+t"
-
-				//row and column totals
-				r3: "a1+b1+c1"
-				r4: "d1+f1+t1"
-				r5: "a2+b2+c2"
-				tot: "col1+col2+col3"
-				col1: "a+d+a1+d1+a2"
-				col2: "b+f+b1+f1+b2"
-				col3: "c+t+c1+t1+c2"
-
-				//expected frequencies
+				a: random(15..35)
+				b: random(20..35)
+				c: random(10..22)
+				d: random(20..30)
+				f: random(15..25)
+				t: random(15..25)
+				a1: random(10..20)
+				b1: random(10..22)
+				c1: random(10..24)
+				d1: random(12..20)
+				f1: random(10..18)
+				t1: random(10..20)
+				a2: random(20..35)
+				b2: random(10..20)
+				c2: random(5..15)
+				r1: a+b+c
+				r2: d+f+t
+				r3: a1+b1+c1
+				r4: d1+f1+t1
+				r5: a2+b2+c2
+				tot: col1+col2+col3
+				col1: a+d+a1+d1+a2
+				col2: b+f+b1+f1+b2
+				col3: c+t+c1+t1+c2
 				e1: "precround(r1*col1/tot,3)"
 				e2: "precround(r1*col2/tot,3)"
 				e3: "precround(r1*col3/tot,3)"
@@ -576,8 +669,6 @@
 				e13: "precround(r5*col1/tot,3)"
 				e14: "precround(r5*col2/tot,3)"
 				e15: "precround(r5*col3/tot,3)"
-
-				//chi values
 				ch1: "precround((a-e1)^2/e1,3)"
 				ch2: "precround((b-e2)^2/e2,3)"
 				ch3: "precround((c-e3)^2/e3,3)"
@@ -593,722 +684,980 @@
 				ch9: "precround((c1-e9)^2/e9,3)"
 				ch8: "precround((b1-e8)^2/e8,3)"
 				ch7: "precround((a1-e7)^2/e7,3)"
-
-				//chi-squared value
 				ch: "precround(ch1+ch2+ch3+ch4+ch5+ch6+ch7+ch8+ch9+ch10+ch11+ch12+ch13+ch14+ch15,3)"
-
-				//values from tables
-				t90: "13.36"
-				t95: "15.51"
-				t99: "20.09"
-
-				//which range does p-value lie in?
+				t90: 13.36
+				t95: 15.51
+				t99: 20.09
 				pval: "switch(ch<t90,0,ch<t95,1,ch<t99,2,3)"
-
-				//describe range p-value lies in
-				pResult: "switch(pval=0,'is greater than $10 \%$',pval=1,'lies between $10 \%$ and $5 \%$',pval=2,'lies between $5 \%$ and $1 \%$','is smaller than $1 \%$')"
+				presult: "switch(pval=0,'is greater than $10 \%$',pval=1,'lies between $10 \%$ and $5 \%$',pval=2,'lies between $5 \%$ and $1 \%$','is smaller than $1 \%$')"
 				evi: "switch(pval=0,'no',pval=1,'slight',pval=2,'moderate','strong')"
 				retain: "if(pval>=2,'reject $H_0$ and accept $H_1$','retain $H_0$')"
 				summary: "if(pval>=2,'There *is* evidence to suggest an association between degree subject and performance.','There is <strong>no</strong> evidence to suggest an association between degree subject and performance.')"
 			}
-
 			statement: """
-				
-				The human resources department of a large finance company is attempting to determine if an employee's performance is influenced by their undergraduate degree subject.
-
-				The 5 subjects considered are: *Marketing*, *Marketing & Management*, *Business Management*, *Accounting & Finance* and *Mathematics*.
-
-				Personnel ratings are grouped as *Excellent*, *Strong* and *Average*.
-
-				A recent assessment gave the following results:
-
-				|{border-bottom: 1px solid; border-right: 1px solid}. |{border-bottom: 1px solid}. *Excellent*|{border-bottom: 1px solid}. *Strong*|{border-bottom: 1px solid}. *Average*|{border-bottom: 1px solid; border-left: 1px solid}. *Totals*|
-				|{border-right: 1px solid}. *Marketing*|{a}|{b}|{c}|{border-left: 1px solid}. {r1}|
-				|{border-right: 1px solid}. *Marketing & Management*|{d}|{f}|{t}|{border-left: 1px solid}. {r2}|
-				|{border-right: 1px solid}. *Business Management*|{a1}|{b1}|{c1}|{border-left: 1px solid}. {r3}|
-				|{border-right: 1px solid}. *Accounting & Finance*|{d1}|{f1}|{t1}|{border-left: 1px solid}. {r4}|
-				|{border-right: 1px solid}. *Mathematics*|{a2}|{b2}|{c2}|{border-left: 1px solid}. {r5}|
-				|{border-right: 1px solid; border-top: 1px solid}. *Totals*|{border-top: 1px solid}. {col1}|{border-top: 1px solid}. {col2}|{border-top: 1px solid}. {col3}|{border-top: 1px solid; border-left: 1px solid}. {tot}|
-
-				Test the null hypothesis that there is no association between degree subject and performance.
+			
+			
+				<p>The human resources department of a large finance company is attempting to determine if an employee&#8217;s performance is influenced by their undergraduate degree subject.</p>
+			
+				<p>The 5 subjects considered are: <strong>Marketing</strong>, <strong>Marketing &#38; Management</strong>, <strong>Business Management</strong>, <strong>Accounting &#38; Finance</strong> and <strong>Mathematics</strong>.</p>
+			
+				<p>Personnel ratings are grouped as <strong>Excellent</strong>, <strong>Strong</strong> and <strong>Average</strong>.</p>
+			
+				<p>A recent assessment gave the following results:</p>
+			
+				<table>
+					<tr>
+						<td style="vertical-align:middle;border-bottom: 1px solid; border-right: 1px solid;"></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Excellent</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Strong</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Average</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid; border-left: 1px solid;"><strong>Totals</strong></td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing</strong></td>
+						<td>{a}</td>
+						<td>{b}</td>
+						<td>{c}</td>
+						<td style="vertical-align:middle;border-left: 1px solid;">{r1}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing &#38; Management</strong></td>
+						<td>{d}</td>
+						<td>{f}</td>
+						<td>{t}</td>
+						<td style="vertical-align:middle;border-left: 1px solid;">{r2}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Business Management</strong></td>
+						<td>{a1}</td>
+						<td>{b1}</td>
+						<td>{c1}</td>
+						<td style="vertical-align:middle;border-left: 1px solid;">{r3}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Accounting &#38; Finance</strong></td>
+						<td>{d1}</td>
+						<td>{f1}</td>
+						<td>{t1}</td>
+						<td style="vertical-align:middle;border-left: 1px solid;">{r4}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Mathematics</strong></td>
+						<td>{a2}</td>
+						<td>{b2}</td>
+						<td>{c2}</td>
+						<td style="vertical-align:middle;border-left: 1px solid;">{r5}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid; border-top: 1px solid;"><strong>Totals</strong></td>
+						<td style="vertical-align:middle;border-top: 1px solid;">{col1}</td>
+						<td style="vertical-align:middle;border-top: 1px solid;">{col2}</td>
+						<td style="vertical-align:middle;border-top: 1px solid;">{col3}</td>
+						<td style="vertical-align:middle;border-top: 1px solid; border-left: 1px solid;">{tot}</td>
+					</tr>
+				</table>
+			
+				<p>Test the null hypothesis that there is no association between degree subject and performance.</p>
 			"""
-
+			
 			parts: [
 				{
 					type: information
-					prompt: """
-						h2. Step 1: Null hypothesis
-
-						$H_0$: There is no association between degree subject and performance.
-
-						h2. Step 2: Alternate hypothesis
-
-						$H_1$: There _is_ an association between degree subject and performance.
-					"""
-				}
+					prompt: "
+						<h2>Step 1: Null hypothesis</h2>
+					
+						<p>$H_0$: There is no association between degree subject and performance.</p>
+					
+						<h2>Step 2: Alternate hypothesis</h2>
+					
+						<p>$H_1$: There <em>is</em> an association between degree subject and performance.</p>
+					"
+				}, 
 				{
 					type: gapfill
 					prompt: """
-						h2. Step 3: Test statistic
-
-						You are given the expected frequencies (all to $3$ decimal places) for Marketing, Marketing & Management and Accounting & Finance.
-
-						You have to calculate the expected frequencies for Business Management and Mathematics and put them in the following table.
-
-						Input each expected frequency to $3$ decimal places.
-
-						|{border-bottom: 1px solid; border-right: 1px solid}. *EXPECTED FREQUENCIES*|{border-bottom: 1px solid}. *Excellent*|{border-bottom: 1px solid}. *Strong*|{border-bottom: 1px solid}. *Average*|
-						|{border-right: 1px solid}. *Marketing*|{e1}|{e2}|{e3}|
-						|{border-right: 1px solid}. *Marketing & Management*|{e4}|{e5}|{e6}|
-						|{border-right: 1px solid}. *Business Management*|[[0]]|[[1]]|[[2]]|
-						|{border-right: 1px solid}. *Accounting & Finance*|{e10}|{e11}|{e12}|
-						|{border-right: 1px solid}. *Mathematics*|[[3]]|[[4]]|[[5]]|
-						
-						Now calculate the test statistic $\chi^2 = \phantom{{}}$[[6]] as the sum of all values in this table.
-
-						Input the test statistic to $3$ decimal places.
+						<h2>Step 3: Test statistic</h2>
+					
+						<p>You are given the expected frequencies (all to $3$ decimal places) for Marketing, Marketing &#38; Management and Accounting &#38; Finance.</p>
+					
+						<p>You have to calculate the expected frequencies for Business Management and Mathematics and put them in the following table.</p>
+					
+						<p>Input each expected frequency to $3$ decimal places.</p>
+					
+						<table>
+							<tr>
+								<td style="vertical-align:middle;border-bottom: 1px solid; border-right: 1px solid;"><strong><span class="caps">EXPECTED</span> FREQUENCIES</strong></td>
+								<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Excellent</strong></td>
+								<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Strong</strong></td>
+								<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Average</strong></td>
+							</tr>
+							<tr>
+								<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing</strong></td>
+								<td>{e1}</td>
+								<td>{e2}</td>
+								<td>{e3}</td>
+							</tr>
+							<tr>
+								<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing &#38; Management</strong></td>
+								<td>{e4}</td>
+								<td>{e5}</td>
+								<td>{e6}</td>
+							</tr>
+							<tr>
+								<td style="vertical-align:middle;border-right: 1px solid;"><strong>Business Management</strong></td>
+								<td>[[0]]</td>
+								<td>[[1]]</td>
+								<td>[[2]]</td>
+							</tr>
+							<tr>
+								<td style="vertical-align:middle;border-right: 1px solid;"><strong>Accounting &#38; Finance</strong></td>
+								<td>{e10}</td>
+								<td>{e11}</td>
+								<td>{e12}</td>
+							</tr>
+							<tr>
+								<td style="vertical-align:middle;border-right: 1px solid;"><strong>Mathematics</strong></td>
+								<td>[[3]]</td>
+								<td>[[4]]</td>
+								<td>[[5]]</td>
+							</tr>
+						</table>
+					
+						<p>Now calculate the test statistic $\chi^2 = \phantom{{}}$[[6]] as the sum of all values in this table.</p>
+					
+						<p>Input the test statistic to $3$ decimal places.</p>
 					"""
-
+					
 					gaps: [
-						{type: numberentry, answer: "e7", marks: 1}
-						{type: numberentry, answer: "e8", marks: 1}
-						{type: numberentry, answer: "e9", marks: 1}
-						{type: numberentry, answer: "e10", marks: 1}
-						{type: numberentry, answer: "e11", marks: 1}
-						{type: numberentry, answer: "e12", marks: 1}
-						{type: numberentry, minvalue: "ch-0.006", maxvalue: "ch+0.006", marks: 1}
+						{
+							type: numberentry
+							answer: e7
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: e8
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: e9
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: e10
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: e11
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: e12
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							minvalue: ch-0.006
+							maxvalue: ch+0.006
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-
-					prompt: """
-						h2. Step 4: $p$-value range
-
-						Calculate $\nu$, the degrees of freedom, for this test.
-
-						$\nu = \phantom{{}}$[[0]]
-
-						Use tables to find a range for your $p$-value. Choose from the options below.
-
-						[[1]]
-					"""
-
+					prompt: "
+						<h2>Step 4: $p$-value range</h2>
+					
+						<p>Calculate $\nu$, the degrees of freedom, for this test.</p>
+					
+						<p>$\nu = \phantom{{}}$[[0]]</p>
+					
+						<p>Use tables to find a range for your $p$-value. Choose from the options below.</p>
+					
+						<p>[[1]]</p>
+					"
+					
 					gaps: [
-						{type: numberentry, answer: 8, marks: 1}
+						{
+							type: numberentry
+							answer: 8
+							marks: 1
+						}, 
 						{
 							type: 1_n_2
-							displayColumns: 1
-							choices: [
-								"$p$ is bigger than $10 \%$"
-								"$p$ lies between $10 \%$ and $5 \%$"
-								"$p$ lies between $5 \%$ and $1 \%$"
-								"$p$ is smaller than $1 \%$"
-							]
+							displaycolumns: 1
+							
+							choices: [$p$ is bigger than $10 \%$, $p$ lies between $10 \%$ and $5 \%$, $p$ lies between $5 \%$ and $1 \%$, $p$ is smaller than $1 \%$]
+							
 							matrix: ["if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)"]
 							marks: 1
 						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-					prompt: """
-						h2. Step 5: Conclusion
-
-						Given the $p$-value and the range you have found, what is the strength of evidence against the null hypothesis?
-
-						[[0]]
-
-						Your decision:
-
-						[[1]]
-
-						Your conclusion:
-
-						[[2]]
-					"""
-
+					prompt: "
+						<h2>Step 5: Conclusion</h2>
+					
+						<p>Given the $p$-value and the range you have found, what is the strength of evidence against the null hypothesis?</p>
+					
+						<p>[[0]]</p>
+					
+						<p>Your decision:</p>
+					
+						<p>[[1]]</p>
+					
+						<p>Your conclusion:</p>
+					
+						<p>[[2]]</p>
+					"
+					
 					gaps: [
-						{type: 1_n_2, choices: ["None","Slight","Moderate","Strong"], matrix: ["if(if(pval=0,1,0),1,0)","if(if(pval=1,1,0),1,0)","if(pval=2,1,0)","if(pval=3,1,0)"], marks: 1}
-						{type: 1_n_2, choices: ["Retain $H_0$","Reject $H_0$"], matrix: ["if(pval<2,1,0)","if(pval>=2,1,0)"], marks: 1}
-						{type: 1_n_2, choices: ["There *is* evidence to suggest an association between degree subject and performance.","There is *no* evidence to suggest an association between degree subject and performance."], matrix: ["if(pval>=2,1,0)","if(pval<2,1,0)"], marks: 1, displayColumns: 1}
+						{
+							type: 1_n_2
+							
+							choices: [None, Slight, Moderate, Strong]
+							
+							matrix: ["if(if(pval=0,1,0),1,0)", "if(if(pval=1,1,0),1,0)", "if(pval=2,1,0)", "if(pval=3,1,0)"]
+							marks: 1
+						}, 
+						{
+							type: 1_n_2
+							
+							choices: [Retain $H_0$, Reject $H_0$]
+							
+							matrix: ["if(pval<2,1,0)", "if(pval>=2,1,0)"]
+							marks: 1
+						}, 
+						{
+							type: 1_n_2
+							
+							choices: [There *is* evidence to suggest an association between degree subject and performance., There is *no* evidence to suggest an association between degree subject and performance.]
+							
+							matrix: ["if(pval>=2,1,0)", "if(pval<2,1,0)"]
+							marks: 1
+							displaycolumns: 1
+						}
 					]
 				}
 			]
-
 			advice: """
-				h2. Step 3
-
-				The expected frequencies are given by replacing a value in the table by the expected value:
-
-				\[E = \frac{\textrm{row total} \times \textrm{column total}}{\textrm{overall total}}\]
-
-				For example, the Excellent category for Marketing & Management lies in the second row (with sum $\var{r2}$) and the first column (with sum $\var{col1}$). 
-				
-				So the expected frequency of Excellent Marketing & Management students is:
-				\[E = \simplify[]{({r2}*{col1})/({tot})} = \var{e4}\]
-
-				Hence we get the following table of expected frequencies:
-
-				|{border-bottom: 1px solid; border-right: 1px solid}. EXPECTED FREQUENCIES|{border-bottom: 1px solid}. *Excellent*|{border-bottom: 1px solid}. *Strong*|{border-bottom: 1px solid}. *Average*|
-				|{border-right: 1px solid}. *Marketing*|{e1}|{e2}|{e3}|
-				|{border-right: 1px solid}. *Marketing & Management*|{e4}|{e5}|{e6}|
-				|{border-right: 1px solid}. *Business Management*|{e7}|{e8}|{e9}|
-				|{border-right: 1px solid}. *Accounting & Finance*|{e10}|{e11}|{e12}|
-				|{border-right: 1px solid}. *Mathematics*|{e13}|{e14}|{e15}|
-
-
-				In order to test to see if there is an association we compare this table with the table of observed values and calculate the test statistic by looking at
-
-				\[\chi^2 = \sum \frac{(O - E)^2}{E}\]
-
-				Calculating the values for Business Management and Mathematics, all to 3 decimal places, you should obtain:
-
-				|{border-bottom: 1px solid; border-right: 1px solid}. $\frac{(O - E)^2}{E}$|{border-bottom: 1px solid}. *Excellent*|{border-bottom: 1px solid}. *Strong*|{border-bottom: 1px solid}. *Average*|
-				|{border-right: 1px solid}. *Marketing*|{ch1}|{ch2}|{ch3}|
-				|{border-right: 1px solid}. *Marketing & Management*|{ch4}|{ch5}|{ch6}|
-				|{border-right: 1px solid}. *Business Management*|{ch7}|{ch8}|{ch9}|
-				|{border-right: 1px solid}. *Accounting & Finance*|{ch10}|{ch11}|{ch12}|
-				|{border-right: 1px solid}. *Mathematics*|{ch13}|{ch14}|{ch15}|
-
-				To find the $\chi_2$ statistic you sum these fifteen values to get:
-
-				\[\begin{eqnarray}
-					\chi^2 &=& \var{ch1} + \var{ch2} + \var{ch3} + \var{ch4} + \var{ch5} +\\
-					&& \var{ch6} + \var{ch7} + \var{ch8} + \var{ch9} + \var{ch10} +\\
-					&& \var{ch11} + \var{ch12} + \var{ch13} + \var{ch14} + \var{ch15} \\
-					&=& \var{ch}.
-				\end{eqnarray}\]
-
-				h2. Step 4
-
-				The degrees of freedom is given by:
-
-				\[\nu = (\textrm{no. of rows} - 1) \times (\textrm{no. of columns} - 1) = 4 \times 2 = 8\]
-
-				The following are the critical values for $\nu = 8$:
-
-				|{border-right: 1px solid; border-bottom: 1px solid}. *$p$-value*|{border-bottom: 1px solid}. *$10 \%$*|{border-bottom: 1px solid}. *$5 \%$*|{border-bottom: 1px solid}. *$1 \%$*|
-				|{border-right: 1px solid}. *Critical value*| $\var{t90}$ | $\var{t95}$ | $\var{t99}$ |
-
-				Comparing these values with the the test statistic we see that the $p$-value {pResult}.
-
-				h2. Step 5: Conclusion
-
-				As the $p$-value {pResult}, there is *{evi}* evidence against $H_0$.
-				
-				Hence we *{retain}*.
-
-				{summary}
+				<h2>Step 3</h2>
+			
+				<p>The expected frequencies are given by replacing a value in the table by the expected value:</p>
+			
+				<p>\[E = \frac{\textrm{row total} \times \textrm{column total}}{\textrm{overall total}}\]</p>
+			
+				<p>For example, the Excellent category for Marketing &#38; Management lies in the second row (with sum $\var{r2}$) and the first column (with sum $\var{col1}$).</p>
+			
+				<p>So the expected frequency of Excellent Marketing &#38; Management students is:<br />\[E = \simplify[]{({r2}*{col1})/({tot})} = \var{e4}\]</p>
+			
+				<p>Hence we get the following table of expected frequencies:</p>
+			
+				<table>
+					<tr>
+						<td style="vertical-align:middle;border-bottom: 1px solid; border-right: 1px solid;"><span class="caps">EXPECTED</span> <span class="caps">FREQUENCIES</span></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Excellent</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Strong</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Average</strong></td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing</strong></td>
+						<td>{e1}</td>
+						<td>{e2}</td>
+						<td>{e3}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing &#38; Management</strong></td>
+						<td>{e4}</td>
+						<td>{e5}</td>
+						<td>{e6}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Business Management</strong></td>
+						<td>{e7}</td>
+						<td>{e8}</td>
+						<td>{e9}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Accounting &#38; Finance</strong></td>
+						<td>{e10}</td>
+						<td>{e11}</td>
+						<td>{e12}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Mathematics</strong></td>
+						<td>{e13}</td>
+						<td>{e14}</td>
+						<td>{e15}</td>
+					</tr>
+				</table>
+			
+				<p>In order to test to see if there is an association we compare this table with the table of observed values and calculate the test statistic by looking at</p>
+			
+				<p>\[\chi^2 = \sum \frac{(O - E)^2}{E}\]</p>
+			
+				<p>Calculating the values for Business Management and Mathematics, all to 3 decimal places, you should obtain:</p>
+			
+				<table>
+					<tr>
+						<td style="vertical-align:middle;border-bottom: 1px solid; border-right: 1px solid;">$\frac{(O - E)^2}{E}$</td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Excellent</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Strong</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>Average</strong></td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing</strong></td>
+						<td>{ch1}</td>
+						<td>{ch2}</td>
+						<td>{ch3}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Marketing &#38; Management</strong></td>
+						<td>{ch4}</td>
+						<td>{ch5}</td>
+						<td>{ch6}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Business Management</strong></td>
+						<td>{ch7}</td>
+						<td>{ch8}</td>
+						<td>{ch9}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Accounting &#38; Finance</strong></td>
+						<td>{ch10}</td>
+						<td>{ch11}</td>
+						<td>{ch12}</td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Mathematics</strong></td>
+						<td>{ch13}</td>
+						<td>{ch14}</td>
+						<td>{ch15}</td>
+					</tr>
+				</table>
+			
+				<p>To find the $\chi_2$ statistic you sum these fifteen values to get:</p>
+			
+				<p>\[\begin{eqnarray}
+			\chi^2 &#38;=&#38; \var{ch1} + \var{ch2} + \var{ch3} + \var{ch4} + \var{ch5} +\\
+			&#38;&#38; \var{ch6} + \var{ch7} + \var{ch8} + \var{ch9} + \var{ch10} +\\
+			&#38;&#38; \var{ch11} + \var{ch12} + \var{ch13} + \var{ch14} + \var{ch15} \\
+			&#38;=&#38; \var{ch}.
+			\end{eqnarray}\]</p>
+			
+				<h2>Step 4</h2>
+			
+				<p>The degrees of freedom is given by:</p>
+			
+				<p>\[\nu = (\textrm{no. of rows} - 1) \times (\textrm{no. of columns} - 1) = 4 \times 2 = 8\]</p>
+			
+				<p>The following are the critical values for $\nu = 8$:</p>
+			
+				<table>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid; border-bottom: 1px solid;"><strong>$p$-value</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>$10 \%$</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>$5 \%$</strong></td>
+						<td style="vertical-align:middle;border-bottom: 1px solid;"><strong>$1 \%$</strong></td>
+					</tr>
+					<tr>
+						<td style="vertical-align:middle;border-right: 1px solid;"><strong>Critical value</strong></td>
+						<td> $\var{t90}$ </td>
+						<td> $\var{t95}$ </td>
+						<td> $\var{t99}$ </td>
+					</tr>
+				</table>
+			
+				<p>Comparing these values with the the test statistic we see that the $p$-value {pResult}.</p>
+			
+				<h2>Step 5: Conclusion</h2>
+			
+				<p>As the $p$-value {pResult}, there is <strong>{evi}</strong> evidence against $H_0$.</p>
+			
+				<p>Hence we <strong>{retain}</strong>.</p>
+			
+				<p>{summary}</p>
 			"""
-		}
-
+		}, 
 		{
 			name: Likelihood functions
-
 			variables: {
 				where: "random('Bradfield in West Yorkshire','Sheffield','Windy Nook', 'Hepple','Leeming','Linton-on-Ouse','Scampton','Cranwell','Keele','Bingley', 'Ecclefechan','Finningley','Foxrock, Dublin')"
-				x1: "random(2.5..5.5#0.5)"
+				x1: random(2.5..5.5#0.5)
 				x2: "if(y2=x1, y2+ random(-1..1#0.5), y2)"
-				x3: "random(2.5..7.5#0.5)"
-				x: "x1+x2+x3"
-				y2: "random(3.5..6.5#0.5)"
+				x3: random(2.5..7.5#0.5)
+				x: x1+x2+x3
+				y2: random(3.5..6.5#0.5)
 				m: "precround(sumsq^2/3,2)"
-				sumsq: "x1^2+x2^2+x3^2"
+				sumsq: x1^2+x2^2+x3^2
 			}
-
-			statement: """
-				The average annual wind speed, $X$, at {where} has the following probability density function:
-
-				\[f(x) = \begin{cases}
-					2txe^{-tx^2} & x \gt 0, \\
-					0 & \textrm{otherwise}. 
-				\end{cases}\]
-
-				For three randomly selected years, we observe the following average wind speeds:
-
-				\[\begin{eqnarray}
-					x_1 &=& \var{x1} \\
-					x_2 &=& \var{x2} \\
-					x_3 &=& \var{x3}
-				\end{eqnarray}\]
-			"""
-
+			statement: "
+				<p>The average annual wind speed, $X$, at {where} has the following probability density function:</p>
+			
+				<p>\[f(x) = \begin{cases}
+			2txe^{-tx^2} &#38; x \gt 0, \\
+			0 &#38; \textrm{otherwise}. 
+			\end{cases}\]</p>
+			
+				<p>For three randomly selected years, we observe the following average wind speeds:</p>
+			
+				<p>\[\begin{eqnarray}
+			x_1 &#38;=&#38; \var{x1} \\
+			x_2 &#38;=&#38; \var{x2} \\
+			x_3 &#38;=&#38; \var{x3}
+			\end{eqnarray}\]</p>
+			"
+			
 			parts: [
 				{
 					type: gapfill
-					prompt: """
-						Find the likelihood function for $t$:
-
-						$L(t|x) = \phantom{{}}$[[0]]
-					"""
-
+					prompt: "
+						<p>Find the likelihood function for $t$:</p>
+					
+						<p>$L(t|x) = \phantom{{}}$[[0]]</p>
+					"
+					
 					gaps: [
-						{type: jme, answer: "{8*x1*x2*x3}*t^3*e^(-{sumsq}*t)", marks: 1}
+						{
+							type: jme
+							answer: "{8*x1*x2*x3}*t^3*e^(-{sumsq}*t)"
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-					prompt: """
-						Hence find the log-likelihood function for $t$:
-
-						$l(t|x) = \phantom{{}}$[[0]]
-					"""
-
+					prompt: "
+						<p>Hence find the log-likelihood function for $t$:</p>
+					
+						<p>$l(t|x) = \phantom{{}}$[[0]]</p>
+					"
+					
 					gaps: [
-						{type: jme, answer: "{8*x1*x2*x3} + 3*ln(t) - {sumsq}*t", marks: 1}
+						{
+							type: jme
+							answer: "{8*x1*x2*x3} + 3*ln(t) - {sumsq}*t"
+							marks: 1
+						}
 					]
 				}
-
 			]
-		}
+		}, 
 		{
 			name: Number theory
-
 			variables: {
-				c: "random(5..29)"
-				a1: "randompow(3)*c"
-				bb: "randompow(3)*c"
+				c: random(5..29)
+				a1: randompow(3)*c
+				bb: randompow(3)*c
 				b1: "if(bb=a1,bb*randompow(2),bb)"
 				a: "max(a1,b1)"
 				b: "min(a1,b1)"
-
 				d: "gcd(a,b)"
 				s: "extendedgcd1(max(a,b),min(a,b))"
 				t: "extendedgcd2(max(a,b),min(a,b))"
-
-				k: "random(2..7)"
-				n: "k*d"
-
-				least: "k*s+diff*ceil(-k*s/diff)"
-				diff: "b/d"
-
+				k: random(2..7)
+				n: k*d
+				least: k*s+diff*ceil(-k*s/diff)
+				diff: b/d
 				gcdsteps: " '<table>'+describeGCD(a,b)+'</table>' "
 				bezoutsteps: " '<ol>'+describeBezout(a,b)+'</ol>' "
-
-				describeLeast: "if(s<0,'So, the first positive solution is\n\[ x = \simplify[]{{k*s} + {diff}*{ceil(-k*s/diff)} } = \var{least}.\]','')"
+				describeleast: "if(s<0,'So, the first positive solution is\n\[ x = \simplify[]{{k*s} + {diff}*{ceil(-k*s/diff)} } = \var{least}.\]','')"
 			}
-
 			functions: {
 				randompow: {
-					parameters: [ [n, number] ]
+					
+					parameters: [
+						
+						[n, number]
+					]
 					type: number
-					definition: "if(n>0,
-									random(2,3,5,7,11,13,17,19,23)*randompow(n-1),
-									1)"
+					definition: "
+					if(n>0,
+														random(2,3,5,7,11,13,17,19,23)*randompow(n-1),
+														1)
+					"
 				}
-
-				describeGCD: {
-					parameters: [[a,number],[b,number]]
+				describegcd: {
+					
+					parameters: [
+						
+						[a, number], 
+						
+						[b, number]
+					]
 					type: string
-					definition: """if(a<b,
-									'<tr><td style="text-align:left;"> First of all, the biggest number needs to go first: </td><td> $\operatorname{gcd}(\var{a},\var{b}) = \operatorname{gcd}(\var{b},\var{a}), $ </td></tr>'+describeGCD(b,a)
-								,
-									if(b|a,
-										'<tr><td style="text-align:left;"> Finally, $\var{b}$ divides into $\var{a}$ exactly $\var{a/b}$ times: </td><td> $\var{a} = \var{b} \times \var{a/b}.$ </td></tr>'
-									,
-										'<tr><td style="text-align:left;"> Divide $\var{a}$ by $\var{b}$ with remainder $\var{mod(a,b)}$: </td><td> $\var{a} = \var{b} \times \var{floor(a/b)} + \var{mod(a,b)},$ </td></tr>'+describeGCD(b,mod(a,b))
-									)
-								)"""
+					definition: """
+					if(a<b,
+														'<tr><td style="text-align:left;"> First of all, the biggest number needs to go first: </td><td> $\operatorname{gcd}(\var{a},\var{b}) = \operatorname{gcd}(\var{b},\var{a}), $ </td></tr>'+describeGCD(b,a)
+													,
+														if(b|a,
+															'<tr><td style="text-align:left;"> Finally, $\var{b}$ divides into $\var{a}$ exactly $\var{a/b}$ times: </td><td> $\var{a} = \var{b} \times \var{a/b}.$ </td></tr>'
+														,
+															'<tr><td style="text-align:left;"> Divide $\var{a}$ by $\var{b}$ with remainder $\var{mod(a,b)}$: </td><td> $\var{a} = \var{b} \times \var{floor(a/b)} + \var{mod(a,b)},$ </td></tr>'+describeGCD(b,mod(a,b))
+														)
+													)
+					"""
 				}
-
 				extendedgcd1: {
-					parameters: [ [a,number], [b,number] ]
+					
+					parameters: [
+						
+						[a, number], 
+						
+						[b, number]
+					]
 					type: number
-					definition: "if((a|b) or (b|a),
-									0
-								,
-									extendedgcd2(b,mod(a,b))
-								)"
+					definition: "
+					if((a|b) or (b|a),
+														0
+													,
+														extendedgcd2(b,mod(a,b))
+													)
+					"
 				}
 				extendedgcd2: {
-					parameters: [ [a,number], [b,number] ]
+					
+					parameters: [
+						
+						[a, number], 
+						
+						[b, number]
+					]
 					type: number
-					definition: "if((a|b) or (b|a),
-									1
-								,
-									extendedgcd1(b,mod(a,b))-(extendedgcd2(b,mod(a,b))*floor(a/b))
-								)"
+					definition: "
+					if((a|b) or (b|a),
+														1
+													,
+														extendedgcd1(b,mod(a,b))-(extendedgcd2(b,mod(a,b))*floor(a/b))
+													)
+					"
 				}
-
-				describeBezout: {
-					parameters: [ [a,number], [b,number] ]
+				describebezout: {
+					
+					parameters: [
+						
+						[a, number], 
+						
+						[b, number]
+					]
 					type: string
-					definition: "if((a|b) or (b|a),
-									''
-								,
-									describeBezout(b,mod(a,b))+'<li> $\simplify[]{{gcd(a,b)} = {a}*{extendedgcd1(a,b)} + {b}*{extendedgcd2(a,b)}}$ </li>'
-								)"
+					definition: "
+					if((a|b) or (b|a),
+														''
+													,
+														describeBezout(b,mod(a,b))+'<li> $\simplify[]{{gcd(a,b)} = {a}*{extendedgcd1(a,b)} + {b}*{extendedgcd2(a,b)}}$ </li>'
+													)
+					"
 				}
-
 			}
-
+			
 			parts: [
 				{
 					type: gapfill
-
-					prompt: """ Find $d = \operatorname{gcd}(\var{a},\var{b})$, the greatest common divisor of $\var{a}$ and $\var{b}$:
-
-					$d = \phantom{{}}$[[0]]
-
-					Now find integers $s$ and $t$ such that:
-
-					\[\var{a}s+\var{b}t = d\]
-
-					$s = \phantom{{}}$[[1]] $, t = \phantom{{}}$[[2]]$.$
-					"""
-
+					prompt: "
+						<p>Find $d = \operatorname{gcd}(\var{a},\var{b})$, the greatest common divisor of $\var{a}$ and $\var{b}$:</p>
+					
+						<p>$d = \phantom{{}}$[[0]]</p>
+					
+						<p>Now find integers $s$ and $t$ such that:</p>
+					
+						<p>\[\var{a}s+\var{b}t = d\]</p>
+					
+						<p>$s = \phantom{{}}$[[1]] $, t = \phantom{{}}$[[2]]$.$</p>
+					"
+					
 					gaps: [
-						{type: numberentry, answer: d, marks: 1}
-						{type: numberentry, answer: s, marks: 1}
-						{type: numberentry, answer: t, marks: 1}
+						{
+							type: numberentry
+							answer: d
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: s
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: t
+							marks: 1
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
-
-					prompt: """
-						Find all solutions $x$ of the following congruence:
-
-						\[\var{a}x \equiv \var{n} \mod \var{b} \]
-
-						The least solution $x$ such that $0 \lt x \lt \var{b}$ is: [[0]]
-
-						What is the difference between two successive solutions? [[1]]
-					"""
-
+					prompt: "
+						<p>Find all solutions $x$ of the following congruence:</p>
+					
+						<p>\[\var{a}x \equiv \var{n} \mod \var{b} \]</p>
+					
+						<p>The least solution $x$ such that $0 \lt x \lt \var{b}$ is: [[0]]</p>
+					
+						<p>What is the difference between two successive solutions? [[1]]</p>
+					"
+					
 					gaps: [
-						{ type: numberentry, answer: "{least}", marks: 1 }
-						{ type: numberentry, answer: "{diff}", marks: 1 }
+						{
+							type: numberentry
+							answer: "{least}"
+							marks: 1
+						}, 
+						{
+							type: numberentry
+							answer: "{diff}"
+							marks: 1
+						}
 					]
 				}
 			]
-
 			advice: """
-				h4. a)
-
-				On applying the standard method for finding the $\operatorname{gcd}$ of two numbers we have the following sequence:
-
-				{gcdsteps}
-
-				The last non-zero remainder is $\var{d}$, so this is the $\operatorname{gcd}$ of $\var{a}$ and $\var{b}$.
-
-				Now work backwards through those steps, rearranging them to find the remainders as linear combinations of the other numbers. 
-				
-				When you reach the last line you will have found $s$ and $t$ such that 
-				\[\var{a}s+\var{b}t = \var{d}\]
-
-				{bezoutsteps}
-
-				So $s = \var{s}$ and $t = \var{t}$.
-
-				<hr/>
-
-				h4. b)
-
-				h3=. First Step
-
-				We would like to find all the solutions $x$ of the equation
-				\[\var{a}x \equiv \var{n} \mod \var{b}.\]
-
-				In order to solve such an equation first determine if there is a solution at all.
-
-				notextile. <div class="lemma">
-
-				h5. Lemma
-
-				An equation of the form $ax \equiv n \mod b$ has a solution if and only if $\operatorname{gcd}(a,b)|n$.
-
-				notextile. </div>
-
-				So the first task is to find $\operatorname{gcd}(a,b)$ and see if it divides $n$. If not, there is no solution.
-
-				In the first part, we found that $d = \operatorname{gcd}(\var{a},\var{b}) = \var{d}$.
-
-				$\var{n} = \var{d} \times \var{k}$, so the equation $\var{a}x \equiv \var{n} \mod \var{b}$ has a solution.
-
-				h3=. Finding a solution
-
-				Note that because $d|n$, then $n=kd$ for some integer $k$.
-
-				In order to find a solution of $x$ go back to the first part and use the integers $s$ and $t$ such that
-
-				\[ \var{a}s + \var{b}t = d. \]
-
-				If we multiply both sides of this equation by $k$ we find that
-
-				\[ \var{a}ks + \var{b}kt = kd = n, \]
-
-				and by taking both sides modulo $\var{b}$ we see that
-
-				\[ \var{a}ks \equiv n \mod \var{b}. \]
-
-				So $x = ks = \var{k*s}$ is a solution of the equation. 
-
-				The difference between successive terms is $\frac{\var{b}}{\var{d}} = \var{diff}$.
-
-				{describeLeast}
+				<h4>a)</h4>
+			
+				<p>On applying the standard method for finding the $\operatorname{gcd}$ of two numbers we have the following sequence:</p>
+			
+				<p>{gcdsteps}</p>
+			
+				<p>The last non-zero remainder is $\var{d}$, so this is the $\operatorname{gcd}$ of $\var{a}$ and $\var{b}$.</p>
+			
+				<p>Now work backwards through those steps, rearranging them to find the remainders as linear combinations of the other numbers.</p>
+			
+				<p>When you reach the last line you will have found $s$ and $t$ such that <br />\[\var{a}s+\var{b}t = \var{d}\]</p>
+			
+				<p>{bezoutsteps}</p>
+			
+				<p>So $s = \var{s}$ and $t = \var{t}$.</p>
+			
+			<hr/>
+			
+				<h4>b)</h4>
+			
+				<h3 style="text-align:center;">First Step</h3>
+			
+				<p>We would like to find all the solutions $x$ of the equation<br />\[\var{a}x \equiv \var{n} \mod \var{b}.\]</p>
+			
+				<p>In order to solve such an equation first determine if there is a solution at all.</p>
+			
+			<div class="lemma">
+			
+				<h5>Lemma</h5>
+			
+				<p>An equation of the form $ax \equiv n \mod b$ has a solution if and only if $\operatorname{gcd}(a,b)|n$.</p>
+			
+			</div>
+			
+				<p>So the first task is to find $\operatorname{gcd}(a,b)$ and see if it divides $n$. If not, there is no solution.</p>
+			
+				<p>In the first part, we found that $d = \operatorname{gcd}(\var{a},\var{b}) = \var{d}$.</p>
+			
+				<p>$\var{n} = \var{d} \times \var{k}$, so the equation $\var{a}x \equiv \var{n} \mod \var{b}$ has a solution.</p>
+			
+				<h3 style="text-align:center;">Finding a solution</h3>
+			
+				<p>Note that because $d|n$, then $n=kd$ for some integer $k$.</p>
+			
+				<p>In order to find a solution of $x$ go back to the first part and use the integers $s$ and $t$ such that</p>
+			
+				<p>\[ \var{a}s + \var{b}t = d. \]</p>
+			
+				<p>If we multiply both sides of this equation by $k$ we find that</p>
+			
+				<p>\[ \var{a}ks + \var{b}kt = kd = n, \]</p>
+			
+				<p>and by taking both sides modulo $\var{b}$ we see that</p>
+			
+				<p>\[ \var{a}ks \equiv n \mod \var{b}. \]</p>
+			
+				<p>So $x = ks = \var{k*s}$ is a solution of the equation.</p>
+			
+				<p>The difference between successive terms is $\frac{\var{b}}{\var{d}} = \var{diff}$.</p>
+			
+				<p>{describeLeast}</p>
 			"""
-		}
+		}, 
 		{
 			name: Homogeneous ODE
-
 			variables: {
 				p: "random(4..6)*random(-1,1)"
-				q: "abs(p)+random(-3..3)"
-
-				n1: "random(-9..9)"
+				q: abs(p)+random(-3..3)
+				n1: random(-9..9)
 				n: "if(n1=-1 or n1=2q-1, 2*random(-4..4), n1)"
-
-				s: "sgn(1+n-2q)"
+				s: sgn(1+n-2q)
 			}
-
-			statement: """
-				You are given that $y = \simplify{x^({q-p})}$ is a solution of the homogeneous differential equation
-				\[\simplify{x^2*diff(y,x,2) + {1+2p}*x*diff(y,x,1) + {p^2-q^2}*y = 0}.\]
-
-				Now use the method of variation of parameters by setting $y =
-				\simplify{x^{q-p}*v(x)}$, for an unknown function $v(x)$ to be determined, and find the complete general solution of
-				\[\simplify{x^2*diff(y,x,2) + {1+2p}*x*diff(y,x,1) + {p^2-q^2}*y = {1+n}*x^{n+1-p-q}},\]
-
-				in the form $y = \simplify{A*x^{q-p}} + Bx^{\beta} + y_{PI}(x)$, where $A$ and $B$ are arbitrary constants and $y_{PI}(x)$ is a particular integral.
-			"""
-
+			statement: "
+				<p>You are given that $y = \simplify{x^({q-p})}$ is a solution of the homogeneous differential equation<br />\[\simplify{x^2*diff(y,x,2) + {1+2p}*x*diff(y,x,1) + {p^2-q^2}*y = 0}.\]</p>
+			
+				<p>Now use the method of variation of parameters by setting $y =
+			\simplify{x^{q-p}*v(x)}$, for an unknown function $v(x)$ to be determined, and find the complete general solution of<br />\[\simplify{x^2*diff(y,x,2) + {1+2p}*x*diff(y,x,1) + {p^2-q^2}*y = {1+n}*x^{n+1-p-q}},\]</p>
+			
+				<p>in the form $y = \simplify{A*x^{q-p}} + Bx^{\beta} + y_{PI}(x)$, where $A$ and $B$ are arbitrary constants and $y_{PI}(x)$ is a particular integral.</p>
+			"
+			
 			parts: [
 				{
 					type: gapfill
-					prompt: """
-						$y = \phantom{{}}$[[0]]
-					"""
-
+					prompt: "	<p>$y = \phantom{{}}$[[0]]</p>"
+					
 					gaps: [
-						{type: jme, answer: "A*x^{q-p} + B*x^{-p-q}+x^{n+1-q-p}/{abs(n+1-2q)}", marks: 1}
+						{
+							type: jme
+							answer: "A*x^{q-p} + B*x^{-p-q}+x^{n+1-q-p}/{abs(n+1-2q)}"
+							marks: 1
+						}
 					]
 				}
 			]
-
-			advice: """
-				Although you are given that $\simplify{y = x^({q-p})}$ is a solution of the homogeneous differential equation, we indicate here how to find this:
-				Putting $y = x^n$ into the differential equation gives:
-				\[\simplify{n*(n-1)x^n+{1+2p}*x^n+{p^2-q^2}*x^n = 0} \Rightarrow \simplify{n^2+{2p}*n+{p^2-q^2} = 0} \Rightarrow \simplify{(n+{p-q})*(n+{p+q}) = 0}\]
-
-				hence $n = \var{q-p}$ or $n = \var{-q-p}$ and we see that $n = \var{q-p}$ gives $\simplify{y=x^({q-p})}$, a solution.
-
-				Set $\simplify{y = x^{q-p}*v(x)}$ for an unknown function $v(x)$ to be determined.
-
-				Note that $y'(x) = \simplify{x^({q-p})*v'(x) + ({q-p})x^({q-p-1})*v(x)}$ and $y''(x) = \simplify{x^({q-p})*v''(x) + {2*(q-p)}x^({q-p-1})*v'(x) + {(q-p-1)*(q-p)}*x^({q-p-2})*v(x)}$
-
-				Substituting into the equation gives:
-				\[\simplify{ x^2*(x^({q-p})*v''(x) + {2*(q-p)}x^({q-p-1})*v'(x) + {(q-p-1)*(q-p)}*x^({q-p-2})*v(x)) + {1+2p}*x*(x^({q-p})*v'(x) + ({q-p})x^({q-p-1})*v(x)) + {p^2-q^2}*(x^({q-p})*v(x)) = {1+n}*x^({n-p-q+1})}\]
-
-				which simplifies to:
-				\[\simplify{x^({q-p}+2)*v''(x) + {1+2q}*x^({q-p+1})*v'(x) = ({1+n})*x^({n-p-q+1})}\]
-
-				On multiplying the equation throughout by $\simplify{x^{p+q-1}}$ we get
-				\[ \simplify{x^({2q+1})*v''(x) + ({1+2q})*x^({2q})*v'(x) = ({1+n})*x^({n})} \]
-
-				This is a linear differential equation in $v'(x)$ and we have
-				\[ \simplify{x^({2q+1})*v''(x) + ({1+2q})*x^({2q})*v'(x) = ({1+n})*x^({n})} \Rightarrow \frac{d}{dx}\left ( \simplify{x^({1+2q})v'(x)} \right ) = \simplify{({1+n})*x^({n})} \]
-
-				Hence on integrating,
-				\[\simplify{x^({1+2q})*v'(x) = x^({n+1}) + B_1} \Rightarrow v'(x) = \simplify{x^({n-2q}) + B_1*x^({-1-2q})}\]
-
-				Integrating again gives: 
-				\[v(x) = \simplify{({s})*(x^({n+1-2q}))/({abs(1+n-2q)}) + B*x^({-2q}) + A} \Rightarrow \simplify{y = x^({q-p})*v(x) = A*x^({q-p}) + B*x^({-p-q}) + ({s})*(x^({n+1-q-p}))/({abs(1+n-2q)})}\]
-
-				Hence $\beta = \var{-q-p}$ and $y_{PI} = \simplify{({s})*(x^({n+1-q-p}))/({abs(1+n-2q)})}$.
-			"""
-		}
-
+			advice: "
+				<p>Although you are given that $\simplify{y = x^({q-p})}$ is a solution of the homogeneous differential equation, we indicate here how to find this:<br />Putting $y = x^n$ into the differential equation gives:<br />\[\simplify{n*(n-1)x^n+{1+2p}*x^n+{p^2-q^2}*x^n = 0} \Rightarrow \simplify{n^2+{2p}*n+{p^2-q^2} = 0} \Rightarrow \simplify{(n+{p-q})*(n+{p+q}) = 0}\]</p>
+			
+				<p>hence $n = \var{q-p}$ or $n = \var{-q-p}$ and we see that $n = \var{q-p}$ gives $\simplify{y=x^({q-p})}$, a solution.</p>
+			
+				<p>Set $\simplify{y = x^{q-p}*v(x)}$ for an unknown function $v(x)$ to be determined.</p>
+			
+				<p>Note that $y&#39;(x) = \simplify{x^({q-p})*v&#39;(x) + ({q-p})x^({q-p-1})*v(x)}$ and $y&#39;&#39;(x) = \simplify{x^({q-p})*v&#39;&#39;(x) + {2*(q-p)}x^({q-p-1})*v&#39;(x) + {(q-p-1)*(q-p)}*x^({q-p-2})*v(x)}$</p>
+			
+				<p>Substituting into the equation gives:<br />\[\simplify{ x^2*(x^({q-p})*v&#39;&#39;(x) + {2*(q-p)}x^({q-p-1})*v&#39;(x) + {(q-p-1)*(q-p)}*x^({q-p-2})*v(x)) + {1+2p}*x*(x^({q-p})*v&#39;(x) + ({q-p})x^({q-p-1})*v(x)) + {p^2-q^2}*(x^({q-p})*v(x)) = {1+n}*x^({n-p-q+1})}\]</p>
+			
+				<p>which simplifies to:<br />\[\simplify{x^({q-p}+2)*v&#39;&#39;(x) + {1+2q}*x^({q-p+1})*v&#39;(x) = ({1+n})*x^({n-p-q+1})}\]</p>
+			
+				<p>On multiplying the equation throughout by $\simplify{x^{p+q-1}}$ we get<br />\[ \simplify{x^({2q+1})*v&#39;&#39;(x) + ({1+2q})*x^({2q})*v&#39;(x) = ({1+n})*x^({n})} \]</p>
+			
+				<p>This is a linear differential equation in $v&#39;(x)$ and we have<br />\[ \simplify{x^({2q+1})*v&#39;&#39;(x) + ({1+2q})*x^({2q})*v&#39;(x) = ({1+n})*x^({n})} \Rightarrow \frac{d}{dx}\left ( \simplify{x^({1+2q})v&#39;(x)} \right ) = \simplify{({1+n})*x^({n})} \]</p>
+			
+				<p>Hence on integrating,<br />\[\simplify{x^({1+2q})*v&#39;(x) = x^({n+1}) + B_1} \Rightarrow v&#39;(x) = \simplify{x^({n-2q}) + B_1*x^({-1-2q})}\]</p>
+			
+				<p>Integrating again gives: <br />\[v(x) = \simplify{({s})*(x^({n+1-2q}))/({abs(1+n-2q)}) + B*x^({-2q}) + A} \Rightarrow \simplify{y = x^({q-p})*v(x) = A*x^({q-p}) + B*x^({-p-q}) + ({s})*(x^({n+1-q-p}))/({abs(1+n-2q)})}\]</p>
+			
+				<p>Hence $\beta = \var{-q-p}$ and $y_{PI} = \simplify{({s})*(x^({n+1-q-p}))/({abs(1+n-2q)})}$.</p>
+			"
+		}, 
 		{
-			name: de Moivre's Theorem
-
+			name: "de Moivre's Theorem"
 			variables: {
-				z1: "random(1..3#0.1) + random(1..3#0.1)*i"
-				n1: "random(-3..-1)"
-				z2: "random(1..3#0.1) + random(1..3#0.1)*i"
-				n2: "random(-3..-1)"
-				z3: "random(1..3#0.1) + random(1..3#0.1)*i"
-				n3: "random(-3..-1)"
+				z1: random(1..3#0.1) + random(1..3#0.1)*i
+				n1: random(-3..-1)
+				z2: random(1..3#0.1) + random(1..3#0.1)*i
+				n2: random(-3..-1)
+				z3: random(1..3#0.1) + random(1..3#0.1)*i
+				n3: random(-3..-1)
 			}
-
-			statement: """
-				Use de Moivre's theorem to write the following complex numbers in the form $a + ib$.
-
-				Note that for these questions arguments of complex numbers lie in the range $-\pi \lt \operatorname{arg} \leq \pi$.
-
-				Enter all answers rounded to $3$ decimal places.
-
-				*Important*: When calculating the final answer to each question, you must use the full calculator values for the modulus and argument calculated in the first two parts and _not_ the rounded values, otherwise the final answer will not be guaranteed to be correct to $3$ decimal places.
-			"""
-
+			statement: "
+				<p>Use de Moivre&#8217;s theorem to write the following complex numbers in the form $a + ib$.</p>
+			
+				<p>Note that for these questions arguments of complex numbers lie in the range $-\pi \lt \operatorname{arg} \leq \pi$.</p>
+			
+				<p>Enter all answers rounded to $3$ decimal places.</p>
+			
+				<p><strong>Important</strong>: When calculating the final answer to each question, you must use the full calculator values for the modulus and argument calculated in the first two parts and <em>not</em> the rounded values, otherwise the final answer will not be guaranteed to be correct to $3$ decimal places.</p>
+			"
+			
 			parts: [
 				{
 					type: gapfill
 					prompt: """
-						\[ \simplify[]{{z1}^{n1}} \]
-
-						<ol style="list-style-type: lower-roman">
-							<li>$\simplify[]{abs({z1}^{n1})} = \phantom{{}}$[[0]]</li>
-							<li>$\simplify[]{arg({z1}^{n1})} = \phantom{{}}$[[1]]</li>
-							<li>So $\simplify[]{{z1}^{n1}} = \phantom{{}}$[[2]]</li>
-						</ol>
+						<p>\[ \simplify[]{{z1}^{n1}} \]</p>
+					
+					<ol style="list-style-type: lower-roman">
+					<li>$\simplify[]{abs({z1}^{n1})} = \phantom{{}}$[[0]]</li>
+					<li>$\simplify[]{arg({z1}^{n1})} = \phantom{{}}$[[1]]</li>
+					<li>So $\simplify[]{{z1}^{n1}} = \phantom{{}}$[[2]]</li>
+					</ol>
 					"""
-
+					
 					gaps: [
-						{type: numberentry, marks: 1, answer: "{precround(abs(z1^n1),3)}"}
-						{type: numberentry, marks: 1, answer: "{precround(arg(z1^n1),3)}"}
-						{type: jme, marks: 1, answer: "{precround(z1^n1,3)}", checkingtype: dp, checkingaccuracy: 3}
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(abs(z1^n1),3)}"
+						}, 
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(arg(z1^n1),3)}"
+						}, 
+						{
+							type: jme
+							marks: 1
+							answer: "{precround(z1^n1,3)}"
+							checkingtype: dp
+							checkingaccuracy: 3
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
 					prompt: """
-						\[ \simplify[]{{z2}^{n2}} \]
-
-						<ol style="list-style-type: lower-roman">
-							<li>$\simplify[]{abs({z2}^{n2})} = \phantom{{}}$[[0]]</li>
-							<li>$\simplify[]{arg({z2}^{n2})} = \phantom{{}}$[[1]]</li>
-							<li>So $\simplify[]{{z2}^{n2}} = \phantom{{}}$[[2]]</li>
-						</ol>
+						<p>\[ \simplify[]{{z2}^{n2}} \]</p>
+					
+					<ol style="list-style-type: lower-roman">
+					<li>$\simplify[]{abs({z2}^{n2})} = \phantom{{}}$[[0]]</li>
+					<li>$\simplify[]{arg({z2}^{n2})} = \phantom{{}}$[[1]]</li>
+					<li>So $\simplify[]{{z2}^{n2}} = \phantom{{}}$[[2]]</li>
+					</ol>
 					"""
-
+					
 					gaps: [
-						{type: numberentry, marks: 1, answer: "{precround(abs(z2^n2),3)}"}
-						{type: numberentry, marks: 1, answer: "{precround(arg(z2^n2),3)}"}
-						{type: jme, marks: 1, answer: "{precround(z2^n2,3)}", checkingtype: dp, checkingaccuracy: 3}
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(abs(z2^n2),3)}"
+						}, 
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(arg(z2^n2),3)}"
+						}, 
+						{
+							type: jme
+							marks: 1
+							answer: "{precround(z2^n2,3)}"
+							checkingtype: dp
+							checkingaccuracy: 3
+						}
 					]
-				}
+				}, 
 				{
 					type: gapfill
 					prompt: """
-						\[ \simplify[]{{z3}^{n3}} \]
-
-						<ol style="list-style-type: lower-roman">
-							<li>$\simplify[]{abs({z3}^{n3})} = \phantom{{}}$[[0]]</li>
-							<li>$\simplify[]{arg({z3}^{n3})} = \phantom{{}}$[[1]]</li>
-							<li>So $\simplify[]{{z3}^{n3}} = \phantom{{}}$[[2]]</li>
-						</ol>
+						<p>\[ \simplify[]{{z3}^{n3}} \]</p>
+					
+					<ol style="list-style-type: lower-roman">
+					<li>$\simplify[]{abs({z3}^{n3})} = \phantom{{}}$[[0]]</li>
+					<li>$\simplify[]{arg({z3}^{n3})} = \phantom{{}}$[[1]]</li>
+					<li>So $\simplify[]{{z3}^{n3}} = \phantom{{}}$[[2]]</li>
+					</ol>
 					"""
-
+					
 					gaps: [
-						{type: numberentry, marks: 1, answer: "{precround(abs(z3^n3),3)}"}
-						{type: numberentry, marks: 1, answer: "{precround(arg(z3^n3),3)}"}
-						{type: jme, marks: 1, answer: "{precround(z3^n3,3)}", checkingtype: dp, checkingaccuracy: 3}
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(abs(z3^n3),3)}"
+						}, 
+						{
+							type: numberentry
+							marks: 1
+							answer: "{precround(arg(z3^n3),3)}"
+						}, 
+						{
+							type: jme
+							marks: 1
+							answer: "{precround(z3^n3,3)}"
+							checkingtype: dp
+							checkingaccuracy: 3
+						}
 					]
 				}
 			]
-
 			advice: """
-				notextile. <div class="lemma">
-
-				h5. de Moivre's Theorem
-
-				Given a complex number raised to some integer power $n$, $z^n = (x+iy)^n)$, de Moivre's theorem states that
-				\[z^n = (x+iy)^n = r^n*( \cos(n\theta) + i\sin(n\theta) ), \]
-				where $r = \lvert x+iy\rvert$ is the modulus of $z$ and $\theta = \operatorname{arg}(z)$ is the argument of $z$.
-
-				notextile. </div>
-
-				As usual, you must be careful that the argument is calculated correctly, by paying attention to the quadrant of the complex plane in which $z$ lies.
+			<div class="lemma">
+			
+				<h5>de Moivre&#8217;s Theorem</h5>
+			
+				<p>Given a complex number raised to some integer power $n$, $z^n = (x+iy)^n)$, de Moivre&#8217;s theorem states that<br />\[z^n = (x+iy)^n = r^n*( \cos(n\theta) + i\sin(n\theta) ), \]<br />where $r = \lvert x+iy\rvert$ is the modulus of $z$ and $\theta = \operatorname{arg}(z)$ is the argument of $z$.</p>
+			
+			</div>
+			
+				<p>As usual, you must be careful that the argument is calculated correctly, by paying attention to the quadrant of the complex plane in which $z$ lies.</p>
 			"""
-		}
-
+		}, 
 		{
 			name: Indefinite Integral
-
-			statement: """
-				Find the following indefinite integral.
-
-				Let the constant of integration be $C$.
-			"""
-
+			statement: "
+				<p>Find the following indefinite integral.</p>
+			
+				<p>Let the constant of integration be $C$.</p>
+			"
 			variables: {
-				n: "random(3..5)"
-				a: "random(2..9)"
-				b: "random(1..3)"
-				d: "random(1..9)"
+				n: random(3..5)
+				a: random(2..9)
+				b: random(1..3)
+				d: random(1..9)
 			}
-
+			
 			parts: [
 				{
 					type: gapfill
-					prompt: """
-						$\displaystyle \int \simplify{{b}/(({a}*x+{d})^{n})} dx= \phantom{{}}$[[0]]
-					"""
-
+					prompt: "	<p>$\displaystyle \int \simplify{{b}/(({a}*x+{d})^{n})} dx= \phantom{{}}$[[0]]</p>"
+					
 					gaps: [
-						{type: jme, answer: "(-{b})/({a*(n-1)}*({a}*x+{d})^{n-1}) + C", answersimplification: "", marks: 1}
+						{
+							type: jme
+							answer: "(-{b})/({a*(n-1)}*({a}*x+{d})^{n-1}) + C"
+							answersimplification: ''
+							marks: 1
+						}
 					]
 				}
 			]
-
-			advice: """
-				Let $y = \simplify[]{{a}*x+{d}}$. Then,
-				\[\simplify[]{{b}/(({a}*x+{d})^{n})} = \simplify[]{{b}/(y^{n})}.\]
-
-				Now,
-				\[\int \simplify[]{{b}/({a}*x+{d})^{n}} dx = \int \simplify[]{{b}/(y^{n})} \frac{dx}{dy} dy.\]
-
-				Rearrange $y = \simplify[]{{a}x+{d}}$ to get $x = \simplify[]{(y-{b})/{a}}$, and hence $\frac{dx}{dy} = \frac{1}{\var{a}}$.
-
-				$\displaystyle \int \frac{1}{x^n} dx = \frac{-1}{(n-1)x^{n-1}} + C$ is a standard integral, so we can now calculate the desired integral:
-
-				\[\int \simplify[]{{b}/(y^{n})} \frac{dx}{dy} dy = \simplify[]{{b}/({n-1}*y^{n-1})} \cdot \frac{1}{\var{a}} + C = \simplify[simplifyFractions]{(-{b})/({a*(n-1)}*({a}*x+{d})^{n-1}) + C}.\]
-			"""
-		}
+			advice: "
+				<p>Let $y = \simplify[]{{a}*x+{d}}$. Then,<br />\[\simplify[]{{b}/(({a}*x+{d})^{n})} = \simplify[]{{b}/(y^{n})}.\]</p>
+			
+				<p>Now,<br />\[\int \simplify[]{{b}/({a}*x+{d})^{n}} dx = \int \simplify[]{{b}/(y^{n})} \frac{dx}{dy} dy.\]</p>
+			
+				<p>Rearrange $y = \simplify[]{{a}x+{d}}$ to get $x = \simplify[]{(y-{b})/{a}}$, and hence $\frac{dx}{dy} = \frac{1}{\var{a}}$.</p>
+			
+				<p>$\displaystyle \int \frac{1}{x^n} dx = \frac{-1}{(n-1)x^{n-1}} + C$ is a standard integral, so we can now calculate the desired integral:</p>
+			
+				<p>\[\int \simplify[]{{b}/(y^{n})} \frac{dx}{dy} dy = \simplify[]{{b}/({n-1}*y^{n-1})} \cdot \frac{1}{\var{a}} + C = \simplify[simplifyFractions]{(-{b})/({a*(n-1)}*({a}*x+{d})^{n-1}) + C}.\]</p>
+			"
+		}, 
 		{
 			name: Integration by Parts
-
-			statement: """
-				Find the following indefinite integral.
-
-				Let the constant of integration be $C$.
-			"""
-
+			statement: "
+				<p>Find the following indefinite integral.</p>
+			
+				<p>Let the constant of integration be $C$.</p>
+			"
 			variables: {
-				a: "random(1..9)"
-				b: "random(1..9)"
-				c: "random(1..9)"
+				a: random(1..9)
+				b: random(1..9)
+				c: random(1..9)
 			}
-
+			
 			parts: [
 				{
 					type: gapfill
-					prompt: """
-						$\displaystyle \int \simplify{{a}x*sin({b}x+{c})} dx = \phantom{{}}$[[0]]
-					"""
-
+					prompt: "	<p>$\displaystyle \int \simplify{{a}x*sin({b}x+{c})} dx = \phantom{{}}$[[0]]</p>"
+					
 					steps: [
 						{
 							type: information
-							prompt: """
-								The formula for integrating by parts is
-								\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]
-							"""
+							prompt: "
+							
+															The formula for integrating by parts is
+															\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]
+														
+							"
 						}
 					]
-
+					
 					gaps: [
-						{type: jme, answer: "({a}/{b^2})sin({b}x+{c}) - ({a}/{b})*xcos({b}x+{c}) + C", marks: 1}
+						{
+							type: jme
+							answer: "({a}/{b^2})sin({b}x+{c}) - ({a}/{b})*xcos({b}x+{c}) + C"
+							marks: 1
+						}
 					]
 				}
 			]
-
-			advice: """
-				The formula for integrating by parts is
-				\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]
-				
-				We choose $u = \simplify{{a}x}$ and $\frac{dv}{dx} = \simplify{sin({b}x+{c})}$.
-
-				So $\frac{du}{dx}$ = $\var{a}$ and $v = \simplify{(-1/{b})*cos({b}x+{c})}$.
-
-				Hence,
-				\[ \begin{eqnarray} \int \simplify{{a}x*sin({b}x+{c})} dx &=& uv - \int v \frac{du}{dx} dx \\
-																		 &=& \simplify{(-{a}/{b})*x*cos({b}x+{c})} - \int \left( \simplify{(-{a}/{b})*cos({b}x+{c})}\right) dx \\
-																		 &=& \simplify{(-{a}/{b})*x*cos({b}x+{c}) + ({a}/{b^2})*sin({b}x+{c}) + C}
-					\end{eqnarray} \]
-			"""
+			advice: "
+				<p>The formula for integrating by parts is<br />\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]</p>
+			
+				<p>We choose $u = \simplify{{a}x}$ and $\frac{dv}{dx} = \simplify{sin({b}x+{c})}$.</p>
+			
+				<p>So $\frac{du}{dx}$ = $\var{a}$ and $v = \simplify{(-1/{b})*cos({b}x+{c})}$.</p>
+			
+				<p>Hence,<br />\[ \begin{eqnarray} \int \simplify{{a}x*sin({b}x+{c})} dx &#38;=&#38; uv - \int v \frac{du}{dx} dx \\
+			&#38;=&#38; \simplify{(-{a}/{b})*x*cos({b}x+{c})} - \int \left( \simplify{(-{a}/{b})*cos({b}x+{c})}\right) dx \\
+			&#38;=&#38; \simplify{(-{a}/{b})*x*cos({b}x+{c}) + ({a}/{b^2})*sin({b}x+{c}) + C}
+			\end{eqnarray} \]</p>
+			"
 		}
 	]
 }

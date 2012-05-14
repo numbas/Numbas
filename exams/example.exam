@@ -1,65 +1,39 @@
 {
-	//This is the exam object.
-	//Define properties for the whole exam here
-
-	// The title of the exam
 	name: My First Exam
-	// How much time the student is allowed, in seconds
 	duration: 1800
-
-	// This says to include all the files in the example_files folder with the exam
-	// Use this to include images with your exam.
+	
 	resources: [example_files]
-
+	
 	questions: [
 		{
 			name: Addition and subtraction
-
-			// The statement is displayed at the top of the question.
-			statement: """
-				Answer the following questions on addition and subtraction.
-				<img src="resources/example_files/Love_math_1.jpg"/>
-			"""
-
-			// Values for the variables defined below are calculated when 
-			// the question is generated.
+			statement: """	<p>Answer the following questions on addition and subtraction.<br /><img src="resources/example_files/Love_math_1.jpg"/></p>"""
 			variables: {
-				a: "random(1..9)"
-				b: "random(1..9)"
-				c: "random(1..9)"
-				d: "random(1..9)"
+				a: random(1..9)
+				b: random(1..9)
+				c: random(1..9)
+				d: random(1..9)
 			}
-
-			// A question has one or more parts which the student must answer.
+			
 			parts: [
 				{
-					// This says that the answer to this question should be a number
-					type: numberentry	
+					type: numberentry
 					marks: 1
-
-					prompt: """
-						What is $\var{a}+\var{b}$?
-					"""
-					// The answer is the sum of the variables a and b
+					prompt: "	<p>What is $\var{a}+\var{b}$?</p>"
 					answer: "{a+b}"
-				}
+				}, 
 				{
 					type: numberentry
-					prompt: "What is $\var{c}-\var{d}$?"
+					prompt: "	<p>What is $\var{c}-\var{d}$?</p>"
 					marks: 1
 					answer: "{c-d}"
 				}
 			]
-
-			// This advice message is displayed if the student clicks on the 
-			// "Reveal" button at the top of the question
-			advice: """
-				In part 1 simply add the two numbers, so that
-				\[\var{a}+\var{b} = \var{a+b}.\]
-
-				In part 2 simply subtract the two numbers, so that
-				\[\var{c}-\var{d} = \var{c-d}.\]
-			"""
+			advice: "
+				<p>In part 1 simply add the two numbers, so that<br />\[\var{a}+\var{b} = \var{a+b}.\]</p>
+			
+				<p>In part 2 simply subtract the two numbers, so that<br />\[\var{c}-\var{d} = \var{c-d}.\]</p>
+			"
 		}
 	]
 }
