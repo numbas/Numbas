@@ -13,6 +13,12 @@
 #   limitations under the License.
 import sys
 import re
+from collections import OrderedDict
+
+try:
+	unicode
+except NameError:
+	basestr = unicode = str
 
 class ParseError(Exception):
 	def __init__(self,parser,message,hint=''):
@@ -67,7 +73,7 @@ class ExamParser:
 			self.cursor+=1
 			self.lstripcomments()
 
-			obj = {}
+			obj = OrderedDict()
 			while self.cursor<len(self.source) and self.source[self.cursor]!='}':
 				i=self.cursor
 				namere = re.compile(r'^\w*$')
@@ -192,14 +198,12 @@ class ExamParser:
 			return v
 
 def printdata(data,tabs=''):
-	if type(data)==dict:
+	if type(data)==dict or type(data)==OrderedDict:
 		s=''
 		first=True
 		for x in data.keys():
 			if not first:
-				s+=', '
-				if '\n' in s:
-					s+='\n'+tabs+'\t'
+				s+='\n'+tabs+'\t'
 			if type(data[x])==dict or type(data[x])==list:
 				s+='\n'+tabs+'\t'
 			s+=x+': '+printdata(data[x],tabs+'\t')
@@ -228,12 +232,18 @@ def printdata(data,tabs=''):
 		return s
 	else:
 		if '"' in str(data) and not (isinstance(data,unicode) or isinstance(data,str)):
-			print(str)
-		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or ':' in data):
+			print("Unexpected type: "+str)
+
+		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
+			if '\n' in data:
+				data = '\n'+'\n'.join([tabs+l for l in data.split('\n')])+'\n'+tabs
+
 			if '"' in data:
 				return '"""'+data+'"""'
 			else:
 				return '"'+data+'"'
+		elif (isinstance(data,str) or isinstance(data,unicode)) and data.strip()=='':
+			return "'"+data+"'"
 		else:
 			return str(data)
 

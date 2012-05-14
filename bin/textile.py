@@ -983,8 +983,7 @@ class Textile(object):
 		return ''.join([before, self.shelve(self.encode_html(text)), after])
 
 	def noTextile(self, text):
-		text = self.doSpecial(text, '<notextile>', '</notextile>', self.fTextile)
-		return self.doSpecial(text, '==', '==', self.fTextile)
+		return self.doSpecial(text, '<notextile>', '</notextile>', self.fTextile)
 
 	def fTextile(self, match):
 		before, notextile, after = match.groups()

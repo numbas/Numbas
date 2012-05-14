@@ -17,7 +17,6 @@
 
 import re
 import xml.etree.ElementTree as etree
-from textile import textile
 import examparser
 import sys
 import os
@@ -50,16 +49,16 @@ def tryLoad(data,attr,obj,altname=''):
 			else:
 				setattr(obj,altname,data[attr])
 
-#convert a textile block of content into html, wrapped in a <content> tag and optionally an <html> tag too.
-def makeContentNode(s,doTextile=True):
+#convert a block of content into html, wrapped in a <content> tag
+def makeContentNode(s):
 	s=str(s)
-	s='\n'.join([x.lstrip() for x in s.split('\n')])	#textile doesn't like whitespace at the start of a line, but I do
-	if doTextile:
-		s=textile(s)
-	else:
-		s = re.sub(r'&(?!#?\w+;)','&amp;',s)
-		s='<span>'+s+'</span>'
-	return etree.fromstring('<content>'+s+'</content>')
+	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
+	s='<span>'+s+'</span>'
+	try:
+		return etree.fromstring('<content>'+s+'</content>')
+	except etree.ParseError as e:
+		print(s)
+		raise e
 
 #make an XML element tree. Pass in an array of arrays or strings.
 def makeTree(struct):
@@ -622,10 +621,10 @@ class Restriction:
 
 		for s in self.strings:
 			string = etree.Element('string')
-			string.text = s
+			string.text = str(s)
 			restriction.append(string)
 
-		restriction.find('message').append(makeContentNode(self.message,doTextile=False))
+		restriction.find('message').append(makeContentNode(self.message))
 
 		return restriction
 
