@@ -100,6 +100,8 @@ R.registerLocale('en-GB',{
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
 
+	'part.setting not present': "Property '%s' not set in part %s of question \"%s\"",
+
 	'part.jme.answer missing': "Correct answer for a JME part is missing (%s)",
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",

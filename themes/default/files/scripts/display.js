@@ -65,7 +65,7 @@ var display = Numbas.display = {
 	//
 
 	showAlert: function(msg) {
-		$.prompt(textile(msg));
+		$.prompt(msg);
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
@@ -520,7 +520,7 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).show().find('.partwarning').append('<span>'+textile(warning.toString())+'</span>');
+		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning.toString()+'</span>');
 		Numbas.display.typeset();
 	},
 
@@ -644,7 +644,7 @@ display.PartDisplay.prototype =
 						feedback.push(message);
 				}
 
-				feedback = textile(feedback.join('\n\n<hr/>'));
+				feedback = feedback.join('\n\n<hr/>');
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
 				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
 			}

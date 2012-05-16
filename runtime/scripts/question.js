@@ -1089,10 +1089,20 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{xml: this.xml, string:true});
 	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
-	settings.minvalue = jme.subvars(settings.minvalue,this.question.scope);
-	settings.maxvalue = jme.subvars(settings.maxvalue,this.question.scope);
-	settings.minvalue = evaluate(settings.minvalue,this.question.scope).value - 0.00000000001;
-	settings.maxvalue = evaluate(settings.maxvalue,this.question.scope).value + 0.00000000001;
+
+	var minvalue = jme.subvars(settings.minvalue,this.question.scope);
+	minvalue = evaluate(minvalue,this.question.scope);
+	if(minvalue && minvalue.type=='number')
+		settings.minvalue = minvalue.value - 0.00000000001;
+	else
+		throw(new Numbas.Error('part.setting not present','minimum value',this.path,this.question.name));
+
+	var maxvalue = jme.subvars(settings.maxvalue,this.question.scope);
+	maxvalue = evaluate(maxvalue,this.question.scope);
+	if(maxvalue && maxvalue.type=='number')
+		settings.maxvalue = maxvalue.value + 0.00000000001;
+	else
+		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
 
 	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
 
@@ -1189,10 +1199,18 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
 
-	settings.minAnswers = jme.subvars(settings.minAnswers, question.scope);
-	settings.minAnswers = jme.evaluate(settings.minAnswers,this.question.scope).value;
-	settings.maxAnswers = jme.subvars(settings.maxAnswers, question.scope);
-	settings.maxAnswers = jme.evaluate(settings.maxAnswers,this.question.scope).value;
+	var minAnswers = jme.subvars(settings.minAnswers, question.scope);
+	minAnswers = jme.evaluate(settings.minAnswers,this.question.scope);
+	if(minAnswers && minAnswers.type=='number')
+		settings.minAnswers = minAnswers.value;
+	else
+		throw(new Numbas.Error('part.setting not present','minimum answers',this.path,this.question.name))
+	var maxAnswers = jme.subvars(settings.maxAnswers, question.scope);
+	maxAnswers = jme.evaluate(settings.maxAnswers,this.question.scope);
+	if(maxAnswers && maxAnswers.type=='number')
+		settings.maxAnswers = maxAnswers.value;
+	else
+		throw(new Numbas.Error('part.setting not present','maximum answers',this.path,this.question.name))
 
 	var choiceNodes = choicesNode.selectNodes('choice');
 	this.numChoices = choiceNodes.length;
