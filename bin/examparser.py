@@ -146,6 +146,8 @@ class ExamParser:
 				i=self.cursor+3
 				while i<len(self.source)-2 and self.source[i:i+3]!='"""':
 					i+=1
+				while i<len(self.source)-3 and self.source[i+3]=='"':	#grab extra double-quotes which are part of the string. e.g. """"hi"""" parses as the string "hi", with double-quotes included
+					i+=1
 				if i==len(self.source)-2:
 					raise ParseError(self,'Expected """ to end string literal')
 				string = self.source[self.cursor+3:i]
@@ -163,6 +165,8 @@ class ExamParser:
 			if self.source[self.cursor:self.cursor+3]=="'''":	#triple-quoted  string
 				i=self.cursor+3
 				while i<len(self.source)-2 and self.source[i:i+3]!="'''":
+					i+=1
+				while i<len(self.source)-3 and self.source[i+3]=="'":	#grab extra quotes which are part of the string. e.g. ''''hi'''' parses as the string "hi", with quotes included
 					i+=1
 				if i==len(self.source)-2:
 					raise ParseError(self,"Expected ''' to end string literal")
