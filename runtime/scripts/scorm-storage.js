@@ -275,14 +275,13 @@ SCORMStorage.prototype = {
 			answered: question.answered,
 			submitted: question.submitted,
 			adviceDisplayed: question.adviceDisplayed,
-			revealed: question.revealed,
-			variables: question.variables
+			revealed: question.revealed
 		};
 
-		qobj.variables = {}
-		for(var name in question.variables)
+		qobj.variables = {};
+		for(var name in question.scope.variables)
 		{
-			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.variables[name]});
+			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.scope.variables[name]});
 		}
 
 		qobj.parts = [];
