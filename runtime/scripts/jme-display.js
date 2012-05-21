@@ -45,7 +45,7 @@ jme.display = {
 	{
 		if(expr.trim()=='')
 			return '';
-		return treeToJME(jme.display.simplify(expr,ruleset,scope));
+		return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset);
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a syntax tree
@@ -707,10 +707,130 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	}
 }
 
+function jmeRationalNumber(n)
+{
+	if(n.complex)
+	{
+		var re = jmeRationalNumber(n.re);
+		var im = jmeRationalNumber(n.im)+' i';
+		if(n.im==0)
+			return re;
+		else if(n.re==0)
+		{
+			if(n.im==1)
+				return 'i';
+			else if(n.im==-1)
+				return '-i';
+			else
+				return im;
+		}
+		else if(n.im<0)
+		{
+			if(n.im==-1)
+				return re+' - i';
+			else
+				return re+' '+im;
+		}
+		else
+		{
+			if(n.im==1)
+				return re+' + '+'i';
+			else
+				return re+' + '+im;
+		}
+
+	}
+	else
+	{
+		var piD;
+		if((piD = math.piDegree(n)) > 0)
+			n /= Math.pow(Math.PI,piD);
+
+		var f = math.rationalApproximation(Math.abs(n));
+		if(f[1]==1)
+			out = Math.abs(f[0]).toString();
+		else
+			var out = f[0]+'/'+f[1];
+		if(n<0)
+			out=' - '+out;
+
+		switch(piD)
+		{
+		case 0:
+			return out;
+		case 1:
+			return out+' pi';
+		default:
+			return out+' pi^'+piD;
+		}
+	}
+}
+
+function jmeRealNumber(n)
+{
+	if(n.complex)
+	{
+		var re = jmeRealNumber(n.re);
+		var im = jmeRealNumber(n.im)+' i';
+		if(n.im==0)
+			return re;
+		else if(n.re==0)
+		{
+			if(n.im==1)
+				return 'i';
+			else if(n.im==-1)
+				return '-i';
+			else
+				return im;
+		}
+		else if(n.im<0)
+		{
+			if(n.im==-1)
+				return re+' - i';
+			else
+				return re+' '+im;
+		}
+		else
+		{
+			if(n.im==1)
+				return re+' + '+'i';
+			else
+				return re+' + '+im;
+		}
+
+	}
+	else
+	{
+		if(n==Infinity)
+			return 'infinity';
+
+		var piD;
+		if((piD = math.piDegree(n)) > 0)
+			n /= Math.pow(Math.PI,piD);
+
+		out = math.niceNumber(n);
+		switch(piD)
+		{
+		case 0:
+			return out;
+		case 1:
+			if(n==1)
+				return 'pi';
+			else
+				return out+' pi';
+		default:
+			if(n==1)
+				return 'pi^'+piD;
+			else
+				return out+' pi^'+piD;
+		}
+	}
+}
+
 
 //turns an evaluation tree back into a JME expression
 //(used when an expression is simplified)
-var treeToJME = jme.display.treeToJME = function(tree)
+var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
 	if(!tree)
 		return '';
@@ -719,8 +839,10 @@ var treeToJME = jme.display.treeToJME = function(tree)
 
 	if(args!==undefined && ((l=args.length)>0))
 	{
-		var bits = args.map(treeToJME);
+		var bits = args.map(function(i){return treeToJME(i,settings)});
 	}
+
+    var jmeNumber = settings.fractionnumbers ? jmeRationalNumber : jmeRealNumber;
 
 	var tok = tree.tok;
 	switch(tok.type)
@@ -733,7 +855,7 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		case Math.PI:
 			return 'pi';
 		default:
-			return Numbas.math.niceNumber(tok.value);
+			return jmeNumber(tok.value);
 		}
 	case 'name':
 		return tok.name;
@@ -746,14 +868,14 @@ var treeToJME = jme.display.treeToJME = function(tree)
 	case 'list':
 		if(!bits)
 		{
-			bits = tok.value.map(function(b){return treeToJME({tok:b});});
+			bits = tok.value.map(function(b){return treeToJME({tok:b},settings);});
 		}
 		return '[ '+bits.join(', ')+' ]';
 	case 'vector':
-		return 'vector('+tok.value.map(function(i){return Numbas.math.niceNumber(i)}).join(',')+')';
+		return 'vector('+tok.value.map(jmeNumber).join(',')+')';
 	case 'matrix':
 		return 'matrix('+
-			tok.value.map(function(row){return '['+row.map(function(x){return Numbas.math.niceNumber(x)}).join(',')+']'}).join(',')+')';
+			tok.value.map(function(row){return '['+row.map(jmeNumber).join(',')+']'}).join(',')+')';
 	case 'special':
 		return tok.value;
 	case 'conc':
