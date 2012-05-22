@@ -113,6 +113,7 @@ Numbas.controls = {
 	submitQuestion: function()
 	{
 		job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
+		job(Numbas.store.save,Numbas.store);
 	},
 
 	//student has changed answer to part - record it and calculate new score

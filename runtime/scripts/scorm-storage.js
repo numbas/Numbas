@@ -91,6 +91,11 @@ SCORMStorage.prototype = {
 		bookmark: 0
 	},
 
+	save: function()
+	{
+		pipwerks.SCORM.save();
+	},
+
 	set: function(key,value)
 	{
 		//Numbas.debug("set "+key+" := "+value,true);

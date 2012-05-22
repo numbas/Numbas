@@ -261,6 +261,7 @@ Exam.prototype = {
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
 		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
+		job(Numbas.store.save,Numbas.store);			//make sure data get saved to LMS
 	},
 
 	//restore previously started exam from storage

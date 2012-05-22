@@ -583,6 +583,7 @@ display.PartDisplay.prototype =
 				Numbas.display.showAlert(R('question.can not submit'));
 				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
 			}
+			Numbas.store.save();
 		});
 
 		this.showScore(this.p.answered);
