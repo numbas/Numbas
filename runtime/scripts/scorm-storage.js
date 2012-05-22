@@ -281,7 +281,7 @@ SCORMStorage.prototype = {
 		qobj.variables = {};
 		for(var name in question.scope.variables)
 		{
-			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.scope.variables[name]});
+			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.scope.variables[name]},{});
 		}
 
 		qobj.parts = [];
@@ -370,7 +370,7 @@ SCORMStorage.prototype = {
 		var variables = {};
 		for(var name in qobj.variables)
 		{
-			variables[name] = Numbas.jme.evaluate(qobj.variables[name]);
+			variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
 		}
 
 		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),

@@ -835,6 +835,8 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	if(!tree)
 		return '';
 
+	settings = settings || {};
+
 	var args=tree.args, l;
 
 	if(args!==undefined && ((l=args.length)>0))
@@ -860,7 +862,8 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'name':
 		return tok.name;
 	case 'string':
-		return '"'+tok.value+'"';
+		var str = tok.value.replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
+		return '"'+str+'"';
 	case 'boolean':
 		return (tok.value ? 'true' : 'false');
 	case 'range':
