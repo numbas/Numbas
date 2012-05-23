@@ -134,6 +134,8 @@
 					test('String',function() {
 						deepCloseEqual(tokenise('"hi"'),[new types.TString('hi')],'"hi"');
 						deepCloseEqual(tokenise("'hi'"),[new types.TString('hi')],"'hi'");
+						deepCloseEqual(tokenise('""'),[new types.TString('')],'"" -- empty string');
+						deepCloseEqual(tokenise("''"),[new types.TString('')],"'' -- empty string");
 
 						deepCloseEqual(tokenise('"hi \\"Bob\\""'),[new types.TString('hi "Bob"')],'"hi \\"Bob\\"" -- escape quotes');
 						deepCloseEqual(tokenise("'hi \\'Bob\\''"),[new types.TString("hi 'Bob'")],"'hi \\'Bob\\'' -- escape quotes");
