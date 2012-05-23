@@ -139,7 +139,7 @@
 
 						deepCloseEqual(tokenise('"hi \\"Bob\\""'),[new types.TString('hi "Bob"')],'"hi \\"Bob\\"" -- escape quotes');
 						deepCloseEqual(tokenise("'hi \\'Bob\\''"),[new types.TString("hi 'Bob'")],"'hi \\'Bob\\'' -- escape quotes");
-						deepCloseEqual(tokenise('"some\\thing"'),[new types.TString('something')],'something -- escape any character');
+						deepCloseEqual(tokenise('"some\\thing"'),[new types.TString('some\\thing')],'something -- backslash doesn\'t escape anything else');
 
 						raisesNumbasError(function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
 						raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');

@@ -126,7 +126,7 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_string))
 			{
 				var str = result[1]!==undefined ? result[1] : result[2];
-				str = str.replace(/\\n/g,'\n').replace(/\\(.)/g,'$1');
+				str = str.replace(/\\n/g,'\n').replace(/\\(["'])/g,'$1');
 
 				token = new TString(str);
 			}
