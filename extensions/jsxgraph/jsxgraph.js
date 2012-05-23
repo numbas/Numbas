@@ -75,9 +75,9 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 		var question = this.q;
 
 		var variables = {};
-		for(var x in question.variables)
+		for(var x in question.scope.variables)
 		{
-			variables[x] = question.variables[x].value;
+			variables[x] = question.scope.variables[x].value;
 		}
 
 		$('div.jsxgraph').each(function(index) {
