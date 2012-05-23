@@ -62,6 +62,10 @@ Numbas.storage.BlankStorage.prototype = {
 		return 'ab-initio';
 	},
 
+	//save data. Normally the storage should save as it goes, but this forces a save
+	save: function() {
+	},
+
 	//get viewing mode: 
 	// 'browse' - see exam info, not questions
 	// 'normal' - sit exam
