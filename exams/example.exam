@@ -7,7 +7,7 @@
 	questions: [
 		{
 			name: Addition and subtraction
-			statement: """	<p>Answer the following questions on addition and subtraction.<br /><img src="resources/example_files/Love_math_1.jpg"/></p>"""
+			statement: """<p>Answer the following questions on addition and subtraction.<br /><img src="resources/example_files/Love_math_1.jpg"/></p>"""
 			variables: {
 				a: random(1..9)
 				b: random(1..9)
@@ -19,20 +19,20 @@
 				{
 					type: numberentry
 					marks: 1
-					prompt: "	<p>What is $\var{a}+\var{b}$?</p>"
+					prompt: "<p>What is $\var{a}+\var{b}$?</p>"
 					answer: "{a+b}"
 				}, 
 				{
 					type: numberentry
-					prompt: "	<p>What is $\var{c}-\var{d}$?</p>"
+					prompt: "<p>What is $\var{c}-\var{d}$?</p>"
 					marks: 1
 					answer: "{c-d}"
 				}
 			]
 			advice: "
-				<p>In part 1 simply add the two numbers, so that<br />\[\var{a}+\var{b} = \var{a+b}.\]</p>
+			<p>In part 1 simply add the two numbers, so that<br />\[\var{a}+\var{b} = \var{a+b}.\]</p>
 			
-				<p>In part 2 simply subtract the two numbers, so that<br />\[\var{c}-\var{d} = \var{c-d}.\]</p>
+			<p>In part 2 simply subtract the two numbers, so that<br />\[\var{c}-\var{d} = \var{c-d}.\]</p>
 			"
 		}
 	]

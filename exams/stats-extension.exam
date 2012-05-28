@@ -18,13 +18,13 @@
 				z: (mean(sample)-mu)/(sigma/sqr(n))
 			}
 			statement: "
-				<p>Here, we generate $n = \var{n}$ samples from the distribution $N(\var{mu},\var{sigma^2})$, stored in the variable <code>sample</code>.</p>
+			<p>Here, we generate $n = \var{n}$ samples from the distribution $N(\var{mu},\var{sigma^2})$, stored in the variable <code>sample</code>.</p>
 			
-				<p>We then use the <code>mean</code> and <code>variance</code> functions to calculate <code>mean(sample)</code> $ = \hat{\mu} = \var{precround(mean(sample),3)}$ and <code>variance(sample)</code> $ = \hat \sigma^2 = \var{precround(variance(sample),3)}$.</p>
+			<p>We then use the <code>mean</code> and <code>variance</code> functions to calculate <code>mean(sample)</code> $ = \hat{\mu} = \var{precround(mean(sample),3)}$ and <code>variance(sample)</code> $ = \hat \sigma^2 = \var{precround(variance(sample),3)}$.</p>
 			
-				<p>We can calculate a test statistic $z = \var{precround(z,3)}$ and use that to calculate <code>cdfNormal(z)</code> $ = P(Z \leq \var{precround(z,3)} | Z \sim N(\var{mu},\var{sigma^2})) = \var{precround(cdfNormal(z),3)}$</p>
+			<p>We can calculate a test statistic $z = \var{precround(z,3)}$ and use that to calculate <code>cdfNormal(z)</code> $ = P(Z \leq \var{precround(z,3)} | Z \sim N(\var{mu},\var{sigma^2})) = \var{precround(cdfNormal(z),3)}$</p>
 			
-				<p>Alternatively, we can use the <code>zTest</code> function directly on <code>sample</code> to get the same number: <code>zTest(sample,mu,sigma^2)</code> $ = \var{precround(zTest(sample,mu,sigma^2),3)}$</p>
+			<p>Alternatively, we can use the <code>zTest</code> function directly on <code>sample</code> to get the same number: <code>zTest(sample,mu,sigma^2)</code> $ = \var{precround(zTest(sample,mu,sigma^2),3)}$</p>
 			"
 		}, 
 		{
@@ -35,7 +35,7 @@
 				x: random(0..30#0.5)
 				y: "pdfNormal(x,mu,sigma)"
 			}
-			statement: "	<p>For a normal distribution with parameters $\mu = \var{mu}$ and $\sigma = \var{sigma}$ the pdfNormal command gives $P(X \leq \var{x}) = \var{y}$.</p>"
+			statement: "<p>For a normal distribution with parameters $\mu = \var{mu}$ and $\sigma = \var{sigma}$ the pdfNormal command gives $P(X \leq \var{x}) = \var{y}$.</p>"
 		}, 
 		{
 			name: Simulating a Bernoulli Random Variable
@@ -43,7 +43,7 @@
 				p: random(0..1#0.01)
 				x: randomBernoulli(p)
 			}
-			statement: "	<p>For probability $p = \var{p}$ we generate the following Bernoulli random variable using the randomBernoulli command. $X = \var{X}$.</p>"
+			statement: "<p>For probability $p = \var{p}$ we generate the following Bernoulli random variable using the randomBernoulli command. $X = \var{X}$.</p>"
 		}, 
 		{
 			name: Simulating a Binomial Random Variable and Calculating pmfs.
@@ -55,9 +55,9 @@
 				d: "pmfBinomial(y,n,p)"
 			}
 			statement: "
-				<p>For $n = \var{n}$ and $p = \var{p}$ we have the following Binomial random variable, generated using the randomBinomial command. $X = \var{X}$.</p>
+			<p>For $n = \var{n}$ and $p = \var{p}$ we have the following Binomial random variable, generated using the randomBinomial command. $X = \var{X}$.</p>
 			
-				<p>For $x = \var{y}$ the pmf is $\var{d}$.</p>
+			<p>For $x = \var{y}$ the pmf is $\var{d}$.</p>
 			"
 		}, 
 		{
@@ -70,9 +70,9 @@
 				c: "cdfGeometric(y,p)"
 			}
 			statement: "
-				<p>For probability $p = \var{p}$ we generate the following Geometric random variable using the randomGeometric command. $X = \var{X}$.</p>
+			<p>For probability $p = \var{p}$ we generate the following Geometric random variable using the randomGeometric command. $X = \var{X}$.</p>
 			
-				<p>For $x = \var{y}$ the pmf is $\var{d}$ and cdf is $\var{c}$.</p>
+			<p>For $x = \var{y}$ the pmf is $\var{d}$ and cdf is $\var{c}$.</p>
 			"
 		}, 
 		{
@@ -83,7 +83,7 @@
 				y: random(1..5#1)
 				d: "pmfPoisson(x,lambda)"
 			}
-			statement: "	<p>For $\lambda = \var{lambda}$ we generate $X = \var{X}$, a Poisson randon variable. For $x = \var{y}$ the pmf is $\var{d}$.</p>"
+			statement: "<p>For $\lambda = \var{lambda}$ we generate $X = \var{X}$, a Poisson randon variable. For $x = \var{y}$ the pmf is $\var{d}$.</p>"
 		}, 
 		{
 			name: Uniform pdf and cdf
@@ -94,7 +94,7 @@
 				d: "pdfUniform(x,a,b)"
 				c: "cdfUniform(x,a,b)"
 			}
-			statement: "	<p>For $a = \var{a}$, $b = \var{b}$ and $x = \var{x}$ the pdf is $\var{d}$ and the cdf is $\var{c}$.</p>"
+			statement: "<p>For $a = \var{a}$, $b = \var{b}$ and $x = \var{x}$ the pdf is $\var{d}$ and the cdf is $\var{c}$.</p>"
 		}, 
 		{
 			name: Stimulating an Exponential random variable
@@ -106,9 +106,9 @@
 				c: "cdfExponential(x,lambda)"
 			}
 			statement: "
-				<p>For $\lambda = \var{lambda}$ we generate the following random Exponential variables using the randomExponential command; $X = \var{y}$.</p>
+			<p>For $\lambda = \var{lambda}$ we generate the following random Exponential variables using the randomExponential command; $X = \var{y}$.</p>
 			
-				<p>For $x = \var{x}$, the pdf is $\var{d}$ and the cdf is $\var{c}$.</p>
+			<p>For $x = \var{x}$, the pdf is $\var{d}$ and the cdf is $\var{c}$.</p>
 			"
 		}, 
 		{
@@ -121,9 +121,9 @@
 				d: "pdfGamma(x,n,lambda)"
 			}
 			statement: "
-				<p>For $n = \var{n}$ and $\lambda = \var{lambda}$  we generate the following Gamma random variable using the randomGamma command $X = \var{y}$.</p>
+			<p>For $n = \var{n}$ and $\lambda = \var{lambda}$  we generate the following Gamma random variable using the randomGamma command $X = \var{y}$.</p>
 			
-				<p>For $x= \var{x}$, the pdf is $\var{d}$.</p>
+			<p>For $x= \var{x}$, the pdf is $\var{d}$.</p>
 			"
 		}, 
 		{
@@ -136,7 +136,7 @@
 				a: "precround(regressionAlpha(x,y),3)"
 				b: "precround(regressionBeta(x,y),3)"
 			}
-			statement: "	<p>The line of best fit for data set $(1,3), (3,12), (7,23), (19,34), (36,40)$ is $y = \var{a} + \var{b}x$.</p>"
+			statement: "<p>The line of best fit for data set $(1,3), (3,12), (7,23), (19,34), (36,40)$ is $y = \var{a} + \var{b}x$.</p>"
 		}
 	]
 }

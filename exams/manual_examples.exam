@@ -17,13 +17,13 @@
 				{
 					type: numberentry
 					marks: 1
-					prompt: "	<p>Convert $\var{a}$ km into metres (give your answer to $3$ decimal places).</p>"
+					prompt: "<p>Convert $\var{a}$ km into metres (give your answer to $3$ decimal places).</p>"
 					answer: "{a*1000}"
 					
 					steps: [
 						{
 							type: information
-							prompt: "Recall: $1$ km = $1000$ m."
+							prompt: "	<p>Recall: $1$ km = $1000$ m.</p>"
 						}
 					]
 				}
@@ -36,17 +36,13 @@
 				{
 					type: numberentry
 					marks: 2
-					prompt: 	<p>Find $x$ where $15 + 3x = 42$.</p>
+					prompt: <p>Find $x$ where $15 + 3x = 42$.</p>
 					answer: 9
 					
 					steps: [
 						{
 							type: gapfill
-							prompt: "
-							Rearrange the equation and the solve for $x$.
-																So, $3x =$ [[0]]. You should now be able to enter 
-																your final answer.
-							"
+							prompt: "	<p>Rearrange the equation and the solve for $x$.<br />So, $3x =$ [[0]]. You should now be able to enter <br />your final answer.</p>"
 							
 							gaps: [
 								{
