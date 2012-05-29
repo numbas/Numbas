@@ -546,8 +546,6 @@
 					<p>Pole with least real part at $z = \phantom{{}}$[[0]].</p>
 					
 					<p>Pole with greatest real part at $z = \phantom{{}}$[[1]].</p>
-					
-					
 					"
 					
 					gaps: [
@@ -695,8 +693,6 @@
 				summary: "if(pval>=2,'There *is* evidence to suggest an association between degree subject and performance.','There is <strong>no</strong> evidence to suggest an association between degree subject and performance.')"
 			}
 			statement: """
-			
-			
 			<p>The human resources department of a large finance company is attempting to determine if an employee&#8217;s performance is influenced by their undergraduate degree subject.</p>
 			
 			<p>The 5 subjects considered are: <strong>Marketing</strong>, <strong>Marketing &#38; Management</strong>, <strong>Business Management</strong>, <strong>Accounting &#38; Finance</strong> and <strong>Mathematics</strong>.</p>
@@ -891,7 +887,7 @@
 							type: 1_n_2
 							displaycolumns: 1
 							
-							choices: [	<p>$p$ is bigger than $10 \%$</p>, 	<p>$p$ lies between $10 \%$ and $5 \%$</p>, 	<p>$p$ lies between $5 \%$ and $1 \%$</p>, 	<p>$p$ is smaller than $1 \%$</p>]
+							choices: [<p>$p$ is bigger than $10 \%$</p>, <p>$p$ lies between $10 \%$ and $5 \%$</p>, <p>$p$ lies between $5 \%$ and $1 \%$</p>, <p>$p$ is smaller than $1 \%$</p>]
 							
 							matrix: ["if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)", "if(pval=0,1,0)"]
 							marks: 1
@@ -920,7 +916,7 @@
 						{
 							type: 1_n_2
 							
-							choices: [	<p>None</p>, 	<p>Slight</p>, 	<p>Moderate</p>, 	<p>Strong</p>]
+							choices: [<p>None</p>, <p>Slight</p>, <p>Moderate</p>, <p>Strong</p>]
 							
 							matrix: ["if(if(pval=0,1,0),1,0)", "if(if(pval=1,1,0),1,0)", "if(pval=2,1,0)", "if(pval=3,1,0)"]
 							marks: 1
@@ -928,7 +924,7 @@
 						{
 							type: 1_n_2
 							
-							choices: [	<p>Retain $H_0$</p>, 	<p>Reject $H_0$</p>]
+							choices: [<p>Retain $H_0$</p>, <p>Reject $H_0$</p>]
 							
 							matrix: ["if(pval<2,1,0)", "if(pval>=2,1,0)"]
 							marks: 1
@@ -936,7 +932,7 @@
 						{
 							type: 1_n_2
 							
-							choices: [	<p>There <strong>is</strong> evidence to suggest an association between degree subject and performance.</p>, 	<p>There is <strong>no</strong> evidence to suggest an association between degree subject and performance.</p>]
+							choices: [<p>There <strong>is</strong> evidence to suggest an association between degree subject and performance.</p>, <p>There is <strong>no</strong> evidence to suggest an association between degree subject and performance.</p>]
 							
 							matrix: ["if(pval>=2,1,0)", "if(pval<2,1,0)"]
 							marks: 1
@@ -1178,11 +1174,9 @@
 					]
 					type: number
 					definition: "
-					
-										if(n>0,
-																			random(2,3,5,7,11,13,17,19,23)*randompow(n-1),
-																			1)
-										
+					if(n>0,
+					random(2,3,5,7,11,13,17,19,23)*randompow(n-1),
+					1)
 					"
 				}
 				describegcd: {
@@ -1195,17 +1189,15 @@
 					]
 					type: string
 					definition: """
-					
-										if(a<b,
-																			'<tr><td style="text-align:left;"> First of all, the biggest number needs to go first: </td><td> $\operatorname{gcd}(\var{a},\var{b}) = \operatorname{gcd}(\var{b},\var{a}), $ </td></tr>'+describeGCD(b,a)
-																		,
-																			if(b|a,
-																				'<tr><td style="text-align:left;"> Finally, $\var{b}$ divides into $\var{a}$ exactly $\var{a/b}$ times: </td><td> $\var{a} = \var{b} \times \var{a/b}.$ </td></tr>'
-																			,
-																				'<tr><td style="text-align:left;"> Divide $\var{a}$ by $\var{b}$ with remainder $\var{mod(a,b)}$: </td><td> $\var{a} = \var{b} \times \var{floor(a/b)} + \var{mod(a,b)},$ </td></tr>'+describeGCD(b,mod(a,b))
-																			)
-																		)
-										
+					if(a<b,
+					'<tr><td style="text-align:left;"> First of all, the biggest number needs to go first: </td><td> $\operatorname{gcd}(\var{a},\var{b}) = \operatorname{gcd}(\var{b},\var{a}), $ </td></tr>'+describeGCD(b,a)
+					,
+					if(b|a,
+					'<tr><td style="text-align:left;"> Finally, $\var{b}$ divides into $\var{a}$ exactly $\var{a/b}$ times: </td><td> $\var{a} = \var{b} \times \var{a/b}.$ </td></tr>'
+					,
+					'<tr><td style="text-align:left;"> Divide $\var{a}$ by $\var{b}$ with remainder $\var{mod(a,b)}$: </td><td> $\var{a} = \var{b} \times \var{floor(a/b)} + \var{mod(a,b)},$ </td></tr>'+describeGCD(b,mod(a,b))
+					)
+					)
 					"""
 				}
 				extendedgcd1: {
@@ -1218,13 +1210,11 @@
 					]
 					type: number
 					definition: "
-					
-										if((a|b) or (b|a),
-																			0
-																		,
-																			extendedgcd2(b,mod(a,b))
-																		)
-										
+					if((a|b) or (b|a),
+					0
+					,
+					extendedgcd2(b,mod(a,b))
+					)
 					"
 				}
 				extendedgcd2: {
@@ -1237,13 +1227,11 @@
 					]
 					type: number
 					definition: "
-					
-										if((a|b) or (b|a),
-																			1
-																		,
-																			extendedgcd1(b,mod(a,b))-(extendedgcd2(b,mod(a,b))*floor(a/b))
-																		)
-										
+					if((a|b) or (b|a),
+					1
+					,
+					extendedgcd1(b,mod(a,b))-(extendedgcd2(b,mod(a,b))*floor(a/b))
+					)
 					"
 				}
 				describebezout: {
@@ -1256,13 +1244,11 @@
 					]
 					type: string
 					definition: "
-					
-										if((a|b) or (b|a),
-																			''
-																		,
-																			describeBezout(b,mod(a,b))+'<li> $\simplify[]{{gcd(a,b)} = {a}*{extendedgcd1(a,b)} + {b}*{extendedgcd2(a,b)}}$ </li>'
-																		)
-										
+					if((a|b) or (b|a),
+					''
+					,
+					describeBezout(b,mod(a,b))+'<li> $\simplify[]{{gcd(a,b)} = {a}*{extendedgcd1(a,b)} + {b}*{extendedgcd2(a,b)}}$ </li>'
+					)
 					"
 				}
 			}
@@ -1633,11 +1619,7 @@
 						{
 							type: information
 							prompt: "
-							
-							
-								<p>The formula for integrating by parts is<br />\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]</p>
-							
-							
+							<p>The formula for integrating by parts is<br />\[ \int u\frac{dv}{dx} dx = uv - \int v \frac{du}{dx} dx. \]</p>
 							"
 						}
 					]
