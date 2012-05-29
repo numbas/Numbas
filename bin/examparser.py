@@ -201,7 +201,8 @@ class ExamParser:
 			self.cursor = i
 			return v
 
-def printdata(data,tabs=''):
+def printdata(data,ntabs=0):
+	tabs = ntabs*'\t'
 	if type(data)==dict or type(data)==OrderedDict:
 		s=''
 		first=True
@@ -210,7 +211,7 @@ def printdata(data,tabs=''):
 				s+='\n'+tabs+'\t'
 			if type(data[x])==dict or type(data[x])==list:
 				s+='\n'+tabs+'\t'
-			s+=x+': '+printdata(data[x],tabs+'\t')
+			s+=x+': '+printdata(data[x],ntabs+1)
 			first=False
 		if '\n' in s: 
 			s='{\n'+tabs+'\t'+s+'\n'+tabs+'}'
@@ -227,7 +228,7 @@ def printdata(data,tabs=''):
 					s+='\n'+tabs+'\t'
 			if type(x)==dict or type(x)==list:
 				s+='\n'+tabs+'\t'
-			s+=printdata(x,tabs+'\t')
+			s+=printdata(x,ntabs+1)
 			first=False
 		if '\n' in s: 
 			s='[\n'+tabs+'\t'+s+'\n'+tabs+']'
@@ -240,7 +241,8 @@ def printdata(data,tabs=''):
 
 		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
 			if '\n' in data:
-				data = '\n'+'\n'.join([tabs+l for l in data.split('\n')])+'\n'+tabs
+				data = re.sub('(^[\n\t]*)|([\n\t]*$)','',data)
+				data = '\n'+'\n'.join([pad_left(l,'\t',ntabs) for l in data.split('\n')])+'\n'+tabs
 
 			if '"' in data:
 				return '"""'+data+'"""'
@@ -268,6 +270,9 @@ def is_int(s):
 	except ValueError:
 		return False
 
+#make sure string s has exactly n copies of c at the start
+def pad_left(s,c,n):
+	return re.sub('^'+c+'*',c*n,s)
 
 def __demo():
 	source='''
