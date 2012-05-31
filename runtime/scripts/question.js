@@ -815,7 +815,7 @@ JMEPart.prototype =
 		correctAnswer: '',
 
 		//default simplification rules to use on correct answer
-		answerSimplification: ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
+		answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
 		
 		//	checking type : SigFig (round answers to x sig figs)
 		//					RelDiff (compare ratio of student answer to correct answer)

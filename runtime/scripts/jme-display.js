@@ -61,7 +61,7 @@ jme.display = {
 		try 
 		{
 			var exprTree = jme.compile(expr,{},true);	//compile the expression to a tree. notypecheck is true, so undefined function names can be used.
-			return jme.display.simplifyTree(exprTree,ruleset);	// simplify the tree
+			return jme.display.simplifyTree(exprTree,ruleset,scope);	// simplify the tree
 		}
 		catch(e) 
 		{
@@ -71,7 +71,7 @@ jme.display = {
 	},
 
 	//simplify a syntax tree according to given ruleset
-	simplifyTree: function(exprTree,rules)
+	simplifyTree: function(exprTree,rules,scope)
 	{
 		var applied = true;
 
@@ -81,7 +81,12 @@ jme.display = {
 			//the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
 			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')	
 			{
-				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0])};
+				try{
+					exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
+				}
+				catch(e) {	//if the eval can't be evaluated, for example because it uses an undefined function, don't worry.
+					applied = false;
+				}
 			}
 			else
 			{
@@ -89,14 +94,14 @@ jme.display = {
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
-						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],rules);
+						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],rules,scope);
 					}
 				}
 				applied = false;
 				for( var i=0; i<rules.length;i++)	//check each rule
 				{
 					var match;
-					if(match = rules[i].match(exprTree))	//if rule can be applied, apply it!
+					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
 					{
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope({variables:match}));
 						applied = true;
@@ -971,7 +976,7 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 }
 
 Rule.prototype = {
-	match: function(exprTree)
+	match: function(exprTree,scope)
 	{
 		//see if expression matches rule
 		var match = matchTree(this.tree,exprTree);
@@ -980,13 +985,13 @@ Rule.prototype = {
 
 		//if expression matches rule, then match is a dictionary of matched variables
 		//check matched variables against conditions
-		if(this.matchConditions(match))
+		if(this.matchConditions(match,scope))
 			return match;
 		else
 			return false;
 	},
 
-	matchConditions: function(match)
+	matchConditions: function(match,scope)
 	{
 		for(var i=0;i<this.conditions.length;i++)
 		{
@@ -994,7 +999,7 @@ Rule.prototype = {
 			c = jme.substituteTree(c,new jme.Scope({variables:match}));
 			try
 			{
-				var result = jme.evaluate(c,{});
+				var result = jme.evaluate(c,scope);
 				if(result.value==false)
 					return false;
 			}
@@ -1210,6 +1215,7 @@ for(var x in simplificationRules)
 }
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=all;
+Numbas.jme.builtinScope = new Numbas.jme.Scope(Numbas.jme.builtinScope,{rulesets: simplificationRules});
 
 var displayFlags = ['fractionnumbers','rowvector'];
 
