@@ -81,12 +81,7 @@ jme.display = {
 			//the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
 			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')	
 			{
-				try{
-					exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
-				}
-				catch(e) {	//if the eval can't be evaluated, for example because it uses an undefined function, don't worry.
-					applied = false;
-				}
+				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
 			}
 			else
 			{

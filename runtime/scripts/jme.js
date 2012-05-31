@@ -1613,7 +1613,7 @@ new funcObj('isa',['?',TString],TBool, null, {
 		}
 		else
 		{
-			var match = args[0].tok.outtype == kind;
+			var match = args[0].tok.type == kind;
 		}
 		return new TBool(match);
 	},
