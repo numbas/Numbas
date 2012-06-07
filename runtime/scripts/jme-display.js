@@ -583,6 +583,7 @@ function texMatrix(m,settings)
 function texName(name,annotation)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
+	name = name.replace(/^(.*?)(\d+)/,'$1_{$2}');	//make numbers at the end of a variable name subscripts
 	if(!annotation)
 		return name;
 
