@@ -860,7 +860,7 @@ JMEPart.prototype =
 
 		try
 		{
-			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'all',this.question.scope);
+			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'',this.question.scope);
 		}
 		catch(e)
 		{
