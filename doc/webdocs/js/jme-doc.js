@@ -190,7 +190,7 @@ $(document).ready(function() {
 				;
 			}
 			try {
-				var result = Numbas.jme.evaluate(tree);
+				var result = Numbas.jme.evaluate(tree,Numbas.jme.builtinScope);
 				if(!((result.type=='number' && !result.value.complex && isNaN(result.value)) || result.value==undefined || result.value==null))
 				{
 					result = Numbas.jme.display.treeToJME({tok:result});

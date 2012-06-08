@@ -91,6 +91,11 @@ SCORMStorage.prototype = {
 		bookmark: 0
 	},
 
+	save: function()
+	{
+		pipwerks.SCORM.save();
+	},
+
 	set: function(key,value)
 	{
 		//Numbas.debug("set "+key+" := "+value,true);
@@ -275,14 +280,13 @@ SCORMStorage.prototype = {
 			answered: question.answered,
 			submitted: question.submitted,
 			adviceDisplayed: question.adviceDisplayed,
-			revealed: question.revealed,
-			variables: question.variables
+			revealed: question.revealed
 		};
 
-		qobj.variables = {}
-		for(var name in question.variables)
+		qobj.variables = {};
+		for(var name in question.scope.variables)
 		{
-			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.variables[name]});
+			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.scope.variables[name]},{});
 		}
 
 		qobj.parts = [];
@@ -371,7 +375,7 @@ SCORMStorage.prototype = {
 		var variables = {};
 		for(var name in qobj.variables)
 		{
-			variables[name] = Numbas.jme.evaluate(qobj.variables[name]);
+			variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
 		}
 
 		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),

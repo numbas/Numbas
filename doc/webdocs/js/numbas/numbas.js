@@ -63,70 +63,11 @@ Numbas.showError = function(e)
 Numbas.Error = function(message)
 {
 	this.name="Numbas Error";
+	this.originalMessage = message;
 	this.message = R.apply(this,arguments);
 }
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
-
-// Initialise the exam:
-// - Connect to the LMS, which might have saved student answers
-// - Load the exam XML and the XSL templates
-// - create and initialise the exam object
-// - display the frontpage
-// This function is called when all the other scripts have been loaded and executed. 
-// It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
-var init = Numbas.init = function()
-{
-	var job = Numbas.schedule.add;
-
-	//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
-
-	job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
-
-	job(function()
-	{
-		var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
-		
-		var exam = Numbas.exam = new Numbas.Exam();					//create the exam object, and load in everything from the XML
-
-		switch(store.getEntry())
-		{
-		case 'ab-initio':
-			job(exam.init,exam);
-			job(Numbas.display.init);
-			job(function() {
-				if(exam.showFrontPage)
-				{
-					exam.display.showInfoPage('frontpage');
-				}
-				else
-				{
-					exam.begin();
-				}
-			});	
-			break;
-
-		case 'resume':
-			job(exam.load,exam);
-			job(Numbas.display.init);
-
-			job(function() {
-				if(exam.currentQuestion !== undefined)
-				{
-					job(exam.display.showInfoPage,exam.display,'suspend');
-				}
-				else
-				{
-					job(exam.display.showInfoPage,exam.display,'frontpage');
-				}
-			});
-
-			break;
-		}
-		//job(function(){Numbas.timing.end('init');});			//end performance timing 
-	});
-
-}
 
 // Script loading system.
 // call loadScript to load a file. It will then call queueScript with a list of its dependencies, and its code wrapped into a callback function.
@@ -134,7 +75,7 @@ var init = Numbas.init = function()
 //
 
 var scriptreqs = {};
-var startOK = false;
+Numbas.startOK = false;
 
 function RequireScript(file)
 {
@@ -177,12 +118,15 @@ var loadCSS = Numbas.loadCSS = function(file)
 	document.getElementsByTagName('head')[0].appendChild(link);
 }
 
+Numbas.scriptPrefix = 'scripts/';
+
 Numbas.queueScript = function(file, deps, callback)	
 //queue up a file's code to be executed
 //file is the path of this file
 //deps is a list of other files which need to be run before this one can be
 //callback is a function wrapping up this file's code
 {
+	file = file.replace(/^scripts\//,Numbas.scriptPrefix);
 	var req = scriptreqs[file];
 
 	if(typeof(deps)=='string')
@@ -191,7 +135,7 @@ Numbas.queueScript = function(file, deps, callback)
 	{
 		var dep = deps[i];
 		if(!dep.match('/'))				//so can refer to built-in scripts just by name
-			dep = 'scripts/'+deps[i]+'.js';
+			dep = Numbas.scriptPrefix+deps[i]+'.js';
 		deps[i] = dep;
 		loadScript(dep);
 		scriptreqs[dep].backdeps.push(file);
@@ -201,13 +145,13 @@ Numbas.queueScript = function(file, deps, callback)
 	
 	req.loaded = true;
 
-	if(startOK)
+	if(Numbas.startOK)
 	{
-		tryInit();
+		Numbas.tryInit();
 	}
 }
 
-function tryInit()
+Numbas.tryInit = function()
 //called when all files have been requested, will try to execute all queued code if all script files have been loaded
 {
 
@@ -251,12 +195,6 @@ function tryInit()
 	Numbas.init();
 }
 
-$(document).ready(function() {
-	loadScript('settings.js');
-	loadScript('scripts/exam.js');
-	startOK = true;
-	tryInit();
-});
 
 
 })();

@@ -25,43 +25,43 @@ jme.display = {
 	//convert a JME expression to LaTeX
 	//ruleset can be anything accepted by jme.display.collectRuleset
 	//settings are also passed through to the texify function
-	exprToLaTeX: function(expr,ruleset)
+	exprToLaTeX: function(expr,ruleset,scope)
 	{
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,Numbas.exam ? Numbas.exam.rulesets : simplificationRules);
+		ruleset = collectRuleset(ruleset,scope);
 
 		expr+='';	//make sure expr is a string
 
 		if(!expr.trim().length)	//if expr is the empty string, don't bother going through the whole compilation proces
 			return '';
-		var tree = jme.display.simplify(expr,ruleset); //compile the expression to a tree and simplify it
+		var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
 		var tex = texify(tree,ruleset); //render the tree as TeX
 		return tex;
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a JME string
-	simplifyExpression: function(expr,ruleset)
+	simplifyExpression: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
 			return '';
-		return treeToJME(jme.display.simplify(expr,ruleset));
+		return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset);
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a syntax tree
-	simplify: function(expr,ruleset)
+	simplify: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
 			return;
 
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,Numbas.exam ? Numbas.exam.rulesets : simplificationRules);		//collect the ruleset - replace set names with the appropriate Rule objects
+		ruleset = collectRuleset(ruleset,scope);		//collect the ruleset - replace set names with the appropriate Rule objects
 
 		try 
 		{
 			var exprTree = jme.compile(expr,{},true);	//compile the expression to a tree. notypecheck is true, so undefined function names can be used.
-			return jme.display.simplifyTree(exprTree,ruleset);	// simplify the tree
+			return jme.display.simplifyTree(exprTree,ruleset,scope);	// simplify the tree
 		}
 		catch(e) 
 		{
@@ -71,7 +71,7 @@ jme.display = {
 	},
 
 	//simplify a syntax tree according to given ruleset
-	simplifyTree: function(exprTree,rules)
+	simplifyTree: function(exprTree,rules,scope)
 	{
 		var applied = true;
 
@@ -81,7 +81,7 @@ jme.display = {
 			//the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
 			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')	
 			{
-				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0])};
+				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
 			}
 			else
 			{
@@ -89,16 +89,16 @@ jme.display = {
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
-						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],rules);
+						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],rules,scope);
 					}
 				}
 				applied = false;
 				for( var i=0; i<rules.length;i++)	//check each rule
 				{
 					var match;
-					if(match = rules[i].match(exprTree))	//if rule can be applied, apply it!
+					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
 					{
-						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),match);
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope({variables:match}));
 						applied = true;
 						break;
 					}
@@ -287,8 +287,8 @@ var texOps = {
 	'>=': infixTex('\\geq'),
 	'<>': infixTex('\neq'),
 	'=': infixTex('='),
-	'&&': infixTex('\\wedge'),
-	'||': infixTex('\\vee'),
+	'and': infixTex('\\wedge'),
+	'or': infixTex('\\vee'),
 	'xor': infixTex('\\, \\textrm{XOR} \\,'),
 	'|': infixTex('|'),
 	'abs': (function(thing,texArgs,settings) { 
@@ -583,6 +583,7 @@ function texMatrix(m,settings)
 function texName(name,annotation)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
+	name = name.replace(/^(.*?)(\d+)/,'$1_{$2}');	//make numbers at the end of a variable name subscripts
 	if(!annotation)
 		return name;
 
@@ -707,20 +708,144 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	}
 }
 
+function jmeRationalNumber(n)
+{
+	if(n.complex)
+	{
+		var re = jmeRationalNumber(n.re);
+		var im = jmeRationalNumber(n.im)+' i';
+		if(n.im==0)
+			return re;
+		else if(n.re==0)
+		{
+			if(n.im==1)
+				return 'i';
+			else if(n.im==-1)
+				return '-i';
+			else
+				return im;
+		}
+		else if(n.im<0)
+		{
+			if(n.im==-1)
+				return re+' - i';
+			else
+				return re+' '+im;
+		}
+		else
+		{
+			if(n.im==1)
+				return re+' + '+'i';
+			else
+				return re+' + '+im;
+		}
+
+	}
+	else
+	{
+		var piD;
+		if((piD = math.piDegree(n)) > 0)
+			n /= Math.pow(Math.PI,piD);
+
+		var f = math.rationalApproximation(Math.abs(n));
+		if(f[1]==1)
+			out = Math.abs(f[0]).toString();
+		else
+			var out = f[0]+'/'+f[1];
+		if(n<0)
+			out=' - '+out;
+
+		switch(piD)
+		{
+		case 0:
+			return out;
+		case 1:
+			return out+' pi';
+		default:
+			return out+' pi^'+piD;
+		}
+	}
+}
+
+function jmeRealNumber(n)
+{
+	if(n.complex)
+	{
+		var re = jmeRealNumber(n.re);
+		var im = jmeRealNumber(n.im)+' i';
+		if(n.im==0)
+			return re;
+		else if(n.re==0)
+		{
+			if(n.im==1)
+				return 'i';
+			else if(n.im==-1)
+				return '-i';
+			else
+				return im;
+		}
+		else if(n.im<0)
+		{
+			if(n.im==-1)
+				return re+' - i';
+			else
+				return re+' '+im;
+		}
+		else
+		{
+			if(n.im==1)
+				return re+' + '+'i';
+			else
+				return re+' + '+im;
+		}
+
+	}
+	else
+	{
+		if(n==Infinity)
+			return 'infinity';
+
+		var piD;
+		if((piD = math.piDegree(n)) > 0)
+			n /= Math.pow(Math.PI,piD);
+
+		out = math.niceNumber(n);
+		switch(piD)
+		{
+		case 0:
+			return out;
+		case 1:
+			if(n==1)
+				return 'pi';
+			else
+				return out+' pi';
+		default:
+			if(n==1)
+				return 'pi^'+piD;
+			else
+				return out+' pi^'+piD;
+		}
+	}
+}
+
 
 //turns an evaluation tree back into a JME expression
 //(used when an expression is simplified)
-var treeToJME = jme.display.treeToJME = function(tree)
+var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
 	if(!tree)
 		return '';
+
+	settings = settings || {};
 
 	var args=tree.args, l;
 
 	if(args!==undefined && ((l=args.length)>0))
 	{
-		var bits = args.map(treeToJME);
+		var bits = args.map(function(i){return treeToJME(i,settings)});
 	}
+
+    var jmeNumber = settings.fractionnumbers ? jmeRationalNumber : jmeRealNumber;
 
 	var tok = tree.tok;
 	switch(tok.type)
@@ -733,12 +858,13 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		case Math.PI:
 			return 'pi';
 		default:
-			return Numbas.math.niceNumber(tok.value);
+			return jmeNumber(tok.value);
 		}
 	case 'name':
 		return tok.name;
 	case 'string':
-		return '"'+tok.value+'"';
+		var str = tok.value.replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
+		return '"'+str+'"';
 	case 'boolean':
 		return (tok.value ? 'true' : 'false');
 	case 'range':
@@ -746,14 +872,14 @@ var treeToJME = jme.display.treeToJME = function(tree)
 	case 'list':
 		if(!bits)
 		{
-			bits = tok.value.map(function(b){return treeToJME({tok:b});});
+			bits = tok.value.map(function(b){return treeToJME({tok:b},settings);});
 		}
 		return '[ '+bits.join(', ')+' ]';
 	case 'vector':
-		return 'vector('+tok.value.map(function(i){return Numbas.math.niceNumber(i)}).join(',')+')';
+		return 'vector('+tok.value.map(jmeNumber).join(',')+')';
 	case 'matrix':
 		return 'matrix('+
-			tok.value.map(function(row){return '['+row.map(function(x){return Numbas.math.niceNumber(x)}).join(',')+']'}).join(',')+')';
+			tok.value.map(function(row){return '['+row.map(jmeNumber).join(',')+']'}).join(',')+')';
 	case 'special':
 		return tok.value;
 	case 'conc':
@@ -799,6 +925,14 @@ var treeToJME = jme.display.treeToJME = function(tree)
 		case '-u':
 			op='-';
 			break;
+		case 'and':
+		case 'or':
+		case 'isa':
+		case 'except':
+			op=' '+op+' ';
+			break;
+		case 'not':
+			op = 'not ';
 		}
 
 		if(l==1)
@@ -838,7 +972,7 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 }
 
 Rule.prototype = {
-	match: function(exprTree)
+	match: function(exprTree,scope)
 	{
 		//see if expression matches rule
 		var match = matchTree(this.tree,exprTree);
@@ -847,21 +981,21 @@ Rule.prototype = {
 
 		//if expression matches rule, then match is a dictionary of matched variables
 		//check matched variables against conditions
-		if(this.matchConditions(match))
+		if(this.matchConditions(match,scope))
 			return match;
 		else
 			return false;
 	},
 
-	matchConditions: function(match)
+	matchConditions: function(match,scope)
 	{
 		for(var i=0;i<this.conditions.length;i++)
 		{
 			var c = Numbas.util.copyobj(this.conditions[i],true);
-			c = jme.substituteTree(c,match);
+			c = jme.substituteTree(c,new jme.Scope({variables:match}));
 			try
 			{
-				var result = jme.evaluate(c,{});
+				var result = jme.evaluate(c,scope);
 				if(result.value==false)
 					return false;
 			}
@@ -1077,12 +1211,14 @@ for(var x in simplificationRules)
 }
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=all;
+Numbas.jme.builtinScope = new Numbas.jme.Scope(Numbas.jme.builtinScope,{rulesets: simplificationRules});
 
 var displayFlags = ['fractionnumbers','rowvector'];
 
-var collectRuleset = jme.display.collectRuleset = function(set,sets)
+var collectRuleset = jme.display.collectRuleset = function(set,scope)
 {
-	sets = Numbas.util.copyobj(sets);
+	scope = new jme.Scope(scope);
+	var sets = scope.rulesets;
 	if(typeof(set)=='string')
 	{
 		set = set.split(',');
@@ -1119,7 +1255,7 @@ var collectRuleset = jme.display.collectRuleset = function(set,sets)
 					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',name));
 				}
 
-				var sub = collectRuleset(sets[name],sets);
+				var sub = collectRuleset(sets[name],scope);
 
 				for(var j=0;j<displayFlags.length;j++)
 				{
