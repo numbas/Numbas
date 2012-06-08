@@ -825,7 +825,7 @@ display.JMEPartDisplay.prototype =
 			if(txt!=='')
 			{
 				try {
-					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification);
+					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification,this.p.question.scope);
 					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;
