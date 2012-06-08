@@ -83,7 +83,8 @@ $(document).ready(function() {
 			return;
 		
 		try {
-			var line = Numbas.jme.contentsubvars(expr,variables);
+			scope = new Numbas.jme.Scope(Numbas.jme.builtinScope,{variables:variables});
+			var line = Numbas.jme.contentsubvars(expr,scope);
 			$('#tryDisplay #display')
 				.html(line)
 				.mathjax()
