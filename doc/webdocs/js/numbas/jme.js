@@ -681,7 +681,7 @@ var jme = Numbas.jme = {
 					brackets--;
 			}
 			if(i == s.length-1 && brackets>0)
-				throw(new Numbas.Error('jme.texsubvars.no right brace'));
+				throw(new Numbas.Error('jme.texsubvars.no right brace',cmd));
 
 			var expr = s.slice(si,i);
 			s = s.slice(i+1);
@@ -1996,8 +1996,10 @@ var checkingFunctions =
 	}
 };
 
-var findvars = jme.findvars = function(tree,boundvars)
+var findvars = jme.findvars = function(tree,boundvars,scope)
 {
+	if(!scope)
+		scope = jme.builtinScope;
 	if(boundvars===undefined)
 		boundvars = [];
 
@@ -2028,14 +2030,14 @@ var findvars = jme.findvars = function(tree,boundvars)
 				switch(cmd)
 				{
 				case 'var':
-					var tree2 = jme.compile(expr,{},true);
+					var tree2 = jme.compile(expr,scope,true);
 					out = out.merge(findvars(tree2,boundvars));
 					break;
 				case 'simplify':
 					var sbits = util.splitbrackets(expr,'{','}');
 					for(var i=1;i<sbits.length-1;i+=2)
 					{
-						var tree2 = jme.compile(sbits[i],{},true);
+						var tree2 = jme.compile(sbits[i],scope,true);
 						out = out.merge(findvars(tree2,boundvars));
 					}
 					break;
