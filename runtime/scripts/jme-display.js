@@ -73,6 +73,8 @@ jme.display = {
 	//simplify a syntax tree according to given ruleset
 	simplifyTree: function(exprTree,rules,scope)
 	{
+		scope = Numbas.util.copyobj(scope);
+		scope.variables = {};	//remove variables from the scope so they don't accidentally get substituted in
 		var applied = true;
 
 		// apply rules until nothing can be done
