@@ -10,6 +10,10 @@ function make_dirs() {
   fi
 }
 
+if [ ! -d ${OUTPUT_DIR} ]; then
+  mkdir ${OUTPUT_DIR}
+fi
+
 for module in $NORMAL_MODULES; do
   make_dirs
   for i in `seq 1 4`; do
