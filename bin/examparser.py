@@ -13,7 +13,12 @@
 #   limitations under the License.
 import sys
 import re
-from collections import OrderedDict
+try:
+  # For Python > 2.7
+  from collections import OrderedDict
+except ImportError:
+  # For Python < 2.6 (after installing ordereddict)
+  from ordereddict import OrderedDict
 
 try:
 	unicode
