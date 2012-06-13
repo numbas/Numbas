@@ -218,6 +218,7 @@
 						ok(evaluate('1<2 && 3<4'),'AND after comparisons');
 						closeEquals(evaluate('true or false and false').value,true,'OR after AND');
 						closeEquals(evaluate('true xor true or true').value,false,'XOR after OR');
+						ok(evaluate('1/-7'),'unary operation straight after a binary operation');
 					});
 
 					test('Synonyms',function() {

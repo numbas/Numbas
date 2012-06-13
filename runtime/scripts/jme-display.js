@@ -73,6 +73,8 @@ jme.display = {
 	//simplify a syntax tree according to given ruleset
 	simplifyTree: function(exprTree,rules,scope)
 	{
+		if(!scope)
+			throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
 		scope = Numbas.util.copyobj(scope);
 		scope.variables = {};	//remove variables from the scope so they don't accidentally get substituted in
 		var applied = true;
@@ -203,7 +205,7 @@ var texOps = {
 		if( thing.args[0].tok.type=='op' )
 		{
 			var op = thing.args[0].tok.name;
-			if(jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
+			if(!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
 			{
 				tex='\\left ( '+tex+' \\right )';
 			}
@@ -1081,8 +1083,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
-		['(-x)/y',[],'-x/y'],			//take negation to left of fraction
-		['x/(-y)',[],'-x/y'],			
+		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
+		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication
 		['x*(-y)',[],'-(x*y)'],		
 		['x+(y+z)',[],'(x+y)+z'],		//make sure sums calculated left-to-right

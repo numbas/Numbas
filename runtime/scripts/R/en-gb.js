@@ -65,6 +65,7 @@ R.registerLocale('en-GB',{
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
 	'jme.display.collectRuleset.set not defined': "Ruleset %s has not been defined",
+	'jme.display.simplifyTree.no scope given': "Numbas.jme.display.simplifyTree must be given a Scope",
 
 	'math.precround.complex': "Can't round to a complex number of decimal places",
 	'math.siground.complex': "Can't round to a complex number of sig figs",
