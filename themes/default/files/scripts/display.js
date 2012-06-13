@@ -1199,6 +1199,8 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 
 function scrollTo(el)
 {
+	if(!(el).length)
+		return;
 	var docTop = $(window).scrollTop();
 	var docBottom = docTop + $(window).height();
 	var elemTop = $(el).offset().top;
