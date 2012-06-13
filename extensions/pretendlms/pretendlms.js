@@ -1805,6 +1805,7 @@ Interaction.prototype = {
 
 function Objective()
 {
+	this.score = Numbas.util.copyobj(this.score);
 }
 Objective.prototype = {
 	id: '',								//unique label for objective												(RW)

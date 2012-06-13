@@ -357,7 +357,7 @@ Exam.prototype = {
 		{
 			job(function(i)
 			{
-				var question = new Numbas.Question( questions[this.questionSubset[i]], i, loading, this.scope );
+				var question = new Numbas.Question( this, questions[this.questionSubset[i]], i, loading, this.scope );
 				this.questionList.push(question);
 			},this,i);
 		}
@@ -471,7 +471,8 @@ Exam.prototype = {
 	updateScore: function()
 	{
 		this.calculateScore();
-		this.display.showScore();	
+		this.display.showScore();
+		Numbas.store.saveExam(this);
 	},
 
 	calculateScore: function()
@@ -559,7 +560,7 @@ Exam.prototype = {
 		var n = e.currentQuestion.number;
 		job(e.display.startRegen,e.display);
 		job(function() {
-			e.questionList[n] = new Numbas.Question(e.xml.selectNodes('questions/question')[n], n, false, e.scope);
+			e.questionList[n] = new Numbas.Question(e, e.xml.selectNodes('questions/question')[n], n, false, e.scope);
 		})
 		job(function() {
 			e.changeQuestion(n);

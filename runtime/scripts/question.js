@@ -25,9 +25,10 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-var Question = Numbas.Question = function( xml, number, loading, gscope )
+var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 {
 	var q = this;
+	q.exam = exam;
 	q.xml = xml;
 	q.originalXML = q.xml;
 	q.number = number;
@@ -388,7 +389,7 @@ Question.prototype =
 		this.display.showScore();
 
 		//notify storage
-		Numbas.store.submitQuestion(this);
+		Numbas.store.saveQuestion(this);
 	}
 
 };

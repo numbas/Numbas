@@ -566,15 +566,21 @@ SCORMStorage.prototype = {
 		this.setSuspendData();
 	},
 
-	//called when current question is submitted
-	submitQuestion: function(question) 
+	saveExam: function(exam)
 	{
-		var exam = Numbas.exam;
 		if(exam.loading)
 			return;
+
 		//update total exam score and so on
 		this.set('score.raw',exam.score);
 		this.set('score.scaled',exam.score/exam.mark || 0);
+	},
+
+	//called when current question is submitted
+	saveQuestion: function(question) 
+	{
+		if(question.exam.loading)
+			return;
 
 		var id = this.getQuestionId(question);
 		var index = this.questionIndices[id];

@@ -78,8 +78,11 @@ Numbas.storage.BlankStorage.prototype = {
 	//called when a part is answered
 	partAnswered: function(part) {},
 
-	//called when current question is submitted
-	submitQuestion: function(question) {},
+	//called when exam is changed
+	saveExam: function(exam) {},
+
+	//called when current question is changed
+	saveQuestion: function(question) {},
 
 	//record that the student displayed question advice
 	adviceDisplayed: function(question) {},
