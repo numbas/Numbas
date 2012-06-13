@@ -135,6 +135,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			else if(q.adviceDisplayed)
 				q.getAdvice(true);
 		}
+
+		q.updateScore();
 		
 		q.display.makeHTML();
 		q.display.showScore();
