@@ -64,7 +64,7 @@ var jme = Numbas.jme = {
 			{
 				token = new TNum(result[0]);
 
-				if(tokens.length>0 && (tokens[tokens.length-1].type==')'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
+				if(tokens.length>0 && (tokens[tokens.length-1].type==')' || tokens[tokens.length-1].type=='name'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
 				{
 					tokens.push(new TOp('*'));
 				}

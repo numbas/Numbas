@@ -145,6 +145,14 @@
 						raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');
 					});
 
+					test('Implicit multiplication',function() {
+						deepCloseEqual(compile('x 5'),compile('x*5'),'x 5');
+						deepCloseEqual(compile('5x'),compile('5*x'),'5x');
+						deepCloseEqual(compile('x x'),compile('x*x'),'x x');
+						deepCloseEqual(compile('5(x+1)'),compile('5*(x+1)'),'5(x+1)');
+						deepCloseEqual(compile('(x+1)(x+2)'),compile('(x+1)*(x+2)'),'(x+1)(x+2)');
+					});
+
 					test('Invalid expressions',function() {
 						raisesNumbasError(function(){tokenise('x.1')},'jme.tokenise.invalid','Invalid: x.1');
 					});
@@ -161,7 +169,6 @@
 						raisesNumbasError(function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
 						raisesNumbasError(function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
 					})
-
 
 					test('jme.typecheck',function() {
 						raisesNumbasError(function(){ compile('x()') },'jme.typecheck.function not defined','function not defined: x()');
