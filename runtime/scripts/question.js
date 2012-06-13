@@ -137,6 +137,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		}
 		
 		q.display.makeHTML();
+		q.display.showScore();
 	});
 
 }
