@@ -51,7 +51,7 @@ var jme = Numbas.jme = {
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
-		var re_string = /^(?:"((?:[^"\\]|\\.)*)")|^(?:'((?:[^'\\]|\\.)*)(?!\\)')/;
+		var re_string = /^(['"])((?:[^\1\\]|\\.)*?)\1/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
 		
 		while( expr.length )
@@ -125,7 +125,7 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_string))
 			{
-				var str = result[1]!==undefined ? result[1] : result[2];
+				var str = result[2];
 				str = str.replace(/\\n/g,'\n').replace(/\\(["'])/g,'$1');
 
 				token = new TString(str);
