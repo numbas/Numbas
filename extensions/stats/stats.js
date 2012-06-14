@@ -51,7 +51,6 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		}
 		return t;
 	}
-
 	new funcObj('sum',[TList],TNum, math.sum);
 
 	//mean of a list of numbers

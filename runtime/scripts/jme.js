@@ -1148,14 +1148,14 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 
 	if(!options.nobuiltin)
 	{
-		if(builtins[name]===undefined)
+		if(jme.builtinScope.functions[name]===undefined)
 		{
-			builtins[name]=[this];
+			jme.builtinScope.functions[name]=[this];
 			builtinsbylength.add(name);
 		}
 		else
 		{
-			builtins[name].push(this);
+			jme.builtinScope.functions[name].push(this);
 		}
 	}
 
@@ -1206,10 +1206,9 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 }
 
 // the built-in operations and functions
-var builtinScope = jme.builtinScope = new Scope({functions: builtins});
-var builtins = jme.builtins = builtinScope.functions;
+var builtinScope = jme.builtinScope = new Scope();
 
-builtins['eval'] = [{
+builtinScope.functions['eval'] = [{
 	name: 'eval',
 	intype: ['?'],
 	outtype: '?',

@@ -157,7 +157,7 @@ function infixTex(code)
 {
 	return function(thing,texArgs)
 	{
-		var arity = jme.builtins[thing.tok.name][0].intype.length;
+		var arity = jme.builtinScope.functions[thing.tok.name][0].intype.length;
 		if( arity == 1 )	//if operation is unary, prepend argument with code
 		{
 			return code+texArgs[0];
