@@ -430,7 +430,7 @@ SCORMStorage.prototype = {
 			out.studentAnswer = answer || '';
 			break;
 		case 'numberentry':
-			out.studentAnswer = parseFloat(answer) || '';
+			out.studentAnswer = answer.length ? parseFloat(answer) : '';
 			break;
 		case '1_n_2':
 		case 'm_n_2':
