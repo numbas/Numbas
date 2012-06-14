@@ -377,6 +377,7 @@ Question.prototype =
 		{
 			this.getAdvice();
 		}
+		Numbas.store.questionSubmitted(this);
 	},
 
 	//recalculate score, display, notify storage
@@ -461,6 +462,7 @@ function Part( xml, path, question, parentPart, loading )
 	{
 		var pobj = Numbas.store.loadPart(this);
 		this.answered = pobj.answered;
+		this.stepsShown = pobj.stepsShown;
 	}
 }
 
@@ -691,6 +693,7 @@ Part.prototype = {
 		{
 			this.display.showSteps();
 			this.question.updateScore();
+			Numbas.store.stepsShown(this);
 		}
 	},
 

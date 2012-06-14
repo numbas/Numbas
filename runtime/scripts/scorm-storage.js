@@ -301,7 +301,8 @@ SCORMStorage.prototype = {
 	partSuspendData: function(part)
 	{
 		var pobj = {
-			answered: part.answered
+			answered: part.answered,
+			stepsShown: part.stepsShown
 		};
 		switch(part.type)
 		{
@@ -598,6 +599,12 @@ SCORMStorage.prototype = {
 		this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
 	},
 
+	//record that a question has been submitted
+	questionSubmitted: function(question)
+	{
+		this.save();
+	},
+
 	//record that the student displayed question advice
 	adviceDisplayed: function(question)
 	{
@@ -608,7 +615,16 @@ SCORMStorage.prototype = {
 	answerRevealed: function(question)
 	{
 		this.setSuspendData();
+		this.save();
+	},
+
+	//record that the student showed the steps for a part
+	stepsShown: function(part)
+	{
+		this.setSuspendData();
+		this.save();
 	}
+	
 };
 
 });

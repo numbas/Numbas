@@ -1217,6 +1217,7 @@ PretendLMS.prototype =
 
 	Commit: function( parameter )
 	{
+		Numbas.debug('Committing SCORM',true);
 		if(parameter !== '')
 		{
 			this.SetError(201,"You must pass in an empty string as a parameter to the Commit function.");
