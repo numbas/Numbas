@@ -802,7 +802,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	if(loading)
 	{
-		var pobj = Numbas.store.loadPart(this);
+		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
 		if(this.answered)
 			this.submit();
@@ -1020,7 +1020,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 
 	if(loading)
 	{
-		var pobj = Numbas.store.loadPart(this);
+		var pobj = Numbas.store.loadPatternMatchPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
 		if(this.answered)
 			this.submit();
@@ -1116,7 +1116,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	
 	if(loading)
 	{
-		var pobj = Numbas.store.loadPart(this);
+		var pobj = Numbas.store.loadNumberEntryPart(this);
 		this.stagedAnswer = [pobj.studentAnswer+''];
 		if(this.answered)
 			this.submit();
@@ -1245,7 +1245,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	
 	if(loading)
 	{
-		var pobj = Numbas.store.loadPart(this);
+		var pobj = Numbas.store.loadMultipleResponsePart(this);
 		this.shuffleChoices = pobj.shuffleChoices;
 		this.shuffleAnswers = pobj.shuffleAnswers;
 		this.ticks = pobj.ticks;

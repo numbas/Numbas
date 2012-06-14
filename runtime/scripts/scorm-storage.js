@@ -410,62 +410,67 @@ SCORMStorage.prototype = {
 				break;
 			}
 		}
+
 		var id = this.getPartId( part );
 		var index = this.partIndices[id];
-
-		var out = {
-			answered: pobj.answered
-		};
-
 		var sc = this;
 		function get(key) { return sc.get('interactions.'+index+'.'+key); };
 
-		var answer = get('learner_response');
-		switch(part.type)
-		{
-		case 'jme':
-			out.studentAnswer = answer || '';
-			break;
-		case 'patternmatch':
-			out.studentAnswer = answer || '';
-			break;
-		case 'numberentry':
-			out.studentAnswer = parseFloat(answer)==answer ? parseFloat(answer) : '';
-			break;
-		case '1_n_2':
-		case 'm_n_2':
-		case 'm_n_x':
-			if(part.numAnswers===undefined)
-				return out;
-			var ticks = [];
-			var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
-			var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
-			for(var i=0;i<w;i++)
-			{
-				ticks.push([]);
-				for(var j=0;j<h;j++)
-				{
-					ticks[i].push(false);
-				}
-			}
-			var tick_re=/(\d+)-(\d+)/;
-			var bits = answer.split('[,]');
-			for(var i=0;i<bits.length;i++)
-			{
-				var m = bits[i].match(tick_re);
-				if(m)
-				{
-					var x = parseInt(m[1],10);
-					var y = parseInt(m[2],10);
-					ticks[x][y]=true;
-				}
-			}
-			out.ticks = ticks;
-			out.shuffleChoices = pobj.shuffleChoices;
-			out.shuffleAnswers = pobj.shuffleAnswers;
-			break;
-		}
+		pobj.answer = get('learner_response');
 
+		return pobj;
+	},
+
+	loadJMEPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = out.answer || '';
+		return out;
+	},
+	loadPatternMatchPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = out.answer || '';
+		return out;
+	},
+	loadNumberEntryPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = parseFloat(out.answer)==out.answer ? parseFloat(out.answer) : '';
+		return out;
+	},
+	loadMultipleResponsePart: function(part)
+	{
+		var out = this.loadPart(part);
+
+		if(part.numAnswers===undefined)
+			return out;
+		var ticks = [];
+		var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
+		var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
+		if(w==0 || h==0)
+			return;
+		for(var i=0;i<w;i++)
+		{
+			ticks.push([]);
+			for(var j=0;j<h;j++)
+			{
+				ticks[i].push(false);
+			}
+		}
+		var tick_re=/(\d+)-(\d+)/;
+		var bits = out.answer.split('[,]');
+		for(var i=0;i<bits.length;i++)
+		{
+			var m = bits[i].match(tick_re);
+			if(m)
+			{
+				var x = parseInt(m[1],10);
+				var y = parseInt(m[2],10);
+				ticks[x][y]=true;
+			}
+		}
+		out.ticks = ticks;
 		return out;
 	},
 
