@@ -114,7 +114,6 @@ R.registerLocale('en-GB',{
 	'part.jme.not-allowed bits': '<span class="monospace">%s</span>',
 	'part.jme.not-allowed one': "Your answer must not contain: %s",
 	'part.jme.not-allowed several': "Your answer must not contain any of: %s",
-	'part.jme.answer invalid': "This is not a valid mathematical expression.\n\n%s",
 
 	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
 	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",
