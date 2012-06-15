@@ -212,26 +212,21 @@ display.ExamDisplay.prototype =
 			$(question.display.questionSelector).attr('class',
 					(question.visited || exam.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
 		}
-
 		//scroll question list to centre on current question
 		if(display.carouselGo)
 			display.carouselGo(exam.currentQuestion.number-1,300);
 		
 		//enable or disable 'previous question' button
 		if(exam.currentQuestion.number === 0)
-			$('*').find('#prevBtn').attr('disabled','true').hide();
+			$('#prevBtn').attr('disabled','true').hide();
 		else if(exam.navigateReverse)
-			$('*').find('#prevBtn').removeAttr('disabled').show();
+			$('#prevBtn').removeAttr('disabled').show();
 
 		//enable or disable 'next question' button
 		if( exam.currentQuestion.number == exam.numQuestions-1 )
-		{
-			$('*').find('#nextBtn').attr('disabled','true').hide();
-		}
+			$('#nextBtn').attr('disabled','true').hide();
 		else
-		{
-			$('*').find('#nextBtn').removeAttr('disabled').show();
-		}
+			$('#nextBtn').removeAttr('disabled').show();
 	},
 
 	showInfoPage: function(page)
@@ -397,9 +392,6 @@ display.QuestionDisplay.prototype =
 		//display advice if appropriate
 		this.showAdvice();
 
-		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
-
 		//show/hide reveal answer button
 		if(exam.allowRevealAnswer)
 			$('#revealBtn').show();
@@ -423,6 +415,11 @@ display.QuestionDisplay.prototype =
 
 		//scroll back to top of page
 		scroll(0,0);
+
+
+		// make mathjax process the question text (render the maths)
+		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
+
 	},
 
 	addPostTypesetCallback: function(callback)
