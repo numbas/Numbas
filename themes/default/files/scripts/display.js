@@ -75,11 +75,16 @@ var display = Numbas.display = {
 	},
 
 	//make MathJax typeset any maths in elem (or whole page if elem not given)
-	typeset: function(elem,callback)
+	typeset: function(selector,callback)
 	{
 		try
 		{
-			MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+			if(!selector)
+				selector = $('body');
+
+			$(selector).each(function(i,elem) {
+				MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+			});
 			if(callback)
 				MathJaxQueue.Push(callback);
 		}
@@ -363,9 +368,6 @@ display.QuestionDisplay.prototype =
 		
 		$('#questionDisplay').html(this.html);
 
-		//remove empty paragraphs
-		$('#questionDisplay p').filter(function(){return /^(\s|&nbsp;)*$/.test($(this).html())}).remove();
-
 		if($('.statement').text().trim()=='')	//hide statement block if empty
 			$('.statement').hide();
 
@@ -396,7 +398,7 @@ display.QuestionDisplay.prototype =
 		this.showAdvice();
 
 		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset($('#questionDisplay')[0],this.postTypesetF);
+		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
 
 		//show/hide reveal answer button
 		if(exam.allowRevealAnswer)
@@ -647,7 +649,7 @@ display.PartDisplay.prototype =
 
 				feedback = feedback.join('\n\n<hr/>');
 				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
-				Numbas.display.typeset(c.find('#feedbackMessage:last')[0]);
+				Numbas.display.typeset(c.find('#feedbackMessage:last'));
 			}
 			else
 			{
@@ -829,7 +831,7 @@ display.JMEPartDisplay.prototype =
 					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;
-					Numbas.display.typeset(previewDiv[0], function(){pp.inputPositionF();});
+					Numbas.display.typeset(previewDiv, function(){pp.inputPositionF();});
 					this.validEntry = true;
 					this.oldtex = tex;
 				}
@@ -1214,13 +1216,13 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 		prevBtn: null,
 		nextBtn: null,
 		speed: 200,
-		step: 2
+		step: 1
 	}, options || {});
 
 	var div = $(elem);
 	var current = div.find('li:first');
 	var going = false;
-	var nextScroll;
+	var nextScroll = null;
 
 	function scrollTo(i)
 	{
@@ -1264,12 +1266,16 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 	function scrollUp() {
 		var i = div.find('li').index(current) || 0;
+		if(nextScroll!==null)
+			i = Math.min(i,nextScroll);
 		i = Math.max(i-options.step, 0);
 		scrollTo(i);
 	}
 	function scrollDown() {
 		var lis = div.find('li');
 		var i = lis.index(current) || 0;
+		if(nextScroll!==null)
+			i = Math.max(i,nextScroll);
 		i = Math.min(i+options.step,lis.length-1);
 		scrollTo(i);
 	}

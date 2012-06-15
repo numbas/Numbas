@@ -145,6 +145,16 @@ body {
 	height:25px;
 	padding: 0.2em 0;
 }
+
+.questionSelector:hover {
+	cursor: pointer;
+	background-color: #cfc;
+}
+
+.questionSelector:hover a {
+	color: black;
+}
+
 .questionSelector #marks #feedback {
 	padding: 0;
 }
@@ -227,6 +237,9 @@ body {
 	text-align:center;
 	margin: 0 auto;
 	width:100%;
+}
+.carouselBtn:hover {
+	cursor: pointer;
 }
 
 .questionList {
