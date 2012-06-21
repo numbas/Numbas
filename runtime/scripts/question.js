@@ -737,9 +737,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 		this.question.scope
 	);
 
-	settings.displaySimplification = {
-	//	fractionnumbers: settings.answerSimplification.fractionnumbers
-	};
+	settings.displaySimplification = '';
 	
 	//get checking type, accuracy, checking range
 	var parametersPath = 'answer';
