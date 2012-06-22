@@ -53,6 +53,7 @@ def tryLoad(data,attr,obj,altname=''):
 def makeContentNode(s):
 	s=str(s)
 	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
+	s = re.sub(r'&nbsp;','&#160;',s)
 	s='<span>'+s+'</span>'
 	try:
 		return etree.fromstring('<content>'+s+'</content>')
