@@ -54,6 +54,7 @@ def makeContentNode(s):
 	s=str(s)
 	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
 	s = re.sub(r'&nbsp;','&#160;',s)
+	s = re.sub(r'&ndash;','&#8211;',s)
 	s='<span>'+s+'</span>'
 	try:
 		return etree.fromstring('<content>'+s+'</content>')
