@@ -131,6 +131,9 @@ var Exam = Numbas.Exam = function()
 	this.totalQuestions = xml.selectNodes('questions/question').length;
 
 	this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
+	this.scope = new Numbas.jme.Scope(this.scope, {
+		functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)
+	});
 
 	//rulesets
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
@@ -252,12 +255,7 @@ Exam.prototype = {
 	init: function()
 	{
 		var exam = this;
-		job(function() {
-			exam.scope = new Numbas.jme.Scope(exam.scope, {
-				functions: Numbas.jme.variables.makeFunctions(exam.xml,exam.scope),
-				variables: Numbas.jme.variables.makeVariables(exam.xml,exam.scope)
-			});
-		});
+		exam.scope.variables = Numbas.jme.variables.makeVariables(exam.xml,exam.scope)
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
 		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
