@@ -42,7 +42,7 @@ R.registerLocale('en-GB',{
 	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
 	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
 
-	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n<code>%s*(...)</code>?",
+	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
@@ -57,7 +57,7 @@ R.registerLocale('en-GB',{
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
 	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
-	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code>\n\n%s",
+	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 
 	'jme.variables.variable not defined': "Variable %s not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
@@ -127,7 +127,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.no choices selected': "No choices selected.",
 	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
 	
-	'question.substituting': "Error substituting content: \n%s\n\n%s",
+	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",
