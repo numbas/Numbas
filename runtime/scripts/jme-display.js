@@ -186,7 +186,7 @@ function funcTex(code)
 }
 
 // define how to texify each operation and function
-var texOps = {
+var texOps = jme.display.texOps = {
 	//range definition. Should never really be seen
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
