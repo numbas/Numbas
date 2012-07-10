@@ -688,6 +688,15 @@
 						ok(scope.rulesets.basic,'extend scope with some rulesets');
 					});
 
+
+					module('Display');
+
+					test('tree to JME', function() {
+						function simplifyExpression(expr) {
+							return Numbas.jme.display.simplifyExpression(expr,'',Numbas.jme.builtinScope);
+						}
+						equals(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
+					});
 				};
 
 

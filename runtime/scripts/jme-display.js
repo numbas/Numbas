@@ -952,7 +952,7 @@ var opBrackets = {
 	'-u':{'+':true,'-':true},
 	'+': {},
 	'-': {},
-	'*': {'+u':true,'-u':true,'+':true, '-':true},
+	'*': {'+u':true,'-u':true,'+':true, '-':true, '/':true},
 	'/': {'+u':true,'-u':true,'+':true, '-':true, '*':true},
 	'^': {'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},
 	'and': {'or':true, 'xor':true},
