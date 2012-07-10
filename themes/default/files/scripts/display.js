@@ -1045,7 +1045,9 @@ $.textMetrics = function(el) {
 		display: 'none'
 	});
 
-	$(div).html($(el).val());
+	var val = $(el).val();
+	val = val.replace(/ /g,'&nbsp;');
+	$(div).html(val);
 	var styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing'];
 	$(styles).each(function() {
 		var s = this.toString();
