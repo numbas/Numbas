@@ -98,9 +98,9 @@ SCORMStorage.prototype = {
 
 	set: function(key,value)
 	{
-		//Numbas.debug("set "+key+" := "+value,true);
+		Numbas.debug("set "+key+" := "+value,true);
 		var val = pipwerks.SCORM.set('cmi.'+key,value);
-		//Numbas.debug(pipwerks.SCORM.debug.getCode(),true);
+		Numbas.debug(pipwerks.SCORM.debug.getCode(),true);
 		return val;
 	},
 
@@ -221,7 +221,7 @@ SCORMStorage.prototype = {
 			break;
 		case 'numberentry':
 			this.set(prepath+'type','numeric');
-			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+':'+p.settings.maxvalue);
+			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+'[:]'+p.settings.maxvalue);
 			break;
 		case 'patternmatch':
 			this.set(prepath+'type','fill-in');
@@ -589,7 +589,12 @@ SCORMStorage.prototype = {
 			return;
 
 		var id = this.getQuestionId(question);
+
+		if(!(id in this.questionIndices))
+			return;
+
 		var index = this.questionIndices[id];
+
 
 		var prepath = 'objectives.'+index+'.';
 
