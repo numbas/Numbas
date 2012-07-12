@@ -98,9 +98,9 @@ SCORMStorage.prototype = {
 
 	set: function(key,value)
 	{
-		//Numbas.debug("set "+key+" := "+value,true);
+		Numbas.debug("set "+key+" := "+value,true);
 		var val = pipwerks.SCORM.set('cmi.'+key,value);
-		//Numbas.debug(pipwerks.SCORM.debug.getCode(),true);
+		Numbas.debug(pipwerks.SCORM.debug.getCode(),true);
 		return val;
 	},
 
@@ -221,7 +221,7 @@ SCORMStorage.prototype = {
 			break;
 		case 'numberentry':
 			this.set(prepath+'type','numeric');
-			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+':'+p.settings.maxvalue);
+			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+'[:]'+p.settings.maxvalue);
 			break;
 		case 'patternmatch':
 			this.set(prepath+'type','fill-in');
@@ -301,7 +301,8 @@ SCORMStorage.prototype = {
 	partSuspendData: function(part)
 	{
 		var pobj = {
-			answered: part.answered
+			answered: part.answered,
+			stepsShown: part.stepsShown
 		};
 		switch(part.type)
 		{
@@ -410,62 +411,67 @@ SCORMStorage.prototype = {
 				break;
 			}
 		}
+
 		var id = this.getPartId( part );
 		var index = this.partIndices[id];
-
-		var out = {
-			answered: pobj.answered
-		};
-
 		var sc = this;
 		function get(key) { return sc.get('interactions.'+index+'.'+key); };
 
-		var answer = get('learner_response');
-		switch(part.type)
-		{
-		case 'jme':
-			out.studentAnswer = answer || '';
-			break;
-		case 'patternmatch':
-			out.studentAnswer = answer || '';
-			break;
-		case 'numberentry':
-			out.studentAnswer = parseFloat(answer) || '';
-			break;
-		case '1_n_2':
-		case 'm_n_2':
-		case 'm_n_x':
-			if(part.numAnswers===undefined)
-				return out;
-			var ticks = [];
-			var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
-			var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
-			for(var i=0;i<w;i++)
-			{
-				ticks.push([]);
-				for(var j=0;j<h;j++)
-				{
-					ticks[i].push(false);
-				}
-			}
-			var tick_re=/(\d+)-(\d+)/;
-			var bits = answer.split('[,]');
-			for(var i=0;i<bits.length;i++)
-			{
-				var m = bits[i].match(tick_re);
-				if(m)
-				{
-					var x = parseInt(m[1],10);
-					var y = parseInt(m[2],10);
-					ticks[x][y]=true;
-				}
-			}
-			out.ticks = ticks;
-			out.shuffleChoices = pobj.shuffleChoices;
-			out.shuffleAnswers = pobj.shuffleAnswers;
-			break;
-		}
+		pobj.answer = get('learner_response');
 
+		return pobj;
+	},
+
+	loadJMEPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = out.answer || '';
+		return out;
+	},
+	loadPatternMatchPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = out.answer || '';
+		return out;
+	},
+	loadNumberEntryPart: function(part)
+	{
+		var out = this.loadPart(part);
+		out.studentAnswer = parseFloat(out.answer)==out.answer ? parseFloat(out.answer) : '';
+		return out;
+	},
+	loadMultipleResponsePart: function(part)
+	{
+		var out = this.loadPart(part);
+
+		if(part.numAnswers===undefined)
+			return out;
+		var ticks = [];
+		var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
+		var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
+		if(w==0 || h==0)
+			return;
+		for(var i=0;i<w;i++)
+		{
+			ticks.push([]);
+			for(var j=0;j<h;j++)
+			{
+				ticks[i].push(false);
+			}
+		}
+		var tick_re=/(\d+)-(\d+)/;
+		var bits = out.answer.split('[,]');
+		for(var i=0;i<bits.length;i++)
+		{
+			var m = bits[i].match(tick_re);
+			if(m)
+			{
+				var x = parseInt(m[1],10);
+				var y = parseInt(m[2],10);
+				ticks[x][y]=true;
+			}
+		}
+		out.ticks = ticks;
 		return out;
 	},
 
@@ -566,18 +572,29 @@ SCORMStorage.prototype = {
 		this.setSuspendData();
 	},
 
-	//called when current question is submitted
-	submitQuestion: function(question) 
+	saveExam: function(exam)
 	{
-		var exam = Numbas.exam;
 		if(exam.loading)
 			return;
+
 		//update total exam score and so on
 		this.set('score.raw',exam.score);
 		this.set('score.scaled',exam.score/exam.mark || 0);
+	},
+
+	//called when current question is submitted
+	saveQuestion: function(question) 
+	{
+		if(question.exam.loading)
+			return;
 
 		var id = this.getQuestionId(question);
+
+		if(!(id in this.questionIndices))
+			return;
+
 		var index = this.questionIndices[id];
+
 
 		var prepath = 'objectives.'+index+'.';
 
@@ -585,6 +602,12 @@ SCORMStorage.prototype = {
 		this.set(prepath+'score.scaled',question.score/question.marks || 0);
 		this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
 		this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
+	},
+
+	//record that a question has been submitted
+	questionSubmitted: function(question)
+	{
+		this.save();
 	},
 
 	//record that the student displayed question advice
@@ -597,7 +620,16 @@ SCORMStorage.prototype = {
 	answerRevealed: function(question)
 	{
 		this.setSuspendData();
+		this.save();
+	},
+
+	//record that the student showed the steps for a part
+	stepsShown: function(part)
+	{
+		this.setSuspendData();
+		this.save();
 	}
+	
 };
 
 });

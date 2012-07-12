@@ -51,7 +51,7 @@ var jme = Numbas.jme = {
 		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
 		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
-		var re_string = /^(?:"((?:[^"\\]|\\.)*)")|^(?:'((?:[^'\\]|\\.)*)(?!\\)')/;
+		var re_string = /^(['"])((?:[^\1\\]|\\.)*?)\1/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
 		
 		while( expr.length )
@@ -64,7 +64,7 @@ var jme = Numbas.jme = {
 			{
 				token = new TNum(result[0]);
 
-				if(tokens.length>0 && (tokens[tokens.length-1].type==')'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
+				if(tokens.length>0 && (tokens[tokens.length-1].type==')' || tokens[tokens.length-1].type=='name'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
 				{
 					tokens.push(new TOp('*'));
 				}
@@ -125,7 +125,7 @@ var jme = Numbas.jme = {
 			}
 			else if (result = expr.match(re_string))
 			{
-				var str = result[1]!==undefined ? result[1] : result[2];
+				var str = result[2];
 				str = str.replace(/\\n/g,'\n').replace(/\\(["'])/g,'$1');
 
 				token = new TString(str);
@@ -1050,11 +1050,11 @@ var precedence = jme.precedence = {
 	'_': 0,
 	'fact': 1,
 	'not': 1,
+	'+u': 2.5,
+	'-u': 2.5,
 	'^': 2,
 	'*': 3,
 	'/': 3,
-	'+u': 3.5,
-	'-u': 3.5,
 	'+': 4,
 	'-': 4,
 	'|': 5,
@@ -1148,14 +1148,14 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 
 	if(!options.nobuiltin)
 	{
-		if(builtins[name]===undefined)
+		if(jme.builtinScope.functions[name]===undefined)
 		{
-			builtins[name]=[this];
+			jme.builtinScope.functions[name]=[this];
 			builtinsbylength.add(name);
 		}
 		else
 		{
-			builtins[name].push(this);
+			jme.builtinScope.functions[name].push(this);
 		}
 	}
 
@@ -1206,10 +1206,9 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 }
 
 // the built-in operations and functions
-var builtinScope = jme.builtinScope = new Scope({functions: builtins});
-var builtins = jme.builtins = builtinScope.functions;
+var builtinScope = jme.builtinScope = new Scope();
 
-builtins['eval'] = [{
+builtinScope.functions['eval'] = [{
 	name: 'eval',
 	intype: ['?'],
 	outtype: '?',

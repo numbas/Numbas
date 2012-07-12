@@ -42,7 +42,7 @@ R.registerLocale('en-GB',{
 	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
 	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
 
-	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean \n\n<code>%s*(...)</code>' ?",
+	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 
@@ -57,7 +57,7 @@ R.registerLocale('en-GB',{
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
 	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
-	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code>\n\n%s",
+	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 
 	'jme.variables.variable not defined': "Variable %s not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
@@ -65,6 +65,7 @@ R.registerLocale('en-GB',{
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
 	'jme.display.collectRuleset.set not defined': "Ruleset %s has not been defined",
+	'jme.display.simplifyTree.no scope given': "Numbas.jme.display.simplifyTree must be given a Scope",
 
 	'math.precround.complex': "Can't round to a complex number of decimal places",
 	'math.siground.complex': "Can't round to a complex number of sig figs",
@@ -105,7 +106,7 @@ R.registerLocale('en-GB',{
 	'part.jme.answer missing': "Correct answer for a JME part is missing (%s)",
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",
-	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.",
+	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.<br/>%s",
 	'part.jme.marking.correct': "Your answer is numerically correct.",
 	'part.jme.must-have bits': '<span class="monospace">%s</span>',
 	'part.jme.must-have one': "Your answer must contain: %s",
@@ -113,7 +114,6 @@ R.registerLocale('en-GB',{
 	'part.jme.not-allowed bits': '<span class="monospace">%s</span>',
 	'part.jme.not-allowed one': "Your answer must not contain: %s",
 	'part.jme.not-allowed several': "Your answer must not contain any of: %s",
-	'part.jme.answer invalid': "This is not a valid mathematical expression.\n\n%s",
 
 	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
 	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",
@@ -127,7 +127,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.no choices selected': "No choices selected.",
 	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
 	
-	'question.substituting': "Error substituting content: \n%s\n\n%s",
+	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",

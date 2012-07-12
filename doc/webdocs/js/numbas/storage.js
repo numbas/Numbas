@@ -38,12 +38,21 @@ Numbas.storage.BlankStorage.prototype = {
 	//}
 	load: function() {},
 
+	//save data. Normally the storage should save as it goes, but this forces a save
+	save: function() {
+	},
+
 	//get suspended info for a question
 	//questionNumber is the one in exam.questionSubset, not the original order
 	loadQuestion: function(questionNumber) {},
 
 	//get suspended info for a part
-	loadPart: function(questionNumber, partNumber, gapNumber) {},
+	loadPart: function(part) {},
+
+	loadJMEPart: function(part) {},
+	loadPatternMatchPart: function(part) {},
+	loadNumberEntryPart: function(part) {},
+	loadMultipleResponsePart: function(part) {},
 
 	//this is called when the exam is started
 	start: function() {},
@@ -62,10 +71,6 @@ Numbas.storage.BlankStorage.prototype = {
 		return 'ab-initio';
 	},
 
-	//save data. Normally the storage should save as it goes, but this forces a save
-	save: function() {
-	},
-
 	//get viewing mode: 
 	// 'browse' - see exam info, not questions
 	// 'normal' - sit exam
@@ -78,13 +83,22 @@ Numbas.storage.BlankStorage.prototype = {
 	//called when a part is answered
 	partAnswered: function(part) {},
 
-	//called when current question is submitted
-	submitQuestion: function(question) {},
+	//called when exam is changed
+	saveExam: function(exam) {},
+
+	//called when current question is changed
+	saveQuestion: function(question) {},
+
+	//record that a question has been submitted
+	questionSubmitted: function(question) {},
 
 	//record that the student displayed question advice
 	adviceDisplayed: function(question) {},
 
 	//record that the student revealed the answer to a question
-	answerRevealed: function(question) {}
+	answerRevealed: function(question) {},
+
+	//record that the student showed the steps for a part
+	stepsShown: function(part) {}
 };
 });
