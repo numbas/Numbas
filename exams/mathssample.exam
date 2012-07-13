@@ -572,7 +572,7 @@
 					gaps: [
 						{
 							type: jme
-							answer: "{a}/{d}"
+							answer: "-{a}/{d}"
 							marks: 1
 						}, 
 						{
