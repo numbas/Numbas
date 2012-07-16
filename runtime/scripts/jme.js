@@ -1606,12 +1606,7 @@ new funcObj('isa',['?',TString],TBool, null, {
 		var match = false;
 		if(kind=='complex')
 		{
-			try {
-				match = args[0].tok.value.complex || false;
-			}
-			catch(e) {
-				match = false;
-			}
+			match = args[0].tok.type=='number' && args[0].tok.value.complex || false;
 		}
 		else
 		{
