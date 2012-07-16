@@ -242,6 +242,8 @@ def printdata(data,ntabs=0):
 			s='['+s+']'
 		return s
 	else:
+		if data=='infinity':
+			return '"infinity"'
 		if '"' in str(data) and not (isinstance(data,unicode) or isinstance(data,str)):
 			print("Unexpected type: "+str)
 
