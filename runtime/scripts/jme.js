@@ -1969,11 +1969,17 @@ var checkingFunctions =
 {
 	absdiff: function(r1,r2,tolerance) 
 	{
+		if(r1===Infinity || r1===-Infinity)
+			return r1===r2;
+
 		// finds absolute difference between values, fails if bigger than tolerance
 		return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
 	},
 
 	reldiff: function(r1,r2,tolerance) {
+		if(r1===Infinity || r1===-Infinity)
+			return r1===r2;
+
 		// fails if (r1/r2 - 1) is bigger than tolerance
 		if(r2!=0) {
 			return math.leq(Math.abs(math.sub(r1,r2)), Math.abs(math.mul(tolerance,r2)));
@@ -1983,12 +1989,18 @@ var checkingFunctions =
 	},
 
 	dp: function(r1,r2,tolerance) {
+		if(r1===Infinity || r1===-Infinity)
+			return r1===r2;
+
 		//rounds both values to 'tolerance' decimal places, and fails if unequal 
 		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
 	},
 
 	sigfig: function(r1,r2,tolerance) {
+		if(r1===Infinity || r1===-Infinity)
+			return r1===r2;
+
 		//rounds both values to 'tolerance' sig figs, and fails if unequal
 		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq(math.siground(r1,tolerance), math.siground(r2,tolerance));
