@@ -126,6 +126,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",
 	'part.mcq.no choices selected': "No choices selected.",
 	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
+	'part.mcq.correct choice': "You chose the correct answer.",
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
