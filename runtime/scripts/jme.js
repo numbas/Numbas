@@ -1606,13 +1606,16 @@ new funcObj('isa',['?',TString],TBool, null, {
 		var match = false;
 		if(kind=='complex')
 		{
-			var v = jme.evaluate(args[0],scope);
-			if(v.type=='number' && v.value.complex)
-				match = true
+			try {
+				match = args[0].tok.value.complex || false;
+			}
+			catch(e) {
+				match = false;
+			}
 		}
 		else
 		{
-			var match = args[0].tok.type == kind;
+			match = args[0].tok.type == kind;
 		}
 		return new TBool(match);
 	},
