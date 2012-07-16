@@ -243,7 +243,8 @@
 					test('Types (isa)',function() {
 						closeEquals(evaluate('1 isa "number"').value,true,'1 isa "number"');
 						closeEquals(evaluate('1 isa "complex"').value,false,'1 isa "complex"');
-						closeEquals(evaluate('1+i isa "complex"').value,true,'1+i isa "complex"');
+						closeEquals(evaluate('i isa "complex"').value,true,'i isa "complex"');
+						closeEquals(evaluate('1+i isa "complex"').value,false,'1+i isa "complex"');
 						closeEquals(evaluate('"1" isa "number"').value,false,'"1" isa "number"');
 						closeEquals(evaluate('"1" isa "string"').value,true,'"1" isa "string"');
 						closeEquals(evaluate('[] isa "list"').value,true,'[] isa "list"');
@@ -692,10 +693,12 @@
 					module('Display');
 
 					test('tree to JME', function() {
-						function simplifyExpression(expr) {
-							return Numbas.jme.display.simplifyExpression(expr,'',Numbas.jme.builtinScope);
+						function simplifyExpression(expr,rules) {
+							return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
 						}
 						equals(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
+						equals(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 -5 i)','(-7)/(-4+5i) - unary minus brough out of complex number properly');
+						equals(simplifyExpression('-4+5i','all'),'-4 + 5 i','-4+5i - unary minus brough out of complex number properly');
 					});
 				};
 

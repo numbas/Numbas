@@ -1717,11 +1717,11 @@ Interaction.prototype = {
 			return true;
 
 		case 'numeric':
-			var numeric_re = /^(-?\d+(?:\.\d+)?)?(:(-?\d+(?:\.\d+)?)?)?$/;
+			var numeric_re = /^(-?\d+(?:\.\d+)?)?(\[:\](-?\d+(?:\.\d+)?)?)?$/;
 
 			if(!numeric_re.test(value))
 			{
-				this.lms.SetError(406,"Numeric response patterns must be in the format <min>:<max>");
+				this.lms.SetError(406,"Numeric response patterns must be in the format <min>[:]<max>");
 				return false;
 			}
 			else

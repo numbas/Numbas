@@ -1546,7 +1546,6 @@ MultipleResponsePart.prototype =
 
 		this.numTicks = 0;
 		var partScore = 0;
-		var row,message;
 		for( i=0; i<this.numAnswers; i++ )
 		{
 			for(var j=0; j<this.numChoices; j++ )
@@ -1556,11 +1555,21 @@ MultipleResponsePart.prototype =
 					partScore += this.settings.matrix[i][j];
 					this.numTicks += 1;
 
-					if((row = this.settings.distractors[i]) && (message=row[j]))
-						this.addCredit(this.settings.matrix[i][j]/this.marks,message);
+					var row = this.settings.distractors[i];
+					if(row)
+						var message = row[j];
+					var award = this.settings.matrix[i][j];
+					if(award>0) {
+						if($(message).text().trim().length==0 && award>0)
+							message = R('part.mcq.correct choice');
+						this.addCredit(award,message);
+					}
 				}
 			}
 		}
+
+		if(this.credit<=0)
+			this.markingComment(R('part.marking.incorrect'));
 
 		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
 
@@ -1663,7 +1672,7 @@ GapFillPart.prototype =
 				var gap = this.gaps[i];
 				this.credit += gap.credit*gap.marks;
 				if(this.gaps.length>1)
-					this.markingComment('*Gap '+(i+1)+'*');
+					this.markingComment(R('part.gapfill.feedback header',i+1));
 				for(var j=0;j<gap.markingFeedback.length;j++)
 				{
 					var action = util.copyobj(gap.markingFeedback[j]);

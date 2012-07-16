@@ -928,6 +928,8 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 			break;
 		case '-u':
 			op='-';
+			if(args[0].tok.type=='number' && args[0].tok.value.complex)
+				return jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
 			break;
 		case 'and':
 		case 'or':
@@ -1083,6 +1085,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
+		['x+y',['x isa "number"','y isa "complex"'],'eval(x+y)'],
+		['-x+y',['x isa "number"','y isa "complex"'],'-eval(x-y)'],
 		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
 		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication

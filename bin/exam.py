@@ -20,6 +20,7 @@ import xml.etree.ElementTree as etree
 import examparser
 import sys
 import os
+from htmlescapes import removeHTMLEscapes
 
 class ExamError(Exception):
 	def __init__(self,message,hint=''):
@@ -52,9 +53,7 @@ def tryLoad(data,attr,obj,altname=''):
 #convert a block of content into html, wrapped in a <content> tag
 def makeContentNode(s):
 	s=str(s)
-	s = re.sub(r'&(?!#?\w+;)','&amp;',s)
-	s = re.sub(r'&nbsp;','&#160;',s)
-	s = re.sub(r'&ndash;','&#8211;',s)
+	s=removeHTMLEscapes(s)
 	s='<span>'+s+'</span>'
 	try:
 		return etree.fromstring('<content>'+s+'</content>')

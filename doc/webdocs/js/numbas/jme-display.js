@@ -73,6 +73,8 @@ jme.display = {
 	//simplify a syntax tree according to given ruleset
 	simplifyTree: function(exprTree,rules,scope)
 	{
+		if(!scope)
+			throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
 		scope = Numbas.util.copyobj(scope);
 		scope.variables = {};	//remove variables from the scope so they don't accidentally get substituted in
 		var applied = true;
@@ -155,7 +157,7 @@ function infixTex(code)
 {
 	return function(thing,texArgs)
 	{
-		var arity = jme.builtins[thing.tok.name][0].intype.length;
+		var arity = jme.builtinScope.functions[thing.tok.name][0].intype.length;
 		if( arity == 1 )	//if operation is unary, prepend argument with code
 		{
 			return code+texArgs[0];
@@ -184,7 +186,7 @@ function funcTex(code)
 }
 
 // define how to texify each operation and function
-var texOps = {
+var texOps = jme.display.texOps = {
 	//range definition. Should never really be seen
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
@@ -203,7 +205,7 @@ var texOps = {
 		if( thing.args[0].tok.type=='op' )
 		{
 			var op = thing.args[0].tok.name;
-			if(jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
+			if(!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
 			{
 				tex='\\left ( '+tex+' \\right )';
 			}
@@ -950,7 +952,7 @@ var opBrackets = {
 	'-u':{'+':true,'-':true},
 	'+': {},
 	'-': {},
-	'*': {'+u':true,'-u':true,'+':true, '-':true},
+	'*': {'+u':true,'-u':true,'+':true, '-':true, '/':true},
 	'/': {'+u':true,'-u':true,'+':true, '-':true, '*':true},
 	'^': {'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},
 	'and': {'or':true, 'xor':true},
@@ -1081,8 +1083,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
-		['(-x)/y',[],'-x/y'],			//take negation to left of fraction
-		['x/(-y)',[],'-x/y'],			
+		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
+		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication
 		['x*(-y)',[],'-(x*y)'],		
 		['x+(y+z)',[],'(x+y)+z'],		//make sure sums calculated left-to-right
