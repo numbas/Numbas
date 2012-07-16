@@ -1663,7 +1663,7 @@ GapFillPart.prototype =
 				var gap = this.gaps[i];
 				this.credit += gap.credit*gap.marks;
 				if(this.gaps.length>1)
-					this.markingComment('*Gap '+(i+1)+'*');
+					this.markingComment(R('part.gapfill.feedback header',i+1));
 				for(var j=0;j<gap.markingFeedback.length;j++)
 				{
 					var action = util.copyobj(gap.markingFeedback[j]);
