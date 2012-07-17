@@ -6,7 +6,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#	   http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,29 +121,18 @@ def makeExam(options):
 			options.resources = exam.resources
 			options.extensions = exam.extensions
 		except ExamError as err:
-			print("Error constructing exam:")
-			print(err)
-			raise 
+			raise Exception('Error constructing exam:\n%s' % err)
 		except examparser.ParseError as err:
-			print("Failed to compile exam due to parsing error.")
-			raise
+			raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
 		except:
-			print("Failed to compile exam")
-			traceback.print_exc(file=sys.stdout)
-			raise
+			raise Exception('Failed to compile exam.')
 	options.examXML = examXML
 	options.xmls = xml2js(options)
 
-	try:
-		if options.zip:
-			compileToZip(options)
-		else:
-			compileToDir(options)
-	except IOError as err:
-		print(err)
-	except:
-		traceback.print_exc(file=sys.stdout)
-		raise
+	if options.zip:
+		compileToZip(options)
+	else:
+		compileToDir(options)
 
 if __name__ == '__main__':
 
@@ -247,5 +236,5 @@ if __name__ == '__main__':
 	try:
 		makeExam(options)
 	except Exception as err:
-		print(err)
+		sys.stderr.write(str(err)+'\n')
 		exit(1)

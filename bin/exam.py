@@ -6,7 +6,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#	   http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ def makeContentNode(s):
 	try:
 		return etree.fromstring('<content>'+s+'</content>')
 	except etree.ParseError as e:
-		print(s)
+		sys.stderr.write(s+'\n')
 		raise e
 
 #make an XML element tree. Pass in an array of arrays or strings.
@@ -136,13 +136,9 @@ class Exam:
 	
 	@staticmethod
 	def fromstring(string):
-		try:
-			data = examparser.ExamParser().parse(string)
-			exam = Exam.fromDATA(data)
-			return exam
-		except examparser.ParseError as err:
-			print('Parse error: ',str(err))
-			raise
+		data = examparser.ExamParser().parse(string)
+		exam = Exam.fromDATA(data)
+		return exam
 
 	@staticmethod
 	def fromDATA(data):
@@ -275,7 +271,7 @@ class Exam:
 			indent(xml)
 			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
 		except etree.ParseError as err:
-			print('XML Error:',str(err))
+			raise ExamError('XML Error: %s' % str(err))
 
 class SimplificationRule:
 	pattern = ''
