@@ -200,7 +200,7 @@ var texOps = jme.display.texOps = {
 	'+u': infixTex('+'),	
 
 	//unary minus
-	'-u': (function(thing,texArgs) {
+	'-u': (function(thing,texArgs,settings) {
 		var tex = texArgs[0];
 		if( thing.args[0].tok.type=='op' )
 		{
@@ -209,6 +209,10 @@ var texOps = jme.display.texOps = {
 			{
 				tex='\\left ( '+tex+' \\right )';
 			}
+		}
+		else if(thing.args[0].tok.type=='number' && thing.args[0].tok.value.complex) {
+			var value = thing.args[0].tok.value;
+			return settings.texNumber({complex:true,re:-value.re,im:-value.im});
 		}
 		return '-'+tex;
 	}),
@@ -643,7 +647,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		}
 	}
 
-	var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
+	var texNumber = settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 
 	var tok = thing.tok || thing;
 	switch(tok.type)
