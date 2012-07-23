@@ -258,5 +258,5 @@ escapes = {
 def removeHTMLEscapes(s):
 	for name,code in escapes.items():
 		s = s.replace(name,code)
-	s = re.sub(r'&(?!(?:\w|#))+;','&#38;',s)
+	s = re.sub(r'&(?!(?:\w|#)+;)','&#38;',s)
 	return s
