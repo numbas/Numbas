@@ -1562,7 +1562,7 @@ MultipleResponsePart.prototype =
 					if(award>0) {
 						if($(message).text().trim().length==0 && award>0)
 							message = R('part.mcq.correct choice');
-						this.addCredit(award,message);
+						this.addCredit(award/this.marks,message);
 					}
 				}
 			}
