@@ -237,4 +237,6 @@ if __name__ == '__main__':
 		makeExam(options)
 	except Exception as err:
 		sys.stderr.write(str(err)+'\n')
+		_,_,exc_traceback = sys.exc_info()
+		traceback.print_exc()
 		exit(1)
