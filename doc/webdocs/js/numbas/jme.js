@@ -527,8 +527,14 @@ var jme = Numbas.jme = {
 
 			if(scope.functions[op]===undefined)
 			{
-				if(tok.type=='function')
-					throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
+				if(tok.type=='function') {
+					//check if the user typed something like xtan(y), when they meant x*tan(y)
+					var possibleOp = op.slice(1);
+					if(op.slice(1) in scope.functions)
+						throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],op.slice(1)));
+					else
+						throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
+				}
 				else
 					throw(new Numbas.Error('jme.typecheck.op not defined',op));
 			}
