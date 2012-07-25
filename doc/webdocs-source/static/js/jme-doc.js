@@ -46,9 +46,9 @@ $(document).ready(function() {
 	Numbas.init = function() {
 		var functions = [];
 
-		for(var name in Numbas.jme.builtins)
+		for(var name in Numbas.jme.builtinScope.functions)
 		{
-			var defs = Numbas.jme.builtins[name];
+			var defs = Numbas.jme.builtinScope.functions[name];
 			for(var i=0;i<defs.length;i++)
 			{
 				var def = defs[i];
