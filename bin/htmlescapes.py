@@ -1,4 +1,6 @@
-﻿escapes = {
+﻿import re
+
+escapes = {
 '&nbsp;': '&#160;',
 '&iexcl;': '&#161;',
 '&cent;': '&#162;',
@@ -256,4 +258,5 @@
 def removeHTMLEscapes(s):
 	for name,code in escapes.items():
 		s = s.replace(name,code)
+	s = re.sub(r'&(?!(?:\w|#)+;)','&#38;',s)
 	return s

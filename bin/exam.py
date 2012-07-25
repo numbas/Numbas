@@ -58,7 +58,7 @@ def makeContentNode(s):
 	try:
 		return etree.fromstring('<content>'+s+'</content>')
 	except etree.ParseError as e:
-		sys.stderr.write(s+'\n')
+		sys.stderr.write('Bad content:\n'+s+'\n\n')
 		raise e
 
 #make an XML element tree. Pass in an array of arrays or strings.
