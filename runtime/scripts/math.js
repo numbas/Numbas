@@ -17,6 +17,8 @@ Copyright 2011 Newcastle University
 Numbas.queueScript('scripts/math.js',[],function() {
 
 var math = Numbas.math = {
+
+re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 	
 	//Operations to cope with complex numbers
 	complex: function(re,im)
@@ -333,6 +335,10 @@ var math = Numbas.math = {
 	piDegree: function(n)
 	{
 		n=Math.abs(n);
+
+		if(n>10000)	//so big numbers don't get rounded to a power of pi accidentally
+			return 0;
+
 		var degree,a;
 		for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && Math.abs(a-math.round(a))>0.00000001; degree++) {}
 		return( a>=1 ? degree : 0 );
