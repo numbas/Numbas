@@ -89,7 +89,7 @@ var util = Numbas.util = {
 			else
 			{
 				var newobj={};
-				for(x in obj)
+				for(var x in obj)
 				{
 					if(deep)
 						newobj[x] = util.copyobj(obj[x],deep);
