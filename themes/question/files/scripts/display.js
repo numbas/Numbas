@@ -212,9 +212,6 @@ display.ExamDisplay.prototype =
 			$(question.display.questionSelector).attr('class',
 					(question.visited || exam.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
 		}
-		//scroll question list to centre on current question
-		if(display.carouselGo)
-			display.carouselGo(exam.currentQuestion.number-1,300);
 		
 		//enable or disable 'previous question' button
 		if(exam.currentQuestion.number === 0)
@@ -288,11 +285,6 @@ display.ExamDisplay.prototype =
 		var exam = this.e;
 
 		exam.currentQuestion.display.show();
-		if(!this.madeCarousel)
-		{
-			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
-			this.madeCarousel = true;
-		}
 	},
 
 	startRegen: function() {
