@@ -111,6 +111,9 @@ display.ExamDisplay = function(e)
 {
 	this.e=e;
 
+	//display exam title at top of page
+	$('#examBanner').html(e.name);
+
 	//'next' button always present
 	$('*').find("#nextBtn").click( Numbas.controls.nextQuestion );
 	
@@ -199,6 +202,33 @@ display.ExamDisplay.prototype =
 		}
 	},
 
+	updateQuestionMenu: function()
+	{
+		var exam = this.e;
+		//highlight current question, unhighlight the rest
+		for(var j=0; j<exam.questionList.length; j++)
+		{
+			var question = exam.questionList[j];
+			$(question.display.questionSelector).attr('class',
+					(question.visited || exam.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
+		}
+		//scroll question list to centre on current question
+		if(display.carouselGo)
+			display.carouselGo(exam.currentQuestion.number-1,300);
+		
+		//enable or disable 'previous question' button
+		if(exam.currentQuestion.number === 0)
+			$('#prevBtn').attr('disabled','true').hide();
+		else if(exam.navigateReverse)
+			$('#prevBtn').removeAttr('disabled').show();
+
+		//enable or disable 'next question' button
+		if( exam.currentQuestion.number == exam.numQuestions-1 )
+			$('#nextBtn').attr('disabled','true').hide();
+		else
+			$('#nextBtn').removeAttr('disabled').show();
+	},
+
 	showInfoPage: function(page)
 	{
 		//hide question container, and show info container
@@ -285,7 +315,7 @@ display.QuestionDisplay = function(q)
 
 	qs
 		.attr('id','questionSelector-'+q.number)
-		.find('#name').html(q.name);
+		.find('#name').html((q.number+1)+'. '+q.name);
 
 	$('#questionList').append(qs);
 	
@@ -321,6 +351,9 @@ display.QuestionDisplay.prototype =
 		//display the question container - content and nav bars
 		$('#questionContainer').show();
 		
+		//update the question menu - highlight this question, etc.
+		exam.display.updateQuestionMenu();
+
 		//enable the submit button
 		$('#submitBtn').removeAttr('disabled');
 		//show the reveal button
@@ -685,25 +718,6 @@ display.JMEPartDisplay.prototype =
 		this.txt = this.p.studentAnswer; this.oldtxt = '';
 
 
-		var inputPositionF = this.inputPositionF = function() {
-			if(pd.txt==='' || !pd.validEntry )
-				inputDiv.css('position','static').css('z-index',1);
-			else
-			{
-				inputDiv.css('position','absolute');
-				if(pd.hasFocus || pd.showAnyway)
-				{
-					inputDiv.css('z-index',1)
-							.position({my: 'left top',at: 'right top', of: previewDiv, offset:'0 10', collision: 'none'})
-				}
-				else
-					inputDiv.css('z-index',-1);
-			}
-		};
-
-		//reposition everything if the window is resized
-		$(window).resize(inputPositionF);
-
 		var keyPressed = function()
 		{
 			pd.inputChanged(inputDiv.val());
@@ -723,39 +737,14 @@ display.JMEPartDisplay.prototype =
 		//when input box loses focus, hide it
 		inputDiv.blur(function() {
 			Numbas.controls.doPart([this.value],p.path);
-			pd.hasFocus = false;
-			inputPositionF();
-		});
-
-		inputDiv.focus(function() {
-			if(p.question.revealed)
-			{
-				inputDiv.blur();
-				return;
-			}
-			pd.hasFocus = true;
-			inputPositionF();
-		});
-
-		previewDiv.click(function() {
-			inputDiv.focus();
-		});
-
-		previewDiv.mouseover(function() {
-			pd.showAnyway = true;
-			inputPositionF();
-		});
-
-		previewDiv.mouseout(function() {
-			pd.showAnyway = false;
-			inputPositionF();
 		});
 
 		this.oldtxt='';
 		this.inputChanged(this.p.studentAnswer,true);
 
-		this.p.question.display.addPostTypesetCallback( function(){inputPositionF();} );
-		previewDiv.mouseout();
+		previewDiv.click(function() {
+			inputDiv.focus();
+		});
 	},
 
 	restoreAnswer: function()
@@ -795,7 +784,7 @@ display.JMEPartDisplay.prototype =
 					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
 					previewDiv.html('$'+tex+'$');
 					var pp = this;
-					Numbas.display.typeset(previewDiv, function(){pp.inputPositionF();});
+					Numbas.display.typeset(previewDiv);
 					this.validEntry = true;
 					this.oldtex = tex;
 				}
@@ -811,8 +800,6 @@ display.JMEPartDisplay.prototype =
 				this.oldtex='';
 				this.validEntry = true;
 			}
-			this.inputPositionF();
-
 			this.oldtxt = txt;
 		}
 		this.timer=undefined;

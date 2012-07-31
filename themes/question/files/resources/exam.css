@@ -432,15 +432,8 @@ input[type=text],input[type=number] {
 }
 
 .mathPreview {
-	cursor: pointer; cursor: hand;
-	color: #005;
-}
-.mathPreview:hover {
-	background: #f0f0f0;
-}
-
-.jme {
-	z-index: 9999
+	background-color: #eee;
+	padding: 0.2em;
 }
 
 div.lemma {
