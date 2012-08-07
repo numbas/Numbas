@@ -130,10 +130,17 @@ var Exam = Numbas.Exam = function()
 
 	this.totalQuestions = xml.selectNodes('questions/question').length;
 
-	this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
-	this.scope = new Numbas.jme.Scope(this.scope, {
+	var scopes = [Numbas.jme.builtinScope];
+	for(var extension in Numbas.extensions) {
+		if('scope' in Numbas.extensions[extension]) {
+			scopes.push(Numbas.extensions[extension].scope);
+		}
+	}
+	scopes.push({
 		functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)
 	});
+
+	this.scope = new Numbas.jme.Scope(scopes);
 
 	//rulesets
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');

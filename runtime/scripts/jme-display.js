@@ -102,7 +102,7 @@ jme.display = {
 					var match;
 					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
 					{
-						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope({variables:match}));
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]));
 						applied = true;
 						break;
 					}
@@ -1044,7 +1044,7 @@ Rule.prototype = {
 		for(var i=0;i<this.conditions.length;i++)
 		{
 			var c = Numbas.util.copyobj(this.conditions[i],true);
-			c = jme.substituteTree(c,new jme.Scope({variables:match}));
+			c = jme.substituteTree(c,new jme.Scope([{variables:match}]));
 			try
 			{
 				var result = jme.evaluate(c,scope);
@@ -1265,13 +1265,13 @@ for(var x in simplificationRules)
 }
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=all;
-Numbas.jme.builtinScope = new Numbas.jme.Scope(Numbas.jme.builtinScope,{rulesets: simplificationRules});
+Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
 
 var displayFlags = ['fractionnumbers','rowvector'];
 
 var collectRuleset = jme.display.collectRuleset = function(set,scope)
 {
-	scope = new jme.Scope(scope);
+	scope = new jme.Scope([scope]);
 	var sets = scope.rulesets;
 	if(typeof(set)=='string')
 	{

@@ -19,13 +19,15 @@ Copyright 2011 Newcastle University
 Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 	var math = Numbas.math;
-	var funcObj = Numbas.jme.funcObj;
 	var types = Numbas.jme.types;
+	var funcObj = Numbas.jme.funcObj;
 	var TNum = types.TNum;
 	var TList = types.TList;
 	var TString = types.TString;
-	
 
+	Numbas.extensions.stats  = {}
+	
+	var statsScope = Numbas.extensions.stats.scope = new Numbas.jme.Scope();
 
 	//generate a random normal variable
 	math.randomNormal = function(mu,sigma)
@@ -37,7 +39,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 		return z*sigma + mu;
 	}
-	new funcObj('randomNormal',[TNum,TNum], TNum, math.randomNormal);
+	statsScope.addFunction(new funcObj('randomNormal',[TNum,TNum], TNum, math.randomNormal));
 
 	//sum of a list of numbers
 	math.sum = function(values)
@@ -51,7 +53,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		}
 		return t;
 	}
-	new funcObj('sum',[TList],TNum, math.sum);
+	statsScope.addFunction(new funcObj('sum',[TList],TNum, math.sum));
 
 	//mean of a list of numbers
 	math.mean = function(values)
@@ -62,7 +64,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return math.sum(values)/values.length;
 	}
 
-	new funcObj('mean',[TList],TNum, math.mean);
+	statsScope.addFunction(new funcObj('mean',[TList],TNum, math.mean));
 
 	//variance of a list of numbers
 	math.variance = function(values)
@@ -76,7 +78,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		}
 		return s/(values.length-1);
 	}
-	new funcObj('variance',[TList],TNum, math.variance);
+	statsScope.addFunction(new funcObj('variance',[TList],TNum, math.variance));
 	
 	//standard deviation of a list of numbers
 	math.standardDev = function(values)
@@ -84,7 +86,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return Math.sqrt(math.variance(values));
 	}
 	
-	new funcObj('standardDev',[TList],TNum,math.standardDev);
+	statsScope.addFunction(new funcObj('standardDev',[TList],TNum,math.standardDev));
 
 
 	//Cumulative Distribution Function of the Normal(0,1) distribution.
@@ -103,7 +105,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return 1-math.pdfNormal(z,0,1)*(a1*t+a2*Math.pow(t,2)+a3*Math.pow(t,3)+a4*Math.pow(t,4)+a5*Math.pow(t,5));
 	}
 
-	new funcObj('cdfNormal',[TNum],TNum,math.normalCDF);
+	statsScope.addFunction(new funcObj('cdfNormal',[TNum],TNum,math.normalCDF));
 
 	//the PDF function for a normal distribution
 	math.pdfNormal = function(x,mu,sigma)
@@ -111,7 +113,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return ((1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp((-1/2)*Math.pow((x-mu)/sigma,2)));
 	}
 	
-	new funcObj('pdfNormal',[TNum,TNum,TNum],TNum,math.pdfNormal);
+	statsScope.addFunction(new funcObj('pdfNormal',[TNum,TNum,TNum],TNum,math.pdfNormal));
 	
 	//z-test of a sample; returns p-value of sample mean assuming given distribution mean and variance
 	math.zTest = function(sample,mu,variance)
@@ -122,7 +124,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return math.normalCDF(z);
 	}
 
-	new funcObj('zTest',[TList,TNum,TNum],TNum,math.zTest);
+	statsScope.addFunction(new funcObj('zTest',[TList,TNum,TNum],TNum,math.zTest));
 	
 	//attempt at a T-test
 	//math.tTest = function(sample,mu)
@@ -142,7 +144,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	//	var t = (mean-mu)*Math.sqrt(n)/S;
 	//}	
 	//
-	//new funcObj('tTest',[TList,TNum],TNum,math.tTest);
+	//statsScope.addFunction(new funcObj('tTest',[TList,TNum],TNum,math.tTest));
 	
 	//random value from Poisson(lambda) distribution
 	math.randomPoisson = function(lambda)
@@ -167,7 +169,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return k;
 	}
 
-	new funcObj('randomPoisson',[TNum],TNum,math.randomPoisson);
+	statsScope.addFunction(new funcObj('randomPoisson',[TNum],TNum,math.randomPoisson));
 	
 	//simulating a Bernoulli random variable
 	math.randomBernoulli = function(p)
@@ -181,7 +183,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return X;
 	}
 	
-	new funcObj('randomBernoulli',[TNum],TNum,math.randomBernoulli);
+	statsScope.addFunction(new funcObj('randomBernoulli',[TNum],TNum,math.randomBernoulli));
 	
 	//simulating a Binomial random variable
 	math.randomBinomial = function(n,p)
@@ -198,7 +200,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return X;
 	}
 	
-	new	funcObj('randomBinomial',[TNum,TNum],TNum,math.randomBinomial);
+	statsScope.addFunction(new funcObj('randomBinomial',[TNum,TNum],TNum,math.randomBinomial));
 	
 	//Binomial pmf
 	math.pmfBinomial = function(x,n,p)
@@ -206,7 +208,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return math.combinations(n,x)*Math.pow(p,x)*Math.pow(1-p,n-x);
 	}
 	
-	new funcObj('pmfBinomial',[TNum,TNum,TNum],TNum,math.pmfBinomial);
+	statsScope.addFunction(new funcObj('pmfBinomial',[TNum,TNum,TNum],TNum,math.pmfBinomial));
 	
 	//simulating a Geometric random variable
 	math.randomGeometric = function(p)
@@ -220,7 +222,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			return Math.ceil(z)
 	}
 	
-	new funcObj('randomGeometric',[TNum],TNum,math.randomGeometric);
+	statsScope.addFunction(new funcObj('randomGeometric',[TNum],TNum,math.randomGeometric));
 	
 	//Geometric pmf
 	math.pmfGeometric = function(x,p)
@@ -228,7 +230,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return Math.pow(1-p,x-1)*p
 	}
 	
-	new funcObj('pmfGeometric',[TNum,TNum],TNum,math.pmfGeometric);
+	statsScope.addFunction(new funcObj('pmfGeometric',[TNum,TNum],TNum,math.pmfGeometric));
 	
 	//Geometric cdf
 	math.cdfGeometric = function(x,p)
@@ -236,7 +238,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return 1-Math.pow(1-p,x)
 	}
 	
-	new funcObj('cdfGeometric',[TNum,TNum],TNum,math.cdfGeometric);
+	statsScope.addFunction(new funcObj('cdfGeometric',[TNum,TNum],TNum,math.cdfGeometric));
 	
 	//Poisson pmf
 	math.pmfPoisson = function(x,lambda)
@@ -244,7 +246,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return (Math.pow(lambda,x)/math.factorial(x))*Math.exp(-lambda)
 	}
 	
-	new funcObj('pmfPoisson',[TNum,TNum],TNum,math.pmfPoisson);
+	statsScope.addFunction(new funcObj('pmfPoisson',[TNum,TNum],TNum,math.pmfPoisson));
 	
 	//Uniform pdf
 	math.pdfUniform = function(x,a,b)
@@ -255,7 +257,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			return 0
 	}
 	
-	new funcObj('pdfUniform',[TNum,TNum,TNum],TNum,math.pdfUniform);
+	statsScope.addFunction(new funcObj('pdfUniform',[TNum,TNum,TNum],TNum,math.pdfUniform));
 	
 	//Uniform cdf
 	math.cdfUniform = function(x,a,b)
@@ -268,7 +270,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			return 1
 	}
 	
-	new funcObj('cdfUniform',[TNum,TNum,TNum],TNum,math.cdfUniform);
+	statsScope.addFunction(new funcObj('cdfUniform',[TNum,TNum,TNum],TNum,math.cdfUniform));
 	
 	//simulate an Exponential random variable
 	math.randomExponential = function(lambda)
@@ -278,7 +280,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return -Math.log(u)/lambda
 	}
 	
-	new funcObj('randomExponential',[TNum],TNum,math.randomExponential);
+	statsScope.addFunction(new funcObj('randomExponential',[TNum],TNum,math.randomExponential));
 	
 	//Exponential  pdf
 	math.pdfExponential = function(x,lambda)
@@ -289,7 +291,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			return 0
 	}
 	
-	new funcObj('pdfExponential',[TNum,TNum],TNum,math.pdfExponential);
+	statsScope.addFunction(new funcObj('pdfExponential',[TNum,TNum],TNum,math.pdfExponential));
 	
 	//Exponential cdf
 	math.cdfExponential = function(x,lambda)
@@ -300,7 +302,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			return 1-Math.exp(-lambda*x)
 	}
 	
-	new funcObj('cdfExponential',[TNum,TNum],TNum,math.cdfExponential);
+	statsScope.addFunction(new funcObj('cdfExponential',[TNum,TNum],TNum,math.cdfExponential));
 	
 	//Simulate a random Gamma variable
 	math.randomGamma = function(n,lambda)
@@ -320,7 +322,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 			throw(new Error("Can't calculate for n not an integer."));
 	}
 			
-	new funcObj('randomGamma',[TNum,TNum],TNum,math.randomGamma);		
+	statsScope.addFunction(new funcObj('randomGamma',[TNum,TNum],TNum,math.randomGamma));		
 	
 	//Gamma pdf
 	math.pdfGamma = function(x,n,lambda)
@@ -328,7 +330,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return (Math.pow(lambda,n)/math.factorial(n-1))*Math.pow(x,n-1)*Math.exp(-lambda*x)
 	}
 	
-	new funcObj('pdfGamma',[TNum,TNum,TNum],TNum,math.pdfGamma);
+	statsScope.addFunction(new funcObj('pdfGamma',[TNum,TNum,TNum],TNum,math.pdfGamma));
 	
 	//calculate a regression  line
 	math.regression = function(x,y)
@@ -352,11 +354,11 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		return [alpha,beta];
 	}
 	
-	new funcObj('regressionAlpha',[TList,TList],TNum,function(l1,l2){
+	statsScope.addFunction(new funcObj('regressionAlpha',[TList,TList],TNum,function(l1,l2){
 		return math.regression(l1,l2)[0];
-	});
+	}));
 
-	new funcObj('regressionBeta',[TList,TList],TNum,function(l1,l2){
+	statsScope.addFunction(new funcObj('regressionBeta',[TList,TList],TNum,function(l1,l2){
 		return math.regression(l1,l2)[1];
-	});
+	}));
 });

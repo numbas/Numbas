@@ -26,6 +26,8 @@ Copyright 2011 Newcastle University
 
 if(!window.Numbas) { window.Numbas = {} }	// create the Numbas object.
 
+Numbas.extensions = {};
+
 // Numbas.debug is a function for displaying debug info in the console. It will try to give a reference back to the line that called it, if it can.
 Numbas.debug = function(msg,noStack)
 {
