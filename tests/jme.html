@@ -666,7 +666,7 @@
 							}
 						});
 						ok(scope.variables.x,'add variables in scope constructor')
-						var scope2 = new jme.Scope(scope,{variables: {x: new types.TNum(2)}});
+						var scope2 = new jme.Scope([scope,{variables: {x: new types.TNum(2)}}]);
 						closeEquals(scope2.variables.x.value,2,'override variable in old scope with new value');
 						closeEquals(scope2.variables.y.value,'hi','but other variables retained if not defined in later scope');
 					});
@@ -674,13 +674,13 @@
 					test('Functions',function() {
 						ok(jme.builtinScope.functions['+'],'builtin scope has functions in it.');
 						deepCloseEqual(new jme.Scope().functions,{},'scope from constructor has no functions');
-						var scope = new jme.Scope(jme.builtinScope,{
+						var scope = new jme.Scope([jme.builtinScope,{
 							functions: {
 								'+':[(new jme.funcObj('+',[types.TBool,types.TBool],types.TBool,null,{nobuiltin:true}))]
 							}
-						});
+						}]);
 						closeEquals(scope.functions['+'].length,jme.builtinScope.functions['+'].length+1,'add overloaded function to old scope');
-						closeEquals(new Numbas.jme.Scope(scope,jme.builtinScope).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
+						closeEquals(new Numbas.jme.Scope([scope,jme.builtinScope]).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
 					});
 
 					test('Rulesets',function() {
