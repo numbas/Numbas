@@ -32,7 +32,7 @@
 		</organization> 
 	</organizations> 
 	<resources> 
-		<resource identifier="resource_1" type="webcontent" adlcp:scormType="sco" href="index.html"> 
+		<resource identifier="resource_1" type="webcontent" adlcp:scormType="asset" href="index.html"> 
 			<file href="index.html"/> 
 			<file href="xmls.js"/> 
 			<file href="resources/cross.png"/> 

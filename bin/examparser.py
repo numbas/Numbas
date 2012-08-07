@@ -21,9 +21,9 @@ except ImportError:
   from ordereddict import OrderedDict
 
 try:
-	unicode
+	basestring
 except NameError:
-	basestr = unicode = str
+	basestring = str
 
 class ParseError(Exception):
 	def __init__(self,parser,message,hint=''):
@@ -244,10 +244,10 @@ def printdata(data,ntabs=0):
 	else:
 		if data=='infinity':
 			return '"infinity"'
-		if '"' in str(data) and not (isinstance(data,unicode) or isinstance(data,str)):
+		if '"' in str(data) and not isinstance(data,basestring):
 			print("Unexpected type: "+str)
 
-		if (isinstance(data,str) or isinstance(data,unicode)) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
+		if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
 			if '\n' in data:
 				data = re.sub('(^[\n\t]*)|([\n\t]*$)','',data)
 				data = '\n'+'\n'.join([pad_left(l,'\t',ntabs) for l in data.split('\n')])+'\n'+tabs
@@ -256,7 +256,7 @@ def printdata(data,ntabs=0):
 				return '"""'+data+'"""'
 			else:
 				return '"'+data+'"'
-		elif (isinstance(data,str) or isinstance(data,unicode)) and data.strip()=='':
+		elif isinstance(data,unicode) and data.strip()=='':
 			return "'"+data+"'"
 		else:
 			return str(data)

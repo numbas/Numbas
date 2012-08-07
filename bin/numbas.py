@@ -16,6 +16,7 @@
 
 
 import os
+import io
 import sys
 import traceback
 import shutil
@@ -24,6 +25,12 @@ import examparser
 from exam import Exam,ExamError
 from xml2js import xml2js
 from zipfile import ZipFile
+import xml.etree.ElementTree as etree
+
+try:
+	basestring
+except NameError:
+	basestring = str
 
 def collectFiles(options):
 	dirs=[('runtime','.')]
@@ -44,40 +51,47 @@ def collectFiles(options):
 		dirs.append(('scormfiles','.'))
 
 
-	files = []
+	files = {}
 	for (src,dst) in dirs:
 		src = os.path.join(options.path,src)
 		for x in os.walk(src, followlinks=options.followlinks):
 			xsrc = x[0]
 			xdst = x[0].replace(src,dst,1)
-			files += [(os.path.join(xsrc,y),os.path.join(xdst,y)) for y in x[2] if not (y[-1]=='~' or y[-4:]=='.swp')]
+			for y in x[2]:
+				if not (y[-1]=='~' or y[-4:]=='.swp'):
+					files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
 
-	files += [(os.path.join(options.path,x),os.path.join('resources',os.path.basename(x))) for x in resources if not os.path.isdir(x)]
-
+	for x in resources:
+		if not os.path.isdir(x):
+			files[os.path.join('resources',os.path.basename(x))] = os.path.join(options.path,x)
+	
 	return files
 
-def compileToDir(options):
+def compileToDir(exam,files,options):
 	if options.action == 'clean':
-		if os.path.exists(options.output):
+		try:
 			shutil.rmtree(options.output)
+		except OSError:
+			pass
+	try:
 		os.mkdir(options.output)
-	elif options.action =='update':
-		if not os.path.exists(options.output):
-			os.mkdir(options.output)
+	except OSError:
+		pass
 	
-	files = collectFiles(options)
+	def makepath(path):	#make sure directory hierarchy of path exists by recursively creating directories
+		dir = os.path.dirname(path)
+		if not os.path.exists(dir):
+			makepath(dir)
+			os.mkdir(dir)
 
-	def makepath(path):
-		path = os.path.dirname(path)
-		if not os.path.exists(path):
-			makepath(path)
-			os.mkdir(path)
-
-	for (src,dst) in files:
+	for (dst,src) in files.items():
 		dst = os.path.join(options.output,dst)
-		if options.action=='clean' or not os.path.exists(dst) or os.path.getmtime(src)>os.path.getmtime(dst):
-			makepath(dst)
-			shutil.copyfile(src,dst)
+		if isinstance(src,basestring):
+			if options.action=='clean' or not os.path.exists(dst) or os.path.getmtime(src)>os.path.getmtime(dst):
+				makepath(dst)
+				shutil.copyfile(src,dst)
+		else:
+			shutil.copyfileobj(src,open(dst,'w'))
 	
 	f=open(os.path.join(options.output,'settings.js'),'w',encoding='utf-8')
 	f.write(options.xmls)
@@ -85,8 +99,7 @@ def compileToDir(options):
 
 	print("Exam created in %s" % os.path.relpath(options.output))
 
-def compileToZip(options):
-	files = collectFiles(options)
+def compileToZip(exam,files,options):
 	
 	def cleanpath(path):
 		if path=='': 
@@ -99,9 +112,13 @@ def compileToZip(options):
 
 	f = ZipFile(options.output,'w')
 
-	for (src, dst) in files:
+	for (dst,src) in files.items():
 		dst = cleanpath(dst)
-		f.write(src,dst)
+		if isinstance(src,basestring):
+			f.write(src,dst)
+		else:
+			f.writestr(dst,src.read())
+
 
 	f.writestr('settings.js',options.xmls.encode('utf-8'))
 
@@ -110,29 +127,35 @@ def compileToZip(options):
 	f.close()
 
 def makeExam(options):
-	if(options.xml):
-		examXML = options.source
-		options.resources=[]
-		options.extensions=[]
-	else:
-		try:
-			exam = Exam.fromstring(options.source)
-			examXML = exam.tostring()
-			options.resources = exam.resources
-			options.extensions = exam.extensions
-		except ExamError as err:
-			raise Exception('Error constructing exam:\n%s' % err)
-		except examparser.ParseError as err:
-			raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
-		except:
-			raise Exception('Failed to compile exam.')
+	try:
+		exam = Exam.fromstring(options.source)
+		examXML = exam.tostring()
+		options.resources = exam.resources
+		options.extensions = exam.extensions
+	except ExamError as err:
+		raise Exception('Error constructing exam:\n%s' % err)
+	except examparser.ParseError as err:
+		raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
+	except:
+		raise Exception('Failed to compile exam.')
+
 	options.examXML = examXML
 	options.xmls = xml2js(options)
 
+	files = collectFiles(options)
+
+	if options.scorm:
+		IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
+		manifest = etree.fromstring(open(os.path.join(options.path,'scormfiles','imsmanifest.xml')).read())
+		manifest.attrib['identifier'] = 'Numbas: %s' % exam.name
+		manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix,IMSprefix,IMSprefix)).text = exam.name
+		manifest = etree.tostring(manifest).decode('utf-8')
+		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest)
+		
 	if options.zip:
-		compileToZip(options)
+		compileToZip(exam,files,options)
 	else:
-		compileToDir(options)
+		compileToDir(exam,files,options)
 
 if __name__ == '__main__':
 
@@ -142,12 +165,6 @@ if __name__ == '__main__':
 		path = os.getcwd()
 
 	parser = OptionParser(usage="usage: %prog [options] source")
-	parser.add_option('-x','--xml',
-						dest='xml',
-						action='store_true',
-						default=False,
-						help='The input is an XML file'
-		)
 	parser.add_option('-t','--theme',
 						dest='theme',
 						action='store',
