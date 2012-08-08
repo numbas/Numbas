@@ -90,7 +90,10 @@ def compileToDir(exam,files,options):
 		dir = os.path.dirname(path)
 		if not os.path.exists(dir):
 			makepath(dir)
-			os.mkdir(dir)
+			try:
+				os.mkdir(dir)
+			except OSError:
+				pass
 
 	for (dst,src) in files.items():
 		dst = os.path.join(options.output,dst)
