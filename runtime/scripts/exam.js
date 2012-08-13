@@ -95,6 +95,7 @@ var Exam = Numbas.Exam = function()
 
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
+	document.title = this.name;
 
 	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
 
