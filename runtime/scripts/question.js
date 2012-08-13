@@ -888,10 +888,11 @@ JMEPart.prototype =
 			return;
 		}
 
+		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'');
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ )
 		{
-			if(this.studentAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
+			if(noSpaceAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
 		}
 		
 		if(!this.failNotAllowed)
@@ -899,7 +900,7 @@ JMEPart.prototype =
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ )
 			{
-				if(!this.studentAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
+				if(noSpaceAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
 			}
 		}
 
