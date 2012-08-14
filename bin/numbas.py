@@ -27,12 +27,19 @@ from xml2js import xml2js
 from zipfile import ZipFile
 import xml.etree.ElementTree as etree
 
-etree.register_namespace('','http://www.imsglobal.org/xsd/imscp_v1p1')
-etree.register_namespace('xsi','http://www.w3.org/2001/XMLSchema-instance')
-etree.register_namespace('adlcp','http://www.adlnet.org/xsd/adlcp_v1p3')
-etree.register_namespace('adlseq','http://www.adlnet.org/xsd/adlseq_v1p3')
-etree.register_namespace('adlnav','http://www.adlnet.org/xsd/adlnav_v1p3')
-etree.register_namespace('imsss','http://www.imsglobal.org/xsd/imsss')
+namespaces = {
+	'': 'http://www.imsglobal.org/xsd/imscp_v1p1',
+	'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+	'adlcp': 'http://www.adlnet.org/xsd/adlcp_v1p3',
+	'adlseq': 'http://www.adlnet.org/xsd/adlseq_v1p3',
+	'adlnav': 'http://www.adlnet.org/xsd/adlnav_v1p3',
+	'imsss': 'http://www.imsglobal.org/xsd/imsss',
+}
+for ns,url in namespaces.items():
+	try:
+		etree.register_namespace(ns,url)		
+	except AttributeError:
+		etree._namespace_map[url]=ns
 
 try:
 	basestring
