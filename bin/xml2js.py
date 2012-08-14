@@ -23,15 +23,17 @@ def encode(xml):
 	return xml
 
 def xml2js(options):
-	themedir = os.path.join(options.path,options.theme,'xslt')
+	for themedir in options.themepaths:
+		xsltdir = os.path.join(themedir,'xslt')
 
-	all = ''
-	files = filter(lambda x: x[-5:]=='.xslt', os.listdir(themedir))
-	for x in files:
-		if len(all):
-			all+=',\n\t\t'
-		s = x[:-5]+': \"'+encode(open(os.path.join(themedir,x),encoding='utf-8').read())+'\"'
-		all+=s
+		if os.path.exists(xsltdir):
+			all = ''
+			files = filter(lambda x: x[-5:]=='.xslt', os.listdir(xsltdir))
+			for x in files:
+				if len(all):
+					all+=',\n\t\t'
+				s = x[:-5]+': \"'+encode(open(os.path.join(xsltdir,x),encoding='utf-8').read())+'\"'
+				all+=s
 
 	extensionfiles = ['extensions/'+x+'/'+x+'.js'for x in [os.path.split(y)[1] for y in options.extensions]]
 
