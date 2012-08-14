@@ -23,11 +23,11 @@ def encode(xml):
 	return xml
 
 def xml2js(options):
+	all = ''
 	for themedir in options.themepaths:
 		xsltdir = os.path.join(themedir,'xslt')
 
 		if os.path.exists(xsltdir):
-			all = ''
 			files = filter(lambda x: x[-5:]=='.xslt', os.listdir(xsltdir))
 			for x in files:
 				if len(all):
