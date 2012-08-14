@@ -128,7 +128,7 @@ jme.display = {
 function texifyOpArg(thing,texArgs,i)
 {
 	var precedence = jme.precedence;
-	tex = texArgs[i];
+	var tex = texArgs[i];
 	if(thing.args[i].tok.type=='op')	//if this is an op applied to an op, might need to bracket
 	{
 		var op1 = thing.args[i].tok.name;	//child op
@@ -1131,8 +1131,10 @@ var simplificationRules = jme.display.simplificationRules = {
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
-		['x+y',['x isa "number"','y isa "complex"'],'eval(x+y)'],
-		['-x+y',['x isa "number"','y isa "complex"'],'-eval(x-y)'],
+		['x+y',['x isa "number"','y isa "complex"','re(y)=0'],'eval(x+y)'],
+		['-x+y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
+		['x-y',['x isa "number"','y isa "complex"','im(y)>=0'],'(x-eval(re(y)))-eval(im(y)*i)'],
+		['x-y',['x isa "number"','y isa "complex"','im(y)<0'],'(x-eval(re(y)))+eval(-im(y)*i)'],
 		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
 		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication
