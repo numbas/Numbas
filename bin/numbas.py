@@ -26,6 +26,7 @@ from exam import Exam,ExamError
 from xml2js import xml2js
 from zipfile import ZipFile
 import xml.etree.ElementTree as etree
+from itertools import count
 
 etree.register_namespace('','http://www.imsglobal.org/xsd/imscp_v1p1')
 etree.register_namespace('xsi','http://www.w3.org/2001/XMLSchema-instance')
@@ -53,8 +54,9 @@ def collectFiles(options):
 			]
 	dirs += extfiles
 
-	themepath=os.path.join(options.theme,'files')
-	dirs.append((themepath,'.'))
+	for themepath in options.themepaths:
+		dirs.append((os.path.join(themepath,'files'),'.'))
+
 	if options.scorm:
 		dirs.append(('scormfiles','.'))
 
@@ -168,6 +170,16 @@ def makeExam(options):
 	else:
 		compileToDir(exam,files,options)
 
+def get_theme_path(theme,options):
+	if os.path.exists(theme):
+		return theme
+	else:
+		ntheme = os.path.join(options.path,'themes',theme)
+		if os.path.exists(ntheme):
+			return ntheme
+		else:
+			raise Exception("Couldn't find theme %s" % theme)
+
 if __name__ == '__main__':
 
 	if 'assesspath' in os.environ:
@@ -253,13 +265,15 @@ if __name__ == '__main__':
 				output += '.zip'
 			options.output=os.path.join(path,'output',output)
 	
-	if not os.path.exists(options.theme):
-		ntheme = os.path.join('themes',options.theme)
-		if os.path.exists(os.path.join(options.path,ntheme)):
-			options.theme = ntheme
-		else:
-			print("Couldn't find theme %s" % options.theme)
-			options.theme = os.path.join(options.path,'themes','default')
+
+	options.themepaths = [options.theme]
+	for theme,i in zip(options.themepaths,count()):
+		theme = options.themepaths[i] = get_theme_path(theme,options)
+		inherit_file = os.path.join(theme,'inherit.txt')
+		if os.path.exists(inherit_file):
+			options.themepaths += open(inherit_file).read().splitlines()
+
+	options.themepaths.reverse()
 
 	try:
 		makeExam(options)
