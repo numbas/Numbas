@@ -1133,8 +1133,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
 		['x+y',['x isa "number"','y isa "complex"','re(y)=0'],'eval(x+y)'],
 		['-x+y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
-		['x-y',['x isa "number"','y isa "complex"','im(y)>=0'],'(x-eval(re(y)))-eval(im(y)*i)'],
-		['x-y',['x isa "number"','y isa "complex"','im(y)<0'],'(x-eval(re(y)))+eval(-im(y)*i)'],
+		['x-y',['x isa "number"','y isa "complex"','re(y)<>0','im(y)>=0'],'(x-eval(re(y)))-eval(im(y)*i)'],
+		['x-y',['x isa "number"','y isa "complex"','re(y)<>0','im(y)<0'],'(x-eval(re(y)))+eval(-im(y)*i)'],
 		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
 		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication
