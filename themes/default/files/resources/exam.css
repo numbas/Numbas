@@ -198,6 +198,10 @@ button:hover, button:focus {
 	text-align:center;
 	padding: 0.5em 0.5em 0 0.5em;
 	border: 1px solid #a2d1f0;
+	max-height: 20em;
+	overflow-y: auto;
+	margin: 0 0 0 auto;
+	width: 50em;
 }
 
 #feedbackMessage hr {
