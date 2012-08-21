@@ -79,6 +79,7 @@ Copyright 2011 Newcastle University
 			<div class="logo">
 				<img src="resources/numbas-logo.gif"/>
 			</div>
+			<div id="examBanner">exam name</div>
 		</div>
 
 		<!-- main content area - info pages or questions go in here -->
@@ -92,8 +93,8 @@ Copyright 2011 Newcastle University
 					<div class="titleBits">
 						<span id="questionNameDisplay">Question Name</span>
 						<span class="adviceNav">
-							<input class="btn" type="button" value="Advice" id="adviceBtn">
-							<input class="btn" type="button" value="Reveal" id="revealBtn">
+							<button id="adviceBtn">Advice</button>
+							<button id="revealBtn">Reveal</button>
 						</span>
 					</div>
 				</div>
@@ -107,12 +108,12 @@ Copyright 2011 Newcastle University
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
 					<div class="submitDiv">
-						<input class="btn" type="button" value="Submit all parts" id="submitBtn">
+						<button id="submitBtn">Submit all parts</button>
 						<div id="marks">	
 							<span id="score"></span>
 							<span id="feedback"><img src="resources/cross.png"/></span>
 						</div>
-						<input class="btn" type="button" value="Try another question like this one" id="regenBtn">
+						<button id="regenBtn">Try another question like this one</button>
 					</div>
 				</div>
 			</div>

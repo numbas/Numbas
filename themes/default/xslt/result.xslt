@@ -20,12 +20,10 @@ Copyright 2011 Newcastle University
 	<div>	
 		<xsl:apply-templates />
 		<div class="exitBtn">
-			<input id="exitBtn" class="btn" type="button" value="Exit">
-			</input>
+			<button id="exitBtn">Exit</button>
 		</div>
 		<span id="reviewBtnSpan">
-			<input id="reviewBtn" class="btn" type="button" value="Review">
-			</input>
+			<button id="reviewBtn">Review</button>
 		</span>
 	</div>
 </xsl:template>

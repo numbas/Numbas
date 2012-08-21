@@ -216,17 +216,21 @@ display.ExamDisplay.prototype =
 		if(display.carouselGo)
 			display.carouselGo(exam.currentQuestion.number-1,300);
 		
-		//enable or disable 'previous question' button
-		if(exam.currentQuestion.number === 0)
-			$('#prevBtn').attr('disabled','true').hide();
-		else if(exam.navigateReverse)
-			$('#prevBtn').removeAttr('disabled').show();
+		if(exam.numQuestions>1) {
+			//enable or disable 'previous question' button
+			if(exam.currentQuestion.number === 0)
+				$('#prevBtn').attr('disabled','true').hide();
+			else if(exam.navigateReverse)
+				$('#prevBtn').removeAttr('disabled').show();
 
-		//enable or disable 'next question' button
-		if( exam.currentQuestion.number == exam.numQuestions-1 )
-			$('#nextBtn').attr('disabled','true').hide();
-		else
-			$('#nextBtn').removeAttr('disabled').show();
+			//enable or disable 'next question' button
+			if( exam.currentQuestion.number == exam.numQuestions-1 )
+				$('#nextBtn').attr('disabled','true').hide();
+			else
+				$('#nextBtn').removeAttr('disabled').show();
+		} else {
+			$('#prevBtn,#nextBtn').hide();
+		}
 	},
 
 	showInfoPage: function(page)
@@ -585,6 +589,19 @@ display.PartDisplay.prototype =
 			Numbas.store.save();
 		});
 
+		var feedbackShown = false;
+		function toggleFeedback(val) {
+			if(val===undefined)
+				feedbackShown = !feedbackShown;
+			else
+				feedbackShown = val;
+			c.find('#feedbackMessage:last').slideToggle('fast');
+			c.find('#partFeedback:last #feedbackToggle').html(feedbackShown ? R('Hide feedback') : R('Show feedback'));
+		}
+		toggleFeedback(false);
+		c.find('#feedbackMessage:last').hide();
+		c.find('#partFeedback:last #feedbackToggle').hide().click(function(){toggleFeedback()});
+
 		this.showScore(this.p.answered);
 	},
 
@@ -645,8 +662,9 @@ display.PartDisplay.prototype =
 				}
 
 				feedback = feedback.join('\n\n<hr/>');
-				c.find('#feedbackMessage:last').html(feedback).hide().fadeIn(500);
+				c.find('#feedbackMessage:last').html(feedback);
 				Numbas.display.typeset(c.find('#feedbackMessage:last'));
+				c.find('#partFeedback:last #feedbackToggle').show();
 			}
 			else
 			{
@@ -1069,50 +1087,6 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		else
 			scoreSelector.hide();
 	}
-/*
-	if(settings.showTotalMark || settings.showActualMark)
-	{
-		if(answered)
-		{
-			if(!settings.showTotalMark && settings.showActualMark)
-				scoreDisplay = niceNumber(score);
-			else if(settings.showTotalMark && !settings.showActualMark)
-				scoreDisplay = 'Answered ('+niceNumber(marks)+')';
-			else if(settings.showTotalMark && settings.showActualMark)
-				scoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
-
-			scoreSelector
-				.show()
-				.html(scoreDisplay);
-		}
-		else
-		{
-			if(settings.showTotalMark)
-			{
-				scoreDisplay = niceNumber(marks)+' '+(marks==1 ? 'mark' : 'marks');
-				scoreSelector
-					.show()
-					.html(scoreDisplay);
-			}
-			else
-				scoreSelector.hide();
-
-		}
-
-	}
-	else
-	{
-		if(answered)
-		{
-			scoreSelector
-				.show()
-				.html('Answered');
-		}
-		else
-			scoreSelector.hide();
-	}
-*/
-
 	if( settings.showAnswerState )
 	{
 		if( answered )

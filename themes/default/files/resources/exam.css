@@ -1,3 +1,10 @@
+.clearAfter::after {
+    clear: both;
+    content: '.';
+    display: block;
+    visibility: hidden;
+    height: 0;
+}
 
 html{	
 	font-family: sans-serif;
@@ -19,10 +26,14 @@ body {
 	font-size: 120%;
 }
 
-.btn{
-	margin:.4em 0;
-	width: 7em;
+button {
+	margin: 0.1em 0.3em;
+	min-width: 7em;
 	/*border: 1px solid #999999*/;
+	background: #f5f5f5;
+	border: 1px solid #999;
+	border-radius: 0;
+	padding: 0.3em 1em;
 }
 
 #progressbar {
@@ -127,7 +138,6 @@ body {
 
 .submitDiv {
 	text-align:center;
-	margin: -0.4em auto;
 }
 #submitBtn {
 	width: 9em;
@@ -143,7 +153,9 @@ body {
 #marks #feedback {
 	width:25px;
 	height:25px;
-	padding: 0.2em 0;
+	padding: 0;
+	display: inline-block !important;
+	vertical-align: middle;
 }
 
 .questionSelector:hover {
@@ -406,6 +418,7 @@ div.part {
 }
 .question {
 	border:1px;
+	margin-bottom: 1em;
 }
 
 .warningcontainer {
@@ -430,12 +443,13 @@ div.part {
 .part #partFeedback {
 	background: #A2D1F0;
 	border: 1px solid #999999;
-	padding: 0.1em 0.5em;
+	padding: 0.2em 0.2em 0.2em 0.1em;
 	float:right;
 }
 
 .part #marks {
 	font-weight: bold;
+	margin: 0 0.3em;
 }
 
 

@@ -58,7 +58,7 @@ Copyright 2011 Newcastle University
 			</xsl:if>
 		</table>
 		<div class="startBtn">
-			<input id="startBtn" class="btn" type="button" value="Start"/>
+			<button id="startBtn">Start</button>
 		</div>
 	</div>
 </xsl:template>

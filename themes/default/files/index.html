@@ -90,13 +90,13 @@ Copyright 2011 Newcastle University
 			<div id="questionContainer">
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
-					<input class="btn leftNav" type="button" value="Previous" id="prevBtn">
-					<input class="btn rightNav" type="button" value="Next" id="nextBtn">
+					<button class="leftNav" id="prevBtn">Previous</button>
+					<button class="rightNav" id="nextBtn">Next</button>
 					<div class="titleBits">
 						<span id="questionNameDisplay">Question Name</span>
 						<span class="adviceNav">
-							<input class="btn" type="button" value="Advice" id="adviceBtn">
-							<input class="btn" type="button" value="Reveal" id="revealBtn">
+							<button id="adviceBtn">Advice</button>
+							<button id="revealBtn">Reveal</button>
 						</span>
 					</div>
 				</div>
@@ -130,23 +130,20 @@ Copyright 2011 Newcastle University
 						</div>
 
 						<!-- end exam button -->
-						<div class="menuButtons">
-							<input class="btn" type="button" value="Pause" id="pauseBtn"><br/>
-							<input class="btn" type="button" value="End Exam" id="endBtn">
-						</div>
+						<div class="menuButtons"><button id="pauseBtn">Pause</button><br/><button id="endBtn">End Exam</button></div>
 					</div>
 				</div>
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
-					<input class="btn leftNav" type="button" value="Previous" id="prevBtn">
-					<input class="btn rightNav" type="button" value="Next" id="nextBtn">
+					<button id="prevBtn" class="leftNav">Previous</button>
+					<button id="nextBtn" class="rightNav">Next</button>
 					<div class="submitDiv">
-						<input class="btn" type="button" value="Submit all parts" id="submitBtn">
+						<button id="submitBtn">Submit all parts</button>
 						<div id="marks">	
 							<span id="score"></span>
 							<span id="feedback"><img src="resources/cross.png"/></span>
 						</div>
-						<input class="btn" type="button" value="Try another question like this one" id="regenBtn">
+						<button id="regenBtn">Try another question like this one</button>
 					</div>
 				</div>
 			</div>

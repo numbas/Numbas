@@ -29,7 +29,7 @@ Copyright 2011 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div class="question" id="question-{@number}">
+	<div class="question clearAfter" id="question-{@number}">
 		<xsl:apply-templates />
 	</div>
 </xsl:template>
@@ -102,11 +102,12 @@ Copyright 2011 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div id="partFeedback">
-				<input class="btn" id="submitPart" value="Submit part" type="button"></input>
+				<button id="submitPart">Submit part</button>
 				<div id="marks">
 					<span id="score"></span>
 					<span id="feedback"><img src="resources/cross.png"/></span>
 				</div>
+				<button id="feedbackToggle"></button>
 			</div>
 			<div id="feedbackMessage"></div>
 		</xsl:if>
@@ -120,7 +121,7 @@ Copyright 2011 Newcastle University
 		<xsl:apply-templates select="part"/>
 		<div style="clear:both;"></div>
 	</div>
-	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><input type="button" value="Show steps" class="btn" id="stepsBtn"></input></div>
+	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button id="stepsBtn">Show steps</button></div>
 </xsl:template>
 
 <xsl:template match="prompt">
