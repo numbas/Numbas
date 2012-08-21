@@ -219,17 +219,17 @@ display.ExamDisplay.prototype =
 		if(exam.numQuestions>1) {
 			//enable or disable 'previous question' button
 			if(exam.currentQuestion.number === 0)
-				$('#prevBtn').attr('disabled','true').hide();
+				$('*').find('#prevBtn').attr('disabled','true').hide();
 			else if(exam.navigateReverse)
-				$('#prevBtn').removeAttr('disabled').show();
+				$('*').find('#prevBtn').removeAttr('disabled').show();
 
 			//enable or disable 'next question' button
 			if( exam.currentQuestion.number == exam.numQuestions-1 )
-				$('#nextBtn').attr('disabled','true').hide();
+				$('*').find('#nextBtn').attr('disabled','true').hide();
 			else
-				$('#nextBtn').removeAttr('disabled').show();
+				$('*').find('#nextBtn').removeAttr('disabled').show();
 		} else {
-			$('#prevBtn,#nextBtn').hide();
+			$('*').find('#prevBtn,#nextBtn').hide();
 		}
 	},
 
