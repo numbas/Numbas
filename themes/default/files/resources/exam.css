@@ -120,6 +120,7 @@ button:hover, button:focus {
 }
 .menuButtons {
 	text-align:center;
+	margin-top: 0.6em;
 }
 
 .titleBits {

@@ -42,6 +42,10 @@ button {
 	padding: 0.3em 1em;
 }
 
+button:hover, button:focus {
+	background: #f90;
+}
+
 #progressbar {
 	position:relative;
 	height:2em;
@@ -122,6 +126,7 @@ button {
 }
 .menuButtons {
 	text-align:center;
+	margin-top: 0.6em;
 }
 
 .titleBits {
