@@ -800,7 +800,7 @@ display.JMEPartDisplay.prototype =
 				try {
 					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification,this.p.question.scope);
 					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
-					previewDiv.html('$'+tex+'$');
+					previewDiv.show().html('$'+tex+'$');
 					var pp = this;
 					Numbas.display.typeset(previewDiv);
 					this.validEntry = true;
@@ -809,12 +809,12 @@ display.JMEPartDisplay.prototype =
 				catch(e) {
 					this.validEntry = false;
 					this.warning(e);
-					previewDiv.html('');
+					previewDiv.hide().html('');
 				}
 			}
 			else
 			{
-				previewDiv.html('');
+				previewDiv.html('').hide();
 				this.oldtex='';
 				this.validEntry = true;
 			}
