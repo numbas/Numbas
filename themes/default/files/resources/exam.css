@@ -252,6 +252,7 @@ button:hover, button:focus {
 	width:12em;
 	position:relative;
 	right:12.5em;
+	padding-bottom: 1em;
 }
 
 .carouselBtn {
