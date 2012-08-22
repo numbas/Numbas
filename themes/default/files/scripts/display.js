@@ -1156,8 +1156,12 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 		nextScroll = i;
 		if(going)
 			return;
-		var listOffset = div.find('ul,ol').position().top;
-		var listHeight = div.find('ul,ol').height();
+		try {
+			var listOffset = div.find('ul,ol').position().top;
+			var listHeight = div.find('ul,ol').height();
+		} catch(e) {
+			return;
+		}
 
 		var lis = div.find('li');
 		var divHeight = div.height();
