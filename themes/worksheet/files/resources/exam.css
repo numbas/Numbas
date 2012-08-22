@@ -1,4 +1,3 @@
-
 html{	
 	font-family: sans-serif;
 }
@@ -59,6 +58,40 @@ h1,h2,h3,h4,h5,h6 {
 	color:#fff;
 	left:0.15em;
 	top:0;
+}
+
+#generatorControls {
+    font-size:  2em;
+    margin-bottom: 1em;
+    background: #eee;
+    padding:  0.5em;
+}
+
+#generatorControls p {
+	margin-bottom: 0.3em;
+}
+
+#generatorControls ol {
+	margin-left: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+#generatorControls #print {
+	display: none
+}
+
+#numExams {
+    border: none;
+	width: 3em;
+}
+
+
+#examTemplate {
+	display: none;
+}
+
+.exam:not(:last-child) {
+	page-break-after: always;
 }
 
 /* title bar */
@@ -232,25 +265,6 @@ hr {
 	margin-left:1em;
 }
 
-/* alert / confirm box */
-#warningDisplay {
-	background: red;
-	position:absolute;
-	width:100%;
-	height:100%;
-}
-
-#warningDisplay .errorBar {
-	text-align:center;
-}
-
-#warningDisplay #warningMessage {
-	max-width:75%;
-	margin: 1em auto;
-	background: white;
-}
-
-
 /* front/exit pages */
 .startBtn {
 	text-align:center;
@@ -275,7 +289,7 @@ hr {
 
 /* question bits */
 
-#questionDisplay table{
+.questionList table{
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -288,6 +302,10 @@ hr {
 	padding-bottom: 0.1em;
 	background: #cfc;
 }
+.statement:empty {
+	display: none;
+}
+
 .part {
 	margin: .5em 0;
 }
@@ -327,6 +345,7 @@ div.part {
 }
 .question {
 	border:1px;
+	margin-bottom: 2em;
 }
 
 .warningcontainer {
@@ -478,7 +497,7 @@ div.jqi button.jqidefaultbutton{
 	padding: initial;
 	position:initial;
 }
-#questionDisplay {
+.questionList {
 	margin:initial;
 	right:initial;
 	list-style-type: none;
@@ -502,8 +521,37 @@ input[type="text"], input[type="number"] {
 	display: none;
 }
 
+@media screen {
+	.exam {
+		display: none;
+	}
+	.exam:not(:last-child) {
+		padding-bottom: 2.5em;
+		margin-bottom: 2.5em;
+		border-bottom: 2px dashed black;
+	}
+}
+
 @media print {
 	body {
 		font-size: 0.7em;
+	}
+
+	#generatorControls {
+		display: none;
+	}
+
+
+	input[type="checkbox"], input[type="radio"] {
+		width: 0;
+		margin-right: 1.2em;
+	}
+	input[type="checkbox"]::before, input[type="radio"]::before {
+		content: '';
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		border: 1px solid black;
+		background: white;
 	}
 }

@@ -74,37 +74,40 @@ Copyright 2011 Newcastle University
 		</div>
 
 		<div id="everything" style="display:none">
-		<!-- top bar - logo, exam title, timing -->
-		<div class="mainDiv titleBar">
-			<div class="logo">
-				<img src="resources/numbas-logo.gif"/>
-			</div>
-			<div id="examBanner">exam name</div>
-		</div>
-
-		<!-- main content area - info pages or questions go in here -->
-		<div class="mainDisplay">
-			<div id="infoDisplay">
+			<div id="generatorControls">
+				<p>Generate <input type="number" id="numExams" value="1" min="1"/> <span id="examNoun">exam</span>, <button id="generateButton">please</button>.</p>
+				<div id="progress">
+					<ol id="examProgress">
+					</ol>
+					<p id="typesetProgress"></p>
+				</div>
+				<p id="print">Now <button id="printButton">print</button>.</p>
 			</div>
 
-			<ol id="questionDisplay">
-			</ol>
 
-			<div id="warningDisplay">
-				<div class="errorBar">
-					<h1>Alert</h1>
-				</div>
-				<div id="warningMessage"></div>
-				<div class="errorBar" id="alert">
-					<input type="button" id="warningOK" value="Ok">
-				</div>
-				<div class="errorBar" id="confirm">
-					<input type="button" id="warningOK" value="OK">
-					<input type="button" id="warningCancel" value="Cancel">
-				</div>
+			<div id="examList">
 			</div>
 
-		</div>
+			<div class="exam" id="examTemplate">
+				<!-- top bar - logo, exam title, timing -->
+				<div class="mainDiv titleBar">
+					<div class="logo">
+						<img src="resources/numbas-logo.gif"/>
+					</div>
+					<div id="examBanner">exam name</div>
+				</div>
+
+				<!-- main content area - info pages or questions go in here -->
+				<div class="mainDisplay">
+					<div id="infoDisplay">
+					</div>
+
+					<ol class="questionList">
+					</ol>
+
+
+				</div>
+			</div>
 		</div>
 
 	</body>

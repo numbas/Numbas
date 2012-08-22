@@ -102,7 +102,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 
 	job(function()
 	{
-		q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
+		q.adviceThreshold = q.exam.adviceGlobalThreshold;
 		q.followVariables = {};
 		
 		//initialise display - get question HTML, make menu item, etc.
@@ -293,7 +293,7 @@ Question.prototype =
 			Numbas.store.answerRevealed(this);
 		}
 
-		Numbas.exam.updateScore();
+		this.exam.updateScore();
 	},
 
 	//validate question - returns true if all parts completed
@@ -373,7 +373,7 @@ Question.prototype =
 							
 		this.updateScore();
 
-		if(Numbas.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
+		if(this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
 		{
 			this.getAdvice();
 		}
@@ -387,7 +387,7 @@ Question.prototype =
 		this.calculateScore('uwNone');
 
 		//update total exam score
-		Numbas.exam.updateScore();
+		this.exam.updateScore();
 
 		//display score - ticks and crosses etc.
 		this.display.showScore();
