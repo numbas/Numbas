@@ -74,6 +74,14 @@ var display = Numbas.display = {
 
 			job(function() {
 				$('#typesetProgress').html('Typesetting...').show();
+
+				var oldProcessMessage = MathJax.Hub.processMessage;
+				MathJax.Hub.processMessage = function(state,type) {
+					oldProcessMessage.apply(MathJax.Hub,arguments);
+					var m = Math.floor(state.i/(state.scripts.length)*100);
+					$('#typesetProgress').html('Typesetting... '+m+'%');
+				}
+
 				MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
 				MathJax.Hub.Queue(function() {
 					$('#print').fadeIn();
