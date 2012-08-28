@@ -256,7 +256,7 @@ def printdata(data,ntabs=0):
 				return '"""'+data+'"""'
 			else:
 				return '"'+data+'"'
-		elif isinstance(data,unicode) and data.strip()=='':
+		elif isinstance(data,basestring) and data.strip()=='':
 			return "'"+data+"'"
 		else:
 			return str(data)
