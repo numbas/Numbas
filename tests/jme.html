@@ -697,8 +697,10 @@
 							return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
 						}
 						equals(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
-						equals(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 -5 i)','(-7)/(-4+5i) - unary minus brough out of complex number properly');
-						equals(simplifyExpression('-4+5i','all'),'-4 + 5 i','-4+5i - unary minus brough out of complex number properly');
+						equals(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
+						equals(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
+						equals(simplifyExpression('(1-i)+(-2+2i)',''),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
+						equals(simplifyExpression('(1-i)-(-2+2i)',''),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
 						equals(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
 						equals(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
 					});
@@ -709,6 +711,7 @@
 						}
 						equals(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
 						equals(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
+						equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 						equals(exprToLaTeX('10000000000000000000000000'),'1 \times 10^{25}','scientific notation - 1*e^25');
 						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \times 10^{25}','scientific notation - 4.7652*e^25');
 					});

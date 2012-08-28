@@ -278,7 +278,17 @@ var texOps = jme.display.texOps = {
 	}),
 	'/': (function(thing,texArgs) { return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }'); }),
 	'+': infixTex('+'),
-	'-': infixTex('-'),
+	'-': (function(thing,texArgs,settings) {
+		var a = thing.args[0];
+		var b = thing.args[1];
+		if(b.tok.type=='number' && b.tok.value.complex && b.tok.value.re!=0) {
+			var texb = settings.texNumber(math.complex(b.tok.value.re,-b.tok.value.im));
+			return texArgs[0]+' - '+texb;
+		}
+		else{
+			return texArgs[0]+' - '+texArgs[1];
+		}
+	}),
 	'dot': infixTex('\\cdot'),
 	'cross': infixTex('\\times'),
 	'transpose': (function(thing,texArgs) {
@@ -741,7 +751,7 @@ function jmeRationalNumber(n)
 	if(n.complex)
 	{
 		var re = jmeRationalNumber(n.re);
-		var im = jmeRationalNumber(n.im)+' i';
+		var im = jmeRationalNumber(n.im)+'i';
 		if(n.im==0)
 			return re;
 		else if(n.re==0)
@@ -758,7 +768,7 @@ function jmeRationalNumber(n)
 			if(n.im==-1)
 				return re+' - i';
 			else
-				return re+' '+im;
+				return re+' - '+jmeRationalNumber(-n.im)+'i';
 		}
 		else
 		{
@@ -811,7 +821,7 @@ function jmeRealNumber(n)
 	if(n.complex)
 	{
 		var re = jmeRealNumber(n.re);
-		var im = jmeRealNumber(n.im)+' i';
+		var im = jmeRealNumber(n.im)+'i';
 		if(n.im==0)
 			return re;
 		else if(n.re==0)
@@ -828,12 +838,12 @@ function jmeRealNumber(n)
 			if(n.im==-1)
 				return re+' - i';
 			else
-				return re+' '+im;
+				return re+' - '+jmeRealNumber(-n.im)+'i';
 		}
 		else
 		{
 			if(n.im==1)
-				return re+' + '+'i';
+				return re+' + i';
 			else
 				return re+' + '+im;
 		}
@@ -977,10 +987,18 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 			if(args[0].tok.type=='number' && args[0].tok.value.complex)
 				return jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
 			break;
+		case '-':
+			var b = args[1].tok.value;
+			if(args[1].tok.type=='number' && args[1].tok.value.complex && args[1].tok.value.re!=0) {
+				return bits[0]+' - '+jmeNumber(math.complex(b.re,-b.im));
+			}
+			op = ' - ';
+			break;
 		case 'and':
 		case 'or':
 		case 'isa':
 		case 'except':
+		case '+':
 			op=' '+op+' ';
 			break;
 		case 'not':
@@ -1133,8 +1151,6 @@ var simplificationRules = jme.display.simplificationRules = {
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
 		['x+y',['x isa "number"','y isa "complex"','re(y)=0'],'eval(x+y)'],
 		['-x+y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
-		['x-y',['x isa "number"','y isa "complex"','re(y)<>0','im(y)>=0'],'(x-eval(re(y)))-eval(im(y)*i)'],
-		['x-y',['x isa "number"','y isa "complex"','re(y)<>0','im(y)<0'],'(x-eval(re(y)))+eval(-im(y)*i)'],
 		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
 		['x/(-y)',[],'-(x/y)'],			
 		['(-x)*y',[],'-(x*y)'],			//take negation to left of multiplication
