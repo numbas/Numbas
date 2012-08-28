@@ -386,9 +386,9 @@ display.QuestionDisplay.prototype =
 		{
 			submitMsg = R('control.submit all parts');
 		}
-		$('.navBar #submitBtn').val(submitMsg);
+		$('.navBar #submitBtn').html(submitMsg);
 
-		$('#regenBtn').val(R('control.regen'));
+		$('#regenBtn').html(R('control.regen'));
 
 		//update question name box in nav bar
 		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
@@ -490,7 +490,7 @@ display.QuestionDisplay.prototype =
 
 		if(!exam.showTotalMark && !exam.showActualMark)
 		{
-			selector.find('#submitBtn').val(R(q.answered ? 'control.submit again' : 'control.submit'));
+			selector.find('#submitBtn').html(R(q.answered ? 'control.submit again' : 'control.submit'));
 		}
 		var anyAnswered = false;
 		for(var i=0;i<q.parts.length;i++)
@@ -570,13 +570,6 @@ display.PartDisplay.prototype =
 			.mouseout(function(){
 				$(this).find('.partwarning').hide()
 			});
-
-		//hide part submit button and score feedback if there's only one part
-		if(p.parentPart==null && p.question.parts.length==1)
-		{
-			c.find('#partFeedback:last').hide();
-		}
-
 
 		c.find('#partFeedback:last #submitPart').click(function() {
 			p.display.removeWarnings();
