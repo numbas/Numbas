@@ -457,6 +457,10 @@ div.part {
 	float:right;
 }
 
+#feedbackToggle {
+	width: 9em;
+}
+
 .part #marks {
 	font-weight: bold;
 	margin: 0 0.3em;
