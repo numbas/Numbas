@@ -900,7 +900,7 @@ JMEPart.prototype =
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ )
 			{
-				if(noSpaceAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
+				if(!noSpaceAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
 			}
 		}
 
