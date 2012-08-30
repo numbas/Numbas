@@ -96,6 +96,7 @@ jme.variables = {
 
 
 		function makeJMEFunction(fn) {
+			fn.tree = jme.compile(fn.definition,scope);
 			return function(args,scope) {
 				var oscope = scope;
 				scope = new jme.Scope(scope);
@@ -108,6 +109,10 @@ jme.variables = {
 			}
 		}
 		function makeJavascriptFunction(fn) {
+			var preamble='(function('+fn.paramNames.join(',')+'){';
+			var math = Numbas.math;
+			var util = Numbas.util;
+			var jfn = eval(preamble+fn.definition+'})');
 			return function(args,scope) {
 				args = args.map(function(a){return jme.evaluate(a,scope).value});
 				try {
@@ -131,16 +136,10 @@ jme.variables = {
 			switch(fn.language)
 			{
 			case 'jme':
-				fn.tree = jme.compile(fn.definition,scope);
-
 				fn.evaluate = makeJMEFunction(fn);
 
 				break;
 			case 'javascript':
-				var preamble='(function('+fn.paramNames.join(',')+'){';
-				var math = Numbas.math, 
-					util = Numbas.util;
-				var jfn = eval(preamble+fn.definition+'})');
 				fn.evaluate = makeJavascriptFunction(fn);
 				break;
 			}
