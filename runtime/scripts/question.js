@@ -185,43 +185,7 @@ Question.prototype =
 			//do contentsubvars on all content
 			for(var i=0;i<contents.length;i++)
 			{
-				//get all non-whitespace text nodes
-				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*:not(iframe)').contents().filter(tnf));
-
-				//filter out script nodes
-				textNodes = textNodes.filter(function(){
-					return !$(this).parent().attr('language')}
-				);
-
-				//run contentsubvars on the collection of text nodes
-				textNodes.each(function(){
-						var old = this.nodeValue;
-						var newtext = jme.contentsubvars(old, q.scope);
-						newtext = util.escapeHTML(newtext);
-						if(newtext!=old)
-						{
-							//parse new content
-							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
-							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
-							{
-								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newtext));
-							}
-
-							//copy new content to same place as original text
-							var p = this.parentNode;
-							Sarissa.copyChildNodes(newNode,p,true);
-							var t = this;
-
-							//move all the new content next to original text
-							$(p).find('tempContent').contents().each(function(){
-								p.insertBefore(this,t);
-							});
-
-							//remove tempContent tag and original text
-							$(p).find('tempContent').remove();
-							$(this).remove();
-						}
-				});
+				jme.variables.DOMcontentsubvars(contents[i],q.scope);
 			}
 
 

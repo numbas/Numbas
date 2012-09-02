@@ -17,6 +17,7 @@ Numbas.queueScript('scripts/jme-variables.js',['schedule','jme','xml','util'],fu
 
 var jme = Numbas.jme;
 var job = Numbas.schedule.add;
+var util = Numbas.util;
 
 jme.variables = {
 	makeFunctions: function(xml,scope)
@@ -108,13 +109,19 @@ jme.variables = {
 				return jme.evaluate(this.tree,scope);
 			}
 		}
+		function unwrapValue(v) {
+			if(v.type=='list')
+				return v.value.map(unwrapValue);
+			else
+				return v.value;
+		}
 		function makeJavascriptFunction(fn) {
 			var preamble='(function('+fn.paramNames.join(',')+'){';
 			var math = Numbas.math;
 			var util = Numbas.util;
 			var jfn = eval(preamble+fn.definition+'})');
 			return function(args,scope) {
-				args = args.map(function(a){return jme.evaluate(a,scope).value});
+				args = args.map(function(a){return unwrapValue(jme.evaluate(a,scope))});
 				try {
 					var val = jfn.apply(this,args);
 					if(!val.type)
@@ -215,6 +222,72 @@ jme.variables = {
 			compute(x,todo,scope);
 		}
 		return scope.variables;
+	},
+
+	DOMcontentsubvars: function(element, scope) {
+		$(element).contents().each(function() {
+			if(this.nodeType==this.TEXT_NODE) {
+				var selector = $(this);
+				var str = this.nodeValue;
+				var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+				var i=0;
+				var l = bits.length;
+				for(var i=0; i<l; i+=4) {
+					var textsubs = jme.variables.DOMsubvars(bits[i],scope);
+					for(var j=0;j<textsubs.length;j++) {
+						selector.before(textsubs[j]);
+					}
+					selector.before((bits[i+1]||'')+jme.texsubvars(bits[i+2]||'',scope)+(bits[i+3]||''));
+				}
+				selector.remove();
+			} else {
+				jme.variables.DOMcontentsubvars(this,scope);
+			}
+		});
+		return element;
+	},
+
+	DOMsubvars: function(str,scope) {
+		var bits = util.splitbrackets(str,'{','}');
+
+		if(bits.length==1)
+			return [str];
+
+		var out = [];
+		for(var i=0; i<bits.length; i++)
+		{
+			if(i % 2)
+			{
+				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+				switch(v.type){ 
+				case 'html':
+					v = v.value;
+					break;
+				case 'number':
+					v = Numbas.math.niceNumber(v.value);
+					break;
+				case 'string':
+					v = v.value;
+					break;
+				default:
+					v = jme.display.treeToJME({tok:v});
+				}
+			}
+			else
+			{
+				v = bits[i];
+			}
+			if(typeof v == 'string') {
+				if(out.length>0 && typeof out[out.length-1]=='string')
+					out[out.length-1]+=v;
+				else
+					out.push(v);
+			}
+			else {
+				out.push(v);
+			}
+		}
+		return out;
 	}
 };
 
