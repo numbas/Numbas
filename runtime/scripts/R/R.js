@@ -38,10 +38,11 @@
     var oldR = exports.R
     ,   inited = false
     ,   eR
+    ,   undef
     ,   R = {
         
         init: function (lang) {
-            lang = lang || typeof navigator !== "undefined" ? navigator.language : 'en-GB';
+            lang = lang || typeof navigator !== undef ? navigator.language : 'en-GB';
             //Initialise some variables.
             eR.locales = {};
             eR.navLang = lang;
@@ -80,7 +81,9 @@
         },
         
         parseVariables: function (args, ret) {
-            var i, c, type = R.realTypeOf(args);
+            var i
+            ,   c
+            ,   type = R.realTypeOf(args);
     
             // This is our structure for formatting, numbers go in i, string in s,
             // and the named arguments (i.e %(age)) go in named.
@@ -90,9 +93,9 @@
     
             //Check args to see what type it is, and add to ret appropriately.
             switch (type) {
-                case 'number': ret.i.push(args);           break;
-                case 'string': ret.s.push(args);           break;
-                case 'date': ret.i.push(args.toString());  break;
+                case 'number': ret.i.push(args);             break;
+                case 'string': ret.s.push(args);             break;
+                case 'date':   ret.i.push(args.toString());  break;
                 case 'object':
                     for (i in args) {
                         if (args.hasOwnProperty(i)) {
@@ -116,14 +119,23 @@
         },
 
         format: function (s, a) {
-            var i, replace, tcount, substrstart, type, l, types = {i: '%i', s: '%s'}, tmp = '', t;
+            var i
+            ,   replace
+            ,   tcount
+            ,   substrstart
+            ,   type
+            ,   l
+            ,   types = {i: '%i', s: '%s'}
+            ,   tmp = ''
+            ,   t;
+            
             //First we'll add all integers to the pot, then the strings
             for (type in types) {
                 if (types.hasOwnProperty(type)) {
                     tcount = (s.match(new RegExp(types[type], 'g')) || []).length;
                     for (i = 0; i < tcount; ++i) {
-                        replace = a[type][i] || replace || false;
-                        if (replace) {
+                        replace = a[type].hasOwnProperty(i) ? a[type][i] : replace;
+                        if (replace !== undef && replace !== false) {
                             if ((substrstart = s.indexOf(types[type])) >= 0) {
                                 s = s.substr(0, substrstart) + replace + s.substr(substrstart + 2);
                             }
@@ -149,7 +161,7 @@
      * R
      * Take an `id` from the registered locales and return the string including any variables.
      * @param {String} id The ID of the
-     * @param {Mixed} variables 
+     * @param {Mixed} variables
      */
     eR = function (id, variables) {
         // If we haven't initialised our variables etc, then do so.
@@ -194,8 +206,8 @@
     eR.localeOrder = function () {
         eR.preferredLocales = R.slice(arguments);
         return eR.setLocale(eR.lang);
-    },
-    
+    };
+        
     /*
      * R
      * Set the `locale` to a different locale
@@ -224,7 +236,10 @@
         return eR;
     };
     
-    eR.noConflict = function () { exports.R = oldR; return eR; }
+    eR.noConflict = function () {
+        exports.R = oldR;
+        return eR;
+    };
     
     exports.R = eR;
 
