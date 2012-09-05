@@ -22,8 +22,10 @@ except ImportError:
 
 try:
 	basestring
+	strcons = unicode
 except NameError:
 	basestring = str
+	strcons = str
 
 class ParseError(Exception):
 	def __init__(self,parser,message,hint=''):
@@ -44,6 +46,13 @@ class ExamParser:
 
 	#parse a string into a data structure
 	def parse(self,source):
+
+		try:
+			if not isinstance(source,unicode):
+				source=unicode(source)
+		except NameError:
+			pass
+
 		source = source.replace('\ufeff','')
 		if len(source)==0:
 			raise ParseError(self,"Empty source string")
@@ -244,7 +253,7 @@ def printdata(data,ntabs=0):
 	else:
 		if data=='infinity':
 			return '"infinity"'
-		if '"' in str(data) and not isinstance(data,basestring):
+		if '"' in strcons(data) and not isinstance(data,basestring):
 			print("Unexpected type: "+str)
 
 		if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
@@ -259,7 +268,7 @@ def printdata(data,ntabs=0):
 		elif isinstance(data,basestring) and data.strip()=='':
 			return "'"+data+"'"
 		else:
-			return str(data)
+			return strcons(data)
 
 
 #utility functions
