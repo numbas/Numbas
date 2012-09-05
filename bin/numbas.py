@@ -169,7 +169,11 @@ def makeExam(options):
 		manifest = etree.fromstring(open(os.path.join(options.path,'scormfiles','imsmanifest.xml')).read())
 		manifest.attrib['identifier'] = 'Numbas: %s' % exam.name
 		manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix,IMSprefix,IMSprefix)).text = exam.name
-		manifest = etree.tostring(manifest).decode('utf-8')
+		manifest = etree.tostring(manifest)
+		try:
+			manifest = manifest.decode('utf-8')
+		except AttributeError:
+			pass
 		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest)
 		
 	if options.zip:
