@@ -295,6 +295,12 @@ hr {
 	margin-right: auto;
 }
 
+.number {
+	float: left;
+	font-size: 1.5em;
+	margin-right: 0.5em;
+}
+
 .statement {
 	margin: 1em 0;
 	padding-top: 0.2em;
