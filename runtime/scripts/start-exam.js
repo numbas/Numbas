@@ -9,6 +9,9 @@
 	// It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
 	var init = Numbas.init = function()
 	{
+
+		Math.seedrandom();
+
 		var job = Numbas.schedule.add;
 
 		//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
