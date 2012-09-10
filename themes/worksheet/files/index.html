@@ -26,6 +26,9 @@ Copyright 2011 Newcastle University
 		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
 		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
 
+		<!-- Math.seedrandom - seedable pseudorandom number generator -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/seedrandom/seedrandom.js"></script>
+
 		<!-- R.js - localisation -->
 		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
 		<script charset="UTF-8" type="text/javascript" src="scripts/R/en-gb.js"></script>
@@ -75,13 +78,19 @@ Copyright 2011 Newcastle University
 
 		<div id="everything" style="display:none">
 			<div id="generatorControls">
-				<p>Generate <input type="number" id="numExams" value="1" min="1"/> <span id="examNoun">exam</span>, <button id="generateButton">please</button>.</p>
+				<p>Generate <input type="number" id="numExams" value="1" min="1"/> <span id="examNoun">exam</span>, <button id="generateButton">please</button> (starting with ID no. <input type="number" id="offset" value="1"/>).</p>
 				<div id="progress">
 					<ol id="examProgress">
 					</ol>
 					<p id="typesetProgress"></p>
 				</div>
-				<p id="print">Now <button id="printButton">print</button>.</p>
+				<div id="print">
+					<p>Now <button id="printButton">print</button></p>
+					<ul id="sheettype">
+						<li><input type="radio" name="sheettype" value="questionsheet" checked="true"/> Question sheets</li>
+						<li><input type="radio" name="sheettype" value="studentanswers" /> Answer sheets</li>
+					</ul>
+				</div>
 			</div>
 
 
@@ -91,7 +100,8 @@ Copyright 2011 Newcastle University
 			<div class="exam" id="examTemplate">
 				<!-- top bar - logo, exam title, timing -->
 				<div class="mainDiv titleBar">
-					<div id="examBanner">exam name</div>
+					<div class="examID">Sheet no. <span class="id"></span></div>
+					<div id="examBanner"><span class="name"></span> <span class="mode"></span></div>
 				</div>
 
 				<!-- main content area - info pages or questions go in here -->

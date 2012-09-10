@@ -30,7 +30,10 @@ Copyright 2011 Newcastle University
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
 	<li class="question" id="question-{@number}">
-		<xsl:apply-templates />
+		<div class="content">
+			<xsl:apply-templates select="statement|parts" />
+		</div>
+		<xsl:apply-templates select="advice"/>
 	</li>
 </xsl:template>
 
@@ -129,8 +132,8 @@ Copyright 2011 Newcastle University
 
 
 <xsl:template match="advice">
-	<div id="adviceContainer">
-		<h3>Advice</h3>
+	<div class="advice">
+		<h3><xsl:value-of select="../@number+1"/>. </h3>
 		<span id="adviceDisplay">
 			<xsl:apply-templates />
 		</span>

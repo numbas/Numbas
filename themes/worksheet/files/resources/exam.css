@@ -30,6 +30,7 @@ h1,h2,h3,h4,h5,h6 {
 	/*border: 1px solid #999999*/;
 }
 
+
 #progressbar {
 	position:relative;
 	height:2em;
@@ -61,7 +62,7 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 #generatorControls {
-    font-size:  2em;
+    font-size:  1.5em;
     margin-bottom: 1em;
     background: #eee;
     padding:  0.5em;
@@ -80,9 +81,26 @@ h1,h2,h3,h4,h5,h6 {
 	display: none
 }
 
-#numExams {
+#generatorControls #sheettype {
+	list-style-type: none;
+	margin-left: 0;
+	padding-left: 0;
+}
+#generatorControls #sheettype li:hover {
+	cursor: pointer;
+}
+
+#generatorControls input[type=number] {
     border: none;
 	width: 3em;
+}
+
+
+.questionsheet .advice {
+	display: none;
+}
+.studentanswers .content {
+	display: none;
 }
 
 
@@ -111,6 +129,10 @@ h1,h2,h3,h4,h5,h6 {
 	text-align:right;
 	font-size: 2em;
 	font-weight: bold;
+}
+
+.examID {
+	float: left;
 }
 
 .timeBox{
@@ -258,7 +280,6 @@ hr {
 
 #adviceContainer {
 	clear:both;
-	display: none;
 }
 
 #adviceDisplay ol,ul {
@@ -299,6 +320,7 @@ hr {
 	float: left;
 	font-size: 1.5em;
 	margin-right: 0.5em;
+	margin-left: -1.2em;
 }
 
 .statement {
@@ -306,7 +328,6 @@ hr {
 	padding-top: 0.2em;
 	padding-left: 1em;
 	padding-bottom: 0.1em;
-	background: #cfc;
 }
 .statement:empty {
 	display: none;
@@ -336,12 +357,6 @@ div.part {
 	display:inline-block;
 }
 
-.advice {
-	background: #cfc;
-	border: 1px solid;
-	margin:1em 0;
-	display:none;
-}
 .multiplechoice li {
 	list-style:none;
 	padding-right: 2em;

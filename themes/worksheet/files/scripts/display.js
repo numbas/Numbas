@@ -45,6 +45,17 @@ var display = Numbas.display = {
 		}
 		$('#numExams').on('input change paste',updateExamNoun);
 
+		function updateSheetType() {
+			var sheetType = $('#sheettype input:checked').val();
+			$('#examList').attr('class',sheetType);
+		}
+
+		$('#sheettype').on('input change',updateSheetType);
+		$('#sheettype li').on('click',function() {
+			$(this).find('input').attr('checked',true).trigger('change');
+		})
+		updateSheetType();
+
 		$('#generateButton').on('click',function() {
 
 			var exams = Numbas.exams = [];
@@ -55,11 +66,17 @@ var display = Numbas.display = {
 
 			$('#examProgress').html('');
 			$('#examList').html('');
+			var offset = parseInt($('#offset').val()) || 0;
 
 			var job = Numbas.schedule.add;
 
 			for(var i=0;i<numExams;i++) {
+				Math.seedrandom(offset);
+
 				var exam = new Numbas.Exam();
+				exam.id = offset;
+				offset++;
+
 				exams.push(exam);
 				job(function() {
 					var progressMarker = $('<li/>').html('Working...');
@@ -143,8 +160,6 @@ display.ExamDisplay = function(e)
 
 	$('#examList').append(c);
 
-	//display exam title at top of page
-	c.find('#examBanner').html(e.name);
 
 }
 display.ExamDisplay.prototype = 
@@ -152,8 +167,14 @@ display.ExamDisplay.prototype =
 	e:undefined,	//reference to main exam object
 
 	show: function() {
-		for(var i=0;i<this.e.numQuestions;i++) {
-			this.e.questionList[i].display.show();
+		var e = this.e;
+
+		//display exam title at top of page
+		this.htmlContext.find('#examBanner .name').html(e.name);
+		this.htmlContext.find('.examID .id').html(e.id);
+
+		for(var i=0;i<e.numQuestions;i++) {
+			e.questionList[i].display.show();
 		}
 	},
 
