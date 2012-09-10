@@ -287,6 +287,13 @@ jme.variables = {
 				out.push(v);
 			}
 		}
+		for(var i=0;i<out.length;i++) {
+			if(typeof out[i] == 'string') {
+				var d = document.createElement('div');
+				d.innerHTML = out[i];
+				out[i] = $(d).contents();
+			}
+		}
 		return out;
 	}
 };
