@@ -133,8 +133,8 @@
 				x: [1, 3, 7, 19, 36]
 				
 				y: [3, 12, 23, 34, 40]
-				a: "precround(regressionAlpha(x,y),3)"
-				b: "precround(regressionBeta(x,y),3)"
+				a: "precround(linearRegression(x,y)[0],3)"
+				b: "precround(linearRegression(x,y)[1],3)"
 			}
 			statement: "<p>The line of best fit for data set $(1,3), (3,12), (7,23), (19,34), (36,40)$ is $y = \var{a} + \var{b}x$.</p>"
 		}
