@@ -1676,6 +1676,12 @@ newBuiltin('listval',[TList,TNum],'?', null, {
 	{
 		var index = jme.evaluate(args[1],scope).value;
 		var list = jme.evaluate(args[0],scope);
+		if(list.type!='list') {
+			if(list.type=='name')
+				throw(new Numbas.Error('jme.variables.variable not defined',list.name));
+			else
+				throw(new Numbas.Error('jme.func.listval.not a list'));
+		}
 		if(index<0)
 			index += list.vars;
 		if(index in list.value)
