@@ -1211,8 +1211,16 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	this.evaluate = options.evaluate || function(args,scope)
 	{
 		var nargs = [];
-		for(var i=0; i<args.length; i++)
-			nargs.push(jme.evaluate(args[i],scope).value);
+		for(var i=0; i<args.length; i++) {
+			var result = jme.evaluate(args[i],scope);
+			if(options.unwrapLists && result.type=='list') {
+				var value = result.value.map(function(v){
+					return v.value;
+				});
+				nargs.push(value);
+			}else
+				nargs.push(result.value);
+		}
 
 		var result = this.fn.apply(null,nargs);
 

@@ -14,8 +14,8 @@
 				mu: random(0.1..1#0.1)
 				sigma: 1
 				n: random(100..400)
-				sample: "repeat(randomNormal(mu,sigma^2),n)"
-				z: (mean(sample)-mu)/(sigma/sqr(n))
+				sample: "repeat(normalSample(mu,sigma^2),n)"
+				z: zscore(sample)
 			}
 			statement: "
 			<p>Here, we generate $n = \var{n}$ samples from the distribution $N(\var{mu},\var{sigma^2})$, stored in the variable <code>sample</code>.</p>
@@ -24,7 +24,7 @@
 			
 			<p>We can calculate a test statistic $z = \var{precround(z,3)}$ and use that to calculate <code>cdfNormal(z)</code> $ = P(Z \leq \var{precround(z,3)} | Z \sim N(\var{mu},\var{sigma^2})) = \var{precround(cdfNormal(z),3)}$</p>
 			
-			<p>Alternatively, we can use the <code>zTest</code> function directly on <code>sample</code> to get the same number: <code>zTest(sample,mu,sigma^2)</code> $ = \var{precround(zTest(sample,mu,sigma^2),3)}$</p>
+			<p>Alternatively, we can use the <code>zTest</code> function directly on <code>sample</code> to get the same number: <code>zTest(mu,sample)</code> $ = \var{precround(zTest(sample,mu,sigma^2),3)}$</p>
 			"
 		}, 
 		{

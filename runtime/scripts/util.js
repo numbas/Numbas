@@ -235,6 +235,11 @@ var util = Numbas.util = {
 			return plural;
 	},
 
+	//make the first letter in the string a capital
+	capitalise: function(str) {
+		return str.replace(/[a-z]/,function(c){return c.toUpperCase()});
+	},
+
 	//split a string up according to brackets
 	//strips out nested brackets
 	//
