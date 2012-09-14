@@ -315,6 +315,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	statsScope.addFunction(new funcObj('tScore',[TNum,TList],TNum,jStat.tscore,{unwrapLists:true}));
 
 	statsScope.addFunction(new funcObj('tTest',[TNum,TNum,TNum,TNum,TNum],TNum,jStat.ttest));
+	statsScope.addFunction(new funcObj('tTest',[TNum,TNum,TNum],TNum,jStat.ttest));
 	statsScope.addFunction(new funcObj('tTest',[TNum,TList,TNum],TNum,jStat.ttest,{unwrapLists:true}));
 
 	statsScope.addFunction(new funcObj('anovaFScore',['*TList'],TNum,jStat.anovafscore,{unwrapLists:true}));
