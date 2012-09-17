@@ -1286,10 +1286,13 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 			}
 			matrix.rows = matrix.length;
 			matrix.columns = matrix[0].length;
-			matrix = Numbas.matrixmath.transpose(matrix);
+			if(this.type=='m_n_x')
+				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		case 'matrix':
-			matrix = Numbas.matrixmath.transpose(matrix.value);
+			matrix = matrix.value;
+			if(this.type=='m_n_x')
+				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
