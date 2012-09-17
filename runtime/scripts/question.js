@@ -1277,7 +1277,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		if(matrix.value[0].type=='list')
 		{
 			matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
-				return row.map(function(e){return e.value;});
+				return row.value.map(function(e){return e.value;});
 			});
 		}
 		else
