@@ -226,7 +226,7 @@ jme.variables = {
 
 	DOMcontentsubvars: function(element, scope) {
 		$(element).contents().each(function() {
-			if(this.nodeType==this.TEXT_NODE) {
+			if(this.nodeType==(this.TEXT_NODE || 3)) {
 				var selector = $(this);
 				var str = this.nodeValue;
 				var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
