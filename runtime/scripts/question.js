@@ -1532,10 +1532,12 @@ MultipleResponsePart.prototype =
 					if(row)
 						var message = row[j];
 					var award = this.settings.matrix[i][j];
-					if(award>0) {
-						if($(message).text().trim().length==0 && award>0)
+					if(award!=0) {
+						if(!util.isNonemptyHTML(message) && award>0)
 							message = R('part.mcq.correct choice');
 						this.addCredit(award/this.marks,message);
+					} else {
+						this.markingComment(message);
 					}
 				}
 			}

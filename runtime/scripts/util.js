@@ -181,6 +181,13 @@ var util = Numbas.util = {
 		return b=='false' || b=='true' || b=='yes' || b=='no';
 	},
 
+	// parse a string as HTML, and return true only if it contains non-whitespace text
+	isNonemptyHTML: function(html) {
+		var d = document.createElement('div');
+		d.innerHTML = html;
+		return $(d).text().trim().length>0;
+	},
+
 	//parse parameter as a boolean
 	//the boolean value true and the strings 'true' and 'yes' are parsed as the value true, everything else is false.
 	parseBool: function(b)

@@ -641,7 +641,7 @@ display.PartDisplay.prototype =
 					}
 
 					var message = action.message || '';
-					if(message.trim().length)
+					if(util.isNonemptyHTML(message))
 					{
 						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
 
@@ -650,7 +650,7 @@ display.PartDisplay.prototype =
 						else if(change<0)
 							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,'was','were'));
 					}
-					if(message.trim().length)
+					if(util.isNonemptyHTML(message))
 						feedback.push(message);
 				}
 
