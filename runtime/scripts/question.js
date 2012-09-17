@@ -1270,21 +1270,29 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def'))
 	{
 		matrix = jme.evaluate(def,this.question.scope);
-		if(matrix.type!='list')
-		{
+		switch(matrix.type) {
+		case 'list':
+			if(matrix.value[0].type=='list')
+			{
+				matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
+					return row.value.map(function(e){return e.value;});
+				});
+			}
+			else
+			{
+				matrix = matrix.value.map(function(e) {
+					return [e.value];
+				});
+			}
+			matrix.rows = matrix.length;
+			matrix.columns = matrix[0].length;
+			matrix = Numbas.matrixmath.transpose(matrix);
+			break;
+		case 'matrix':
+			matrix = Numbas.matrixmath.transpose(matrix.value);
+			break;
+		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
-		}
-		if(matrix.value[0].type=='list')
-		{
-			matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
-				return row.value.map(function(e){return e.value;});
-			});
-		}
-		else
-		{
-			matrix = matrix.value.map(function(e) {
-				return [e.value];
-			});
 		}
 	}
 	else
