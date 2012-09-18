@@ -74,7 +74,7 @@ if etree.VERSION[0:3] == '1.2':
 
 	etree.fixtag = fixtag
 	for ns,url in namespaces.items():
-		etree._namespace_map[url] = ns if len(n) else None
+		etree._namespace_map[url] = ns if len(ns) else None
 else:
 	#For etree > 1.3, use register_namespace function
 	for ns,url in namespaces.items():
