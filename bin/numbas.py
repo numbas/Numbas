@@ -36,11 +36,53 @@ namespaces = {
 	'adlnav': 'http://www.adlnet.org/xsd/adlnav_v1p3',
 	'imsss': 'http://www.imsglobal.org/xsd/imsss',
 }
-for ns,url in namespaces.items():
-	try:
-		etree.register_namespace(ns,url)		
-	except AttributeError:
-		etree._namespace_map[url]=ns
+
+# because pre-py3.2 versions of etree always put a colon in front of tag names
+# from http://stackoverflow.com/questions/8113296/supressing-namespace-prefixes-in-elementtree-1-2
+if etree.VERSION[0:3] == '1.2':
+	#in etree < 1.3, this is a workaround for supressing prefixes
+
+	def fixtag(tag, namespaces):
+		import string
+		# given a decorated tag (of the form {uri}tag), return prefixed
+		# tag and namespace declaration, if any
+		if isinstance(tag, etree.QName):
+			tag = tag.text
+		namespace_uri, tag = string.split(tag[1:], "}", 1)
+		prefix = namespaces.get(namespace_uri)
+		if namespace_uri not in namespaces:
+			prefix = etree._namespace_map.get(namespace_uri)
+			if namespace_uri not in etree._namespace_map:
+				prefix = "ns%d" % len(namespaces)
+			namespaces[namespace_uri] = prefix
+			if prefix == "xml":
+				xmlns = None
+			else:
+				if prefix is not None:
+					nsprefix = ':' + prefix
+				else:
+					nsprefix = ''
+				xmlns = ("xmlns%s" % nsprefix, namespace_uri)
+		else:
+			xmlns = None
+		if prefix is not None:
+			prefix += ":"
+		else:
+			prefix = ''
+
+		return "%s%s" % (prefix, tag), xmlns
+
+	etree.fixtag = fixtag
+	for ns,url in namespaces.items():
+		etree._namespace_map[url] = ns if len(n) else None
+else:
+	#For etree > 1.3, use register_namespace function
+	for ns,url in namespaces.items():
+		try:
+			etree.register_namespace(ns,url)		
+		except AttributeError:
+			etree._namespace_map[url]=ns
+
 
 try:
 	basestring
