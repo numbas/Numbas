@@ -48,7 +48,7 @@ if etree.VERSION[0:3] == '1.2':
 		# tag and namespace declaration, if any
 		if isinstance(tag, etree.QName):
 			tag = tag.text
-		namespace_uri, tag = string.split(tag[1:], "}", 1)
+		namespace_uri, tag = tag[1:].split("}", 1)
 		prefix = namespaces.get(namespace_uri)
 		if namespace_uri not in namespaces:
 			prefix = etree._namespace_map.get(namespace_uri)
