@@ -233,7 +233,7 @@ jme.variables = {
 				var i=0;
 				var l = bits.length;
 				for(var i=0; i<l; i+=4) {
-					var textsubs = jme.variables.DOMsubvars(bits[i],scope);
+					var textsubs = jme.variables.DOMsubvars(bits[i],scope,this.ownerDocument);
 					for(var j=0;j<textsubs.length;j++) {
 						selector.before(textsubs[j]);
 					}
@@ -247,7 +247,8 @@ jme.variables = {
 		return element;
 	},
 
-	DOMsubvars: function(str,scope) {
+	DOMsubvars: function(str,scope,doc) {
+		doc = doc || document;
 		var bits = util.splitbrackets(str,'{','}');
 
 		if(bits.length==1)
@@ -291,11 +292,46 @@ jme.variables = {
 			if(typeof out[i] == 'string') {
 				var d = document.createElement('div');
 				d.innerHTML = out[i];
+				d = importNode(doc,d,true);
 				out[i] = $(d).contents();
 			}
 		}
 		return out;
 	}
 };
+
+// cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
+// because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way
+function importNode(doc,node,allChildren) {
+	var ELEMENT_NODE = 1;
+	var TEXT_NODE = 3;
+	var CDATA_SECTION_NODE = 4;
+	var COMMENT_NODE = 8;
+
+	switch (node.nodeType) {
+		case ELEMENT_NODE:
+			var newNode = doc.createElement(node.nodeName);
+			var il;
+			/* does the node have any attributes to add? */
+			if (node.attributes && (il=node.attributes.length) > 0) {
+				for (var i = 0; i < il; i++)
+					newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i].nodeName));
+			}
+			/* are we going after children too, and does the node have any? */
+			if (allChildren && node.childNodes && (il=node.childNodes.length) > 0) {
+				for (var i = 0; i<il; i++)
+					newNode.appendChild(importNode(doc,node.childNodes[i], allChildren));
+			}
+			return newNode;
+		case TEXT_NODE:
+		case CDATA_SECTION_NODE:
+			return doc.createTextNode(node.nodeValue);
+		case COMMENT_NODE:
+			return doc.createComment(node.nodeValue);
+	}
+};
+
+
+
 
 });
