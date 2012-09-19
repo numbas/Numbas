@@ -696,7 +696,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		return tok.value ? 'true' : 'false';
 		break;
 	case 'range':
-		return tok.value[0]+ ' \dots '+tok.value[1];
+		return tok.value[0]+ ' \\dots '+tok.value[1];
 		break;
 	case 'list':
 		if(!texArgs)
