@@ -97,6 +97,11 @@
 						deepCloseEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
 					});
 
+					test('Whitespace',function() {
+						deepCloseEqual(tokenise('\u00A01'),[new types.TNum(1)],'\\u00A01');
+						deepCloseEqual(tokenise('1        '),[new types.TNum(1)],'1       (whitespace at end of expression)');
+					});
+
 					test('Operators', function() {
 						deepCloseEqual(tokenise('_'),[new types.TOp('_')],'_');
 						deepCloseEqual(tokenise('..'),[new types.TOp('..')],'..');
