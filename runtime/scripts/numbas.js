@@ -60,6 +60,7 @@ Numbas.showError = function(e)
 	}
 	Numbas.debug(e.stack || message);
 	Numbas.display.showAlert(message);
+	throw(e);
 };
 
 Numbas.Error = function(message)
