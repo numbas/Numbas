@@ -237,7 +237,8 @@ jme.variables = {
 					for(var j=0;j<textsubs.length;j++) {
 						selector.before(textsubs[j]);
 					}
-					selector.before((bits[i+1]||'')+jme.texsubvars(bits[i+2]||'',scope)+(bits[i+3]||''));
+					var n = this.ownerDocument.createTextNode((bits[i+1]||'')+jme.texsubvars(bits[i+2]||'',scope)+(bits[i+3]||''));
+					selector.before(n);
 				}
 				selector.remove();
 			} else {
