@@ -210,6 +210,7 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	var types = Numbas.jme.types;
 	var funcObj = Numbas.jme.funcObj;
 	var TNum = types.TNum;
+	var TBool = types.TBool;
 	var TList = types.TList;
 
 	var stats = Numbas.extensions.stats  = {};
@@ -221,6 +222,8 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 		var fn = listFuncs[i];
 		statsScope.addFunction(new funcObj(fn, [TList],TNum, jStat[fn], {unwrapLists:true}));
 	}
+	statsScope.addFunction(new funcObj('stdev', [TList,TBool],TNum, jStat.stdev, {unwrapLists:true}));
+	statsScope.addFunction(new funcObj('variance', [TList,TBool],TNum, jStat.variance, {unwrapLists:true}));
 
 	// fill in geometric distribution because jStat doesn't have it
 	if(!('geometric' in jStat)) {
