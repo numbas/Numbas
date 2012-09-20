@@ -71,22 +71,25 @@ var display = Numbas.display = {
 			var job = Numbas.schedule.add;
 
 			for(var i=0;i<numExams;i++) {
-				Math.seedrandom(offset);
-
-				var exam = new Numbas.Exam();
-				exam.id = offset;
-				offset++;
-
-				exams.push(exam);
 				job(function() {
-					var progressMarker = $('<li/>').html('Working...');
-					$('#examProgress').append(progressMarker)
+					Math.seedrandom(offset);
+
+					var exam = new Numbas.Exam();
+
+					exam.id = offset;
+					offset = offset+1;
+
+					exams.push(exam);
+					job(function() {
+						var progressMarker = $('<li/>').html('Working...');
+						$('#examProgress').append(progressMarker)
+					})
+					job(exam.init,exam);
+					job(exam.display.show,exam.display);
+					job(function() {
+						$('#examProgress li:last').html('Done');
+					});
 				})
-				job(exam.init,exam);
-				job(exam.display.show,exam.display);
-				job(function() {
-					$('#examProgress li:last').html('Done');
-				});
 			}
 
 			job(function() {
