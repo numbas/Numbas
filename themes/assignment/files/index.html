@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!--
+Copyright 2011 Newcastle University
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+	<head>
+		<title>Numbas</title>
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+		<meta http-equiv="X-UA-Compatible" content="IE=8">
+
+		<!--Sarissa XML handling-->
+		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
+
+		<!-- Math.seedrandom - seedable pseudorandom number generator -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/seedrandom/seedrandom.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery-ui.custom.min.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.mousewheel.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.xslTransform.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/R/en-gb.js"></script>
+    <script type="text/javascript">
+    R.registerLocale('en-GB-assignment',$.extend(R.locales['en-GB'],{
+        'control.confirm end': "Are you sure you want to end the assignment? After you end the assignment, you will not be able to change any of your answers.",
+        'exam.xml.bad root': "Root element of assignment XML should be 'assignment'",
+        'exam.changeQuestion.no questions': "This assignment contains no questions! Check the .assignment file for errors."
+    }));
+    R.setLocale('en-GB-assignment');
+</script>
+
+		<!-- pipwerks SCORM wrapper -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="scripts/start-exam.js" charset="utf-8"></script>
+
+		<!-- mathjax stuff -->
+    <SCRIPT SRC="https://www.mas.ncl.ac.uk/MathJax/MathJax.js">
+		  MathJax.Hub.Config({
+			extensions: ['tex2jax.js',"MathMenu.js","TeX/AMSmath.js"],
+			tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
+			jax: ["input/TeX","output/HTML-CSS"],
+			displayAlign: "center",
+			displayIndent: "0.1em"
+		  });
+		</SCRIPT>
+
+
+		<!-- CSS -->
+		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="resources/typography.css" />
+		<link rel="stylesheet" type="text/css" href="resources/exam.css" />
+	</head>
+	
+	<body style="font-size:1em;">
+
+		<div id="loading">
+			<div id="progressbar">
+				<p>Loading...</p>
+				<div id="completed"><p>Loading...</p></div>
+			</div>
+		</div>
+
+		<div id="everything" style="display:none">
+		<!-- top bar - logo, exam title, timing -->
+		<div class="mainDiv titleBar">
+			<div class="logo">
+				<img src="resources/numbas-logo.gif"/>
+			</div>
+			<div id="examBanner">exam name</div>
+		</div>
+
+		<!-- main content area - info pages or questions go in here -->
+		<div class="mainDisplay">
+			<div id="infoDisplay">
+			</div>
+
+			<div id="questionContainer">
+				<!-- top navigation bar - prv/nxt, and question name -->
+				<div class="mainDiv navBar">
+					<button class="leftNav" id="prevBtn">Previous</button>
+					<button class="rightNav" id="nextBtn">Next</button>
+					<div class="titleBits">
+						<span id="questionNameDisplay">Question Name</span>
+						<span class="adviceNav">
+							<button id="adviceBtn">Advice</button>
+							<button id="revealBtn">Reveal</button>
+						</span>
+					</div>
+				</div>
+
+				<div class="colwrap">
+
+					<!-- question and advice go in here -->
+					<div class="col1wrap">
+						<div id="questionDisplay">
+						</div>
+					</div>
+
+					<!-- menu for navigating questions and displaying scores/feedback -->
+					<!-- also timing controls -->
+					<div class="questionMenu">
+						<div class="carouselBtn prev"><img src="resources/arrow-up.png" /></div>
+						<div class="questionList">
+							<ul id="questionList">
+							</ul>
+						</div>
+						<div class="carouselBtn next"><img src="resources/arrow-down.png" /></div>
+
+						<!-- total exam score display -->
+						<div class="examScore">
+							Total <span id="examScore">0/0</span>
+						</div>
+						
+						<!-- stopwatch and timing controls -->
+						<div class="mainDiv timeBox">
+							<p id="stopWatch">Time remaining: 01:00:00</p>
+						</div>
+
+						<!-- end exam button -->
+						<div class="menuButtons"><button id="pauseBtn">Pause</button><br/><button id="endBtn">End Assignment</button></div>
+					</div>
+				</div>
+				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
+				<div class="mainDiv navBar">
+					<button id="prevBtn" class="leftNav">Previous</button>
+					<button id="nextBtn" class="rightNav">Next</button>
+					<div class="submitDiv">
+						<button id="submitBtn">Submit all parts</button>
+						<div id="marks">	
+							<span id="score"></span>
+							<span id="feedback"><img src="resources/cross.png"/></span>
+						</div>
+						<button id="regenBtn">Try another question like this one</button>
+					</div>
+				</div>
+			</div>
+
+			<div id="warningDisplay">
+				<div class="errorBar">
+					<h1>Alert</h1>
+				</div>
+				<div id="warningMessage"></div>
+				<div class="errorBar" id="alert">
+					<input type="button" id="warningOK" value="Ok">
+				</div>
+				<div class="errorBar" id="confirm">
+					<input type="button" id="warningOK" value="OK">
+					<input type="button" id="warningCancel" value="Cancel">
+				</div>
+			</div>
+
+		</div>
+		</div>
+		<ul style="display:hidden;">
+			<!-- empty question selector thing - will be copied into question list for each question -->
+			<li id="questionSelector" class="questionSelector-hidden">
+				<a href="#">
+					<span id="name"></span>
+					<div id="marks">
+						<div id="feedback"></div>
+						<div id="score"></div>
+					</div>
+				</a>
+			</li>
+		</ul>
+	</body>
+
+</html>
