@@ -32,7 +32,7 @@ var jme = Numbas.jme = {
 		'pi': Math.PI,
 		'i': math.complex(0,1),
 		'infinity': Infinity,
-		'infty': Infinity,
+		'infty': Infinity
 	},
 
 	tokenise: function(expr)
@@ -775,7 +775,7 @@ var jme = Numbas.jme = {
 			}
 		}
 		return out;
-	},
+	}
 };
 
 //evaluation environment
@@ -1074,7 +1074,7 @@ var arity = jme.arity = {
 var prefixForm = {
 	'+': '+u',
 	'-': '-u',
-	'!': 'not',
+	'!': 'not'
 }
 var postfixForm = {
 	'!': 'fact'
@@ -1104,7 +1104,7 @@ var precedence = jme.precedence = {
 	'isa': 9,
 	'and': 11,
 	'or': 12,
-	'xor': 13,
+	'xor': 13
 };
 
 var synonyms = {
