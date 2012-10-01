@@ -115,6 +115,22 @@ jme.variables = {
 			else
 				return v.value;
 		}
+		function wrapValue(v) {
+			switch(typeof v) {
+			case 'number':
+				return new jme.types.TNum(v);
+			case 'string':
+				return new jme.types.TString(v);
+			case 'boolean':
+				return new jme.types.TBool(v);
+			default:
+				if($.isArray(v)) {
+					v = v.map(wrapValue);
+					return new jme.types.TList(v);
+				}
+				return v;
+			}
+		}
 		function makeJavascriptFunction(fn) {
 			var preamble='(function('+fn.paramNames.join(',')+'){';
 			var math = Numbas.math;
@@ -124,6 +140,7 @@ jme.variables = {
 				args = args.map(function(a){return unwrapValue(jme.evaluate(a,scope))});
 				try {
 					var val = jfn.apply(this,args);
+					val = wrapValue(val);
 					if(!val.type)
 						val = new fn.outcons(val);
 					return val;
