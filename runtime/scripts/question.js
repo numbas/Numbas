@@ -656,10 +656,12 @@ Part.prototype = {
 		if(!loading)
 		{
 			this.display.showSteps();
-			if(this.answered)
-				this.submit();
-			else
-				this.question.updateScore();
+			if(!this.revealed) {
+				if(this.answered)
+					this.submit();
+				else
+					this.question.updateScore();
+			}
 			Numbas.store.stepsShown(this);
 		}
 	},
@@ -669,12 +671,15 @@ Part.prototype = {
 	{
 		if(!loading)
 			this.display.revealAnswer();
+		this.revealed = true;
 		this.answered = true;
 		this.setCredit(0);
-		this.showSteps(loading);
-		for(var i=0; i<this.steps.length; i++ )
-		{
-			this.steps[i].revealAnswer(loading);
+		if(this.steps.length>0) {
+			this.showSteps(loading);
+			for(var i=0; i<this.steps.length; i++ )
+			{
+				this.steps[i].revealAnswer(loading);
+			}
 		}
 	}
 
