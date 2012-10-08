@@ -49,17 +49,17 @@ Copyright 2011 Newcastle University
 		<script charset="UTF-8" type="text/javascript" src="scripts/start-exam.js" charset="utf-8"></script>
 
 		<!-- mathjax stuff -->
-    <!--<SCRIPT SRC="http://cdn.mathjax.org/mathjax/latest/MathJax.js">-->
-    <SCRIPT SRC="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js">
-		  MathJax.Hub.Config({
-			extensions: ['tex2jax.js',"MathMenu.js","TeX/AMSmath.js"],
-			tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]},
-			jax: ["input/TeX","output/HTML-CSS"],
-			displayAlign: "center",
-			displayIndent: "0.1em"
-		  });
-		</SCRIPT>
-
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({
+				tex2jax: {
+					inlineMath: [['$','$'], ['\\(','\\)']],
+					displayMath: [['\\[','\\]'], ['$$','$$']]
+				},
+				displayAlign: "center",
+				displayIndent: "0.1em"
+			});
+		</script>
+		<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
 		<!-- CSS -->
 		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />
