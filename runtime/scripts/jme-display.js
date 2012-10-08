@@ -483,7 +483,7 @@ function texRationalNumber(n)
 			var exponent = m[2];
 			if(exponent[0]=='+')
 				exponent = exponent.slice(1);
-			return mantissa+' \times 10^{'+exponent+'}';
+			return mantissa+' \\times 10^{'+exponent+'}';
 		}
 
 		var f = math.rationalApproximation(Math.abs(n));
@@ -556,7 +556,7 @@ function texRealNumber(n)
 			var exponent = m[2];
 			if(exponent[0]=='+')
 				exponent = exponent.slice(1);
-			return mantissa+' \times 10^{'+exponent+'}';
+			return mantissa+' \\times 10^{'+exponent+'}';
 		}
 
 		switch(piD)
