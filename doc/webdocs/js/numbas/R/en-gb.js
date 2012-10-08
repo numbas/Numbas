@@ -51,6 +51,7 @@ R.registerLocale('en-GB',{
 
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
+	'jme.func.listval.not a list': "Object is not subscriptable",
 	'jme.func.matrix.invalid row type': "Can't construct a matrix from rows of type %s",
 	'jme.func.except.continuous range': "Can't use the 'except' operator on continuous ranges.",
 
@@ -60,7 +61,7 @@ R.registerLocale('en-GB',{
 
 	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 
-	'jme.variables.variable not defined': "Variable %s not defined.",
+	'jme.variables.variable not defined': "Variable %s is not defined.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",

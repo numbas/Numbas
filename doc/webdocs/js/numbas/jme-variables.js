@@ -17,6 +17,7 @@ Numbas.queueScript('scripts/jme-variables.js',['schedule','jme','xml','util'],fu
 
 var jme = Numbas.jme;
 var job = Numbas.schedule.add;
+var util = Numbas.util;
 
 jme.variables = {
 	makeFunctions: function(xml,scope)
@@ -96,6 +97,7 @@ jme.variables = {
 
 
 		function makeJMEFunction(fn) {
+			fn.tree = jme.compile(fn.definition,scope);
 			return function(args,scope) {
 				var oscope = scope;
 				scope = new jme.Scope(scope);
@@ -107,11 +109,38 @@ jme.variables = {
 				return jme.evaluate(this.tree,scope);
 			}
 		}
+		function unwrapValue(v) {
+			if(v.type=='list')
+				return v.value.map(unwrapValue);
+			else
+				return v.value;
+		}
+		function wrapValue(v) {
+			switch(typeof v) {
+			case 'number':
+				return new jme.types.TNum(v);
+			case 'string':
+				return new jme.types.TString(v);
+			case 'boolean':
+				return new jme.types.TBool(v);
+			default:
+				if($.isArray(v)) {
+					v = v.map(wrapValue);
+					return new jme.types.TList(v);
+				}
+				return v;
+			}
+		}
 		function makeJavascriptFunction(fn) {
+			var preamble='(function('+fn.paramNames.join(',')+'){';
+			var math = Numbas.math;
+			var util = Numbas.util;
+			var jfn = eval(preamble+fn.definition+'})');
 			return function(args,scope) {
-				args = args.map(function(a){return jme.evaluate(a,scope).value});
+				args = args.map(function(a){return unwrapValue(jme.evaluate(a,scope))});
 				try {
 					var val = jfn.apply(this,args);
+					val = wrapValue(val);
 					if(!val.type)
 						val = new fn.outcons(val);
 					return val;
@@ -131,16 +160,10 @@ jme.variables = {
 			switch(fn.language)
 			{
 			case 'jme':
-				fn.tree = jme.compile(fn.definition,scope);
-
 				fn.evaluate = makeJMEFunction(fn);
 
 				break;
 			case 'javascript':
-				var preamble='(function('+fn.paramNames.join(',')+'){';
-				var math = Numbas.math, 
-					util = Numbas.util;
-				var jfn = eval(preamble+fn.definition+'})');
 				fn.evaluate = makeJavascriptFunction(fn);
 				break;
 			}
@@ -216,7 +239,117 @@ jme.variables = {
 			compute(x,todo,scope);
 		}
 		return scope.variables;
+	},
+
+	DOMcontentsubvars: function(element, scope) {
+		$(element).contents().each(function() {
+			if(this.nodeType==(this.TEXT_NODE || 3)) {
+				var selector = $(this);
+				var str = this.nodeValue;
+				var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+				var i=0;
+				var l = bits.length;
+				for(var i=0; i<l; i+=4) {
+					var textsubs = jme.variables.DOMsubvars(bits[i],scope,this.ownerDocument);
+					for(var j=0;j<textsubs.length;j++) {
+						selector.before(textsubs[j]);
+					}
+					var n = this.ownerDocument.createTextNode((bits[i+1]||'')+jme.texsubvars(bits[i+2]||'',scope)+(bits[i+3]||''));
+					selector.before(n);
+				}
+				selector.remove();
+			} else {
+				jme.variables.DOMcontentsubvars(this,scope);
+			}
+		});
+		return element;
+	},
+
+	DOMsubvars: function(str,scope,doc) {
+		doc = doc || document;
+		var bits = util.splitbrackets(str,'{','}');
+
+		if(bits.length==1)
+			return [str];
+
+		var out = [];
+		for(var i=0; i<bits.length; i++)
+		{
+			if(i % 2)
+			{
+				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+				switch(v.type){ 
+				case 'html':
+					v = v.value;
+					break;
+				case 'number':
+					v = Numbas.math.niceNumber(v.value);
+					break;
+				case 'string':
+					v = v.value;
+					break;
+				default:
+					v = jme.display.treeToJME({tok:v});
+				}
+			}
+			else
+			{
+				v = bits[i];
+			}
+			if(typeof v == 'string') {
+				if(out.length>0 && typeof out[out.length-1]=='string')
+					out[out.length-1]+=v;
+				else
+					out.push(v);
+			}
+			else {
+				out.push(v);
+			}
+		}
+		for(var i=0;i<out.length;i++) {
+			if(typeof out[i] == 'string') {
+				var d = document.createElement('div');
+				d.innerHTML = out[i];
+				d = importNode(doc,d,true);
+				out[i] = $(d).contents();
+			}
+		}
+		return out;
 	}
 };
+
+// cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
+// because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way
+function importNode(doc,node,allChildren) {
+	var ELEMENT_NODE = 1;
+	var TEXT_NODE = 3;
+	var CDATA_SECTION_NODE = 4;
+	var COMMENT_NODE = 8;
+
+	switch (node.nodeType) {
+		case ELEMENT_NODE:
+			var newNode = doc.createElement(node.nodeName);
+			var il;
+			/* does the node have any attributes to add? */
+			if (node.attributes && (il=node.attributes.length) > 0) {
+				for (var i = 0; i < il; i++)
+					newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i].nodeName));
+			}
+			/* are we going after children too, and does the node have any? */
+			if (allChildren && node.childNodes && (il=node.childNodes.length) > 0) {
+				for (var i = 0; i<il; i++)
+					newNode.appendChild(importNode(doc,node.childNodes[i], allChildren));
+			}
+			return newNode;
+		case TEXT_NODE:
+		case CDATA_SECTION_NODE:
+			return doc.createTextNode(node.nodeValue);
+		case COMMENT_NODE:
+			return doc.createComment(node.nodeValue);
+	}
+};
+
+
+
 
 });

@@ -95,14 +95,14 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.scope.variables = Numbas.jme.variables.makeVariables(q.xml,q.scope);
 		}
 	
-		q.scope = new jme.Scope(gscope,q.scope);
+		q.scope = new jme.Scope([gscope,q.scope]);
 	});
 
 	job(this.subvars,this);
 
 	job(function()
 	{
-		q.adviceThreshold = Numbas.exam.adviceGlobalThreshold;
+		q.adviceThreshold = q.exam.adviceGlobalThreshold;
 		q.followVariables = {};
 		
 		//initialise display - get question HTML, make menu item, etc.
@@ -185,43 +185,7 @@ Question.prototype =
 			//do contentsubvars on all content
 			for(var i=0;i<contents.length;i++)
 			{
-				//get all non-whitespace text nodes
-				var textNodes = $(contents[i]).filter(tnf).add($(contents[i]).find('*:not(iframe)').contents().filter(tnf));
-
-				//filter out script nodes
-				textNodes = textNodes.filter(function(){
-					return !$(this).parent().attr('language')}
-				);
-
-				//run contentsubvars on the collection of text nodes
-				textNodes.each(function(){
-						var old = this.nodeValue;
-						var newtext = jme.contentsubvars(old, q.scope);
-						newtext = util.escapeHTML(newtext);
-						if(newtext!=old)
-						{
-							//parse new content
-							var newNode = parser.parseFromString('<tempContent>'+newtext+'</tempContent>','text/xml');
-							if(Sarissa.getParseErrorText(newNode) != Sarissa.PARSED_OK)
-							{
-								throw(new Numbas.Error('question.substituting',Sarissa.getParseErrorText(newNode),newtext));
-							}
-
-							//copy new content to same place as original text
-							var p = this.parentNode;
-							Sarissa.copyChildNodes(newNode,p,true);
-							var t = this;
-
-							//move all the new content next to original text
-							$(p).find('tempContent').contents().each(function(){
-								p.insertBefore(this,t);
-							});
-
-							//remove tempContent tag and original text
-							$(p).find('tempContent').remove();
-							$(this).remove();
-						}
-				});
+				jme.variables.DOMcontentsubvars(contents[i],q.scope);
 			}
 
 
@@ -293,7 +257,7 @@ Question.prototype =
 			Numbas.store.answerRevealed(this);
 		}
 
-		Numbas.exam.updateScore();
+		this.exam.updateScore();
 	},
 
 	//validate question - returns true if all parts completed
@@ -373,7 +337,7 @@ Question.prototype =
 							
 		this.updateScore();
 
-		if(Numbas.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
+		if(this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
 		{
 			this.getAdvice();
 		}
@@ -387,7 +351,7 @@ Question.prototype =
 		this.calculateScore('uwNone');
 
 		//update total exam score
-		Numbas.exam.updateScore();
+		this.exam.updateScore();
 
 		//display score - ticks and crosses etc.
 		this.display.showScore();
@@ -692,7 +656,12 @@ Part.prototype = {
 		if(!loading)
 		{
 			this.display.showSteps();
-			this.question.updateScore();
+			if(!this.revealed) {
+				if(this.answered)
+					this.submit();
+				else
+					this.question.updateScore();
+			}
 			Numbas.store.stepsShown(this);
 		}
 	},
@@ -702,12 +671,15 @@ Part.prototype = {
 	{
 		if(!loading)
 			this.display.revealAnswer();
+		this.revealed = true;
 		this.answered = true;
 		this.setCredit(0);
-		this.showSteps(loading);
-		for(var i=0; i<this.steps.length; i++ )
-		{
-			this.steps[i].revealAnswer(loading);
+		if(this.steps.length>0) {
+			this.showSteps(loading);
+			for(var i=0; i<this.steps.length; i++ )
+			{
+				this.steps[i].revealAnswer(loading);
+			}
 		}
 	}
 
@@ -888,10 +860,11 @@ JMEPart.prototype =
 			return;
 		}
 
+		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'');
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ )
 		{
-			if(this.studentAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
+			if(noSpaceAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
 		}
 		
 		if(!this.failNotAllowed)
@@ -899,7 +872,7 @@ JMEPart.prototype =
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ )
 			{
-				if(!this.studentAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
+				if(!noSpaceAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
 			}
 		}
 
@@ -1305,21 +1278,32 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def'))
 	{
 		matrix = jme.evaluate(def,this.question.scope);
-		if(matrix.type!='list')
-		{
+		switch(matrix.type) {
+		case 'list':
+			if(matrix.value[0].type=='list')
+			{
+				matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
+					return row.value.map(function(e){return e.value;});
+				});
+			}
+			else
+			{
+				matrix = matrix.value.map(function(e) {
+					return [e.value];
+				});
+			}
+			matrix.rows = matrix.length;
+			matrix.columns = matrix[0].length;
+			if(this.type=='m_n_x')
+				matrix = Numbas.matrixmath.transpose(matrix);
+			break;
+		case 'matrix':
+			matrix = matrix.value;
+			if(this.type=='m_n_x')
+				matrix = Numbas.matrixmath.transpose(matrix);
+			break;
+		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
-		}
-		if(matrix.value[0].type=='list')
-		{
-			matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
-				return row.map(function(e){return e.value;});
-			});
-		}
-		else
-		{
-			matrix = matrix.value.map(function(e) {
-				return [e.value];
-			});
 		}
 	}
 	else
@@ -1559,10 +1543,12 @@ MultipleResponsePart.prototype =
 					if(row)
 						var message = row[j];
 					var award = this.settings.matrix[i][j];
-					if(award>0) {
-						if($(message).text().trim().length==0 && award>0)
+					if(award!=0) {
+						if(!util.isNonemptyHTML(message) && award>0)
 							message = R('part.mcq.correct choice');
 						this.addCredit(award/this.marks,message);
+					} else {
+						this.markingComment(message);
 					}
 				}
 			}

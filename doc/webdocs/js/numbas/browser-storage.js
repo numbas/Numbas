@@ -93,7 +93,7 @@ BrowserStorage.prototype =
 		for(var i=0;i<q.parts.length;i++)
 		{
 			this.initPart(q.parts[i]);
-		},
+		}
 	},
 
 	initPart: function(p)
@@ -116,7 +116,7 @@ BrowserStorage.prototype =
 	cleanup: function()
 	{
 		this.set('mode','ab-initio');
-	},
+	}
 };		   
 
 	update: function()

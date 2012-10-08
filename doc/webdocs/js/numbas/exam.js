@@ -19,66 +19,6 @@ Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule'
 
 	var job = Numbas.schedule.add;
 
-// Initialise the exam:
-// - Connect to the LMS, which might have saved student answers
-// - Load the exam XML and the XSL templates
-// - create and initialise the exam object
-// - display the frontpage
-// This function is called when all the other scripts have been loaded and executed. 
-// It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
-var init = Numbas.init = function()
-{
-	var job = Numbas.schedule.add;
-
-	//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
-
-	job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
-
-	job(function()
-	{
-		var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
-		
-		var exam = Numbas.exam = new Numbas.Exam();					//create the exam object, and load in everything from the XML
-
-		switch(store.getEntry())
-		{
-		case 'ab-initio':
-			job(exam.init,exam);
-			job(Numbas.display.init);
-			job(function() {
-				if(exam.showFrontPage)
-				{
-					exam.display.showInfoPage('frontpage');
-				}
-				else
-				{
-					exam.begin();
-				}
-			});	
-			break;
-
-		case 'resume':
-			job(exam.load,exam);
-			job(Numbas.display.init);
-
-			job(function() {
-				if(exam.currentQuestion !== undefined)
-				{
-					job(exam.display.showInfoPage,exam.display,'suspend');
-				}
-				else
-				{
-					job(exam.display.showInfoPage,exam.display,'frontpage');
-				}
-			});
-
-			break;
-		}
-		//job(function(){Numbas.timing.end('init');});			//end performance timing 
-	});
-
-}
-
 
 // exam object keeps track of all info we need to know while exam is running
 var Exam = Numbas.Exam = function()
@@ -95,6 +35,7 @@ var Exam = Numbas.Exam = function()
 
 	//load settings from XML
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
+	document.title = this.name;
 
 	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
 
@@ -130,10 +71,17 @@ var Exam = Numbas.Exam = function()
 
 	this.totalQuestions = xml.selectNodes('questions/question').length;
 
-	this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
-	this.scope = new Numbas.jme.Scope(this.scope, {
+	var scopes = [Numbas.jme.builtinScope];
+	for(var extension in Numbas.extensions) {
+		if('scope' in Numbas.extensions[extension]) {
+			scopes.push(Numbas.extensions[extension].scope);
+		}
+	}
+	scopes.push({
 		functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)
 	});
+
+	this.scope = new Numbas.jme.Scope(scopes);
 
 	//rulesets
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
@@ -377,6 +325,7 @@ Exam.prototype = {
 	{
 		this.start = new Date();        //make a note of when the exam was started
 		this.endTime = new Date(this.start.getTime()+this.duration*1000);	//work out when the exam should end
+		this.timeRemaining = this.duration;
 
 		this.changeQuestion(0);			//start at the first question!
 
@@ -433,7 +382,7 @@ Exam.prototype = {
 
 		if(this.duration > 0)
 		{
-			this.timeRemaining = Math.ceil((this.endTime - t)/1000);
+			this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
 			this.display.showTiming();
 
 			if(this.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
