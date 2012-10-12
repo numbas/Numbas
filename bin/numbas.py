@@ -148,7 +148,7 @@ def compileToDir(exam,files,options):
 				makepath(dst)
 				shutil.copyfile(src,dst)
 		else:
-			shutil.copyfileobj(src,open(dst,'w'))
+			shutil.copyfileobj(src,open(dst,'w',encoding='utf-8'))
 	
 	print("Exam created in %s" % os.path.relpath(options.output))
 
