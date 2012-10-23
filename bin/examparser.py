@@ -268,10 +268,22 @@ def printdata(data,ntabs=0):
 		elif isinstance(data,basestring) and data.strip()=='':
 			return "'"+data+"'"
 		else:
-			return strcons(data)
+			return fix_number_repr(data)
 
 
 #utility functions
+
+"""Force fixed precision output of floats, instead of scientific notation"""
+def fix_number_repr(data):
+	if (data is True) or (data is False):
+		out=data
+	elif is_int(data):
+		out='%i' % data
+	elif is_number(data):
+		out='%.14f' % data
+	else:
+		out=data
+	return strcons(out)
 
 def is_number(s):
 	try:
@@ -283,7 +295,7 @@ def is_number(s):
 def is_int(s):
 	try:
 		int(s)
-		return True
+		return int(s)==s
 	except ValueError:
 		return False
 
