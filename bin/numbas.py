@@ -90,8 +90,7 @@ except NameError:
 	basestring = str
 
 
-def collectFiles(options):
-	dirs=[('runtime','.')]
+def collectFiles(options,dirs=[('runtime','.')]):
 
 	resources = [os.path.join(options.sourcedir,x) for x in options.resources]
 	dirs += [(os.path.join(os.getcwd(),x),os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
@@ -105,10 +104,6 @@ def collectFiles(options):
 
 	for themepath in options.themepaths:
 		dirs.append((os.path.join(themepath,'files'),'.'))
-
-	if options.scorm:
-		dirs.append(('scormfiles','.'))
-
 
 	files = {}
 	for (src,dst) in dirs:
@@ -153,12 +148,8 @@ def compileToDir(exam,files,options):
 				makepath(dst)
 				shutil.copyfile(src,dst)
 		else:
-			shutil.copyfileobj(src,open(dst,'w'))
+			shutil.copyfileobj(src,open(dst,'w',encoding='utf-8'))
 	
-	f=open(os.path.join(options.output,'settings.js'),'w',encoding='utf-8')
-	f.write(options.xmls)
-	f.close()
-
 	print("Exam created in %s" % os.path.relpath(options.output))
 
 def compileToZip(exam,files,options):
@@ -182,7 +173,6 @@ def compileToZip(exam,files,options):
 			f.writestr(dst,src.read())
 
 
-	f.writestr('settings.js',options.xmls.encode('utf-8'))
 
 	print("Exam created in %s" % os.path.relpath(options.output))
 
@@ -205,18 +195,40 @@ def makeExam(options):
 	options.xmls = xml2js(options)
 
 	files = collectFiles(options)
+	files[os.path.join('.','settings.js')] = io.StringIO(options.xmls)
 
 	if options.scorm:
 		IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
 		manifest = etree.fromstring(open(os.path.join(options.path,'scormfiles','imsmanifest.xml')).read())
 		manifest.attrib['identifier'] = 'Numbas: %s' % exam.name
 		manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix,IMSprefix,IMSprefix)).text = exam.name
-		manifest = etree.tostring(manifest)
+		def to_relative_url(path):
+			path = os.path.normpath(path)
+			bits = []
+			head,tail=os.path.split(path)
+			while head!='':
+				bits.insert(0,tail)
+				head,tail=os.path.split(head)
+			bits.insert(0,tail)
+			return '/'.join(bits)
+
+		resource_files = [to_relative_url(x) for x in files.keys()]
+
+		resource_element = manifest.find('%sresources/%sresource' % (IMSprefix,IMSprefix))
+		for filename in resource_files:
+			file_element = etree.Element('file')
+			file_element.attrib = {'href': filename}
+			resource_element.append(file_element)
+
+		files.update(collectFiles(options,[('scormfiles','.')]))
+
+		manifest_string = etree.tostring(manifest)
 		try:
-			manifest = manifest.decode('utf-8')
+			manifest_string = manifest_string.decode('utf-8')
 		except AttributeError:
 			pass
-		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest)
+
+		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest_string)
 		
 	if options.zip:
 		compileToZip(exam,files,options)

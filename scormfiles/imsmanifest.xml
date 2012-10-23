@@ -33,30 +33,6 @@
 	</organizations> 
 	<resources> 
 		<resource identifier="resource_1" type="webcontent" adlcp:scormType="sco" href="index.html"> 
-			<file href="index.html"/> 
-			<file href="xmls.js"/> 
-			<file href="resources/cross.png"/> 
-			<file href="resources/exam.css"/> 
-			<file href="resources/numbas-logo.gif"/> 
-			<file href="resources/percent.png"/> 
-			<file href="resources/tick.png"/> 
-			<file href="scripts/SCORM_API_wrapper.js"/> 
-			<file href="scripts/browser-storage.js"/> 
-			<file href="scripts/display.js"/> 
-			<file href="scripts/exam.js"/> 
-			<file href="scripts/numbas.js"/> 
-			<file href="scripts/jme.js"/> 
-			<file href="scripts/pretendlms.js"/> 
-			<file href="scripts/question.js"/> 
-			<file href="scripts/question.js"/> 
-			<file href="scripts/scorm-storage.js"/> 
-			<file href="scripts/storage.js"/> 
-			<file href="scripts/jquery/jcarousellite.js"/> 
-			<file href="scripts/jquery/jquery.js"/> 
-			<file href="scripts/jquery/jquery.mousewheel.js"/> 
-			<file href="scripts/jquery/jquery.xslTransform.js"/> 
-			<file href="scripts/sarissa/sarissa.js"/> 
-			<file href="scripts/sarissa/sarissa_ieemu_xpath.js"/> 
 		</resource> 
 	</resources> 
 </manifest> 
