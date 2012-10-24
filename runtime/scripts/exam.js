@@ -581,11 +581,8 @@ Exam.prototype = {
 function ExamEvent(eventNode)
 {
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
-	tryGetAttribute(this,eventNode,'type');
-	tryGetAttribute(this,'action','type','action',{xml: eventNode});
-	var messageNode = eventNode.selectSingleNode('action/warning/message');
-	if(messageNode)
-		this.message = Numbas.xml.serializeMessage(messageNode);
+	tryGetAttribute(this,eventNode,['type','action']);
+	this.message = Numbas.xml.serializeMessage(eventNode);
 }
 ExamEvent.prototype = {
 	type: '',
