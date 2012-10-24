@@ -1116,7 +1116,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 		settings.displayAnswer = displayAnswer;
 		break;
 	default:
-		settings.displayAnswer = math.niceNumber(settings.displayAnswer);
+		settings.displayAnswer = math.niceNumber(displayAnswer);
 		break;
 	}
 
