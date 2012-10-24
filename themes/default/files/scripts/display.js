@@ -235,6 +235,8 @@ display.ExamDisplay.prototype =
 
 	showInfoPage: function(page)
 	{
+		window.onbeforeunload = null;
+
 		//hide question container, and show info container
 		$('#questionContainer').hide();
 		$('#questionDisplay').html('');
@@ -289,6 +291,8 @@ display.ExamDisplay.prototype =
 
 	showQuestion: function()
 	{
+		window.onbeforeunload = function() { return R('control.confirm leave') };
+
 		var exam = this.e;
 
 		exam.currentQuestion.display.show();
