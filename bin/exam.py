@@ -659,7 +659,7 @@ class PatternMatchPart(Part):
 class NumberEntryPart(Part):
 	kind = 'numberentry'
 	integerAnswer = False
-	partialCredit = 0
+	integerPartialCredit = 0
 	checkingType = 'range'
 	answer = 0
 	checkingAccuracy = 0
@@ -667,13 +667,18 @@ class NumberEntryPart(Part):
 	maxvalue = 0
 	inputStep = 1
 
+	precisionType = 'none'
+	precision = 0
+	precisionPartialCredit = 0
+	precisionMessage = ''
+
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
 	
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','partialCredit','checkingType','inputStep'],part)
+		tryLoad(data,['integerAnswer','integerPartialCredit','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage'],part)
 		if part.checkingType == 'range':
 			if 'answer' in data:
 				part.maxvalue = part.minvalue = data['answer']
@@ -689,6 +694,7 @@ class NumberEntryPart(Part):
 		part = Part.toxml(self)
 		part.append(makeTree(['answer',
 								['allowonlyintegeranswers'],
+								['precision','message'],
 							]
 							))
 
@@ -703,7 +709,9 @@ class NumberEntryPart(Part):
 		else:
 			answer.attrib['answer'] = strcons(self.answer)
 			answer.attrib['accuracy'] = strcons(self.checkingAccuracy)
-		answer.find('allowonlyintegeranswers').attrib = {'value': strcons(self.integerAnswer), 'partialcredit': strcons(self.partialCredit)+'%'}
+		answer.find('allowonlyintegeranswers').attrib = {'value': strcons(self.integerAnswer), 'partialcredit': strcons(self.integerPartialCredit)+'%'}
+		answer.find('precision').attrib = {'type': strcons(self.precisionType), 'precision': strcons(self.precision), 'partialcredit': strcons(self.precisionPartialCredit)+'%'}
+		answer.find('precision/message').append(makeContentNode(self.precisionMessage))
 
 		return part
 

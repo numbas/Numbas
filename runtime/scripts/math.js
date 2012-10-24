@@ -467,6 +467,22 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 		}
 	},
 
+	countDP: function(n) {
+		var m = n.match(/\.(\d*)$/);
+		if(!m)
+			return 0;
+		else
+			return m[1].length;
+	},
+	
+	countSigFigs: function(n) {
+		var m = n.match(/^(?:(\d$)|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))$)/);
+		if(!m)
+			return 0;
+		var sigFigs = m[1] || m[2] || m[3] || m[4];
+		return sigFigs.replace('.','').length;
+	},
+
 	factorial: function(n)
 	{
 		if( Numbas.util.isInt(n) && n>=0 )
