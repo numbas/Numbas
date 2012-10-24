@@ -278,9 +278,9 @@ def fix_number_repr(data):
 	if (data is True) or (data is False):
 		out=data
 	elif is_int(data):
-		out='%i' % data
+		out='%i' % int(data)
 	elif is_number(data):
-		out='%.14f' % data
+		out='%.14f' % float(data)
 	else:
 		out=data
 	return strcons(out)
@@ -289,14 +289,14 @@ def is_number(s):
 	try:
 		float(s)
 		return True
-	except ValueError:
+	except (ValueError,TypeError):
 		return False
 
 def is_int(s):
 	try:
 		int(s)
 		return int(s)==s
-	except ValueError:
+	except (ValueError,TypeError):
 		return False
 
 #make sure string s has exactly n copies of c at the start
