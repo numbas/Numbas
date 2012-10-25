@@ -109,38 +109,16 @@ jme.variables = {
 				return jme.evaluate(this.tree,scope);
 			}
 		}
-		function unwrapValue(v) {
-			if(v.type=='list')
-				return v.value.map(unwrapValue);
-			else
-				return v.value;
-		}
-		function wrapValue(v) {
-			switch(typeof v) {
-			case 'number':
-				return new jme.types.TNum(v);
-			case 'string':
-				return new jme.types.TString(v);
-			case 'boolean':
-				return new jme.types.TBool(v);
-			default:
-				if($.isArray(v)) {
-					v = v.map(wrapValue);
-					return new jme.types.TList(v);
-				}
-				return v;
-			}
-		}
 		function makeJavascriptFunction(fn) {
-			var preamble='(function('+fn.paramNames.join(',')+'){';
+			var preamble='fn.jfn=(function('+fn.paramNames.join(',')+'){';
 			var math = Numbas.math;
 			var util = Numbas.util;
 			var jfn = eval(preamble+fn.definition+'})');
 			return function(args,scope) {
-				args = args.map(function(a){return unwrapValue(jme.evaluate(a,scope))});
+				args = args.map(function(a){return jme.unwrapValue(jme.evaluate(a,scope))});
 				try {
 					var val = jfn.apply(this,args);
-					val = wrapValue(val);
+					val = jme.wrapValue(val);
 					if(!val.type)
 						val = new fn.outcons(val);
 					return val;

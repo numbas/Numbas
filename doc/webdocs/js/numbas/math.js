@@ -418,6 +418,16 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 		return Q; 
 	},
 
+	shuffle: function(list) {
+		var l = list.length;
+		var permutation = math.deal(l);
+		var list2 = new Array(l);
+		for(var i=0;i<l;i++) {
+			list2[i]=(list[permutation[i]]);
+		}
+		return list2;
+	},
+
 	//returns the inverse of a shuffling
 	inverse: function(l)
 	{
@@ -465,6 +475,22 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 			b = Math.pow(10,Math.ceil(math.log10(s*a))-b);
 			return Math.round(a/b)*b;
 		}
+	},
+
+	countDP: function(n) {
+		var m = n.match(/\.(\d*)$/);
+		if(!m)
+			return 0;
+		else
+			return m[1].length;
+	},
+	
+	countSigFigs: function(n) {
+		var m = n.match(/^(?:(\d$)|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))$)/);
+		if(!m)
+			return 0;
+		var sigFigs = m[1] || m[2] || m[3] || m[4];
+		return sigFigs.replace('.','').length;
 	},
 
 	factorial: function(n)

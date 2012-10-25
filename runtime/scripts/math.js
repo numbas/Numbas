@@ -418,6 +418,16 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 		return Q; 
 	},
 
+	shuffle: function(list) {
+		var l = list.length;
+		var permutation = math.deal(l);
+		var list2 = new Array(l);
+		for(var i=0;i<l;i++) {
+			list2[i]=(list[permutation[i]]);
+		}
+		return list2;
+	},
+
 	//returns the inverse of a shuffling
 	inverse: function(l)
 	{

@@ -1082,9 +1082,43 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	else
 		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
 
-	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','partialCredit'],{xml: this.xml});
+	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC'],{xml: this.xml});
+	tryGetAttribute(settings,'answer/precision',['type','partialcredit'],['precisionType','precisionPC'],{xml: this.xml});
+	tryGetAttribute(settings,'answer/precision','precision','precision',{xml: this.xml, string:true});
+	settings.precision = jme.subvars(settings.precision, this.question.scope);
+	settings.precision = evaluate(settings.precision,this.question.scope).value;
+	var messageNode = this.xml.selectSingleNode('answer/precision/message');
+	if(messageNode)
+		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 
-	settings.displayAnswer = math.niceNumber((settings.minvalue + settings.maxvalue)/2);
+	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
+	switch(settings.precisionType) {
+	case 'dp':
+		displayAnswer = math.precround(displayAnswer,settings.precision)+'';
+		var dp = math.countDP(displayAnswer);
+		if(dp<settings.precision) {
+			if(displayAnswer.indexOf('.')==-1)
+				displayAnswer += '.';
+			for(var i=0;i<settings.precision-dp;i++)
+				displayAnswer+='0';
+		}
+		settings.displayAnswer = displayAnswer;
+		break;
+	case 'sigfig':
+		displayAnswer = math.siground(displayAnswer,settings.precision)+'';
+		var sigFigs = math.countSigFigs(displayAnswer);
+		if(sigFigs<settings.precision) {
+			if(displayAnswer.indexOf('.')==-1)
+				displayAnswer += '.';
+			for(var i=0;i<settings.precision-sigFigs;i++)
+				displayAnswer+='0';
+		}
+		settings.displayAnswer = displayAnswer;
+		break;
+	default:
+		settings.displayAnswer = math.niceNumber(displayAnswer);
+		break;
+	}
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
@@ -1106,8 +1140,12 @@ NumberEntryPart.prototype =
 		minvalue: 0,
 		maxvalue: 0,
 		integerAnswer: false,//must answer be an integer?
-		partialCredit: 0,	//partial credit to award if answer is not an integer
-		displayAnswer: 0	//number to display if revealing answer
+		integerPC: 0,	//partial credit to award if answer is not an integer
+		displayAnswer: 0,	//number to display if revealing answer
+		precisionType: 'none',	//'none', 'dp' or 'sigfig'
+		precision: 0,
+		precisionPC: 0,	//fraction of credit to take away if precision wrong
+		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
 	},
 
 	mark: function()
@@ -1123,20 +1161,47 @@ NumberEntryPart.prototype =
 		// uk number format only for now - get rid of any UK 1000 separators	
 		this.studentAnswer = this.studentAnswer.replace(/,/g, '');
 		this.studentAnswer = $.trim(this.studentAnswer);
-		
+
 		if( this.studentAnswer.length>0 && !isNaN(this.studentAnswer) )
 		{
-			this.studentAnswer = parseFloat(this.studentAnswer);
-			if( this.studentAnswer <= this.settings.maxvalue && this.studentAnswer >= this.settings.minvalue )
+			var answerFloat = parseFloat(this.studentAnswer);
+			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue )
 			{
-				if(this.settings.integerAnswer && !util.isInt(this.studentAnswer))
-					this.setCredit(this.settings.partialCredit,R('part.numberentry.correct except decimal'));
+				if(this.settings.integerAnswer && !util.isInt(answerFloat))
+					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except decimal'));
 				else
 					this.setCredit(1,R('part.marking.correct'));
 			}else{
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
 			this.answered = true;
+
+			var failedPrecision = false;
+			switch(this.settings.precisionType) {
+			case 'dp':
+				if(this.precision==0) {
+					failedPrecision = this.studentAnswer.indexOf('.')>=0;
+					break;
+				} else {
+					failedPrecision = math.countDP(this.studentAnswer) != this.settings.precision;
+					break;
+				}
+			case 'sigfig':
+				var sigFigs = math.countSigFigs(this.studentAnswer)
+				failedPrecision = sigFigs != this.settings.precision;
+				if(failedPrecision && sigFigs < this.settings.precision && /[1-9]\d*0+$/.test(this.studentAnswer)) {	// in cases like 2070, which could be to either 3 or 4 sig figs
+					var trailingZeroes = this.studentAnswer.match(/0*$/)[0].length;
+					if(sigFigs + trailingZeroes >= this.settings.precision)
+						failedPrecision = false;
+				}
+				break;
+			default:
+				break;
+			}
+			
+			if(failedPrecision) {
+				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
+			}
 		}else{
 			this.answered = false;
 			this.setCredit(0,R('part.numberentry.answer invalid'));

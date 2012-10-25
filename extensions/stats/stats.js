@@ -220,10 +220,10 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 	var listFuncs = 'sum sumsqrd sumsqerr product min max mean meansqerr geomean median cumsum diff mode range variance stdev meandev meddev coeffvar quartiles covariance corrcoeff'.split(' ');
 	for(var i=0;i<listFuncs.length;i++) {
 		var fn = listFuncs[i];
-		statsScope.addFunction(new funcObj(fn, [TList],TNum, jStat[fn], {unwrapLists:true}));
+		statsScope.addFunction(new funcObj(fn, [TList],TNum, jStat[fn], {unwrapValues:true}));
 	}
-	statsScope.addFunction(new funcObj('stdev', [TList,TBool],TNum, jStat.stdev, {unwrapLists:true}));
-	statsScope.addFunction(new funcObj('variance', [TList,TBool],TNum, jStat.variance, {unwrapLists:true}));
+	statsScope.addFunction(new funcObj('stdev', [TList,TBool],TNum, jStat.stdev, {unwrapValues:true}));
+	statsScope.addFunction(new funcObj('variance', [TList,TBool],TNum, jStat.variance, {unwrapValues:true}));
 
 	// fill in geometric distribution because jStat doesn't have it
 	if(!('geometric' in jStat)) {
@@ -309,26 +309,26 @@ Numbas.queueScript('extensions/stats/stats.js',['math','jme'],function() {
 
 
 	statsScope.addFunction(new funcObj('zScore',[TNum,TNum,TNum],TNum,jStat.zscore));
-	statsScope.addFunction(new funcObj('zScore',[TNum,TList],TNum,jStat.zscore,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('zScore',[TNum,TList],TNum,jStat.zscore,{unwrapValues:true}));
 
 	statsScope.addFunction(new funcObj('zTest',[TNum,TNum,TNum,TNum],TNum,jStat.ztest));
-	statsScope.addFunction(new funcObj('zTest',[TNum,TList,TNum],TNum,jStat.ztest,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('zTest',[TNum,TList,TNum],TNum,jStat.ztest,{unwrapValues:true}));
 
 	statsScope.addFunction(new funcObj('tScore',[TNum,TNum,TNum,TNum],TNum,jStat.tscore));
-	statsScope.addFunction(new funcObj('tScore',[TNum,TList],TNum,jStat.tscore,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('tScore',[TNum,TList],TNum,jStat.tscore,{unwrapValues:true}));
 
 	statsScope.addFunction(new funcObj('tTest',[TNum,TNum,TNum,TNum,TNum],TNum,jStat.ttest));
 	statsScope.addFunction(new funcObj('tTest',[TNum,TNum,TNum],TNum,jStat.ttest));
-	statsScope.addFunction(new funcObj('tTest',[TNum,TList,TNum],TNum,jStat.ttest,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('tTest',[TNum,TList,TNum],TNum,jStat.ttest,{unwrapValues:true}));
 
-	statsScope.addFunction(new funcObj('anovaFScore',['*TList'],TNum,jStat.anovafscore,{unwrapLists:true}));
-	statsScope.addFunction(new funcObj('anovaFTest',['*TList'],TNum,jStat.anovaftest,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('anovaFScore',['*TList'],TNum,jStat.anovafscore,{unwrapValues:true}));
+	statsScope.addFunction(new funcObj('anovaFTest',['*TList'],TNum,jStat.anovaftest,{unwrapValues:true}));
 	statsScope.addFunction(new funcObj('ftest',[TNum,TNum,TNum],TNum,jStat.ftest));
 
 	statsScope.addFunction(new funcObj('normalci',[TNum,TNum,TNum,TNum],TNum,jStat.normalci));
-	statsScope.addFunction(new funcObj('normalci',[TNum,TNum,TList],TNum,jStat.normalci,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('normalci',[TNum,TNum,TList],TNum,jStat.normalci,{unwrapValues:true}));
 	statsScope.addFunction(new funcObj('tci',[TNum,TNum,TNum,TNum],TNum,jStat.tci));
-	statsScope.addFunction(new funcObj('tci',[TNum,TNum,TList],TNum,jStat.tci,{unwrapLists:true}));
+	statsScope.addFunction(new funcObj('tci',[TNum,TNum,TList],TNum,jStat.tci,{unwrapValues:true}));
 
 	var specialFunctions = {
 		betafn: 2,

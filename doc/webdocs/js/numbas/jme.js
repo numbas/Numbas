@@ -775,6 +775,28 @@ var jme = Numbas.jme = {
 			}
 		}
 		return out;
+	},
+	unwrapValue: function(v) {
+		if(v.type=='list')
+			return v.value.map(jme.unwrapValue);
+		else
+			return v.value;
+	},
+	wrapValue: function(v) {
+		switch(typeof v) {
+		case 'number':
+			return new jme.types.TNum(v);
+		case 'string':
+			return new jme.types.TString(v);
+		case 'boolean':
+			return new jme.types.TBool(v);
+		default:
+			if($.isArray(v)) {
+				v = v.map(wrapValue);
+				return new jme.types.TList(v);
+			}
+			return v;
+		}
 	}
 };
 
@@ -1147,6 +1169,7 @@ var commutative = jme.commutative =
 //options can contain any of:
 //	typecheck: a function which checks whether the funcObj can be applied to the given arguments 
 //  evaluate: a function which performs the funcObj on given arguments and variables. Arguments are passed as expression trees, i.e. unevaluated
+//  unwrapValues: unwrap list elements in arguments into javascript primitives before passing to the evaluate function
 var funcObjAcc = 0;	//accumulator for ids for funcObjs, so they can be sorted
 var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 {
@@ -1216,18 +1239,25 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 		var nargs = [];
 		for(var i=0; i<args.length; i++) {
 			var result = jme.evaluate(args[i],scope);
-			if(options.unwrapLists && result.type=='list') {
-				var value = result.value.map(function(v){
-					return v.value;
-				});
-				nargs.push(value);
-			}else
+			if(options.unwrapValues) {
+				result = jme.unwrapValue(result);
+				nargs.push(result);
+			}
+			else
 				nargs.push(result.value);
 		}
 
 		var result = this.fn.apply(null,nargs);
 
-		return new this.outcons(result);
+		if(options.unwrapValues) {
+			result = jme.wrapValue(result);
+			if(!result.type)
+				result = new this.outcons(result);
+		}
+		else
+			result = new this.outcons(result);
+
+		return result;
 	}	
 
 	this.doc = options.doc;
@@ -1559,6 +1589,17 @@ newBuiltin('deal',[TNum],TList,
 		usage: ['deal(n)','deal(5)'],
 		description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
 		tags: ['permutation','order','shuffle']
+	}}
+);
+
+newBuiltin('shuffle',[TList],TList,
+	function(list) {
+		return math.shuffle(list);
+	},
+	{doc: {
+		usage: ['shuffle(list)','shuffle([1,2,3])'],
+		description: 'Randomly reorder a list.',
+		tags: ['permutation','order','shuffle','deal']	
 	}}
 );
 
@@ -1969,6 +2010,40 @@ newBuiltin('list',[TMatrix],TList,null, {
 		description: 'Cast a matrix to a list of its rows.'
 	}
 });
+
+newBuiltin('table',[TList,TList],THTML,
+	function(data,headers) {
+		var table = $('<table/>');
+
+		var thead = $('<thead/>');
+		table.append(thead);
+		for(var i=0;i<headers.length;i++) {
+			thead.append($('<th/>').html(headers[i]));
+		}
+
+		var tbody=$('<tbody/>');
+		table.append(tbody);
+		for(var i=0;i<data.length;i++) {
+			var row = $('<tr/>');
+			tbody.append(row);
+			for(var j=0;j<data[i].length;j++) {
+				row.append($('<td/>').html(data[i][j]));
+			}
+		}
+
+		console.log(table);
+		return table;
+	},
+	{
+		unwrapValues: true,
+
+		doc: {
+			usage: ['table([ [1,2,3], [4,5,6] ], [\'Header 1\', \'Header 2\'])', 'table(data,headers)'],
+			tags: ['table','tabular','data','html'],
+			description: 'Create a table to display a list of rows of data, with the given headers.'
+		}
+	}
+);
 
 ///end of builtins
 
