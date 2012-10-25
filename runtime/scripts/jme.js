@@ -2037,7 +2037,6 @@ newBuiltin('table',[TList,TList],THTML,
 			}
 		}
 
-		console.log(table);
 		return table;
 	},
 	{
