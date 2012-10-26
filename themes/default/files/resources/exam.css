@@ -406,11 +406,14 @@ div.part {
 	display:none;
 	border: 1px solid;
 	padding: 0.5em 0.5em;
-	/*float:right;*/
 }
 
 .steps #prompt {
 	display:inline-block;
+}
+
+.stepsBtnDiv, .steps {
+	margin-bottom: 1em;
 }
 
 .advice {
