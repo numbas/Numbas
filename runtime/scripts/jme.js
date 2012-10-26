@@ -56,7 +56,7 @@ var jme = Numbas.jme = {
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^(['"])((?:[^\1\\]|\\.)*?)\1/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
-        var re_comment = /^\/\/.*\(\n|$\)/;
+        var re_comment = /^\/\/.*(?:\n|$)/;
 		
 		while( expr.length )
 		{
@@ -2037,7 +2037,6 @@ newBuiltin('table',[TList,TList],THTML,
 			}
 		}
 
-		console.log(table);
 		return table;
 	},
 	{
