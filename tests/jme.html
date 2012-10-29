@@ -144,10 +144,13 @@
 
 						deepCloseEqual(tokenise('"hi \\"Bob\\""'),[new types.TString('hi "Bob"')],'"hi \\"Bob\\"" -- escape quotes');
 						deepCloseEqual(tokenise("'hi \\'Bob\\''"),[new types.TString("hi 'Bob'")],"'hi \\'Bob\\'' -- escape quotes");
-						deepCloseEqual(tokenise('"some\\thing"'),[new types.TString('some\\thing')],'something -- backslash doesn\'t escape anything else');
 
 						raisesNumbasError(function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
 						raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');
+
+						deepCloseEqual(tokenise('"hi \\n there"'),[new types.TString('hi \n there')],'"hi \\n there"');
+						deepCloseEqual(tokenise('"hi \\\\n there"'),[new types.TString('hi \\n there')],'"hi \\\\n there"');
+						deepCloseEqual(tokenise('"hi \\\\\\n there"'),[new types.TString('hi \\\n there')],'"hi \\\\\\n there"');
 					});
 
 					test('Implicit multiplication',function() {
@@ -717,8 +720,8 @@
 						equals(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
 						equals(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 						equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
-						equals(exprToLaTeX('10000000000000000000000000'),'1 \times 10^{25}','scientific notation - 1*e^25');
-						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \times 10^{25}','scientific notation - 4.7652*e^25');
+						equals(exprToLaTeX('10000000000000000000000000'),'1 \\times 10^{25}','scientific notation - 1*e^25');
+						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
 					});
 				};
 
