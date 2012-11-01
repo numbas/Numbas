@@ -388,7 +388,10 @@ div.part {
 	display:none;
 	border: 1px solid;
 	padding: 0.5em 0.5em;
-	/*float:right;*/
+}
+
+.stepsBtnDiv, .steps {
+	margin-bottom: 1em;
 }
 
 .steps #prompt {
