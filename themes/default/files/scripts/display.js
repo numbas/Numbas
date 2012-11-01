@@ -782,9 +782,9 @@ display.JMEPartDisplay.prototype =
 	//display a live preview of the student's answer typeset properly
 	inputChanged: function(txt,force)
 	{
-		this.p.storeAnswer([txt]);
 		if((txt!=this.oldtxt && txt!==undefined) || force)
 		{
+			this.p.storeAnswer([txt]);
 			this.txt = txt;
 
 			this.removeWarnings();

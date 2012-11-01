@@ -56,6 +56,7 @@ var jme = Numbas.jme = {
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^(['"])((?:[^\1\\]|\\.)*?)\1/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
+        var re_comment = /^\/\/.*(?:\n|$)/;
 		
 		while( expr.length )
 		{
@@ -63,6 +64,11 @@ var jme = Numbas.jme = {
 		
 			var result;
 			var token;
+
+            while(result=expr.match(re_comment)) {
+                expr=expr.slice(result[0].length).replace(re_strip_whitespace,'');
+            }
+
 			if(result = expr.match(re_number))
 			{
 				token = new TNum(result[0]);
@@ -129,9 +135,26 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_string))
 			{
 				var str = result[2];
-				str = str.replace(/\\n/g,'\n').replace(/\\(["'])/g,'$1');
+	
+				var estr = '';
+				while(true) {
+					var i = str.indexOf('\\');
+					if(i==-1)
+						break;
+					else {
+						estr += str.slice(0,i);
+						if((c=str.charAt(i+1))=='n') {
+							estr+='\n';
+						}
+						else {
+							estr+=c;
+						}
+						str=str.slice(i+2);
+					}
+				}
+				estr+=str;
 
-				token = new TString(str);
+				token = new TString(estr);
 			}
 			else if (result = expr.match(re_special))
 			{
@@ -2031,7 +2054,6 @@ newBuiltin('table',[TList,TList],THTML,
 			}
 		}
 
-		console.log(table);
 		return table;
 	},
 	{

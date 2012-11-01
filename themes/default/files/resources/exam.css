@@ -422,10 +422,13 @@ div.part {
 	margin:1em 0;
 	display:none;
 }
+
 .multiplechoice li {
 	list-style:none;
 	padding-right: 2em;
+	line-height: 1.5em;
 }
+
 .multiplechoice p {
 	display:inline;
 }

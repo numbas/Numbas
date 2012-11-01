@@ -135,9 +135,26 @@ var jme = Numbas.jme = {
 			else if (result = expr.match(re_string))
 			{
 				var str = result[2];
-				str = str.replace(/\\n/g,'\n').replace(/\\(["'])/g,'$1');
+	
+				var estr = '';
+				while(true) {
+					var i = str.indexOf('\\');
+					if(i==-1)
+						break;
+					else {
+						estr += str.slice(0,i);
+						if((c=str.charAt(i+1))=='n') {
+							estr+='\n';
+						}
+						else {
+							estr+=c;
+						}
+						str=str.slice(i+2);
+					}
+				}
+				estr+=str;
 
-				token = new TString(str);
+				token = new TString(estr);
 			}
 			else if (result = expr.match(re_special))
 			{
