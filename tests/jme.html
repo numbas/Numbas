@@ -100,6 +100,7 @@
 					test('Whitespace',function() {
 						deepCloseEqual(tokenise('\u00A01'),[new types.TNum(1)],'\\u00A01');
 						deepCloseEqual(tokenise('1        '),[new types.TNum(1)],'1       (whitespace at end of expression)');
+						deepCloseEqual(tokenise('a &nbsp; + b'),[new types.TName('a'),new types.TOp('+'),new types.TName('b')],'a &nbsp; + b (html-escaped space)');
 					});
 
 					test('Operators', function() {

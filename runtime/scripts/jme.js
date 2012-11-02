@@ -22,7 +22,7 @@ var math = Numbas.math;
 var vectormath = Numbas.vectormath;
 var matrixmath = Numbas.matrixmath;
 
-var re_whitespace = '[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]';
+var re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
 var re_strip_whitespace = new RegExp('^'+re_whitespace+'+|'+re_whitespace+'+$','g');
 
 var jme = Numbas.jme = {
