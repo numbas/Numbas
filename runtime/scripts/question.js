@@ -1092,33 +1092,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 
 	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
-	switch(settings.precisionType) {
-	case 'dp':
-		displayAnswer = math.precround(displayAnswer,settings.precision)+'';
-		var dp = math.countDP(displayAnswer);
-		if(dp<settings.precision) {
-			if(displayAnswer.indexOf('.')==-1)
-				displayAnswer += '.';
-			for(var i=0;i<settings.precision-dp;i++)
-				displayAnswer+='0';
-		}
-		settings.displayAnswer = displayAnswer;
-		break;
-	case 'sigfig':
-		displayAnswer = math.siground(displayAnswer,settings.precision)+'';
-		var sigFigs = math.countSigFigs(displayAnswer);
-		if(sigFigs<settings.precision) {
-			if(displayAnswer.indexOf('.')==-1)
-				displayAnswer += '.';
-			for(var i=0;i<settings.precision-sigFigs;i++)
-				displayAnswer+='0';
-		}
-		settings.displayAnswer = displayAnswer;
-		break;
-	default:
-		settings.displayAnswer = math.niceNumber(displayAnswer);
-		break;
-	}
+	settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision});
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
