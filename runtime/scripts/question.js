@@ -167,28 +167,13 @@ Question.prototype =
 	subvars: function()
 	{
 		var q = this;
-		var doc = Sarissa.getDomDocument();
-		doc.appendChild($(q.originalXML).clone()[0]);	//get a fresh copy of the original XML, to sub variables into
-		q.xml = doc.selectSingleNode('question');
-		q.xml.setAttribute('number',q.number);
+		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.originalXML).string);
 
 		job(function()
 		{
-			//substitute variables into content nodes
-			var serializer = new XMLSerializer();
-			var parser = new DOMParser();
-			var contents = q.xml.selectNodes('descendant::content');
-
-			//filter to get non-whitespace text nodes 
-			function tnf(){ return ((this.nodeType == Node.TEXT_NODE) && !(/^\s*$/.test(this.nodeValue))); }
-
-			//do contentsubvars on all content
-			for(var i=0;i<contents.length;i++)
-			{
-				jme.variables.DOMcontentsubvars(contents[i],q.scope);
-			}
-
-
+			q.html.each(function(e) {
+				jme.variables.DOMcontentsubvars(this,q.scope);
+			})
 		});
 
 		job(function() {

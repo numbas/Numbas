@@ -344,8 +344,6 @@ display.QuestionDisplay.prototype =
 	questionSelector: '',			//jQuery selector for this question's menu entry
 
 	makeHTML: function() {
-		//make html for question and advice text
-		this.html = $.xsl.transform(Numbas.xml.templates.question, this.q.xml).string;
 	},
 
 	show: function()
@@ -369,10 +367,8 @@ display.QuestionDisplay.prototype =
 
 		//display question's html
 		
-		$('#questionDisplay').html(this.html);
+		$('#questionDisplay').html('').append(q.html);
 
-		if($('.statement').text().trim()=='')	//hide statement block if empty
-			$('.statement').hide();
 
 		//show parts
 		this.postTypesetF = function(){};
