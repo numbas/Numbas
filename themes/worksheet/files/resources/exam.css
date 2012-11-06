@@ -1,3 +1,15 @@
+/* VML fix for IE */
+v\:* { behavior: url(#default#VML); display:inline-block}
+o\:* { behavior: url(#default#VML); }
+
+.clearAfter::after {
+    clear: both;
+    content: '.';
+    display: block;
+    visibility: hidden;
+    height: 0;
+}
+
 html{	
 	font-family: sans-serif;
 }
