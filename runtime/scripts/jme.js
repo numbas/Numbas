@@ -815,7 +815,7 @@ var jme = Numbas.jme = {
 			return new jme.types.TBool(v);
 		default:
 			if($.isArray(v)) {
-				v = v.map(wrapValue);
+				v = v.map(jme.wrapValue);
 				return new jme.types.TList(v);
 			}
 			return v;
