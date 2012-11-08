@@ -170,6 +170,10 @@ jme.variables = {
 
 				var vars = [];
 
+				if(value.trim()=='') {
+					throw(new Numbas.Error('jme.variables.empty definition',name));
+				}
+
 				var tree = jme.compile(value,scope,true);
 				vars = vars.merge(jme.findvars(tree));
 				todo[name]={

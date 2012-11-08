@@ -20,6 +20,7 @@ import io
 import sys
 import traceback
 import shutil
+import codecs
 from optparse import OptionParser
 import examparser
 from exam import Exam,ExamError
@@ -309,7 +310,8 @@ if __name__ == '__main__':
 	(options,args) = parser.parse_args()
 
 	if options.pipein:
-		options.source = sys.stdin.read()
+		stdin = codecs.getreader('utf-8')(sys.stdin)
+		options.source = stdin.read()
 		options.sourcedir = os.getcwd()
 		if not options.output:
 			options.output = os.path.join(path,'output','exam')

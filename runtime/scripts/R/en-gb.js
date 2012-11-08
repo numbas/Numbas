@@ -63,6 +63,7 @@ R.registerLocale('en-GB',{
 	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 
 	'jme.variables.variable not defined': "Variable %s is not defined.",
+	'jme.variables.empty definition': "Definition of variable %s is empty.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
