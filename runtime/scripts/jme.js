@@ -1383,6 +1383,19 @@ newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c',
 
 newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
 
+newBuiltin('latex',[TString],TString,null,{
+	evaluate: function(args,scope) {
+		var s = jme.evaluate(args[0],scope);
+		s.latex = true;
+		console.log(s);
+		return s;
+	},
+	doc: {
+		usage: ['latex("something")'],
+		description: 'Output a string as raw LaTeX. Normally, strings are wrapped in a \\textrm command.'
+	}
+});
+
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange,TRange], TList,

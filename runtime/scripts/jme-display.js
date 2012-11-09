@@ -690,7 +690,10 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		else
 			return texNumber(tok.value);
 	case 'string':
-		return '\\textrm{'+tok.value+'}';
+		if(tok.latex)
+			return tok.value;
+		else
+			return '\\textrm{'+tok.value+'}';
 		break;
 	case 'boolean':
 		return tok.value ? 'true' : 'false';
