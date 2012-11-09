@@ -17,7 +17,7 @@ Copyright 2011 Newcastle University
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="xml" version="1.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/xhtml" omit-xml-declaration="yes"/>
 <xsl:template match="/">
-	<div>	
+	<div id="results">	
 		<xsl:apply-templates />
 		<div class="exitBtn">
 			<button id="exitBtn">Exit</button>
@@ -92,19 +92,18 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="questions">
 	<h3>Detailed Question Breakdown</h3>
-	<table>		
-		<tr>
+	<table id="question-breakdown">		
+		<thead>
 			<th class="qtd">
 				<xsl:text>Question Number</xsl:text>
 			</th>
 			<th class="qtd">
-				<xsl:text>Topic</xsl:text>
+				<xsl:text>Score</xsl:text>
 			</th>
-			<th class="qtd">
-				<xsl:text>Question Score</xsl:text>
-			</th>
-		</tr>		
-		<xsl:apply-templates />
+		</thead>		
+		<tbody>
+			<xsl:apply-templates />
+		</tbody>
 	</table>
 </xsl:template>
 
@@ -112,9 +111,6 @@ Copyright 2011 Newcastle University
 	<tr>
 			<td class="qtd">
 				<xsl:value-of select="number"/>
-			</td>
-			<td class="qtd">
-				<xsl:value-of select="name"/>
 			</td>
 			<td class="qtd">
 				<xsl:value-of select="score"/><xsl:text> / </xsl:text><xsl:value-of select="marks"/>

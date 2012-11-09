@@ -323,7 +323,7 @@ display.QuestionDisplay = function(q)
 
 	qs
 		.attr('id','questionSelector-'+q.number)
-		.find('#name').html((q.number+1)+'. '+q.name);
+		.find('#name').html(R('question.header',q.number+1));
 
 	$('#questionList').append(qs);
 	
@@ -391,7 +391,7 @@ display.QuestionDisplay.prototype =
 		$('#regenBtn').html(R('control.regen'));
 
 		//update question name box in nav bar
-		$('#questionNameDisplay').html((q.number+1)+'. '+q.name);
+		$('#questionNameDisplay').html(R('question.header',q.number+1));
 
 		//display advice if appropriate
 		this.showAdvice();

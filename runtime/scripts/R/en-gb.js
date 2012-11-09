@@ -134,6 +134,7 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
