@@ -1387,7 +1387,6 @@ newBuiltin('latex',[TString],TString,null,{
 	evaluate: function(args,scope) {
 		var s = jme.evaluate(args[0],scope);
 		s.latex = true;
-		console.log(s);
 		return s;
 	},
 	doc: {
