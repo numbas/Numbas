@@ -63,6 +63,7 @@ R.registerLocale('en-GB',{
 	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 
 	'jme.variables.variable not defined': "Variable %s is not defined.",
+	'jme.variables.empty definition': "Definition of variable %s is empty.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
@@ -133,6 +134,7 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",

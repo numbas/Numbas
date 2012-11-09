@@ -815,7 +815,7 @@ var jme = Numbas.jme = {
 			return new jme.types.TBool(v);
 		default:
 			if($.isArray(v)) {
-				v = v.map(wrapValue);
+				v = v.map(jme.wrapValue);
 				return new jme.types.TList(v);
 			}
 			return v;
@@ -1382,6 +1382,19 @@ newBuiltin('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}}); 
 
 newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
+
+newBuiltin('latex',[TString],TString,null,{
+	evaluate: function(args,scope) {
+		var s = jme.evaluate(args[0],scope);
+		s.latex = true;
+		console.log(s);
+		return s;
+	},
+	doc: {
+		usage: ['latex("something")'],
+		description: 'Output a string as raw LaTeX. Normally, strings are wrapped in a \\textrm command.'
+	}
+});
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
