@@ -319,6 +319,12 @@ Exam.prototype = {
 			}
 		},this);
 	},
+
+	showInfoPage: function(page) {
+		if(this.currentQuestion)
+			this.currentQuestion.leave();
+		this.display.showInfoPage(page);
+	},
 	
 	//begin exam
 	begin: function()
@@ -492,6 +498,9 @@ Exam.prototype = {
 	//actually change the current question
 	changeQuestion: function(i)
 	{
+		if(this.currentQuestion) {
+			this.currentQuestion.leave();
+		}
 		this.currentQuestion = this.questionList[i];
 		if(!this.currentQuestion)
 		{

@@ -29,7 +29,7 @@ Copyright 2011 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div class="question clearAfter" id="question-{@number}">
+	<div class="question clearAfter">
 		<xsl:apply-templates />
 	</div>
 </xsl:template>

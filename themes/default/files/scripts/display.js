@@ -239,7 +239,6 @@ display.ExamDisplay.prototype =
 
 		//hide question container, and show info container
 		$('#questionContainer').hide();
-		$('#questionDisplay').html('');
 		$('#infoDisplay').show();
 
 		var exam = this.e;
@@ -366,8 +365,7 @@ display.QuestionDisplay.prototype =
 		$('#revealBtn').show().removeAttr('disabled');
 
 		//display question's html
-		
-		$('#questionDisplay').html('').append(q.html);
+		$('#questionDisplay').append(q.html);
 
 
 		//show parts
@@ -424,6 +422,10 @@ display.QuestionDisplay.prototype =
 		// make mathjax process the question text (render the maths)
 		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
 
+	},
+
+	leave: function() {
+		$('#questionDisplay .question').remove();
 	},
 
 	addPostTypesetCallback: function(callback)
@@ -536,7 +538,7 @@ display.PartDisplay.prototype =
 	//returns a jquery selector for the HTML div containing this part's things
 	htmlContext: function()
 	{
-		s = $('#questionContainer').find('#'+this.p.path);
+		s = $(this.p.question.html).find('#'+this.p.path);
 		return s;
 	},
 
@@ -561,7 +563,6 @@ display.PartDisplay.prototype =
 				p.showSteps();
 			});
 		}
-		this.restoreAnswer();
 
 		$(this.warningDiv)
 			.mouseover(function(){
