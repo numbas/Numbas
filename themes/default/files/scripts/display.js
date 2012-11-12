@@ -343,6 +343,16 @@ display.QuestionDisplay.prototype =
 	questionSelector: '',			//jQuery selector for this question's menu entry
 
 	makeHTML: function() {
+		var q = this.q;
+		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+
+		Numbas.schedule.add(function()
+		{
+			q.html.each(function(e) {
+				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
+			})
+		});
+
 	},
 
 	show: function()

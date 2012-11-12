@@ -175,14 +175,6 @@ Question.prototype =
 		doc.appendChild($(q.originalXML).clone()[0]);	//get a fresh copy of the original XML, to sub variables into
 		q.xml = doc.selectSingleNode('question');
 		q.xml.setAttribute('number',q.number);
-		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.originalXML).string);
-
-		job(function()
-		{
-			q.html.each(function(e) {
-				jme.variables.DOMcontentsubvars(this,q.scope);
-			})
-		});
 
 		job(function() {
 			//sub vars into math nodes
@@ -1261,7 +1253,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 	else
 	{
-
 		this.shuffleChoices=[];
 		if(settings.choiceOrder=='random')
 		{
