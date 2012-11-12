@@ -6,3 +6,8 @@
 #questionContainer {
 	background: white;
 }
+#questionDisplay {
+	margin: inherit;
+	position: inherit;
+	right: inherit;
+}
