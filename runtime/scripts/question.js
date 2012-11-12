@@ -168,6 +168,10 @@ Question.prototype =
 	{
 		var q = this;
 		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.originalXML).string);
+		var doc = Sarissa.getDomDocument();
+		doc.appendChild($(q.originalXML).clone()[0]);	//get a fresh copy of the original XML, to sub variables into
+		q.xml = doc.selectSingleNode('question');
+		q.xml.setAttribute('number',q.number);
 
 		job(function()
 		{
