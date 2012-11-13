@@ -1,0 +1,245 @@
+{
+	name: Stability Test
+	metadata: {
+		notes: ''
+		description: "<p>Used to check that new code in the Numbas runtime hasn't broken anything.</p>"
+	}
+	duration: 0
+	percentpass: 50
+	shufflequestions: False
+	navigation: {
+		allowregen: True
+		reverse: True
+		browse: True
+		showfrontpage: True
+		onadvance: {
+			action: none
+			message: ''
+		}
+		onreverse: {
+			action: none
+			message: ''
+		}
+		onmove: {
+			action: none
+			message: ''
+		}
+	}
+	timing: {
+		timeout: {
+			action: none
+			message: ''
+		}
+		timedwarning: {
+			action: none
+			message: ''
+		}
+	}
+	feedback: {
+		showactualmark: True
+		showtotalmark: True
+		showanswerstate: True
+		allowrevealanswer: True
+		advicethreshold: 0
+	}
+	
+	extensions: []
+	
+	questions: [
+		{
+			name: Stability Test 1 - parts
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: "<p>Used to check new code in the Numbas runtime hasn't broken anything.</p>"
+			}
+			statement: ''
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {}
+			functions: {}
+			
+			parts: [
+				{
+					type: jme
+					marks: 1
+					prompt: "<p><strong>JME:&nbsp;</strong>Write $x^2+\sin(y)$.</p>"
+					answer: x^2+sin(y)
+					checkingtype: absdiff
+					checkingaccuracy: 0.00100000000000
+					vsetrangepoints: 5
+					
+					vsetrange: [0, 1]
+				}, 
+				{
+					type: numberentry
+					marks: 1
+					prompt: "<p><strong>Number entry:</strong> write 0.345</p>"
+					minvalue: 0.34500000000000
+					maxvalue: 0.34500000000000
+				}, 
+				{
+					type: patternmatch
+					marks: 1
+					prompt: """<p><strong>Match text pattern:&nbsp;</strong>write "hello"</p>"""
+					answer: hello
+					displayanswer: hello
+				}, 
+				{
+					type: 1_n_2
+					marks: 1
+					prompt: """<p><strong>Choose one from a list:&nbsp;</strong>pick "blue"</p>"""
+					minmarks: 0
+					maxmarks: 0
+					shufflechoices: True
+					displaytype: radiogroup
+					displaycolumns: 0
+					minanswers: 0
+					maxanswers: 0
+					
+					choices: [Red, Blue, Green]
+					
+					matrix: [0, 1, 0]
+					
+					distractors: ['', '', '']
+				}, 
+				{
+					type: m_n_2
+					marks: 1
+					prompt: "<p><strong>Choose several from a list:&nbsp;</strong>Pick even numbers.</p>"
+					minmarks: 0
+					maxmarks: 0
+					shufflechoices: False
+					displaytype: checkbox
+					displaycolumns: 0
+					minanswers: 0
+					maxanswers: 0
+					
+					choices: [one, two, three, four, five]
+					
+					matrix: [0, 1, 0, 1, 0]
+					
+					distractors: [one is odd!, two is even!, three is odd!, four is even!, five is odd!]
+				}, 
+				{
+					type: m_n_x
+					marks: 1
+					prompt: "<p><strong>Match choices with answers:&nbsp;</strong>match numbers with their squares</p>"
+					minmarks: 0
+					maxmarks: 0
+					minanswers: 0
+					maxanswers: 0
+					shufflechoices: False
+					shuffleanswers: False
+					
+					choices: [one, $2$, 3]
+					
+					matrix: [
+						
+						[1, 0, 0], 
+						
+						[0, 1, 0], 
+						
+						[0, 0, 1]
+					]
+					
+					answers: [1, 4, 9]
+				}
+			]
+		}, 
+		{
+			name: Stability Test 2 - variables
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: "
+			<p>$q=1=\var{q}$</p>
+			  <p>$r = \var{r}$</p>
+			  <p>$s = r \cdot q = \var{s}$</p>
+			  <p>$\simplify{r+s={r}+{s}}$</p>
+			  <p>{str}</p>
+			"
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {
+				q: 1
+				r: random(1..5)
+				s: r*q
+				str: "'This string contains the variable $r=\\var{r}$'"
+			}
+			functions: {}
+			
+			parts: []
+		}, 
+		{
+			name: Stability test 3 - functions
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: "
+			<p>$f(x) := x^2$</p>
+			  <p>$f(2) = 4 = \var{f(2)}$</p>
+			  <p>$g(x):= f \cdot f(x)$</p>
+			  <p>$g(2) = 16 = \var{g(2)}$</p>
+			  <p>$jsf(n)$ returns the first $n$ squares.</p>
+			  <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
+			"
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {}
+			functions: {
+				f: {
+					
+					parameters: [
+						
+						[x, number]
+					]
+					type: number
+					language: jme
+					definition: x^2
+				}
+				g: {
+					
+					parameters: [
+						
+						[x, number]
+					]
+					type: number
+					language: jme
+					definition: f(f(x))
+				}
+				jsf: {
+					
+					parameters: [
+						
+						[n, number]
+					]
+					type: list
+					language: javascript
+					definition: "
+					var out = [];
+					      for(var i=0;i<n;i++) {
+					        out.push(i*i);
+					      }
+					      return out;
+					"
+				}
+			}
+			
+			parts: []
+		}
+	]
+}
