@@ -47,7 +47,7 @@
 	
 	questions: [
 		{
-			name: Stability Test 1 - parts
+			name: Stability Test - parts
 			
 			tags: []
 			metadata: {
@@ -151,7 +151,7 @@
 			]
 		}, 
 		{
-			name: Stability Test 2 - variables
+			name: Stability Test - variables
 			
 			tags: []
 			metadata: {
@@ -160,10 +160,10 @@
 			}
 			statement: "
 			<p>$q=1=\var{q}$</p>
-			  <p>$r = \var{r}$</p>
-			  <p>$s = r \cdot q = \var{s}$</p>
-			  <p>$\simplify{r+s={r}+{s}}$</p>
-			  <p>{str}</p>
+			    <p>$r = \var{r}$</p>
+			    <p>$s = r \cdot q = \var{s}$</p>
+			    <p>$\simplify{r+s={r}+{s}}$</p>
+			    <p>{str}</p>
 			"
 			
 			extensions: []
@@ -180,7 +180,7 @@
 			parts: []
 		}, 
 		{
-			name: Stability test 3 - functions
+			name: Stability test - functions
 			
 			tags: []
 			metadata: {
@@ -189,11 +189,11 @@
 			}
 			statement: "
 			<p>$f(x) := x^2$</p>
-			  <p>$f(2) = 4 = \var{f(2)}$</p>
-			  <p>$g(x):= f \cdot f(x)$</p>
-			  <p>$g(2) = 16 = \var{g(2)}$</p>
-			  <p>$jsf(n)$ returns the first $n$ squares.</p>
-			  <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
+			    <p>$f(2) = 4 = \var{f(2)}$</p>
+			    <p>$g(x):= f \cdot f(x)$</p>
+			    <p>$g(2) = 16 = \var{g(2)}$</p>
+			    <p>$jsf(n)$ returns the first $n$ squares.</p>
+			    <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
 			"
 			
 			extensions: []
@@ -231,15 +231,65 @@
 					language: javascript
 					definition: "
 					var out = [];
-					      for(var i=0;i<n;i++) {
-					        out.push(i*i);
-					      }
-					      return out;
+					        for(var i=0;i<n;i++) {
+					      out.push(i*i);
+					        }
+					        return out;
 					"
 				}
 			}
 			
 			parts: []
+		}, 
+		{
+			name: Stability test - custom marking matrix
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: <p>The custom marking matrix should follow the shuffling of the choices.</p>
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {m: "[1,0,0]"}
+			functions: {}
+			
+			parts: [
+				{
+					type: 1_n_2
+					marks: 1
+					minmarks: 0
+					maxmarks: 0
+					shufflechoices: True
+					displaytype: radiogroup
+					displaycolumns: 0
+					minanswers: 0
+					maxanswers: 0
+					
+					choices: [Correct, Wrong 1, Wrong 2]
+					matrix: m
+					
+					distractors: ['', '', '']
+				}, 
+				{
+					type: m_n_x
+					marks: 1
+					minmarks: 0
+					maxmarks: 0
+					minanswers: 0
+					maxanswers: 0
+					shufflechoices: True
+					shuffleanswers: True
+					
+					choices: [1, 2, 3]
+					matrix: "[[0,1],[1,0],[0,1]]"
+					
+					answers: [Even, Odd]
+				}
+			]
 		}
 	]
 }
