@@ -80,7 +80,7 @@ Copyright 2011 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part</xsl:attribute>
+		<xsl:attribute name="class">part <xsl:value-of select="@type"/></xsl:attribute>
 		<xsl:attribute name="id">
 			<xsl:value-of select="$path" />
 		</xsl:attribute>
@@ -256,8 +256,8 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<div id="multipleresponse-{$path}">
-		<table>
+	<div id="multipleresponse-{$path}" class="m_n_x">
+		<table class="choices-grid">
 			<tr>
 				<td/>
 				<xsl:for-each select="answers/answer">
@@ -284,7 +284,7 @@ Copyright 2011 Newcastle University
 		<td><xsl:apply-templates select="content"/></td>
 		<xsl:for-each select="$answers/answer">
 			<xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
-			<td>
+			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
 						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" />

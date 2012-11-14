@@ -454,6 +454,11 @@ div.part {
 .multiplechoice p {
 	display:inline;
 }
+
+.part.m_n_x table.choices-grid td.option {
+	text-align: center;
+}
+
 .question {
 	border:1px;
 	margin-bottom: 1em;
