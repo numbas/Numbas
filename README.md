@@ -1,4 +1,4 @@
-**Numbas** is an open-source system for creating SCORM-compliant exams which run entirely in the browser, developed by [Newcastle University's School of Maths and Stats](http://www.ncl.ac.uk/math).
+**Numbas** is an open-source system for creating SCORM-compliant exams which run entirely in the browser, developed by [Newcastle University's School of Maths and Stats](http://www.ncl.ac.uk/maths).
 
 * Can be run on anything that has a web browser.
 * Compatible with IE8+, Firefox 3+, Chrome, Safari, Opera, iPhone, etc.

@@ -1274,6 +1274,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		}
 	}
 
+	//apply shuffling to XML nodes
 	for(var i=0;i<this.numChoices;i++)
 	{
 		choicesNode.removeChild(choiceNodes[i]);
@@ -1320,17 +1321,31 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 			}
 			matrix.rows = matrix.length;
 			matrix.columns = matrix[0].length;
-			if(this.type=='m_n_x')
-				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		case 'matrix':
 			matrix = matrix.value;
-			if(this.type=='m_n_x')
-				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
 		}
+
+		// take into account shuffling;
+		var omatrix = matrix;
+		var matrix = [];
+		matrix.rows = omatrix.rows;
+		matrix.columns = omatrix.columns;
+		for(var i=0;i<this.numChoices;i++) {
+			matrix[i]=[];
+		}
+		for(var i=0; i<this.numChoices; i++) {
+			for(var j=0;j<this.numAnswers; j++) {
+				matrix[this.shuffleChoices[i]][this.shuffleAnswers[j]] = omatrix[i][j];
+			}
+		}
+
+		if(this.type=='m_n_x')
+			matrix = Numbas.matrixmath.transpose(matrix);
+
 	}
 	else
 	{
