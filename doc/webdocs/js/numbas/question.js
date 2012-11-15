@@ -164,17 +164,17 @@ Question.prototype =
 
 	display: undefined,		//display code
 
+	leave: function() {
+		this.display.leave();
+	},
+
 	subvars: function()
 	{
 		var q = this;
-		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.originalXML).string);
-
-		job(function()
-		{
-			q.html.each(function(e) {
-				jme.variables.DOMcontentsubvars(this,q.scope);
-			})
-		});
+		var doc = Sarissa.getDomDocument();
+		doc.appendChild($(q.originalXML).clone()[0]);	//get a fresh copy of the original XML, to sub variables into
+		q.xml = doc.selectSingleNode('question');
+		q.xml.setAttribute('number',q.number);
 
 		job(function() {
 			//sub vars into math nodes
@@ -762,6 +762,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
+		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
@@ -981,6 +982,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadPatternMatchPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
+		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
@@ -1085,6 +1087,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadNumberEntryPart(this);
 		this.stagedAnswer = [pobj.studentAnswer+''];
+		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
@@ -1250,7 +1253,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 	else
 	{
-
 		this.shuffleChoices=[];
 		if(settings.choiceOrder=='random')
 		{
@@ -1474,6 +1476,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 					this.stagedAnswer[i][j]=true;
 			}
 		}
+		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
@@ -1648,6 +1651,7 @@ function GapFillPart(xml, path, question, parentPart, loading)
 
 	if(loading)
 	{
+		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
