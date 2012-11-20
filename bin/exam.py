@@ -147,7 +147,8 @@ class Exam:
 		if 'navigation' in data:
 			nav = data['navigation']
 			tryLoad(nav,['allowregen','reverse','browse','showfrontpage'],exam.navigation)
-			tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
+			if 'onleave' in nav:
+				tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
 		if 'timing' in data:
 			timing = data['timing']
