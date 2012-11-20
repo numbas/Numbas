@@ -470,16 +470,7 @@ Exam.prototype = {
 		}
 		else
 		{
-			//work out what action is happening
-			var event = '';
-			if(i==currentQuestion.number-1)		//reversing
-				event='onreverse';
-			else if(i==currentQuestion.number+1)	//advancing
-				event='onadvance';
-			else								//jumping
-				event='onmove';
-
-			var eventObj = this.navigationEvents[event];
+			var eventObj = this.navigationEvents.onleave;
 			switch( eventObj.action )
 			{
 			case 'none':

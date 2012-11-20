@@ -18,16 +18,8 @@
 		browse: boolean			#allow student to jump forwards or backwards to any question
 		showfrontpage: boolean	#show front page intro message if true, or got straight into first question if false
 
-		onadvance: {			#what to do when student tries to move to next question without finishing current question
+		onmove: {				#what to do when student tries to leave a question without answering it sufficiently
 			action: string		#none, warnifunattempted, or preventifunattempted
-			message: string
-		}
-		onreverse: {			#what to do when student tries to move to previous question without finishing current question
-			action: string		#as onadvancce
-			message: string
-		}
-		onmove: {				#what to do when student tries to move to any other question without finishing current question
-			action: string		#as onadvance
 			message: string
 		}
 	}
