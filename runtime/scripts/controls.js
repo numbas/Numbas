@@ -44,12 +44,9 @@ Numbas.controls = {
 
 	endExam: function()
 	{
-		Numbas.display.showConfirm(
-			R('control.confirm end'),
-			function() {
-				job(Numbas.exam.end,Numbas.exam);
-			}
-		);
+		job(function() {
+			Numbas.exam.tryEnd();
+		});
 	},
 
 	exitExam: function()

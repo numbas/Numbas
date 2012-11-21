@@ -516,6 +516,26 @@ Exam.prototype = {
 		job(e.display.endRegen,e.display);
 	},
 
+	tryEnd: function() {
+		var message = R('control.confirm end');
+		var answeredAll = true;
+		for(var i=0;i<this.questionList.length;i++) {
+			if(!this.questionList[i].answered) {
+				answeredAll = false;
+				break;
+			}
+		}
+		if(!answeredAll) {
+			message = R('control.not all questions answered') + '<br/>' + message;
+		}
+		Numbas.display.showConfirm(
+			message,
+			function() {
+				job(Numbas.exam.end,Numbas.exam);
+			}
+		);
+	},
+
 	end: function()
 	{
 		//get time of finish
