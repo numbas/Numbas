@@ -758,13 +758,15 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	this.display = new Numbas.display.JMEPartDisplay(this);
 
-	if(loading)
-	{
+	if(loading)	{
 		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
 		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
+	}
+	else {
+		this.stagedAnswer = [''];
 	}
 }
 

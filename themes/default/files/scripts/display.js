@@ -737,7 +737,7 @@ display.JMEPartDisplay.prototype =
 
 		this.hasFocus = false;
 		this.validEntry = true;
-		this.txt = this.p.studentAnswer; this.oldtxt = '';
+		this.txt = this.p.stagedAnswer[0]; this.oldtxt = '';
 
 
 		var keyPressed = function()
@@ -762,7 +762,7 @@ display.JMEPartDisplay.prototype =
 		});
 
 		this.oldtxt='';
-		this.inputChanged(this.p.studentAnswer,true);
+		this.inputChanged(this.p.stagedAnswer[0],true);
 
 		previewDiv.click(function() {
 			inputDiv.focus();
