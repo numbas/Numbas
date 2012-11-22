@@ -926,7 +926,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'name':
 		return tok.name;
 	case 'string':
-		var str = tok.value.replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
+		var str = tok.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
 		return '"'+str+'"';
 	case 'boolean':
 		return (tok.value ? 'true' : 'false');
