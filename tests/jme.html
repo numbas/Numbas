@@ -724,6 +724,8 @@
 						equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 						equals(exprToLaTeX('10000000000000000000000000'),'1 \\times 10^{25}','scientific notation - 1*e^25');
 						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
+						equals(exprToLaTeX('ln(abs(x))'),'\\ln \\left | x \\right |','ln(abs(x)) - ln of absolute value has no parentheses');
+						equals(exprToLaTeX('ln(x)'),'\\ln \\left( x \\right)','ln(x) - ln of anything else has parentheses');
 					});
 				};
 

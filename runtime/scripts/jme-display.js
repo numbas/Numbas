@@ -418,7 +418,12 @@ var texOps = jme.display.texOps = {
 	'arcsinh': funcTex('\\operatorname{arcsinh}'),
 	'arccosh': funcTex('\\operatorname{arccosh}'),
 	'arctanh': funcTex('\\operatorname{arctanh}'),
-	'ln': funcTex('\\ln'),
+	'ln': function(thing,texArgs,settings) {
+		if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='abs')
+			return '\\ln '+texArgs[0];
+		else
+			return '\\ln \\left( '+texArgs[0]+' \\right)';
+	},
 	'log': funcTex('\\log_{10}'),
 	'vector': (function(thing,texArgs,settings) {
 		return '\\left( '+texVector(thing,settings)+' \\right)';
