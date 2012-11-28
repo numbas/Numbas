@@ -246,11 +246,12 @@ button:hover, button:focus {
 	padding-bottom:1em;
 }
 
-#questionDisplay{
+#questionDisplay {
 	margin:1em 0.5em 0 14.5em;
 	position:relative;
 	right:100%;
-	/*overflow:hidden;*/
+	overflow-x: auto;
+	overflow-y: hidden;
 }
 #questionContainer .questionMenu {
 	float:left;
