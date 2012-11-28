@@ -201,10 +201,17 @@ display.QuestionDisplay.prototype =
 	menuSelector: '',			//jQuery selector for this question's menu entry
 
 	makeHTML: function() {
-		//make html for question and advice text
-		this.html = $.xsl.transform(Numbas.xml.templates.question, this.q.xml).string;
-		var el = this.htmlContext = $(this.html);
-		this.examContext.find('.questionList').append(el);
+		var q = this.q;
+		var qd = this;
+		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+
+		Numbas.schedule.add(function()
+		{
+			q.html.each(function(e) {
+				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
+			})
+			qd.examContext.find('.questionList').append(q.html);
+		});
 	},
 
 	show: function()
@@ -212,17 +219,19 @@ display.QuestionDisplay.prototype =
 		var q = this.q;
 		var exam = this.q.exam;
 
-		if(this.htmlContext.find('.statement').text().trim()==''){	//hide statement block if empty
-		console.log(this.htmlContext.find('.statement'));
-			this.htmlContext.find('.statement').html('');
-		}
-
 		//show parts
 		this.postTypesetF = function(){};
 		for(var i=0;i<q.parts.length;i++)
 		{
 			q.parts[i].display.show();
 		}
+
+		//display question's html
+		$('#questionDisplay').append(q.html);
+	},
+
+	leave: function() {
+		$('#questionDisplay .question').remove();
 	},
 
 	showScore: function() {}
