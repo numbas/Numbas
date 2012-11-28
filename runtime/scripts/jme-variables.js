@@ -224,6 +224,9 @@ jme.variables = {
 	},
 
 	DOMcontentsubvars: function(element, scope) {
+		if($.nodeName(element,'iframe'))
+			return element;
+
 		$(element).contents().each(function() {
 			if(this.nodeType==(this.TEXT_NODE || 3)) {
 				var selector = $(this);
