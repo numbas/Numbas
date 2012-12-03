@@ -38,7 +38,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 	tryGetAttribute(q,'.','name');
 
 	job(function() {
-		q.scope.functions = Numbas.jme.variables.makeFunctions(q.xml,q.scope);
+		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
+		q.scope.functions = Numbas.jme.variables.makeFunctions(functionsTodo,q.scope);
 		//make rulesets
 		var rulesetNodes = q.xml.selectNodes('rulesets/set');
 

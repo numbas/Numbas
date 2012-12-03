@@ -61,11 +61,13 @@ R.registerLocale('en-GB',{
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
 	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
-	'jme.user javascript error': "Error in user-defined javascript function <code>%s</code><br/>%s",
+	'jme.user javascript.error': "Error in user-defined javascript function <code>%s</code><br/>%s",
+	'jme.user javascript.error': "User-defined javascript function <code>%s</code> didn't return anything",
 
 	'jme.variables.variable not defined': "Variable %s is not defined.",
 	'jme.variables.empty definition': "Definition of variable %s is empty.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
+	'jme.variables.error computing dependency': "Error computing referenced variable <code>%s</code>",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',

@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/xml.js',[],function() {
+Numbas.queueScript('scripts/xml.js',['jme'],function() {
 
 var xml = Numbas.xml = {
 	dp: new DOMParser(),
@@ -74,6 +74,45 @@ var xml = Numbas.xml = {
 		return doc;
 	},
 
+	loadFunctions: function(xml,scope)
+	{
+		var tmpFunctions = [];
+
+		//work out functions
+		var functionNodes = xml.selectNodes('functions/function');
+		if(!functionNodes)
+			return {};
+
+		//first pass: get function names and types
+		for(var i=0; i<functionNodes.length; i++)
+		{
+			var name = functionNodes[i].getAttribute('name').toLowerCase();
+
+			var definition = functionNodes[i].getAttribute('definition');
+			var language = functionNodes[i].getAttribute('language');
+
+			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
+
+			var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
+			var parameters = [];
+			for(var j=0; j<parameterNodes.length; j++)
+			{
+				parameters.push({
+					name: parameterNodes[j].getAttribute('name'),
+					type: parameterNodes[j].getAttribute('type').toLowerCase()
+				});
+			}
+			tmpFunctions.push({
+				name: name,
+				definition: definition,
+				language: language,
+				outtype: outtype,
+				parameters: parameters
+			});
+
+		}
+		return tmpFunctions;
+	},
 	loadVariables: function(xml,scope) {
 		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
 		if(!variableNodes)
@@ -97,8 +136,8 @@ var xml = Numbas.xml = {
 					throw(new Numbas.Error('jme.variables.empty definition',name));
 				}
 
-				var tree = jme.compile(value,scope,true);
-				vars = vars.merge(jme.findvars(tree));
+				var tree = Numbas.jme.compile(value,scope,true);
+				vars = vars.merge(Numbas.jme.findvars(tree));
 				todo[name]={
 					tree: tree,
 					vars: vars
