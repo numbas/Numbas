@@ -150,45 +150,47 @@ jme.variables = {
 		return functions;
 	},
 
+	computeVariable: function(name,todo,scope,path)
+	{
+		if(scope.variables[name]!==undefined)
+			return;
+
+		if(path===undefined)
+			path=[];
+
+
+		if(path.contains(name))
+		{
+			throw(new Numbas.Error('jme.variables.circular reference',name,path));
+		}
+
+		var v = todo[name];
+
+		if(v===undefined)
+			throw(new Numbas.Error('jme.variables.variable not defined',name));
+
+		//work out dependencies
+		for(var i=0;i<v.vars.length;i++)
+		{
+			var x=v.vars[i];
+			if(scope.variables[x]===undefined)
+			{
+				var newpath = path.slice(0);
+				newpath.splice(0,0,name);
+				compute(x,todo,scope,newpath);
+			}
+		}
+
+		scope.variables[name] = jme.evaluate(v.tree,scope);
+		return scope.variables[name];
+	},
+
 	makeVariables: function(todo,scope)
 	{
-		function compute(name,todo,scope,path)
-		{
-			if(scope.variables[name]!==undefined)
-				return;
-
-			if(path===undefined)
-				path=[];
-
-
-			if(path.contains(name))
-			{
-				throw(new Numbas.Error('jme.variables.circular reference',name,path));
-			}
-
-			var v = todo[name];
-
-			if(v===undefined)
-				throw(new Numbas.Error('jme.variables.variable not defined',name));
-
-			//work out dependencies
-			for(var i=0;i<v.vars.length;i++)
-			{
-				var x=v.vars[i];
-				if(scope.variables[x]===undefined)
-				{
-					var newpath = path.slice(0);
-					newpath.splice(0,0,name);
-					compute(x,todo,scope,newpath);
-				}
-			}
-
-			scope.variables[name] = jme.evaluate(v.tree,scope);
-		}
 		scope = new jme.Scope(scope);
 		for(var x in todo)
 		{
-			compute(x,todo,scope);
+			jme.variables.computeVariable(x,todo,scope);
 		}
 		return scope.variables;
 	},
