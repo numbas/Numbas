@@ -37,7 +37,7 @@ var Exam = Numbas.Exam = function()
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 	document.title = this.name;
 
-	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
+	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
@@ -164,6 +164,7 @@ Exam.prototype = {
 	questionList: [],			//Question objects, in order student will see them
 		
 	//navigation
+	preventLeave: true,			//prevent the browser from leaving the page while the exam is running?
 	allowRegen: false,			//can student re-randomise a question?
 	navigateReverse: false,		//can student navigate to previous question?
 	navigateBrowse: false,		//can student jump to any question they like?

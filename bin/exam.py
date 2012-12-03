@@ -115,7 +115,8 @@ class Exam:
 				'reverse': True,
 				'browse': True,
 				'showfrontpage': True,
-				'onleave': Event('onleave','none','You have not finished the current question')
+				'onleave': Event('onleave','none','You have not finished the current question'),
+				'preventleave': True,
 			}
 
 		self.timing = { 
@@ -146,7 +147,7 @@ class Exam:
 
 		if 'navigation' in data:
 			nav = data['navigation']
-			tryLoad(nav,['allowregen','reverse','browse','showfrontpage'],exam.navigation)
+			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','preventleave'],exam.navigation)
 			if 'onleave' in nav:
 				tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -218,7 +219,8 @@ class Exam:
 			'allowregen':strcons(self.navigation['allowregen']),
 			'reverse':strcons(self.navigation['reverse']), 
 			'browse': strcons(self.navigation['browse']),
-			'showfrontpage': strcons(self.navigation['showfrontpage'])
+			'showfrontpage': strcons(self.navigation['showfrontpage']),
+			'preventleave': strcons(self.navigation['preventleave'])
 		}
 
 		nav.append(self.navigation['onleave'].toxml())

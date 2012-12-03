@@ -290,9 +290,10 @@ display.ExamDisplay.prototype =
 
 	showQuestion: function()
 	{
-		window.onbeforeunload = function() { return R('control.confirm leave') };
-
 		var exam = this.e;
+
+		if(exam.preventLeave)
+			window.onbeforeunload = function() { return R('control.confirm leave') };
 
 		exam.currentQuestion.display.show();
 		if(!this.madeCarousel)
