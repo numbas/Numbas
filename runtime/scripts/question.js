@@ -92,7 +92,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		}
 		else
 		{
-			q.scope.variables = Numbas.jme.variables.makeVariables(q.xml,q.scope);
+			var variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
+			q.scope.variables = Numbas.jme.variables.makeVariables(variablesTodo,q.scope);
 		}
 	
 		q.scope = new jme.Scope([gscope,q.scope]);

@@ -74,6 +74,41 @@ var xml = Numbas.xml = {
 		return doc;
 	},
 
+	loadVariables: function(xml,scope) {
+		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
+		if(!variableNodes)
+			return {};
+
+		//list of variable names to ignore because they don't make sense
+		var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
+
+		//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
+		var todo = {};
+		for( var i=0; i<variableNodes.length; i++ )
+		{
+			var name = variableNodes[i].getAttribute('name').toLowerCase();
+			if(!ignoreVariables.contains(name))
+			{
+				var value = variableNodes[i].getAttribute('value');
+
+				var vars = [];
+
+				if(value.trim()=='') {
+					throw(new Numbas.Error('jme.variables.empty definition',name));
+				}
+
+				var tree = jme.compile(value,scope,true);
+				vars = vars.merge(jme.findvars(tree));
+				todo[name]={
+					tree: tree,
+					vars: vars
+				};
+			}
+		}
+		return todo;
+	},
+
+
 	//lots of the time we have a message stored inside content/html/.. structure
 	//this pulls the message out and serializes it so it can be inserted easily with jQuery
 	serializeMessage: function(node)
