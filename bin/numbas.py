@@ -245,8 +245,7 @@ def get_theme_path(theme,options):
 		else:
 			raise Exception("Couldn't find theme %s" % theme)
 
-if __name__ == '__main__':
-
+def run():
 	if 'assesspath' in os.environ:
 		path = os.environ['assesspath']
 	else:
@@ -314,7 +313,12 @@ if __name__ == '__main__':
 		if not options.output:
 			options.output = os.path.join(path,'output','exam')
 	else:
-		source_path = args[0]
+		try:
+			source_path = args[0]
+		except IndexError:
+			parser.print_help()
+			return
+
 		if not os.path.exists(source_path):
 			osource = source_path
 			source_path = os.path.join(path,source_path)
@@ -347,3 +351,7 @@ if __name__ == '__main__':
 		_,_,exc_traceback = sys.exc_info()
 		traceback.print_exc()
 		exit(1)
+
+if __name__ == '__main__':
+	run()
+
