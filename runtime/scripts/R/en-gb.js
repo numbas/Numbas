@@ -154,5 +154,7 @@ R.registerLocale('en-GB',{
 	
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
-	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s"
+	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
+
+	'scorm.failed save': "The request to save data to the server failed. Your session, including responses and scores, might not be saved. Please email <a href="mailto:numbas@ncl.ac.uk">numbas@ncl.ac.uk</a> straight away and keep this window open if possible."
 });

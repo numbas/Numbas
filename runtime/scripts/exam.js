@@ -427,7 +427,7 @@ Exam.prototype = {
 	{
 		this.calculateScore();
 		this.display.showScore();
-		Numbas.store.saveExam(this);
+		job(Numbas.store.save,Numbas.store);
 	},
 
 	calculateScore: function()
