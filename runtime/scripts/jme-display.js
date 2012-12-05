@@ -933,6 +933,10 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'string':
 		var str = tok.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
 		return '"'+str+'"';
+	case 'html':
+		var html = $(tok.value).clone().wrap('<div>').parent().html();
+		html = html.replace(/"/g,'\\"');
+		return 'html("'+html+'")';
 	case 'boolean':
 		return (tok.value ? 'true' : 'false');
 	case 'range':
