@@ -95,7 +95,9 @@ SCORMStorage.prototype = {
 	{
 		var result = pipwerks.SCORM.save();
 		if(!result) {
-			throw(new Numbas.Error('scorm.failed save'));
+			var error = new Numbas.Error('scorm.failed save');
+			Numbas.showError(error);
+			throw(error);
 		}
 	},
 
