@@ -110,6 +110,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
 
+		q.display.makeHTML();
+
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -140,7 +142,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 
 		q.updateScore();
 		
-		q.display.makeHTML();
 		q.display.showScore();
 	});
 
@@ -1495,9 +1496,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 					this.stagedAnswer[i][j]=true;
 			}
 		}
-		this.display.restoreAnswer();
-		if(this.answered)
-			this.submit();
 	}
 	else
 	{
@@ -1522,6 +1520,11 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.wrongNumber = settings.minAnswers > 0;
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
+	if(loading) {
+		this.display.restoreAnswer();
+		if(this.answered)
+			this.submit();
+	}
 }
 MultipleResponsePart.prototype =
 {
