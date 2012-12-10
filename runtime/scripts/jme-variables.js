@@ -21,7 +21,7 @@ var util = Numbas.util;
 jme.variables = {
 	
 	makeJMEFunction: function(fn,scope) {
-		fn.tree = jme.compile(fn.definition,scope);
+		fn.tree = jme.compile(fn.definition,scope,true);
 		return function(args,scope) {
 			var oscope = scope;
 			scope = new jme.Scope(scope);
@@ -110,7 +110,7 @@ jme.variables = {
 	computeVariable: function(name,todo,scope,path)
 	{
 		if(scope.variables[name]!==undefined)
-			return;
+			return scope.variables[name];
 
 		if(path===undefined)
 			path=[];

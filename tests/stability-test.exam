@@ -12,18 +12,11 @@
 		reverse: True
 		browse: True
 		showfrontpage: True
-		onadvance: {
+		onleave: {
 			action: none
 			message: ''
 		}
-		onreverse: {
-			action: none
-			message: ''
-		}
-		onmove: {
-			action: none
-			message: ''
-		}
+		preventleave: True
 	}
 	timing: {
 		timeout: {
@@ -189,17 +182,19 @@
 			}
 			statement: "
 			<p>$f(x) := x^2$</p>
-			    <p>$f(2) = 4 = \var{f(2)}$</p>
-			    <p>$g(x):= f \cdot f(x)$</p>
-			    <p>$g(2) = 16 = \var{g(2)}$</p>
-			    <p>$jsf(n)$ returns the first $n$ squares.</p>
-			    <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
+			  <p>$f(2) = 4 = \var{f(2)}$</p>
+			  <p>$g(x):= f \cdot f(x)$</p>
+			  <p>$g(2) = 16 = \var{g(2)}$</p>
+			  <p>$jsf(n)$ returns the first $n$ squares.</p>
+			  <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
+			  <p>$recf(n)$ is the factorial function, implemented recursively.</p>
+			  <p>$recf(3) = 6 = \var{recf(3)}$.</p>
 			"
 			
 			extensions: []
 			advice: ''
 			rulesets: {}
-			variables: {}
+			variables: {q: recf(3)}
 			functions: {
 				f: {
 					
@@ -230,12 +225,23 @@
 					type: list
 					language: javascript
 					definition: "
-					var out = [];
+					        var out = [];
 					        for(var i=0;i<n;i++) {
 					      out.push(i*i);
 					        }
 					        return out;
+					        
 					"
+				}
+				recf: {
+					
+					parameters: [
+						
+						[n, number]
+					]
+					type: number
+					language: jme
+					definition: "if(n<=1,1,n*recf(n-1))"
 				}
 			}
 			
