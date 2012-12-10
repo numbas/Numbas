@@ -159,6 +159,7 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
+	<form>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<form>
@@ -187,6 +188,7 @@ Copyright 2011 Newcastle University
 			</select>
 		</xsl:when>
 	</xsl:choose>
+	</form>
 </xsl:template>
 
 <xsl:template match="choice" mode="radiogroup">
@@ -257,20 +259,24 @@ Copyright 2011 Newcastle University
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
 	<div id="multipleresponse-{$path}" class="m_n_x">
+		<form>
 		<table class="choices-grid">
-			<tr>
+			<thead>
 				<td/>
 				<xsl:for-each select="answers/answer">
-					<td><xsl:apply-templates select="content"/></td>
+					<th><xsl:apply-templates select="content"/></th>
 				</xsl:for-each>
-			</tr>
-			<xsl:for-each select="choices/choice">
-				<xsl:apply-templates select="." mode="mrx">
-					<xsl:with-param name="path" select="$path"/>
-					<xsl:with-param name="displaytype" select="$displaytype"/>
-				</xsl:apply-templates>
-			</xsl:for-each>
+			</thead>
+			<tbody>
+				<xsl:for-each select="choices/choice">
+					<xsl:apply-templates select="." mode="mrx">
+						<xsl:with-param name="path" select="$path"/>
+						<xsl:with-param name="displaytype" select="$displaytype"/>
+					</xsl:apply-templates>
+				</xsl:for-each>
+			</tbody>
 		</table>
+		</form>
 	</div>
 </xsl:template>
 
