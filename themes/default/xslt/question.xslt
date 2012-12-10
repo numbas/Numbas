@@ -287,7 +287,7 @@ Copyright 2011 Newcastle University
 	<xsl:variable name="answers" select="../../answers"/>
 	<xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
 	<tr>
-		<td><xsl:apply-templates select="content"/></td>
+		<td class="choice"><xsl:apply-templates select="content"/></td>
 		<xsl:for-each select="$answers/answer">
 			<xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
 			<td class="option">

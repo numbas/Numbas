@@ -463,6 +463,11 @@ div.part {
 .part.m_n_x .choices-grid th {
 	background: inherit;
 	font-weight: normal;
+	text-align: center;
+}
+.part.m_n_x .choices-grid .choice {
+	text-align: left;
+	max-width: 40em;
 }
 
 .question {
