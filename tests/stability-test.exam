@@ -182,13 +182,13 @@
 			}
 			statement: "
 			<p>$f(x) := x^2$</p>
-			    <p>$f(2) = 4 = \var{f(2)}$</p>
-			    <p>$g(x):= f \cdot f(x)$</p>
-			    <p>$g(2) = 16 = \var{g(2)}$</p>
-			    <p>$jsf(n)$ returns the first $n$ squares.</p>
-			    <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
-			    <p>$recf(n)$ is the factorial function, implemented recursively.</p>
-			    <p>$recf(3) = 6 = \var{recf(3)}$.</p>
+			  <p>$f(2) = 4 = \var{f(2)}$</p>
+			  <p>$g(x):= f \cdot f(x)$</p>
+			  <p>$g(2) = 16 = \var{g(2)}$</p>
+			  <p>$jsf(n)$ returns the first $n$ squares.</p>
+			  <p>$jsf(4)$ = [ 0, 1, 4, 9 ] = {jsf(4)}.</p>
+			  <p>$recf(n)$ is the factorial function, implemented recursively.</p>
+			  <p>$recf(3) = 6 = \var{recf(3)}$.</p>
 			"
 			
 			extensions: []
@@ -225,12 +225,12 @@
 					type: list
 					language: javascript
 					definition: "
-					      var out = [];
-					      for(var i=0;i<n;i++) {
-					        out.push(i*i);
-					      }
-					      return out;
-					      
+					        var out = [];
+					        for(var i=0;i<n;i++) {
+					      out.push(i*i);
+					        }
+					        return out;
+					        
 					"
 				}
 				recf: {
@@ -314,6 +314,70 @@
 			functions: {}
 			
 			parts: []
+		}, 
+		{
+			name: Stability test - multiple choice
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: <p>Try Reveal - all parts should be correctly revealed.</p>
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {}
+			functions: {}
+			
+			parts: [
+				{
+					type: m_n_x
+					marks: 1
+					minmarks: 0
+					maxmarks: 0
+					minanswers: 0
+					maxanswers: 0
+					shufflechoices: False
+					shuffleanswers: False
+					
+					choices: [Choice 1, Choice 2]
+					
+					matrix: [
+						
+						[1, 0], 
+						
+						[0, 1]
+					]
+					
+					answers: [Answer 1, Answer 2]
+				}, 
+				{
+					type: m_n_x
+					marks: 1
+					prompt: <p>Check that this looks OK.</p>
+					minmarks: 0
+					maxmarks: 0
+					minanswers: 0
+					maxanswers: 0
+					shufflechoices: True
+					shuffleanswers: True
+					
+					choices: [a really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsaa really long dsadsa dsa dsad sa dsad sa dsad as dsa dsa a dasd sa dsa sda das dsa, b, a]
+					
+					matrix: [
+						
+						[1, 0], 
+						
+						[0, 1], 
+						
+						[1, 0]
+					]
+					
+					answers: [a, b]
+				}
+			]
 		}
 	]
 }
