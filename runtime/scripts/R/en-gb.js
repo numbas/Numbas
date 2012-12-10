@@ -48,6 +48,7 @@ R.registerLocale('en-GB',{
 	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
+	'jme.typecheck.map not on enumerable': "<code>map</code> operation must work over a list or a range, not %s",
 
 	'jme.evaluate.undefined variable': "Variable %s is undefined",
 
