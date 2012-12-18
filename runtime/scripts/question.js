@@ -110,8 +110,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
 
-		q.display.makeHTML();
-
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -122,6 +120,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
+
+		q.display.makeHTML();
 
 		if(loading)
 		{
