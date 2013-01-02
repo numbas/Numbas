@@ -49,7 +49,7 @@ class ExamParser:
 
 		try:
 			if not isinstance(source,unicode):
-				source=unicode(source)
+				source=unicode(source,encoding='utf-8')
 		except NameError:
 			pass
 
