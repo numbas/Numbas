@@ -2016,7 +2016,10 @@ newBuiltin('table',[TList,TList],THTML,
 		var thead = $('<thead/>');
 		table.append(thead);
 		for(var i=0;i<headers.length;i++) {
-			thead.append($('<th/>').html(headers[i]));
+			var cell = headers[i];
+			if(typeof cell=='number')
+				cell = Numbas.math.niceNumber(cell);
+			thead.append($('<th/>').html(cell));
 		}
 
 		var tbody=$('<tbody/>');
@@ -2025,7 +2028,10 @@ newBuiltin('table',[TList,TList],THTML,
 			var row = $('<tr/>');
 			tbody.append(row);
 			for(var j=0;j<data[i].length;j++) {
-				row.append($('<td/>').html(data[i][j]));
+				var cell = data[i][j];
+				if(typeof cell=='number')
+					cell = Numbas.math.niceNumber(cell);
+				row.append($('<td/>').html(cell));
 			}
 		}
 
