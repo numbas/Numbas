@@ -27,7 +27,6 @@ var display = Numbas.display = {
 		//localise strings in page HTML
 		$('[data-localise]').each(function() {
 			var localString = R($(this).data('localise'));
-			console.log(this,localString);
 			$(this).html(localString);
 		})
 	},
