@@ -908,11 +908,15 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 	}
 };
 
-var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq;
+var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
 
 //vector operations
 //these operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of vectors don't line up exactly
 var vectormath = Numbas.vectormath = {
+	negate: function(v) {
+		return v.map(function(x) { return negate(x); });
+	},
+
 	add: function(a,b) {
 		if(b.length>a.length)
 		{
@@ -1040,6 +1044,16 @@ var vectormath = Numbas.vectormath = {
 //matrix operations
 //again, these operations are lax about the sizes of things
 var matrixmath = Numbas.matrixmath = {
+	negate: function(m) {
+		var matrix = [];
+		for(var i=0;i<m.rows;i++) {
+			matrix.push(m[i].map(function(x){ return negate(x) }));
+		}
+		matrix.rows = m.rows;
+		matrix.columns = m.columns;
+		return matrix;
+	},
+
 	add: function(a,b) {
 		var rows = Math.max(a.rows,b.rows);
 		var columns = Math.max(a.columns,b.columns);

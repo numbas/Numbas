@@ -226,6 +226,8 @@
 						closeEquals(evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
 						closeEquals(evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
 						closeEquals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
+						deepCloseEqual(evaluate('-vector(1,2,-3.3)').value,[-1,-2,3.3],'unary minus: -vector(1,2,-3.3)==vector(-1,-2,3.3)');
+						deepCloseEqual(evaluate('-matrix([1,0],[2,3])').value,[[-1,0],[-2,-3]],'unary minus: -matrix([1,0],[2,3])==matrix([-1,0],[-2,-3]))');
 						ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
 						closeEquals(evaluate('1+2..5').value[0],3,'arithmetic before range .. operator: 1+2..5 = (1+2)..5');
 						closeEquals(evaluate('1..5#2').value[2],2,'range step operator');
