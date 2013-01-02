@@ -511,8 +511,20 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 			var s = math.sign(a);
 			if(a==0) { return 0; }
 			if(a==Infinity || a==-Infinity) { return a; }
-			b = Math.pow(10,Math.ceil(math.log10(s*a))-b);
-			return Math.round(a/b)*b;
+			b = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+
+			//test to allow a bit of leeway to account for floating point errors
+			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
+			var v = a*b*10 % 1;
+			var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+			if(d==4 && 1-v<1e-9) {
+				return Math.round(a*b+1)/b;
+			}
+			else if(d==-5 && v>-1e-9 && v<0) {
+				return Math.round(a*b+1)/b;
+			}
+
+			return Math.round(a*b)/b;
 		}
 	},
 
