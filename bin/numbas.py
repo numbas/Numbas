@@ -89,6 +89,8 @@ try:
 except NameError:
 	basestring = str
 
+def realFile(file):
+	return not (file[-1]=='~' or file[-4:]=='.swp')
 
 def collectFiles(options,dirs=[('runtime','.')]):
 
@@ -111,9 +113,8 @@ def collectFiles(options,dirs=[('runtime','.')]):
 		for x in os.walk(src, followlinks=options.followlinks):
 			xsrc = x[0]
 			xdst = x[0].replace(src,dst,1)
-			for y in x[2]:
-				if not (y[-1]=='~' or y[-4:]=='.swp'):
-					files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
+			for y in filter(realFile,x[2]):
+				files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
 
 	for x in resources:
 		if not os.path.isdir(x):
@@ -196,6 +197,11 @@ def makeExam(options):
 
 	files = collectFiles(options)
 	files[os.path.join('.','settings.js')] = io.StringIO(options.xmls)
+
+	localePath = os.path.join(options.path,'locales',options.locale+'.js')
+	if not os.path.exists(localePath):
+		raise Exception("Can't find locale "+options.locale)
+	files[os.path.join('.','locale.js')] = io.StringIO(open(localePath).read())
 
 	if options.scorm:
 		IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
@@ -304,6 +310,10 @@ def run():
 						action='store_true',
 						default=False,
 						help="Read .exam from stdin")
+	parser.add_option('-l','--language',
+						dest='locale',
+						default='en-GB',
+						help='Language (ISO language code) to use when displaying text')
 
 	(options,args) = parser.parse_args()
 

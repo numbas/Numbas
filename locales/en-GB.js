@@ -16,7 +16,7 @@ Copyright 2011 Newcastle University
 R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
 
-	'exam.exam name': "<b>Exam Name:</b>",
+	'exam.exam name': "Exam Name:",
 	'exam.number of questions': "Number of Questions:",
 	'exam.marks available': "Marks Available:",
 	'exam.pass percentage': "Pass Percentage:",
