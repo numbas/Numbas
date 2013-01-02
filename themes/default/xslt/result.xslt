@@ -20,38 +20,38 @@ Copyright 2011 Newcastle University
 	<div id="results">	
 		<xsl:apply-templates />
 		<div class="exitBtn">
-			<button id="exitBtn">Exit</button>
+			<button id="exitBtn"><localise>result.exit</localise></button>
 		</div>
 		<span id="reviewBtnSpan">
-			<button id="reviewBtn">Review</button>
+			<button id="reviewBtn"><localise>result.review</localise></button>
 		</span>
 	</div>
 </xsl:template>
 
 <xsl:template match="examsummary">
-	<h3>Exam Summary</h3>
+	<h3><localise>result.exam summary</localise></h3>
 
 	<table>
 		<tr>
-			<td>Exam Name:</td>
+			<td><localise>exam.exam name</localise></td>
 			<td class="rtd"><xsl:value-of select="name" /></td>
 		</tr>
 		<tr>
-			<td>Number of Questions:</td>
+			<td><localise>exam.number of questions</localise></td>
 			<td class="rtd"><xsl:value-of select="numberofquestions" /></td>
 		</tr>
 		<tr>
-			<td>Marks Available:</td>
+			<td><localise>exam.marks available</localise></td>
 			<td class="rtd"><xsl:value-of select="mark" /></td>	
 		</tr>
 		<xsl:if test="passpercentage>0">
 		<tr>
-			<td>Pass Percentage:</td>
+			<td><localise>exam.pass percentage</localise></td>
 			<td class="rtd"><xsl:value-of select="passpercentage*100" />%</td>
 		</tr>
 		</xsl:if>
 		<tr>
-			<td>Time Allowed:</td>
+			<td><localise>exam.time allowed</localise></td>
 			<td class="rtd"><xsl:value-of select="duration" /></td>
 		</tr>
 	</table>
@@ -61,28 +61,28 @@ Copyright 2011 Newcastle University
 	<h3>Performance Summary</h3>
 	<table>
 		<tr>
-			<td>Exam Start:</td>
+			<td><localise>result.exam start</localise></td>
 			<td class="rtd"><xsl:value-of select="start" /></td>	
 		</tr>	
 		<tr>
-			<td>Exam Stop:</td>
+			<td><localise>result.exam stop</localise></td>
 			<td class="rtd"><xsl:value-of select="stop" /></td>	
         </tr>
         <tr>
-            <td>Time Spent:</td>
+            <td><localise>result.time spent</localise></td>
             <td class="rtd"><xsl:value-of select="timespent" /></td>
         </tr> 
 		<tr>
-			<td>Questions Attempted:</td>
+			<td><localise>result.questions attempted</localise></td>
 			<td class="rtd"><xsl:value-of select="questionsattempted" /> / <xsl:value-of select="ancestor::report/examsummary/numberofquestions" /></td>
 		</tr>
 		<tr>
-			<td>Score:</td>
+			<td><localise>result.score</localise></td>
 			<td class="rtd"><xsl:value-of select="score" /> / <xsl:value-of select="ancestor::report/examsummary/mark" /><br/>(<xsl:value-of select="percentagescore" />%)</td>
 		</tr>
 		<xsl:if test="passpercentage>0">
 		<tr class="resultrow">
-			<td>Result:</td>
+			<td><localise>result.result</localise></td>
 			<td class="rtd"><xsl:value-of select="result" /></td>	
 		</tr>							
 		</xsl:if>
@@ -91,14 +91,12 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="questions">
-	<h3>Detailed Question Breakdown</h3>
+	<h3><localise>result.detailed question breakdown</localise></h3>
 	<table id="question-breakdown">		
 		<thead>
-			<th class="qtd">
-				<xsl:text>Question Number</xsl:text>
+			<th class="qtd"><localise>result.question number</localise>
 			</th>
-			<th class="qtd">
-				<xsl:text>Score</xsl:text>
+			<th class="qtd"><localise>result.question score</localise>
 			</th>
 		</thead>		
 		<tbody>

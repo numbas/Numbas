@@ -18,6 +18,8 @@
 
 		job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
+		job(Numbas.display.localisePage);
+
 		job(function()
 		{
 			var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam

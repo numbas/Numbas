@@ -21,20 +21,20 @@ Copyright 2011 Newcastle University
 	<div>
 		<table>
 			<tr>
-				<td>Exam Name:</td>
+				<td><localise>exam.exam name</localise></td>
 				<td class="rtd">
 					<xsl:value-of select="name" />
 				</td>
 			</tr>
 			<tr>
-				<td>Number of Questions:</td>
+				<td><localise>exam.number of questions</localise></td>
 				<td class="rtd">
 					<xsl:value-of select="numQuestions" />
 				</td>
 			</tr>
 			<xsl:if test="showTotalMark='true'">
 			<tr>
-				<td>Marks Available:</td>
+				<td><localise>exam.marks available</localise></td>
 				<td class="rtd">
 					<xsl:value-of select="mark" />
 				</td>
@@ -42,7 +42,7 @@ Copyright 2011 Newcastle University
 			</xsl:if>
 			<xsl:if test="percentPass>0">
 			<tr>
-				<td>Pass Percentage:</td>
+				<td><localise>exam.pass percentage</localise></td>
 				<td class="rtd">
 					<xsl:value-of select="percentPass*100" /><xsl:text>%</xsl:text>
 				</td>
@@ -50,7 +50,7 @@ Copyright 2011 Newcastle University
 			</xsl:if>
 			<xsl:if test="string-length(displayDuration)>0">
 				<tr>
-					<td>Time Allowed:</td>
+					<td><localise>exam.time allowed</localise></td>
 					<td class="rtd">
 						<xsl:value-of select="displayDuration" />
 					</td>
@@ -58,7 +58,7 @@ Copyright 2011 Newcastle University
 			</xsl:if>
 		</table>
 		<div class="startBtn">
-			<button id="startBtn">Start</button>
+			<button id="startBtn"><localise>frontpage.start</localise></button>
 		</div>
 	</div>
 </xsl:template>

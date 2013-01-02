@@ -28,6 +28,7 @@ var xml = Numbas.xml = {
 		for(var x in Numbas.rawxml.templates)
 		{
 			templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
+			xml.localise(templates[x]);
 		}
 
 		return;
@@ -249,6 +250,14 @@ var xml = Numbas.xml = {
 			}
 		}
 		return value;
+	},
+
+	localise: function(template) {
+		$(template).find('localise').each(function() {
+			var localString = R($(this).text());
+			$(this).replaceWith(localString);
+		});
+		return template;
 	}
 };
 
