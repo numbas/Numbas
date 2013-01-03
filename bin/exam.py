@@ -856,7 +856,7 @@ class GapFillPart(Part):
 			self.marks += gap.marks
 
 		prompt = self.prompt
-		self.prompt = re.sub(r"\[\[(.*?)\]\]",lambda m: '<gapfill reference="%s" />' % m.group(1),self.prompt)
+		self.prompt = re.sub(r"\[\[(\d+?)\]\]",lambda m: '<gapfill reference="%s" />' % m.group(1),self.prompt)
 		part = Part.toxml(self)
 		self.prompt = prompt
 
