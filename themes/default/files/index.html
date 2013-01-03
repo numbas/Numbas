@@ -31,7 +31,7 @@ Copyright 2011 Newcastle University
 
 		<!-- R.js - localisation -->
 		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/R/en-gb.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="locale.js"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
@@ -71,8 +71,8 @@ Copyright 2011 Newcastle University
 
 		<div id="loading">
 			<div id="progressbar">
-				<p>Loading...</p>
-				<div id="completed"><p>Loading...</p></div>
+				<p data-localise="page.loading">Loading...</p>
+				<div id="completed"><p data-localise="page.loading"></p></div>
 			</div>
 		</div>
 
@@ -93,13 +93,13 @@ Copyright 2011 Newcastle University
 			<div id="questionContainer">
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
-					<button class="leftNav" id="prevBtn">Previous</button>
-					<button class="rightNav" id="nextBtn">Next</button>
+					<button class="leftNav" id="prevBtn" data-localise="control.previous"></button>
+					<button class="rightNav" id="nextBtn" data-localise="control.next"></button>
 					<div class="titleBits">
 						<span id="questionNameDisplay">Question Name</span>
 						<span class="adviceNav">
-							<button id="adviceBtn">Advice</button>
-							<button id="revealBtn">Reveal</button>
+							<button id="adviceBtn" data-localise="control.advice"></button>
+							<button id="revealBtn" data-localise="control.reveal"></button>
 						</span>
 					</div>
 				</div>
@@ -124,7 +124,7 @@ Copyright 2011 Newcastle University
 
 						<!-- total exam score display -->
 						<div class="examScore">
-							Total <span id="examScore">0/0</span>
+							<span data-localise="control.total"></span> <span id="examScore">0/0</span>
 						</div>
 						
 						<!-- stopwatch and timing controls -->
@@ -133,35 +133,24 @@ Copyright 2011 Newcastle University
 						</div>
 
 						<!-- end exam button -->
-						<div class="menuButtons"><button id="pauseBtn">Pause</button><br/><button id="endBtn">End Exam</button></div>
+						<div class="menuButtons">
+							<div><button id="pauseBtn" data-localise="control.pause"></button></div>
+							<div><button id="endBtn" data-localise="control.end exam"></button></div>
+						</div>
 					</div>
 				</div>
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
-					<button id="prevBtn" class="leftNav">Previous</button>
-					<button id="nextBtn" class="rightNav">Next</button>
+					<button id="prevBtn" class="leftNav" data-localise="control.previous"></button>
+					<button id="nextBtn" class="rightNav" data-localise="control.next"></button>
 					<div class="submitDiv">
-						<button id="submitBtn">Submit all parts</button>
+						<button id="submitBtn" data-localise="control.submit all parts"></button>
 						<div id="marks">	
 							<span id="score"></span>
 							<span id="feedback"><img src="resources/cross.png"/></span>
 						</div>
-						<button id="regenBtn">Try another question like this one</button>
+						<button id="regenBtn" data-localise="control.regen"></button>
 					</div>
-				</div>
-			</div>
-
-			<div id="warningDisplay">
-				<div class="errorBar">
-					<h1>Alert</h1>
-				</div>
-				<div id="warningMessage"></div>
-				<div class="errorBar" id="alert">
-					<input type="button" id="warningOK" value="Ok">
-				</div>
-				<div class="errorBar" id="confirm">
-					<input type="button" id="warningOK" value="OK">
-					<input type="button" id="warningCancel" value="Cancel">
 				</div>
 			</div>
 

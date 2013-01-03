@@ -23,6 +23,14 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 	var util = Numbas.util;
 
 var display = Numbas.display = {
+	localisePage: function() {
+		//localise strings in page HTML
+		$('[data-localise]').each(function() {
+			var localString = R($(this).data('localise'));
+			$(this).html(localString);
+		})
+	},
+
 	// update progress bar when loading
 	showLoadProgress: function()
 	{

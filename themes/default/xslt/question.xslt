@@ -102,7 +102,7 @@ Copyright 2011 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div id="partFeedback">
-				<button id="submitPart">Submit part</button>
+				<button id="submitPart"><localise>question.submit part</localise></button>
 				<div id="marks">
 					<span id="score"></span>
 					<span id="feedback"><img src="resources/cross.png"/></span>
@@ -121,7 +121,7 @@ Copyright 2011 Newcastle University
 		<xsl:apply-templates select="part"/>
 		<div style="clear:both;"></div>
 	</div>
-	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button id="stepsBtn">Show steps</button></div>
+	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button id="stepsBtn"><localise>question.show steps</localise></button></div>
 </xsl:template>
 
 <xsl:template match="prompt">
@@ -141,7 +141,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="advice">
 	<div id="adviceContainer">
-		<h3>Advice</h3>
+		<h3><localise>question.advice</localise></h3>
 		<span id="adviceDisplay">
 			<xsl:apply-templates />
 		</span>
@@ -339,7 +339,7 @@ Copyright 2011 Newcastle University
 </xsl:template>
 
 <xsl:template match="part" mode="typespecific">
-	Unsupported part type <xsl:value-of select="@type"/>
+	<localise>question.unsupported part type</localise> <xsl:value-of select="@type"/>
 </xsl:template>
 
 <xsl:template match="math" mode="content">

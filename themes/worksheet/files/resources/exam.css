@@ -329,7 +329,7 @@ hr {
 
 .number {
 	float: left;
-	font-size: 1.5em;
+	font-size: 1.1em;
 	margin-right: 0.5em;
 	margin-left: -1.2em;
 }
@@ -377,7 +377,7 @@ div.part {
 }
 .question {
 	border:1px;
-	margin-bottom: 2em;
+	margin-bottom: 1em;
 }
 
 .warningcontainer {
@@ -566,7 +566,7 @@ input[type="text"], input[type="number"] {
 
 @media print {
 	body {
-		font-size: 0.7em;
+		font-size: 0.9em;
 	}
 
 	#generatorControls {

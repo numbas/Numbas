@@ -49,7 +49,7 @@ class ExamParser:
 
 		try:
 			if not isinstance(source,unicode):
-				source=unicode(source)
+				source=unicode(source,encoding='utf-8')
 		except NameError:
 			pass
 
@@ -289,14 +289,14 @@ def is_number(s):
 	try:
 		float(s)
 		return True
-	except (ValueError,TypeError):
+	except (ValueError,OverflowError,TypeError):
 		return False
 
 def is_int(s):
 	try:
 		int(s)
 		return int(s)==s
-	except (ValueError,TypeError):
+	except (ValueError,OverflowError,TypeError):
 		return False
 
 #make sure string s has exactly n copies of c at the start

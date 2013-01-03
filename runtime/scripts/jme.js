@@ -1259,7 +1259,12 @@ function newBuiltin(name,intype,outcons,fn,options) {
 
 newBuiltin('_', ['?','?'], '?', null, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
 newBuiltin('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});	
+newBuiltin('+u', [TVector], TVector, function(a){return a;}, {doc: {usage: '+x', description: "Vector unary addition.", tags: ['plus','positive']}});	
+newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;}, {doc: {usage: '+x', description: "Matrix unary addition.", tags: ['plus','positive']}});	
 newBuiltin('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
+newBuiltin('-u', [TVector], TVector, vectormath.negate, {doc: {usage: '-x', description: "Vector negation.", tags: ['minus','negative','negate']}});
+newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate, {doc: {usage: '-x', description: "Matrix negation.", tags: ['minus','negative','negate']}});
+
 newBuiltin('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
 
 newBuiltin('+', [TList,TList], TList, null, {
@@ -2011,7 +2016,10 @@ newBuiltin('table',[TList,TList],THTML,
 		var thead = $('<thead/>');
 		table.append(thead);
 		for(var i=0;i<headers.length;i++) {
-			thead.append($('<th/>').html(headers[i]));
+			var cell = headers[i];
+			if(typeof cell=='number')
+				cell = Numbas.math.niceNumber(cell);
+			thead.append($('<th/>').html(cell));
 		}
 
 		var tbody=$('<tbody/>');
@@ -2020,7 +2028,10 @@ newBuiltin('table',[TList,TList],THTML,
 			var row = $('<tr/>');
 			tbody.append(row);
 			for(var j=0;j<data[i].length;j++) {
-				row.append($('<td/>').html(data[i][j]));
+				var cell = data[i][j];
+				if(typeof cell=='number')
+					cell = Numbas.math.niceNumber(cell);
+				row.append($('<td/>').html(cell));
 			}
 		}
 

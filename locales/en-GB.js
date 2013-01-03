@@ -14,6 +14,34 @@ Copyright 2011 Newcastle University
    limitations under the License.
 */
 R.registerLocale('en-GB',{
+	'page.loading': "Loading...",
+
+	'exam.exam name': "Exam Name:",
+	'exam.number of questions': "Number of Questions:",
+	'exam.marks available': "Marks Available:",
+	'exam.pass percentage': "Pass Percentage:",
+	'exam.time allowed': "Time Allowed:",
+	'frontpage.start': "Start",
+
+	'suspend.exam suspended': "The Exam has been suspended. Press Resume to continue.",
+	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
+	'suspend.resume': "Resume",
+
+	'result.exit': "Exit",
+	'result.review': "Review",
+	'result.exam summary': "Exam Summary",
+	'result.exam start': "Exam Start:",
+	'result.exam stop': "Exam Stop:",
+	'result.time spent': "Time Spent:",
+	'result.questions attempted': "Questions Attempted:",
+	'result.score': "Score:",
+	'result.result': "Result:",
+	'result.detailed question breakdown': "Detailed Question Breakdown",
+	'result.question number': "Question Number",
+	'result.question score': "Score",
+
+	'end.exam has finished': "The exam has finished. You may now close this window.",
+
 	'control.confirm leave': "You haven't finished the exam.",
 	'control.not all questions answered': "You have not completed every question in this exam.",
 	'control.confirm end': "Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
@@ -24,6 +52,13 @@ R.registerLocale('en-GB',{
 	'control.submit all parts': "Submit all parts",
 	'control.submit again': "Submit again",
 	'control.submit': "Submit",
+	'control.previous': "Previous",
+	'control.next': "Next",
+	'control.advice': "Advice",
+	'control.reveal': "Reveal",
+	'control.total': "Total",
+	'control.pause': "Pause",
+	'control.end exam': "End Exam",
 
 	'display.part.jme.error making maths': "Error making maths display",
 	
@@ -138,8 +173,12 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
+	'question.submit part': "Submit part",
+	'question.show steps': "Show steps",
+	'question.advice': "Advice",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",

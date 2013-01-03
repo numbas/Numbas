@@ -19,7 +19,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="/">
 	<div>
-		<center><h2>The exam has finished.<br/>You may now close this window.</h2></center>
+		<center><h2><localise>end.exam has finished</localise></h2></center>
 	</div>
 </xsl:template>
 

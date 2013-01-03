@@ -123,6 +123,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.marks += part.marks;
 		}
 
+		q.display.makeHTML();
+
 		if(loading)
 		{
 			var qobj = Numbas.store.loadQuestion(q);

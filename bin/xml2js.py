@@ -45,7 +45,7 @@ Numbas.rawxml = {
 
 	examXML: \"%s\"
 };
-	
+
 });
 """ % (str(extensionfiles),all, encode(options.examXML))
 	return out

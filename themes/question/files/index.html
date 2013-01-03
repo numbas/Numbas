@@ -31,7 +31,7 @@ Copyright 2011 Newcastle University
 
 		<!-- R.js - localisation -->
 		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/R/en-gb.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="locale.js"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
@@ -73,8 +73,8 @@ Copyright 2011 Newcastle University
 
 		<div id="loading">
 			<div id="progressbar">
-				<p>Loading...</p>
-				<div id="completed"><p>Loading...</p></div>
+				<p data-localise="page.loading">Loading...</p>
+				<div id="completed"><p data-localise="page.loading"></p></div>
 			</div>
 		</div>
 
@@ -98,8 +98,8 @@ Copyright 2011 Newcastle University
 					<div class="titleBits">
 						<span id="questionNameDisplay">Question Name</span>
 						<span class="adviceNav">
-							<button id="adviceBtn">Advice</button>
-							<button id="revealBtn">Reveal</button>
+							<button id="adviceBtn" data-localise="control.advice"></button>
+							<button id="revealBtn" data-localise="control.reveal"></button>
 						</span>
 					</div>
 				</div>
@@ -111,27 +111,13 @@ Copyright 2011 Newcastle University
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
 					<div class="submitDiv">
-						<button id="submitBtn">Submit all parts</button>
+						<button id="submitBtn" data-localise="control.submit all parts"></button>
 						<div id="marks">	
 							<span id="score"></span>
 							<span id="feedback"><img src="resources/cross.png"/></span>
 						</div>
-						<button id="regenBtn">Try another question like this one</button>
+						<button id="regenBtn" data-localise="control.regen"></button>
 					</div>
-				</div>
-			</div>
-
-			<div id="warningDisplay">
-				<div class="errorBar">
-					<h1>Alert</h1>
-				</div>
-				<div id="warningMessage"></div>
-				<div class="errorBar" id="alert">
-					<input type="button" id="warningOK" value="Ok">
-				</div>
-				<div class="errorBar" id="confirm">
-					<input type="button" id="warningOK" value="OK">
-					<input type="button" id="warningCancel" value="Cancel">
 				</div>
 			</div>
 
