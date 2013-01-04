@@ -183,6 +183,8 @@ R.registerLocale('en-GB',{
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",
 
+	'question.score feedback.show': 'Show feedback',
+	'question.score feedback.hide': 'Hide feedback',
 	'question.score feedback.answered total actual': "Score: %(score)/%(marks)",
 	'question.score feedback.answered total': "%(marksString). Answered.",
 	'question.score feedback.answered actual': "Score: %(scoreString)",

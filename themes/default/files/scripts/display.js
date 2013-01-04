@@ -609,7 +609,7 @@ display.PartDisplay.prototype =
 			else
 				feedbackShown = val;
 			c.find('#feedbackMessage:last').slideToggle('fast');
-			c.find('#partFeedback:last #feedbackToggle').html(feedbackShown ? R('Hide feedback') : R('Show feedback'));
+			c.find('#partFeedback:last #feedbackToggle').html(feedbackShown ? R('question.score feedback.hide') : R('question.score feedback.show'));
 		}
 		toggleFeedback(false);
 		c.find('#feedbackMessage:last').hide();
