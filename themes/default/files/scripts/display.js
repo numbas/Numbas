@@ -663,12 +663,12 @@ display.PartDisplay.prototype =
 					var message = action.message || '';
 					if(util.isNonemptyHTML(message))
 					{
-						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,'mark','marks'));
+						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,R('mark'),R('marks')));
 
 						if(change>0)
 							message+='\n\n'+R('feedback.you were awarded',marks);
 						else if(change<0)
-							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,'was','were'));
+							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,R('was'),R('were')));
 					}
 					if(util.isNonemptyHTML(message))
 						feedback.push(message);
@@ -1077,8 +1077,8 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	var scoreobj = {
 		marks: niceNumber(marks),
 		score: niceNumber(score),
-		marksString: niceNumber(marks)+' '+util.pluralise(marks,'mark','marks'),
-		scoreString: niceNumber(marks)+' '+util.pluralise(marks,'mark','marks')
+		marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
+		scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
 	};
 	if(answered)
 	{
