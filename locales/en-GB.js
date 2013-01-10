@@ -183,6 +183,8 @@ R.registerLocale('en-GB',{
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",
 
+	'question.score feedback.show': 'Show feedback',
+	'question.score feedback.hide': 'Hide feedback',
 	'question.score feedback.answered total actual': "Score: %(score)/%(marks)",
 	'question.score feedback.answered total': "%(marksString). Answered.",
 	'question.score feedback.answered actual': "Score: %(scoreString)",
@@ -196,5 +198,10 @@ R.registerLocale('en-GB',{
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
 
-	'scorm.failed save': "The request to save data to the server failed. Your session, including responses and scores, might not be saved. Please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straight away and keep this window open if possible."
+	'scorm.failed save': "The request to save data to the server failed. Your session, including responses and scores, might not be saved. Please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straight away and keep this window open if possible.",
+
+	'mark': 'mark',
+	'marks': 'marks',
+	'was': 'was',
+	'were': 'were'
 });
