@@ -22,7 +22,6 @@ def encode(xml):
 	xml = re.sub('\\\\','\\\\\\\\',xml)
 	xml = re.sub('\n',r'\\n',xml)
 	xml = re.sub('"','\\"',xml)
-	print(xml)
 	return xml
 
 def xml2js(options):
