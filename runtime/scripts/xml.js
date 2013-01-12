@@ -129,7 +129,7 @@ var xml = Numbas.xml = {
 			var name = variableNodes[i].getAttribute('name').toLowerCase();
 			if(!ignoreVariables.contains(name))
 			{
-				var value = variableNodes[i].getAttribute('value');
+				var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
 
 				var vars = [];
 
