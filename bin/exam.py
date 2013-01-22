@@ -408,10 +408,9 @@ class Variable:
 		self.definition = definition
 	
 	def toxml(self):
-		variable = etree.Element('variable',{
-			'name': strcons(self.name),
-			'value': strcons(self.definition)
-			})
+		variable = makeTree(['variable',['value']])
+		variable.attrib = {'name': strcons(self.name)}
+		variable.find('value').text = strcons(self.definition)
 		return variable
 
 class Function:

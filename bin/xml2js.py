@@ -17,8 +17,10 @@ import re
 import sys
 
 def encode(xml):
-	xml = re.sub('\n|\r','',xml)
+	xml = xml.strip()
+	xml = re.sub('\r','',xml)
 	xml = re.sub('\\\\','\\\\\\\\',xml)
+	xml = re.sub('\n',r'\\n',xml)
 	xml = re.sub('"','\\"',xml)
 	return xml
 

@@ -420,6 +420,10 @@ div.part {
 	margin-left: 1em;
 }
 
+.part.gapfill .part {
+	display: inline-block;
+}
+
 .partheader {
 	clear:both;
 }

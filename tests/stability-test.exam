@@ -378,6 +378,29 @@
 					answers: [a, b]
 				}
 			]
+		}, 
+		{
+			name: Stability test - multiline variable definitions
+			
+			tags: []
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: "<p>This should say 1: {a}</p>"
+			
+			extensions: []
+			advice: ''
+			rulesets: {}
+			variables: {
+				a: "
+				//arg
+				    1
+				"
+			}
+			functions: {}
+			
+			parts: []
 		}
 	]
 }

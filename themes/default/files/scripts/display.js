@@ -386,7 +386,6 @@ display.QuestionDisplay.prototype =
 		//display question's html
 		$('#questionDisplay').append(q.html);
 
-
 		//show parts
 		this.postTypesetF = function(){};
 		for(var i=0;i<q.parts.length;i++)
@@ -440,7 +439,9 @@ display.QuestionDisplay.prototype =
 
 		// make mathjax process the question text (render the maths)
 		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
-
+		setTimeout(function(){
+			MathJaxQueue.Push(['Rerender',MathJax.Hub,$('#questionDisplay')[0]]);
+		},100);
 	},
 
 	leave: function() {
