@@ -201,7 +201,7 @@ def makeExam(options):
 	localePath = os.path.join(options.path,'locales',options.locale+'.js')
 	if not os.path.exists(localePath):
 		raise Exception("Can't find locale "+options.locale)
-	files[os.path.join('.','locale.js')] = io.StringIO(open(localePath).read())
+	files[os.path.join('.','locale.js')] = io.StringIO(open(localePath,encoding='utf-8').read())
 
 	if options.scorm:
 		IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
