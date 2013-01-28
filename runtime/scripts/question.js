@@ -980,6 +980,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	if(!displayAnswerNode)
 		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+	settings.displayAnswer = jme.contentsubvars(settings.displayAnswer,question.scope);
 
 	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
 
