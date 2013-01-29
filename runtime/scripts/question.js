@@ -1397,6 +1397,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		var cell = {message: ""};
 		tryGetAttribute(cell, distractorNodes[i], ['answerIndex', 'choiceIndex']);
 		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+		cell.message= jme.contentsubvars(cell.message,question.scope);
 
 		//take into account shuffling
 		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
