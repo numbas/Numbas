@@ -15,7 +15,7 @@ Copyright 2011 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/xml.js',[],function() {
+Numbas.queueScript('scripts/xml.js',['jme'],function() {
 
 var xml = Numbas.xml = {
 	dp: new DOMParser(),
@@ -28,6 +28,7 @@ var xml = Numbas.xml = {
 		for(var x in Numbas.rawxml.templates)
 		{
 			templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
+			xml.localise(templates[x]);
 		}
 
 		return;
@@ -73,6 +74,80 @@ var xml = Numbas.xml = {
 
 		return doc;
 	},
+
+	loadFunctions: function(xml,scope)
+	{
+		var tmpFunctions = [];
+
+		//work out functions
+		var functionNodes = xml.selectNodes('functions/function');
+		if(!functionNodes)
+			return {};
+
+		//first pass: get function names and types
+		for(var i=0; i<functionNodes.length; i++)
+		{
+			var name = functionNodes[i].getAttribute('name').toLowerCase();
+
+			var definition = functionNodes[i].getAttribute('definition');
+			var language = functionNodes[i].getAttribute('language');
+
+			var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
+
+			var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
+			var parameters = [];
+			for(var j=0; j<parameterNodes.length; j++)
+			{
+				parameters.push({
+					name: parameterNodes[j].getAttribute('name'),
+					type: parameterNodes[j].getAttribute('type').toLowerCase()
+				});
+			}
+			tmpFunctions.push({
+				name: name,
+				definition: definition,
+				language: language,
+				outtype: outtype,
+				parameters: parameters
+			});
+
+		}
+		return tmpFunctions;
+	},
+	loadVariables: function(xml,scope) {
+		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
+		if(!variableNodes)
+			return {};
+
+		//list of variable names to ignore because they don't make sense
+		var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
+
+		//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
+		var todo = {};
+		for( var i=0; i<variableNodes.length; i++ )
+		{
+			var name = variableNodes[i].getAttribute('name').toLowerCase();
+			if(!ignoreVariables.contains(name))
+			{
+				var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+
+				var vars = [];
+
+				if(value.trim()=='') {
+					throw(new Numbas.Error('jme.variables.empty definition',name));
+				}
+
+				var tree = Numbas.jme.compile(value,scope,true);
+				vars = vars.merge(Numbas.jme.findvars(tree));
+				todo[name]={
+					tree: tree,
+					vars: vars
+				};
+			}
+		}
+		return todo;
+	},
+
 
 	//lots of the time we have a message stored inside content/html/.. structure
 	//this pulls the message out and serializes it so it can be inserted easily with jQuery
@@ -175,6 +250,14 @@ var xml = Numbas.xml = {
 			}
 		}
 		return value;
+	},
+
+	localise: function(template) {
+		$(template).find('localise').each(function() {
+			var localString = R($(this).text());
+			$(this).replaceWith(localString);
+		});
+		return template;
 	}
 };
 

@@ -38,7 +38,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 	tryGetAttribute(q,'.','name');
 
 	job(function() {
-		q.scope.functions = Numbas.jme.variables.makeFunctions(q.xml,q.scope);
+		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
+		q.scope.functions = Numbas.jme.variables.makeFunctions(functionsTodo,q.scope);
 		//make rulesets
 		var rulesetNodes = q.xml.selectNodes('rulesets/set');
 
@@ -92,7 +93,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		}
 		else
 		{
-			q.scope.variables = Numbas.jme.variables.makeVariables(q.xml,q.scope);
+			var variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
+			q.scope.variables = Numbas.jme.variables.makeVariables(variablesTodo,q.scope);
 		}
 	
 		q.scope = new jme.Scope([gscope,q.scope]);
@@ -108,6 +110,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
 
+		q.display.makeHTML();
+
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -118,6 +122,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
+
+		q.display.makeHTML();
 
 		if(loading)
 		{
@@ -138,7 +144,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 
 		q.updateScore();
 		
-		q.display.makeHTML();
 		q.display.showScore();
 	});
 
@@ -758,13 +763,15 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	this.display = new Numbas.display.JMEPartDisplay(this);
 
-	if(loading)
-	{
+	if(loading)	{
 		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
 		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
+	}
+	else {
+		this.stagedAnswer = [''];
 	}
 }
 
@@ -973,6 +980,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	if(!displayAnswerNode)
 		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+	settings.displayAnswer = jme.contentsubvars(settings.displayAnswer,question.scope);
 
 	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
 
@@ -1274,6 +1282,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		}
 	}
 
+	//apply shuffling to XML nodes
 	for(var i=0;i<this.numChoices;i++)
 	{
 		choicesNode.removeChild(choiceNodes[i]);
@@ -1320,17 +1329,31 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 			}
 			matrix.rows = matrix.length;
 			matrix.columns = matrix[0].length;
-			if(this.type=='m_n_x')
-				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		case 'matrix':
 			matrix = matrix.value;
-			if(this.type=='m_n_x')
-				matrix = Numbas.matrixmath.transpose(matrix);
 			break;
 		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
 		}
+
+		// take into account shuffling;
+		var omatrix = matrix;
+		var matrix = [];
+		matrix.rows = omatrix.rows;
+		matrix.columns = omatrix.columns;
+		for(var i=0;i<this.numChoices;i++) {
+			matrix[i]=[];
+		}
+		for(var i=0; i<this.numChoices; i++) {
+			for(var j=0;j<this.numAnswers; j++) {
+				matrix[this.shuffleChoices[i]][this.shuffleAnswers[j]] = omatrix[i][j];
+			}
+		}
+
+		if(this.type=='m_n_x')
+			matrix = Numbas.matrixmath.transpose(matrix);
+
 	}
 	else
 	{
@@ -1374,6 +1397,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		var cell = {message: ""};
 		tryGetAttribute(cell, distractorNodes[i], ['answerIndex', 'choiceIndex']);
 		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+		cell.message= jme.contentsubvars(cell.message,question.scope);
 
 		//take into account shuffling
 		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
@@ -1476,9 +1500,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 					this.stagedAnswer[i][j]=true;
 			}
 		}
-		this.display.restoreAnswer();
-		if(this.answered)
-			this.submit();
 	}
 	else
 	{
@@ -1503,6 +1524,11 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.wrongNumber = settings.minAnswers > 0;
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
+	if(loading) {
+		this.display.restoreAnswer();
+		if(this.answered)
+			this.submit();
+	}
 }
 MultipleResponsePart.prototype =
 {

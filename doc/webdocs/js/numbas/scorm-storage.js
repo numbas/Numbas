@@ -93,7 +93,12 @@ SCORMStorage.prototype = {
 
 	save: function()
 	{
-		pipwerks.SCORM.save();
+		var result = pipwerks.SCORM.save();
+		if(!result) {
+			var error = new Numbas.Error('scorm.failed save');
+			Numbas.showError(error);
+			throw(error);
+		}
 	},
 
 	set: function(key,value)

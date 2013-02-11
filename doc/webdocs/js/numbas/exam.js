@@ -37,7 +37,7 @@ var Exam = Numbas.Exam = function()
 	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
 	document.title = this.name;
 
-	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage']);
+	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
 
 	//get navigation events and actions
 	this.navigationEvents = {};
@@ -164,6 +164,7 @@ Exam.prototype = {
 	questionList: [],			//Question objects, in order student will see them
 		
 	//navigation
+	preventLeave: true,			//prevent the browser from leaving the page while the exam is running?
 	allowRegen: false,			//can student re-randomise a question?
 	navigateReverse: false,		//can student navigate to previous question?
 	navigateBrowse: false,		//can student jump to any question they like?
@@ -203,7 +204,8 @@ Exam.prototype = {
 	init: function()
 	{
 		var exam = this;
-		exam.scope.variables = Numbas.jme.variables.makeVariables(exam.xml,exam.scope)
+		var variablesTodo = Numbas.xml.loadVariables(exam.xml,exam.scope);
+		exam.scope.variables = Numbas.jme.variables.makeVariables(variablesTodo,exam.scope)
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
 		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
@@ -470,16 +472,7 @@ Exam.prototype = {
 		}
 		else
 		{
-			//work out what action is happening
-			var event = '';
-			if(i==currentQuestion.number-1)		//reversing
-				event='onreverse';
-			else if(i==currentQuestion.number+1)	//advancing
-				event='onadvance';
-			else								//jumping
-				event='onmove';
-
-			var eventObj = this.navigationEvents[event];
+			var eventObj = this.navigationEvents.onleave;
 			switch( eventObj.action )
 			{
 			case 'none':
@@ -523,6 +516,26 @@ Exam.prototype = {
 			e.display.showQuestion();
 		});
 		job(e.display.endRegen,e.display);
+	},
+
+	tryEnd: function() {
+		var message = R('control.confirm end');
+		var answeredAll = true;
+		for(var i=0;i<this.questionList.length;i++) {
+			if(!this.questionList[i].answered) {
+				answeredAll = false;
+				break;
+			}
+		}
+		if(!answeredAll) {
+			message = R('control.not all questions answered') + '<br/>' + message;
+		}
+		Numbas.display.showConfirm(
+			message,
+			function() {
+				job(Numbas.exam.end,Numbas.exam);
+			}
+		);
 	},
 
 	end: function()

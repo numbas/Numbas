@@ -11,23 +11,20 @@
 	{% autoescape true %}
 	<!-- handlebars templates -->
 	<script class="template" id="usage-partial" type="text/x-handlebars-partial">
-		{{ '{{' }}#join usage ", "{{ '}}' }}<code class="example">{{ '{{' }}this{{ '}}' }}</code>{{ '{{' }}/join{{ '}}' }}
+		{{ '{{' }}#join usage ", "{{ '}}' }}``{{ '{{' }}this{{ '}}' }}``{{ '{{' }}/join{{ '}}' }}
 	</script>
 
 	<script id="functions-template" type="text/x-handlebars-template">
 		{{ '{{' }}#each this}}
-		<li class="function def">
-			<div class="name">
-				{{ '{{' }}name}} :: 
-				({{ '{{' }}#join intype ", "}}<code class="intype">{{ '{{' }}this}}</code>{{ '{{' }}/join}})
-				=>
-				<code class="outtype">{{ '{{' }}outtype}}</code>
-			</div>
-			<div class="usages">
-				<strong>Example usage: </strong> {{ '{{' }}> usage-partial}}
-			</div>
-			<div class="description">{{ '{{' }}{textile description}}}</div>
-		</li>
+
+.. function:: {{ '{{' }}name}}({{ '{{' }}#join intype ", "}}{{ '{{' }}this}}{{ '{{' }}/join}})
+
+	{{ '{{' }}{textile description}}}
+
+	Example: {{ '{{' }}> usage-partial}}
+
+	:rtype: {{ '{{' }}outtype}}
+
 		{{ '{{' }}/each}}
 	</script>
 

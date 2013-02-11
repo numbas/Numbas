@@ -143,6 +143,7 @@ var jme = Numbas.jme = {
 						break;
 					else {
 						estr += str.slice(0,i);
+						var c;
 						if((c=str.charAt(i+1))=='n') {
 							estr+='\n';
 						}
@@ -430,20 +431,6 @@ var jme = Numbas.jme = {
 		}
 	},
 
-	bind: function(tree,scope)
-	{
-		if(tree.bound)
-			return
-		if(tree.args)
-		{
-			for(var i=0;i<tree.args.length;i++)
-				jme.bind(tree.args[i],scope);
-		}
-
-		jme.typecheck(tree,scope);
-		tree.tok.bound = true;
-	},
-
 	evaluate: function(tree,scope)
 	{
 		//if a string is given instead of an expression tree, compile it to a tree
@@ -454,7 +441,6 @@ var jme = Numbas.jme = {
 
 
 		tree = jme.substituteTree(tree,scope,true);
-		jme.bind(tree,scope);
 
 		var tok = tree.tok;
 		switch(tok.type)
@@ -484,7 +470,44 @@ var jme = Numbas.jme = {
 			break;
 		case 'op':
 		case 'function':
-			return tok.fn.evaluate(tree.args,scope);
+			var op = tok.name.toLowerCase();
+			if(lazyOps.indexOf(op)>=0) {
+				return scope.functions[op][0].evaluate(tree.args,scope);
+			}
+			else {
+
+				for(var i=0;i<tree.args.length;i++) {
+					tree.args[i] = jme.evaluate(tree.args[i],scope);
+				}
+
+				if(scope.functions[op]===undefined)
+				{
+					if(tok.type=='function') {
+						//check if the user typed something like xtan(y), when they meant x*tan(y)
+						var possibleOp = op.slice(1);
+						if(op.slice(1) in scope.functions)
+							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],op.slice(1)));
+						else
+							throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
+					}
+					else
+						throw(new Numbas.Error('jme.typecheck.op not defined',op));
+				}
+
+				for(var j=0;j<scope.functions[op].length; j++)
+				{
+					var fn = scope.functions[op][j];
+					if(fn.typecheck(tree.args))
+					{
+						tok.fn = fn;
+						break;
+					}
+				}
+				if(tok.fn)
+					return tok.fn.evaluate(tree.args,scope);
+				else
+					throw(new Numbas.Error('jme.typecheck.no right type definition',op));
+			}
 		default:
 			return tok;
 		}
@@ -508,77 +531,7 @@ var jme = Numbas.jme = {
 		if(tree===null)
 			return;
 
-		if(!notypecheck)
-			jme.typecheck(tree,scope);	//will throw an error if there is a type problem
-
 		return(tree);nop
-	},
-
-	typecheck: function(tree,scope)
-	{
-		if(tree.bound)
-			return true;
-
-		tree.tok.bound = true;
-
-		if(tree.args!=undefined)
-		{
-			for(var i=0;i<tree.args.length;i++)
-			{
-				jme.typecheck(tree.args[i],scope);
-				if(!tree.args[i].tok.bound)
-					tree.tok.bound = false;
-			}
-		}
-
-		var tok = tree.tok;
-		switch(tok.type)
-		{
-		case 'number':
-		case 'string':
-		case 'boolean':
-		case 'range':
-		case 'list':
-		case 'vector':
-		case 'matrix':
-			tok.outtype = tok.type;
-			return true;
-		case 'name':
-			tok.outtype = '?';
-			tok.bound = false;
-			return true;
-		case 'op':
-		case 'function':
-			var op = tok.name.toLowerCase();
-
-			if(scope.functions[op]===undefined)
-			{
-				if(tok.type=='function') {
-					//check if the user typed something like xtan(y), when they meant x*tan(y)
-					var possibleOp = op.slice(1);
-					if(op.slice(1) in scope.functions)
-						throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],op.slice(1)));
-					else
-						throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
-				}
-				else
-					throw(new Numbas.Error('jme.typecheck.op not defined',op));
-			}
-
-			var result = undefined;
-
-			for(var j=0;j<scope.functions[op].length; j++)
-			{
-				var fn = scope.functions[op][j];
-				if(fn.typecheck(tree.args))
-				{
-					tok.fn = fn;
-					tok.outtype = fn.outtype;
-					return true;
-				}
-			}
-			throw(new Numbas.Error('jme.typecheck.no right type definition',op));
-		}
 	},
 
 	compare: function(expr1,expr2,settings,scope) {
@@ -1038,8 +991,8 @@ var TRange = types.TRange = types.range = function(range)
 TRange.prototype.type = 'range';
 TRange.doc = {
 	name: 'range',
-	usage: ['1..3','1..3#0.1',';1..3#0'],
-	description: 'A range @a..b#c@ represents the set of numbers $\{a+nc | 0 \leq n \leq \frac{b-a}{c} \}$. If the step size is zero, then the range is the continuous interval $\[a,b\]$.'
+	usage: ['1..3','1..3#0.1','1..3#0'],
+	description: 'A range @a..b#c@ represents the set of numbers $\\{a+nc | 0 \\leq n \\leq \\frac{b-a}{c} \\}$. If the step size is zero, then the range is the continuous interval $\[a,b\]$.'
 }
 
 var TName = types.TName = types.name = function(name,annotation)
@@ -1165,6 +1118,7 @@ var synonyms = {
 	'verb': 'verbatim'
 };
 	
+var lazyOps = ['if','switch','repeat','map','isa'];
 
 
 function leftAssociative(op)
@@ -1236,7 +1190,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 				var ntype = this.intype[i].slice(1);
 				while(variables.length)
 				{
-					if(variables[0].tok.outtype==ntype || ntype=='?' || variables[0].tok.outtype=='?')
+					if(variables[0].type==ntype || ntype=='?' || variables[0].type=='?')
 						variables = variables.slice(1);
 					else
 						return false;
@@ -1245,7 +1199,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 				if(variables.length==0)
 					return false;
 
-				if(variables[0].tok.outtype==this.intype[i] || this.intype[i]=='?' || variables[0].tok.outtype=='?')
+				if(variables[0].type==this.intype[i] || this.intype[i]=='?' || variables[0].type=='?')
 					variables = variables.slice(1);
 				else
 					return false;
@@ -1261,13 +1215,10 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	{
 		var nargs = [];
 		for(var i=0; i<args.length; i++) {
-			var result = jme.evaluate(args[i],scope);
-			if(options.unwrapValues) {
-				result = jme.unwrapValue(result);
-				nargs.push(result);
-			}
+			if(options.unwrapValues)
+				nargs.push(jme.unwrapValue(args[i]));
 			else
-				nargs.push(result.value);
+				nargs.push(args[i].value);
 		}
 
 		var result = this.fn.apply(null,nargs);
@@ -1308,15 +1259,18 @@ function newBuiltin(name,intype,outcons,fn,options) {
 
 newBuiltin('_', ['?','?'], '?', null, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
 newBuiltin('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});	
+newBuiltin('+u', [TVector], TVector, function(a){return a;}, {doc: {usage: '+x', description: "Vector unary addition.", tags: ['plus','positive']}});	
+newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;}, {doc: {usage: '+x', description: "Matrix unary addition.", tags: ['plus','positive']}});	
 newBuiltin('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
+newBuiltin('-u', [TVector], TVector, vectormath.negate, {doc: {usage: '-x', description: "Vector negation.", tags: ['minus','negative','negate']}});
+newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate, {doc: {usage: '-x', description: "Matrix negation.", tags: ['minus','negative','negate']}});
+
 newBuiltin('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
 
 newBuiltin('+', [TList,TList], TList, null, {
 	evaluate: function(args,scope)
 	{
-		var list0 = jme.evaluate(args[0],scope);
-		var list1 = jme.evaluate(args[1],scope);
-		var value = list0.value.concat(list1.value);
+		var value = args[0].value.concat(args[1].value);
 		return new TList(value);
 	},
 
@@ -1330,10 +1284,8 @@ newBuiltin('+', [TList,TList], TList, null, {
 newBuiltin('+',[TList,'?'],TList, null, {
 	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],scope);
-		var item = jme.evaluate(args[1],scope);
-		var value = list.value.slice();
-		value.push(item);
+		var value = args[0].value.slice();
+		value.push(args[1]);
 		return new TList(value);
 	},
 
@@ -1385,9 +1337,8 @@ newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usag
 
 newBuiltin('latex',[TString],TString,null,{
 	evaluate: function(args,scope) {
-		var s = jme.evaluate(args[0],scope);
-		s.latex = true;
-		return s;
+		args[0].latex = true;
+		return args[0];
 	},
 	doc: {
 		usage: ['latex("something")'],
@@ -1395,7 +1346,7 @@ newBuiltin('latex',[TString],TString,null,{
 	}
 });
 
-newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the firsty letter of a string', tags: ['upper-case','case','upper']}});
+newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the first letter of a string', tags: ['upper-case','case','upper']}});
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
 
@@ -1485,9 +1436,7 @@ newBuiltin('except', [TList,TList], TList,
 
 newBuiltin('except',[TList,'?'], TList, null, {
 	evaluate: function(args,scope) {
-		var list = jme.evaluate(args[0],scope).value;
-		var except = jme.evaluate(args[1],scope);
-		return new TList(util.except(list,[except]));
+		return new TList(util.except(args[0].value,[args[1]]));
 	},
 
   	doc: {
@@ -1503,9 +1452,7 @@ newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], 
 newBuiltin('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
 newBuiltin('<>', ['?','?'], TBool, null, {
 	evaluate: function(args,scope) {
-		var a = jme.evaluate(args[0],scope);
-		var b = jme.evaluate(args[1],scope);
-		return new TBool(util.neq(a,b));
+		return new TBool(util.neq(args[0],args[1]));
 	},
 	doc: {
 		usage: ['\'this string\' <> \'that string\'', 'a <> b', '1<>2','sin(90)<>1'], 
@@ -1515,9 +1462,7 @@ newBuiltin('<>', ['?','?'], TBool, null, {
 });
 newBuiltin('=', ['?','?'], TBool, null, {
 	evaluate: function(args,scope) {
-		var a = jme.evaluate(args[0],scope);
-		var b = jme.evaluate(args[1],scope);
-		return new TBool(util.eq(a,b));
+		return new TBool(util.eq(args[0],args[1]));
 	},
 	doc: {
 		usage: ['x=y','vector(1,2)=vector(1,2,0)','0.1=0.2'], 
@@ -1547,6 +1492,7 @@ newBuiltin('ln', [TNum], TNum, math.log, {doc: {usage: 'ln(x)', description: 'Na
 newBuiltin('log', [TNum], TNum, math.log10, {doc: {usage: 'log(x)', description: 'Logarithm with base $10$.'}} );
 newBuiltin('exp', [TNum], TNum, math.exp, {doc: {usage: 'exp(x)', description: 'Exponentiation. Equivalent to @e^x@. ', tags: ['exponential']}} );
 newBuiltin('fact', [TNum], TNum, math.factorial, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
+newBuiltin('gamma', [TNum], TNum, math.gamma, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
 newBuiltin('sin', [TNum], TNum, math.sin, {doc: {usage: 'sin(x)', description: 'Sine.', tags: ['trigonometric','trigonometry']}} );
 newBuiltin('cos', [TNum], TNum, math.cos, {doc: {usage: 'cos(x)', description: 'Cosine.', tags: ['trigonometric','trigonometry']}} );
 newBuiltin('tan', [TNum], TNum, math.tan, {doc: {usage: 'tan(x)', description: 'Tangent.', tags: ['trigonometric','trigonometry']}} );
@@ -1579,8 +1525,7 @@ newBuiltin('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', 
 newBuiltin('random',[TList],'?',null, {
 	evaluate: function(args,scope) 
 	{
-		var l = jme.evaluate(args[0],scope);
-		return math.choose(l.value);
+		return math.choose(args[0].value);
 	},
 
 	doc: {
@@ -1592,7 +1537,7 @@ newBuiltin('random',[TList],'?',null, {
 
 newBuiltin( 'random',[],'?', null, {
 	typecheck: function() { return true; },
-	evaluate: function(args,scope) { return jme.evaluate(math.choose(args),scope);},
+	evaluate: function(args,scope) { return math.choose(args);},
 	doc: {
 		usage: 'random(1,2,3,4,5)',
 		description: 'Choose at random from the given arguments.',
@@ -1613,7 +1558,7 @@ newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','roo
 newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
 newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
-newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @y@ divides @x@.', tags: ['multiple of']}} );
+newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @x@ divides @y@.', tags: ['multiple of']}} );
 
 newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
 newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
@@ -1679,7 +1624,7 @@ newBuiltin('switch',[],'?', null, {
 
 		for( var i=0; i<check; i+=2 )
 		{
-			switch(variables[i].tok.outtype)
+			switch(variables[i].tok.type)
 			{
 			case '?':
 			case 'boolean':
@@ -1759,8 +1704,8 @@ newBuiltin('repeat',['?',TNum],TList, null, {
 newBuiltin('listval',[TList,TNum],'?', null, {
 	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],scope).value;
-		var list = jme.evaluate(args[0],scope);
+		var index = args[1].value;
+		var list = args[0];
 		if(list.type!='list') {
 			if(list.type=='name')
 				throw(new Numbas.Error('jme.variables.variable not defined',list.name));
@@ -1785,8 +1730,8 @@ newBuiltin('listval',[TList,TNum],'?', null, {
 newBuiltin('listval',[TList,TRange],TList, null, {
 	evaluate: function(args,scope)
 	{
-		var range = jme.evaluate(args[1],scope).value;
-		var list = jme.evaluate(args[0],scope);
+		var range = args[1].value;
+		var list = args[0];
 		var start = range[0];
 		var end = range[1];
 		var size = list.vars;
@@ -1808,8 +1753,8 @@ newBuiltin('listval',[TList,TRange],TList, null, {
 newBuiltin('listval',[TVector,TNum],TNum, null, {
 	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],scope).value;
-		var vector = jme.evaluate(args[0],scope);
+		var index = args[1].value;
+		var vector = args[0];
 		return new TNum(vector.value[index] || 0);
 	},
 
@@ -1823,8 +1768,8 @@ newBuiltin('listval',[TVector,TNum],TNum, null, {
 newBuiltin('listval',[TMatrix,TNum],TVector, null, {
 	evaluate: function(args,scope)
 	{
-		var index = jme.evaluate(args[1],scope).value;
-		var matrix = jme.evaluate(args[0],scope);
+		var index = args[1].value;
+		var matrix = args[0];
 		return new TVector(matrix.value[index] || []);
 	},
 
@@ -1835,16 +1780,29 @@ newBuiltin('listval',[TMatrix,TNum],TVector, null, {
 	}
 });
 
-newBuiltin('map',['?',TName,TList],TList, null, {
+newBuiltin('map',['?',TName,'?'],TList, null, {
 	evaluate: function(args,scope)
 	{
 		var list = jme.evaluate(args[2],scope);
+		switch(list.type) {
+		case 'list':
+			list = list.value;
+			break;
+		case 'range':
+			list = list.value.slice(3);
+			for(var i=0;i<list.length;i++) {
+				list[i] = new TNum(list[i]);
+			}
+			break;
+		default:
+			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+		}
 		var value = [];
 		var name = args[1].tok.name;
 		scope = new Scope(scope);
-		for(var i=0;i<list.value.length;i++)
+		for(var i=0;i<list.length;i++)
 		{
-			scope.variables[name] = list.value[i];
+			scope.variables[name] = list[i];
 			value[i] = jme.evaluate(args[0],scope);
 		}
 		return new TList(value);
@@ -1881,7 +1839,7 @@ newBuiltin('map',['?',TName,TRange],TList, null, {
 newBuiltin('sort',[TList],TList, null, {
 	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],scope);
+		var list = args[0];
 		var newlist = new TList(list.vars);
 		newlist.value = list.value.slice().sort(function(a,b){ 
 			if(math.gt(a.value,b.value))
@@ -1906,7 +1864,7 @@ newBuiltin('vector',['*TNum'],TVector, null, {
 		var value = [];
 		for(var i=0;i<args.length;i++)
 		{
-			value.push(jme.evaluate(args[i],scope).value);
+			value.push(args[i].value);
 		}
 		return new TVector(value);
 	},
@@ -1921,7 +1879,7 @@ newBuiltin('vector',['*TNum'],TVector, null, {
 newBuiltin('vector',[TList],TVector, null, {
 	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],scope);
+		var list = args[0];
 		var value = list.value.map(function(x){return x.value});
 		return new TVector(value);
 	},
@@ -1936,7 +1894,7 @@ newBuiltin('vector',[TList],TVector, null, {
 newBuiltin('matrix',[TList],TMatrix,null, {
 	evaluate: function(args,scope)
 	{
-		var list = jme.evaluate(args[0],scope);
+		var list = args[0];
 		var rows = list.vars;
 		var columns = 0;
 		var value = [];
@@ -1978,7 +1936,7 @@ newBuiltin('matrix',['*list'],TMatrix, null, {
 		var value = [];
 		for(var i=0;i<args.length;i++)
 		{
-			var row = jme.evaluate(args[i],scope).value;
+			var row = args[i].value;
 			value.push(row.map(function(x){return x.value}));
 			columns = Math.max(columns,row.length);
 		}
@@ -2000,7 +1958,7 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
 		var row = [];
 		for(var i=0;i<args.length;i++)
 		{
-			row.push(jme.evaluate(args[i],scope).value);
+			row.push(args[i].value);
 		}
 		var matrix = [row];
 		matrix.rows = 1;
@@ -2019,7 +1977,7 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
 newBuiltin('list',[TVector],TList,null, {
 	evaluate: function(args,scope)
 	{
-		var vector = jme.evaluate(args[0],scope);
+		var vector = args[0];
 		var value = vector.value.map(function(n){ return new TNum(n)});
 		return new TList(value);
 	},
@@ -2035,7 +1993,7 @@ newBuiltin('list',[TVector],TList,null, {
 newBuiltin('list',[TMatrix],TList,null, {
 	evaluate: function(args,scope)
 	{
-		var matrix = jme.evaluate(args[0],scope);
+		var matrix = args[0];
 		var value = [];
 		for(var i=0;i<matrix.value.rows;i++)
 		{
@@ -2059,7 +2017,10 @@ newBuiltin('table',[TList,TList],THTML,
 		var thead = $('<thead/>');
 		table.append(thead);
 		for(var i=0;i<headers.length;i++) {
-			thead.append($('<th/>').html(headers[i]));
+			var cell = headers[i];
+			if(typeof cell=='number')
+				cell = Numbas.math.niceNumber(cell);
+			thead.append($('<th/>').html(cell));
 		}
 
 		var tbody=$('<tbody/>');
@@ -2068,7 +2029,10 @@ newBuiltin('table',[TList,TList],THTML,
 			var row = $('<tr/>');
 			tbody.append(row);
 			for(var j=0;j<data[i].length;j++) {
-				row.append($('<td/>').html(data[i][j]));
+				var cell = data[i][j];
+				if(typeof cell=='number')
+					cell = Numbas.math.niceNumber(cell);
+				row.append($('<td/>').html(cell));
 			}
 		}
 
