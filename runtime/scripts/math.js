@@ -561,7 +561,7 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 		}
 		else	//gamma function extends factorial to non-ints and negative numbers
 		{
-			return math.gamma(n);
+			return math.gamma(n+1);
 		}
 	},
 
