@@ -1973,6 +1973,24 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
 	}
 });
 
+newBuiltin('rowvector',[TList],TMatrix, null, {
+	evaluate: function(args,scope)
+	{
+		var list = args[0];
+		var row = list.value.map(function(x){return x.value});
+		var matrix = [row];
+		matrix.rows = 1;
+		matrix.columns = row.length;
+		return new TMatrix(matrix);
+	},
+
+	doc: {
+		usage: 'rowvector(1,2,3)',
+		description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
+		tags: ['constructor','new']
+	}
+});
+
 //cast vector to list
 newBuiltin('list',[TVector],TList,null, {
 	evaluate: function(args,scope)

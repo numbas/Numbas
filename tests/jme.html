@@ -553,9 +553,9 @@
 						closeEquals(evaluate('fact(0)').value,1,'fact(0)');
 						closeEquals(evaluate('fact(1)').value,1,'fact(1)');
 						closeEquals(evaluate('fact(6)').value,720,'fact(6)');
-						closeEquals(evaluate('fact(1/2)').value,1.7724538509055157,'fact(1/2)');
-						closeEquals(evaluate('fact(-3/2)').value,2.363271801207352,'fact(-3/2)');
-						deepCloseEqual(evaluate('fact(i)').value,math.complex(-0.15494982830181037,-0.49801566811835596),'fact(i)');
+						closeEquals(evaluate('fact(1/2)').value,0.8862269255,'fact(1/2)');
+						closeEquals(evaluate('fact(-3/2)').value,-3.5449077018 ,'fact(-3/2)');
+						deepCloseEqual(evaluate('fact(i)').value,math.complex(0.4980156681,-0.1549498283),'fact(i)');
 
 						closeEquals(evaluate('root(8,3)').value,2,'root(8,3)');
 						deepCloseEqual(evaluate('root(-81,4)').value,math.complex(2.121320343559643,2.121320343559643),'root(-81,4)');

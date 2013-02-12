@@ -18,7 +18,7 @@ Numbas.queueScript('scripts/math.js',[],function() {
 
 var math = Numbas.math = {
 
-re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
+	re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 	
 	//Operations to cope with complex numbers
 	complex: function(re,im)
@@ -561,7 +561,7 @@ re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
 		}
 		else	//gamma function extends factorial to non-ints and negative numbers
 		{
-			return math.gamma(n+1);
+			return math.gamma(math.add(n,1));
 		}
 	},
 
