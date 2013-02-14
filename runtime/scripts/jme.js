@@ -51,8 +51,8 @@ var jme = Numbas.jme = {
 		var i = 0;
 		var re_bool = /^true|^false/i;
 		var re_number = /^[0-9]+(?:\x2E[0-9]+)?/;
-		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z][a-zA-Z0-9]*'*)|\?)}?/i;
-		var re_op = /^(_|\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
+		var re_name = /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?)}?/i;
+		var re_op = /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i;
 		var re_punctuation = /^([\(\),\[\]])/;
 		var re_string = /^(['"])((?:[^\1\\]|\\.)*?)\1/;
 		var re_special = /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/;
@@ -1079,7 +1079,6 @@ var postfixForm = {
 }
 
 var precedence = jme.precedence = {
-	'_': 0,
 	'fact': 1,
 	'not': 1,
 	'+u': 2.5,
@@ -1257,7 +1256,6 @@ function newBuiltin(name,intype,outcons,fn,options) {
 	return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
 
-newBuiltin('_', ['?','?'], '?', null, {doc: {usage: 'x_i', description: "Special character to create subscripts. (deprecated)", tags: ['subscript','index']}});
 newBuiltin('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});	
 newBuiltin('+u', [TVector], TVector, function(a){return a;}, {doc: {usage: '+x', description: "Vector unary addition.", tags: ['plus','positive']}});	
 newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;}, {doc: {usage: '+x', description: "Matrix unary addition.", tags: ['plus','positive']}});	

@@ -95,6 +95,8 @@
 						deepCloseEqual(tokenise('xyz'),[new types.TName('xyz')],'xyz');
 						deepCloseEqual(tokenise('$x'),[new types.TName('$x')],'$x');
 						deepCloseEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
+						deepCloseEqual(tokenise("_"),[new types.TName("_")],"_");
+						deepCloseEqual(tokenise("a_1"),[new types.TName("a_1")],"a_1");
 					});
 
 					test('Whitespace',function() {
@@ -104,7 +106,6 @@
 					});
 
 					test('Operators', function() {
-						deepCloseEqual(tokenise('_'),[new types.TOp('_')],'_');
 						deepCloseEqual(tokenise('..'),[new types.TOp('..')],'..');
 						deepCloseEqual(tokenise('#'),[new types.TOp('#')],'#');
 						deepCloseEqual(tokenise('<='),[new types.TOp('<=')],'<=');
@@ -740,6 +741,8 @@
 						function exprToLaTeX(expr,rules) {
 							return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
 						}
+						equals(exprToLaTeX('a1'),'a_{1}','a1 -- make numbers at the end of variable names subscripts');	
+						equals(exprToLaTeX('a_1'),'a\\_1','a_1 -- dusplay underscores in variable names as underscores');	
 						equals(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
 						equals(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 						equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	

@@ -190,9 +190,6 @@ var texOps = jme.display.texOps = {
 	//range definition. Should never really be seen
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
-	//subscript
-	'_': (function(thing,texArgs) { return texArgs[0]+'_{'+texArgs[1]+'}'; }),
-
 	//logical negation
 	'!': infixTex('\\neg '),	
 
@@ -232,7 +229,7 @@ var texOps = jme.display.texOps = {
 		for(var i=1; i<thing.args.length; i++ )
 		{
 			//specials or subscripts
-			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special' || (thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='_') || (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='_'))	
+			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
 			{
 				s+=' ';
 			}
@@ -636,7 +633,8 @@ function texMatrix(m,settings,parens)
 function texName(name,annotation)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
-	name = name.replace(/^(.*?)(\d+)/,'$1_{$2}');	//make numbers at the end of a variable name subscripts
+	name = name.replace(/_/g,'\\_');	//make numbers at the end of a variable name subscripts
+	name = name.replace(/^(.*?[^_])(\d+)$/,'$1_{$2}');	//make numbers at the end of a variable name subscripts
 	if(!annotation)
 		return name;
 
