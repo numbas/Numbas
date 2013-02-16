@@ -91,10 +91,11 @@ class ExamParser:
 			obj = OrderedDict()
 			while self.cursor<len(self.source) and self.source[self.cursor]!='}':
 				i=self.cursor
-				namere = re.compile(r'^\w*$')
+				namere = re.compile(r'^[\w_]*\'*$')
 				while i<len(self.source) and self.source[i]!=':':
-					if(not namere.match(self.source[self.cursor:i].strip())):
-						raise ParseError(self,"Invalid name '%s' for an object property" % self.source[self.cursor:i],"check for mismatched brackets")
+					name = self.source[self.cursor:i+1].strip()
+					if(not namere.match(name)):
+						raise ParseError(self,"Invalid name '%s' for an object property" % name,"check for mismatched brackets")
 					i+=1
 				if i==len(self.source):
 					raise ParseError(self,"Expected a colon")
