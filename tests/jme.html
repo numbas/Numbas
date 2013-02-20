@@ -405,7 +405,7 @@
 						deepCloseEqual(evaluate('mod(5,0)').value,NaN,'mod(5,0)');
 						closeEquals(evaluate('mod(13,2)').value,1,'mod(13,2)');
 						closeEquals(evaluate('mod(4.765,3)').value,1.765,'mod(4.765,3)');
-						closeEquals(evaluate('mod(-13,6)').value,-1,'mod(-13,6)');
+						closeEquals(evaluate('mod(-13,6)').value,5,'mod(-13,6)');
 						closeEquals(evaluate('mod(2.4,1.1)').value,0.2,'mod(2.4,1.1)');
 
 						closeEquals(evaluate('max(3,5)').value,5,'max(3,5)');
