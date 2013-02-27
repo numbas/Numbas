@@ -750,6 +750,7 @@
 						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
 						equals(exprToLaTeX('ln(abs(x))'),'\\ln \\left | x \\right |','ln(abs(x)) - ln of absolute value has no parentheses');
 						equals(exprToLaTeX('ln(x)'),'\\ln \\left( x \\right)','ln(x) - ln of anything else has parentheses');
+						equals(exprToLaTeX('x-(-1.5)','fractionnumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
 					});
 				};
 

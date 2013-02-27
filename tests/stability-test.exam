@@ -11,12 +11,12 @@
 		allowregen: True
 		reverse: True
 		browse: True
-		showfrontpage: True
+		showfrontpage: False
 		onleave: {
 			action: none
 			message: ''
 		}
-		preventleave: True
+		preventleave: False
 	}
 	timing: {
 		timeout: {
@@ -398,6 +398,33 @@
 				    1
 				"
 			}
+			functions: {}
+			
+			parts: []
+		}, 
+		{
+			name: "Stability Test: rulesets"
+			
+			tags: []
+			progress: in-progress
+			metadata: {
+				notes: ''
+				description: ''
+			}
+			statement: "
+			<p>Trying to simplify $(x-(-1.5))^2$ with <code>fractionNumbers</code> and <code>all</code> turned on.&nbsp;</p>
+			  <p>$\simplify[r]{(x-{qb/2})^2 }$</p>
+			  <p>$\simplify[fractionnumbers,all]{(x-{qb/2})^2 }$</p>
+			  <p>$\simplify[fractionnumbers,all,!fractionnumbers]{(x-{qb/2})^2 }$</p>
+			"
+			
+			extensions: []
+			advice: ''
+			rulesets: {
+				
+				r: [all, fractionNumbers]
+			}
+			variables: {qb: -3}
 			functions: {}
 			
 			parts: []

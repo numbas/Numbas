@@ -122,7 +122,7 @@ var Exam = Numbas.Exam = function()
 
 	for(var name in sets)
 	{
-		this.scope.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],this.scope);
+		this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.rulesets);
 	}
 
 	//initialise display

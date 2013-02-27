@@ -13,8 +13,6 @@ Copyright 2011 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
-
 Numbas.queueScript('scripts/jme-display.js',['math','jme','util'],function() {
 	
 var math = Numbas.math;
@@ -29,14 +27,14 @@ jme.display = {
 	{
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,scope);
+		ruleset = jme.collectRuleset(ruleset,scope.rulesets);
 
 		expr+='';	//make sure expr is a string
 
 		if(!expr.trim().length)	//if expr is the empty string, don't bother going through the whole compilation proces
 			return '';
 		var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
-		var tex = texify(tree,ruleset); //render the tree as TeX
+		var tex = texify(tree,ruleset.flags); //render the tree as TeX
 		return tex;
 	},
 
@@ -45,7 +43,7 @@ jme.display = {
 	{
 		if(expr.trim()=='')
 			return '';
-		return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset);
+		return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset.flags);
 	},
 
 	//simplify a JME expression string according to given ruleset and return it as a syntax tree
@@ -56,7 +54,7 @@ jme.display = {
 
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = collectRuleset(ruleset,scope);		//collect the ruleset - replace set names with the appropriate Rule objects
+		ruleset = jme.collectRuleset(ruleset,scope.rulesets);		//collect the ruleset - replace set names with the appropriate Rule objects
 
 		try 
 		{
@@ -71,13 +69,15 @@ jme.display = {
 	},
 
 	//simplify a syntax tree according to given ruleset
-	simplifyTree: function(exprTree,rules,scope)
+	simplifyTree: function(exprTree,ruleset,scope)
 	{
 		if(!scope)
 			throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
 		scope = Numbas.util.copyobj(scope);
 		scope.variables = {};	//remove variables from the scope so they don't accidentally get substituted in
 		var applied = true;
+
+		var rules = ruleset.rules;
 
 		// apply rules until nothing can be done
 		while( applied )
@@ -93,7 +93,7 @@ jme.display = {
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
-						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],rules,scope);
+						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope);
 					}
 				}
 				applied = false;
@@ -1291,7 +1291,7 @@ var compileRules = jme.display.compileRules = function(rules)
 		result = rules[i][2];
 		rules[i] = new Rule(pattern,conditions,result);
 	}
-	return rules;
+	return new jme.Ruleset(rules,{});
 }
 
 var all=[];
@@ -1299,88 +1299,9 @@ var nsimplificationRules = Numbas.jme.display.simplificationRules = {};
 for(var x in simplificationRules)
 {
 	nsimplificationRules[x] = nsimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
-	all = all.concat(nsimplificationRules[x.toLowerCase()]);
+	all = all.concat(nsimplificationRules[x].rules);
 }
 simplificationRules = nsimplificationRules;
-simplificationRules['all']=all;
+simplificationRules['all']=new jme.Ruleset(all,{});
 Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
-
-var displayFlags = ['fractionnumbers','rowvector'];
-
-var collectRuleset = jme.display.collectRuleset = function(set,scope)
-{
-	scope = new jme.Scope([scope]);
-	var sets = scope.rulesets;
-	if(typeof(set)=='string')
-	{
-		set = set.split(',');
-	}
-	if(!set)
-	{
-		return [];
-	}
-	if(!sets)
-	{
-		throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
-	}
-
-	var out = [];
-	for(var i=0;i<displayFlags.length;i++)
-	{
-		out[displayFlags[i]] = set[displayFlags[i]];
-	}
-	for(var i=0; i<set.length; i++ )
-	{
-		if(typeof(set[i])=='string')
-		{
-			var m = /^(!)?(.*)$/.exec(set[i]);
-			var neg = m[1]=='!' ? true : false;
-			var name = m[2].trim().toLowerCase();
-			if(displayFlags.contains(name))
-			{
-				out[name]= !neg;
-			}
-			else if(name.length>0)
-			{
-				if(!(name in sets))
-				{
-					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',name));
-				}
-
-				var sub = collectRuleset(sets[name],scope);
-
-				for(var j=0;j<displayFlags.length;j++)
-				{
-					if(displayFlags[j] in sub)
-						out[displayFlags[j]] = sub[displayFlags[j]];
-				}
-
-				sets[name] = sub;
-				if(neg)
-				{
-					for(var j=0; j<sub.length; j++)
-					{
-						if((m=out.indexOf(sub[j]))>=0)
-						{
-							out.splice(m,1);
-						}
-					}
-				}
-				else
-				{
-					for(var j=0; j<sub.length; j++)
-					{
-						if(!(out.contains(sub[j])))
-						{
-							out.push(sub[j]);
-						}
-					}
-				}
-			}
-		}
-		else
-			out.push(set[i]);
-	}
-	return out;
-}
 });

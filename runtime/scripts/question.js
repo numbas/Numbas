@@ -78,7 +78,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 
 		for(var name in sets)
 		{
-			q.scope.rulesets[name] = Numbas.jme.display.collectRuleset(sets[name],q.scope);
+			q.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],q.scope.rulesets);
 		}
 	});
 
@@ -691,7 +691,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
 
-	settings.answerSimplification = Numbas.jme.display.collectRuleset(settings.answerSimplification,this.question.scope);
+	settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplification,this.question.scope.rulesets);
 
 	settings.correctAnswer = jme.display.simplifyExpression(
 		Numbas.xml.getTextContent(answerMathML).trim(),
