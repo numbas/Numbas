@@ -110,8 +110,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
 
-		q.display.makeHTML();
-
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -122,6 +120,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
+
+		q.display.makeHTML();
 
 		if(loading)
 		{
@@ -138,6 +138,10 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 				q.revealAnswer(true);
 			else if(q.adviceDisplayed)
 				q.getAdvice(true);
+
+			for(var j=0;j<q.parts.length;j++) {
+				q.parts[j].display.restoreAnswer();
+			}
 		}
 
 		q.updateScore();
@@ -766,7 +770,6 @@ function JMEPart(xml, path, question, parentPart, loading)
 		this.stagedAnswer = [pobj.studentAnswer];
 		if(this.answered)
 			this.submit();
-		this.display.restoreAnswer();
 	}
 	else {
 		this.stagedAnswer = [''];
@@ -990,7 +993,6 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 		this.stagedAnswer = [pobj.studentAnswer];
 		if(this.answered)
 			this.submit();
-		this.display.restoreAnswer();
 	}
 }
 PatternMatchPart.prototype = {
@@ -1095,7 +1097,6 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 		this.stagedAnswer = [pobj.studentAnswer+''];
 		if(this.answered)
 			this.submit();
-		this.display.restoreAnswer();
 	}
 }
 NumberEntryPart.prototype =
@@ -1523,7 +1524,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
 	if(loading) {
-		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
@@ -1675,7 +1675,6 @@ function GapFillPart(xml, path, question, parentPart, loading)
 
 	if(loading)
 	{
-		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
 	}
