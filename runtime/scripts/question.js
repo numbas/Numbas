@@ -123,8 +123,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 			q.marks += part.marks;
 		}
 
-		q.display.makeHTML();
-
 		if(loading)
 		{
 			var qobj = Numbas.store.loadQuestion(q);
@@ -766,9 +764,9 @@ function JMEPart(xml, path, question, parentPart, loading)
 	if(loading)	{
 		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
-		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
+		this.display.restoreAnswer();
 	}
 	else {
 		this.stagedAnswer = [''];
@@ -990,9 +988,9 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadPatternMatchPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
-		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
+		this.display.restoreAnswer();
 	}
 }
 PatternMatchPart.prototype = {
@@ -1095,9 +1093,9 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadNumberEntryPart(this);
 		this.stagedAnswer = [pobj.studentAnswer+''];
-		this.display.restoreAnswer();
 		if(this.answered)
 			this.submit();
+		this.display.restoreAnswer();
 	}
 }
 NumberEntryPart.prototype =
