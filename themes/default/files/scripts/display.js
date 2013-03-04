@@ -1081,7 +1081,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 		marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
 		scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
 	};
-	if(answered)
+	if(answered && marks>0)
 	{
 		var str = 'question.score feedback.answered'
 					+ (settings.showTotalMark ? ' total' : '')
@@ -1103,7 +1103,7 @@ function showScoreFeedback(selector,answered,score,marks,settings)
 	}
 	if( settings.showAnswerState )
 	{
-		if( answered )
+		if( answered && marks>0 )
 		{
 			var state;
 			if( score<=0  )
