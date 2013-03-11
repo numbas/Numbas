@@ -94,8 +94,13 @@ def realFile(file):
 
 def collectFiles(options,dirs=[('runtime','.')]):
 
-	resources = [os.path.join(options.sourcedir,x) for x in options.resources]
-	dirs += [(os.path.join(os.getcwd(),x),os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
+	resources=[x if isinstance(x,list) else [x,x] for x in options.resources]
+
+	print(resources)
+	for name,path in resources:
+		if os.path.isdir(path):
+			dirs.append((os.path.join(os.getcwd(),path),os.path.join('resources',name)))
+
 
 	extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
 	extfiles = [
@@ -116,9 +121,9 @@ def collectFiles(options,dirs=[('runtime','.')]):
 			for y in filter(realFile,x[2]):
 				files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
 
-	for x in resources:
-		if not os.path.isdir(x):
-			files[os.path.join('resources',os.path.basename(x))] = os.path.join(options.path,x)
+	for name,path in resources:
+		if not os.path.isdir(path):
+			files[os.path.join('resources',name)] = os.path.join(options.path,path)
 	
 	return files
 
