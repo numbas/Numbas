@@ -1166,6 +1166,8 @@ var simplificationRules = jme.display.simplificationRules = {
 	basic: [
 		['+x',[],'x'],					//get rid of unary plus
 		['x+(-y)',[],'x-y'],			//plus minus = minus
+		['x+y',['y<0'],'x-eval(-y)'],
+		['x-y',['y<0'],'x+eval(-y)'],
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
 		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],

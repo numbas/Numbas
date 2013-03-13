@@ -731,6 +731,7 @@
 						equals(simplifyExpression('(1-i)-(-2+2i)',''),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
 						equals(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
 						equals(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
+						equals(simplifyExpression('x+(-10+2)'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
 						equals(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
 
 						var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
