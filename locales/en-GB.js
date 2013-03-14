@@ -21,6 +21,8 @@ R.registerLocale('en-GB',{
 	'exam.marks available': "Marks Available:",
 	'exam.pass percentage': "Pass Percentage:",
 	'exam.time allowed': "Time Allowed:",
+	'exam.passed': 'Passed',
+	'exam.failed': 'Failed',
 	'frontpage.start': "Start",
 
 	'suspend.exam suspended': "The Exam has been suspended. Press Resume to continue.",

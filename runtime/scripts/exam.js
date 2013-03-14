@@ -566,7 +566,7 @@ Exam.prototype = {
 									score: niceNumber(this.score),
 									percentagescore: niceNumber(this.percentScore),
 									passed: this.passed,
-									result: (this.passed ? 'Passed' :'Failed')
+									result: R(this.passed ? 'exam.passed' :'exam.failed')
 								},
 			questions: new Array()
 		};
