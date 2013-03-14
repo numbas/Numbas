@@ -120,13 +120,14 @@ display.ExamDisplay = function(e)
 	this.e=e;
 
 	//display exam title at top of page
+	document.title = e.settings.name;
 	$('#examBanner').html(e.name);
 
 	//'next' button always present
 	$('*').find("#nextBtn").click( Numbas.controls.nextQuestion );
 	
 	//show 'previous' button if allowed
-	if( e.navigateReverse )
+	if( e.settings.navigateReverse )
 	{
 		$('*').find("#prevBtn").click( Numbas.controls.previousQuestion ).show();
 	}
@@ -135,18 +136,10 @@ display.ExamDisplay = function(e)
 		$('*').find("#prevBtn").hide();
 	}
 
-	//register 'show advice' button
-	var adviceBtns = $('*').find('#adviceBtn');
-	adviceBtns.click( Numbas.controls.getAdvice );
-	if(e.adviceType=='triggerbutton')
-		adviceBtns.show();
-	else
-		adviceBtns.hide();
-
 	//display 'reveal' button if allowed
 	var revealBtns = $('*').find('#revealBtn');
 	revealBtns.click( Numbas.controls.revealAnswer );
-	if(e.allowRevealAnswer)
+	if(e.settings.allowRevealAnswer)
 		revealBtns.show();
 	else
 		revealBtns.hide();
@@ -155,7 +148,7 @@ display.ExamDisplay = function(e)
 	$('*').find('#submitBtn').click( Numbas.controls.submitQuestion );
 	
 	//register 'try another question like this one' button
-	if(e.allowRegen)
+	if(e.settings.allowRegen)
 		$('*').find('#regenBtn').click( Numbas.controls.regenQuestion );
 	else
 		$('*').find('#regenBtn').hide();
@@ -191,7 +184,7 @@ display.ExamDisplay.prototype =
 	{
 		var exam = this.e;
 
-		if(exam.showActualMark)
+		if(exam.settings.showActualMark)
 		{
 			$('.examScore').show();
 			var niceNumber = Numbas.math.niceNumber;
@@ -218,21 +211,21 @@ display.ExamDisplay.prototype =
 		{
 			var question = exam.questionList[j];
 			$(question.display.questionSelector).attr('class',
-					(question.visited || exam.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
+					(question.visited || exam.settings.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
 		}
 		//scroll question list to centre on current question
 		if(display.carouselGo)
 			display.carouselGo(exam.currentQuestion.number-1,300);
 		
-		if(exam.numQuestions>1) {
+		if(exam.settings.numQuestions>1) {
 			//enable or disable 'previous question' button
 			if(exam.currentQuestion.number === 0)
 				$('*').find('#prevBtn').attr('disabled','true').hide();
-			else if(exam.navigateReverse)
+			else if(exam.settings.navigateReverse)
 				$('*').find('#prevBtn').removeAttr('disabled').show();
 
 			//enable or disable 'next question' button
-			if( exam.currentQuestion.number == exam.numQuestions-1 )
+			if( exam.currentQuestion.number == exam.settings.numQuestions-1 )
 				$('*').find('#nextBtn').attr('disabled','true').hide();
 			else
 				$('*').find('#nextBtn').removeAttr('disabled').show();
@@ -300,7 +293,7 @@ display.ExamDisplay.prototype =
 	{
 		var exam = this.e;
 
-		if(exam.preventLeave)
+		if(exam.settings.preventLeave)
 			window.onbeforeunload = function() { return R('control.confirm leave') };
 
 		exam.currentQuestion.display.show();
@@ -366,25 +359,45 @@ display.QuestionDisplay.prototype =
 
 	show: function()
 	{
-		var exam = Numbas.exam;
 		var q = this.q;
+		var exam = q.exam;
 
 		//hides the info page, if visible
 		$('#infoDisplay').hide();
 
 		//display the question container - content and nav bars
 		$('#questionContainer').show();
+
+		//display question's html
+		$('#questionDisplay').append(q.html);
 		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
 
-		//enable the submit button
-		$('#submitBtn').removeAttr('disabled');
-		//show the reveal button
-		$('#revealBtn').show().removeAttr('disabled');
+		switch(exam.mode) {
+		case 'normal':
+			//enable the submit button
+			$('#submitBtn').removeAttr('disabled');
 
-		//display question's html
-		$('#questionDisplay').append(q.html);
+			var submitMsg = R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
+			$('.navBar #submitBtn').html(submitMsg);
+
+			$('#regenBtn').html(R('control.regen'));
+
+			//show/hide reveal answer button
+			if(exam.settings.allowRevealAnswer)
+				$('#revealBtn').show().removeAttr('disabled');
+			else
+				$('#revealBtn').hide();
+
+			break;
+
+		case 'review':
+
+			$('#submitBtn, #revealBtn, #regenBtn').hide();
+
+			break;
+		}
 
 		//show parts
 		this.postTypesetF = function(){};
@@ -393,30 +406,11 @@ display.QuestionDisplay.prototype =
 			q.parts[i].display.show();
 		}
 
-		var submitMsg;
-		if(q.parts.length<=1)
-		{
-			submitMsg = R('control.submit answer');
-		}
-		else
-		{
-			submitMsg = R('control.submit all parts');
-		}
-		$('.navBar #submitBtn').html(submitMsg);
-
-		$('#regenBtn').html(R('control.regen'));
-
 		//update question name box in nav bar
 		$('#questionNameDisplay').html(R('question.header',q.number+1));
 
 		//display advice if appropriate
 		this.showAdvice();
-
-		//show/hide reveal answer button
-		if(exam.allowRevealAnswer)
-			$('#revealBtn').show();
-		else
-			$('#revealBtn').hide();
 
 		//show correct answers if appropriate
 		this.revealAnswer();
@@ -431,11 +425,11 @@ display.QuestionDisplay.prototype =
 		//resize text inputs to just fit their contents
 		$('input[type=text],input[type=number]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
 
+		//make sure 'input' event is triggered when inputs change
 		$('input').bind('propertychange',function(){$(this).trigger('input')});
 
 		//scroll back to top of page
 		scroll(0,0);
-
 
 		// make mathjax process the question text (render the maths)
 		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
@@ -503,14 +497,14 @@ display.QuestionDisplay.prototype =
 	//display question score and answer state
 	showScore: function()
 	{
-		var exam = Numbas.exam;
 		var q = this.q;
+		var exam = q.exam;
 
 		var selector = $(this.questionSelector).add('.submitDiv');
 
-		showScoreFeedback(selector,q.answered,q.score,q.marks,exam);
+		showScoreFeedback(selector,q.answered,q.score,q.marks,exam.settings);
 
-		if(!exam.showTotalMark && !exam.showActualMark)
+		if(!exam.showTotalMark && !exam.settings.showActualMark)
 		{
 			selector.find('#submitBtn').html(R(q.answered ? 'control.submit again' : 'control.submit'));
 		}
@@ -623,6 +617,7 @@ display.PartDisplay.prototype =
 	showScore: function(valid)
 	{
 		var c = this.htmlContext();
+		var exam = this.p.question.exam;
 
 		if(this.p.marks==0)
 		{
@@ -630,17 +625,17 @@ display.PartDisplay.prototype =
 		}
 		else if(this.p.question.revealed)
 		{
-			showScoreFeedback(c,false,0,this.p.marks,Numbas.exam);
+			showScoreFeedback(c,false,0,this.p.marks,exam.settings);
 		}
 		else
 		{
 			c.find('#marks:last').show();
 			if(valid===undefined)
 				valid = this.p.validate();
-			showScoreFeedback(c,valid,this.p.score,this.p.marks,Numbas.exam);
+			showScoreFeedback(c,valid,this.p.score,this.p.marks,exam.settings);
 		}
 
-		if(Numbas.exam.showAnswerState)
+		if(exam.showAnswerState)
 		{
 			if(this.p.markingFeedback.length && !this.p.question.revealed)
 			{

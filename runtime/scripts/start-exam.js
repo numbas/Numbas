@@ -32,7 +32,7 @@
 				job(exam.init,exam);
 				job(Numbas.display.init);
 				job(function() {
-					if(exam.showFrontPage)
+					if(exam.settings.showFrontPage)
 					{
 						exam.display.showInfoPage('frontpage');
 					}

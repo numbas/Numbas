@@ -35,7 +35,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
 	q.scope = new jme.Scope(gscope);
 
 	//get question's name
-	tryGetAttribute(q,'.','name');
+	tryGetAttribute(q,q.xml,'.','name');
 
 	job(function() {
 		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
@@ -358,7 +358,7 @@ Question.prototype =
 
 function createPart(xml, path, question, parentPart, loading)
 {
-	var type = tryGetAttribute(null,'.','type',[],{xml: xml});
+	var type = tryGetAttribute(null,xml,'.','type',[]);
 	if(type==null)
 		throw(new Numbas.Error('part.missing type attribute'));
 	if(partConstructors[type])
@@ -392,9 +392,9 @@ function Part( xml, path, question, parentPart, loading )
 	//initialise settings object
 	this.settings = util.copyobj(Part.prototype.settings);
 	
-	tryGetAttribute(this,'.',['type','marks']);
+	tryGetAttribute(this,this.xml,'.',['type','marks']);
 
-	tryGetAttribute(this.settings,'.',['minimumMarks','enableMinimumMarks','stepsPenalty'],[],{xml: this.xml});
+	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty'],[]);
 
 	//initialise gap and step arrays
 	this.gaps = [];
@@ -691,7 +691,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	if(!answerMathML)
 		throw(new Numbas.Error('part.jme.answer missing',this.path));
 
-	tryGetAttribute(settings,'answer/correctanswer','simplification','answerSimplification',{xml: this.xml});
+	tryGetAttribute(settings,this.xml,'answer/correctanswer','simplification','answerSimplification');
 
 	settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplification,this.question.scope.rulesets);
 
@@ -705,13 +705,13 @@ function JMEPart(xml, path, question, parentPart, loading)
 	
 	//get checking type, accuracy, checking range
 	var parametersPath = 'answer';
-	tryGetAttribute(settings,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate'],{xml: this.xml});
+	tryGetAttribute(settings,this.xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
 
-	tryGetAttribute(settings,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints'],{xml: this.xml});
+	tryGetAttribute(settings,this.xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
 
 
 	//max length and min length
-	tryGetAttribute(settings,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC'],{xml: this.xml});
+	tryGetAttribute(settings,this.xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
 	var messageNode = xml.selectSingleNode('answer/maxlength/message');
 	if(messageNode)
 	{
@@ -719,7 +719,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 		if($(settings.maxLengthMessage).text() == '')
 			settings.maxLengthMessage = R('part.jme.answer too long');
 	}
-	tryGetAttribute(settings,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC'],{xml: this.xml});
+	tryGetAttribute(settings,this.xml,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC']);
 	var messageNode = xml.selectSingleNode('answer/minlength/message');
 	if(messageNode)
 	{
@@ -739,7 +739,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
 		}
 		//partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
-		tryGetAttribute(settings,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
+		tryGetAttribute(settings,this.xml,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
 		//warning message to display when a must-have is missing
 		var messageNode = mustHaveNode.selectSingleNode('message');
 		if(messageNode)
@@ -757,7 +757,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
 		}
 		//partial credit for failing not-allowed test
-		tryGetAttribute(settings,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
+		tryGetAttribute(settings,this.xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
 		var messageNode = notAllowedNode.selectSingleNode('message');
 		if(messageNode)
 			settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -983,7 +983,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 	settings.displayAnswer = jme.contentsubvars(settings.displayAnswer,question.scope);
 
-	tryGetAttribute(settings,'case',['sensitive','partialCredit'],'caseSensitive',{xml: this.xml});
+	tryGetAttribute(settings,this.xml,'case',['sensitive','partialCredit'],'caseSensitive');
 
 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
 
@@ -1060,8 +1060,8 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{xml: this.xml, string:true});
-	tryGetAttribute(settings,'answer','inputstep','inputStep',{xml:this.xml});
+	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{string:true});
+	tryGetAttribute(settings,this.xml,'answer','inputstep','inputStep');
 
 	var minvalue = jme.subvars(settings.minvalue,this.question.scope);
 	minvalue = evaluate(minvalue,this.question.scope);
@@ -1077,9 +1077,9 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	else
 		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
 
-	tryGetAttribute(settings,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC'],{xml: this.xml});
-	tryGetAttribute(settings,'answer/precision',['type','partialcredit'],['precisionType','precisionPC'],{xml: this.xml});
-	tryGetAttribute(settings,'answer/precision','precision','precision',{xml: this.xml, string:true});
+	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
+	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit'],['precisionType','precisionPC']);
+	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{string:true});
 	settings.precision = jme.subvars(settings.precision, this.question.scope);
 	settings.precision = evaluate(settings.precision,this.question.scope).value;
 	var messageNode = this.xml.selectSingleNode('answer/precision/message');
@@ -1194,14 +1194,14 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 
 
 	//work out marks available
-	tryGetAttribute(settings,'marking/maxmarks','enabled','maxMarksEnabled',{xml: this.xml});
+	tryGetAttribute(settings,this.xml,'marking/maxmarks','enabled','maxMarksEnabled');
 	if(settings.maxMarksEnabled)
 	{
-		tryGetAttribute(this,'marking/maxmarks','value','marks',{xml: this.xml});
+		tryGetAttribute(this,this.xml,'marking/maxmarks','value','marks');
 	}
 	else
 	{
-		tryGetAttribute(this,'.','marks');
+		tryGetAttribute(this,this.xml,'.','marks');
 	}
 
 	//get restrictions on number of choices
@@ -1209,7 +1209,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	if(!choicesNode)
 		throw(new Numbas.Error('part.mcq.choices missing',this.path));
 
-	tryGetAttribute(settings,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
+	tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
 
 	var minAnswers = jme.subvars(settings.minAnswers, question.scope);
 	minAnswers = jme.evaluate(settings.minAnswers,this.question.scope);
@@ -1237,7 +1237,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		var answersNode = this.xml.selectSingleNode('answers');
 		if(answersNode)
 		{
-			tryGetAttribute(settings,answersNode,'order','answerOrder');
+			tryGetAttribute(settings,null,answersNode,'order','answerOrder');
 			var answerNodes = answersNode.selectNodes('answer');
 			this.numAnswers = answerNodes.length;
 		}
@@ -1247,7 +1247,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	warningNode = this.xml.selectSingleNode('uiwarning');
 	if(warningNode)
 	{
-		tryGetAttribute(settings,warningNode,'type','warningType');
+		tryGetAttribute(settings,null,warningNode,'type','warningType');
 		settings.warningMessage = $.xsl.transform(Numbas.xml.templates.question,warningNode).string;
 	}
 	
@@ -1360,7 +1360,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		for( i=0; i<matrixNodes.length; i++ )
 		{
 			var cell = {value: ""};
-			tryGetAttribute(cell, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
+			tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
 
 			if(util.isFloat(cell.value))
 				cell.value = parseFloat(cell.value);
@@ -1394,7 +1394,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	for( i=0; i<distractorNodes.length; i++ )
 	{
 		var cell = {message: ""};
-		tryGetAttribute(cell, distractorNodes[i], ['answerIndex', 'choiceIndex']);
+		tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
 		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
 		cell.message= jme.contentsubvars(cell.message,question.scope);
 

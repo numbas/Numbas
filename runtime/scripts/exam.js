@@ -23,7 +23,6 @@ Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule'
 // exam object keeps track of all info we need to know while exam is running
 var Exam = Numbas.Exam = function()
 {
-	var parseBool = Numbas.util.parseBool;
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 	//get the exam info out of the XML and into the exam object
@@ -33,43 +32,44 @@ var Exam = Numbas.Exam = function()
 		throw(new Numbas.Error('exam.xml.bad root'));
 	}
 
-	//load settings from XML
-	tryGetAttribute(this,'.',['name','percentPass','totalQuestions','allQuestions','selectQuestions','shuffleQuestions']);
-	document.title = this.name;
+	var settings = this.settings;
 
-	tryGetAttribute(this,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
+	//load settings from XML
+	tryGetAttribute(settings,xml,'.',['name','percentPass','shuffleQuestions']);
+
+	tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
 
 	//get navigation events and actions
-	this.navigationEvents = {};
+	settings.navigationEvents = {};
 
 	var navigationEventNodes = xml.selectNodes('settings/navigation/event');
 	for( var i=0; i<navigationEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(navigationEventNodes[i]);
-		this.navigationEvents[e.type] = e;
+		settings.navigationEvents[e.type] = e;
 	}
 
-	tryGetAttribute(this,'settings/timing','duration');
+	tryGetAttribute(settings,xml,'settings/timing','duration');
 	
 	//get text representation of exam duration
-	this.displayDuration = this.duration>0 ? Numbas.timing.secsToDisplayTime( this.duration ) : '';
+	this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
 						
 	//get timing events
-	this.timerEvents = {};
+	settings.timerEvents = {};
 	var timerEventNodes = this.xml.selectNodes('settings/timing/event');
 	for( i=0; i<timerEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(timerEventNodes[i]);
-		this.timerEvents[e.type] = e;
+		settings.timerEvents[e.type] = e;
 	}
 		
 	//feedback
 	var feedbackPath = 'settings/feedback';
-	tryGetAttribute(this,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer']);
+	tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer']);
 
-	tryGetAttribute(this,feedbackPath+'/advice',['type','threshold'],['adviceType','adviceGlobalThreshold']);	
+	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);	
 
-	this.totalQuestions = xml.selectNodes('questions/question').length;
+	this.settings.numQuestions = xml.selectNodes('questions/question').length;
 
 	var scopes = [Numbas.jme.builtinScope];
 	for(var extension in Numbas.extensions) {
@@ -131,56 +131,51 @@ var Exam = Numbas.Exam = function()
 }
 Exam.prototype = {
 
+	settings: {
+		name: '',					//title of exam
+		percentPass: 0,				//percentage student must achieve to pass
+		shuffleQuestions: false,	//should the questions be shuffled?
+		numQuestions: 0,			//number of questions in this sitting
+		preventLeave: true,			//prevent the browser from leaving the page while the exam is running?
+		allowRegen: false,			//can student re-randomise a question?
+		navigateReverse: false,		//can student navigate to previous question?
+		navigateBrowse: false,		//can student jump to any question they like?
+		showFrontPage: true,		//show the frontpage before starting the exam?
+		navigationEvents: {},		//checks to perform when doing certain navigation action
+		timerEvents: {},			//events based on timing
+		duration: 0,				//how long is exam?
+		showActualMark: false,		//show current score?
+		showTotalMark: false,		//show total marks in exam?
+		showAnswerState: false,		//tell student if answer is correct/wrong/partial ?
+		allowRevealAnswer: false,	//allow 'reveal answer' button ?
+		adviceGlobalThreshold: 0, 	//if student scores lower than this percentage on a question, the advice is displayed
+	},
+
 	xml: undefined,				//base node of exam XML
 
-	mode: 'entry',				//can be 	"entry" - exam not started yet
-								//			"in progress" - exam started, not finished
+	mode: 'normal',				//can be 	"normal" - sitting exam
                                 //			"review" - looking at completed exam
-                                //			"suspend" - exam is paused
 
-	//exam properties
-	name: '',					//title of exam
 	mark: 0,					//total marks available in exam
 	score: 0,					//student's current score
-	percentPass: 0,				//percentage student must achieve to pass
-	percentScore: 0,			//student's score as a percentage
 	passed: false,				//did student pass the exam?
 
 	//JME evaluation environment
 	scope: undefined,
+
+	//exam properties
+	percentScore: 0,			//student's score as a percentage
 	
 	//question selection
-	totalQuestions: 0,			//how many questions are available?
-	allQuestions: true,			//use all questions?
-	selectQuestions: 0,			//how many questions to select, if not using all?
-	shuffleQuestions: false,	//should the questions be shuffled?
-	sortingList: [],			//??
-	balancingRule: '',			//??
 	currentQuestionNumber: 0,	//number of current question
 	currentQuestion: undefined,	//current question object
 	
-	numQuestions: 0,			//number of questions in this sitting
 	questionSubset: [],			//which questions from the pool to use? for reconstructing question list on resume
 	questionList: [],			//Question objects, in order student will see them
 		
-	//navigation
-	preventLeave: true,			//prevent the browser from leaving the page while the exam is running?
-	allowRegen: false,			//can student re-randomise a question?
-	navigateReverse: false,		//can student navigate to previous question?
-	navigateBrowse: false,		//can student jump to any question they like?
-	navigateBrowseType: '',		//dropbox or ??
-	onAdvanceAction: 'none',	//some options about what to do when student clicks 'next question' button
-	onReverseAction: 'none',	//same for 'previous question' button
-	onMoveAction: 'none',		//and for jumping to arbitrary question
 
-	navigationEvents: {},		//checks to perform when doing certain navigation action
-	timerEvents: {},			//events based on timing
-	
 	//timing
-	duration: 0,				//how long is exam?
 	displayDuration: '',//exam duration in h:m:s format
-	timeoutAction: 'none',		//what to do when timer runs out
-	timedWarningAction: 'none',	//warning 5 minutes before end?
 	stopwatch: undefined,		//stopwatch object - updates timer every second
 	endTime: undefined,			//time that the exam should stop
 	timeRemaining: 0,			//seconds until end of exam
@@ -190,13 +185,6 @@ Exam.prototype = {
 	start: Date(),				//time exam started
 	stop: Date(),				//time exam finished
 	
-	//feedback
-	showActualMark: false,		//show current score?
-	showTotalMark: false,		//show total marks in exam?
-	showAnswerState: false,		//tell student if answer is correct/wrong/partial ?
-	allowRevealAnswer: false,	//allow 'reveal answer' button ?
-	adviceType: '',				//something to do with when advice can be shown ??
-	adviceGlobalThreshold: 0, 	//if student scores lower than this percentage on a question, the advice is displayed
 
 	display: undefined,			//display code
 
@@ -221,14 +209,14 @@ Exam.prototype = {
 		job(function() {
 			this.timeRemaining = suspendData.timeRemaining;
 			this.questionSubset = suspendData.questionSubset;
-			this.numQuestions = this.questionSubset.length;
+			this.settings.numQuestions = this.questionSubset.length;
 			this.start = new Date(suspendData.start);
 			this.score = suspendData.score;
 		},this);
 
 		job(this.makeQuestionList,this,true);
 		job(function() {
-			for(var i=0;i<this.numQuestions;i++)
+			for(var i=0;i<this.settings.numQuestions;i++)
 			{
 				var q = this.questionList[i];
 			}
@@ -267,25 +255,15 @@ Exam.prototype = {
 		//get all questions out of XML
 		var tmpQuestionList = new Array();
 
-		//decide how many questions in this sitting
-		if( this.allQuestions )
-		{
-			this.numQuestions = this.totalQuestions;
-		}
-		else
-		{
-			this.numQuestions = Math.min(this.totalQuestions,this.selectQuestions);
-		}
-
 		//shuffle questions?
 		this.questionSubset = [];
-		if(this.shuffleQuestions)
+		if(this.settings.shuffleQuestions)
 		{
-			this.questionSubset=Numbas.math.deal(this.numQuestions);
+			this.questionSubset=Numbas.math.deal(this.settings.numQuestions);
 		}
 		else	//otherwise just pick required number of questions from beginning of list
 		{
-			this.questionSubset = Numbas.math.range(this.numQuestions);
+			this.questionSubset = Numbas.math.range(this.settings.numQuestions);
 		}
 
 		if(this.questionSubset.length==0)
@@ -315,7 +293,7 @@ Exam.prototype = {
 			this.mark = 0;
 
 			//go through the questions and recalculate the part scores, then the question scores, then the exam score
-			for( i=0; i<this.numQuestions; i++ )
+			for( i=0; i<this.settings.numQuestions; i++ )
 			{
 				this.mark += this.questionList[i].marks;
 			}
@@ -332,8 +310,8 @@ Exam.prototype = {
 	begin: function()
 	{
 		this.start = new Date();        //make a note of when the exam was started
-		this.endTime = new Date(this.start.getTime()+this.duration*1000);	//work out when the exam should end
-		this.timeRemaining = this.duration;
+		this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);	//work out when the exam should end
+		this.timeRemaining = this.settings.duration;
 
 		this.changeQuestion(0);			//start at the first question!
 
@@ -372,7 +350,7 @@ Exam.prototype = {
 			id: setInterval(function(){exam.countDown();}, 1000)
 		};
 
-		if( this.duration > 0 )
+		if( this.settings.duration > 0 )
 			this.display.showTiming();
 			
 		else
@@ -388,15 +366,15 @@ Exam.prototype = {
 		var t = new Date();
 		this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
 
-		if(this.duration > 0)
+		if(this.settings.duration > 0)
 		{
 			this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
 			this.display.showTiming();
 
-			if(this.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
+			if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
 			{
 				this.showedTimeWarning = true;
-				var e = this.timerEvents['timedwarning'];
+				var e = this.settings.timerEvents['timedwarning'];
 				if(e && e.action=='warn')
 				{
 					Numbas.display.showAlert(e.message);
@@ -404,7 +382,7 @@ Exam.prototype = {
 			}
 			else if(this.timeRemaining===0)
 			{
-				var e = this.timerEvents['timeout'];
+				var e = this.settings.timerEvents['timeout'];
 				if(e && e.action=='warn')
 				{
 					Numbas.display.showAlert(e.message);
@@ -441,11 +419,11 @@ Exam.prototype = {
 	//will check move is allowed and if so change question and update display
 	tryChangeQuestion: function(i)
 	{
-		if(i<0 || i>=this.numQuestions)
+		if(i<0 || i>=this.settings.numQuestions)
 			return;
 
-		if( ! (this.navigateBrowse 	// is browse navigation enabled?
-			|| (this.questionList[i].visited && this.navigateReverse)	// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+		if( ! (this.settings.navigateBrowse 	// is browse navigation enabled?
+			|| (this.questionList[i].visited && this.settings.navigateReverse)	// if not, we can still move backwards to questions already seen if reverse navigation is enabled
 			|| (i>this.currentQuestion.number && this.questionList[i-1].visited)	// or you can always move to the next question
 		))
 		{
@@ -472,7 +450,7 @@ Exam.prototype = {
 		}
 		else
 		{
-			var eventObj = this.navigationEvents.onleave;
+			var eventObj = this.settings.navigationEvents.onleave;
 			switch( eventObj.action )
 			{
 			case 'none':
@@ -548,16 +526,16 @@ Exam.prototype = {
 
 		//work out summary info
 		this.percentScore = Math.round(100*this.score/this.mark);
-		this.passed = this.percentScore >= this.percentPass;
+		this.passed = this.percentScore >= this.settings.percentPass;
 
 		var niceNumber = Numbas.math.niceNumber;
 
 		//construct report object
 		var report = this.report = 
-		{	examsummary: {	name: this.name,
-							numberofquestions: this.numQuestions, 
+		{	examsummary: {	name: this.settings.name,
+							numberofquestions: this.settings.numQuestions, 
 							mark: niceNumber(this.mark),
-							passpercentage: niceNumber(this.percentPass),
+							passpercentage: niceNumber(this.settings.percentPass),
 							duration: this.displayDuration 
 						 },
 			performancesummary: {	start: this.start.toGMTString(),
@@ -603,7 +581,7 @@ Exam.prototype = {
 function ExamEvent(eventNode)
 {
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
-	tryGetAttribute(this,eventNode,['type','action']);
+	tryGetAttribute(this,null,eventNode,['type','action']);
 	this.message = Numbas.xml.serializeMessage(eventNode);
 }
 ExamEvent.prototype = {
