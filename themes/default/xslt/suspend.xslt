@@ -21,7 +21,7 @@ Copyright 2011 Newcastle University
 	<div>
 		<p><localise>suspend.exam suspended</localise></p>
 		<p><localise>suspend.you can resume</localise></p>
-		<button id="resumeBtn"><localise>Resume</localise></button>
+		<button class="btn" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam"><localise>suspend.resume</localise></button>
 	</div>
 </xsl:template>
 

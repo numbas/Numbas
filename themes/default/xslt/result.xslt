@@ -20,10 +20,10 @@ Copyright 2011 Newcastle University
 	<div id="results">	
 		<xsl:apply-templates />
 		<div class="exitBtn">
-			<button id="exitBtn"><localise>result.exit</localise></button>
+			<button class="btn" id="exitBtn" data-bind="click: Numbas.controls.exitExam"><localise>result.exit</localise></button>
 		</div>
 		<span id="reviewBtnSpan">
-			<button id="reviewBtn"><localise>result.review</localise></button>
+			<button class="btn" id="reviewBtn" data-bind="visible: exam.settings.canReview"><localise>result.review</localise></button>
 		</span>
 	</div>
 </xsl:template>

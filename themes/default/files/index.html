@@ -41,6 +41,9 @@ Copyright 2011 Newcastle University
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
 
+		<!-- knockout.js - model/view bindings -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/knockout/knockout.js"></script>
+
 		<!-- pipwerks SCORM wrapper -->
 		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
 
@@ -82,23 +85,23 @@ Copyright 2011 Newcastle University
 			<div class="logo">
 				<img src="resources/numbas-logo.gif"/>
 			</div>
-			<div id="examBanner">exam name</div>
+			<div id="examBanner" data-bind="text: exam.settings.name">Exam name</div>
 		</div>
 
 		<!-- main content area - info pages or questions go in here -->
 		<div class="mainDisplay">
-			<div id="infoDisplay">
+			<div id="infoDisplay" data-bind="visible: infoPage">
 			</div>
 
-			<div id="questionContainer">
+			<div id="questionContainer" data-bind="visible: currentQuestion">
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
-					<button class="leftNav" id="prevBtn" data-localise="control.previous"></button>
-					<button class="rightNav" id="nextBtn" data-localise="control.next"></button>
+					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="attr: {disabled: !canReverse()}, click: Numbas.controls.previousQuestion"></button>
+					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
 					<div class="titleBits">
 						<span id="questionNameDisplay">Question Name</span>
 						<span class="adviceNav">
-							<button id="revealBtn" data-localise="control.reveal"></button>
+							<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: exam.settings.allowRevealAnswer, click: Numbas.controls.revealAnswer"></button>
 						</span>
 					</div>
 				</div>
@@ -107,66 +110,59 @@ Copyright 2011 Newcastle University
 
 					<!-- question and advice go in here -->
 					<div class="col1wrap">
-						<div id="questionDisplay">
+						<div id="questionDisplay" data-bind="with: currentQuestion">
 						</div>
 					</div>
 
 					<!-- menu for navigating questions and displaying scores/feedback -->
 					<!-- also timing controls -->
 					<div class="questionMenu">
-						<div class="carouselBtn prev"><img src="resources/arrow-up.png" /></div>
+						<div class="carouselBtn prev"></div>
 						<div class="questionList">
-							<ul id="questionList">
+							<ul id="questionList" data-bind="foreach: exam.questionList">
+								<li id="questionSelector" class="questionSelector" data-bind="with: display, css: {current: $root.currentQuestion()==$data.display}, click: Numbas.controls.makeQuestionJumper(number)">
+									<span id="name" data-bind="text: question.name"></span>
+									<div id="marks">
+										<div id="feedback"></div>
+										<div id="score"></div>
+									</div>
+								</li>
 							</ul>
 						</div>
-						<div class="carouselBtn next"><img src="resources/arrow-down.png" /></div>
+						<div class="carouselBtn next" data-bind="attr: {disabled: currentQuestionNumber()==exam.questionList.length-1}"></div>
 
 						<!-- total exam score display -->
-						<div class="examScore">
-							<span data-localise="control.total"></span> <span id="examScore">0/0</span>
+						<div class="examScore" data-bind="visible: exam.settings.showActualMark, html: examScoreDisplay">
+							<span data-localise="control.total"></span> <span id="examScore" data-bind="html: examScoreDisplay"></span>
 						</div>
 						
 						<!-- stopwatch and timing controls -->
-						<div class="mainDiv timeBox">
-							<p id="stopWatch">Time remaining: 01:00:00</p>
-						</div>
+						<div id="stopWatch" data-bind="visible: displayTime, text: displayTime"></div>
 
 						<!-- end exam button -->
 						<div class="menuButtons">
-							<div><button id="pauseBtn" data-localise="control.pause"></button></div>
-							<div><button id="endBtn" data-localise="control.end exam"></button></div>
+							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></div>
+							<div><button class="btn" id="endBtn" data-localise="control.end exam", data-bind="click: Numbas.controls.endExam"></button></div>
 						</div>
 					</div>
 				</div>
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
-					<button id="prevBtn" class="leftNav" data-localise="control.previous"></button>
-					<button id="nextBtn" class="rightNav" data-localise="control.next"></button>
+					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="visible: $root.canReverse, click: Numbas.controls.previousQuestion"></button>
+					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
 					<div class="submitDiv">
-						<button id="submitBtn" data-localise="control.submit all parts"></button>
+						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="click: Numbas.controls.submitQuestion"></button>
 						<div id="marks">	
 							<span id="score"></span>
 							<span id="feedback"><img src="resources/cross.png"/></span>
 						</div>
-						<button id="regenBtn" data-localise="control.regen"></button>
+						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
 					</div>
 				</div>
 			</div>
 
 		</div>
 		</div>
-		<ul style="display:hidden;">
-			<!-- empty question selector thing - will be copied into question list for each question -->
-			<li id="questionSelector" class="questionSelector-hidden">
-				<a href="#">
-					<span id="name"></span>
-					<div id="marks">
-						<div id="feedback"></div>
-						<div id="score"></div>
-					</div>
-				</a>
-			</li>
-		</ul>
 	</body>
 
 </html>

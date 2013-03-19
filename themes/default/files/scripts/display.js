@@ -22,6 +22,31 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 
 	var util = Numbas.util;
 
+ko.bindingHandlers.dom = {
+	update: function(element,valueAccessor) {
+		var html = ko.utils.unwrapObservable(valueAccessor());
+		$(element).children().remove();
+		$(element).append(html);
+	}
+}
+
+ko.bindingHandlers.slideVisible = {
+	update: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		if(v)
+			$(element).slideDown('fast');
+		else
+			$(element).slideUp('fast');
+	}
+}
+
+ko.bindingHandlers.latex = {
+	update: function(element,valueAccessor) {
+		ko.bindingHandlers.html.update(element,valueAccessor);
+		Numbas.display.typeset(element);
+	}
+}
+
 var display = Numbas.display = {
 	localisePage: function() {
 		//localise strings in page HTML
@@ -47,11 +72,13 @@ var display = Numbas.display = {
 		$('#loading').hide();
 		$('#everything').show();
 
+		ko.applyBindings(Numbas.exam.display);
+
 		$(document).keydown( function(e)
 		{
 			if(!Numbas.exam.inProgress) { return; }
 
-			if(display.inInput || $('#jqibox:visible').length)
+			if(display.inInput || $('#jqibox').is(':visible'))
 				return;
 			
 			switch(e.keyCode)
@@ -117,54 +144,31 @@ var display = Numbas.display = {
 //display properties of exam object
 display.ExamDisplay = function(e) 
 {
-	this.e=e;
+	this.exam=e;
 
-	//display exam title at top of page
+	this.infoPage = ko.observable(null);
+	this.currentQuestion = ko.observable(null);
+	this.currentQuestionNumber = ko.computed(function() {
+		var q = this.currentQuestion();
+		if(q)
+			return q.question.number;
+		else
+			return null;
+	},this);
+
+	this.canReverse = ko.computed(function() {
+		return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
+	},this);
+	this.canAdvance = ko.computed(function() {
+		return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
+	},this);
+
+
+	this.examScoreDisplay = ko.observable('');
+	this.displayTime = ko.observable('');
+
 	document.title = e.settings.name;
-	$('#examBanner').html(e.settings.name);
 
-	//'next' button always present
-	$('*').find("#nextBtn").click( Numbas.controls.nextQuestion );
-	
-	//show 'previous' button if allowed
-	if( e.settings.navigateReverse )
-	{
-		$('*').find("#prevBtn").click( Numbas.controls.previousQuestion ).show();
-	}
-	else
-	{
-		$('*').find("#prevBtn").hide();
-	}
-
-	//display 'reveal' button if allowed
-	var revealBtns = $('*').find('#revealBtn');
-	revealBtns.click( Numbas.controls.revealAnswer );
-	if(e.settings.allowRevealAnswer)
-		revealBtns.show();
-	else
-		revealBtns.hide();
-
-	//register 'submit question' button
-	$('*').find('#submitBtn').click( Numbas.controls.submitQuestion );
-	
-	//register 'try another question like this one' button
-	if(e.settings.allowRegen)
-		$('*').find('#regenBtn').click( Numbas.controls.regenQuestion );
-	else
-		$('*').find('#regenBtn').hide();
-
-	if(Numbas.store)
-	{
-		$('*').find('#pauseBtn').click( Numbas.controls.pauseExam );
-	}
-	else
-	{
-		//hide 'pause' button
-		$('*').find('#pauseBtn').hide();
-	}
-
-	//register 'end exam' button
-	$('*').find("#endBtn").click( Numbas.controls.endExam );
 }
 display.ExamDisplay.prototype = 
 {
@@ -172,40 +176,32 @@ display.ExamDisplay.prototype =
 
 	showTiming: function()
 	{
-		$('#stopWatch').html(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.e.timeRemaining)));
+		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
 	},
 
 	hideTiming: function()
 	{
-		$('.timeBox').hide();
+		this.displayTime('');
 	},
 
 	showScore: function()
 	{
-		var exam = this.e;
+		var exam = this.exam;
 
-		if(exam.settings.showActualMark)
-		{
-			$('.examScore').show();
-			var niceNumber = Numbas.math.niceNumber;
+		var niceNumber = Numbas.math.niceNumber;
 
-			var totalExamScoreDisplay = '';
-			if(exam.settings.showTotalMark)
-				totalExamScoreDisplay = niceNumber(exam.score)+'/'+niceNumber(exam.mark);
-			else
-				totalExamScoreDisplay = niceNumber(exam.score);
-
-			$('#examScore').html(totalExamScoreDisplay);
-		}
+		var totalExamScoreDisplay = '';
+		if(exam.settings.showTotalMark)
+			totalExamScoreDisplay = niceNumber(exam.score)+'/'+niceNumber(exam.mark);
 		else
-		{
-			$('.examScore').hide();
-		}
+			totalExamScoreDisplay = niceNumber(exam.score);
+
+		this.examScoreDisplay(totalExamScoreDisplay);
 	},
 
 	updateQuestionMenu: function()
 	{
-		var exam = this.e;
+		var exam = this.exam;
 		//highlight current question, unhighlight the rest
 		for(var j=0; j<exam.questionList.length; j++)
 		{
@@ -216,33 +212,16 @@ display.ExamDisplay.prototype =
 		//scroll question list to centre on current question
 		if(display.carouselGo)
 			display.carouselGo(exam.currentQuestion.number-1,300);
-		
-		if(exam.settings.numQuestions>1) {
-			//enable or disable 'previous question' button
-			if(exam.currentQuestion.number === 0)
-				$('*').find('#prevBtn').attr('disabled','true').hide();
-			else if(exam.settings.navigateReverse)
-				$('*').find('#prevBtn').removeAttr('disabled').show();
-
-			//enable or disable 'next question' button
-			if( exam.currentQuestion.number == exam.settings.numQuestions-1 )
-				$('*').find('#nextBtn').attr('disabled','true').hide();
-			else
-				$('*').find('#nextBtn').removeAttr('disabled').show();
-		} else {
-			$('*').find('#prevBtn,#nextBtn').hide();
-		}
 	},
 
 	showInfoPage: function(page)
 	{
 		window.onbeforeunload = null;
 
-		//hide question container, and show info container
-		$('#questionContainer').hide();
-		$('#infoDisplay').show();
+		this.infoPage(page);
+		this.currentQuestion(null);
 
-		var exam = this.e;
+		var exam = this.exam;
 
 		//scroll back to top of screen
 		scroll(0,0);
@@ -257,7 +236,6 @@ display.ExamDisplay.prototype =
 
 			$('#infoDisplay').getTransform(Numbas.xml.templates.frontpage,exam.xmlize());
 
-			$('#startBtn').click( Numbas.controls.beginExam );
 			break;
 
 		case "result":
@@ -267,17 +245,11 @@ display.ExamDisplay.prototype =
 			//display result page using report XML
 			$('#infoDisplay').getTransform(Numbas.xml.templates.result,xmlDoc);
 			
-			//make exit button 
-			$('#exitBtn').click(Numbas.controls.exitExam);	
-					
-			$('#reviewBtn').hide();
 			break;
 
 		case "suspend":
 			$('#infoDisplay').getTransform(Numbas.xml.templates.suspend,exam.xmlize());
 		
-			$('#resumeBtn').click( Numbas.controls.resumeExam );
-
 			Numbas.exam.display.showScore();
 
 			break;
@@ -286,12 +258,15 @@ display.ExamDisplay.prototype =
 			$('#infoDisplay').getTransform(Numbas.xml.templates.exit,exam.xmlize());
 			break;
 		}
-
+		ko.applyBindings(this,$('#infoDisplay')[0]);
 	},
 
 	showQuestion: function()
 	{
-		var exam = this.e;
+		var exam = this.exam;
+
+		this.infoPage(null);
+		this.currentQuestion(exam.currentQuestion.display);
 
 		if(exam.settings.preventLeave)
 			window.onbeforeunload = function() { return R('control.confirm leave') };
@@ -316,41 +291,26 @@ display.ExamDisplay.prototype =
 //display properties of question object
 display.QuestionDisplay = function(q)
 {
-	this.q = q;
+	this.question = q;
 
+	this.adviceDisplayed = ko.observable(false);
 
-	//make question selector for menu
-	var qs = $('#questionSelector').clone();
-
-	qs
-		.attr('id','questionSelector-'+q.number)
-		.find('#name').html(R('question.header',q.number+1));
-
-	$('#questionList').append(qs);
-	
-	//have to make anonymous functions because of scope - can't just pass in this.number
-	function makeJumper(n)
-	{
-		return function() { Numbas.controls.jumpQuestion(n);};
+	this.getPart = function(path) {
+		return q.getPart(path).display;
 	}
-
-	qs.click(makeJumper(q.number));
-
-	this.questionSelector = '#questionSelector-'+q.number;
 }
 display.QuestionDisplay.prototype =
 {
 	q: undefined,					//reference back to the main question object
 	html: '',						//HTML for displaying question
-	questionSelector: '',			//jQuery selector for this question's menu entry
 
 	makeHTML: function() {
-		var q = this.q;
-		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+		var q = this.question;
+		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
 
 		Numbas.schedule.add(function()
 		{
-			q.html.each(function(e) {
+			html.each(function(e) {
 				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
 			})
 		});
@@ -359,17 +319,13 @@ display.QuestionDisplay.prototype =
 
 	show: function()
 	{
-		var q = this.q;
+		var q = this.question;
 		var exam = q.exam;
 
-		//hides the info page, if visible
-		$('#infoDisplay').hide();
-
-		//display the question container - content and nav bars
-		$('#questionContainer').show();
-
 		//display question's html
-		$('#questionDisplay').append(q.html);
+		$('#questionDisplay').append(this.html);
+		ko.applyBindings(this,this.html[0]);
+
 		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
@@ -382,19 +338,9 @@ display.QuestionDisplay.prototype =
 			var submitMsg = R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
 			$('.navBar #submitBtn').html(submitMsg);
 
-			$('#regenBtn').html(R('control.regen'));
-
-			//show/hide reveal answer button
-			if(exam.settings.allowRevealAnswer)
-				$('#revealBtn').show().removeAttr('disabled');
-			else
-				$('#revealBtn').hide();
-
 			break;
 
 		case 'review':
-
-			$('#submitBtn, #revealBtn, #regenBtn').hide();
 
 			break;
 		}
@@ -407,6 +353,7 @@ display.QuestionDisplay.prototype =
 		}
 
 		//update question name box in nav bar
+		
 		$('#questionNameDisplay').html(R('question.header',q.number+1));
 
 		//display advice if appropriate
@@ -454,7 +401,9 @@ display.QuestionDisplay.prototype =
 	//display Advice
 	showAdvice: function( fromButton )
 	{
-		if( this.q.adviceDisplayed )
+		this.adviceDisplayed(this.question.adviceDisplayed);
+
+		if( this.question.adviceDisplayed )
 		{
 			$('#adviceBtn').attr('disabled','true');
 
@@ -480,7 +429,7 @@ display.QuestionDisplay.prototype =
 
 	revealAnswer: function()
 	{
-		if(!this.q.revealed)
+		if(!this.question.revealed)
 			return;
 
 		//disable submit button
@@ -488,16 +437,16 @@ display.QuestionDisplay.prototype =
 		//hide reveal button
 		$('#revealBtn').hide();
 
-		for(var i=0;i<this.q.parts.length;i++)
+		for(var i=0;i<this.question.parts.length;i++)
 		{
-			this.q.parts[i].display.revealAnswer();
+			this.question.parts[i].display.revealAnswer();
 		}
 	},
 
 	//display question score and answer state
 	showScore: function()
 	{
-		var q = this.q;
+		var q = this.question;
 		var exam = q.exam;
 
 		var selector = $(this.questionSelector).add('.submitDiv');
@@ -528,8 +477,30 @@ var extend = Numbas.util.extend;
 //display methods for question parts
 display.PartDisplay = function(p)
 {
-	this.p = p;
+	var pd = this;
+	this.part = p;
 	this.warningDiv = '#warning-'+p.path;
+
+	this.submit = function() {
+		p.display.removeWarnings();
+		p.submit();
+		if(!p.answered)
+		{
+			Numbas.display.showAlert(R('question.can not submit'));
+			scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
+		}
+		Numbas.store.save();
+	}
+
+	this.feedbackShown = ko.observable(false);
+	this.feedbackMessages = ko.observableArray([]);
+	this.showFeedbackToggler = ko.computed(function() {
+		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
+	});
+
+	this.toggleFeedback = function() {
+		pd.feedbackShown(!pd.feedbackShown());
+	}
 }
 display.PartDisplay.prototype = 
 {
@@ -552,20 +523,20 @@ display.PartDisplay.prototype =
 	//returns a jquery selector for the HTML div containing this part's things
 	htmlContext: function()
 	{
-		s = $(this.p.question.html).find('#'+this.p.path);
+		s = $(this.part.question.display.html).find('#'+this.part.path);
 		return s;
 	},
 
 	answerContext: function()
 	{
-		return this.htmlContext().find('#answer-'+this.p.path);
+		return this.htmlContext().find('#answer-'+this.part.path);
 	},
 
 	//called when part is displayed (basically when question is changed)
 	//show steps if appropriate, restore answers
 	show: function()
 	{
-		var p = this.p;
+		var p = this.part;
 		var c = this.htmlContext();
 		if(p.stepsShown)
 		{
@@ -586,72 +557,51 @@ display.PartDisplay.prototype =
 				$(this).find('.partwarning').hide()
 			});
 
-		c.find('#partFeedback:last #submitPart').click(function() {
-			p.display.removeWarnings();
-			p.submit();
-			if(!p.answered)
-			{
-				Numbas.display.showAlert(R('question.can not submit'));
-				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
-			}
-			Numbas.store.save();
-		});
-
 		var feedbackShown = false;
-		function toggleFeedback(val) {
-			if(val===undefined)
-				feedbackShown = !feedbackShown;
-			else
-				feedbackShown = val;
-			c.find('#feedbackMessage:last').slideToggle('fast');
-			c.find('#partFeedback:last #feedbackToggle').html(feedbackShown ? R('question.score feedback.hide') : R('question.score feedback.show'));
-		}
-		toggleFeedback(false);
 		c.find('#feedbackMessage:last').hide();
-		c.find('#partFeedback:last #feedbackToggle').hide().click(function(){toggleFeedback()});
 
-		this.showScore(this.p.answered);
+		this.showScore(this.part.answered);
 	},
 
 	//update 
 	showScore: function(valid)
 	{
 		var c = this.htmlContext();
-		var exam = this.p.question.exam;
+		var exam = this.part.question.exam;
 
-		if(this.p.marks==0)
+		if(this.part.marks==0)
 		{
 			c.find('#partFeedback:last').hide();
 		}
-		else if(this.p.question.revealed)
+		else if(this.part.question.revealed)
 		{
-			showScoreFeedback(c,false,0,this.p.marks,exam.settings);
+			showScoreFeedback(c,false,0,this.part.marks,exam.settings);
 		}
 		else
 		{
 			c.find('#marks:last').show();
 			if(valid===undefined)
-				valid = this.p.validate();
-			showScoreFeedback(c,valid,this.p.score,this.p.marks,exam.settings);
+				valid = this.part.validate();
+			showScoreFeedback(c,valid,this.part.score,this.part.marks,exam.settings);
 		}
 
 		if(exam.settings.showAnswerState)
 		{
-			if(this.p.markingFeedback.length && !this.p.question.revealed)
+			if(this.part.markingFeedback.length && !this.part.question.revealed)
 			{
 				var feedback = [];
-				var maxMarks = this.p.marks - (this.p.stepsShown ? this.p.settings.stepsPenalty : 0);
+				var maxMarks = this.part.marks - (this.part.stepsShown ? this.part.settings.stepsPenalty : 0);
 				var t = 0;
-				for(var i=0;i<this.p.markingFeedback.length;i++)
+				for(var i=0;i<this.part.markingFeedback.length;i++)
 				{
-					var action = this.p.markingFeedback[i];
+					var action = this.part.markingFeedback[i];
 					var change = 0;
 
 					switch(action.op) {
 					case 'addCredit':
 						change = action.credit*maxMarks;
 						if(action.gap!=undefined)
-							change *= this.p.gaps[action.gap].marks/this.p.marks;
+							change *= this.part.gaps[action.gap].marks/this.part.marks;
 						t += change;
 						break;
 					}
@@ -669,20 +619,9 @@ display.PartDisplay.prototype =
 					if(util.isNonemptyHTML(message))
 						feedback.push(message);
 				}
-
-				feedback = feedback.join('\n\n<hr/>');
-				c.find('#feedbackMessage:last').html(feedback);
-				Numbas.display.typeset(c.find('#feedbackMessage:last'));
-				c.find('#partFeedback:last #feedbackToggle').show();
+				
+				this.feedbackMessages(feedback);
 			}
-			else
-			{
-				c.find('#feedbackMessage').hide();
-			}
-		}
-		else
-		{
-			c.find('#feedbackMessage').hide();
 		}
 	},
 
@@ -690,12 +629,12 @@ display.PartDisplay.prototype =
 	showSteps: function()
 	{
 		var c = this.htmlContext();
-		c.find('#steps-'+this.p.path).show();
-		c.find('#stepsBtnDiv-'+this.p.path).hide();
+		c.find('#steps-'+this.part.path).show();
+		c.find('#stepsBtnDiv-'+this.part.path).hide();
 
-		for(var i=0;i<this.p.steps.length;i++)
+		for(var i=0;i<this.part.steps.length;i++)
 		{
-			this.p.steps[i].display.show();
+			this.part.steps[i].display.show();
 		}
 	},
 
@@ -733,7 +672,7 @@ display.JMEPartDisplay.prototype =
 	show: function()
 	{
 		var pd = this;
-		var p = this.p;
+		var p = this.part;
 		var hc = this.htmlContext();
 		var ac = this.answerContext();
 		var previewDiv = ac.find('#preview');
@@ -742,7 +681,7 @@ display.JMEPartDisplay.prototype =
 
 		this.hasFocus = false;
 		this.validEntry = true;
-		this.txt = this.p.stagedAnswer[0]; this.oldtxt = '';
+		this.txt = this.part.stagedAnswer[0]; this.oldtxt = '';
 
 
 		var keyPressed = function()
@@ -767,7 +706,7 @@ display.JMEPartDisplay.prototype =
 		});
 
 		this.oldtxt='';
-		this.inputChanged(this.p.stagedAnswer[0],true);
+		this.inputChanged(this.part.stagedAnswer[0],true);
 
 		previewDiv.click(function() {
 			inputDiv.focus();
@@ -777,7 +716,7 @@ display.JMEPartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.answerContext();
-		c.find('#jme').val(this.p.studentAnswer);
+		c.find('#jme').val(this.part.studentAnswer);
 	},
 
 	revealAnswer: function() 
@@ -785,8 +724,8 @@ display.JMEPartDisplay.prototype =
 		var c = this.answerContext();
 		c.find('#jme')
 			.attr('disabled','true')
-			.val(this.p.settings.correctAnswer);
-		this.inputChanged(this.p.settings.correctAnswer,true);
+			.val(this.part.settings.correctAnswer);
+		this.inputChanged(this.part.settings.correctAnswer,true);
 		c.find('#preview').css('color','#555')
 						  .mouseout();			//for some reason just hiding the input doesn't work, so simulate a mouseout to do the same thing
 	},
@@ -796,18 +735,18 @@ display.JMEPartDisplay.prototype =
 	{
 		if((txt!=this.oldtxt && txt!==undefined) || force)
 		{
-			this.p.storeAnswer([txt]);
+			this.part.storeAnswer([txt]);
 			this.txt = txt;
 
 			this.removeWarnings();
 			var ac = this.answerContext();
 			var previewDiv = ac.find('#preview');
 			var inputDiv = ac.find('#jme');
-			var errorSpan = this.htmlContext().find('#warning-'+this.p.path);
+			var errorSpan = this.htmlContext().find('#warning-'+this.part.path);
 			if(txt!=='')
 			{
 				try {
-					var tex = Numbas.jme.display.exprToLaTeX(txt,this.p.settings.displaySimplification,this.p.question.scope);
+					var tex = Numbas.jme.display.exprToLaTeX(txt,this.part.settings.displaySimplification,this.part.question.scope);
 					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
 					previewDiv.show().html('$'+tex+'$');
 					var pp = this;
@@ -843,7 +782,7 @@ display.PatternMatchPartDisplay.prototype =
 	show: function()
 	{
 		var c = this.answerContext();
-		var p = this.p;
+		var p = this.part;
 		c.find('#patternmatch').bind('input',function() {
 			p.storeAnswer([$(this).val()]);
 		});
@@ -852,7 +791,7 @@ display.PatternMatchPartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.answerContext();
-		c.find('#patternmatch').val(this.p.studentAnswer);
+		c.find('#patternmatch').val(this.part.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -860,7 +799,7 @@ display.PatternMatchPartDisplay.prototype =
 		var c = this.answerContext();
 		c.find('#patternmatch')
 			.attr('disabled',true)
-			.val(this.p.settings.displayAnswer);
+			.val(this.part.settings.displayAnswer);
 	}
 };
 display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);
@@ -872,7 +811,7 @@ display.NumberEntryPartDisplay = function()
 display.NumberEntryPartDisplay.prototype =
 {
 	show: function() {
-		var p = this.p;
+		var p = this.part;
 		this.answerContext().find('#numberentry').bind('input',function(){
 			p.storeAnswer([$(this).val()]);
 		});
@@ -881,7 +820,7 @@ display.NumberEntryPartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.answerContext();
-		c.find('#numberentry').val(this.p.studentAnswer);
+		c.find('#numberentry').val(this.part.studentAnswer);
 	},
 
 	revealAnswer: function()
@@ -889,7 +828,7 @@ display.NumberEntryPartDisplay.prototype =
 		var c = this.answerContext();
 		c.find('#numberentry')
 			.attr('disabled','true')
-			.val(this.p.settings.displayAnswer);
+			.val(this.part.settings.displayAnswer);
 	}
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
@@ -903,7 +842,7 @@ display.MultipleResponsePartDisplay.prototype =
 {
 	show: function()
 	{
-		var p = this.p;
+		var p = this.part;
 		var c = this.htmlContext();
 
 		function makeClicker(choice,answer)
@@ -935,11 +874,11 @@ display.MultipleResponsePartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();
-		for(var i=0; i<this.p.numChoices; i++)
+		for(var i=0; i<this.part.numChoices; i++)
 		{
-			for(var j=0; j<this.p.numAnswers; j++)
+			for(var j=0; j<this.part.numAnswers; j++)
 			{
-				var checked = this.p.ticks[j][i];
+				var checked = this.part.ticks[j][i];
 				c.find('#choice-'+i+'-'+j).prop('checked',checked);
 			}
 		}
@@ -947,17 +886,17 @@ display.MultipleResponsePartDisplay.prototype =
 
 	revealAnswer: function()
 	{
-		switch(this.p.settings.displayType)
+		switch(this.part.settings.displayType)
 		{
 		case 'radiogroup':
 		case 'checkbox':
 			//tick a response if it has positive marks
 			var c = this.answerContext();
-			for(var j=0; j<this.p.numAnswers; j++)
+			for(var j=0; j<this.part.numAnswers; j++)
 			{
-				for(var i=0; i<this.p.numChoices; i++)
+				for(var i=0; i<this.part.numChoices; i++)
 				{
-					var checked = this.p.settings.matrix[j][i]>0;
+					var checked = this.part.settings.matrix[j][i]>0;
 					c.find('#choice-'+i+'-'+j)
 						.attr('disabled',true)
 						.prop('checked',checked);
@@ -966,11 +905,11 @@ display.MultipleResponsePartDisplay.prototype =
 			break;
 		case 'dropdownlist':
 			var bigscore=0;
-			for(var i=0;i<this.p.numAnswers;i++)
+			for(var i=0;i<this.part.numAnswers;i++)
 			{
-				if(this.p.settings.matrix[i][0] > bigscore)
+				if(this.part.settings.matrix[i][0] > bigscore)
 				{
-					bigscore = this.p.settings.matrix[i][0];
+					bigscore = this.part.settings.matrix[i][0];
 					$(this.answerContext().find('option')[i]).attr('selected','true');
 				}
 			}
@@ -988,20 +927,20 @@ display.GapFillPartDisplay.prototype =
 {
 	show: function()
 	{
-		for(var i=0;i<this.p.gaps.length; i++)
-			this.p.gaps[i].display.show();
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.show();
 	},
 
 	restoreAnswer: function()
 	{
-		for(var i=0;i<this.p.gaps.length; i++)
-			this.p.gaps[i].display.restoreAnswer();
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.restoreAnswer();
 	},
 
 	revealAnswer: function()
 	{
-		for(var i=0; i<this.p.gaps.length; i++)
-			this.p.gaps[i].display.revealAnswer();
+		for(var i=0; i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.revealAnswer();
 	}
 };
 display.GapFillPartDisplay = extend(display.PartDisplay,display.GapFillPartDisplay,true);

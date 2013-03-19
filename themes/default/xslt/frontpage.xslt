@@ -58,7 +58,7 @@ Copyright 2011 Newcastle University
 			</xsl:if>
 		</table>
 		<div class="startBtn">
-			<button id="startBtn"><localise>frontpage.start</localise></button>
+			<button class="btn" id="startBtn" data-bind="click: Numbas.controls.beginExam"><localise>frontpage.start</localise></button>
 		</div>
 	</div>
 </xsl:template>

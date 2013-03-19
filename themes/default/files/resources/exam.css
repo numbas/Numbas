@@ -31,6 +31,11 @@ body {
 }
 
 button {
+	background: none;
+	border: none;
+}
+
+.btn {
 	margin: 0.1em 0.3em;
 	min-width: 7em;
 	/*border: 1px solid #999999*/;
@@ -93,18 +98,13 @@ button:hover, button:focus {
 	font-weight: bold;
 }
 
-.timeBox{
-	text-align:center;
-}
 #stopWatch {
+	text-align:center;
+	margin: 0.1em 0;
 	font-size: 1em;
 	font-weight: bold;
 	color: #1F4564;
 }
-.timeBox p {
-	margin: 0.1em 0;
-}
-
 
 .navBar{
 	zoom: 1;
@@ -198,22 +198,25 @@ button:hover, button:focus {
 	display:none;
 }
 
-#feedbackMessage {
-	clear:both;
-	text-align:center;
-	padding: 0.5em 0.5em 0 0.5em;
+#feedbackMessages {
+	clear: both;
+	text-align: center;
+	padding: 0.5em 0.5em 0.5em 0.5em;
 	border: 1px solid #a2d1f0;
 	max-height: 20em;
 	overflow-y: auto;
 	margin: 0 0 0 auto;
 	width: 50em;
+	list-style-type: none;
 }
 
-#feedbackMessage hr {
-	max-width: 30em;
-	border: none;
-	height:1px;
+.feedbackMessage:not(:last-child):after {
+	content: '';
+	display: block;
 	background: #a2d1f0;
+	height: 1px;
+	width: 90%;
+	margin: 0.5em auto;
 }
 
 
@@ -262,13 +265,23 @@ button:hover, button:focus {
 }
 
 .carouselBtn {
-	text-align:center;
+	text-align: center;
 	margin: 0 auto;
-	width:100%;
-}
-.carouselBtn:hover {
 	cursor: pointer;
+	display: block;
+	width: 16px;
+	height: 16px;
+	padding: 0.4em;
+	background-repeat: no-repeat;
+	background-position:  50%;
 }
+
+.carouselBtn.prev {
+	background-image: url('arrow-up.png');
+}
+.carouselBtn.next {
+	background-image: url('arrow-down.png');
+}:
 
 .questionList {
 	overflow: hidden;
@@ -312,7 +325,7 @@ button:hover, button:focus {
 }
 
 
-.qs-selected {
+.questionSelector.current {
 	background: #94B4F7;
 }
 

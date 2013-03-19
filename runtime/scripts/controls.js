@@ -69,6 +69,11 @@ Numbas.controls = {
 		});
 	},
 
+	makeQuestionJumper: function(n) {
+		return function() {
+			Numbas.controls.jumpQuestion(n);
+		}
+	},
 
 	// move directly to a particular question
 	jumpQuestion: function( jumpTo )

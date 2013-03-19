@@ -84,6 +84,7 @@ Copyright 2011 Newcastle University
 		<xsl:attribute name="id">
 			<xsl:value-of select="$path" />
 		</xsl:attribute>
+		<xsl:attribute name="data-bind">with: getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
 			<xsl:apply-templates select="prompt" />
@@ -102,14 +103,16 @@ Copyright 2011 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div id="partFeedback">
-				<button id="submitPart"><localise>question.submit part</localise></button>
+				<button class="btn" id="submitPart" data-bind="click: submit"><localise>question.submit part</localise></button>
 				<div id="marks">
 					<span id="score"></span>
 					<span id="feedback"><img src="resources/cross.png"/></span>
 				</div>
-				<button id="feedbackToggle"></button>
+				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: toggleFeedback, text: R(feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show')"></button>
 			</div>
-			<div id="feedbackMessage"></div>
+			<ol id="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
+				<li class="feedbackMessage" data-bind="latex: $data"></li>
+			</ol>
 		</xsl:if>
 	</xsl:element>
 </xsl:template>
@@ -121,7 +124,7 @@ Copyright 2011 Newcastle University
 		<xsl:apply-templates select="part"/>
 		<div style="clear:both;"></div>
 	</div>
-	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button id="stepsBtn"><localise>question.show steps</localise></button></div>
+	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button class="btn" id="stepsBtn"><localise>question.show steps</localise></button></div>
 </xsl:template>
 
 <xsl:template match="prompt">
@@ -140,7 +143,7 @@ Copyright 2011 Newcastle University
 
 
 <xsl:template match="advice">
-	<div id="adviceContainer">
+	<div id="adviceContainer" data-bind="visible: adviceDisplayed">
 		<h3><localise>question.advice</localise></h3>
 		<span id="adviceDisplay">
 			<xsl:apply-templates />
