@@ -121,7 +121,7 @@ display.ExamDisplay = function(e)
 
 	//display exam title at top of page
 	document.title = e.settings.name;
-	$('#examBanner').html(e.name);
+	$('#examBanner').html(e.settings.name);
 
 	//'next' button always present
 	$('*').find("#nextBtn").click( Numbas.controls.nextQuestion );
@@ -190,7 +190,7 @@ display.ExamDisplay.prototype =
 			var niceNumber = Numbas.math.niceNumber;
 
 			var totalExamScoreDisplay = '';
-			if(exam.showTotalMark)
+			if(exam.settings.showTotalMark)
 				totalExamScoreDisplay = niceNumber(exam.score)+'/'+niceNumber(exam.mark);
 			else
 				totalExamScoreDisplay = niceNumber(exam.score);
@@ -504,7 +504,7 @@ display.QuestionDisplay.prototype =
 
 		showScoreFeedback(selector,q.answered,q.score,q.marks,exam.settings);
 
-		if(!exam.showTotalMark && !exam.settings.showActualMark)
+		if(!exam.settings.showTotalMark && !exam.settings.showActualMark)
 		{
 			selector.find('#submitBtn').html(R(q.answered ? 'control.submit again' : 'control.submit'));
 		}
@@ -635,7 +635,7 @@ display.PartDisplay.prototype =
 			showScoreFeedback(c,valid,this.p.score,this.p.marks,exam.settings);
 		}
 
-		if(exam.showAnswerState)
+		if(exam.settings.showAnswerState)
 		{
 			if(this.p.markingFeedback.length && !this.p.question.revealed)
 			{
