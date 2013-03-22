@@ -84,7 +84,7 @@ Copyright 2011 Newcastle University
 		<xsl:attribute name="id">
 			<xsl:value-of select="$path" />
 		</xsl:attribute>
-		<xsl:attribute name="data-bind">with: getPart('<xsl:value-of select="$path" />')</xsl:attribute>
+		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
 			<xsl:apply-templates select="prompt" />
@@ -104,9 +104,9 @@ Copyright 2011 Newcastle University
 			<br/>
 			<div id="partFeedback">
 				<button class="btn" id="submitPart" data-bind="click: submit"><localise>question.submit part</localise></button>
-				<div id="marks">
-					<span id="score"></span>
-					<span id="feedback"><img src="resources/cross.png"/></span>
+				<div id="marks" data-bind="pulse: scoreFeedback.update">
+					<span id="score" data-bind="html: scoreFeedback.message"></span>
+					<span id="feedback"><xsl:attribute name="data-bind">css: scoreFeedback.state</xsl:attribute></span>
 				</div>
 				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: toggleFeedback, text: R(feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show')"></button>
 			</div>
@@ -120,11 +120,11 @@ Copyright 2011 Newcastle University
 <xsl:template match="steps">
 	<xsl:param name="path"/>
 
-	<div class="steps" id="steps-{$path}">
+	<div class="steps" data-bind="slideVisible: stepsShown">
 		<xsl:apply-templates select="part"/>
 		<div style="clear:both;"></div>
 	</div>
-	<div class="stepsBtnDiv" id="stepsBtnDiv-{$path}"><button class="btn" id="stepsBtn"><localise>question.show steps</localise></button></div>
+	<button class="btn stepsBtn" data-bind="visible: !stepsShown()"><localise>question.show steps</localise></button>
 </xsl:template>
 
 <xsl:template match="prompt">

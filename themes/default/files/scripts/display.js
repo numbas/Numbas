@@ -31,6 +31,11 @@ ko.bindingHandlers.dom = {
 }
 
 ko.bindingHandlers.slideVisible = {
+	init: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		$(element).toggle(v);
+	},
+		
 	update: function(element,valueAccessor) {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		if(v)
@@ -46,6 +51,15 @@ ko.bindingHandlers.latex = {
 		Numbas.display.typeset(element);
 	}
 }
+
+ko.bindingHandlers.pulse = {
+	init: function() {
+	},
+	update: function(element,valueAccessor) {
+		valueAccessor()();
+		$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+	}
+};
 
 var display = Numbas.display = {
 	localisePage: function() {
@@ -298,6 +312,14 @@ display.QuestionDisplay = function(q)
 	this.getPart = function(path) {
 		return q.getPart(path).display;
 	}
+
+	this.displayName = ko.observable(R('question.header',q.number+1));
+
+	this.score = ko.observable(q.score);
+	this.marks = ko.observable(q.marks);
+	this.answered = ko.observable(q.answered);
+	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
+	this.anyAnswered = ko.observable(false);
 }
 display.QuestionDisplay.prototype =
 {
@@ -354,8 +376,6 @@ display.QuestionDisplay.prototype =
 
 		//update question name box in nav bar
 		
-		$('#questionNameDisplay').html(R('question.header',q.number+1));
-
 		//display advice if appropriate
 		this.showAdvice();
 
@@ -449,9 +469,10 @@ display.QuestionDisplay.prototype =
 		var q = this.question;
 		var exam = q.exam;
 
-		var selector = $(this.questionSelector).add('.submitDiv');
-
-		showScoreFeedback(selector,q.answered,q.score,q.marks,exam.settings);
+		this.score(q.score);
+		this.marks(q.marks);
+		this.answered(q.answered);
+		this.scoreFeedback.update(true);
 
 		if(!exam.settings.showTotalMark && !exam.settings.showActualMark)
 		{
@@ -462,9 +483,7 @@ display.QuestionDisplay.prototype =
 		{
 			anyAnswered |= q.parts[i].answered;
 		}
-		if(!anyAnswered)
-			$('.submitDiv').find('#feedback,#score').hide();
-
+		this.anyAnswered(anyAnswered);
 	},
 
 	scrollToError: function() {
@@ -492,11 +511,18 @@ display.PartDisplay = function(p)
 		Numbas.store.save();
 	}
 
+	this.score = ko.observable(p.score);
+	this.marks = ko.observable(p.marks);
+	this.answered = ko.observable(p.answered);
+	this.scoreFeedback = showScoreFeedback(this,p.question.exam.settings);
+
 	this.feedbackShown = ko.observable(false);
 	this.feedbackMessages = ko.observableArray([]);
 	this.showFeedbackToggler = ko.computed(function() {
 		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
 	});
+
+	this.stepsShown = ko.observable(p.stepsShown);
 
 	this.toggleFeedback = function() {
 		pd.feedbackShown(!pd.feedbackShown());
@@ -538,16 +564,6 @@ display.PartDisplay.prototype =
 	{
 		var p = this.part;
 		var c = this.htmlContext();
-		if(p.stepsShown)
-		{
-			this.showSteps();
-		}
-		else
-		{
-			c.find('#stepsBtn:last').click(function() {
-				p.showSteps();
-			});
-		}
 
 		$(this.warningDiv)
 			.mouseover(function(){
@@ -567,23 +583,16 @@ display.PartDisplay.prototype =
 	showScore: function(valid)
 	{
 		var c = this.htmlContext();
-		var exam = this.part.question.exam;
+		var p = this.part;
+		var exam = p.question.exam;
 
-		if(this.part.marks==0)
-		{
-			c.find('#partFeedback:last').hide();
-		}
-		else if(this.part.question.revealed)
-		{
-			showScoreFeedback(c,false,0,this.part.marks,exam.settings);
-		}
-		else
-		{
-			c.find('#marks:last').show();
-			if(valid===undefined)
-				valid = this.part.validate();
-			showScoreFeedback(c,valid,this.part.score,this.part.marks,exam.settings);
-		}
+		this.score(p.score);
+		this.marks(p.marks);
+		this.scoreFeedback.update(true);
+
+		if(valid===undefined)
+			valid = this.part.validate();
+		this.answered(valid);
 
 		if(exam.settings.showAnswerState)
 		{
@@ -628,9 +637,7 @@ display.PartDisplay.prototype =
 	//called when 'show steps' button is pressed, or coming back to a part after steps shown
 	showSteps: function()
 	{
-		var c = this.htmlContext();
-		c.find('#steps-'+this.part.path).show();
-		c.find('#stepsBtnDiv-'+this.part.path).hide();
+		this.stepsShown(this.part.stepsShown);
 
 		for(var i=0;i<this.part.steps.length;i++)
 		{
@@ -1000,78 +1007,62 @@ function resizeF() {
 //	showTotalMark
 //	showActualMark
 //	showAnswerState
-function showScoreFeedback(selector,answered,score,marks,settings)
+function showScoreFeedback(obj,settings)
 {
 	var niceNumber = Numbas.math.niceNumber;
 	var scoreDisplay = '';
 
-	answered = answered || score>0;
+	var newScore = ko.observable(false);
 
-	var scoreSelector = selector.find('#score:last');
-
-	var scoreobj = {
-		marks: niceNumber(marks),
-		score: niceNumber(score),
-		marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
-		scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
-	};
-	if(answered && marks>0)
-	{
-		var str = 'question.score feedback.answered'
-					+ (settings.showTotalMark ? ' total' : '')
-					+ (settings.showActualMark ? ' actual' : '')
-		scoreSelector
-			.show()
-			.html(R(str,scoreobj));
-	}
-	else
-	{
-		if(settings.showTotalMark)
-		{
-			scoreSelector
-				.show()
-				.html(R('question.score feedback.unanswered total',scoreobj));
-		}
-		else
-			scoreSelector.hide();
-	}
-	if( settings.showAnswerState )
-	{
-		if( answered && marks>0 )
-		{
-			var state;
-			if( score<=0  )
-			{
-				state = 'cross';
+	return {
+		update: ko.computed({
+			read: function() {
+				return newScore();
+			},
+			write: function() {
+				newScore(!newScore());
 			}
-			else if( score == marks )
+		}),
+		message: ko.computed(function() {
+			var answered = obj.answered(), score = obj.score(), marks = obj.marks();
+			answered = answered || score>0;
+
+			var scoreobj = {
+				marks: niceNumber(marks),
+				score: niceNumber(score),
+				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
+				scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
+			};
+			if(answered && marks>0)
 			{
-				state = 'tick';
-			}		
+				var str = 'question.score feedback.answered'
+							+ (settings.showTotalMark ? ' total' : '')
+							+ (settings.showActualMark ? ' actual' : '')
+				return R(str,scoreobj);
+			}
+			else if(settings.showTotalMark) {
+				return R('question.score feedback.unanswered total',scoreobj);
+			}
 			else
-			{
-				state = 'partial';
+				return '';
+		}),
+		state: ko.computed(function() {
+			var answered = obj.answered(), score = obj.score(), marks = obj.marks();
+			answered = answered || score>0;
+
+			if( settings.showAnswerState && answered && marks>0 ) {
+				if(score<=0)
+					return 'icon-remove';
+				else if(score==marks)
+					return 'icon-ok';
+				else
+					return 'icon-ok partial';
 			}
-			selector.find('#feedback:last')
-				.show()
-				.attr('class',state)
-			;
-		}
-		else
-		{
-			selector.find('#feedback:last').attr('class','').hide();
-		}
+			else {
+				return 'none';
+			}
+		})
 	}
-	else
-	{
-		selector.find('#feedback:last').hide();
-	}	
-
-	selector.find('#marks:last').each(function(){
-		if(!$(this).is(':animated'))
-			$(this).fadeOut(200).fadeIn(200);
-	});
-
 };
 
 function scrollTo(el)
