@@ -22,6 +22,13 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 
 	var util = Numbas.util;
 
+ko.bindingHandlers.autosize = {
+	init: function(element) {
+		//resize text inputs to just fit their contents
+		$(element).keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+	}
+}
+
 ko.bindingHandlers.dom = {
 	update: function(element,valueAccessor) {
 		var html = ko.utils.unwrapObservable(valueAccessor());
@@ -61,6 +68,20 @@ ko.bindingHandlers.pulse = {
 	}
 };
 
+ko.bindingHandlers.hover = {
+	init: function(element,valueAccessor) {
+		var val = valueAccessor();
+		val(false);
+		$(element).hover(
+			function() {
+				val(true);
+			},
+			function() {
+				val(false)
+			}
+		);
+	}
+}
 var display = Numbas.display = {
 	localisePage: function() {
 		//localise strings in page HTML
@@ -178,7 +199,22 @@ display.ExamDisplay = function(e)
 	},this);
 
 
-	this.examScoreDisplay = ko.observable('');
+	this.score = ko.observable(e.score);
+	this.marks = ko.observable(e.mark);
+	this.examScoreDisplay = ko.computed(function() {
+		var niceNumber = Numbas.math.niceNumber;
+		var exam = this.exam;
+		var score = this.score();
+		var marks = this.marks();
+
+		var totalExamScoreDisplay = '';
+		if(exam.settings.showTotalMark)
+			totalExamScoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
+		else
+			totalExamScoreDisplay = niceNumber(score);
+
+		return R('control.total',totalExamScoreDisplay);
+	},this);
 	this.displayTime = ko.observable('');
 
 	document.title = e.settings.name;
@@ -201,16 +237,8 @@ display.ExamDisplay.prototype =
 	showScore: function()
 	{
 		var exam = this.exam;
-
-		var niceNumber = Numbas.math.niceNumber;
-
-		var totalExamScoreDisplay = '';
-		if(exam.settings.showTotalMark)
-			totalExamScoreDisplay = niceNumber(exam.score)+'/'+niceNumber(exam.mark);
-		else
-			totalExamScoreDisplay = niceNumber(exam.score);
-
-		this.examScoreDisplay(totalExamScoreDisplay);
+		this.marks(exam.mark);
+		this.score(exam.score);
 	},
 
 	updateQuestionMenu: function()
@@ -306,6 +334,7 @@ display.ExamDisplay.prototype =
 display.QuestionDisplay = function(q)
 {
 	this.question = q;
+	var exam = q.exam;
 
 	this.adviceDisplayed = ko.observable(false);
 
@@ -314,6 +343,11 @@ display.QuestionDisplay = function(q)
 	}
 
 	this.displayName = ko.observable(R('question.header',q.number+1));
+
+	this.visited = ko.observable(q.visited);
+	this.visible = ko.computed(function() {
+		return this.visited() || exam.settings.navigateBrowse;
+	},this);
 
 	this.score = ko.observable(q.score);
 	this.marks = ko.observable(q.marks);
@@ -343,6 +377,8 @@ display.QuestionDisplay.prototype =
 	{
 		var q = this.question;
 		var exam = q.exam;
+
+		this.visited(q.visited);
 
 		//display question's html
 		$('#questionDisplay').append(this.html);
@@ -389,8 +425,6 @@ display.QuestionDisplay.prototype =
 		$('input')	.blur( function(e) { Numbas.display.inInput = false; } )
 					.focus( function(e) { Numbas.display.inInput = true; } );
 
-		//resize text inputs to just fit their contents
-		$('input[type=text],input[type=number]').keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
 
 		//make sure 'input' event is triggered when inputs change
 		$('input').bind('propertychange',function(){$(this).trigger('input')});
@@ -474,10 +508,6 @@ display.QuestionDisplay.prototype =
 		this.answered(q.answered);
 		this.scoreFeedback.update(true);
 
-		if(!exam.settings.showTotalMark && !exam.settings.showActualMark)
-		{
-			selector.find('#submitBtn').html(R(q.answered ? 'control.submit again' : 'control.submit'));
-		}
 		var anyAnswered = false;
 		for(var i=0;i<q.parts.length;i++)
 		{
@@ -500,23 +530,18 @@ display.PartDisplay = function(p)
 	this.part = p;
 	this.warningDiv = '#warning-'+p.path;
 
-	this.submit = function() {
-		p.display.removeWarnings();
-		p.submit();
-		if(!p.answered)
-		{
-			Numbas.display.showAlert(R('question.can not submit'));
-			scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
-		}
-		Numbas.store.save();
-	}
-
 	this.score = ko.observable(p.score);
 	this.marks = ko.observable(p.marks);
 	this.answered = ko.observable(p.answered);
 	this.scoreFeedback = showScoreFeedback(this,p.question.exam.settings);
 
+	this.warnings = ko.observableArray([]);
+	this.warningsShown = ko.observable(false);
+
 	this.feedbackShown = ko.observable(false);
+	this.toggleFeedbackText = ko.computed(function() {
+		return R(this.feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show');
+	},this);
 	this.feedbackMessages = ko.observableArray([]);
 	this.showFeedbackToggler = ko.computed(function() {
 		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
@@ -524,8 +549,23 @@ display.PartDisplay = function(p)
 
 	this.stepsShown = ko.observable(p.stepsShown);
 
-	this.toggleFeedback = function() {
-		pd.feedbackShown(!pd.feedbackShown());
+	this.controls = {
+		toggleFeedback: function() {
+			pd.feedbackShown(!pd.feedbackShown());
+		},
+		submit: function() {
+			p.display.removeWarnings();
+			p.submit();
+			if(!p.answered)
+			{
+				Numbas.display.showAlert(R('question.can not submit'));
+				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
+			}
+			Numbas.store.save();
+		},
+		showSteps: function() {
+			p.showSteps();
+		}
 	}
 }
 display.PartDisplay.prototype = 
@@ -536,14 +576,13 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		$(this.warningDiv).show().find('.partwarning').append('<span>'+warning.toString()+'</span>');
-		Numbas.display.typeset();
+		this.warnings.push(warning+'');
 	},
 
 	//remove all previously displayed warnings
 	removeWarnings: function()
 	{
-		$(this.warningDiv).hide().find('.partwarning').html('');
+		this.warnings([]);
 	},
 
 	//returns a jquery selector for the HTML div containing this part's things

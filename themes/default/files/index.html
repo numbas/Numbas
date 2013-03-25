@@ -118,19 +118,21 @@ Copyright 2011-13 Newcastle University
 					<!-- menu for navigating questions and displaying scores/feedback -->
 					<!-- also timing controls -->
 					<div class="questionMenu">
-						<div class="carouselBtn prev"></div>
-						<div class="questionList">
-							<ul id="questionList" data-bind="foreach: exam.questionList">
-								<li id="questionSelector" class="questionSelector" data-bind="with: display, css: {current: $root.currentQuestion()==$data.display}, click: Numbas.controls.makeQuestionJumper(number)">
-									<span id="name" data-bind="text: displayName"></span>
-									<div id="marks">
-										<div id="feedback" data-bind="attr: {'data-state': scoreFeedback.state}"></div>
-										<div id="score" data-bind="html: scoreFeedback.message"></div>
-									</div>
-								</li>
-							</ul>
+						<div class="carousel">
+							<div class="carouselBtn prev icon-caret-up"></div>
+							<div class="questionList">
+								<ul id="questionList" data-bind="foreach: exam.questionList">
+									<li id="questionSelector" class="questionSelector" data-bind="visible: display.visible, with: display, css: {current: $root.currentQuestion()==$data.display}, click: Numbas.controls.makeQuestionJumper(number)">
+										<span id="name" data-bind="text: displayName"></span>
+										<div id="marks">
+											<div id="feedback" data-bind="css: scoreFeedback.state"></div>
+											<div id="score" data-bind="html: scoreFeedback.message"></div>
+										</div>
+									</li>
+								</ul>
+							</div>
+							<div class="carouselBtn next icon-caret-down" data-bind="attr: {disabled: currentQuestionNumber()==exam.questionList.length-1}"></div>
 						</div>
-						<div class="carouselBtn next" data-bind="attr: {disabled: currentQuestionNumber()==exam.questionList.length-1}"></div>
 
 						<!-- total exam score display -->
 						<div class="examScore" data-bind="visible: exam.settings.showActualMark, html: examScoreDisplay">

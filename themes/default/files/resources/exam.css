@@ -209,6 +209,7 @@ button:hover, button:focus {
 
 .questionSelector #marks #feedback {
 	padding: 0;
+	font-size: 1.5em;
 }
 
 .questionSelector #name {
@@ -291,24 +292,23 @@ button:hover, button:focus {
 	padding-bottom: 1em;
 }
 
+.carousel {
+	margin-bottom: 1em;
+}
+
 .carouselBtn {
 	text-align: center;
 	margin: 0 auto;
 	cursor: pointer;
-	display: block;
-	width: 16px;
-	height: 16px;
-	padding: 0.4em;
+	display: block !important;
+	padding: 0.2em;
+	font-size: 1.3em;
 	background-repeat: no-repeat;
 	background-position:  50%;
 }
-
-.carouselBtn.prev {
-	background-image: url('arrow-up.png');
+.carouselBtn:hover {
+	background-color: #f90;
 }
-.carouselBtn.next {
-	background-image: url('arrow-down.png');
-}:
 
 .questionList {
 	overflow: hidden;
@@ -435,9 +435,7 @@ button:hover, button:focus {
 
 .statement {
 	margin: 1em 0;
-	padding-top: 0.2em;
 	padding-left: 1em;
-	padding-bottom: 0.1em;
 	background: #cfc;
 }
 .part {
@@ -473,6 +471,7 @@ div.part {
 
 .stepsBtn, .steps {
 	margin-bottom: 1em;
+	margin-left: 0;
 }
 
 .advice {
@@ -510,23 +509,25 @@ div.part {
 	margin-bottom: 1em;
 }
 
-.warningcontainer {
-	display: none;
+.warning-icon {
+	margin: 0 0.2em;
+	color: red;
 }
 
-.partwarning {
+.warnings {
 	color: red;
 	font-size: 1em;
 	position: absolute;
 	background-color: #ddd;
 	z-index: 1;
-	margin-left: 0.2em;
 	padding: 0.2em;
-	display: none;
 	max-width: 20em;
+	display: inline-block;
+	list-style-type: none;
 }
-.partwarning p {
+.warning {
 	margin: 0.1em;
+	display: block;
 }
 
 .part #partFeedback {

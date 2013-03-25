@@ -94,21 +94,26 @@ Copyright 2011-13 Newcastle University
 				<xsl:with-param name="path" select="$path"/>
 			</xsl:apply-templates>
 		</xsl:if>
-		<span id="answer-{$path}">
-			<xsl:apply-templates select="." mode="typespecific">
-				<xsl:with-param name="path" select="$path"/>
-			</xsl:apply-templates>
+		<span class="answer">
+			<span id="answer-{$path}">
+				<xsl:apply-templates select="." mode="typespecific">
+					<xsl:with-param name="path" select="$path"/>
+				</xsl:apply-templates>
+			</span>
+			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown"></span>
+			<span class="warnings" data-bind="visible: warningsShown, foreach: warnings">
+				<span class="warning" data-bind="latex: $data"></span>
+			</span>
 		</span>
-		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div id="partFeedback">
-				<button class="btn" id="submitPart" data-bind="click: submit"><localise>question.submit part</localise></button>
+				<button class="btn" id="submitPart" data-bind="click: controls.submit"><localise>question.submit part</localise></button>
 				<div id="marks" data-bind="pulse: scoreFeedback.update">
 					<span id="score" data-bind="html: scoreFeedback.message"></span>
-					<span id="feedback"><xsl:attribute name="data-bind">css: scoreFeedback.state</xsl:attribute></span>
+					<span id="feedback" data-bind="css: scoreFeedback.state"></span>
 				</div>
-				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: toggleFeedback, text: R(feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show')"></button>
+				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 			</div>
 			<ol id="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
 				<li class="feedbackMessage" data-bind="latex: $data"></li>
@@ -124,7 +129,7 @@ Copyright 2011-13 Newcastle University
 		<xsl:apply-templates select="part"/>
 		<div style="clear:both;"></div>
 	</div>
-	<button class="btn stepsBtn" data-bind="visible: !stepsShown()"><localise>question.show steps</localise></button>
+	<button class="btn stepsBtn" data-bind="visible: !stepsShown(), click: controls.showSteps"><localise>question.show steps</localise></button>
 </xsl:template>
 
 <xsl:template match="prompt">
@@ -310,7 +315,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" data-bind="autosize: true"></input>
 </xsl:template>
 
 <xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
@@ -327,14 +332,14 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
-	<input type="text" spellcheck="false" class="jme" id="jme" />
+	<input type="text" spellcheck="false" class="jme" id="jme" data-bind="autosize: true"/>
 	<span id="preview" class="mathPreview"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" data-bind="autosize: true"/>
 </xsl:template>
 
 <xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">

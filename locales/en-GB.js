@@ -58,7 +58,7 @@ R.registerLocale('en-GB',{
 	'control.next': "Next",
 	'control.advice': "Advice",
 	'control.reveal': "Reveal",
-	'control.total': "Total",
+	'control.total': "Total %s",
 	'control.pause': "Pause",
 	'control.end exam': "End Exam",
 
