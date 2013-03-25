@@ -213,7 +213,6 @@ var util = Numbas.util = {
 	formatString: function(str)
 	{
 		var i=0;
-		var re = /%s/;
 		for(var i=1;i<arguments.length;i++)
 		{
 			str=str.replace(/%s/,arguments[i]);

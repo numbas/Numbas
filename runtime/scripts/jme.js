@@ -484,8 +484,8 @@ var jme = Numbas.jme = {
 					if(tok.type=='function') {
 						//check if the user typed something like xtan(y), when they meant x*tan(y)
 						var possibleOp = op.slice(1);
-						if(op.slice(1) in scope.functions)
-							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],op.slice(1)));
+						if(possibleOp in scope.functions)
+							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],possibleOp));
 						else
 							throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
 					}
@@ -512,7 +512,7 @@ var jme = Numbas.jme = {
 		}
 	},
 
-	compile: function(expr,scope,notypecheck) 
+	compile: function(expr,scope)
 	{
 		expr+='';	//make sure expression is a string and not a number or anything like that
 
@@ -530,7 +530,7 @@ var jme = Numbas.jme = {
 		if(tree===null)
 			return;
 
-		return(tree);nop
+		return(tree);
 	},
 
 	compare: function(expr1,expr2,settings,scope) {
