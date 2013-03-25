@@ -16,7 +16,7 @@
 		options = $.extend({},$.prompt.defaults,options);
 		$.prompt.currentPrefix = options.prefix;
 
-		var ie6		= ($.browser.msie && $.browser.version < 7);
+		var ie6		= false;
 		var $body	= $(document.body);
 		var $window	= $(window);
 		
