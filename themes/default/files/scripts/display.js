@@ -549,6 +549,8 @@ display.PartDisplay = function(p)
 
 	this.stepsShown = ko.observable(p.stepsShown);
 
+	this.revealed = ko.observable(false);
+
 	this.controls = {
 		toggleFeedback: function() {
 			pd.feedbackShown(!pd.feedbackShown());
@@ -602,18 +604,8 @@ display.PartDisplay.prototype =
 	show: function()
 	{
 		var p = this.part;
-		var c = this.htmlContext();
 
-		$(this.warningDiv)
-			.mouseover(function(){
-				$(this).find('.partwarning').show();
-			})
-			.mouseout(function(){
-				$(this).find('.partwarning').hide()
-			});
-
-		var feedbackShown = false;
-		c.find('#feedbackMessage:last').hide();
+		this.feedbackShown(false);
 
 		this.showScore(this.part.answered);
 	},
@@ -621,7 +613,6 @@ display.PartDisplay.prototype =
 	//update 
 	showScore: function(valid)
 	{
-		var c = this.htmlContext();
 		var p = this.part;
 		var exam = p.question.exam;
 
@@ -637,7 +628,7 @@ display.PartDisplay.prototype =
 		{
 			if(this.part.markingFeedback.length && !this.part.question.revealed)
 			{
-				var feedback = [];
+				var messages = [];
 				var maxMarks = this.part.marks - (this.part.stepsShown ? this.part.settings.stepsPenalty : 0);
 				var t = 0;
 				for(var i=0;i<this.part.markingFeedback.length;i++)
@@ -665,10 +656,10 @@ display.PartDisplay.prototype =
 							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,R('was'),R('were')));
 					}
 					if(util.isNonemptyHTML(message))
-						feedback.push(message);
+						messages.push(message);
 				}
 				
-				this.feedbackMessages(feedback);
+				this.feedbackMessages(messages);
 			}
 		}
 	},
@@ -687,16 +678,13 @@ display.PartDisplay.prototype =
 	//called when question displayed - fills student's last answer into inputs
 	restoreAnswer: function() 
 	{
-		this.answerContext().find('input[type=text]').each(resizeF);
 	},
 
 	//fills inputs with correct answers
 	revealAnswer: function() 
 	{
-		var c = this.htmlContext();
+		this.revealed(true);
 		this.removeWarnings();
-		c.find('input[type=text],input[type=number]').each(resizeF);
-		c.find('#submitPart').attr('disabled',true);
 		this.showScore();
 	}
 };
@@ -772,8 +760,6 @@ display.JMEPartDisplay.prototype =
 			.attr('disabled','true')
 			.val(this.part.settings.correctAnswer);
 		this.inputChanged(this.part.settings.correctAnswer,true);
-		c.find('#preview').css('color','#555')
-						  .mouseout();			//for some reason just hiding the input doesn't work, so simulate a mouseout to do the same thing
 	},
 	
 	//display a live preview of the student's answer typeset properly
@@ -822,30 +808,18 @@ display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true)
 //Pattern Match display code
 display.PatternMatchPartDisplay = function()
 {
+	var p = this.part;
+
+	this.studentAnswer = ko.observable(this.part.studentAnswer);
+	ko.computed(function() {
+		p.storeAnswer([this.studentAnswer()]);
+	},this);
 }
 display.PatternMatchPartDisplay.prototype = 
 {
-	show: function()
-	{
-		var c = this.answerContext();
-		var p = this.part;
-		c.find('#patternmatch').bind('input',function() {
-			p.storeAnswer([$(this).val()]);
-		});
-	},
-
 	restoreAnswer: function()
 	{
-		var c = this.answerContext();
-		c.find('#patternmatch').val(this.part.studentAnswer);
-	},
-
-	revealAnswer: function()
-	{
-		var c = this.answerContext();
-		c.find('#patternmatch')
-			.attr('disabled',true)
-			.val(this.part.settings.displayAnswer);
+		this.studentAnswer(this.part.studentAnswer);
 	}
 };
 display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);
@@ -853,28 +827,18 @@ display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatc
 //Number Entry display code
 display.NumberEntryPartDisplay = function()
 {
+	var p = this.part;
+
+	this.studentAnswer = ko.observable(this.part.studentAnswer);
+	ko.computed(function() {
+		p.storeAnswer([this.studentAnswer()]);
+	},this);
 }
 display.NumberEntryPartDisplay.prototype =
 {
-	show: function() {
-		var p = this.part;
-		this.answerContext().find('#numberentry').bind('input',function(){
-			p.storeAnswer([$(this).val()]);
-		});
-	},
-
 	restoreAnswer: function()
 	{
-		var c = this.answerContext();
-		c.find('#numberentry').val(this.part.studentAnswer);
-	},
-
-	revealAnswer: function()
-	{
-		var c = this.answerContext();
-		c.find('#numberentry')
-			.attr('disabled','true')
-			.val(this.part.settings.displayAnswer);
+		this.studentAnswer(this.part.studentAnswer);
 	}
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
@@ -883,40 +847,70 @@ display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryP
 //Multiple Response display code
 display.MultipleResponsePartDisplay = function()
 {
+	var p = this.part;
+
+	function makeTicker(answer,choice) {
+		var obs = ko.observable(false);
+		ko.computed(function() {
+			p.storeAnswer([answer,choice,obs()]);
+		},p);
+		return obs;
+	}
+
+	function makeRadioTicker(answer) {
+		var obs = ko.observable(null);
+		ko.computed(function() {
+			var choice = parseInt(obs());
+			p.storeAnswer([answer,choice]);
+		},p);
+		return obs;
+	}
+	function makeCheckboxTicker(answer,choice) {
+		var obs = ko.observable(false);
+		ko.computed(function() {
+			p.storeAnswer([answer,choice,obs()]);
+		});
+		return obs;
+	}
+
+	switch(p.type) {
+	case '1_n_2':
+		this.studentAnswer = ko.observable(null);
+		ko.computed(function() {
+			var i = parseInt(this.studentAnswer());
+			p.storeAnswer([i,0]);
+		},this);
+		break;
+	case 'm_n_2':
+		this.ticks = [];
+		for(var i=0; i<p.numAnswers; i++) {
+			this.ticks[i] = makeTicker(i,0);
+		}
+		break;
+	case 'm_n_x':
+		switch(p.settings.displayType) {
+		case 'radiogroup':
+			this.ticks = [];
+			for(var i=0; i<p.numAnswers; i++) {
+				this.ticks.push(makeRadioTicker(i));
+			}
+			break;
+		case 'checkbox':
+			this.ticks = [];
+			for(var i=0; i<p.numAnswers; i++) {
+				var row = [];
+				this.ticks.push(row);
+				for(var j=0; j<p.numChoices; j++) {
+					row.push(makeCheckboxTicker(i,j));
+				}
+			}
+			break;
+		}
+		break;
+	}
 }
 display.MultipleResponsePartDisplay.prototype =
 {
-	show: function()
-	{
-		var p = this.part;
-		var c = this.htmlContext();
-
-		function makeClicker(choice,answer)
-		{
-			return function() {
-				p.storeAnswer([choice,answer,$(this).prop('checked')]);
-			};
-		}
-
-		switch(p.settings.displayType)
-		{
-		case 'dropdownlist':
-			c.find('.multiplechoice').bind('change',function() {
-				var i = $(this).find('option:selected').index();
-				p.storeAnswer([i-1,0]);
-			});
-			break;
-		default:
-			for(var i=0; i<p.numAnswers; i++)
-			{
-				for(var j=0; j<p.numChoices; j++)
-				{
-					c.find('#choice-'+j+'-'+i).change(makeClicker(i,j));
-				}
-			}
-		}
-
-	},
 	restoreAnswer: function()
 	{
 		var c = this.htmlContext();

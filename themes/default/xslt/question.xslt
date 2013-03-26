@@ -213,7 +213,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" />
+		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: studentAnswer" value="{$choicenum}"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -232,7 +232,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" />
+		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: ticks[{$choicenum}]" />
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -301,10 +301,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" />
+						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}]" />
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" />
+						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}]" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
@@ -315,7 +315,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" data-bind="autosize: true"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
 </xsl:template>
 
 <xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
@@ -339,7 +339,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" data-bind="autosize: true"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
 </xsl:template>
 
 <xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">
