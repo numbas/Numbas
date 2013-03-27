@@ -81,9 +81,6 @@ Copyright 2011-13 Newcastle University
 	</xsl:if>
 	<xsl:element name="{$tag}">
 		<xsl:attribute name="class">part <xsl:value-of select="@type"/></xsl:attribute>
-		<xsl:attribute name="id">
-			<xsl:value-of select="$path" />
-		</xsl:attribute>
 		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
@@ -95,11 +92,9 @@ Copyright 2011-13 Newcastle University
 			</xsl:apply-templates>
 		</xsl:if>
 		<span class="answer">
-			<span id="answer-{$path}">
-				<xsl:apply-templates select="." mode="typespecific">
-					<xsl:with-param name="path" select="$path"/>
-				</xsl:apply-templates>
-			</span>
+			<xsl:apply-templates select="." mode="typespecific">
+				<xsl:with-param name="path" select="$path"/>
+			</xsl:apply-templates>
 			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown"></span>
 			<span class="warnings" data-bind="visible: warningsShown, foreach: warnings">
 				<span class="warning" data-bind="latex: $data"></span>
@@ -107,15 +102,15 @@ Copyright 2011-13 Newcastle University
 		</span>
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
-			<div id="partFeedback">
-				<button class="btn" id="submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
-				<div id="marks" data-bind="pulse: scoreFeedback.update">
-					<span id="score" data-bind="html: scoreFeedback.message"></span>
-					<span id="feedback" data-bind="css: scoreFeedback.state"></span>
+			<div class="partFeedback">
+				<button class="btn submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
+				<div class="marks" data-bind="pulse: scoreFeedback.update">
+					<span class="score" data-bind="html: scoreFeedback.message"></span>
+					<span class="feedback" data-bind="css: scoreFeedback.state"></span>
 				</div>
 				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 			</div>
-			<ol id="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
+			<ol class="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
 				<li class="feedbackMessage" data-bind="latex: $data"></li>
 			</ol>
 		</xsl:if>
@@ -133,7 +128,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="prompt">
-	<span id="prompt">
+	<span class="prompt">
 		<xsl:apply-templates />
 	</span>
 </xsl:template>
@@ -148,9 +143,9 @@ Copyright 2011-13 Newcastle University
 
 
 <xsl:template match="advice">
-	<div id="adviceContainer" data-bind="visible: adviceDisplayed">
+	<div class="adviceContainer" data-bind="visible: adviceDisplayed">
 		<h3><localise>question.advice</localise></h3>
-		<span id="adviceDisplay">
+		<span class="adviceDisplay">
 			<xsl:apply-templates />
 		</span>
 	</div>
@@ -213,7 +208,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
+		<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -232,7 +227,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
+		<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -242,7 +237,7 @@ Copyright 2011-13 Newcastle University
 	<xsl:param name="answernum" select="0"/>
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
-	<option id="choice-{$answernum}-{$choicenum}">
+	<option>
 		<xsl:apply-templates select="content"/>
 	</option>
 </xsl:template>
@@ -266,7 +261,7 @@ Copyright 2011-13 Newcastle University
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<div id="multipleresponse-{$path}" class="m_n_x">
+	<div class="m_n_x">
 		<form>
 		<table class="choices-grid">
 			<thead>
@@ -301,10 +296,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed" />
+						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed" />
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed" value="{$answernum}"/>
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
@@ -315,7 +310,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
 </xsl:template>
 
 <xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
@@ -332,14 +327,14 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
-	<input type="text" spellcheck="false" class="jme" id="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
-	<span id="preview" class="mathPreview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
+	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
+	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
 </xsl:template>
 
 <xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">
