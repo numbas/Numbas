@@ -59,7 +59,15 @@ ko.bindingHandlers.slideVisible = {
 
 ko.bindingHandlers.latex = {
 	update: function(element,valueAccessor) {
-		ko.bindingHandlers.html.update(element,valueAccessor);
+		ko.bindingHandlers.html.update.apply(this,arguments);
+		Numbas.display.typeset(element);
+	}
+}
+
+ko.bindingHandlers.maths = {
+	update: function(element,valueAccessor) {
+		var val = ko.utils.unwrapObservable(valueAccessor());
+		element.innerHTML = '<script type="math/tex">'+val+'</script>';
 		Numbas.display.typeset(element);
 	}
 }
@@ -72,6 +80,12 @@ ko.bindingHandlers.pulse = {
 		$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
 	}
 };
+
+ko.bindingHandlers.carousel = {
+	update: function() {
+
+	}
+}
 
 ko.bindingHandlers.hover = {
 	init: function(element,valueAccessor) {
@@ -249,13 +263,6 @@ display.ExamDisplay.prototype =
 	updateQuestionMenu: function()
 	{
 		var exam = this.exam;
-		//highlight current question, unhighlight the rest
-		for(var j=0; j<exam.questionList.length; j++)
-		{
-			var question = exam.questionList[j];
-			$(question.display.questionSelector).attr('class',
-					(question.visited || exam.settings.navigateBrowse ? 'questionSelector' : 'questionSelector-hidden')+(j==exam.currentQuestion.number ? ' qs-selected' : ''));
-		}
 		//scroll question list to centre on current question
 		if(display.carouselGo)
 			display.carouselGo(exam.currentQuestion.number-1,300);
@@ -347,6 +354,8 @@ display.QuestionDisplay = function(q)
 		return q.getPart(path).display;
 	}
 
+	this.submitMessage = ko.observable('');
+
 	this.displayName = ko.observable(R('question.header',q.number+1));
 
 	this.visited = ko.observable(q.visited);
@@ -359,10 +368,12 @@ display.QuestionDisplay = function(q)
 	this.answered = ko.observable(q.answered);
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
 	this.anyAnswered = ko.observable(false);
+
+	this.revealed = ko.observable(q.revealed);
 }
 display.QuestionDisplay.prototype =
 {
-	q: undefined,					//reference back to the main question object
+	question: undefined,			//reference back to the main question object
 	html: '',						//HTML for displaying question
 
 	makeHTML: function() {
@@ -389,22 +400,14 @@ display.QuestionDisplay.prototype =
 		$('#questionDisplay').append(this.html);
 		ko.applyBindings(this,this.html[0]);
 
-		
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
 
 		switch(exam.mode) {
 		case 'normal':
-			//enable the submit button
-			$('#submitBtn').removeAttr('disabled');
-
-			var submitMsg = R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
-			$('.navBar #submitBtn').html(submitMsg);
-
+			this.submitMessage( R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts') );
 			break;
-
 		case 'review':
-
 			break;
 		}
 
@@ -415,8 +418,6 @@ display.QuestionDisplay.prototype =
 			q.parts[i].display.show();
 		}
 
-		//update question name box in nav bar
-		
 		//display advice if appropriate
 		this.showAdvice();
 
@@ -426,14 +427,6 @@ display.QuestionDisplay.prototype =
 		//display score if appropriate
 		this.showScore();
 		
-		//make input elements report when they get and lose focus
-		$('input')	.blur( function(e) { Numbas.display.inInput = false; } )
-					.focus( function(e) { Numbas.display.inInput = true; } );
-
-
-		//make sure 'input' event is triggered when inputs change
-		$('input').bind('propertychange',function(){$(this).trigger('input')});
-
 		//scroll back to top of page
 		scroll(0,0);
 
@@ -448,53 +441,17 @@ display.QuestionDisplay.prototype =
 		$('#questionDisplay .question').remove();
 	},
 
-	addPostTypesetCallback: function(callback)
-	{
-		var f = this.postTypesetF;
-		this.postTypesetF = function() {
-			callback();
-			f();
-		}
-	},
-
 	//display Advice
 	showAdvice: function( fromButton )
 	{
 		this.adviceDisplayed(this.question.adviceDisplayed);
-
-		if( this.question.adviceDisplayed )
-		{
-			$('#adviceBtn').attr('disabled','true');
-
-			//if advice text non-empty, show it and typeset maths
-			if($.trim($('#adviceDisplay').text()))
-			{
-				$('#adviceContainer').show();			
-				if(fromButton)
-				{
-					Numbas.display.typeset();
-				}
-			}else	//otherwise hide the advice box if it's empty
-			{
-				$('#adviceContainer').hide();
-			}
-		}
-		else
-		{
-			$('#adviceContainer').hide();
-			$('#adviceBtn').removeAttr('disabled');
-		}	
 	},
 
 	revealAnswer: function()
 	{
+		this.revealed(this.question.revealed);
 		if(!this.question.revealed)
 			return;
-
-		//disable submit button
-		$('#submitBtn').attr('disabled','true');
-		//hide reveal button
-		$('#revealBtn').hide();
 
 		for(var i=0;i<this.question.parts.length;i++)
 		{
@@ -522,7 +479,7 @@ display.QuestionDisplay.prototype =
 	},
 
 	scrollToError: function() {
-		scrollTo($('.warningcontainer:visible:first'));
+		scrollTo($('.warning-icon:visible:first'));
 	}
 };
 
@@ -566,7 +523,6 @@ display.PartDisplay = function(p)
 			if(!p.answered)
 			{
 				Numbas.display.showAlert(R('question.can not submit'));
-				scrollTo(p.display.htmlContext().find('.warningcontainer:visible:first'));
 			}
 			Numbas.store.save();
 		},
@@ -577,9 +533,7 @@ display.PartDisplay = function(p)
 }
 display.PartDisplay.prototype = 
 {
-	p: undefined,	//reference back to main part object
-
-	warningDiv:'',	//id of div where warning messages are displayed
+	part: undefined,	//reference back to main part object
 
 	warning: function(warning)
 	{
@@ -590,18 +544,6 @@ display.PartDisplay.prototype =
 	removeWarnings: function()
 	{
 		this.warnings([]);
-	},
-
-	//returns a jquery selector for the HTML div containing this part's things
-	htmlContext: function()
-	{
-		s = $(this.part.question.display.html).find('#'+this.part.path);
-		return s;
-	},
-
-	answerContext: function()
-	{
-		return this.htmlContext().find('#answer-'+this.part.path);
 	},
 
 	//called when part is displayed (basically when question is changed)
@@ -697,115 +639,43 @@ display.PartDisplay.prototype =
 //JME display code
 display.JMEPartDisplay = function()
 {
+	var p = this.part;
+	this.studentAnswer = ko.observable('');
+
+	ko.computed(function() {
+		p.storeAnswer([this.studentAnswer()]);
+	},this);
+
+	this.studentAnswerLaTeX = ko.computed(function() {
+		var studentAnswer = this.studentAnswer();
+		if(studentAnswer=='')
+			return '';
+
+		this.removeWarnings();
+
+		try {
+			var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,p.settings.displaySimplification,p.question.scope);
+			if(tex===undefined)
+				throw(new Numbas.Error('display.part.jme.error making maths'));
+
+			return tex;
+		}
+		catch(e) {
+			this.warning(e);
+			return '';
+		}
+	},this).extend({throttle:100});
+
+	this.inputHasFocus = ko.observable(false);
+	this.focusInput = function() {
+		this.inputHasFocus(true);
+	}
 }
 display.JMEPartDisplay.prototype =
 {
-	timer: undefined,		//timer for the live preview
-	txt: '',
-	oldtxt: '',				//last displayed preview
-	oldtex: '',
-	hasFocus: false,
-	validEntry: true,
-	showAnyway: true,
-
-	show: function()
-	{
-		var pd = this;
-		var p = this.part;
-		var hc = this.htmlContext();
-		var ac = this.answerContext();
-		var previewDiv = ac.find('#preview');
-		var inputDiv = ac.find('#jme');
-		var errorSpan = hc.find('#warning-'+p.path);
-
-		this.hasFocus = false;
-		this.validEntry = true;
-		this.txt = this.part.stagedAnswer[0]; this.oldtxt = '';
-
-
-		var keyPressed = function()
-		{
-			pd.inputChanged(inputDiv.val());
-		};
-
-		//when student types in input box, update display
-		inputDiv.bind('input',function() {
-			if(pd.timer!=undefined)
-				return;
-
-			clearTimeout(pd.timer);
-
-
-			pd.timer = setTimeout(keyPressed,100);
-		});
-
-		//when input box loses focus, hide it
-		inputDiv.blur(function() {
-			Numbas.controls.doPart([this.value],p.path);
-		});
-
-		this.oldtxt='';
-		this.inputChanged(this.part.stagedAnswer[0],true);
-
-		previewDiv.click(function() {
-			inputDiv.focus();
-		});
-	},
-
 	restoreAnswer: function()
 	{
-		var c = this.answerContext();
-		c.find('#jme').val(this.part.studentAnswer);
-	},
-
-	revealAnswer: function() 
-	{
-		var c = this.answerContext();
-		c.find('#jme')
-			.attr('disabled','true')
-			.val(this.part.settings.correctAnswer);
-		this.inputChanged(this.part.settings.correctAnswer,true);
-	},
-	
-	//display a live preview of the student's answer typeset properly
-	inputChanged: function(txt,force)
-	{
-		if((txt!=this.oldtxt && txt!==undefined) || force)
-		{
-			this.part.storeAnswer([txt]);
-			this.txt = txt;
-
-			this.removeWarnings();
-			var ac = this.answerContext();
-			var previewDiv = ac.find('#preview');
-			var inputDiv = ac.find('#jme');
-			var errorSpan = this.htmlContext().find('#warning-'+this.part.path);
-			if(txt!=='')
-			{
-				try {
-					var tex = Numbas.jme.display.exprToLaTeX(txt,this.part.settings.displaySimplification,this.part.question.scope);
-					if(tex===undefined){throw(new Numbas.Error('display.part.jme.error making maths'))};
-					previewDiv.show().html('$'+tex+'$');
-					var pp = this;
-					Numbas.display.typeset(previewDiv);
-					this.validEntry = true;
-					this.oldtex = tex;
-				}
-				catch(e) {
-					this.validEntry = false;
-					this.warning(e);
-					previewDiv.hide().html('');
-				}
-			}
-			else
-			{
-				previewDiv.html('').hide();
-				this.oldtex='';
-				this.validEntry = true;
-			}
-			this.oldtxt = txt;
-		}
-		this.timer=undefined;
+		this.studentAnswer(this.part.studentAnswer);
 	}
 };
 display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);
@@ -919,7 +789,6 @@ display.MultipleResponsePartDisplay.prototype =
 	restoreAnswer: function()
 	{
 		var part = this.part;
-		var c = this.htmlContext();
 		switch(part.type) {
 		case '1_n_2':
 			for(var i=0;i<part.numAnswers; i++) {
@@ -939,14 +808,6 @@ display.MultipleResponsePartDisplay.prototype =
 				}
 			}
 			break;
-		}
-		for(var i=0; i<this.part.numChoices; i++)
-		{
-			for(var j=0; j<this.part.numAnswers; j++)
-			{
-				var checked = this.part.ticks[j][i];
-				c.find('#choice-'+i+'-'+j).prop('checked',checked);
-			}
 		}
 	}
 };

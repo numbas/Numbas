@@ -332,8 +332,8 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
 	<xsl:param name="path"/>
 
-	<input type="text" spellcheck="false" class="jme" id="jme" data-bind="autosize: true"/>
-	<span id="preview" class="mathPreview"></span>
+	<input type="text" spellcheck="false" class="jme" id="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
+	<span id="preview" class="mathPreview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">

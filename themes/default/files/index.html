@@ -101,9 +101,6 @@ Copyright 2011-13 Newcastle University
 					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
 					<div class="titleBits" data-bind="with: currentQuestion">
 						<span id="questionNameDisplay" data-bind="text: displayName"></span>
-						<span class="adviceNav">
-							<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: $root.exam.settings.allowRevealAnswer, click: Numbas.controls.revealAnswer"></button>
-						</span>
 					</div>
 				</div>
 
@@ -153,13 +150,14 @@ Copyright 2011-13 Newcastle University
 				<div class="mainDiv navBar">
 					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="visible: $root.canReverse, click: Numbas.controls.previousQuestion"></button>
 					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
-					<div class="submitDiv">
-						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="click: Numbas.controls.submitQuestion"></button>
-						<div id="marks" data-bind="with: currentQuestion">
+					<div class="submitDiv" data-bind="with: currentQuestion">
+						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
+						<div id="marks">
 							<span id="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
 							<span id="feedback" data-bind="css: scoreFeedback.state, pulse: scoreFeedback.update"></span>
 						</div>
-						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+						<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: question.parts.length && $root.exam.settings.allowRevealAnswer, click: Numbas.controls.revealAnswer"></button>
 					</div>
 				</div>
 			</div>
