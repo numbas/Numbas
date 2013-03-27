@@ -22,6 +22,11 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 
 	var util = Numbas.util;
 
+function resizeF() {
+	var w = $.textMetrics(this).width;
+	$(this).width(Math.max(w+30,60)+'px');
+};
+
 ko.bindingHandlers.autosize = {
 	init: function(element) {
 		//resize text inputs to just fit their contents
@@ -913,7 +918,28 @@ display.MultipleResponsePartDisplay.prototype =
 {
 	restoreAnswer: function()
 	{
+		var part = this.part;
 		var c = this.htmlContext();
+		switch(part.type) {
+		case '1_n_2':
+			for(var i=0;i<part.numAnswers; i++) {
+				if(part.ticks[i][0])
+					this.studentAnswer(i);
+			}
+			break;
+		case 'm_n_2':
+			for(var i=0; i<part.numAnswers; i++) {
+				this.ticks[i](part.ticks[i][0]);
+			}
+			break;
+		case 'm_n_x':
+			for(var i=0; i<part.numAnswers; i++) {
+				for(var j=0; j<part.numChoices; j++) {
+					this.ticks[i][j](part.ticks[i][j]);
+				}
+			}
+			break;
+		}
 		for(var i=0; i<this.part.numChoices; i++)
 		{
 			for(var j=0; j<this.part.numAnswers; j++)
@@ -921,39 +947,6 @@ display.MultipleResponsePartDisplay.prototype =
 				var checked = this.part.ticks[j][i];
 				c.find('#choice-'+i+'-'+j).prop('checked',checked);
 			}
-		}
-	},
-
-	revealAnswer: function()
-	{
-		switch(this.part.settings.displayType)
-		{
-		case 'radiogroup':
-		case 'checkbox':
-			//tick a response if it has positive marks
-			var c = this.answerContext();
-			for(var j=0; j<this.part.numAnswers; j++)
-			{
-				for(var i=0; i<this.part.numChoices; i++)
-				{
-					var checked = this.part.settings.matrix[j][i]>0;
-					c.find('#choice-'+i+'-'+j)
-						.attr('disabled',true)
-						.prop('checked',checked);
-				}
-			}
-			break;
-		case 'dropdownlist':
-			var bigscore=0;
-			for(var i=0;i<this.part.numAnswers;i++)
-			{
-				if(this.part.settings.matrix[i][0] > bigscore)
-				{
-					bigscore = this.part.settings.matrix[i][0];
-					$(this.answerContext().find('option')[i]).attr('selected','true');
-				}
-			}
-			break;
 		}
 	}
 };
@@ -1026,11 +1019,6 @@ $.textMetrics = function(el) {
 
 	return ret;
 }
-
-function resizeF() {
-	var w = $.textMetrics(this).width;
-	$(this).width(Math.max(w+30,60)+'px');
-};
 
 //update a score feedback box
 //selector - jQuery selector of element to update

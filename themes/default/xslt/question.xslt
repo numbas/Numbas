@@ -108,7 +108,7 @@ Copyright 2011-13 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div id="partFeedback">
-				<button class="btn" id="submitPart" data-bind="click: controls.submit"><localise>question.submit part</localise></button>
+				<button class="btn" id="submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
 				<div id="marks" data-bind="pulse: scoreFeedback.update">
 					<span id="score" data-bind="html: scoreFeedback.message"></span>
 					<span id="feedback" data-bind="css: scoreFeedback.state"></span>
@@ -213,7 +213,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: studentAnswer" value="{$choicenum}"/>
+		<input type="radio" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -232,7 +232,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:variable>
 
 	<li style="float:left;{$break}">
-		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: ticks[{$choicenum}]" />
+		<input type="checkbox" id="choice-{$answernum}-{$choicenum}" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -301,10 +301,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}]" />
+						<input type="checkbox" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed" />
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}]" value="{$answernum}"/>
+						<input type="radio" id="choice-{$choicenum}-{$answernum}" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
