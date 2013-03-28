@@ -91,7 +91,7 @@ Copyright 2011-13 Newcastle University
 				<xsl:with-param name="path" select="$path"/>
 			</xsl:apply-templates>
 		</xsl:if>
-		<span class="answer">
+		<span class="student-answer">
 			<xsl:apply-templates select="." mode="typespecific">
 				<xsl:with-param name="path" select="$path"/>
 			</xsl:apply-templates>
@@ -100,13 +100,14 @@ Copyright 2011-13 Newcastle University
 				<span class="warning" data-bind="latex: $data"></span>
 			</span>
 		</span>
+		<xsl:apply-templates select="." mode="correctanswer"/>
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div class="partFeedback">
 				<button class="btn submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
 				<div class="marks" data-bind="pulse: scoreFeedback.update">
 					<span class="score" data-bind="html: scoreFeedback.message"></span>
-					<span class="feedback" data-bind="css: scoreFeedback.state"></span>
+					<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
 				</div>
 				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 			</div>
@@ -242,7 +243,7 @@ Copyright 2011-13 Newcastle University
 	</option>
 </xsl:template>
 
-<xsl:template match="part[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']" mode="typespecific">
+<xsl:template match="part[@type='1_n_2']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<xsl:apply-templates select="choices" mode="one">
@@ -250,14 +251,14 @@ Copyright 2011-13 Newcastle University
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="part[@type='m_n_2' or @type='CUEdt.MRm_n_2Part']" mode="typespecific">
+<xsl:template match="part[@type='m_n_2']" mode="typespecific">
 	<xsl:param name="path"/>
 	<xsl:apply-templates select="choices" mode="one">
 		<xsl:with-param name="path" select="$path"/>
 	</xsl:apply-templates>
 </xsl:template>
 
-<xsl:template match="part[@type='m_n_x' or @type='CUEdt.MRm_n_xPart']" mode="typespecific">
+<xsl:template match="part[@type='m_n_x']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
@@ -307,14 +308,27 @@ Copyright 2011-13 Newcastle University
 	</tr>
 </xsl:template>
 
-<xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
+<xsl:template match="part[@type='1_n_2' or @type='m_n_2' or @type='m_n_x']" mode="correctanswer"></xsl:template>
+
+<xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
 </xsl:template>
 
-<xsl:template match="part[@type='gapfill' or @type='CUEdt.GapFillPart']" mode="typespecific">
+<xsl:template match="part[@type='patternmatch']" mode="correctanswer">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+		<localise>part.correct answer</localise>
+		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+	</span>
+</xsl:template>
+
+<xsl:template match="part[@type='gapfill']" mode="typespecific">
 	<xsl:param name="path"/>
+</xsl:template>
+
+<xsl:template match="part[@type='gapfill']" mode="correctanswer">
 </xsl:template>
 
 <xsl:template match="gapfill" mode="content">
@@ -324,21 +338,40 @@ Copyright 2011-13 Newcastle University
 	<xsl:apply-templates select="ancestor::part[1]/gaps/part[$n+1]" />
 </xsl:template>
 
-<xsl:template match="part[@type='jme' or @type='CUEdt.JMEPart']" mode="typespecific">
+<xsl:template match="part[@type='jme']" mode="typespecific">
 	<xsl:param name="path"/>
 
 	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 </xsl:template>
 
-<xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
+<xsl:template match="part[@type='jme']" mode="correctanswer">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+		<localise>part.correct answer</localise>
+		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+	</span>
+</xsl:template>
+
+<xsl:template match="part[@type='numberentry']" mode="typespecific">
 	<xsl:param name="path"/>
 	
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
 </xsl:template>
 
-<xsl:template match="part[@type='information' or @type='CUEdt.InformationOnlyPart']" mode="typespecific">
+<xsl:template match="part[@type='numberentry']" mode="correctanswer">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+		<localise>part.correct answer</localise>
+		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+	</span>
+</xsl:template>
+
+<xsl:template match="part[@type='information']" mode="typespecific">
 	<xsl:param name="path"/>
+</xsl:template>
+
+<xsl:template match="part[@type='information']" mode="correctanswer">
 </xsl:template>
 
 <xsl:template match="part" mode="typespecific">

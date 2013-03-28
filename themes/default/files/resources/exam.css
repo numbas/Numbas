@@ -182,21 +182,21 @@ button:hover, button:focus {
 .marks .score {
 	padding-right: 0.5em;
 }
-.marks .feedback {
+.feedback-icon {
 	font-size: 1.2em;
 	display: inline-block;
 	-webkit-text-stroke: 1px #222;
 }
-.marks .feedback.icon-ok {
+.feedback-icon.icon-ok {
 	color: lime;
 }
-.marks .feedback.partial {
+.feedback-icon.partial {
 	color: lightslategrey;
 }
-.marks .feedback.icon-remove {
+.feedback-icon.icon-remove {
 	color: red;
 }
-.marks .feedback.none {
+.feedback-icon.none {
 	display: none;
 }
 
@@ -209,7 +209,8 @@ button:hover, button:focus {
 	color: black;
 }
 
-.questionSelector .marks .feedback {
+.questionSelector .feedback-icon {
+	float: right;
 	padding: 0;
 	font-size: 1.5em;
 }
@@ -222,10 +223,6 @@ button:hover, button:focus {
 .questionSelector .marks {
 	float: right;
 	clear: left;
-}
-
-.marks .feedback img {
-	visibility: hidden;
 }
 
 .feedbackMessages {
@@ -330,12 +327,6 @@ button:hover, button:focus {
 	padding: 0.5em 0;
 }
 
-.questionSelector .feedback {
-	width: 25px;
-	height: 25px;
-	float: right;
-}
-
 .questionSelector .score {
 	float: right;
 }
@@ -428,6 +419,11 @@ div.part {
 	clear: both;
 }
 
+.correct-answer {
+	margin-left: 1em;
+	border: 1px dashed #999;
+	padding: 0.4em;
+}
 
 .steps {
 	border: 1px solid;
@@ -547,6 +543,35 @@ div.lemma p {
 	padding: 0em 0.2em;
 }
 
+/*
+------------------------------
+	Impromptu
+------------------------------
+*/
+div.jqi .jqititle{
+	padding: 5px 10px;
+	font-size: 16px; 
+	line-height: 20px; 
+	border-bottom: solid 1px #eeeeee;
+}
+
+.jqi .jqiarrow{ position: absolute; height: 0; width:0; line-height: 0; font-size: 0; border: solid 10px transparent;}
+
+.jqi .jqiarrowtl{ left: 10px; top: -20px; border-bottom-color: #ffffff; }
+.jqi .jqiarrowtc{ left: 50%; top: -20px; border-bottom-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowtr{ right: 10px; top: -20px; border-bottom-color: #ffffff; }
+
+.jqi .jqiarrowbl{ left: 10px; bottom: -20px; border-top-color: #ffffff; }
+.jqi .jqiarrowbc{ left: 50%; bottom: -20px; border-top-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowbr{ right: 10px; bottom: -20px; border-top-color: #ffffff; }
+
+.jqi .jqiarrowlt{ left: -20px; top: 10px; border-right-color: #ffffff; }
+.jqi .jqiarrowlm{ left: -20px; top: 50%; border-right-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowlb{ left: -20px; bottom: 10px; border-right-color: #ffffff; }
+
+.jqi .jqiarrowrt{ right: -20px; top: 10px; border-left-color: #ffffff; }
+.jqi .jqiarrowrm{ right: -20px; top: 50%; border-left-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowrb{ right: -20px; bottom: 10px; border-left-color: #ffffff; }
 
 /* jquery.impromptu dialog boxes */
 

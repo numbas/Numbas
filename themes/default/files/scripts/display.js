@@ -31,6 +31,9 @@ ko.bindingHandlers.autosize = {
 	init: function(element) {
 		//resize text inputs to just fit their contents
 		$(element).keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+	},
+	update: function(element) {
+		resizeF.apply(element);
 	}
 }
 
@@ -160,7 +163,8 @@ var display = Numbas.display = {
 	showConfirm: function(msg,fnOK,fnCancel) {
 		fnOK = fnOK || function(){};
 		fnCancel = fnCancel || function(){};
-		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},callback: function(val){ val ? fnOK() : fnCancel(); }});
+
+		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},submit: function(val){ val ? fnOK() : fnCancel(); }});
 	},
 
 	//make MathJax typeset any maths in elem (or whole page if elem not given)
@@ -641,6 +645,7 @@ display.JMEPartDisplay = function()
 {
 	var p = this.part;
 	this.studentAnswer = ko.observable('');
+	this.correctAnswer = ko.observable(p.settings.correctAnswer);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
@@ -686,6 +691,9 @@ display.PatternMatchPartDisplay = function()
 	var p = this.part;
 
 	this.studentAnswer = ko.observable(this.part.studentAnswer);
+
+	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
@@ -704,7 +712,10 @@ display.NumberEntryPartDisplay = function()
 {
 	var p = this.part;
 
-	this.studentAnswer = ko.observable(this.part.studentAnswer);
+	this.studentAnswer = ko.observable(p.studentAnswer);
+
+	this.correctAnswer = ko.observable(p.settings.displayAnswer);
+
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
 	},this);

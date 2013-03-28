@@ -122,7 +122,7 @@ Copyright 2011-13 Newcastle University
 									<li id="questionSelector" class="questionSelector" data-bind="visible: display.visible, with: display, css: {current: $root.currentQuestion()==$data.display}, click: Numbas.controls.makeQuestionJumper(number)">
 										<span class="name" data-bind="text: displayName"></span>
 										<div class="marks">
-											<div class="feedback" data-bind="css: scoreFeedback.state"></div>
+											<div class="feedback-icon" data-bind="css: scoreFeedback.state"></div>
 											<div class="score" data-bind="html: scoreFeedback.message"></div>
 										</div>
 									</li>
@@ -154,7 +154,7 @@ Copyright 2011-13 Newcastle University
 						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
 						<div class="marks">
 							<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
-							<span class="feedback" data-bind="css: scoreFeedback.state, pulse: scoreFeedback.update"></span>
+							<span class="feedback-icon" data-bind="css: scoreFeedback.state, pulse: scoreFeedback.update"></span>
 						</div>
 						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
 						<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: question.parts.length && $root.exam.settings.allowRevealAnswer, click: Numbas.controls.revealAnswer"></button>

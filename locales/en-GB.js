@@ -142,6 +142,7 @@ R.registerLocale('en-GB',{
 	'part.marking.nothing entered': "You did not enter an answer.",
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
+	'part.correct answer': "Correct answer:",
 
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",

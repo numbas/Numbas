@@ -237,7 +237,7 @@ Question.prototype =
 		for(var i=0; i<this.parts.length; i++)
 			this.parts[i].revealAnswer(loading);
 
-		this.score = 0;
+		//this.score = 0;
 
 		if(!loading)
 		{
@@ -275,11 +275,11 @@ Question.prototype =
 	//calculate score - adds up all part scores
 	calculateScore: function(uiWarning)
 	{
-		if(this.revealed)
+		/*if(this.revealed)
 		{
 			this.score = 0;
 			return 0;
-		}
+		}*/
 
 		var tmpScore=0;
 		var answered = true;
@@ -665,7 +665,7 @@ Part.prototype = {
 			this.display.revealAnswer();
 		this.revealed = true;
 		this.answered = true;
-		this.setCredit(0);
+		//this.setCredit(0);
 		if(this.steps.length>0) {
 			this.showSteps(loading);
 			for(var i=0; i<this.steps.length; i++ )
