@@ -458,6 +458,11 @@ div.part {
 	list-style: none;
 	padding-right: 2em;
 	line-height: 1.5em;
+	float: left;
+}
+
+.multiplechoice li.start-column {
+	clear: both;
 }
 
 .multiplechoice p {

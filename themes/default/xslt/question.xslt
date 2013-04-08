@@ -87,14 +87,10 @@ Copyright 2011-13 Newcastle University
 			<xsl:apply-templates select="prompt" />
 		</xsl:if>
 		<xsl:if test="count(steps/part)>0">
-			<xsl:apply-templates select="steps">
-				<xsl:with-param name="path" select="$path"/>
-			</xsl:apply-templates>
+			<xsl:apply-templates select="steps"/>
 		</xsl:if>
 		<span class="student-answer">
-			<xsl:apply-templates select="." mode="typespecific">
-				<xsl:with-param name="path" select="$path"/>
-			</xsl:apply-templates>
+			<xsl:apply-templates select="." mode="typespecific"/>
 			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown"></span>
 			<span class="warnings" data-bind="visible: warningsShown, foreach: warnings">
 				<span class="warning" data-bind="latex: $data"></span>
@@ -119,11 +115,9 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="steps">
-	<xsl:param name="path"/>
 
-	<div class="steps" data-bind="slideVisible: stepsShown">
+	<div class="steps clearAfter" data-bind="slideVisible: stepsShown">
 		<xsl:apply-templates select="part"/>
-		<div style="clear:both;"></div>
 	</div>
 	<button class="btn stepsBtn" data-bind="visible: !stepsShown(), click: controls.showSteps"><localise>question.show steps</localise></button>
 </xsl:template>
@@ -160,35 +154,24 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="choices" mode="one">
-	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
 	<form>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<form>
-			<ul class="multiplechoice">
-				<xsl:apply-templates select="choice" mode="radiogroup">
-					<xsl:with-param name="path" select="$path"/>
-				</xsl:apply-templates>
-			</ul><br style="clear:left;"/>
-			</form>
+			<ul class="multiplechoice clearAfter">
+				<xsl:apply-templates select="choice" mode="radiogroup"/>
+			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<form>
-			<ul class="multiplechoice">
-				<xsl:apply-templates select="choice" mode="checkbox">
-					<xsl:with-param name="path" select="$path"/>
-				</xsl:apply-templates>
-			</ul><br style="clear:left;"/>
-			</form>
+			<ul class="multiplechoice clearAfter">
+				<xsl:apply-templates select="choice" mode="checkbox"/>
+			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
 			<select class="multiplechoice">
 				<option></option>
-				<xsl:apply-templates select="choice" mode="dropdownlist">
-					<xsl:with-param name="path" select="$path"/>
-				</xsl:apply-templates>
+				<xsl:apply-templates select="choice" mode="dropdownlist"/>
 			</select>
 		</xsl:when>
 	</xsl:choose>
@@ -196,46 +179,38 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="choice" mode="radiogroup">
-	<xsl:param name="path"/>
-	<xsl:param name="answernum" select="0"/>
 	<xsl:variable name="cols" select="../@displaycolumns"/>
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
-	
-	<xsl:variable name="break">
-		<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-			<xsl:text>clear:both;</xsl:text>
-		</xsl:if>
-	</xsl:variable>
 
-	<li style="float:left;{$break}">
+	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
 
 <xsl:template match="choice" mode="checkbox">
-	<xsl:param name="path"/>
-	<xsl:param name="answernum" select="0"/>
 	<xsl:variable name="cols" select="../@displaycolumns"/>
 
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
-	<xsl:variable name="break">
-		<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-			<xsl:text>clear:both;</xsl:text>
-		</xsl:if>
-	</xsl:variable>
-
-	<li style="float:left;{$break}">
+	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
 
 <xsl:template match="choice" mode="dropdownlist">
-	<xsl:param name="path"/>
-	<xsl:param name="answernum" select="0"/>
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 	<option>
@@ -244,22 +219,15 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="typespecific">
-	<xsl:param name="path"/>
 	
-	<xsl:apply-templates select="choices" mode="one">
-		<xsl:with-param name="path" select="$path"/>
-	</xsl:apply-templates>
+	<xsl:apply-templates select="choices" mode="one"/>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="typespecific">
-	<xsl:param name="path"/>
-	<xsl:apply-templates select="choices" mode="one">
-		<xsl:with-param name="path" select="$path"/>
-	</xsl:apply-templates>
+	<xsl:apply-templates select="choices" mode="one"/>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
-	<xsl:param name="path"/>
 
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
 	<div class="m_n_x">
@@ -274,7 +242,6 @@ Copyright 2011-13 Newcastle University
 			<tbody>
 				<xsl:for-each select="choices/choice">
 					<xsl:apply-templates select="." mode="mrx">
-						<xsl:with-param name="path" select="$path"/>
 						<xsl:with-param name="displaytype" select="$displaytype"/>
 					</xsl:apply-templates>
 				</xsl:for-each>
@@ -285,7 +252,6 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="choice" mode="mrx">
-	<xsl:param name="path"/>
 	<xsl:param name="displaytype"/>
 
 	<xsl:variable name="answers" select="../../answers"/>
@@ -311,7 +277,6 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='1_n_2' or @type='m_n_2' or @type='m_n_x']" mode="correctanswer"></xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
-	<xsl:param name="path"/>
 	
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
 </xsl:template>
@@ -325,21 +290,18 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='gapfill']" mode="typespecific">
-	<xsl:param name="path"/>
 </xsl:template>
 
 <xsl:template match="part[@type='gapfill']" mode="correctanswer">
 </xsl:template>
 
 <xsl:template match="gapfill" mode="content">
-	<xsl:param name="path"/>
 	
 	<xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
 	<xsl:apply-templates select="ancestor::part[1]/gaps/part[$n+1]" />
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="typespecific">
-	<xsl:param name="path"/>
 
 	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
@@ -354,7 +316,6 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
-	<xsl:param name="path"/>
 	
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
 </xsl:template>
@@ -368,7 +329,6 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='information']" mode="typespecific">
-	<xsl:param name="path"/>
 </xsl:template>
 
 <xsl:template match="part[@type='information']" mode="correctanswer">
