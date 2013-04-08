@@ -1471,6 +1471,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		}
 	}
 
+
 	if(this.type == '1_n_2' || this.type == 'm_n_2')
 	{	//because we swapped answers and choices round in the marking matrix
 		this.numAnswers = this.numChoices;

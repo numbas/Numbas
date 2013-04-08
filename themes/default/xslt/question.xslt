@@ -153,8 +153,29 @@ Copyright 2011-13 Newcastle University
 	</xsl:copy>
 </xsl:template>
 
-<xsl:template match="choices" mode="one">
+<xsl:template match="part[@type='1_n_2']" mode="typespecific">
+	<xsl:apply-templates select="choices" mode="one"/>
+</xsl:template>
 
+<xsl:template match="part[@type='1_n_2']" mode="correctanswer">
+	<span class="correct-answer">
+		<localise>part.correct answer</localise>
+		<xsl:apply-templates select="choices" mode="correctanswer"/>
+	</span>
+</xsl:template>
+
+<xsl:template match="part[@type='m_n_2']" mode="typespecific">
+	<xsl:apply-templates select="choices" mode="one"/>
+</xsl:template>
+
+<xsl:template match="part[@type='m_n_2']" mode="correctanswer">
+	<span class="correct-answer">
+		<localise>part.correct answer</localise>
+		<xsl:apply-templates select="choices" mode="correctanswer"/>
+	</span>
+</xsl:template>
+
+<xsl:template match="choices" mode="one">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
 	<form>
 	<xsl:choose>
@@ -178,6 +199,30 @@ Copyright 2011-13 Newcastle University
 	</form>
 </xsl:template>
 
+<xsl:template match="choices" mode="correctanswer">
+	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
+	<form>
+	<xsl:choose>
+		<xsl:when test="@displaytype='radiogroup'">
+			<ul class="multiplechoice clearAfter">
+				<xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
+			</ul>
+		</xsl:when>
+		<xsl:when test="@displaytype='checkbox'">
+			<ul class="multiplechoice clearAfter">
+				<xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
+			</ul>
+		</xsl:when>
+		<xsl:when test="@displaytype='dropdownlist'">
+			<select class="multiplechoice">
+				<option></option>
+				<xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
+			</select>
+		</xsl:when>
+	</xsl:choose>
+	</form>
+</xsl:template>
+
 <xsl:template match="choice" mode="radiogroup">
 	<xsl:variable name="cols" select="../@displaycolumns"/>
 	
@@ -190,6 +235,21 @@ Copyright 2011-13 Newcastle University
 			</xsl:if>
 		</xsl:attribute>
 		<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
+		<xsl:apply-templates select="content"/>
+	</li>
+</xsl:template>
+<xsl:template match="choice" mode="radiogroup-correctanswer">
+	<xsl:variable name="cols" select="../@displaycolumns"/>
+	
+	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+
+	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
+		<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
 		<xsl:apply-templates select="content"/>
 	</li>
 </xsl:template>
@@ -210,21 +270,28 @@ Copyright 2011-13 Newcastle University
 	</li>
 </xsl:template>
 
+<xsl:template match="choice" mode="checkbox-correctanswer">
+	<xsl:variable name="cols" select="../@displaycolumns"/>
+
+	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+
+	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
+		<input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
+		<xsl:apply-templates select="content"/>
+	</li>
+</xsl:template>
+
 <xsl:template match="choice" mode="dropdownlist">
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 	<option>
 		<xsl:apply-templates select="content"/>
 	</option>
-</xsl:template>
-
-<xsl:template match="part[@type='1_n_2']" mode="typespecific">
-	
-	<xsl:apply-templates select="choices" mode="one"/>
-</xsl:template>
-
-<xsl:template match="part[@type='m_n_2']" mode="typespecific">
-	<xsl:apply-templates select="choices" mode="one"/>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
@@ -241,7 +308,7 @@ Copyright 2011-13 Newcastle University
 			</thead>
 			<tbody>
 				<xsl:for-each select="choices/choice">
-					<xsl:apply-templates select="." mode="mrx">
+					<xsl:apply-templates select="." mode="m_n_x">
 						<xsl:with-param name="displaytype" select="$displaytype"/>
 					</xsl:apply-templates>
 				</xsl:for-each>
@@ -251,7 +318,7 @@ Copyright 2011-13 Newcastle University
 	</div>
 </xsl:template>
 
-<xsl:template match="choice" mode="mrx">
+<xsl:template match="choice" mode="m_n_x">
 	<xsl:param name="displaytype"/>
 
 	<xsl:variable name="answers" select="../../answers"/>
@@ -274,7 +341,7 @@ Copyright 2011-13 Newcastle University
 	</tr>
 </xsl:template>
 
-<xsl:template match="part[@type='1_n_2' or @type='m_n_2' or @type='m_n_x']" mode="correctanswer"></xsl:template>
+<xsl:template match="part[@type='m_n_x']" mode="correctanswer"></xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	

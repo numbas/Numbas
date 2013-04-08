@@ -423,6 +423,7 @@ div.part {
 	margin-left: 1em;
 	border: 1px dashed #999;
 	padding: 0.4em;
+	display: inline-block;
 }
 
 .correct-answer .feedback-icon {

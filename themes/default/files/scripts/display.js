@@ -758,15 +758,27 @@ display.MultipleResponsePartDisplay = function()
 	switch(p.type) {
 	case '1_n_2':
 		this.studentAnswer = ko.observable(null);
+
 		ko.computed(function() {
 			var i = parseInt(this.studentAnswer());
 			p.storeAnswer([i,0]);
 		},this);
 		break;
+
+		var max = 0, maxi = -1;
+		for(var i=0;i<p.numAnswers;i++) {
+			if(p.settings.matrix[i][0]>max || maxi==-1) {
+				max = p.settings.matrix[i][0];
+				maxi = i;
+			}
+		}
+		this.correctAnswer = ko.observable(maxi);
 	case 'm_n_2':
 		this.ticks = [];
+		this.correctTicks = [];
 		for(var i=0; i<p.numAnswers; i++) {
 			this.ticks[i] = makeTicker(i,0);
+			this.correctTicks[i] = p.settings.matrix[i][0]>0;
 		}
 		break;
 	case 'm_n_x':
