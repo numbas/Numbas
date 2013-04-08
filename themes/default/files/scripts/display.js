@@ -370,10 +370,10 @@ display.QuestionDisplay = function(q)
 	this.score = ko.observable(q.score);
 	this.marks = ko.observable(q.marks);
 	this.answered = ko.observable(q.answered);
-	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
+	this.revealed = ko.observable(q.revealed);
 	this.anyAnswered = ko.observable(false);
 
-	this.revealed = ko.observable(q.revealed);
+	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
 }
 display.QuestionDisplay.prototype =
 {
@@ -456,11 +456,6 @@ display.QuestionDisplay.prototype =
 		this.revealed(this.question.revealed);
 		if(!this.question.revealed)
 			return;
-
-		for(var i=0;i<this.question.parts.length;i++)
-		{
-			this.question.parts[i].display.revealAnswer();
-		}
 	},
 
 	//display question score and answer state
@@ -499,7 +494,6 @@ display.PartDisplay = function(p)
 	this.score = ko.observable(p.score);
 	this.marks = ko.observable(p.marks);
 	this.answered = ko.observable(p.answered);
-	this.scoreFeedback = showScoreFeedback(this,p.question.exam.settings);
 
 	this.warnings = ko.observableArray([]);
 	this.warningsShown = ko.observable(false);
@@ -516,6 +510,8 @@ display.PartDisplay = function(p)
 	this.stepsShown = ko.observable(p.stepsShown);
 
 	this.revealed = ko.observable(false);
+
+	this.scoreFeedback = showScoreFeedback(this,p.question.exam.settings);
 
 	this.controls = {
 		toggleFeedback: function() {
@@ -844,8 +840,6 @@ display.GapFillPartDisplay.prototype =
 
 	revealAnswer: function()
 	{
-		for(var i=0; i<this.part.gaps.length; i++)
-			this.part.gaps[i].display.revealAnswer();
 	}
 };
 display.GapFillPartDisplay = extend(display.PartDisplay,display.GapFillPartDisplay,true);
@@ -940,10 +934,10 @@ function showScoreFeedback(obj,settings)
 				return '';
 		}),
 		state: ko.computed(function() {
-			var answered = obj.answered(), score = obj.score(), marks = obj.marks();
+			var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 			answered = answered || score>0;
 
-			if( settings.showAnswerState && answered && marks>0 ) {
+			if( settings.showAnswerState && (answered||revealed) && marks>0 ) {
 				if(score<=0)
 					return 'icon-remove';
 				else if(score==marks)

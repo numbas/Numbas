@@ -661,8 +661,9 @@ Part.prototype = {
 	//reveal the correct answer
 	revealAnswer: function(loading)
 	{
-		if(!loading)
+		if(!loading) {
 			this.display.revealAnswer();
+		}
 		this.revealed = true;
 		this.answered = true;
 		//this.setCredit(0);

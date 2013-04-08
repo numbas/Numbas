@@ -425,6 +425,10 @@ div.part {
 	padding: 0.4em;
 }
 
+.correct-answer .feedback-icon {
+	margin-left: 0.2em;
+}
+
 .steps {
 	border: 1px solid;
 	padding: 0.5em 0.5em;
