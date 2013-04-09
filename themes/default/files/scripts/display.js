@@ -753,10 +753,10 @@ display.MultipleResponsePartDisplay = function()
 		return obs;
 	}
 
-	function makeRadioTicker(answer) {
+	function makeRadioTicker(choice) {
 		var obs = ko.observable(null);
 		ko.computed(function() {
-			var choice = parseInt(obs());
+			var answer = parseInt(obs());
 			p.storeAnswer([answer,choice]);
 		},p);
 		return obs;
@@ -801,13 +801,13 @@ display.MultipleResponsePartDisplay = function()
 		case 'radiogroup':
 			this.ticks = [];
 			this.correctTicks = [];
-			for(var i=0; i<p.numAnswers; i++) {
+			for(var i=0; i<p.numChoices; i++) {
 				this.ticks.push(makeRadioTicker(i));
 				var maxj=-1,max=0;
-				for(var j=0;j<p.numChoices; j++) {
-					if(maxj==-1 || p.settings.matrix[i][j]>max) {
+				for(var j=0;j<p.numAnswers; j++) {
+					if(maxj==-1 || p.settings.matrix[j][i]>max) {
 						maxj = j;
-						max = p.settings.matrix[i][j];
+						max = p.settings.matrix[j][i];
 					}
 				}
 				this.correctTicks.push(maxj);
@@ -941,6 +941,23 @@ function showScoreFeedback(obj,settings)
 
 	var newScore = ko.observable(false);
 
+	var state = ko.computed(function() {
+		var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
+		answered = answered || score>0;
+
+		if( settings.showAnswerState && (answered||revealed) && marks>0 ) {
+			if(score<=0)
+				return 'wrong';
+			else if(score==marks)
+				return 'correct';
+			else
+				return 'partial';
+		}
+		else {
+			return 'none';
+		}
+	});
+
 	return {
 		update: ko.computed({
 			read: function() {
@@ -973,21 +990,18 @@ function showScoreFeedback(obj,settings)
 			else
 				return '';
 		}),
-		state: ko.computed(function() {
-			var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
-			answered = answered || score>0;
-
-			if( settings.showAnswerState && (answered||revealed) && marks>0 ) {
-				if(score<=0)
-					return 'icon-remove';
-				else if(score==marks)
-					return 'icon-ok';
-				else
-					return 'icon-ok partial';
+		iconClass: ko.computed(function() {
+			switch(state()) {
+			case 'wrong':
+				return 'icon-remove';
+			case 'correct':
+				return 'icon-ok';
+			case 'partial':
+				return 'icon-ok partial';
 			}
-			else {
-				return 'none';
-			}
+		}),
+		iconAttr: ko.computed(function() {
+			return {title:R('question.score feedback.'+state())};
 		})
 	}
 };

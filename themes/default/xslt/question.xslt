@@ -103,7 +103,7 @@ Copyright 2011-13 Newcastle University
 				<button class="btn submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
 				<div class="marks" data-bind="pulse: scoreFeedback.update">
 					<span class="score" data-bind="html: scoreFeedback.message"></span>
-					<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+					<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 				</div>
 				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 			</div>
@@ -395,7 +395,7 @@ Copyright 2011-13 Newcastle University
 	<span class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: correctAnswer, autosize: true"/>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 
@@ -422,7 +422,7 @@ Copyright 2011-13 Newcastle University
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="preview" data-bind="maths: correctAnswerLaTeX"></span>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 
@@ -435,7 +435,8 @@ Copyright 2011-13 Newcastle University
 	<span class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
+		<span data-bind=""></span>
+		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 

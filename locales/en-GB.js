@@ -193,6 +193,9 @@ R.registerLocale('en-GB',{
 	'question.score feedback.answered actual': "Score: %(scoreString)",
 	'question.score feedback.answered': "Answered.",
 	'question.score feedback.unanswered total': "%(marksString).",
+	'question.score feedback.correct': 'Your answer is correct',
+	'question.score feedback.partial': 'Your answer is partially correct',
+	'question.score feedback.wrong': 'Your answer is incorrect',
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Time remaining: %s",
