@@ -75,6 +75,13 @@ ko.bindingHandlers.maths = {
 	}
 }
 
+ko.bindingHandlers.typeset = {
+	update: function(element, valueAccessor) {
+		ko.utils.unwrapObservable(valueAccessor());
+		Numbas.display.typeset(element);
+	}
+}
+
 ko.bindingHandlers.pulse = {
 	init: function() {
 	},
@@ -135,7 +142,7 @@ var display = Numbas.display = {
 		{
 			if(!Numbas.exam.inProgress) { return; }
 
-			if(display.inInput || $('#jqibox').is(':visible'))
+			if($('input:focus').length || $('#jqibox').is(':visible'))
 				return;
 			
 			switch(e.keyCode)
@@ -641,7 +648,8 @@ display.JMEPartDisplay = function()
 {
 	var p = this.part;
 	this.studentAnswer = ko.observable('');
-	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+	this.correctAnswer = p.settings.correctAnswer;
+	this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.displaySimplification,p.question.scope);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
@@ -763,7 +771,6 @@ display.MultipleResponsePartDisplay = function()
 			var i = parseInt(this.studentAnswer());
 			p.storeAnswer([i,0]);
 		},this);
-		break;
 
 		var max = 0, maxi = -1;
 		for(var i=0;i<p.numAnswers;i++) {
@@ -773,6 +780,8 @@ display.MultipleResponsePartDisplay = function()
 			}
 		}
 		this.correctAnswer = ko.observable(maxi);
+
+		break;
 	case 'm_n_2':
 		this.ticks = [];
 		this.correctTicks = [];
@@ -785,17 +794,30 @@ display.MultipleResponsePartDisplay = function()
 		switch(p.settings.displayType) {
 		case 'radiogroup':
 			this.ticks = [];
+			this.correctTicks = [];
 			for(var i=0; i<p.numAnswers; i++) {
 				this.ticks.push(makeRadioTicker(i));
+				var maxj=-1,max=0;
+				for(var j=0;j<p.numChoices; j++) {
+					if(maxj==-1 || p.settings.matrix[i][j]>max) {
+						maxj = j;
+						max = p.settings.matrix[i][j];
+					}
+				}
+				this.correctTicks.push(maxj);
 			}
 			break;
 		case 'checkbox':
 			this.ticks = [];
+			this.correctTicks = [];
 			for(var i=0; i<p.numAnswers; i++) {
 				var row = [];
 				this.ticks.push(row);
+				var correctRow = [];
+				this.correctTicks.push(correctRow);
 				for(var j=0; j<p.numChoices; j++) {
 					row.push(makeCheckboxTicker(i,j));
+					correctRow.push(p.settings.matrix[i][j]>0);
 				}
 			}
 			break;

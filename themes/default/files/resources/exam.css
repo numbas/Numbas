@@ -40,7 +40,7 @@ body {
 	overflow: hidden;
 }
 
-.jme .preview {
+.type-jme .preview {
 	background-color: #eee;
 	padding: 0.2em;
 	font-family: serif;
@@ -392,7 +392,7 @@ button:hover, button:focus {
 
 /* question bits */
 
-#questionDisplay table{
+.statement table, .prompt table, .advice table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -411,7 +411,7 @@ div.part {
 	margin-left: 1em;
 }
 
-.part.gapfill .part {
+.part.type-gapfill .part {
 	display: inline-block;
 }
 
@@ -420,6 +420,7 @@ div.part {
 }
 
 .correct-answer {
+	vertical-align: bottom;
 	margin-left: 1em;
 	border: 1px dashed #999;
 	padding: 0.4em;
@@ -470,16 +471,25 @@ div.part {
 	display: inline;
 }
 
-.part.m_n_x table.choices-grid td.option {
+.part.type-m_n_x form, .part.type-1_n_2 form, .part.type-m_n_2 form {
+	display: inline-block;
+}
+
+.part.type-m_n_x .choices-grid {
+	margin-left: 1em;
+	width: auto;
+}
+
+.part.type-m_n_x table.choices-grid td.option {
 	text-align: center;
 }
 
-.part.m_n_x .choices-grid th {
+.part.type-m_n_x .choices-grid th {
 	background: inherit;
 	font-weight: normal;
 	text-align: center;
 }
-.part.m_n_x .choices-grid .choice {
+.part.type-m_n_x .choices-grid .choice {
 	text-align: left;
 	max-width: 40em;
 }

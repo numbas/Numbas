@@ -80,7 +80,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part <xsl:value-of select="@type"/></xsl:attribute>
+		<xsl:attribute name="class">part type-<xsl:value-of select="@type"/></xsl:attribute>
 		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
@@ -158,10 +158,10 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
-	<span class="correct-answer">
+	<div class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
-	</span>
+	</div>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="typespecific">
@@ -169,10 +169,10 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
-	<span class="correct-answer">
+	<div class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
-	</span>
+	</div>
 </xsl:template>
 
 <xsl:template match="choices" mode="one">
@@ -295,10 +295,8 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
-
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<div class="m_n_x">
-		<form>
+	<form>
 		<table class="choices-grid">
 			<thead>
 				<td/>
@@ -309,6 +307,29 @@ Copyright 2011-13 Newcastle University
 			<tbody>
 				<xsl:for-each select="choices/choice">
 					<xsl:apply-templates select="." mode="m_n_x">
+						<xsl:with-param name="displaytype" select="$displaytype"/>
+					</xsl:apply-templates>
+				</xsl:for-each>
+			</tbody>
+		</table>
+	</form>
+</xsl:template>
+
+<xsl:template match="part[@type='m_n_x']" mode="correctanswer">
+	<xsl:variable name="displaytype" select="choices/@displaytype"/>
+	<div class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
+		<localise>part.correct answer</localise>
+		<form>
+		<table class="choices-grid">
+			<thead>
+				<td/>
+				<xsl:for-each select="answers/answer">
+					<th><xsl:apply-templates select="content"/></th>
+				</xsl:for-each>
+			</thead>
+			<tbody>
+				<xsl:for-each select="choices/choice">
+					<xsl:apply-templates select="." mode="m_n_x-correctanswer">
 						<xsl:with-param name="displaytype" select="$displaytype"/>
 					</xsl:apply-templates>
 				</xsl:for-each>
@@ -341,7 +362,29 @@ Copyright 2011-13 Newcastle University
 	</tr>
 </xsl:template>
 
-<xsl:template match="part[@type='m_n_x']" mode="correctanswer"></xsl:template>
+<xsl:template match="choice" mode="m_n_x-correctanswer">
+	<xsl:param name="displaytype"/>
+
+	<xsl:variable name="answers" select="../../answers"/>
+	<xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
+	<tr>
+		<td class="choice"><xsl:apply-templates select="content"/></td>
+		<xsl:for-each select="$answers/answer">
+			<xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
+			<td class="option">
+				<xsl:choose>
+					<xsl:when test="$displaytype='checkbox'">
+						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}]" disabled="true"/>
+					</xsl:when>
+					<xsl:when test="$displaytype='radiogroup'">
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" value="{$answernum}"/>
+					</xsl:when>
+				</xsl:choose>
+			</td>
+		</xsl:for-each>
+	</tr>
+</xsl:template>
+
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	
@@ -349,9 +392,9 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
-	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
-		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
+		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
 	</span>
 </xsl:template>
@@ -375,9 +418,10 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="correctanswer">
-	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
+		<span class="preview" data-bind="maths: correctAnswerLaTeX"></span>
 		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
 	</span>
 </xsl:template>
@@ -388,7 +432,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">
-	<span class="correct-answer" data-bind="if: revealed, visible: revealed">
+	<span class="correct-answer" data-bind="if: revealed, visible: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="feedback-icon" data-bind="css: scoreFeedback.state"></span>
