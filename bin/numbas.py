@@ -27,6 +27,7 @@ from xml2js import xml2js
 from zipfile import ZipFile
 import xml.etree.ElementTree as etree
 from itertools import count
+import subprocess
 
 namespaces = {
 	'': 'http://www.imsglobal.org/xsd/imscp_v1p1',
@@ -94,8 +95,13 @@ def realFile(file):
 
 def collectFiles(options,dirs=[('runtime','.')]):
 
-	resources = [os.path.join(options.sourcedir,x) for x in options.resources]
-	dirs += [(os.path.join(os.getcwd(),x),os.path.join('resources',os.path.split(x)[1])) for x in resources if os.path.isdir(x)]
+	resources=[x if isinstance(x,list) else [x,x] for x in options.resources]
+
+	print(resources)
+	for name,path in resources:
+		if os.path.isdir(path):
+			dirs.append((os.path.join(os.getcwd(),path),os.path.join('resources',name)))
+
 
 	extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
 	extfiles = [
@@ -116,9 +122,9 @@ def collectFiles(options,dirs=[('runtime','.')]):
 			for y in filter(realFile,x[2]):
 				files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
 
-	for x in resources:
-		if not os.path.isdir(x):
-			files[os.path.join('resources',os.path.basename(x))] = os.path.join(options.path,x)
+	for name,path in resources:
+		if not os.path.isdir(path):
+			files[os.path.join('resources',name)] = os.path.join(options.path,path)
 	
 	return files
 
@@ -144,9 +150,9 @@ def compileToDir(exam,files,options):
 
 	for (dst,src) in files.items():
 		dst = os.path.join(options.output,dst)
+		makepath(dst)
 		if isinstance(src,basestring):
 			if options.action=='clean' or not os.path.exists(dst) or os.path.getmtime(src)>os.path.getmtime(dst):
-				makepath(dst)
 				shutil.copyfile(src,dst)
 		else:
 			shutil.copyfileobj(src,open(dst,'w',encoding='utf-8'))
@@ -235,6 +241,17 @@ def makeExam(options):
 			pass
 
 		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest_string)
+
+	if options.minify:
+		for dst,src in files.items():
+			if isinstance(src,basestring) and os.path.splitext(dst)[1] == '.js':
+				p = subprocess.Popen([options.minify,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				out,err = p.communicate()
+				code = p.poll()
+				if code != 0:
+					raise Exception('Failed to minify %s with minifier %s' % (src,options.minify))
+				else:
+					files[dst] = io.StringIO(out.decode('utf-8'))
 		
 	if options.zip:
 		compileToZip(exam,files,options)
@@ -314,6 +331,10 @@ def run():
 						dest='locale',
 						default='en-GB',
 						help='Language (ISO language code) to use when displaying text')
+	parser.add_option('--minify',
+						dest='minify',
+						default='',
+						help='Path to Javascript minifier. If not given, no minification is performed.')
 
 	(options,args) = parser.parse_args()
 
