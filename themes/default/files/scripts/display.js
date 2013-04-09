@@ -469,6 +469,7 @@ display.QuestionDisplay.prototype =
 		this.revealed(this.question.revealed);
 		if(!this.question.revealed)
 			return;
+		scroll(0,0);
 	},
 
 	//display question score and answer state
@@ -531,9 +532,12 @@ display.PartDisplay = function(p)
 			pd.feedbackShown(!pd.feedbackShown());
 		},
 		submit: function() {
-			p.display.removeWarnings();
-			p.submit();
-			if(!p.answered)
+			var np = p;
+			while(np.isGap)
+				np = np.parentPart;
+			np.display.removeWarnings();
+			np.submit();
+			if(!np.answered)
 			{
 				Numbas.display.showAlert(R('question.can not submit'));
 			}
@@ -541,6 +545,15 @@ display.PartDisplay = function(p)
 		},
 		showSteps: function() {
 			p.showSteps();
+		},
+	}
+	this.inputEvents = {
+		keypress: function(context,e) {
+			if(e.which==13) {
+				pd.controls.submit();
+			}
+			else
+				return true;
 		}
 	}
 }

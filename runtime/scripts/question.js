@@ -1669,6 +1669,7 @@ function GapFillPart(xml, path, question, parentPart, loading)
 	for( var i=0 ; i<gapXML.length; i++ )
 	{
 		var gap = createPart(gapXML[i], path+'g'+i, this.question, this, loading);
+		gap.isGap = true;
 		this.marks += gap.marks;
 		this.gaps[i]=gap;
 	}

@@ -388,7 +388,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, value: studentAnswer, disable: revealed"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', disable: revealed"></input>
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
@@ -412,8 +412,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="typespecific">
-
-	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
+	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 </xsl:template>
 
@@ -428,7 +427,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, value: studentAnswer, disable: revealed"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', disable: revealed"/>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">

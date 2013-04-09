@@ -471,6 +471,10 @@ div.part {
 	display: inline;
 }
 
+.multiplechoice .choice {
+	margin-right: 0.3em;
+}
+
 .part.type-m_n_x form, .part.type-1_n_2 form, .part.type-m_n_2 form {
 	display: inline-block;
 }
