@@ -171,7 +171,9 @@ var display = Numbas.display = {
 		fnOK = fnOK || function(){};
 		fnCancel = fnCancel || function(){};
 
-		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},submit: function(val){ val ? fnOK() : fnCancel(); }});
+		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},submit: function(e,val){
+				val ? fnOK() : fnCancel(); 
+		}});
 	},
 
 	//make MathJax typeset any maths in elem (or whole page if elem not given)
@@ -379,6 +381,10 @@ display.QuestionDisplay = function(q)
 	this.answered = ko.observable(q.answered);
 	this.revealed = ko.observable(q.revealed);
 	this.anyAnswered = ko.observable(false);
+
+	this.canReveal = ko.computed(function() {
+		return exam.settings.allowRevealAnswer && !this.revealed();
+	},this);
 
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
 }
