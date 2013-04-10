@@ -92,7 +92,124 @@ Copyright 2011-13 Newcastle University
 		<!-- main content area - info pages or questions go in here -->
 		<div class="mainDisplay">
 			<div id="infoDisplay" data-bind="visible: infoPage">
+				<div id="frontpage" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
+					<table>
+						<tr>
+							<td data-localise="exam.exam name"></td>
+							<td class="rtd" data-bind="html: exam.settings.name"></td>
+						</tr>
+						<tr>
+							<td data-localise="exam.number of questions"></td>
+							<td class="rtd" data-bind="html: exam.settings.numQuestions"></td>
+						</tr>
+						<tr data-bind="visible: exam.settings.showTotalMark">
+							<td data-localise="exam.marks available"></td>
+							<td class="rtd" data-bind="text: marks"></td>
+						</tr>
+						<tr data-bind="visible: exam.settings.percentPass>0">
+							<td data-localise="exam.pass percentage"></td>
+							<td class="rtd" data-bind="text: percentPass"></td>
+						</tr>
+						<tr data-bind="visible: exam.settings.duration>0">
+							<td data-localise="exam.time allowed"></td>
+							<td class="rtd" data-bind="html: exam.displayDuration"></td>
+						</tr>
+					</table>
+					<div class="startBtn">
+						<button class="btn" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
+					</div>
+				</div>
+				<div id="suspend" data-bind="visible: infoPage()=='suspend', if: infoPage()=='suspend'">
+					<p data-localise="suspend.exam suspended"></p>
+					<p data-localise="suspend.you can resume"></p>
+					<button class="btn" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam" data-localise="suspend.resume"></button>
+				</div>
+				<div id="results" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
+					<h3 data-localise="result.exam summary"></h3>
+
+					<table>
+						<tr>
+							<td data-localise="exam.exam name"></td>
+							<td class="rtd" data-bind="html: exam.settings.name"></td>
+						</tr>
+						<tr>
+							<td data-localise="exam.number of questions"></td>
+							<td class="rtd" data-bind="text: exam.settings.numQuestions"></td>
+						</tr>
+						<tr>
+							<td data-localise="exam.marks available"></td>
+							<td class="rtd" data-bind="text: marks"></td>	
+						</tr>
+						<tr data-bind="visible: exam.settings.percentPass>0">
+							<td data-localise="exam.pass percentage"></td>
+							<td class="rtd" data-bind="text: percentPass"></td>
+						</tr>
+						<tr data-bind="visible: exam.settings.duration>0">
+							<td data-localise="exam.time allowed"></td>
+							<td class="rtd" data-bind="text: exam.displayDuration"></td>
+						</tr>
+					</table>
+
+					<h3 data-localise="result.performance summary"></h3>
+					<table>
+						<tr>
+							<td data-localise="result.exam start"></td>
+							<td class="rtd" data-bind="text: exam.start"></td>	
+						</tr>	
+						<tr>
+							<td data-localise="result.exam stop"></td>
+							<td class="rtd" data-bind="text: exam.stop"></td>	
+						</tr>
+						<tr>
+							<td data-localise="result.time spent"></td>
+							<td class="rtd" data-bind="text: timeSpent" /></td>
+						</tr> 
+						<tr>
+							<td data-localise="result.questions attempted"></td>
+							<td class="rtd" data-bind="html: questionsAttemptedDisplay"></td>
+						</tr>
+						<tr>
+							<td data-localise="result.score"></td>
+							<td class="rtd">
+								<span data-bind="text: examScoreDisplay"></span>
+								<br/>
+								(<span data-bind="text: percentScore"></span>%)</td>
+						</tr>
+						<tr class="resultrow" data-bind="visible: exam.settings.percentPass>0">
+							<td data-localise="result.result"></td>
+							<td class="rtd" data-bind="html: result"></td>	
+						</tr>							
+					</table>
+
+					<h3 data-localise="result.detailed question breakdown"></h3>
+					<p data-localise="result.click a question to review"></p>
+					<table id="question-breakdown">		
+						<thead>
+							<th class="qtd" data-localise="result.question number"></th>
+							<th class="qtd" colspan="3" data-localise="result.question score"></th>
+						</thead>		
+						<tbody data-bind="foreach: questions">
+							<tr class="question" data-bind="click: Numbas.controls.review">
+								<td class="qtd" data-bind="text: question.number"></td>
+								<td class="qtd" data-bind="text: score"></td>
+								<td class="qtd">/</td>
+								<td class="qtd" data-bind="text: marks"></td>
+							</tr>
+						</tbody>
+					</table>
+							
+					<div class="exitBtn">
+						<button class="btn" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button>
+					</div>
+					<span id="reviewBtnSpan">
+						<button class="btn" id="reviewBtn" data-bind="visible: exam.settings.canReview" data-localise="result.review"></button>
+					</span>
+				</div>
+				<div id="exit" data-bind="visible: infoPage()=='exit', if: infoPage()=='exit'">
+					<h2 data-localise="end.exam has finished"></h2>
+				</div>
 			</div>
+
 
 			<div id="questionContainer" data-bind="visible: currentQuestion">
 				<!-- top navigation bar - prv/nxt, and question name -->
@@ -132,7 +249,7 @@ Copyright 2011-13 Newcastle University
 						</div>
 
 						<!-- total exam score display -->
-						<div class="examScore" data-bind="visible: exam.settings.showActualMark, html: examScoreDisplay">
+						<div class="examScore" data-bind="visible: exam.settings.showActualMark">
 							<span data-localise="control.total"></span> <span id="examScore" data-bind="html: examScoreDisplay"></span>
 						</div>
 						

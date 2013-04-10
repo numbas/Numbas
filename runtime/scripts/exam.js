@@ -230,25 +230,6 @@ Exam.prototype = {
 	},
 
 
-	//xmlize for info pages and so on
-	xmlize: function()
-	{
-		var obj = {};
-		var dontwant = ['xml','questionList','stopwatch','display','currentQuestion','navigationEvents','scope'];
-		for( var x in this )
-		{
-			if(!(dontwant.contains(x) || typeof(this[x])=='function'))
-			{
-				var prop = this[x];
-				if(Numbas.util.isFloat(prop))
-					prop = Numbas.math.precround(prop,10);
-				obj[x]=prop;
-			}
-		}
-
-		return Sarissa.xmlize(obj,'exam');
-	},
-
 	//decide which questions to use and in what order
 	chooseQuestionSubset: function()
 	{
@@ -413,6 +394,7 @@ Exam.prototype = {
 		this.score=0;
 		for(var i=0; i<this.questionList.length; i++)
 			this.score += this.questionList[i].score;
+		this.percentScore = Math.round(100*this.score/this.mark);
 	},
 
 	//call this when student wants to move between questions
@@ -525,45 +507,8 @@ Exam.prototype = {
 		this.endTiming();
 
 		//work out summary info
-		this.percentScore = Math.round(100*this.score/this.mark);
 		this.passed = this.percentScore >= this.settings.percentPass;
-
-		var niceNumber = Numbas.math.niceNumber;
-
-		//construct report object
-		var report = this.report = 
-		{	examsummary: {	name: this.settings.name,
-							numberofquestions: this.settings.numQuestions, 
-							mark: niceNumber(this.mark),
-							passpercentage: niceNumber(this.settings.percentPass),
-							duration: this.displayDuration 
-						 },
-			performancesummary: {	start: this.start.toGMTString(),
-									stop: this.stop.toGMTString(),
-									timespent: Numbas.timing.secsToDisplayTime(this.timeSpent),
-									score: niceNumber(this.score),
-									percentagescore: niceNumber(this.percentScore),
-									passed: this.passed,
-									result: R(this.passed ? 'exam.passed' :'exam.failed')
-								},
-			questions: new Array()
-		};
-
-		//construct reports for each question
-		var examQuestionsAttempted = 0;
-		for(var j=0; j<this.questionList.length; j++)
-		{
-			var question = this.questionList[j];
-			if(question.answered)
-				examQuestionsAttempted++;
-
-			report.questions.push({question: {	number: question.number+1,
-												name: question.name,
-												marks: niceNumber(question.marks),
-												score: niceNumber(question.score) } });
-		}
-		report.performancesummary.questionsattempted = examQuestionsAttempted;
-
+		this.result = R(this.passed ? 'exam.passed' :'exam.failed')
 
 		//send result to LMS, and tell it we're finished
 		Numbas.store.end();

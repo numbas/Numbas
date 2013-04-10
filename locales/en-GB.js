@@ -32,6 +32,7 @@ R.registerLocale('en-GB',{
 	'result.exit': "Exit",
 	'result.review': "Review",
 	'result.exam summary': "Exam Summary",
+	'result.performance summary': "Performance Summary",
 	'result.exam start': "Exam Start:",
 	'result.exam stop': "Exam Stop:",
 	'result.time spent': "Time Spent:",
@@ -58,7 +59,7 @@ R.registerLocale('en-GB',{
 	'control.next': "Next",
 	'control.advice': "Advice",
 	'control.reveal': "Reveal",
-	'control.total': "Total %s",
+	'control.total': "Total",
 	'control.pause': "Pause",
 	'control.end exam': "End Exam",
 

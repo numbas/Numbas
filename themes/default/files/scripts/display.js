@@ -222,6 +222,7 @@ display.ExamDisplay = function(e)
 		else
 			return null;
 	},this);
+	this.questions = ko.observableArray([]);
 
 	this.canReverse = ko.computed(function() {
 		return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
@@ -233,6 +234,7 @@ display.ExamDisplay = function(e)
 
 	this.score = ko.observable(e.score);
 	this.marks = ko.observable(e.mark);
+	this.percentPass = ko.observable(e.settings.percentPass*100+'%');
 	this.examScoreDisplay = ko.computed(function() {
 		var niceNumber = Numbas.math.niceNumber;
 		var exam = this.exam;
@@ -245,9 +247,21 @@ display.ExamDisplay = function(e)
 		else
 			totalExamScoreDisplay = niceNumber(score);
 
-		return R('control.total',totalExamScoreDisplay);
+		return totalExamScoreDisplay;
 	},this);
+	this.percentScore = ko.observable(0);
+
 	this.displayTime = ko.observable('');
+	this.timeSpent = ko.observable('');
+
+	this.questionsAttempted = ko.computed(function() {
+		return this.questions().reduce(function(s,q) { return s + (q.answered() ? 1 : 0); },0);
+	},this);
+	this.questionsAttemptedDisplay = ko.computed(function() {
+		return this.questionsAttempted()+' / '+this.exam.settings.numQuestions;
+	},this);
+
+	this.result = ko.observable('');
 
 	document.title = e.settings.name;
 
@@ -259,6 +273,7 @@ display.ExamDisplay.prototype =
 	showTiming: function()
 	{
 		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
+		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
 	},
 
 	hideTiming: function()
@@ -269,8 +284,9 @@ display.ExamDisplay.prototype =
 	showScore: function()
 	{
 		var exam = this.exam;
-		this.marks(exam.mark);
-		this.score(exam.score);
+		this.marks(Numbas.math.niceNumber(exam.mark));
+		this.score(Numbas.math.niceNumber(exam.score));
+		this.percentScore(exam.percentScore);
 	},
 
 	updateQuestionMenu: function()
@@ -296,36 +312,23 @@ display.ExamDisplay.prototype =
 		switch(page)
 		{
 		case "frontpage":
-
-			//the whole page was hidden at load, so user doesn't see all the nav elements briefly
-			$('body > *').show();
-			$('#loading').hide();
-
-			$('#infoDisplay').getTransform(Numbas.xml.templates.frontpage,exam.xmlize());
+			this.marks(exam.mark);
 
 			break;
 
 		case "result":
-			//turn report into XML
-			var xmlDoc = Sarissa.xmlize(exam.report,"report");
-
-			//display result page using report XML
-			$('#infoDisplay').getTransform(Numbas.xml.templates.result,xmlDoc);
+			this.result(exam.result);
 			
 			break;
 
 		case "suspend":
-			$('#infoDisplay').getTransform(Numbas.xml.templates.suspend,exam.xmlize());
-		
-			Numbas.exam.display.showScore();
+			this.showScore();
 
 			break;
 		
 		case "exit":
-			$('#infoDisplay').getTransform(Numbas.xml.templates.exit,exam.xmlize());
 			break;
 		}
-		ko.applyBindings(this,$('#infoDisplay')[0]);
 	},
 
 	showQuestion: function()
@@ -387,6 +390,8 @@ display.QuestionDisplay = function(q)
 	},this);
 
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
+
+	exam.display.questions.push(this);
 }
 display.QuestionDisplay.prototype =
 {

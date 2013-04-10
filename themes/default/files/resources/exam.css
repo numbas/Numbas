@@ -371,7 +371,7 @@ button:hover, button:focus {
 
 .resultrow td {
 	font-weight: bold;
-	font-size: 1.5em;
+	font-size: 1.3em;
 }
 
 /* results page */
@@ -389,6 +389,11 @@ button:hover, button:focus {
 	background-color: #eee;
 }
 
+
+/* exit page */
+#exit {
+	text-align: center;
+}
 
 /* question bits */
 
@@ -541,7 +546,7 @@ div.part {
 }
 
 
-.question td, .adviceDisplay td {
+#questionDisplay .question td, #questionDisplay .adviceDisplay td {
 	text-align: right;
 }
 
