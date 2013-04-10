@@ -111,6 +111,24 @@ ko.bindingHandlers.hover = {
 		);
 	}
 }
+
+ko.bindingHandlers.visibleIf = {
+	init: function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+		var val = ko.utils.unwrapObservable(valueAccessor());
+		$(element).toggle(val);
+		if(val)
+			ko.applyBindingsToDescendants(bindingContext,element);
+
+		return {controlsDescendantBindings: true};
+	},
+	update:function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+		var val = ko.utils.unwrapObservable(valueAccessor());
+		$(element).toggle(val);
+		if(val)
+			ko.applyBindingsToDescendants(bindingContext,element);
+	}
+}
+
 var display = Numbas.display = {
 	localisePage: function() {
 		//localise strings in page HTML
@@ -212,6 +230,8 @@ var display = Numbas.display = {
 display.ExamDisplay = function(e) 
 {
 	this.exam=e;
+
+	this.mode = ko.observable(e.mode);
 
 	this.infoPage = ko.observable(null);
 	this.currentQuestion = ko.observable(null);
@@ -355,6 +375,10 @@ display.ExamDisplay.prototype =
 	
 	endRegen: function() {
 		$('#questionDisplay').fadeIn(200);
+	},
+
+	end: function() {
+		this.mode(this.exam.mode);
 	}
 };
 
@@ -389,7 +413,12 @@ display.QuestionDisplay = function(q)
 		return exam.settings.allowRevealAnswer && !this.revealed();
 	},this);
 
+
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
+
+	this.review = function() {
+		exam.reviewQuestion(q.number);
+	}
 
 	exam.display.questions.push(this);
 }

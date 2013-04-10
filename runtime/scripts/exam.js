@@ -463,6 +463,11 @@ Exam.prototype = {
 		Numbas.store.changeQuestion(this.currentQuestion);
 	},
 
+	reviewQuestion: function(i) {
+		this.changeQuestion(i);
+		this.display.showQuestion();
+	},
+
 	regenQuestion: function()
 	{
 		var e = this;
@@ -502,6 +507,8 @@ Exam.prototype = {
 	{
 		//get time of finish
 		this.stop = new Date();
+
+		this.mode = 'review';
 		
 		//stop the stopwatch
 		this.endTiming();
@@ -514,7 +521,12 @@ Exam.prototype = {
 		Numbas.store.end();
 
 		//display the results
+		this.display.end();
 		this.display.showInfoPage( 'result' );
+
+		for(var i=0;i<this.questionList.length;i++) {
+			this.questionList[i].revealAnswer();
+		}
 	},
 
 	exit: function()

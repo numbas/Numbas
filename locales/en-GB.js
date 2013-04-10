@@ -23,6 +23,7 @@ R.registerLocale('en-GB',{
 	'exam.time allowed': "Time Allowed:",
 	'exam.passed': 'Passed',
 	'exam.failed': 'Failed',
+	'exam.review header': "Review: ",
 	'frontpage.start': "Start",
 
 	'suspend.exam suspended': "The Exam has been suspended. Press Resume to continue.",

@@ -189,7 +189,7 @@ Copyright 2011-13 Newcastle University
 							<th class="qtd" colspan="3" data-localise="result.question score"></th>
 						</thead>		
 						<tbody data-bind="foreach: questions">
-							<tr class="question" data-bind="click: Numbas.controls.review">
+							<tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
 								<td class="qtd" data-bind="text: question.number"></td>
 								<td class="qtd" data-bind="text: score"></td>
 								<td class="qtd">/</td>
@@ -211,12 +211,13 @@ Copyright 2011-13 Newcastle University
 			</div>
 
 
-			<div id="questionContainer" data-bind="visible: currentQuestion">
+			<div id="questionContainer" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
 					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="attr: {disabled: !canReverse()}, click: Numbas.controls.previousQuestion"></button>
 					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
 					<div class="titleBits" data-bind="with: currentQuestion">
+						<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
 						<span id="questionNameDisplay" data-bind="text: displayName"></span>
 					</div>
 				</div>
@@ -278,8 +279,6 @@ Copyright 2011-13 Newcastle University
 					</div>
 				</div>
 			</div>
-
-		</div>
 		</div>
 <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>

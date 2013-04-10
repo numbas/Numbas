@@ -148,9 +148,6 @@ button:hover, button:focus {
 .titleBits {
 	text-align: center;
 	margin: 0 10em;
-}
-
-#questionNameDisplay{
 	font-size: 2em;
 }
 
@@ -372,6 +369,11 @@ button:hover, button:focus {
 .resultrow td {
 	font-weight: bold;
 	font-size: 1.3em;
+}
+
+#question-breakdown .question:hover {
+	background-color: #f90;
+	cursor: pointer;
 }
 
 /* results page */
