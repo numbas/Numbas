@@ -743,7 +743,7 @@
 							return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
 						}
 						equals(exprToLaTeX('a1'),'a_{1}','a1 -- make numbers at the end of variable names subscripts');	
-						equals(exprToLaTeX('a_1'),'a\\_1','a_1 -- dusplay underscores in variable names as underscores');	
+						equals(exprToLaTeX('a_xx'),'a_{xx}','a_xx -- display subscripts in variable names properly');	
 						equals(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
 						equals(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 						equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
