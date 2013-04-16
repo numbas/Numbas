@@ -258,18 +258,6 @@ hr {
 	line-height: 1em;
 }
 
-.tick {
-	background-image:url('tick.png');
-}
-
-.cross {
-	background-image:url('cross.png');
-}
-.partial {
-	background-image:url('percent.png');
-}
-
-
 .qs-selected {
 	background: #94B4F7;
 }
