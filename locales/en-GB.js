@@ -30,7 +30,7 @@ R.registerLocale('en-GB',{
 	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
 	'suspend.resume': "Resume",
 
-	'result.exit': "Exit",
+	'result.exit': "Exit Exam",
 	'result.review': "Review",
 	'result.exam summary': "Exam Summary",
 	'result.performance summary': "Performance Summary",
@@ -43,6 +43,8 @@ R.registerLocale('en-GB',{
 	'result.detailed question breakdown': "Detailed Question Breakdown",
 	'result.question number': "Question Number",
 	'result.question score': "Score",
+	'result.question review title': "Review this question",
+	'result.click a question to review': "Click on a question number to get marking feedback.",
 
 	'end.exam has finished': "The exam has finished. You may now close this window.",
 
@@ -63,6 +65,7 @@ R.registerLocale('en-GB',{
 	'control.total': "Total",
 	'control.pause': "Pause",
 	'control.end exam': "End Exam",
+	'control.back to results': "Go back to results",
 
 	'display.part.jme.error making maths': "Error making maths display",
 	

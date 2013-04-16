@@ -257,10 +257,10 @@ Copyright 2011-13 Newcastle University
 						<!-- stopwatch and timing controls -->
 						<div id="stopWatch" data-bind="visible: displayTime, text: displayTime"></div>
 
-						<!-- end exam button -->
 						<div class="menuButtons">
-							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></div>
-							<div><button class="btn" id="endBtn" data-localise="control.end exam", data-bind="click: Numbas.controls.endExam"></button></div>
+							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: mode()=='normal'"></button></div>
+							<div><button class="btn" id="endBtn" data-localise="control.end exam", data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></div>
+							<div><button class="btn" data-localise="control.back to results", data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></div>
 						</div>
 					</div>
 				</div>
@@ -269,12 +269,12 @@ Copyright 2011-13 Newcastle University
 					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="visible: $root.canReverse, click: Numbas.controls.previousQuestion"></button>
 					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
 					<div class="submitDiv" data-bind="with: currentQuestion">
-						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
+						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
 						<div class="marks">
 							<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
 							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
 						</div>
-						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
 						<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
 					</div>
 				</div>

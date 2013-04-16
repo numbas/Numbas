@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -41,6 +41,9 @@ Copyright 2011 Newcastle University
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
 		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
 
+		<!-- knockout.js - model/view bindings -->
+		<script charset="UTF-8" type="text/javascript" src="scripts/knockout/knockout.js"></script>
+
 		<!-- pipwerks SCORM wrapper -->
 		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
 
@@ -61,12 +64,12 @@ Copyright 2011 Newcastle University
 		</script>
 		<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
-
 		<!-- CSS -->
 		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />
 		<link rel="stylesheet" type="text/css" href="resources/typography.css" />
 		<link rel="stylesheet" type="text/css" href="resources/exam.css" />
 		<link rel="stylesheet" type="text/css" href="resources/question.css" />
+		<link rel="stylesheet" type="text/css" href="resources/iconfont/font-awesome.min.css" />
 	</head>
 	
 	<body style="font-size:1em;">
@@ -84,57 +87,42 @@ Copyright 2011 Newcastle University
 			<div class="logo">
 				<img src="resources/numbas-logo.gif"/>
 			</div>
-			<div id="examBanner">exam name</div>
+			<div id="examBanner" data-bind="text: exam.settings.name">Exam name</div>
 		</div>
 
 		<!-- main content area - info pages or questions go in here -->
 		<div class="mainDisplay">
-			<div id="infoDisplay">
-			</div>
-
-			<div id="questionContainer">
+			<div id="questionContainer" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
-					<div class="titleBits">
-						<span id="questionNameDisplay">Question Name</span>
-						<span class="adviceNav">
-							<button id="adviceBtn" data-localise="control.advice"></button>
-							<button id="revealBtn" data-localise="control.reveal"></button>
-						</span>
+					<div class="titleBits" data-bind="with: currentQuestion">
+						<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
+						<span id="questionNameDisplay" data-bind="text: displayName"></span>
 					</div>
 				</div>
 
+
 				<!-- question and advice go in here -->
-				<div id="questionDisplay">
+				<div id="questionDisplay" data-bind="with: currentQuestion">
 				</div>
 
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
-					<div class="submitDiv">
-						<button id="submitBtn" data-localise="control.submit all parts"></button>
-						<div id="marks">	
-							<span id="score"></span>
-							<span id="feedback"><img src="resources/cross.png"/></span>
+					<div class="submitDiv" data-bind="with: currentQuestion">
+						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
+						<div class="marks">
+							<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
+							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
 						</div>
-						<button id="regenBtn" data-localise="control.regen"></button>
+						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+						<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
 					</div>
 				</div>
 			</div>
-
 		</div>
-		</div>
-		<ul style="display:hidden;">
-			<!-- empty question selector thing - will be copied into question list for each question -->
-			<li id="questionSelector" class="questionSelector-hidden">
-				<a href="#">
-					<span id="name"></span>
-					<div id="marks">
-						<div id="feedback"></div>
-						<div id="score"></div>
-					</div>
-				</a>
-			</li>
-		</ul>
+<!--[if lt IE 9]>
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
 	</body>
 
 </html>

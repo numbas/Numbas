@@ -49,6 +49,13 @@ Numbas.controls = {
 		});
 	},
 
+	backToResults: function()
+	{
+		job(function() {
+			Numbas.exam.showInfoPage('result');
+		});
+	},
+
 	exitExam: function()
 	{
 		job(Numbas.exam.exit,Numbas.exam);
