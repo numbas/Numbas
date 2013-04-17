@@ -37,6 +37,11 @@ ko.bindingHandlers.autosize = {
 	}
 }
 
+ko.bindingHandlers.test = {
+	update: function(element,valueAccessor) {
+		console.log(ko.utils.unwrapObservable(valueAccessor()));
+	}
+}
 ko.bindingHandlers.dom = {
 	update: function(element,valueAccessor) {
 		var html = ko.utils.unwrapObservable(valueAccessor());
@@ -70,7 +75,7 @@ ko.bindingHandlers.latex = {
 ko.bindingHandlers.maths = {
 	update: function(element,valueAccessor) {
 		var val = ko.utils.unwrapObservable(valueAccessor());
-		element.innerHTML = '<script type="math/tex">'+val+'</script>';
+		$(element).html('<script type="math/tex">'+val+'</script>');
 		Numbas.display.typeset(element);
 	}
 }
@@ -537,13 +542,13 @@ display.PartDisplay = function(p)
 {
 	var pd = this;
 	this.part = p;
-	this.warningDiv = '#warning-'+p.path;
 
 	this.score = ko.observable(p.score);
 	this.marks = ko.observable(p.marks);
 	this.answered = ko.observable(p.answered);
 
 	this.warnings = ko.observableArray([]);
+	this.warnings2 = ko.observableArray([{message:'a'}]);
 	this.warningsShown = ko.observable(false);
 
 	this.feedbackShown = ko.observable(false);
@@ -597,7 +602,7 @@ display.PartDisplay.prototype =
 
 	warning: function(warning)
 	{
-		this.warnings.push(warning+'');
+		this.warnings.push({message:warning+''});
 	},
 
 	//remove all previously displayed warnings

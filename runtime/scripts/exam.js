@@ -514,7 +514,7 @@ Exam.prototype = {
 		this.endTiming();
 
 		//work out summary info
-		this.passed = this.percentScore >= this.settings.percentPass;
+		this.passed = (this.percentScore >= this.settings.percentPass*100);
 		this.result = R(this.passed ? 'exam.passed' :'exam.failed')
 
 		//send result to LMS, and tell it we're finished

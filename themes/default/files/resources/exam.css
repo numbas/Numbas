@@ -18,7 +18,7 @@ Copyright 2011-13 Newcastle University
 v\:* { behavior: url(#default#VML); display: inline-block}
 o\:* { behavior: url(#default#VML); }
 
-.clearAfter::after {
+.clearAfter:after {
     clear: both;
     content: '.';
     display: block;
