@@ -80,7 +80,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part type-<xsl:value-of select="@type"/></xsl:attribute>
+		<xsl:attribute name="class">part clearAfter type-<xsl:value-of select="@type"/></xsl:attribute>
 		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
