@@ -223,8 +223,8 @@ Exam.prototype = {
 		},this);
 
 		job(function() {
-			if(suspendData.location!==undefined)
-				this.changeQuestion(suspendData.location);
+			if(suspendData.currentQuestion!==undefined)
+				this.changeQuestion(suspendData.currentQuestion);
 			this.loading = false;
 		},this);
 	},

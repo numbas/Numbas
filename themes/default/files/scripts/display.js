@@ -31,6 +31,7 @@ ko.bindingHandlers.autosize = {
 	init: function(element) {
 		//resize text inputs to just fit their contents
 		$(element).keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
+		resizeF.apply(element);
 	},
 	update: function(element) {
 		resizeF.apply(element);
@@ -901,10 +902,23 @@ display.MultipleResponsePartDisplay.prototype =
 			}
 			break;
 		case 'm_n_x':
-			for(var i=0; i<part.numAnswers; i++) {
-				for(var j=0; j<part.numChoices; j++) {
-					this.ticks[i][j](part.ticks[i][j]);
+			switch(part.displayType) {
+			case 'radiogroup':
+				for(var i=0; i<part.numAnswers; i++) {
+					for(var j=0; j<part.numChoices; j++) {
+						if(part.ticks[i][j]) {
+							this.ticks[i](j);
+						}
+					}
 				}
+				break;
+			case 'checkbox':
+				for(var i=0; i<part.numAnswers; i++) {
+					for(var j=0; j<part.numChoices; j++) {
+						this.ticks[i][j](part.ticks[i][j]);
+					}
+				}
+				break;
 			}
 			break;
 		}

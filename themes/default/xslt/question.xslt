@@ -73,6 +73,12 @@ Copyright 2011-13 Newcastle University
 			<xsl:otherwise>div</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
+	<xsl:variable name="clear">
+		<xsl:choose>
+			<xsl:when test="ancestor::gaps"></xsl:when>
+			<xsl:otherwise><xsl:text>clearAfter</xsl:text></xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
 
 	<xsl:if test="parent::parts">
 		<xsl:if test="count(../part) &gt; 1">
@@ -80,7 +86,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part clearAfter type-<xsl:value-of select="@type"/></xsl:attribute>
+		<xsl:attribute name="class">part {$clear} type-<xsl:value-of select="@type"/></xsl:attribute>
 		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
@@ -388,7 +394,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	
-	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', disable: revealed"></input>
+	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"></input>
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
@@ -412,7 +418,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="typespecific">
-	<input type="text" spellcheck="false" class="jme" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, disable: revealed"/>
+	<input type="text" spellcheck="false" class="jme" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, autosize: true, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 </xsl:template>
 
@@ -427,7 +433,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
 	
-	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="autosize: true, event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', disable: revealed"/>
+	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">
