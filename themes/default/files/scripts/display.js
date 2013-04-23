@@ -799,7 +799,7 @@ display.MultipleResponsePartDisplay = function()
 	var p = this.part;
 
 	function makeTicker(answer,choice) {
-		var obs = ko.observable(false);
+		var obs = ko.observable(p.ticks[answer][choice]);
 		ko.computed(function() {
 			p.storeAnswer([answer,choice,obs()]);
 		},p);
@@ -808,6 +808,10 @@ display.MultipleResponsePartDisplay = function()
 
 	function makeRadioTicker(choice) {
 		var obs = ko.observable(null);
+		for(var i=0;i<p.numAnswers;i++) {
+			if(p.ticks[i][choice])
+				obs(i);
+		}
 		ko.computed(function() {
 			var answer = parseInt(obs());
 			p.storeAnswer([answer,choice]);
@@ -815,7 +819,7 @@ display.MultipleResponsePartDisplay = function()
 		return obs;
 	}
 	function makeCheckboxTicker(answer,choice) {
-		var obs = ko.observable(false);
+		var obs = ko.observable(p.ticks[answer][choice]);
 		ko.computed(function() {
 			p.storeAnswer([answer,choice,obs()]);
 		});
@@ -825,6 +829,10 @@ display.MultipleResponsePartDisplay = function()
 	switch(p.type) {
 	case '1_n_2':
 		this.studentAnswer = ko.observable(null);
+		for(var i=0;i<p.numAnswers;i++) {
+			if(p.ticks[i][0])
+				this.studentAnswer(i);
+		}
 
 		ko.computed(function() {
 			var i = parseInt(this.studentAnswer());
