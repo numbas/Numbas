@@ -217,11 +217,8 @@ Question.prototype =
 	getAdvice: function(loading)
 	{
 		this.adviceDisplayed = true;
-		if(!loading)
-		{
-			this.display.showAdvice(true);
-			Numbas.store.adviceDisplayed(this);
-		}
+		this.display.showAdvice(true);
+		Numbas.store.adviceDisplayed(this);
 	},
 
 	//reveal correct answer to student
@@ -237,15 +234,12 @@ Question.prototype =
 		for(var i=0; i<this.parts.length; i++)
 			this.parts[i].revealAnswer(loading);
 
-		//this.score = 0;
+		//display revealed answers
+		this.display.revealAnswer();
 
-		if(!loading)
-		{
-			//display revealed answers
-			this.display.revealAnswer();
+		this.display.showScore();
 
-			this.display.showScore();
-
+		if(!loading) {
 			Numbas.store.answerRevealed(this);
 		}
 
@@ -645,15 +639,15 @@ Part.prototype = {
 	{
 		this.stepsShown = true;
 		this.calculateScore();
+		this.display.showSteps();
+		if(!this.revealed) {
+			if(this.answered)
+				this.submit();
+			else
+				this.question.updateScore();
+		}
 		if(!loading)
 		{
-			this.display.showSteps();
-			if(!this.revealed) {
-				if(this.answered)
-					this.submit();
-				else
-					this.question.updateScore();
-			}
 			Numbas.store.stepsShown(this);
 		}
 	},
@@ -661,9 +655,7 @@ Part.prototype = {
 	//reveal the correct answer
 	revealAnswer: function(loading)
 	{
-		if(!loading) {
-			this.display.revealAnswer();
-		}
+		this.display.revealAnswer();
 		this.revealed = true;
 		this.answered = true;
 		//this.setCredit(0);
