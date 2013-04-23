@@ -214,32 +214,33 @@ Question.prototype =
 	},
 
 	//trigger advice
-	getAdvice: function(loading)
+	getAdvice: function(dontStore)
 	{
 		this.adviceDisplayed = true;
 		this.display.showAdvice(true);
-		Numbas.store.adviceDisplayed(this);
+		if(!dontStore)
+			Numbas.store.adviceDisplayed(this);
 	},
 
 	//reveal correct answer to student
-	revealAnswer: function(loading)
+	revealAnswer: function(dontStore)
 	{
 		this.revealed = true;
 		this.answered = true;
 		
 		//display advice if allowed
-		this.getAdvice(loading);
+		this.getAdvice(dontStore);
 
 		//part-specific reveal code. Might want to do some logging in future? 
 		for(var i=0; i<this.parts.length; i++)
-			this.parts[i].revealAnswer(loading);
+			this.parts[i].revealAnswer(dontStore);
 
 		//display revealed answers
 		this.display.revealAnswer();
 
 		this.display.showScore();
 
-		if(!loading) {
+		if(!dontStore) {
 			Numbas.store.answerRevealed(this);
 		}
 
@@ -635,7 +636,7 @@ Part.prototype = {
 	validate: function() { return true; },
 
 	//reveal the steps
-	showSteps: function(loading)
+	showSteps: function(dontStore)
 	{
 		this.stepsShown = true;
 		this.calculateScore();
@@ -646,24 +647,24 @@ Part.prototype = {
 			else
 				this.question.updateScore();
 		}
-		if(!loading)
+		if(!dontStore)
 		{
 			Numbas.store.stepsShown(this);
 		}
 	},
 
 	//reveal the correct answer
-	revealAnswer: function(loading)
+	revealAnswer: function(dontStore)
 	{
 		this.display.revealAnswer();
 		this.revealed = true;
 		this.answered = true;
 		//this.setCredit(0);
 		if(this.steps.length>0) {
-			this.showSteps(loading);
+			this.showSteps(dontStore);
 			for(var i=0; i<this.steps.length; i++ )
 			{
-				this.steps[i].revealAnswer(loading);
+				this.steps[i].revealAnswer(dontStore);
 			}
 		}
 	}
@@ -1678,10 +1679,10 @@ GapFillPart.prototype =
 {
 	stagedAnswer: 'something',
 
-	revealAnswer: function(loading)
+	revealAnswer: function(dontStore)
 	{
 		for(var i=0; i<this.gaps.length; i++)
-			this.gaps[i].revealAnswer(loading);
+			this.gaps[i].revealAnswer(dontStore);
 	},
 
 	submit: function()

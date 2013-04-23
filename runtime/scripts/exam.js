@@ -525,7 +525,7 @@ Exam.prototype = {
 		this.display.showInfoPage( 'result' );
 
 		for(var i=0;i<this.questionList.length;i++) {
-			this.questionList[i].revealAnswer();
+			this.questionList[i].revealAnswer(true);
 		}
 	},
 
