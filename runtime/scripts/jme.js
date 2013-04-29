@@ -146,6 +146,9 @@ var jme = Numbas.jme = {
 						if((c=str.charAt(i+1))=='n') {
 							estr+='\n';
 						}
+						else if(c=='{' || c=='}') {
+							estr+='\\'+c;
+						}
 						else {
 							estr+=c;
 						}
@@ -530,7 +533,7 @@ var jme = Numbas.jme = {
 		if(tree===null)
 			return;
 
-		return(tree);nop
+		return(tree);
 	},
 
 	compare: function(expr1,expr2,settings,scope) {

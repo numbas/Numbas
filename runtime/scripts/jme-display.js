@@ -939,7 +939,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'name':
 		return tok.name;
 	case 'string':
-		var str = tok.value.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
+		var str = tok.value.replace(/\\/g,'\\\\').replace(/\\([{}])/g,'$1').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
 		return '"'+str+'"';
 	case 'html':
 		var html = $(tok.value).clone().wrap('<div>').parent().html();
