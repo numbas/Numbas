@@ -257,7 +257,7 @@ def printdata(data,ntabs=0):
 		if '"' in strcons(data) and not isinstance(data,basestring):
 			print("Unexpected type: "+str)
 
-		if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data):
+		if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data or '//' in data):
 			if '\n' in data:
 				data = re.sub('(^[\n\t]*)|([\n\t]*$)','',data)
 				data = '\n'+'\n'.join([pad_left(l,'\t',ntabs) for l in data.split('\n')])+'\n'+tabs
