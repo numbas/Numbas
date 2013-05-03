@@ -19,8 +19,11 @@ Copyright 2011 Newcastle University
 <xsl:template match="/">
 	<div id="results">	
 		<xsl:apply-templates />
-		<div class="exitBtn">
-			<button id="exitBtn"><localise>result.exit</localise></button>
+
+		
+		<div class="resultBtns">
+			<div><button id="printBtn"><localise>result.print</localise></button></div>
+			<div><button id="exitBtn"><localise>result.exit</localise></button></div>
 		</div>
 		<span id="reviewBtnSpan">
 			<button id="reviewBtn"><localise>result.review</localise></button>
@@ -115,7 +118,6 @@ Copyright 2011 Newcastle University
 			</td>
 		</tr>
 </xsl:template>
-
 
 
 </xsl:stylesheet>

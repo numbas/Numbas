@@ -276,6 +276,7 @@ display.ExamDisplay.prototype =
 			
 			//make exit button 
 			$('#exitBtn').click(Numbas.controls.exitExam);	
+			$('#printBtn').click(function(){window.print()});	
 					
 			$('#reviewBtn').hide();
 			break;

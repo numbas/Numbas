@@ -29,6 +29,7 @@ R.registerLocale('en-GB',{
 	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
 	'suspend.resume': "Resume",
 
+	'result.print': "Print this results summary",
 	'result.exit': "Exit",
 	'result.review': "Review",
 	'result.exam summary': "Exam Summary",
