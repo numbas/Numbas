@@ -274,7 +274,7 @@ var util = Numbas.util = {
 					i-=1;
 				}
 			}
-			else if(t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
+			else if(depth>0 && t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
 			{
 				depth-=1;
 				if(depth==0)
