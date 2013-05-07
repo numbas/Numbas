@@ -10,7 +10,7 @@
 	var init = Numbas.init = function()
 	{
 
-		Math.seedrandom();
+		var seed = Math.seedrandom();
 
 		var job = Numbas.schedule.add;
 
@@ -25,6 +25,7 @@
 			var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
 			
 			var exam = Numbas.exam = new Numbas.Exam();					//create the exam object, and load in everything from the XML
+			exam.seed = Numbas.util.hashCode(seed);
 
 			switch(store.getEntry())
 			{

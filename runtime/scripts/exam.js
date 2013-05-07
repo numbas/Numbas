@@ -555,6 +555,7 @@ Exam.prototype = {
 		//construct report object
 		var report = this.report = 
 		{	examsummary: {	name: this.name,
+							seed: this.seed,
 							numberofquestions: this.numQuestions, 
 							mark: niceNumber(this.mark),
 							passpercentage: niceNumber(this.percentPass),

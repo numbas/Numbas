@@ -40,6 +40,10 @@ Copyright 2011 Newcastle University
 			<td class="rtd"><xsl:value-of select="name" /></td>
 		</tr>
 		<tr>
+			<td><localise>exam.random seed</localise></td>
+			<td class="rtd"><xsl:value-of select="seed" /></td>
+		</tr>
+		<tr>
 			<td><localise>exam.number of questions</localise></td>
 			<td class="rtd"><xsl:value-of select="numberofquestions" /></td>
 		</tr>
