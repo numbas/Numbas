@@ -345,7 +345,7 @@ var util = Numbas.util = {
 	// got rid of the line to convert to 32 bit, because I don't need it
 	hashCode: function(str){
 		var hash = 0, i, c;
-		if (this.length == 0) return hash;
+		if (str.length == 0) return hash;
 		for (i = 0; i < str.length; i++) {
 			c = str.charCodeAt(i);
 			hash = ((hash<<5)-hash)+c;
