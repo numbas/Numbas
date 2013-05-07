@@ -205,7 +205,7 @@ jme.variables = {
 					v = Numbas.math.niceNumber(v.value);
 					break;
 				case 'string':
-					v = v.value;
+					v = v.value.replace(/\\([{}])/g,'$1');
 					break;
 				default:
 					v = jme.display.treeToJME({tok:v});

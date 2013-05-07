@@ -146,6 +146,9 @@ var jme = Numbas.jme = {
 						if((c=str.charAt(i+1))=='n') {
 							estr+='\n';
 						}
+						else if(c=='{' || c=='}') {
+							estr+='\\'+c;
+						}
 						else {
 							estr+=c;
 						}
@@ -181,11 +184,13 @@ var jme = Numbas.jme = {
 
 				token = new cons(tex);
 			}
-			else
+			else if(expr.length)
 			{
 				//invalid character or not able to match a token
 				throw(new Numbas.Error('jme.tokenise.invalid',oexpr));
 			}
+			else
+				break;
 			
 			expr=expr.slice(result[0].length);	//chop found token off the expression
 			

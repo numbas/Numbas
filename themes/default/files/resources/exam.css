@@ -354,9 +354,11 @@ button:hover, button:focus {
 	text-align: center;
 }
 
-.exitBtn {
-	margin-top: 2em;
+.resultBtns {
 	text-align: center;
+}
+.resultBtns div {
+	margin-top: 2em;
 }
 
 .rtd {

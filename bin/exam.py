@@ -207,7 +207,7 @@ class Exam:
 							['questions']
 						])
 		root.attrib = {
-				'name': self.name,
+				'name': strcons(self.name),
 				'percentPass': strcons(self.percentPass)+'%',
 				'shuffleQuestions': strcons(self.shuffleQuestions),
 			}
@@ -216,8 +216,8 @@ class Exam:
 
 		nav = settings.find('navigation')
 		nav.attrib = {
-			'allowregen':strcons(self.navigation['allowregen']),
-			'reverse':strcons(self.navigation['reverse']), 
+			'allowregen': strcons(self.navigation['allowregen']),
+			'reverse': strcons(self.navigation['reverse']), 
 			'browse': strcons(self.navigation['browse']),
 			'showfrontpage': strcons(self.navigation['showfrontpage']),
 			'preventleave': strcons(self.navigation['preventleave'])
@@ -237,7 +237,7 @@ class Exam:
 				'showanswerstate': strcons(self.showanswerstate),
 				'allowrevealanswer': strcons(self.allowrevealanswer)
 		}
-		feedback.find('advice').attrib = {'type':self.adviceType, 'threshold': strcons(self.adviceGlobalThreshold)}
+		feedback.find('advice').attrib = {'type': strcons(self.adviceType), 'threshold': strcons(self.adviceGlobalThreshold)}
 
 		rules = settings.find('rulesets')
 		for name in self.rulesets.keys():
@@ -288,8 +288,8 @@ class SimplificationRule:
 		rule = makeTree(['ruledef',
 							['conditions']
 						])
-		rule.attrib = {	'pattern': self.pattern,
-						'result': self.result
+		rule.attrib = {	'pattern': strcons(self.pattern),
+						'result': strcons(self.result)
 						}
 		conditions = rule.find('conditions')
 		for condition in self.conditions:
@@ -310,7 +310,7 @@ class Event:
 
 	def toxml(self):
 		event = makeTree(['event'])
-		event.attrib = {'type':self.kind, 'action': self.action}
+		event.attrib = {'type': strcons(self.kind), 'action': strcons(self.action)}
 		event.append(makeContentNode(self.message))
 		return event
 
@@ -371,7 +371,7 @@ class Question:
 								['rulesets']
 							])
 
-		question.attrib = {'name': self.name}
+		question.attrib = {'name': strcons(self.name)}
 		question.find('statement').append(makeContentNode(self.statement))
 		question.find('advice').append(makeContentNode(self.advice))
 
@@ -433,10 +433,10 @@ class Function:
 		function = makeTree(['function',
 								['parameters']
 							])
-		function.attrib = { 'name': self.name,
-							'outtype': self.type,
-							'definition': self.definition,
-							'language': self.language
+		function.attrib = { 'name': strcons(self.name),
+							'outtype': strcons(self.type),
+							'definition': strcons(self.definition),
+							'language': strcons(self.language)
 							}
 		
 		parameters = function.find('parameters')
@@ -497,7 +497,7 @@ class Part:
 	def toxml(self):
 		part = makeTree(['part',['prompt'],['steps']])
 
-		part.attrib = {'type': self.kind, 'marks': strcons(self.marks), 'stepspenalty': strcons(self.stepsPenalty), 'enableminimummarks': strcons(self.enableMinimumMarks), 'minimummarks': strcons(self.minimumMarks)}
+		part.attrib = {'type': strcons(self.kind), 'marks': strcons(self.marks), 'stepspenalty': strcons(self.stepsPenalty), 'enableminimummarks': strcons(self.enableMinimumMarks), 'minimummarks': strcons(self.minimumMarks)}
 
 		part.find('prompt').append(makeContentNode(self.prompt))
 
@@ -572,7 +572,7 @@ class JMEPart(Part):
 		
 		checking = answer.find('checking')
 		checking.attrib = {
-				'type': self.checkingType, 
+				'type': strcons(self.checkingType),
 				'accuracy': strcons(self.checkingAccuracy),
 				'failurerate': strcons(self.failureRate)
 		}
@@ -611,7 +611,7 @@ class Restriction:
 
 		restriction.attrib = {'partialcredit': strcons(self.partialCredit)+'%', 'showstrings': strcons(self.showStrings)}
 		if self.length>=0:
-			restriction.attrib['length']=strcons(self.length)
+			restriction.attrib['length'] = strcons(self.length)
 
 		for s in self.strings:
 			string = etree.Element('string')
@@ -781,7 +781,7 @@ class MultipleChoicePart(Part):
 			'maximumexpected': strcons(self.maxAnswers),
 			'displaycolumns': strcons(self.displayColumns),
 			'order': 'random' if self.shuffleChoices else 'fixed',
-			'displaytype': self.displayType
+			'displaytype': strcons(self.displayType)
 			}
 
 		for choice in self.choices:
@@ -797,7 +797,7 @@ class MultipleChoicePart(Part):
 		marking.find('minmarks').attrib = {'enabled': strcons(self.minMarksEnabled), 'value': strcons(self.minMarks)}
 		matrix = marking.find('matrix')
 		if isinstance(self.matrix,str):
-			matrix.attrib = {'def':self.matrix}
+			matrix.attrib = {'def': strcons(self.matrix)}
 		else:
 			for i in range(len(self.matrix)):
 				for j in range(len(self.matrix[i])):

@@ -17,6 +17,7 @@ R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
 
 	'exam.exam name': "Exam Name:",
+	'exam.random seed': "Session ID:",
 	'exam.number of questions': "Number of Questions:",
 	'exam.marks available': "Marks Available:",
 	'exam.pass percentage': "Pass Percentage:",
@@ -31,6 +32,7 @@ R.registerLocale('en-GB',{
 	'suspend.resume': "Resume",
 
 	'result.exit': "Exit Exam",
+	'result.print': "Print this results summary",
 	'result.review': "Review",
 	'result.exam summary': "Exam Summary",
 	'result.performance summary': "Performance Summary",

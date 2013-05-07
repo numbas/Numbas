@@ -273,7 +273,7 @@ var util = Numbas.util = {
 					i-=1;
 				}
 			}
-			else if(t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
+			else if(depth>0 && t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
 			{
 				depth-=1;
 				if(depth==0)
@@ -338,6 +338,21 @@ var util = Numbas.util = {
 			else
 				return 0;
 		}
+	},
+
+	// from http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+	// got rid of the line to convert to 32 bit, because I don't need it
+	hashCode: function(str){
+		var hash = 0, i, c;
+		if (str.length == 0) return hash;
+		for (i = 0; i < str.length; i++) {
+			c = str.charCodeAt(i);
+			hash = ((hash<<5)-hash)+c;
+		}
+		if(hash<0)
+			return '0'+(-hash);
+		else
+			return '1'+hash;
 	}
 
 };
@@ -502,6 +517,7 @@ if(!String.prototype.split)
 		return cbSplit(this, separator, limit);
 	};
 }
+
 
 // es5-shim.min.js 24/09/2012
 //
