@@ -136,6 +136,10 @@ Copyright 2011-13 Newcastle University
 							<td class="rtd" data-bind="html: exam.settings.name"></td>
 						</tr>
 						<tr>
+							<td data-localise="exam.random seed"></td>
+							<td class="rtd" data-bind="html: exam.seed"></td>
+						</tr>
+						<tr>
 							<td data-localise="exam.number of questions"></td>
 							<td class="rtd" data-bind="text: exam.settings.numQuestions"></td>
 						</tr>
@@ -201,12 +205,10 @@ Copyright 2011-13 Newcastle University
 						</tbody>
 					</table>
 							
-					<div class="exitBtn">
-						<button class="btn" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button>
+					<div class="resultBtns">
+						<div><button class="btn" data-bind="click: function(){ window.print(); }" data-localise="result.print"></button></div>
+						<div><button class="btn" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button></div>
 					</div>
-					<span id="reviewBtnSpan">
-						<button class="btn" id="reviewBtn" data-bind="visible: exam.settings.canReview" data-localise="result.review"></button>
-					</span>
 				</div>
 				<div id="exit" data-bind="visible: infoPage()=='exit', if: infoPage()=='exit'">
 					<h2 data-localise="end.exam has finished"></h2>
