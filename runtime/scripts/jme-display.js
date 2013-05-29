@@ -283,7 +283,10 @@ var texOps = jme.display.texOps = {
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			return texArgs[0]+' - '+texArgs[1];
+			if(b.tok.type=='op' && b.tok.name=='+')
+				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
+			else
+				return texArgs[0]+' - '+texArgs[1];
 		}
 	}),
 	'dot': infixTex('\\cdot'),
@@ -971,7 +974,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 
 		for(var i=0;i<l;i++)
 		{
-			if(args[i].tok.type=='op' && opBrackets[op][args[i].tok.name]==true)
+			if(args[i].tok.type=='op' && opBrackets[op][i][args[i].tok.name]==true)
 			{
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
@@ -1033,18 +1036,19 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 }
 
 //does each argument (of an operation) need brackets around it?
+//arrays consisting of one object for each argument of the operation
 var opBrackets = {
-	'+u':{},
-	'-u':{'+':true,'-':true},
-	'+': {},
-	'-': {},
-	'*': {'+u':true,'-u':true,'+':true, '-':true, '/':true},
-	'/': {'+u':true,'-u':true,'+':true, '-':true, '*':true},
-	'^': {'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},
-	'and': {'or':true, 'xor':true},
-	'or': {'xor':true},
-	'xor':{},
-	'=': {}
+	'+u':[{}],
+	'-u':[{'+':true,'-':true}],
+	'+': [{},{}],
+	'-': [{},{'+':true}],
+	'*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
+	'/': [{'+u':true,'-u':true,'+':true, '-':true, '*':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+	'^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
+	'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
+	'or': [{'xor':true},{'xor':true}],
+	'xor':[{},{}],
+	'=': [{},{}]
 };
 
 var Rule = jme.display.Rule = function(pattern,conditions,result)

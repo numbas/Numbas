@@ -732,6 +732,8 @@
 						equals(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
 						equals(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
 						equals(simplifyExpression('x+(-10+2)'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
+						equals(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
+						equals(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
 						equals(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
 
 						var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
@@ -751,6 +753,8 @@
 						equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
 						equals(exprToLaTeX('ln(abs(x))'),'\\ln \\left | x \\right |','ln(abs(x)) - ln of absolute value has no parentheses');
 						equals(exprToLaTeX('ln(x)'),'\\ln \\left( x \\right)','ln(x) - ln of anything else has parentheses');
+						equals(exprToLaTeX('4-(x^2+x+1)',[]),'4 - \\left( x^{ 2 } + x + 1 \\right)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
+						equals(exprToLaTeX('(x^2+x+1)-4',[]),'x^{ 2 } + x + 1 - 4','(x^2+x+1)-4 - brackets round left-hand operand in subtraction can be dropped.');
 						equals(exprToLaTeX('x-(-1.5)','fractionnumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
 					});
 				};
