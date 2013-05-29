@@ -1,6 +1,8 @@
 This is an exam created by the Numbas system.
+Copyright in the exam content resides with the exam author.
 
-Copyright 2011 Newcastle University
+Numbas is:
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,15 +16,18 @@ Copyright 2011 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 
-Some Icons are Copyright © Yusuke Kamiyamane (http://p.yusukekamiyamane.com). All rights reserved. Licensed under a Creative Commons Attribution 3.0 license.
+The icons are from Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome
+
 The following libraries are used:
 	jQuery (http://jquery.com)
 	jQuery-UI (http://jqueryui.com/)
 	MathJax (http://mathjax.org)
-	jCarouselLite (http://www.gmarwaha.com/jquery/jcarousellite)
 	jQuery.Impromptu (http://trentrichardson.com/Impromptu)
 	jQuery.xslTransform & jQuery.debug (http://jquery.glyphix.com/)
 	JSON (http://www.JSON.org)
 	jQuery.mousewheel (http://brandonaaron.net)
 	Sarissa (http://sarissa.sf.net)
-	flot (http://code.google.com/p/flot/)
+	knockout.js (http://knockoutjs.com/)
+	R.js (https://github.com/keithamus/R.js)
+	seedrandom.js (http://davidbau.com/encode/seedrandom.js)
+	es5-shim (https://github.com/kriskowal/es5-shim)

@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -489,8 +489,8 @@ var jme = Numbas.jme = {
 					if(tok.type=='function') {
 						//check if the user typed something like xtan(y), when they meant x*tan(y)
 						var possibleOp = op.slice(1);
-						if(op.slice(1) in scope.functions)
-							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],op.slice(1)));
+						if(possibleOp in scope.functions)
+							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],possibleOp));
 						else
 							throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
 					}
@@ -517,7 +517,7 @@ var jme = Numbas.jme = {
 		}
 	},
 
-	compile: function(expr,scope,notypecheck) 
+	compile: function(expr,scope)
 	{
 		expr+='';	//make sure expression is a string and not a number or anything like that
 

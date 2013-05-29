@@ -1,8 +1,24 @@
+/*
+Copyright 2011-13 Newcastle University
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
 /* VML fix for IE */
-v\:* { behavior: url(#default#VML); display:inline-block}
+v\:* { behavior: url(#default#VML); display: inline-block}
 o\:* { behavior: url(#default#VML); }
 
-.clearAfter::after {
+.clearAfter:after {
     clear: both;
     content: '.';
     display: block;
@@ -24,13 +40,20 @@ body {
 	overflow: hidden;
 }
 
-#preview {
+.type-jme .preview {
+	background-color: #eee;
+	padding: 0.2em;
 	font-family: serif;
 	display: inline-block;
 	font-size: 120%;
 }
 
 button {
+	background: none;
+	border: none;
+}
+
+.btn {
 	margin: 0.1em 0.3em;
 	min-width: 7em;
 	/*border: 1px solid #999999*/;
@@ -45,109 +68,101 @@ button:hover, button:focus {
 }
 
 #progressbar {
-	position:relative;
-	height:2em;
-	width:10em;
+	position: relative;
+	height: 2em;
+	width: 10em;
 	border: 1px solid #1f4564;
 }
 #progressbar p {
-	position:absolute;
-	left:0.3em;
-	top:0.15em;
+	position: absolute;
+	left: 0.3em;
+	top: 0.15em;
 }
 
 #completed {
-	position:absolute;
-	left:0;
-	top:0;
-	height:1.7em;
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 1.7em;
 	margin: 0.15em;
-	width:0;
+	width: 0;
 	background-color: #a2d1f0;
-	overflow:hidden;
+	overflow: hidden;
 }
 
 #completed p {
-	position:absolute;
-	color:#fff;
-	left:0.15em;
-	top:0;
+	position: absolute;
+	color: #fff;
+	left: 0.15em;
+	top: 0;
 }
 
 /* title bar */
 .titleBar{
-	position:relative;
-	height:75px;
+	position: relative;
+	height: 75px;
 }
 .logo{
-	position:absolute;
-	top:0;
-	left:0;
+	position: absolute;
+	top: 0;
+	left: 0;
 }
 
-#examBanner{
+#examBanner {
 	margin-left: 250px;
-	line-height:1em;
-	text-align:right;
+	line-height: 1em;
+	text-align: right;
 	font-size: 2em;
 	font-weight: bold;
 }
 
-.timeBox{
-	text-align:center;
-}
 #stopWatch {
+	text-align: center;
+	margin: 0.1em 0;
 	font-size: 1em;
 	font-weight: bold;
 	color: #1F4564;
 }
-.timeBox p {
-	margin: 0.1em 0;
-}
-
 
 .navBar{
 	zoom: 1;
 	margin-left: auto;
 	margin-right: auto;
-	padding:0.2em;
+	padding: 0.2em;
 	background: #A2D1F0;
 	border: 1px solid #999999;
-	line-height:2em;
+	line-height: 2em;
 }
 
 .leftNav {
-	float:left;
+	float: left;
 }
 .rightNav {
-	float:right;
+	float: right;
 }
 .menuButtons {
-	text-align:center;
+	text-align: center;
 	margin-top: 0.6em;
 }
 
 .titleBits {
-	text-align:center;
+	text-align: center;
 	margin: 0 10em;
-}
-
-#questionNameDisplay{
-	font-size:2em;
+	font-size: 2em;
 }
 
 .mainDisplay {
 	margin: 0 0;
-	overflow-x:hidden;
+	overflow-x: hidden;
 }
 
 #infoDisplay {
-	width:75%;
+	width: 75%;
 	margin: 1em auto;
 }
 
 .submitDiv {
-	text-align:center;
+	text-align: center;
 }
 #submitBtn {
 	width: 9em;
@@ -157,15 +172,29 @@ button:hover, button:focus {
 	width: auto;
 }
 
-#marks {
-	display:inline;
-}
-#marks #feedback {
-	width:25px;
-	height:25px;
-	padding: 0;
-	display: inline-block !important;
+.marks {
+	display: inline;
 	vertical-align: middle;
+}
+.marks .score {
+	padding-right: 0.5em;
+}
+.feedback-icon {
+	font-size: 1.2em;
+	display: inline-block;
+	-webkit-text-stroke: 1px #222;
+}
+.feedback-icon.icon-ok {
+	color: lime;
+}
+.feedback-icon.partial {
+	color: lightslategrey;
+}
+.feedback-icon.icon-remove {
+	color: red;
+}
+.feedback-icon.none {
+	display: none;
 }
 
 .questionSelector:hover {
@@ -177,53 +206,51 @@ button:hover, button:focus {
 	color: black;
 }
 
-.questionSelector #marks #feedback {
+.questionSelector .feedback-icon {
+	float: right;
 	padding: 0;
+	font-size: 1.5em;
 }
 
-.questionSelector #name {
-	float:left;
+.questionSelector .name {
+	float: left;
 	width: 15em;
 }
 
-.questionSelector #marks {
+.questionSelector .marks {
 	float: right;
 	clear: left;
 }
 
-#marks #feedback img {
-	visibility:hidden;
-}
-#marks #score {
-	display:none;
-}
-
-#feedbackMessage {
-	clear:both;
-	text-align:center;
-	padding: 0.5em 0.5em 0 0.5em;
+.feedbackMessages {
+	clear: both;
+	text-align: center;
+	padding: 0.5em 0.5em 0.5em 0.5em;
 	border: 1px solid #a2d1f0;
 	max-height: 20em;
 	overflow-y: auto;
 	margin: 0 0 0 auto;
 	width: 50em;
+	list-style-type: none;
 }
 
-#feedbackMessage hr {
-	max-width: 30em;
-	border: none;
-	height:1px;
+.feedbackMessage:not(:last-child):after {
+	content: '';
+	display: block;
 	background: #a2d1f0;
+	height: 1px;
+	width: 90%;
+	margin: 0.5em auto;
 }
 
 
 /* column container */
 #questionContainer {
-	position:relative;		/* This fixes the IE7 overflow hidden bug and stops the layout jumping out of place */
-	clear:both;
-	float:left;
-	width:100%;			/* width of whole page */
-	background:#A2D1F0;
+	position: relative;		/* This fixes the IE7 overflow hidden bug and stops the layout jumping out of place */
+	clear: both;
+	float: left;
+	width: 100%;			/* width of whole page */
+	background: #A2D1F0;
 }
 
 #questionContainer p {
@@ -232,42 +259,51 @@ button:hover, button:focus {
 
 /* 2 column left menu settings */
 #questionContainer .colwrap {
-	float:left;
-	width:200%;
-	position:relative;
-	left:13em;
-	background:#fff;
+	float: left;
+	width: 200%;
+	position: relative;
+	left: 13em;
+	background: #fff;
 }
 #questionContainer .col1wrap {
-	float:right;
-	width:50%;
-	position:relative;
-	right:13em;
-	padding-bottom:1em;
+	float: right;
+	width: 50%;
+	position: relative;
+	right: 13em;
+	padding-bottom: 1em;
 }
 
 #questionDisplay {
-	margin:1em 0.5em 0 14.5em;
-	position:relative;
-	right:100%;
+	margin: 1em 0.5em 0 14.5em;
+	position: relative;
+	right: 100%;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
 #questionContainer .questionMenu {
-	float:left;
-	width:12em;
-	position:relative;
-	right:12.5em;
+	float: left;
+	width: 12em;
+	position: relative;
+	right: 12.5em;
 	padding-bottom: 1em;
 }
 
+.carousel {
+	margin-bottom: 1em;
+}
+
 .carouselBtn {
-	text-align:center;
+	text-align: center;
 	margin: 0 auto;
-	width:100%;
+	cursor: pointer;
+	display: block !important;
+	padding: 0.2em;
+	font-size: 1.3em;
+	background-repeat: no-repeat;
+	background-position:  50%;
 }
 .carouselBtn:hover {
-	cursor: pointer;
+	background-color: #f90;
 }
 
 .questionList {
@@ -282,86 +318,40 @@ button:hover, button:focus {
 	padding: 0;
 }
 
-.questionSelector-hidden {
-	display:none; 
-}
 .questionSelector {
-	display:inline-block;
-	font-size:0.8em;
+	display: inline-block;
+	font-size: 0.8em;
+	padding: 0.5em 0;
 }
 
-.questionSelector #feedback {
-	width:25px;
-	height:25px;
-	float:right;
-}
-
-.questionSelector #score {
-	float:right;
-}
-
-.tick {
-	background-image:url('tick.png');
-}
-
-.cross {
-	background-image:url('cross.png');
-}
-.partial {
-	background-image:url('percent.png');
+.questionSelector .score {
+	float: right;
 }
 
 
-.qs-selected {
+
+.questionSelector.current {
 	background: #94B4F7;
 }
 
 .examScore {
 	background: #fff;
-	font-weight:bold;
-	font-size:1.2em;
-	text-align:center;
+	font-weight: bold;
+	font-size: 1.2em;
+	text-align: center;
 }
 
-.adviceNav {
+.adviceContainer {
+	clear: both;
+}
+
+.adviceDisplay ol,ul {
 	margin-left: 1em;
 }
 
-.adviceNav button {
-	margin-left: 0.2em;
-	vertical-align: top;
-}
-
-#adviceContainer {
-	clear:both;
-}
-
-#adviceDisplay ol,ul {
-	margin-left:1em;
-}
-
-/* alert / confirm box */
-#warningDisplay {
-	background: red;
-	position:absolute;
-	width:100%;
-	height:100%;
-}
-
-#warningDisplay .errorBar {
-	text-align:center;
-}
-
-#warningDisplay #warningMessage {
-	max-width:75%;
-	margin: 1em auto;
-	background: white;
-}
-
-
 /* front/exit pages */
 .startBtn {
-	text-align:center;
+	text-align: center;
 }
 
 .resultBtns {
@@ -372,15 +362,20 @@ button:hover, button:focus {
 }
 
 .rtd {
-	text-align:right;
+	text-align: right;
 }
 .qtd {
-	text-align:center;
+	text-align: center;
 }
 
 .resultrow td {
-	font-weight:bold;
-	font-size: 1.5em;
+	font-weight: bold;
+	font-size: 1.3em;
+}
+
+#question-breakdown .question:hover {
+	background-color: #f90;
+	cursor: pointer;
 }
 
 /* results page */
@@ -399,9 +394,14 @@ button:hover, button:focus {
 }
 
 
+/* exit page */
+#exit {
+	text-align: center;
+}
+
 /* question bits */
 
-#questionDisplay table{
+.statement table, .prompt table, .advice table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -409,9 +409,7 @@ button:hover, button:focus {
 
 .statement {
 	margin: 1em 0;
-	padding-top: 0.2em;
 	padding-left: 1em;
-	padding-bottom: 0.1em;
 	background: #cfc;
 }
 .part {
@@ -422,113 +420,143 @@ div.part {
 	margin-left: 1em;
 }
 
-.part.gapfill .part {
+.part.type-gapfill .part {
 	display: inline-block;
 }
 
 .partheader {
-	clear:both;
+	clear: both;
 }
 
+.correct-answer {
+	vertical-align: bottom;
+	margin-left: 1em;
+	border: 1px dashed #999;
+	padding: 0.4em;
+	display: inline-block;
+}
+
+.correct-answer .feedback-icon {
+	margin-left: 0.2em;
+}
 
 .steps {
-	display:none;
 	border: 1px solid;
 	padding: 0.5em 0.5em;
 }
 
-.steps #prompt {
-	display:inline-block;
+.steps .prompt {
+	display: inline-block;
+	padding-right: 1em;
 }
 
-.stepsBtnDiv, .steps {
+.stepsBtn {
+	display: block;
+}
+
+.stepsBtn, .steps {
 	margin-bottom: 1em;
+	margin-left: 0;
 }
 
 .advice {
 	background: #cfc;
 	border: 1px solid;
-	margin:1em 0;
-	display:none;
+	margin: 1em 0;
 }
 
 .multiplechoice li {
-	list-style:none;
+	list-style: none;
 	padding-right: 2em;
 	line-height: 1.5em;
+	float: left;
+}
+
+.multiplechoice li.start-column {
+	clear: both;
 }
 
 .multiplechoice p {
-	display:inline;
+	display: inline;
 }
 
-.part.m_n_x table.choices-grid td.option {
+.multiplechoice .choice {
+	margin-right: 0.3em;
+}
+
+.part.type-m_n_x form, .part.type-1_n_2 form, .part.type-m_n_2 form {
+	display: inline-block;
+}
+
+.part.type-m_n_x .choices-grid {
+	margin-left: 1em;
+	width: auto;
+}
+
+.part.type-m_n_x table.choices-grid td.option {
 	text-align: center;
 }
 
-.part.m_n_x .choices-grid th {
+.part.type-m_n_x .choices-grid th {
 	background: inherit;
 	font-weight: normal;
 	text-align: center;
 }
-.part.m_n_x .choices-grid .choice {
+.part.type-m_n_x .choices-grid .choice {
 	text-align: left;
 	max-width: 40em;
 }
 
 .question {
-	border:1px;
+	border: 1px;
 	margin-bottom: 1em;
 }
 
-.warningcontainer {
-	display:none;
+.warning-icon {
+	margin: 0 0.2em;
+	color: red;
 }
 
-.partwarning {
-	color:red;
+.warnings {
+	color: red;
 	font-size: 1em;
-	position:absolute;
+	position: absolute;
 	background-color: #ddd;
 	z-index: 1;
-	margin-left: 0.2em;
 	padding: 0.2em;
-	display:none;
 	max-width: 20em;
+	display: inline-block;
+	list-style-type: none;
 }
-.partwarning p {
+.warning {
 	margin: 0.1em;
+	display: block;
 }
 
-.part #partFeedback {
+.part .partFeedback {
 	background: #A2D1F0;
 	border: 1px solid #999999;
 	padding: 0.2em 0.2em 0.2em 0.1em;
-	float:right;
+	float: right;
 }
 
-#feedbackToggle {
+.feedbackToggle {
 	width: 9em;
 }
 
-.part #marks {
+.part .marks {
 	font-weight: bold;
 	margin: 0 0.3em;
 }
 
 
-.question td, #adviceDisplay td {
-	text-align:right;
+#questionDisplay .question td, #questionDisplay .adviceDisplay td {
+	text-align: right;
 }
 
 input[type=text],input[type=number] {
 	width: 60px;
 	text-align: center;
-}
-
-.mathPreview {
-	background-color: #eee;
-	padding: 0.2em;
 }
 
 div.lemma {
@@ -548,6 +576,35 @@ div.lemma p {
 	padding: 0em 0.2em;
 }
 
+/*
+------------------------------
+	Impromptu
+------------------------------
+*/
+div.jqi .jqititle{
+	padding: 5px 10px;
+	font-size: 16px; 
+	line-height: 20px; 
+	border-bottom: solid 1px #eeeeee;
+}
+
+.jqi .jqiarrow{ position: absolute; height: 0; width:0; line-height: 0; font-size: 0; border: solid 10px transparent;}
+
+.jqi .jqiarrowtl{ left: 10px; top: -20px; border-bottom-color: #ffffff; }
+.jqi .jqiarrowtc{ left: 50%; top: -20px; border-bottom-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowtr{ right: 10px; top: -20px; border-bottom-color: #ffffff; }
+
+.jqi .jqiarrowbl{ left: 10px; bottom: -20px; border-top-color: #ffffff; }
+.jqi .jqiarrowbc{ left: 50%; bottom: -20px; border-top-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowbr{ right: 10px; bottom: -20px; border-top-color: #ffffff; }
+
+.jqi .jqiarrowlt{ left: -20px; top: 10px; border-right-color: #ffffff; }
+.jqi .jqiarrowlm{ left: -20px; top: 50%; border-right-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowlb{ left: -20px; bottom: 10px; border-right-color: #ffffff; }
+
+.jqi .jqiarrowrt{ right: -20px; top: 10px; border-left-color: #ffffff; }
+.jqi .jqiarrowrm{ right: -20px; top: 50%; border-left-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowrb{ right: -20px; bottom: 10px; border-left-color: #ffffff; }
 
 /* jquery.impromptu dialog boxes */
 
@@ -617,7 +674,7 @@ div.jqi button.jqidefaultbutton{
 		height: 50%;
 	}
 	.navBar {
-		display:none;
+		display: none;
 	}
 	#questionContainer .colwrap {
 		width: 100%;
@@ -627,13 +684,13 @@ div.jqi button.jqidefaultbutton{
 		width: 100%;
 		right: auto;
 		padding: initial;
-		position:initial;
+		position: initial;
 	}
 	#questionDisplay {
-		margin:initial;
-		right:initial;
+		margin: initial;
+		right: initial;
 	}
-	#partFeedback {
+	.partFeedback {
 		display: none;
 	}
 
@@ -642,7 +699,7 @@ div.jqi button.jqidefaultbutton{
 	}
 
 	input[type="text"], input[type="number"] {
-		border:none;
+		border: none;
 		border-bottom: 1px solid;
 	}
 	button {

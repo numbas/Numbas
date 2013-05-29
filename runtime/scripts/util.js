@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -213,7 +213,6 @@ var util = Numbas.util = {
 	formatString: function(str)
 	{
 		var i=0;
-		var re = /%s/;
 		for(var i=1;i<arguments.length;i++)
 		{
 			str=str.replace(/%s/,arguments[i]);

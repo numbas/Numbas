@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ Numbas.controls = {
 		});
 	},
 
+	backToResults: function()
+	{
+		job(function() {
+			Numbas.exam.showInfoPage('result');
+		});
+	},
+
 	exitExam: function()
 	{
 		job(Numbas.exam.exit,Numbas.exam);
@@ -69,6 +76,11 @@ Numbas.controls = {
 		});
 	},
 
+	makeQuestionJumper: function(n) {
+		return function() {
+			Numbas.controls.jumpQuestion(n);
+		}
+	},
 
 	// move directly to a particular question
 	jumpQuestion: function( jumpTo )

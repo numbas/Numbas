@@ -102,7 +102,6 @@ Copyright 2011 Newcastle University
 				<xsl:with-param name="path" select="$path"/>
 			</xsl:apply-templates>
 		</span>
-		<span class="warningcontainer" id="warning-{$path}"><img src="resources/exclamation-red.png"/><span class="partwarning"></span></span>
 	</xsl:element>
 </xsl:template>
 

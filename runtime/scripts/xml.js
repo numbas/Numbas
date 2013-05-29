@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -170,17 +170,10 @@ var xml = Numbas.xml = {
 	},
 
 	//try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If obj is null, then the loaded value is just returned
-	tryGetAttribute: function(obj,elem,names,altnames,options)
+	tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
 	{
 		if(!options)
 			options = {};
-
-		//can give an xml node to start from. Default is the target object's saved XML.
-		var xmlroot;
-		if(options.xml)
-			xmlroot = options.xml;
-		else if(obj)
-			xmlroot = obj.xml;
 
 		if(typeof(elem)=='string')	//instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
 			elem = xmlroot.selectSingleNode(elem);

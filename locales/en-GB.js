@@ -24,16 +24,18 @@ R.registerLocale('en-GB',{
 	'exam.time allowed': "Time Allowed:",
 	'exam.passed': 'Passed',
 	'exam.failed': 'Failed',
+	'exam.review header': "Review: ",
 	'frontpage.start': "Start",
 
 	'suspend.exam suspended': "The Exam has been suspended. Press Resume to continue.",
 	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
 	'suspend.resume': "Resume",
 
+	'result.exit': "Exit Exam",
 	'result.print': "Print this results summary",
-	'result.exit': "Exit",
 	'result.review': "Review",
 	'result.exam summary': "Exam Summary",
+	'result.performance summary': "Performance Summary",
 	'result.exam start': "Exam Start:",
 	'result.exam stop': "Exam Stop:",
 	'result.time spent': "Time Spent:",
@@ -43,6 +45,8 @@ R.registerLocale('en-GB',{
 	'result.detailed question breakdown': "Detailed Question Breakdown",
 	'result.question number': "Question Number",
 	'result.question score': "Score",
+	'result.question review title': "Review this question",
+	'result.click a question to review': "Click on a question number to get marking feedback.",
 
 	'end.exam has finished': "The exam has finished. You may now close this window.",
 
@@ -50,7 +54,7 @@ R.registerLocale('en-GB',{
 	'control.not all questions answered': "You have not completed every question in this exam.",
 	'control.confirm end': "Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
 	'control.confirm regen': "Would you like to re-randomise this question? If you click OK, all your answers and marks for the current question will be lost.",
-	'control.confirm reveal': "Would you like to reveal the answer to this question? Any marks you have received so far will be removed and you will not be able to answer this question later.",
+	'control.confirm reveal': "Would you like to reveal the answer to this question? Any marks you have received so far will be locked and you will not be able to answer this question later.",
 	'control.regen': "Try another question like this one",
 	'control.submit answer': "Submit answer",
 	'control.submit all parts': "Submit all parts",
@@ -63,6 +67,7 @@ R.registerLocale('en-GB',{
 	'control.total': "Total",
 	'control.pause': "Pause",
 	'control.end exam': "End Exam",
+	'control.back to results': "Go back to results",
 
 	'display.part.jme.error making maths': "Error making maths display",
 	
@@ -144,6 +149,7 @@ R.registerLocale('en-GB',{
 	'part.marking.nothing entered': "You did not enter an answer.",
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
+	'part.correct answer': "Correct answer:",
 
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
@@ -194,6 +200,9 @@ R.registerLocale('en-GB',{
 	'question.score feedback.answered actual': "Score: %(scoreString)",
 	'question.score feedback.answered': "Answered.",
 	'question.score feedback.unanswered total': "%(marksString).",
+	'question.score feedback.correct': 'Your answer is correct',
+	'question.score feedback.partial': 'Your answer is partially correct',
+	'question.score feedback.wrong': 'Your answer is incorrect',
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Time remaining: %s",

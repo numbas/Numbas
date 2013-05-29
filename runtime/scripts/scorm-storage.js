@@ -1,5 +1,5 @@
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-13 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ SCORMStorage.prototype = {
 		this.questionIndices = {};
 		this.partIndices = {};
 
-		for(var i=0; i<exam.numQuestions; i++)
+		for(var i=0; i<exam.settings.numQuestions; i++)
 		{
 			this.initQuestion(exam.questionList[i]);
 		}
@@ -267,7 +267,7 @@ SCORMStorage.prototype = {
 		};
 
 		eobj.questions = [];
-		for(var i=0;i<exam.numQuestions;i++)
+		for(var i=0;i<exam.settings.numQuestions;i++)
 		{
 			eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
 		}
@@ -355,17 +355,19 @@ SCORMStorage.prototype = {
 		var eobj = this.getSuspendData();
 		this.set('exit','suspend');
 		
-		var location = this.get('location');
-		if(location.length)
-			location=parseInt(location,10);
+		var currentQuestion = this.get('location');
+		if(currentQuestion.length)
+			currentQuestion=parseInt(currentQuestion,10);
 		else
-			location=undefined;
+			currentQuestion=undefined;
+
+		var score = parseInt(this.get('score.raw'),10);
 
 		return {timeRemaining: eobj.timeRemaining,
 				questionSubset: eobj.questionSubset,
 				start: eobj.start,
-				score: parseInt(this.get('score.raw'),10),
-				location: location
+				score: score,
+				currentQuestion: currentQuestion
 		};
 	},
 
