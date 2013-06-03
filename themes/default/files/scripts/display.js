@@ -1021,7 +1021,7 @@ function showScoreFeedback(obj,settings)
 		var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 		answered = answered || score>0;
 
-		if( settings.showAnswerState && (answered||revealed) && marks>0 ) {
+		if( marks>0 && (revealed || (settings.showAnswerState && answered)) ) {
 			if(score<=0)
 				return 'wrong';
 			else if(score==marks)
