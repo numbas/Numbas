@@ -281,7 +281,9 @@ display.ExamDisplay = function(e)
 	this.timeSpent = ko.observable('');
 
 	this.questionsAttempted = ko.computed(function() {
-		return this.questions().reduce(function(s,q) { return s + (q.answered() ? 1 : 0); },0);
+		return this.questions().reduce(function(s,q) { 
+			return s + (q.answered() ? 1 : 0); 
+		},0);
 	},this);
 	this.questionsAttemptedDisplay = ko.computed(function() {
 		return this.questionsAttempted()+' / '+this.exam.settings.numQuestions;

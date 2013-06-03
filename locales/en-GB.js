@@ -42,11 +42,11 @@ R.registerLocale('en-GB',{
 	'result.questions attempted': "Questions Attempted:",
 	'result.score': "Score:",
 	'result.result': "Result:",
-	'result.detailed question breakdown': "Detailed Question Breakdown",
+	'result.detailed question breakdown': "Detailed Question Breakdown and Feedback",
 	'result.question number': "Question Number",
 	'result.question score': "Score",
 	'result.question review title': "Review this question",
-	'result.click a question to review': "Click on a question number to get marking feedback.",
+	'result.click a question to review': "Click on a question number to see how your answers were marked and, where available, full solutions.",
 
 	'end.exam has finished': "The exam has finished. You may now close this window.",
 

@@ -226,7 +226,6 @@ Question.prototype =
 	revealAnswer: function(dontStore)
 	{
 		this.revealed = true;
-		this.answered = true;
 		
 		//display advice if allowed
 		this.getAdvice(dontStore);
@@ -277,11 +276,11 @@ Question.prototype =
 		}*/
 
 		var tmpScore=0;
-		var answered = true;
+		var answered = false;
 		for(var i=0; i<this.parts.length; i++)
 		{
 			tmpScore += this.parts[i].score;
-			answered = answered && this.parts[i].answered;
+			answered = answered || this.parts[i].answered;
 		}
 		this.answered = answered;
 		
@@ -658,7 +657,7 @@ Part.prototype = {
 	{
 		this.display.revealAnswer();
 		this.revealed = true;
-		this.answered = true;
+
 		//this.setCredit(0);
 		if(this.steps.length>0) {
 			this.showSteps(dontStore);

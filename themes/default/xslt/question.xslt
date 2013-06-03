@@ -105,7 +105,7 @@ Copyright 2011-13 Newcastle University
 		<xsl:apply-templates select="." mode="correctanswer"/>
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
-			<div class="partFeedback">
+			<div class="partFeedback" data-bind="visible: marks()>0">
 				<button class="btn submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
 				<div class="marks" data-bind="pulse: scoreFeedback.update">
 					<span class="score" data-bind="html: scoreFeedback.message"></span>
@@ -161,6 +161,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='1_n_2']" mode="typespecific">
 	<xsl:apply-templates select="choices" mode="one"/>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
@@ -172,6 +173,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='m_n_2']" mode="typespecific">
 	<xsl:apply-templates select="choices" mode="one"/>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
@@ -319,6 +321,7 @@ Copyright 2011-13 Newcastle University
 			</tbody>
 		</table>
 	</form>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
@@ -395,13 +398,13 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
 	
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"></input>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
 	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: correctAnswer, autosize: true"/>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 
@@ -420,6 +423,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='jme']" mode="typespecific">
 	<input type="text" spellcheck="false" class="jme" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, autosize: true, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="correctanswer">
@@ -427,13 +431,13 @@ Copyright 2011-13 Newcastle University
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="preview" data-bind="maths: correctAnswerLaTeX"></span>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
 	
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
+	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">
@@ -441,7 +445,6 @@ Copyright 2011-13 Newcastle University
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span data-bind=""></span>
-		<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 	</span>
 </xsl:template>
 

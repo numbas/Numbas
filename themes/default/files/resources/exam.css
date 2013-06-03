@@ -196,6 +196,9 @@ button:hover, button:focus {
 .feedback-icon.none {
 	display: none;
 }
+.student-answer .feedback-icon {
+    margin-left: 0.2em;
+}
 
 .questionSelector:hover {
 	cursor: pointer;
