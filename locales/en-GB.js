@@ -199,6 +199,7 @@ R.registerLocale('en-GB',{
 	'question.score feedback.answered total': "%(marksString). Answered.",
 	'question.score feedback.answered actual': "Score: %(scoreString)",
 	'question.score feedback.answered': "Answered.",
+	'question.score feedback.unanswered': "Unanswered.",
 	'question.score feedback.unanswered total': "%(marksString).",
 	'question.score feedback.correct': 'Your answer is correct',
 	'question.score feedback.partial': 'Your answer is partially correct',

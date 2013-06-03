@@ -1044,7 +1044,7 @@ function showScoreFeedback(obj,settings)
 			}
 		}),
 		message: ko.computed(function() {
-			var answered = obj.answered(), score = obj.score(), marks = obj.marks();
+			var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 			answered = answered || score>0;
 
 			var scoreobj = {
@@ -1053,7 +1053,9 @@ function showScoreFeedback(obj,settings)
 				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
 				scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
 			};
-			if(answered && marks>0)
+			if(revealed && !answered)
+				return R('question.score feedback.unanswered');
+			else if(answered && marks>0)
 			{
 				var str = 'question.score feedback.answered'
 							+ (settings.showTotalMark ? ' total' : '')
