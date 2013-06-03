@@ -426,7 +426,7 @@ Exam.prototype = {
 			exam.display.showQuestion();
 		}
 
-		if(currentQuestion.answered || currentQuestion.revealed)
+		if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0)
 		{
 			go();
 		}
