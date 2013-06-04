@@ -29,8 +29,10 @@ Copyright 2011-13 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div class="question clearAfter">
+	<div data-bind="visible: $root.currentQuestionNumber()=={@number}">
+	<div class="question clearAfter" data-bind="with: questions()[{@number}]">
 		<xsl:apply-templates />
+	</div>
 	</div>
 </xsl:template>
 
@@ -87,7 +89,7 @@ Copyright 2011-13 Newcastle University
 	</xsl:if>
 	<xsl:element name="{$tag}">
 		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/></xsl:attribute>
-		<xsl:attribute name="data-bind">with: $root.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
+		<xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
 			<xsl:apply-templates select="prompt" />

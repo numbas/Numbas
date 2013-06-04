@@ -438,6 +438,7 @@ display.QuestionDisplay.prototype =
 	makeHTML: function() {
 		var q = this.question;
 		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+		$('#questionDisplay').append(html);
 
 		Numbas.schedule.add(function()
 		{
@@ -454,10 +455,6 @@ display.QuestionDisplay.prototype =
 		var exam = q.exam;
 
 		this.visited(q.visited);
-
-		//display question's html
-		$('#questionDisplay').append(this.html);
-		ko.applyBindings(this,this.html[0]);
 
 		//update the question menu - highlight this question, etc.
 		exam.display.updateQuestionMenu();
@@ -497,7 +494,6 @@ display.QuestionDisplay.prototype =
 	},
 
 	leave: function() {
-		$('#questionDisplay .question').remove();
 	},
 
 	//display Advice
@@ -545,6 +541,7 @@ display.PartDisplay = function(p)
 {
 	var pd = this;
 	this.part = p;
+	this.question = p.question;
 
 	this.score = ko.observable(p.score);
 	this.marks = ko.observable(p.marks);

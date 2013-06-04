@@ -215,12 +215,6 @@ Exam.prototype = {
 		},this);
 
 		job(this.makeQuestionList,this,true);
-		job(function() {
-			for(var i=0;i<this.settings.numQuestions;i++)
-			{
-				var q = this.questionList[i];
-			}
-		},this);
 
 		job(function() {
 			if(suspendData.currentQuestion!==undefined)

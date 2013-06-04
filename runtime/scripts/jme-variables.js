@@ -189,7 +189,7 @@ jme.variables = {
 		var bits = util.splitbrackets(str,'{','}');
 
 		if(bits.length==1)
-			return [str];
+			return [doc.createTextNode(str)];
 
 		var out = [];
 		for(var i=0; i<bits.length; i++)
