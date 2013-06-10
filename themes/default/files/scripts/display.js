@@ -296,12 +296,18 @@ display.ExamDisplay = function(e)
 }
 display.ExamDisplay.prototype = 
 {
-	e:undefined,	//reference to main exam object
+	exam: undefined,	//reference to main exam object
 
 	showTiming: function()
 	{
 		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
 		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
+	},
+
+	initQuestionList: function() {
+		for(var i=0; i<this.exam.questionList.length; i++) {
+			this.questions.push(this.exam.questionList[i].display);
+		}
 	},
 
 	hideTiming: function()
@@ -379,9 +385,15 @@ display.ExamDisplay.prototype =
 
 	startRegen: function() {
 		$('#questionDisplay').hide();
+		this.exam.currentQuestion.display.html.remove();
+		this.oldQuestion = this.exam.currentQuestion.display;
+		console.log(this.oldQuestion);
 	},
 	
 	endRegen: function() {
+		var currentQuestion = this.exam.currentQuestion;
+		this.questions.splice(currentQuestion.number,1,currentQuestion.display);
+		ko.applyBindings(this,this.exam.currentQuestion.display.html[0]);
 		$('#questionDisplay').fadeIn(200);
 	},
 
@@ -427,8 +439,6 @@ display.QuestionDisplay = function(q)
 	this.review = function() {
 		exam.reviewQuestion(q.number);
 	}
-
-	exam.display.questions.push(this);
 }
 display.QuestionDisplay.prototype =
 {

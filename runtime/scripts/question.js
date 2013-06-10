@@ -25,7 +25,7 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-var Question = Numbas.Question = function( exam, xml, number, loading, gscope )
+var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 {
 	var q = this;
 	q.exam = exam;

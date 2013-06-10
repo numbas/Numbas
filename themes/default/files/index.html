@@ -240,8 +240,8 @@ Copyright 2011-13 Newcastle University
 						<div class="carousel">
 							<div class="carouselBtn prev icon-caret-up"></div>
 							<div class="questionList">
-								<ul id="questionList" data-bind="foreach: exam.questionList">
-									<li id="questionSelector" class="questionSelector" data-bind="visible: display.visible, with: display, css: {current: $root.currentQuestion()==$data.display}, click: Numbas.controls.makeQuestionJumper(number)">
+								<ul id="questionList" data-bind="foreach: questions">
+									<li id="questionSelector" class="questionSelector" data-bind="visible: visible, css: {current: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
 										<span class="name" data-bind="text: displayName"></span>
 										<div class="marks">
 											<div class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></div>

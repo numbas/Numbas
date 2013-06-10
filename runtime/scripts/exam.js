@@ -264,6 +264,9 @@ Exam.prototype = {
 		}
 
 		job(function() {
+			//register questions with exam display
+			this.display.initQuestionList();
+
 			//calculate max marks available in exam
 			this.mark = 0;
 
