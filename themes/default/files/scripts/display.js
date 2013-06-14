@@ -462,6 +462,7 @@ display.QuestionDisplay.prototype =
 	show: function()
 	{
 		var q = this.question;
+		var qd = this;
 		var exam = q.exam;
 
 		this.visited(q.visited);
@@ -497,9 +498,9 @@ display.QuestionDisplay.prototype =
 		scroll(0,0);
 
 		// make mathjax process the question text (render the maths)
-		Numbas.display.typeset($('#questionDisplay'),this.postTypesetF);
+		Numbas.display.typeset(this.html,this.postTypesetF);
 		setTimeout(function(){
-			MathJaxQueue.Push(['Rerender',MathJax.Hub,$('#questionDisplay')[0]]);
+			MathJaxQueue.Push(['Rerender',MathJax.Hub,qd.html[0]]);
 		},100);
 	},
 
