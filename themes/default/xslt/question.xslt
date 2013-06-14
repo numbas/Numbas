@@ -99,7 +99,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 		<span class="student-answer">
 			<xsl:apply-templates select="." mode="typespecific"/>
-			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown"></span>
+			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown, event: {{focus: showWarnings, blur: hideWarnings}}" tabindex="0"></span>
 			<span class="warnings" data-bind="foreach: warnings, visible: warningsShown">
 				<span class="warning" data-bind="latex: message"></span>
 			</span>

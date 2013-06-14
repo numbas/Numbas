@@ -558,8 +558,14 @@ display.PartDisplay = function(p)
 	this.answered = ko.observable(p.answered);
 
 	this.warnings = ko.observableArray([]);
-	this.warnings2 = ko.observableArray([{message:'a'}]);
 	this.warningsShown = ko.observable(false);
+
+	this.showWarnings = function() {
+		this.warningsShown(true);
+	}
+	this.hideWarnings = function() {
+		this.warningsShown(false);
+	}
 
 	this.feedbackShown = ko.observable(false);
 	this.toggleFeedbackText = ko.computed(function() {
