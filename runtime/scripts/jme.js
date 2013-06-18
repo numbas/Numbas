@@ -2192,7 +2192,7 @@ function randoms(varnames,min,max,times)
 function varnamesAgree(array1, array2) {
 	var name;
 	for(var i=0; i<array1.length; i++) {
-		if( (name=array1[i][0])!='$' && !array2.contains(name) )
+		if( (name=array1[i])[0]!='$' && !array2.contains(name) )
 			return false;
 	}
 	
