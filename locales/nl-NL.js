@@ -16,20 +16,28 @@ Copyright 2011 Newcastle University
 R.registerLocale('nl-NL',{
 	'page.loading': "Bezig met laden ...",
 
+
+	"exam.random seed": "Sessie ID:",
+	"exam.passed": "Gehaald",
+	"exam.failed": "Niet gehaald",
+	"exam.review header": "Review: ",
 	'exam.exam name': "Naam toets:",
 	'exam.number of questions': "Aantal vragen:",
 	'exam.marks available': "Aantal punten:",
 	'exam.pass percentage': "Geslaagd bij:",
 	'exam.time allowed': "Beschikbare tijd:",
-	'exam.passed': 'Geslaagd',
-	'exam.failed': 'Niet geslaagd',
 	'frontpage.start': "Start",
 
 	'suspend.exam suspended': "De toets is onderbroken. Klik Ga door om verder te gaan.",
 	'suspend.you can resume': "Volgende keer dat je de toets opstart kun je verder gaan met deze sessie.",
 	'suspend.resume': "Ga door",
 
-	'result.exit': "Exit",
+	"result.exit": "Exit",
+	"result.print": "Print dit overzicht van de resultaten",
+	"result.performance summary": "Overzicht van de resultaten",
+	"result.question review title": "Review deze vraag",
+	"result.detailed question breakdown": "Gedetailleerd overzicht",
+	"result.click a question to review": "Klik op een vraagnummer om je scores en eventuele uitwerkingen te zien.",
 	'result.review': "Review",
 	'result.exam summary': "Overzicht toets",
 	'result.exam start': "Start toets:",
@@ -38,17 +46,17 @@ R.registerLocale('nl-NL',{
 	'result.questions attempted': "Aantal gemaakte vragen:",
 	'result.score': "Score:",
 	'result.result': "Resultaat:",
-	'result.detailed question breakdown': "Gedetailleerd overzicht",
 	'result.question number': "Vraag nummer",
 	'result.question score': "Score",
 
 	'end.exam has finished': "De toets is afgelopen. Je kunt het venster sluiten.",
 
+	"control.back to results": "Ga terug naar resultaten",
 	'control.confirm leave': "De toets is nog niet af.",
 	'control.not all questions answered': "Je hebt niet alle vragen in deze toets beantwoord.",
 	'control.confirm end': "Weet je zeker dat je de toets wilt afsluiten? Als je afsluit kun je geen antwoorden meer wijzigen.",
 	'control.confirm regen': "Weet je zeker dat je deze vraag opnieuw wilt maken? Als je opnieuw begint verlies je je huidige score.",
-	'control.confirm reveal': "Wil je het antwoord zien? Je verliest je huidige score en kunt de vraag later niet opnieuw beantwoorden.",
+	"control.confirm reveal": "Wil je het antwoord zien? Je verliest je huidige score en kunt de vraag later niet opnieuw beantwoorden.",
 	'control.regen': "Probeer opnieuw",
 	'control.submit answer': "Verzend",
 	'control.submit all parts': "Verzend alles",
@@ -144,6 +152,7 @@ R.registerLocale('nl-NL',{
 	'part.marking.correct': "Je antwoord is goed.",
 	'part.correct answer': "Goede antwoord:",
 
+	"part.correct answer": "Goede antwoord:",
 	'part.missing type attribute': "Onderdeeltype ontbreekt",
 	'part.unknown type': "Onderdeeltype %s is onbekend",
 
@@ -193,6 +202,10 @@ R.registerLocale('nl-NL',{
 	'question.score feedback.answered actual': "Score: %(scoreString)",
 	'question.score feedback.answered': "Beantwoord.",
 	'question.score feedback.unanswered total': "%(marksString).",
+	"question.score feedback.unanswered": "Niet gemaakt.",
+	"question.score feedback.correct": "Je antwoord is goed",
+	"question.score feedback.partial": "Je antwoord is gedeeltelijk goed",
+	"question.score feedback.wrong": "Je antwoord is fout",
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Resterende tijd: %s",
