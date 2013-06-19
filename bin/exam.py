@@ -858,8 +858,8 @@ class GapFillPart(Part):
 
 		def replace_gapfill(m):
 			d=int(m.group(1))
-			if len(self.gaps)>=d:
-				raise ExamError("Reference to an undefined gap in a gapfill part")
+			if len(self.gaps)<=d:
+				raise ExamError("Reference to an undefined gap in a gapfill part (%i,%i)" %(d,len(self.gaps)))
 			return '<gapfill reference="%s" />' % d
 
 		self.prompt = re.sub(r"\[\[(\d+?)\]\]",replace_gapfill,self.prompt)
