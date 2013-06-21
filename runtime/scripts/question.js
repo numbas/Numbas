@@ -508,8 +508,17 @@ Part.prototype = {
 	//update the stored answer from the student (called when student changes their answer, before submitting)
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
-		this.display.isDirty(true);
+		this.isDirty(true);
 		this.display.removeWarnings();
+	},
+
+	isDirty: function(dirty) {
+		if(this.display) {
+			this.display.isDirty(dirty);
+			if(dirty && this.parentPart) {
+				this.parentPart.isDirty(true);
+			}
+		}
 	},
 
 	//submit answer to this part - save answer, mark, update score
@@ -542,7 +551,7 @@ Part.prototype = {
 		else
 		{
 			this.answerList = util.copyarray(this.stagedAnswer);
-			this.display.isDirty(false);
+			this.isDirty(false);
 			this.mark();
 			this.answered = this.validate();
 		}
