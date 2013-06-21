@@ -108,7 +108,7 @@ Copyright 2011-13 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
 			<div class="partFeedback" data-bind="visible: marks()>0">
-				<button class="btn submitPart" data-bind="click: controls.submit, visible: !revealed()"><localise>question.submit part</localise></button>
+				<button class="btn submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
 				<div class="marks" data-bind="pulse: scoreFeedback.update">
 					<span class="score" data-bind="html: scoreFeedback.message"></span>
 					<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>

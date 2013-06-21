@@ -27,6 +27,24 @@ function resizeF() {
 	$(this).width(Math.max(w+30,60)+'px');
 };
 
+ko.bindingHandlers.horizontalSlideVisible = {
+	init: function(element, valueAccessor) {
+		var containerWidth = $(element).width();
+		ko.utils.domData.set(element,'originalWidth',containerWidth);
+		$(element).css({display:'inline-block', 'overflow-x': 'hidden'});
+
+		var buttonWidth = $(element).children().outerWidth();
+		$(element).children().css({width:buttonWidth});
+	},
+	update: function(element, valueAccessor) {
+		var value = ko.utils.unwrapObservable(valueAccessor());
+		var originalWidth = ko.utils.domData.get(element,'originalWidth');
+
+		console.log(value,originalWidth);
+		$(element).animate({width: value ? originalWidth : 0}, 1000);
+	}
+}
+
 ko.bindingHandlers.autosize = {
 	init: function(element) {
 		//resize text inputs to just fit their contents
@@ -557,6 +575,8 @@ display.PartDisplay = function(p)
 	this.score = ko.observable(p.score);
 	this.marks = ko.observable(p.marks);
 	this.answered = ko.observable(p.answered);
+
+	this.isDirty = ko.observable(false);
 
 	this.warnings = ko.observableArray([]);
 	this.warningsShown = ko.observable(false);

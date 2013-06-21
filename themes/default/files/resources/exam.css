@@ -541,6 +541,12 @@ div.part {
 	border: 1px solid #999999;
 	padding: 0.2em 0.2em 0.2em 0.1em;
 	float: right;
+	text-align: center;
+}
+
+.part .submitPart {
+	display: block;
+	margin: 0 auto 0.3em auto;
 }
 
 .feedbackToggle {

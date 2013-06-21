@@ -508,6 +508,7 @@ Part.prototype = {
 	//update the stored answer from the student (called when student changes their answer, before submitting)
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
+		this.display.isDirty(true);
 		this.display.removeWarnings();
 	},
 
@@ -541,6 +542,7 @@ Part.prototype = {
 		else
 		{
 			this.answerList = util.copyarray(this.stagedAnswer);
+			this.display.isDirty(false);
 			this.mark();
 			this.answered = this.validate();
 		}
