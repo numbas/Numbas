@@ -38,6 +38,10 @@ a:hover {
 	color: #f90;
 }
 
+table {
+	background-color: white;
+}
+
 /*main template */
 .mainDiv{ 
 	clear: both;
