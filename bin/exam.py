@@ -56,11 +56,16 @@ def makeContentNode(s):
 	s=strcons(s)
 	s=removeHTMLEscapes(s)
 	s='<span>'+s+'</span>'
+
 	try:
-		return etree.fromstring('<content>'+s+'</content>')
+		content = etree.fromstring('<content>'+s+'</content>')
 	except etree.ParseError as e:
 		sys.stderr.write('Bad content:\n'+s+'\n\n')
 		raise e
+
+	for a in content.findall('.//a'):
+		a.attrib.setdefault('target','_blank')
+	return content
 
 #make an XML element tree. Pass in an array of arrays or strings.
 def makeTree(struct):

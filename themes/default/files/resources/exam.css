@@ -34,6 +34,10 @@ body {
 	padding: 1em;
 }
 
+a:hover {
+	color: #f90;
+}
+
 /*main template */
 .mainDiv{ 
 	clear: both;
