@@ -1555,6 +1555,7 @@ MultipleResponsePart.prototype =
 
 	storeAnswer: function(answerList)
 	{
+		this.isDirty(true);
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
 		var answerIndex = answerList[0];
