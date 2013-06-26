@@ -705,6 +705,9 @@ function JMEPart(xml, path, question, parentPart, loading)
 		this.question.scope
 	);
 
+	this.markingScope = new jme.Scope(this.question.scope);
+	this.markingScope.variables = {};
+
 	settings.displaySimplification = '';
 	
 	//get checking type, accuracy, checking range
@@ -852,7 +855,7 @@ JMEPart.prototype =
 		this.answered = this.studentAnswer.length > 0;
 		
 		//do comparison of student's answer with correct answer
-		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.question.scope))
+		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.markingScope))
 		{
 			this.setCredit(0,R('part.marking.incorrect'));
 			return;
