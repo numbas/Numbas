@@ -428,6 +428,12 @@ var texOps = jme.display.texOps = {
 	'vector': (function(thing,texArgs,settings) {
 		return '\\left( '+texVector(thing,settings)+' \\right)';
 	}),
+	'rowvector': (function(thing,texArgs,settings) {
+		if(thing.args[0].tok.type!='list')
+			return texMatrix({args:[{args:thing.args}]},settings,true);
+		else
+			return texMatrix(thing,settings,true);
+	}),
 	'matrix': (function(thing,texArgs,settings) {
 		return texMatrix(thing,settings,true);
 	}),
