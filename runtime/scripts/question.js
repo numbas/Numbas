@@ -1121,7 +1121,7 @@ NumberEntryPart.prototype =
 		
 		// do a bit of string tidy up
 		// uk number format only for now - get rid of any UK 1000 separators	
-		this.studentAnswer = this.studentAnswer.replace(/,/g, '');
+		this.studentAnswer = (this.studentAnswer+'').replace(/,/g, '');
 		this.studentAnswer = $.trim(this.studentAnswer);
 
 		if( this.studentAnswer.length>0 && !isNaN(this.studentAnswer) )
