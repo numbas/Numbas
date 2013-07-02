@@ -35,12 +35,16 @@ jme.variables = {
 	},
 
 	makeJavascriptFunction: function(fn,scope) {
-		var preamble='fn.jfn=(function('+fn.paramNames.join(',')+'){';
+		var paramNames = fn.paramNames.slice();
+		paramNames.push('scope');
+		var preamble='fn.jfn=(function('+paramNames.join(',')+'){';
 		var math = Numbas.math;
 		var util = Numbas.util;
 		var jfn = eval(preamble+fn.definition+'})');
 		return function(args,scope) {
+			console.log('call',scope.variables);
 			args = args.map(function(a){return jme.unwrapValue(a)});
+			args.push(scope);
 			try {
 				var val = jfn.apply(this,args);
 				if(val===undefined) {
