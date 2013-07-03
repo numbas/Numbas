@@ -475,7 +475,7 @@ display.QuestionDisplay.prototype =
 				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
 			})
 
-			$(document).trigger('question-html-attached',q,qd);
+			$(html).trigger('question-html-attached',q,qd);
 			$(document).unbind('question-html-attached');
 		});
 	},
