@@ -42,7 +42,6 @@ jme.variables = {
 		var util = Numbas.util;
 		var jfn = eval(preamble+fn.definition+'})');
 		return function(args,scope) {
-			console.log('call',scope.variables);
 			args = args.map(function(a){return jme.unwrapValue(a)});
 			args.push(scope);
 			try {

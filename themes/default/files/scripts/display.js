@@ -465,6 +465,7 @@ display.QuestionDisplay.prototype =
 
 	makeHTML: function() {
 		var q = this.question;
+		var qd = this;
 		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
 		$('#questionDisplay').append(html);
 
@@ -473,8 +474,10 @@ display.QuestionDisplay.prototype =
 			html.each(function(e) {
 				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
 			})
-		});
 
+			$(document).trigger('question-html-attached',q,qd);
+			$(document).unbind('question-html-attached');
+		});
 	},
 
 	show: function()

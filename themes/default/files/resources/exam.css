@@ -30,7 +30,7 @@ html{
 	font-family: sans-serif;
 }
 
-body {
+#everything, #loading {
 	padding: 1em;
 }
 
