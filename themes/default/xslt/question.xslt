@@ -423,7 +423,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="typespecific">
-	<input type="text" spellcheck="false" class="jme" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', hasfocus: inputHasFocus, autosize: true, disable: revealed"/>
+	<input type="text" spellcheck="false" class="jme" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
 	<span class="preview" data-bind="visible: studentAnswerLaTeX, maths: studentAnswerLaTeX, click: focusInput"></span>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
@@ -457,7 +457,10 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part" mode="typespecific">
-	<localise>question.unsupported part type</localise> <xsl:value-of select="@type"/>
+	<localise>question.unsupported part type</localise> <xsl:text> </xsl:text> <xsl:value-of select="@type"/>
+</xsl:template>
+
+<xsl:template match="part" mode="correctanswer">
 </xsl:template>
 
 <xsl:template match="math" mode="content">
