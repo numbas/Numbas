@@ -1331,17 +1331,34 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		matrix = jme.evaluate(def,this.question.scope);
 		switch(matrix.type) {
 		case 'list':
-			if(matrix.value[0].type=='list')
+			var numLists = 0;
+			var numNumbers = 0;
+			for(var i=0;i<matrix.value.length;i++) {
+				switch(matrix.value[i].type) {
+				case 'list':
+					numLists++;
+					break;
+				case 'number':
+					numNumbers++;
+					break;
+				default:
+					throw(new Numbas.Error('part.mcq.matrix wrong type',matrix.value[i].type));
+				}
+			}
+			if(numLists == matrix.value.length)
 			{
 				matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
 					return row.value.map(function(e){return e.value;});
 				});
 			}
-			else
+			else if(numNumbers == matrix.value.length)
 			{
 				matrix = matrix.value.map(function(e) {
 					return [e.value];
 				});
+			}
+			else {
+				throw(new Numbas.Error('part.mcq.matrix mix of numbers and lists'));
 			}
 			matrix.rows = matrix.length;
 			matrix.columns = matrix[0].length;
@@ -1352,6 +1369,8 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		default:
 			throw(new Numbas.Error('part.mcq.matrix not a list'));
 		}
+		if(matrix.length!=this.numChoices)
+			throw(new Numbas.Error('part.mcq.matrix wrong size'));
 
 		// take into account shuffling;
 		var omatrix = matrix;
@@ -1360,6 +1379,8 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		matrix.columns = omatrix.columns;
 		for(var i=0;i<this.numChoices;i++) {
 			matrix[i]=[];
+			if(omatrix[i].length!=this.numAnswers)
+				throw(new Numbas.Error('part.mcq.matrix wrong size'));
 		}
 		for(var i=0; i<this.numChoices; i++) {
 			for(var j=0;j<this.numAnswers; j++) {

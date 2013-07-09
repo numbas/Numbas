@@ -179,6 +179,9 @@ R.registerLocale('en-GB',{
 	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",
 	'part.mcq.no choices selected': "No choices selected.",
 	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
+	'part.mcq.matrix wrong type': "Element of invalid type '%s' used in marking matrix.",
+	'part.mcq.matrix mix of numbers and lists': "Mix of numbers and lists used in marking matrix.",
+	'part.mcq.matrix wrong size': "Marking matrix is the wrong size.",
 	'part.mcq.correct choice': "You chose the correct answer.",
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
