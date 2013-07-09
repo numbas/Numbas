@@ -704,6 +704,9 @@ function JMEPart(xml, path, question, parentPart, loading)
 		settings.answerSimplification,
 		this.question.scope
 	);
+	if(settings.correctAnswer == '' && this.marks>0) {
+		throw(new Numbas.Error('part.jme.answer missing',this.path));
+	}
 
 	this.markingScope = new jme.Scope(this.question.scope);
 	this.markingScope.variables = {};
