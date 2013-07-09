@@ -1211,6 +1211,13 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 		tryGetAttribute(this,this.xml,'.','marks');
 	}
 
+	//get minimum marks setting
+	tryGetAttribute(settings,this.xml,'marking/minmarks','enabled','minMarksEnabled');
+	if(settings.minMarksEnabled)
+	{
+		tryGetAttribute(this.settings,this.xml,'marking/minmarks','value','minimumMarks');
+	}
+
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
 	if(!choicesNode)
