@@ -40,7 +40,6 @@ ko.bindingHandlers.horizontalSlideVisible = {
 		var value = ko.utils.unwrapObservable(valueAccessor());
 		var originalWidth = ko.utils.domData.get(element,'originalWidth');
 
-		console.log(value,originalWidth);
 		$(element).animate({width: value ? originalWidth : 0}, 1000);
 	}
 }
@@ -405,7 +404,6 @@ display.ExamDisplay.prototype =
 		$('#questionDisplay').hide();
 		this.exam.currentQuestion.display.html.remove();
 		this.oldQuestion = this.exam.currentQuestion.display;
-		console.log(this.oldQuestion);
 	},
 	
 	endRegen: function() {
