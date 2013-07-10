@@ -2334,7 +2334,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 			return false;
 		for(var i=0;i<v1.length;i++)
 		{
-			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+			if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
 				return false;
 		}
 		return true;
@@ -2346,7 +2346,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 		{
 			for(var j=0;j<v1.columns;j++)
 			{
-				if(!resultsEqual(v1[i][j]||0,v2[i][j]||0,checkingFunction,checkingAccuracy))
+				if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
 					return false;
 			}
 		}
