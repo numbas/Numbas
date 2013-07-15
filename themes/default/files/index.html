@@ -107,7 +107,7 @@ Copyright 2011-13 Newcastle University
 						</tr>
 						<tr data-bind="visible: exam.settings.showTotalMark">
 							<td data-localise="exam.marks available"></td>
-							<td class="rtd" data-bind="text: marks"></td>
+							<td class="rtd" data-bind="niceNumber: marks"></td>
 						</tr>
 						<tr data-bind="visible: exam.settings.percentPass>0">
 							<td data-localise="exam.pass percentage"></td>
@@ -145,7 +145,7 @@ Copyright 2011-13 Newcastle University
 						</tr>
 						<tr>
 							<td data-localise="exam.marks available"></td>
-							<td class="rtd" data-bind="text: marks"></td>	
+							<td class="rtd" data-bind="niceNumber: marks"></td>	
 						</tr>
 						<tr data-bind="visible: exam.settings.percentPass>0">
 							<td data-localise="exam.pass percentage"></td>
@@ -197,9 +197,9 @@ Copyright 2011-13 Newcastle University
 						<tbody data-bind="foreach: questions">
 							<tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
 								<td class="qtd" data-bind="text: question.number+1"></td>
-								<td class="qtd" data-bind="text: score"></td>
+								<td class="qtd" data-bind="niceNumber: score"></td>
 								<td class="qtd">/</td>
-								<td class="qtd" data-bind="text: marks"></td>
+								<td class="qtd" data-bind="niceNumber: marks"></td>
 							</tr>
 						</tbody>
 					</table>

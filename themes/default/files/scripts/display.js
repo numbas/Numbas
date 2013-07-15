@@ -44,6 +44,13 @@ ko.bindingHandlers.horizontalSlideVisible = {
 	}
 }
 
+ko.bindingHandlers.niceNumber = {
+	update: function(element,valueAccessor) {
+		var n = ko.utils.unwrapObservable(valueAccessor());
+		$(element).text(Numbas.math.niceNumber(n));
+	}
+}
+
 ko.bindingHandlers.autosize = {
 	init: function(element) {
 		//resize text inputs to just fit their contents
