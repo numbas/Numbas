@@ -167,6 +167,8 @@ R.registerLocale('en-GB',{
 	'part.jme.not-allowed bits': '<span class="monospace">%s</span>',
 	'part.jme.not-allowed one': "Your answer must not contain: %s",
 	'part.jme.not-allowed several': "Your answer must not contain any of: %s",
+	'part.jme.unexpected variable name': "Your answer was interpreted to use the unexpected variable name <code>%s</code>.",
+	'part.jme.unexpected variable name suggestion': "Your answer was interpreted to use the unexpected variable name <code>%s</code>. Did you mean <code>%s</code>?",
 
 	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
 	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",

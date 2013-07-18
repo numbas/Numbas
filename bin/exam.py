@@ -532,6 +532,7 @@ class JMEPart(Part):
 		self.minLength.length = 0
 		self.mustHave = Restriction('musthave',0,'Your answer does not contain all required elements.')
 		self.notAllowed = Restriction('notallowed',0,'Your answer contains elements which are not allowed.')
+		self.expectedVariableNames = []
 	
 	@staticmethod
 	def fromDATA(data):
@@ -554,6 +555,12 @@ class JMEPart(Part):
 			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
 		if 'notallowed' in data:
 			part.notAllowed = Restriction.fromDATA('notallowed',data['notallowed'],part.notAllowed)
+		if 'expectedvariablenames' in data:
+			part.expectedVariableNames = Restriction('expectedvariablenames')
+			try:
+				part.expectedVariableNames.strings = list(data['expectedvariablenames'])#
+			except TypeError:
+				raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
 
 		if 'vsetrange' in data and len(data['vsetrange']) == 2:
 			part.vsetRangeStart = data['vsetrange'][0]
@@ -586,7 +593,8 @@ class JMEPart(Part):
 		answer.append(self.minLength.toxml())
 		answer.append(self.mustHave.toxml())
 		answer.append(self.notAllowed.toxml())
-
+		answer.append(self.expectedVariableNames.toxml())
+		
 		return part
 
 class Restriction:

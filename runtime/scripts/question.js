@@ -773,6 +773,15 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 	}
 
+	var expectedVariableNamesNode = this.xml.selectSingleNode('answer/expectedvariablenames');
+	settings.expectedVariableNames = [];
+	if(expectedVariableNamesNode)
+	{
+		var nameNodes = expectedVariableNamesNode.selectNodes('string');
+		for(i=0; i<nameNodes.length; i++)
+			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]));
+	}
+
 	this.display = new Numbas.display.JMEPartDisplay(this);
 
 	if(loading)	{
@@ -849,6 +858,19 @@ JMEPart.prototype =
 			return;
 		}
 
+		if(this.settings.expectedVariableNames.length) {
+			var tree = jme.compile(this.studentAnswer,this.question.scope);
+			var usedvars = jme.findvars(tree);
+			this.failExpectedVariableNames = false;
+			for(var i=0;i<usedvars.length;i++) {
+				if(!this.settings.expectedVariableNames.contains(usedvars[i])) {
+					this.failExpectedVariableNames = true;
+					this.unexpectedVariableName = usedvars[i];
+					break;
+				}
+			}
+		}
+
 		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
 		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
 		this.failNotAllowed = false;
@@ -870,7 +892,7 @@ JMEPart.prototype =
 		{
 			if(noSpaceAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
 		}
-		
+
 		if(!this.failNotAllowed)
 		{
 			//see if student answer contains all the required strings
@@ -940,6 +962,20 @@ JMEPart.prototype =
 		{
 			this.giveWarning(R('part.jme.answer invalid',e.message));
 			return false;
+		}
+
+		if( this.failExpectedVariableNames ) {
+			var suggestedNames = this.unexpectedVariableName.split(jme.re.re_short_name);
+			if(suggestedNames.length>3) {
+				var suggestion = [];
+				for(var i=1;i<suggestedNames.length;i+=2) {
+					suggestion.push(suggestedNames[i]);
+				}
+				suggestion = suggestion.join('*');
+				this.giveWarning(R('part.jme.unexpected variable name suggestion',this.unexpectedVariableName,suggestion));
+			}
+			else
+				this.giveWarning(R('part.jme.unexpected variable name', this.unexpectedVariableName));
 		}
 
 		if( this.failMinLength)
