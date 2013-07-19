@@ -522,6 +522,8 @@ class JMEPart(Part):
 	vsetRangeStart = 0
 	vsetRangeEnd = 1
 	vsetRangePoints = 5
+	checkVariableNames = False
+	expectedVariableNames = []
 
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
@@ -537,7 +539,7 @@ class JMEPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = JMEPart()
-		tryLoad(data,['answer','answerSimplification','checkingType','failureRate','vsetRangePoints'],part)
+		tryLoad(data,['answer','answerSimplification','checkingType','failureRate','vsetRangePoints','checkVariableNames'],part)
 
 		#default checking accuracies
 		if part.checkingType.lower() == 'reldiff' or part.checkingType.lower() == 'absdiff':
@@ -578,6 +580,9 @@ class JMEPart(Part):
 							]))
 
 		answer = part.find('answer')
+		answer.attrib = {
+				'checkvariablenames': strcons(self.checkVariableNames)
+		}
 		correctAnswer = answer.find('correctanswer')
 		correctAnswer.attrib = {'simplification': strcons(self.answerSimplification)}
 		correctAnswer.find('math').text = strcons(self.answer)

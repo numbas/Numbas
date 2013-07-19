@@ -773,6 +773,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 	}
 
+	tryGetAttribute(settings,this.xml,parametersPath,'checkVariableNames');
 	var expectedVariableNamesNode = this.xml.selectSingleNode('answer/expectedvariablenames');
 	settings.expectedVariableNames = [];
 	if(expectedVariableNamesNode)
@@ -858,7 +859,7 @@ JMEPart.prototype =
 			return;
 		}
 
-		if(this.settings.expectedVariableNames.length) {
+		if(this.settings.checkVariableNames) {
 			var tree = jme.compile(this.studentAnswer,this.question.scope);
 			var usedvars = jme.findvars(tree);
 			this.failExpectedVariableNames = false;
