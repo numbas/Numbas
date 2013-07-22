@@ -345,11 +345,11 @@ var texOps = jme.display.texOps = {
 				var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
 				if(thing.args[0].tok.type=='name')
 				{
-					return ('\\frac{d'+degree+texArgs[0]+'}{d'+texArgs[1]+degree+'}');
+					return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
 				}
 				else
 				{
-					return ('\\frac{d'+degree+'}{d'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+					return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
 				}
 			}),
 	'partialdiff': (function(thing,texArgs) 
