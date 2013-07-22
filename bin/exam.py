@@ -523,7 +523,6 @@ class JMEPart(Part):
 	vsetRangeEnd = 1
 	vsetRangePoints = 5
 	checkVariableNames = False
-	expectedVariableNames = []
 
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
@@ -534,7 +533,7 @@ class JMEPart(Part):
 		self.minLength.length = 0
 		self.mustHave = Restriction('musthave',0,'Your answer does not contain all required elements.')
 		self.notAllowed = Restriction('notallowed',0,'Your answer contains elements which are not allowed.')
-		self.expectedVariableNames = []
+		self.expectedVariableNames = Restriction('expectedvariablenames')
 	
 	@staticmethod
 	def fromDATA(data):
