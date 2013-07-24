@@ -551,6 +551,8 @@ function texRealNumber(n)
 	{
 		if(n==Infinity)
 			return '\\infty';
+		else if(n==-Infinity)
+			return '-\\infty';
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
@@ -878,6 +880,8 @@ function jmeRealNumber(n)
 	{
 		if(n==Infinity)
 			return 'infinity';
+		else if(n==-Infinity)
+			return '-infinity';
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
