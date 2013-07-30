@@ -848,7 +848,12 @@ function jmeRealNumber(n)
 	if(n.complex)
 	{
 		var re = jmeRealNumber(n.re);
-		var im = jmeRealNumber(n.im)+'i';
+		var im = jmeRealNumber(n.im);
+		if(im[im.length-1].match(/[a-zA-Z]/))
+			im += '*i';
+		else
+			im += 'i';
+
 		if(n.im==0)
 			return re;
 		else if(n.re==0)
