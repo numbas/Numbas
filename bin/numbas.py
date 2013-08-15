@@ -15,6 +15,7 @@
 #   limitations under the License.
 
 
+import datetime
 import os
 import io
 import sys
@@ -24,7 +25,7 @@ from optparse import OptionParser
 import examparser
 from exam import Exam,ExamError
 from xml2js import xml2js
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipInfo
 import xml.etree.ElementTree as etree
 from itertools import count
 import subprocess
@@ -173,9 +174,11 @@ def compileToZip(exam,files,options):
 	f = ZipFile(options.output,'w')
 
 	for (dst,src) in files.items():
-		dst = cleanpath(dst)
+		dst = ZipInfo(cleanpath(dst))
+		dst.external_attr = 0o644<<16
+		dst.date_time = datetime.datetime.today().timetuple()
 		if isinstance(src,basestring):
-			f.write(src,dst)
+			f.writestr(dst,src)
 		else:
 			f.writestr(dst,src.read())
 
