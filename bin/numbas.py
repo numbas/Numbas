@@ -98,7 +98,6 @@ def collectFiles(options,dirs=[('runtime','.')]):
 
 	resources=[x if isinstance(x,list) else [x,x] for x in options.resources]
 
-	print(resources)
 	for name,path in resources:
 		if os.path.isdir(path):
 			dirs.append((os.path.join(os.getcwd(),path),os.path.join('resources',name)))
@@ -178,7 +177,7 @@ def compileToZip(exam,files,options):
 		dst.external_attr = 0o644<<16
 		dst.date_time = datetime.datetime.today().timetuple()
 		if isinstance(src,basestring):
-			f.writestr(dst,src)
+			f.writestr(dst,open(src,'rb').read())
 		else:
 			f.writestr(dst,src.read())
 
