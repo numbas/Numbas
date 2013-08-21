@@ -1022,7 +1022,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
 	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
-	settings.correctAnswer = jme.subvars(settings.correctAnswer, question.scope);
+	settings.correctAnswer = '^'+jme.contentsubvars(settings.correctAnswer, question.scope)+'$';
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
