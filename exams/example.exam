@@ -2,8 +2,6 @@
 	name: My First Exam
 	duration: 1800
 	
-	resources: [example_files]
-	
 	questions: [
 		{
 			name: Addition and subtraction
