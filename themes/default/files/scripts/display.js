@@ -525,9 +525,6 @@ display.QuestionDisplay.prototype =
 
 		// make mathjax process the question text (render the maths)
 		Numbas.display.typeset(this.html,this.postTypesetF);
-		setTimeout(function(){
-			MathJaxQueue.Push(['Rerender',MathJax.Hub,qd.html[0]]);
-		},100);
 	},
 
 	leave: function() {
