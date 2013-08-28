@@ -797,6 +797,7 @@ display.PatternMatchPartDisplay = function()
 	this.studentAnswer = ko.observable(this.part.studentAnswer);
 
 	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+	this.displayAnswer = ko.observable(p.settings.displayAnswer);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);

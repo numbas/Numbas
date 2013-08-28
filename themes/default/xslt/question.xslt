@@ -406,7 +406,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
 	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
 		<localise>part.correct answer</localise>
-		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: correctAnswer, autosize: true"/>
+		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: displayAnswer, autosize: true"/>
 	</span>
 </xsl:template>
 
