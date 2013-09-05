@@ -736,6 +736,7 @@
 						equals(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
 						equals(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
 						equals(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
+						equals(simplifyExpression('-3x-4',['all']),'-3x - 4','-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers');
 
 						var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 						equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');

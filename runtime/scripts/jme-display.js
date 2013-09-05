@@ -1240,7 +1240,7 @@ var simplificationRules = jme.display.simplificationRules = {
 	],
 
 	collectNumbers: [
-		['-x-y',[],'-(x+y)'],										//collect minuses
+		['-x-y',['x isa "number"','y isa "number"'],'-(x+y)'],										//collect minuses
 		['n+m',['n isa "number"','m isa "number"'],'eval(n+m)'],	//add numbers
 		['n-m',['n isa "number"','m isa "number"'],'eval(n-m)'],	//subtract numbers
 		['n+x',['n isa "number"','!(x isa "number")'],'x+n'],		//add numbers last
