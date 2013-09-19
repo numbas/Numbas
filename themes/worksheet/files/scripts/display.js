@@ -181,6 +181,8 @@ display.ExamDisplay.prototype =
 		}
 	},
 
+	initQuestionList: function() {},
+
 	showInfoPage: function() {},
 
 	showScore: function() {}
