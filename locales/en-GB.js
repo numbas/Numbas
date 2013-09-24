@@ -196,7 +196,7 @@ R.registerLocale('en-GB',{
 	'question.submit part': "Submit part",
 	'question.show steps': "Show steps",
 	'question.show steps penalty': "you will lose <strong>%s</strong> %s",
-	'question.show steps no penalty': "(no penalty)",
+	'question.show steps no penalty': "your score will not be affected",
 	'question.hide steps': "Hide steps",
 	'question.hide steps no penalty': "your score will not be affected",
 	'question.advice': "Advice",
