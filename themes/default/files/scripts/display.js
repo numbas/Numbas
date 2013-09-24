@@ -749,6 +749,7 @@ display.JMEPartDisplay = function()
 	var p = this.part;
 	this.studentAnswer = ko.observable('');
 	this.correctAnswer = p.settings.correctAnswer;
+	this.showPreview = p.settings.showPreview;
 	this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.displaySimplification,p.question.scope);
 
 	ko.computed(function() {

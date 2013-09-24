@@ -516,6 +516,7 @@ class JMEPart(Part):
 	kind = 'jme'
 	answer = ''
 	answerSimplification = 'basic,unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers'
+	showPreview = True
 	checkingType = 'RelDiff'
 	checkingAccuracy = 0		#real default value depends on checkingtype - 0.0001 for difference ones, 5 for no. of digits ones
 	failureRate = 1
@@ -538,7 +539,7 @@ class JMEPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = JMEPart()
-		tryLoad(data,['answer','answerSimplification','checkingType','failureRate','vsetRangePoints','checkVariableNames'],part)
+		tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames'],part)
 
 		#default checking accuracies
 		if part.checkingType.lower() == 'reldiff' or part.checkingType.lower() == 'absdiff':
@@ -580,7 +581,8 @@ class JMEPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-				'checkvariablenames': strcons(self.checkVariableNames)
+				'checkvariablenames': strcons(self.checkVariableNames),
+				'showPreview': strcons(self.showPreview),
 		}
 		correctAnswer = answer.find('correctanswer')
 		correctAnswer.attrib = {'simplification': strcons(self.answerSimplification)}

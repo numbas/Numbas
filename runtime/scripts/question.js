@@ -773,7 +773,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 			settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 	}
 
-	tryGetAttribute(settings,this.xml,parametersPath,'checkVariableNames');
+	tryGetAttribute(settings,this.xml,parametersPath,['checkVariableNames','showPreview']);
 	var expectedVariableNamesNode = this.xml.selectSingleNode('answer/expectedvariablenames');
 	settings.expectedVariableNames = [];
 	if(expectedVariableNamesNode)
