@@ -124,10 +124,14 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="steps">
 
-	<div class="steps clearAfter" data-bind="slideVisible: stepsShown">
+	<div class="steps clearAfter" data-bind="slideVisible: stepsOpen">
 		<xsl:apply-templates select="part"/>
 	</div>
-	<button class="btn stepsBtn" data-bind="visible: !stepsShown(), click: controls.showSteps"><localise>question.show steps</localise></button>
+	<div class="stepsBtn">
+		<button class="btn" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
+		<button class="btn" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
+		(<span class="penaltyMessage" data-bind="html: stepsPenaltyMessage"></span>)
+	</div>
 </xsl:template>
 
 <xsl:template match="prompt">
@@ -398,7 +402,7 @@ Copyright 2011-13 Newcastle University
 
 
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
-	
+	<xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"></input>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
@@ -423,6 +427,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="typespecific">
+	<xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
 	<input type="text" spellcheck="false" class="jme" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
 	<span class="preview" data-bind="visible: showPreview &amp;&amp; studentAnswerLaTeX(), maths: showPreview ? studentAnswerLaTeX() : '', click: focusInput"></span>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
@@ -437,7 +442,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
-	
+	<xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>

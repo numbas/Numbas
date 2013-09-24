@@ -63,7 +63,7 @@ R.registerLocale('en-GB',{
 	'control.previous': "Previous",
 	'control.next': "Next",
 	'control.advice': "Advice",
-	'control.reveal': "Reveal",
+	'control.reveal': "Reveal answers",
 	'control.total': "Total",
 	'control.pause': "Pause",
 	'control.end exam': "End Exam",
@@ -136,6 +136,8 @@ R.registerLocale('en-GB',{
 	'vectormath.dot.matrix too big': "Can't calculate dot product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 	'vectormath.cross.matrix too big': "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 
+	'part.with steps answer prompt': 'Answer: ',
+
 	'part.marking.steps no matter': "Because you received full marks for the part, your answers to the steps aren't counted.",
 	'part.marking.steps change single': "You were awarded <strong>%s</strong> mark for your answers to the steps",
 	'part.marking.steps change plural': "You were awarded <strong>%s</strong> marks for your answers to the steps",
@@ -193,6 +195,10 @@ R.registerLocale('en-GB',{
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
 	'question.submit part': "Submit part",
 	'question.show steps': "Show steps",
+	'question.show steps penalty': "you will lose <strong>%s</strong> %s",
+	'question.show steps no penalty': "(no penalty)",
+	'question.hide steps': "Hide steps",
+	'question.hide steps no penalty': "your score will not be affected",
 	'question.advice': "Advice",
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",

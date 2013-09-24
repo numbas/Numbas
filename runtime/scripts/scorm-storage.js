@@ -307,7 +307,8 @@ SCORMStorage.prototype = {
 	{
 		var pobj = {
 			answered: part.answered,
-			stepsShown: part.stepsShown
+			stepsShown: part.stepsShown,
+			stepsOpen: part.stepsOpen
 		};
 		switch(part.type)
 		{
@@ -632,6 +633,13 @@ SCORMStorage.prototype = {
 
 	//record that the student showed the steps for a part
 	stepsShown: function(part)
+	{
+		this.setSuspendData();
+		this.save();
+	},
+	
+	//record that the student hid the steps for a part
+	stepsHidden: function(part)
 	{
 		this.setSuspendData();
 		this.save();

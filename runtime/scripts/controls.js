@@ -138,6 +138,14 @@ Numbas.controls = {
 		job(function() {
 			Numbas.exam.currentQuestion.getPart(partRef).showSteps();
 		});
+	},
+
+	//hide steps for a question part
+	hideSteps: function( partRef )
+	{
+		job(function() {
+			Numbas.exam.currentQuestion.getPart(partRef).hideSteps();
+		});
 	}
 };
 

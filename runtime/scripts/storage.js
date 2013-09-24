@@ -99,6 +99,9 @@ Numbas.storage.BlankStorage.prototype = {
 	answerRevealed: function(question) {},
 
 	//record that the student showed the steps for a part
-	stepsShown: function(part) {}
+	stepsShown: function(part) {},
+
+	//record that the student closed the steps for a part
+	stepsHidden: function(part) {}
 };
 });

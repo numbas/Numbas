@@ -413,6 +413,7 @@ function Part( xml, path, question, parentPart, loading )
 		var pobj = Numbas.store.loadPart(this);
 		this.answered = pobj.answered;
 		this.stepsShown = pobj.stepsShown;
+		this.stepsOpen = pobj.stepsOpen;
 	}
 }
 
@@ -435,6 +436,7 @@ Part.prototype = {
 	gaps: [],				//child gapfills, if any
 	steps: [],				//child steps, if any
 	stepsShown: false,		//have steps for this part been shown?
+	stepsOpen: false,
 
 	settings: 
 	{
@@ -649,6 +651,7 @@ Part.prototype = {
 	showSteps: function(dontStore)
 	{
 		this.stepsShown = true;
+		this.stepsOpen = true;
 		this.calculateScore();
 		this.display.showSteps();
 		if(!this.revealed) {
@@ -661,6 +664,13 @@ Part.prototype = {
 		{
 			Numbas.store.stepsShown(this);
 		}
+	},
+
+	hideSteps: function()
+	{
+		this.stepsOpen = false;
+		this.display.hideSteps();
+		Numbas.store.stepsHidden(this);
 	},
 
 	//reveal the correct answer

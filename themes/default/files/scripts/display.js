@@ -603,6 +603,15 @@ display.PartDisplay = function(p)
 	});
 
 	this.stepsShown = ko.observable(p.stepsShown);
+	this.stepsPenaltyMessage = ko.computed(function() {
+		if(this.stepsOpen)
+			return R('question.hide steps no penalty');
+		else if(this.stepsShown() || this.part.settings.stepsPenalty==0)
+			return R('question.show steps no penalty');
+		else
+			return R('question.show steps penalty',Numbas.math.niceNumber(this.part.settings.stepsPenalty),util.pluralise(this.part.settings.stepsPenalty,R('mark'),R('marks')));
+	},this);
+	this.stepsOpen = ko.observable(p.stepsOpen);
 
 	this.revealed = ko.observable(false);
 
@@ -627,6 +636,9 @@ display.PartDisplay = function(p)
 		showSteps: function() {
 			p.showSteps();
 		},
+		hideSteps: function() {
+			p.hideSteps();
+		}
 	}
 	this.inputEvents = {
 		keypress: function(context,e) {
@@ -722,11 +734,17 @@ display.PartDisplay.prototype =
 	showSteps: function()
 	{
 		this.stepsShown(this.part.stepsShown);
+		this.stepsOpen(this.part.stepsOpen);
 
 		for(var i=0;i<this.part.steps.length;i++)
 		{
 			this.part.steps[i].display.show();
 		}
+	},
+
+	hideSteps: function()
+	{
+		this.stepsOpen(this.part.stepsOpen);
 	},
 
 	//called when question displayed - fills student's last answer into inputs
