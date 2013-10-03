@@ -603,15 +603,17 @@ display.PartDisplay = function(p)
 	});
 
 	this.stepsShown = ko.observable(p.stepsShown);
+	this.stepsOpen = ko.observable(p.stepsOpen);
 	this.stepsPenaltyMessage = ko.computed(function() {
-		if(this.stepsOpen)
+		if(this.stepsOpen())
 			return R('question.hide steps no penalty');
-		else if(this.stepsShown() || this.part.settings.stepsPenalty==0)
+		else if(this.part.settings.stepsPenalty==0)
 			return R('question.show steps no penalty');
+		else if(this.stepsShown())
+			return R('question.show steps already penalised');
 		else
 			return R('question.show steps penalty',Numbas.math.niceNumber(this.part.settings.stepsPenalty),util.pluralise(this.part.settings.stepsPenalty,R('mark'),R('marks')));
 	},this);
-	this.stepsOpen = ko.observable(p.stepsOpen);
 
 	this.revealed = ko.observable(false);
 
