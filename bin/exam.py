@@ -126,7 +126,8 @@ class Exam:
 
 		self.timing = { 
 				'timeout': Event('timeout','none',''),
-				'timedwarning': Event('timedwarning','none','')
+				'timedwarning': Event('timedwarning','none',''),
+				'allowPause': False,
 			}
 
 		self.rulesets = {}
@@ -158,6 +159,7 @@ class Exam:
 
 		if 'timing' in data:
 			timing = data['timing']
+			tryLoad(timing,['allowPause'],exam.timing)
 			for event in ['timeout','timedwarning']:
 				if event in timing:
 					tryLoad(timing[event],['action','message'],exam.timing[event])
@@ -231,7 +233,10 @@ class Exam:
 		nav.append(self.navigation['onleave'].toxml())
 
 		timing = settings.find('timing')
-		timing.attrib = {'duration': strcons(self.duration)}
+		timing.attrib = {
+				'duration': strcons(self.duration),
+				'allowPause': strcons(self.timing['allowPause']),
+		}
 		timing.append(self.timing['timeout'].toxml())
 		timing.append(self.timing['timedwarning'].toxml())
 

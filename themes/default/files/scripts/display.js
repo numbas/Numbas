@@ -303,6 +303,7 @@ display.ExamDisplay = function(e)
 
 	this.displayTime = ko.observable('');
 	this.timeSpent = ko.observable('');
+	this.allowPause = e.settings.allowPause;
 
 	this.questionsAttempted = ko.computed(function() {
 		return this.questions().reduce(function(s,q) { 

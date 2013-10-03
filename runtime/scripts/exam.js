@@ -49,7 +49,7 @@ var Exam = Numbas.Exam = function()
 		settings.navigationEvents[e.type] = e;
 	}
 
-	tryGetAttribute(settings,xml,'settings/timing','duration');
+	tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
 	
 	//get text representation of exam duration
 	this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
@@ -144,6 +144,7 @@ Exam.prototype = {
 		navigationEvents: {},		//checks to perform when doing certain navigation action
 		timerEvents: {},			//events based on timing
 		duration: 0,				//how long is exam?
+		allowPause: false,			//can the student suspend the timer with the pause button or by leaving?
 		showActualMark: false,		//show current score?
 		showTotalMark: false,		//show total marks in exam?
 		showAnswerState: false,		//tell student if answer is correct/wrong/partial ?
@@ -207,10 +208,16 @@ Exam.prototype = {
 		var suspendData = Numbas.store.load(this);	//get saved info from storage
 
 		job(function() {
-			this.timeRemaining = suspendData.timeRemaining;
 			this.questionSubset = suspendData.questionSubset;
 			this.settings.numQuestions = this.questionSubset.length;
 			this.start = new Date(suspendData.start);
+			if(this.settings.allowPause) {
+				this.timeRemaining = suspendData.timeRemaining;
+			}
+			else {
+				this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);
+				this.timeRemaining = (this.endTime - new Date())/1000;
+			}
 			this.score = suspendData.score;
 		},this);
 

@@ -263,7 +263,7 @@ Copyright 2011-13 Newcastle University
 						<div id="stopWatch" data-bind="visible: displayTime, text: displayTime"></div>
 
 						<div class="menuButtons">
-							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: mode()=='normal'"></button></div>
+							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></div>
 							<div><button class="btn" id="endBtn" data-localise="control.end exam", data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></div>
 							<div><button class="btn" data-localise="control.back to results", data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></div>
 						</div>
