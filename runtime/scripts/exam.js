@@ -507,22 +507,24 @@ Exam.prototype = {
 		);
 	},
 
-	end: function()
+	end: function(save)
 	{
-		//get time of finish
-		this.stop = new Date();
-
 		this.mode = 'review';
-		
-		//stop the stopwatch
-		this.endTiming();
 
 		//work out summary info
 		this.passed = (this.percentScore >= this.settings.percentPass*100);
 		this.result = R(this.passed ? 'exam.passed' :'exam.failed')
 
-		//send result to LMS, and tell it we're finished
-		Numbas.store.end();
+		if(save) {
+			//get time of finish
+			this.stop = new Date();
+
+			//stop the stopwatch
+			this.endTiming();
+
+			//send result to LMS, and tell it we're finished
+			Numbas.store.end();
+		}
 
 		//display the results
 		this.display.end();

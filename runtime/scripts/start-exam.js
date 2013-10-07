@@ -43,7 +43,11 @@ $(document).ready(function() {
 			var exam = Numbas.exam = new Numbas.Exam();					//create the exam object, and load in everything from the XML
 			exam.seed = Numbas.util.hashCode(seed);
 
-			switch(store.getEntry())
+			var entry = store.getEntry();
+			if(store.getMode() == 'review')
+				entry = 'review';
+
+			switch(entry)
 			{
 			case 'ab-initio':
 				job(exam.init,exam);
@@ -61,11 +65,16 @@ $(document).ready(function() {
 				break;
 
 			case 'resume':
+			case 'review':
 				job(exam.load,exam);
 				job(Numbas.display.init);
 
 				job(function() {
-					if(exam.currentQuestion !== undefined)
+					if(entry == 'review')
+					{
+						job(exam.end,exam,false);
+					}
+					else if(exam.currentQuestion !== undefined)
 					{
 						job(exam.display.showInfoPage,exam.display,'suspend');
 					}
