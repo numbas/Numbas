@@ -89,17 +89,20 @@ var jme = Numbas.jme = {
 				token = result[0];
 				//work out if operation is being used prefix or postfix
 				var nt;
-				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || nt=='op' )
+				var postfix = false;
+				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) )
 				{
 					if(token in prefixForm)
 						token = prefixForm[token];
 				}
 				else
 				{
-					if(token in postfixForm)
+					if(token in postfixForm) {
 						token = postfixForm[token];
+						postfix = true;
+					}
 				}
-				token=new TOp(token);
+				token=new TOp(token,postfix);
 			}
 			else if (result = expr.match(jme.re.re_name))
 			{
@@ -1138,13 +1141,14 @@ var TFunc = types.TFunc = types['function'] = function(name,annotation)
 TFunc.prototype.type = 'function';
 TFunc.prototype.vars = 0;
 
-var TOp = types.TOp = types.op = function(op)
+var TOp = types.TOp = types.op = function(op,postfix)
 {
 	var arity = 2;
 	if(jme.arity[op]!==undefined)
 		arity = jme.arity[op];
 
 	this.name = op;
+	this.postfix = postfix || false;
 	this.vars = arity;
 }
 TOp.prototype.type = 'op';
