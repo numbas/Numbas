@@ -74,13 +74,13 @@ pipwerks.SCORM.API.find = function(win){
     var API = null,
 		findAttempts = 0,
         findAttemptLimit = 500,
-		errorGettingAPI = false;
+		errorGettingAPI = false,
 		traceMsgPrefix = "SCORM.API.find",
 		trace = pipwerks.UTILS.trace,
 		scorm = pipwerks.SCORM;
 
 	try {
-		while (!errorGettingParent &&
+		while (!errorGettingAPI &&
 			   (!win.API && !win.API_1484_11) &&
 			   (win.parent) &&
 			   (win.parent != win) &&
