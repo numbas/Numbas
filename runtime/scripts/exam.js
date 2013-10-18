@@ -502,7 +502,7 @@ Exam.prototype = {
 		Numbas.display.showConfirm(
 			message,
 			function() {
-				job(Numbas.exam.end,Numbas.exam);
+				job(Numbas.exam.end,Numbas.exam,true);
 			}
 		);
 	},
