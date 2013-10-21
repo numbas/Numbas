@@ -372,7 +372,7 @@ Exam.prototype = {
 				{
 					Numbas.display.showAlert(e.message);
 				}
-				this.end();
+				this.end(true);
 			}	
 		}
 	},
