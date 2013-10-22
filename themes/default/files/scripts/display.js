@@ -423,6 +423,9 @@ display.ExamDisplay.prototype =
 
 	end: function() {
 		this.mode(this.exam.mode);
+		this.questions().map(function(q) {
+			q.end();
+		});
 	}
 };
 
@@ -452,6 +455,8 @@ display.QuestionDisplay = function(q)
 	this.answered = ko.observable(q.answered);
 	this.revealed = ko.observable(q.revealed);
 	this.anyAnswered = ko.observable(false);
+
+	this.isDirty = ko.observable(false);
 
 	this.canReveal = ko.computed(function() {
 		return exam.settings.allowRevealAnswer && !this.revealed();
@@ -566,6 +571,14 @@ display.QuestionDisplay.prototype =
 
 	scrollToError: function() {
 		scrollTo($('.warning-icon:visible:first'));
+	},
+
+	end: function() {
+		var q = this.question;
+		for(var i=0;i<q.parts.length;i++)
+		{
+			q.parts[i].display.end();
+		}
 	}
 };
 
@@ -761,6 +774,10 @@ display.PartDisplay.prototype =
 		this.revealed(true);
 		this.removeWarnings();
 		this.showScore();
+	},
+
+	end: function() {
+		this.restoreAnswer();
 	}
 };
 
@@ -963,6 +980,7 @@ display.MultipleResponsePartDisplay.prototype =
 		var part = this.part;
 		switch(part.type) {
 		case '1_n_2':
+			this.studentAnswer(null);
 			for(var i=0;i<part.numAnswers; i++) {
 				if(part.ticks[i][0])
 					this.studentAnswer(i);
@@ -974,7 +992,7 @@ display.MultipleResponsePartDisplay.prototype =
 			}
 			break;
 		case 'm_n_x':
-			switch(part.displayType) {
+			switch(part.settings.displayType) {
 			case 'radiogroup':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {

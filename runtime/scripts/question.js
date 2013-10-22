@@ -257,6 +257,24 @@ Question.prototype =
 		return success;
 	},
 
+	//if any part has unsubmitted answers, return true
+	isDirty: function()
+	{
+		for(var i=0;i<this.parts.length; i++) {
+			if(this.parts[i].isDirty)
+				return true;
+		}
+		return false;
+	},
+
+	// show a warning and return true if question is dirty
+	leavingDirtyQuestion: function() {
+		if(this.answered && this.isDirty()) {
+			Numbas.display.showAlert(R(this.parts.length>1 ? 'question.unsubmitted changes.several parts' : 'question.unsubmitted changes.one part'));
+			return true;
+		}
+	},
+
 	//mark the student's answer to a given part/gap/step
 	doPart: function(answerList, partRef)
 	{
@@ -428,6 +446,7 @@ Part.prototype = {
 	credit: 0,				//proportion of availabe marks awarded to student
 	score: 0,				//student's score on this part
 	markingFeedback: [],	//messages explaining awarded marks
+	isDirty: false,			//is the student's answer different than the last submitted one?
 
 	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
 	answerList: undefined,	//student's last submitted answer
@@ -510,18 +529,21 @@ Part.prototype = {
 	//update the stored answer from the student (called when student changes their answer, before submitting)
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
-		this.isDirty(true);
+		this.setDirty(true);
 		this.display.removeWarnings();
 	},
 
-	isDirty: function(dirty) {
+	setDirty: function(dirty) {
+		this.isDirty = dirty;
 		if(this.display) {
 			this.display.isDirty(dirty);
 			if(dirty && this.parentPart) {
-				this.parentPart.isDirty(true);
+				this.parentPart.setDirty(true);
 			}
+			this.question.display.isDirty(this.question.isDirty());
 		}
 	},
+
 
 	//submit answer to this part - save answer, mark, update score
 	submit: function() {
@@ -553,7 +575,7 @@ Part.prototype = {
 		else
 		{
 			this.answerList = util.copyarray(this.stagedAnswer);
-			this.isDirty(false);
+			this.setDirty(false);
 			this.mark();
 			this.answered = this.validate();
 		}
@@ -1609,6 +1631,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.wrongNumber = settings.minAnswers > 0;
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
+	this.setDirty(false);
 	if(loading) {
 		if(this.answered)
 			this.submit();
@@ -1636,7 +1659,7 @@ MultipleResponsePart.prototype =
 
 	storeAnswer: function(answerList)
 	{
-		this.isDirty(true);
+		this.setDirty(true);
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
 		var answerIndex = answerList[0];

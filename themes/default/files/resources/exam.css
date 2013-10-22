@@ -233,6 +233,15 @@ button:hover, button:focus {
 	clear: left;
 }
 
+.questionSelector .dirty-message {
+    float: right;
+    clear: both;
+    padding-right: 0.5em;
+}
+.questionSelector .dirty-message .warning-icon {
+	font-size: 18px;
+}
+
 .feedbackMessages {
 	clear: both;
 	text-align: center;
