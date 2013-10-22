@@ -218,6 +218,9 @@ var display = Numbas.display = {
 				break;
 			}
 		});
+		Numbas.exam.display.questions().map(function(q) {
+			q.init();
+		});
 	},
 
 	// does an input element currently have focus?
@@ -591,6 +594,14 @@ display.QuestionDisplay.prototype =
 		scrollTo($('.warning-icon:visible:first'));
 	},
 
+	init: function() {
+		var q = this.question;
+		for(var i=0;i<q.parts.length;i++)
+		{
+			q.parts[i].display.init();
+		}
+	},
+
 	end: function() {
 		var q = this.question;
 		for(var i=0;i<q.parts.length;i++)
@@ -794,8 +805,18 @@ display.PartDisplay.prototype =
 		this.showScore();
 	},
 
+	init: function() {
+		this.part.setDirty(false);
+		for(var i=0;i<this.part.steps.length;i++) {
+			this.part.steps[i].display.init();
+		}
+	},
+
 	end: function() {
 		this.restoreAnswer();
+		for(var i=0;i<this.part.steps.length;i++) {
+			this.part.steps[i].display.end();
+		}
 	}
 };
 
@@ -1054,6 +1075,16 @@ display.GapFillPartDisplay.prototype =
 
 	revealAnswer: function()
 	{
+	},
+
+	init: function() {
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.init();
+	},
+
+	end: function() {
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.end();
 	}
 };
 display.GapFillPartDisplay = extend(display.PartDisplay,display.GapFillPartDisplay,true);
