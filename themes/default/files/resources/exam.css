@@ -75,6 +75,23 @@ button:hover, button:focus {
 	background: #f90;
 }
 
+#saving {
+    width: 100%;
+    position: fixed;
+    height: 100%;
+    text-align: center;
+    background: rgba(200,200,200,0.7);
+    /* opacity: 0.5; */
+    z-index: 1;
+}
+#saving .text {
+    background: white;
+    padding: 1em;
+    display: inline-block;
+    border-radius: 5px;
+    margin-top: 1em;
+}
+
 #progressbar {
 	position: relative;
 	height: 2em;

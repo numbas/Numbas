@@ -15,6 +15,7 @@ Copyright 2011 Newcastle University
 */
 R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
+	'page.saving': "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
 
 	'exam.exam name': "Exam Name:",
 	'exam.random seed': "Session ID:",
@@ -230,7 +231,7 @@ R.registerLocale('en-GB',{
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
 
-	'scorm.failed save': "The request to save data to the server failed. Your session, including responses and scores, might not be saved. You can try submitting your answer again. If you get this message repeatedly, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straight away.",
+	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
 
 	'mark': 'mark',
 	'marks': 'marks',

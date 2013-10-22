@@ -84,9 +84,24 @@ ko.bindingHandlers.slideVisible = {
 	update: function(element,valueAccessor) {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		if(v)
-			$(element).slideDown('fast');
+			$(element).stop().slideDown('fast');
 		else
-			$(element).slideUp('fast');
+			$(element).stop().slideUp('fast');
+	}
+}
+
+ko.bindingHandlers.fadeVisible = {
+	init: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		$(element).toggle(v);
+	},
+		
+	update: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		if(v)
+			$(element).stop().fadeIn();
+		else
+			$(element).stop().fadeOut();
 	}
 }
 
@@ -211,8 +226,11 @@ var display = Numbas.display = {
 	//alert / confirm boxes
 	//
 
-	showAlert: function(msg) {
-		$.prompt(msg);
+	showAlert: function(msg,fnOK) {
+		fnOK = fnOK || function() {};
+		$.prompt(msg,{overlayspeed: 'fast', close: function() {
+			fnOK();
+		}});
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
@@ -254,14 +272,14 @@ var display = Numbas.display = {
 
 };
 
-
-
 //display properties of exam object
 display.ExamDisplay = function(e) 
 {
 	this.exam=e;
 
 	this.mode = ko.observable(e.mode);
+	
+	this.saving = ko.observable(false);
 
 	this.infoPage = ko.observable(null);
 	this.currentQuestion = ko.observable(null);
