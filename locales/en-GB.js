@@ -221,7 +221,7 @@ R.registerLocale('en-GB',{
 	'question.score feedback.partial': 'Your answer is partially correct',
 	'question.score feedback.wrong': 'Your answer is incorrect',
 
-	'question.selector.unsubmitted changes': "Unsubmitted changes",
+	'question.selector.unsubmitted changes': "Unsubmitted changes.",
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Time remaining: %s",

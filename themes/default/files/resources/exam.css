@@ -236,10 +236,10 @@ button:hover, button:focus {
 .questionSelector .dirty-message {
     float: right;
     clear: both;
-    padding-right: 0.5em;
 }
 .questionSelector .dirty-message .warning-icon {
 	font-size: 18px;
+	margin: 0 0 0 0.3em;
 }
 
 .feedbackMessages {
