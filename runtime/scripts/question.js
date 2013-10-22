@@ -377,6 +377,7 @@ function createPart(xml, path, question, parentPart, loading)
 	{
 		var cons = partConstructors[type];
 		var part = new cons(xml, path, question, parentPart, loading);
+		part.setDirty(false);
 		return part;
 	}
 	else
@@ -1631,7 +1632,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.wrongNumber = settings.minAnswers > 0;
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
-	this.setDirty(false);
 	if(loading) {
 		if(this.answered)
 			this.submit();
