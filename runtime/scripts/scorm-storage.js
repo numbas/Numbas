@@ -97,12 +97,14 @@ SCORMStorage.prototype = {
 		function trySave() {
 			exam.display.saving(true);
 			var saved = pipwerks.SCORM.save();
-			exam.display.saving(false);
+
 			if(!saved) {
 				Numbas.display.showAlert(R('scorm.failed save'),function(){
 					setTimeout(trySave,1);
 				});
 			}
+			else
+				exam.display.saving(false);
 		}
 		trySave();
 	},
