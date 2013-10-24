@@ -1589,7 +1589,7 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	else
 	{
 		//ticks array - which answers/choices are selected?
-		this.ticks=[];
+		this.ticks = [];
 		this.stagedAnswer = [];
 		for( i=0; i<this.numAnswers; i++ )
 		{
@@ -1663,7 +1663,7 @@ MultipleResponsePart.prototype =
 			this.setCredit(0,R('part.marking.did not answer'));
 			return false;
 		}
-		this.ticks = util.copyarray(this.stagedAnswer);
+		this.ticks = util.copyarray(this.stagedAnswer,true);
 		this.setCredit(0);
 
 		this.numTicks = 0;
