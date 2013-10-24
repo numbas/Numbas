@@ -719,6 +719,10 @@
 
 					module('Display');
 
+					test('subvars',function() {
+						ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
+					});
+
 					test('tree to JME', function() {
 						function simplifyExpression(expr,rules) {
 							return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);

@@ -628,8 +628,9 @@ var jme = Numbas.jme = {
 
 	texsplit: function(s)
 	{
-		var cmdre = /((?:.|\n)*?)\\((?:var)|(?:simplify))/m;
+		var cmdre = /^((?:.|[\n\r])*?)\\(var|simplify)/m;
 		var out = [];
+		var m;
 		while( m = s.match(cmdre) )
 		{
 			out.push(m[1]);
