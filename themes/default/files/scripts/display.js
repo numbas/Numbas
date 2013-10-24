@@ -978,8 +978,8 @@ display.MultipleResponsePartDisplay.prototype =
 			case 'radiogroup':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
-						if(part.ticks[i][j]) {
-							this.ticks[i](j);
+						if(part.ticks[j][i]) {
+							this.ticks[j](i);
 						}
 					}
 				}
