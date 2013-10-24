@@ -40,7 +40,7 @@ var jme = Numbas.jme = {
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/,
-		re_comment: /^\/\/.*(?:\n|$)/,
+		re_comment: /^\/\/.*(?:\n|$)/
 	},
 
 	tokenise: function(expr)
