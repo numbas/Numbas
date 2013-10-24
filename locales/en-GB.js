@@ -15,6 +15,7 @@ Copyright 2011 Newcastle University
 */
 R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
+	'page.saving': "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
 
 	'exam.exam name': "Exam Name:",
 	'exam.random seed': "Session ID:",
@@ -52,9 +53,11 @@ R.registerLocale('en-GB',{
 
 	'control.confirm leave': "You haven't finished the exam.",
 	'control.not all questions answered': "You have not completed every question in this exam.",
+	'control.not all questions submitted': "You have made changes to one or more answers but not submitted them. Please check each question has been submitted.",
 	'control.confirm end': "Are you sure you want to end the exam? After you end the exam, you will not be able to change any of your answers.",
 	'control.confirm regen': "Would you like to re-randomise this question? If you click OK, all your answers and marks for the current question will be lost.",
 	'control.confirm reveal': "Would you like to reveal the answer to this question? Any marks you have received so far will be locked and you will not be able to answer this question later.",
+	'control.proceed anyway': "Proceed anyway?",
 	'control.regen': "Try another question like this one",
 	'control.submit answer': "Submit answer",
 	'control.submit all parts': "Submit all parts",
@@ -204,6 +207,8 @@ R.registerLocale('en-GB',{
 	'question.no such part': "Can't find part %s",
 	'question.can not submit': "Can not submit answer - check for errors.",
 	'question.answer submitted': "Answer submitted",
+	'question.unsubmitted changes.several parts': "You have made changes to your answers but not submitted them. Please check your answers to each part and then press the <strong>Submit all parts</strong> button.",
+	'question.unsubmitted changes.one part': "You have made a change to your answer but not submitted it. Please check your answer and then press the <strong>Submit answer</strong> button.",
 
 	'question.score feedback.show': 'Show feedback',
 	'question.score feedback.hide': 'Hide feedback',
@@ -216,6 +221,8 @@ R.registerLocale('en-GB',{
 	'question.score feedback.correct': 'Your answer is correct',
 	'question.score feedback.partial': 'Your answer is partially correct',
 	'question.score feedback.wrong': 'Your answer is incorrect',
+
+	'question.selector.unsubmitted changes': "Unsubmitted changes.",
 	
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Time remaining: %s",
@@ -224,7 +231,7 @@ R.registerLocale('en-GB',{
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
 
-	'scorm.failed save': "The request to save data to the server failed. Your session, including responses and scores, might not be saved. You can try submitting your answer again. If you get this message repeatedly, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straight away.",
+	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
 
 	'mark': 'mark',
 	'marks': 'marks',

@@ -84,9 +84,24 @@ ko.bindingHandlers.slideVisible = {
 	update: function(element,valueAccessor) {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		if(v)
-			$(element).slideDown('fast');
+			$(element).stop().slideDown('fast');
 		else
-			$(element).slideUp('fast');
+			$(element).stop().slideUp('fast');
+	}
+}
+
+ko.bindingHandlers.fadeVisible = {
+	init: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		$(element).toggle(v);
+	},
+		
+	update: function(element,valueAccessor) {
+		var v = ko.utils.unwrapObservable(valueAccessor());
+		if(v)
+			$(element).stop().fadeIn();
+		else
+			$(element).stop().fadeOut();
 	}
 }
 
@@ -203,6 +218,9 @@ var display = Numbas.display = {
 				break;
 			}
 		});
+		Numbas.exam.display.questions().map(function(q) {
+			q.init();
+		});
 	},
 
 	// does an input element currently have focus?
@@ -211,8 +229,11 @@ var display = Numbas.display = {
 	//alert / confirm boxes
 	//
 
-	showAlert: function(msg) {
-		$.prompt(msg);
+	showAlert: function(msg,fnOK) {
+		fnOK = fnOK || function() {};
+		$.prompt(msg,{overlayspeed: 'fast', close: function() {
+			fnOK();
+		}});
 	},
 
 	showConfirm: function(msg,fnOK,fnCancel) {
@@ -254,14 +275,14 @@ var display = Numbas.display = {
 
 };
 
-
-
 //display properties of exam object
 display.ExamDisplay = function(e) 
 {
 	this.exam=e;
 
 	this.mode = ko.observable(e.mode);
+	
+	this.saving = ko.observable(false);
 
 	this.infoPage = ko.observable(null);
 	this.currentQuestion = ko.observable(null);
@@ -423,6 +444,9 @@ display.ExamDisplay.prototype =
 
 	end: function() {
 		this.mode(this.exam.mode);
+		this.questions().map(function(q) {
+			q.end();
+		});
 	}
 };
 
@@ -452,6 +476,8 @@ display.QuestionDisplay = function(q)
 	this.answered = ko.observable(q.answered);
 	this.revealed = ko.observable(q.revealed);
 	this.anyAnswered = ko.observable(false);
+
+	this.isDirty = ko.observable(false);
 
 	this.canReveal = ko.computed(function() {
 		return exam.settings.allowRevealAnswer && !this.revealed();
@@ -566,6 +592,22 @@ display.QuestionDisplay.prototype =
 
 	scrollToError: function() {
 		scrollTo($('.warning-icon:visible:first'));
+	},
+
+	init: function() {
+		var q = this.question;
+		for(var i=0;i<q.parts.length;i++)
+		{
+			q.parts[i].display.init();
+		}
+	},
+
+	end: function() {
+		var q = this.question;
+		for(var i=0;i<q.parts.length;i++)
+		{
+			q.parts[i].display.end();
+		}
 	}
 };
 
@@ -761,6 +803,20 @@ display.PartDisplay.prototype =
 		this.revealed(true);
 		this.removeWarnings();
 		this.showScore();
+	},
+
+	init: function() {
+		this.part.setDirty(false);
+		for(var i=0;i<this.part.steps.length;i++) {
+			this.part.steps[i].display.init();
+		}
+	},
+
+	end: function() {
+		this.restoreAnswer();
+		for(var i=0;i<this.part.steps.length;i++) {
+			this.part.steps[i].display.end();
+		}
 	}
 };
 
@@ -963,6 +1019,7 @@ display.MultipleResponsePartDisplay.prototype =
 		var part = this.part;
 		switch(part.type) {
 		case '1_n_2':
+			this.studentAnswer(null);
 			for(var i=0;i<part.numAnswers; i++) {
 				if(part.ticks[i][0])
 					this.studentAnswer(i);
@@ -974,7 +1031,7 @@ display.MultipleResponsePartDisplay.prototype =
 			}
 			break;
 		case 'm_n_x':
-			switch(part.displayType) {
+			switch(part.settings.displayType) {
 			case 'radiogroup':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
@@ -1018,6 +1075,16 @@ display.GapFillPartDisplay.prototype =
 
 	revealAnswer: function()
 	{
+	},
+
+	init: function() {
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.init();
+	},
+
+	end: function() {
+		for(var i=0;i<this.part.gaps.length; i++)
+			this.part.gaps[i].display.end();
 	}
 };
 display.GapFillPartDisplay = extend(display.PartDisplay,display.GapFillPartDisplay,true);

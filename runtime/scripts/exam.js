@@ -430,7 +430,9 @@ Exam.prototype = {
 			exam.display.showQuestion();
 		}
 
-		if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0)
+		if(currentQuestion.leavingDirtyQuestion()) {
+		}
+		else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0)
 		{
 			go();
 		}
@@ -443,7 +445,7 @@ Exam.prototype = {
 				go();
 				break;
 			case 'warnifunattempted':
-				Numbas.display.showConfirm(eventObj.message+'<p>Proceed anyway?</p>',go);
+				Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
 				break;
 			case 'preventifunattempted':
 				Numbas.display.showAlert(eventObj.message);
@@ -490,14 +492,23 @@ Exam.prototype = {
 	tryEnd: function() {
 		var message = R('control.confirm end');
 		var answeredAll = true;
+		var submittedAll = true;
 		for(var i=0;i<this.questionList.length;i++) {
 			if(!this.questionList[i].answered) {
 				answeredAll = false;
 				break;
 			}
+			if(this.questionList[i].isDirty()) {
+				submittedAll = false;
+			}
 		}
+		if(this.currentQuestion.leavingDirtyQuestion())
+			return;
 		if(!answeredAll) {
 			message = R('control.not all questions answered') + '<br/>' + message;
+		}
+		else if(!submittedAll) {
+			message = R('control.not all questions submitted') + '<br/>' + message;
 		}
 		Numbas.display.showConfirm(
 			message,

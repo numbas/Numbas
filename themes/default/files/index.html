@@ -84,6 +84,10 @@ Copyright 2011-13 Newcastle University
 			</div>
 		</div>
 
+		<div id="saving" data-bind="visible: saving" style="display:none">
+			<div class="text" data-localise="page.saving"></div>
+		</div>
+
 		<div id="everything" style="display:none">
 		<!-- top bar - logo, exam title, timing -->
 		<div class="mainDiv titleBar">
@@ -248,6 +252,7 @@ Copyright 2011-13 Newcastle University
 											<div class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></div>
 											<div class="score" data-bind="html: scoreFeedback.message"></div>
 										</div>
+										<div data-bind="visible: isDirty" class="dirty-message"><span data-localise="question.selector.unsubmitted changes"></span><span class="warning-icon icon-exclamation-sign"></span></div>
 									</li>
 								</ul>
 							</div>
