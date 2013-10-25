@@ -1035,7 +1035,7 @@ display.MultipleResponsePartDisplay.prototype =
 			case 'radiogroup':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
-						if(part.ticks[j][i]) {
+						if(part.ticks[i][j]) {
 							this.ticks[j](i);
 						}
 					}
