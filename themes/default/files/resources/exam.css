@@ -34,6 +34,11 @@ html{
 	padding: 1em;
 }
 
+a {
+	color: #00e;
+	text-decoration: underline;
+}
+
 a:hover {
 	color: #f90;
 }
