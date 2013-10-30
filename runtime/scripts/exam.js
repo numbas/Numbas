@@ -484,6 +484,7 @@ Exam.prototype = {
 		})
 		job(function() {
 			e.changeQuestion(n);
+			e.currentQuestion.display.init();
 			e.display.showQuestion();
 		});
 		job(e.display.endRegen,e.display);
