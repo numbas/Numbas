@@ -183,6 +183,11 @@
 					
 					module('Evaluating');
 
+					test('Numbas.math',function() {
+						equals(Numbas.math.countSigFigs('1.10'),3,"math.countSigFigs('1.10')==3");
+						equals(Numbas.math.countSigFigs('-1.10'),3,"math.countSigFigs('-1.10')==3");
+					});
+
 					var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
 
 					test('jme.typecheck',function() {
