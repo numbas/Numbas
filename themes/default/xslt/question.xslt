@@ -243,13 +243,15 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
-		<xsl:attribute name="class">
-			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-				<xsl:text>start-column</xsl:text>
-			</xsl:if>
-		</xsl:attribute>
-		<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
-		<xsl:apply-templates select="content"/>
+		<label>
+			<xsl:attribute name="class">
+				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+					<xsl:text>start-column</xsl:text>
+				</xsl:if>
+			</xsl:attribute>
+			<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
+			<xsl:apply-templates select="content"/>
+		</label>
 	</li>
 </xsl:template>
 <xsl:template match="choice" mode="radiogroup-correctanswer">
@@ -258,13 +260,15 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
-		<xsl:attribute name="class">
-			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-				<xsl:text>start-column</xsl:text>
-			</xsl:if>
-		</xsl:attribute>
-		<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
-		<xsl:apply-templates select="content"/>
+		<label>
+			<xsl:attribute name="class">
+				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+					<xsl:text>start-column</xsl:text>
+				</xsl:if>
+			</xsl:attribute>
+			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
+			<xsl:apply-templates select="content"/>
+		</label>
 	</li>
 </xsl:template>
 
@@ -274,13 +278,15 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
-		<xsl:attribute name="class">
-			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-				<xsl:text>start-column</xsl:text>
-			</xsl:if>
-		</xsl:attribute>
-		<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
-		<xsl:apply-templates select="content"/>
+		<label>
+			<xsl:attribute name="class">
+				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+					<xsl:text>start-column</xsl:text>
+				</xsl:if>
+			</xsl:attribute>
+			<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
+			<xsl:apply-templates select="content"/>
+		</label>
 	</li>
 </xsl:template>
 
@@ -290,13 +296,15 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
-		<xsl:attribute name="class">
-			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-				<xsl:text>start-column</xsl:text>
-			</xsl:if>
-		</xsl:attribute>
-		<input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
-		<xsl:apply-templates select="content"/>
+		<label>
+			<xsl:attribute name="class">
+				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+					<xsl:text>start-column</xsl:text>
+				</xsl:if>
+			</xsl:attribute>
+			<input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
+			<xsl:apply-templates select="content"/>
+		</label>
 	</li>
 </xsl:template>
 
