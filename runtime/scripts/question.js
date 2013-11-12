@@ -1142,25 +1142,41 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer','inputstep','inputStep');
 
+	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
+	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit'],['precisionType','precisionPC']);
+	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
+	settings.precision = jme.subvars(settings.precision, this.question.scope);
+	settings.precision = evaluate(settings.precision,this.question.scope).value;
+
 	var minvalue = jme.subvars(settings.minvalue,this.question.scope);
 	minvalue = evaluate(minvalue,this.question.scope);
 	if(minvalue && minvalue.type=='number')
-		settings.minvalue = minvalue.value - 0.00000000001;
+		minvalue = minvalue.value;
 	else
 		throw(new Numbas.Error('part.setting not present','minimum value',this.path,this.question.name));
 
 	var maxvalue = jme.subvars(settings.maxvalue,this.question.scope);
 	maxvalue = evaluate(maxvalue,this.question.scope);
 	if(maxvalue && maxvalue.type=='number')
-		settings.maxvalue = maxvalue.value + 0.00000000001;
+		maxvalue = maxvalue.value;
 	else
 		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
 
-	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
-	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit'],['precisionType','precisionPC']);
-	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{string:true});
-	settings.precision = jme.subvars(settings.precision, this.question.scope);
-	settings.precision = evaluate(settings.precision,this.question.scope).value;
+	var fudge = 0.00000000001
+	switch(settings.precisionType) {
+	case 'dp':
+		minvalue = math.precround(minvalue,settings.precision);
+		maxvalue = math.precround(maxvalue,settings.precision);
+		break;
+	case 'sigfig':
+		minvalue = math.siground(minvalue,settings.precision);
+		maxvalue = math.siground(maxvalue,settings.precision);
+		break;
+	}
+
+	settings.minvalue = minvalue - fudge;
+	settings.maxvalue = maxvalue + fudge;
+
 	var messageNode = this.xml.selectSingleNode('answer/precision/message');
 	if(messageNode)
 		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
