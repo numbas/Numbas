@@ -1247,11 +1247,16 @@ NumberEntryPart.prototype =
 				if(this.settings.strictPrecision)
 					failedPrecision = studentDP != this.settings.precision;
 				else
-					failedPrecision = studentDP > this.settings.precision || (studentDP < this.settings.precision && this.studentAnswer.charAt(this.studentAnswer.length-1)=='0');
+					failedPrecision = studentDP > this.settings.precision;
 				break;
 			case 'sigfig':
-				var sigFigs = math.countSigFigs(this.studentAnswer)
-				failedPrecision = sigFigs != this.settings.precision;
+				var sigFigs = math.countSigFigs(this.studentAnswer);
+
+				if(this.settings.strictPrecision)
+					failedPrecision = sigFigs != this.settings.precision;
+				else
+					failedPrecision = sigFigs > this.settings.precision;
+
 				if(failedPrecision && sigFigs < this.settings.precision && /[1-9]\d*0+$/.test(this.studentAnswer)) {	// in cases like 2070, which could be to either 3 or 4 sig figs
 					var trailingZeroes = this.studentAnswer.match(/0*$/)[0].length;
 					if(sigFigs + trailingZeroes >= this.settings.precision)
