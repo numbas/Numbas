@@ -1143,7 +1143,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	tryGetAttribute(settings,this.xml,'answer','inputstep','inputStep');
 
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
-	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit'],['precisionType','precisionPC']);
+	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
 	settings.precision = jme.subvars(settings.precision, this.question.scope);
 	settings.precision = evaluate(settings.precision,this.question.scope).value;
@@ -1243,13 +1243,12 @@ NumberEntryPart.prototype =
 			var failedPrecision = false;
 			switch(this.settings.precisionType) {
 			case 'dp':
-				if(this.precision==0) {
-					failedPrecision = this.studentAnswer.indexOf('.')>=0;
-					break;
-				} else {
-					failedPrecision = math.countDP(this.studentAnswer) != this.settings.precision;
-					break;
-				}
+				var studentDP = math.countDP(this.studentAnswer);
+				if(this.settings.strictPrecision)
+					failedPrecision = studentDP != this.settings.precision;
+				else
+					failedPrecision = studentDP > this.settings.precision || (studentDP < this.settings.precision && this.studentAnswer.charAt(this.studentAnswer.length-1)=='0');
+				break;
 			case 'sigfig':
 				var sigFigs = math.countSigFigs(this.studentAnswer)
 				failedPrecision = sigFigs != this.settings.precision;
@@ -1258,8 +1257,6 @@ NumberEntryPart.prototype =
 					if(sigFigs + trailingZeroes >= this.settings.precision)
 						failedPrecision = false;
 				}
-				break;
-			default:
 				break;
 			}
 			

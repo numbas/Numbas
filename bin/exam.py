@@ -691,6 +691,7 @@ class NumberEntryPart(Part):
 	precision = 0
 	precisionPartialCredit = 0
 	precisionMessage = ''
+	strictPrecision = True
 
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
@@ -698,7 +699,7 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','integerPartialCredit','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage'],part)
+		tryLoad(data,['integerAnswer','integerPartialCredit','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 		if part.checkingType == 'range':
 			if 'answer' in data:
 				part.maxvalue = part.minvalue = data['answer']
@@ -730,7 +731,12 @@ class NumberEntryPart(Part):
 			answer.attrib['answer'] = strcons(self.answer)
 			answer.attrib['accuracy'] = strcons(self.checkingAccuracy)
 		answer.find('allowonlyintegeranswers').attrib = {'value': strcons(self.integerAnswer), 'partialcredit': strcons(self.integerPartialCredit)+'%'}
-		answer.find('precision').attrib = {'type': strcons(self.precisionType), 'precision': strcons(self.precision), 'partialcredit': strcons(self.precisionPartialCredit)+'%'}
+		answer.find('precision').attrib = {
+			'type': strcons(self.precisionType), 
+			'precision': strcons(self.precision), 
+			'partialcredit': strcons(self.precisionPartialCredit)+'%',
+			'strict': strcons(self.strictPrecision)
+		}
 		answer.find('precision/message').append(makeContentNode(self.precisionMessage))
 
 		return part
