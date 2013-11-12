@@ -845,12 +845,40 @@ display.JMEPartDisplay = function()
 			if(tex===undefined)
 				throw(new Numbas.Error('display.part.jme.error making maths'));
 
-			return tex;
 		}
 		catch(e) {
 			this.warning(e);
 			return '';
 		}
+
+		if(p.settings.checkVariableNames) {
+			var tree = Numbas.jme.compile(studentAnswer,p.question.scope);
+			var usedvars = Numbas.jme.findvars(tree);
+			var failExpectedVariableNames = false;
+			var unexpectedVariableName;
+			for(var i=0;i<usedvars.length;i++) {
+				if(!p.settings.expectedVariableNames.contains(usedvars[i])) {
+					failExpectedVariableNames = true;
+					unexpectedVariableName = usedvars[i];
+					break;
+				}
+			}
+			if( failExpectedVariableNames ) {
+				var suggestedNames = unexpectedVariableName.split(Numbas.jme.re.re_short_name);
+				if(suggestedNames.length>3) {
+					var suggestion = [];
+					for(var i=1;i<suggestedNames.length;i+=2) {
+						suggestion.push(suggestedNames[i]);
+					}
+					suggestion = suggestion.join('*');
+					this.warning(R('part.jme.unexpected variable name suggestion',unexpectedVariableName,suggestion));
+				}
+				else
+					this.warning(R('part.jme.unexpected variable name', unexpectedVariableName));
+			}
+		}
+
+		return tex;
 	},this).extend({throttle:100});
 
 	this.inputHasFocus = ko.observable(false);
