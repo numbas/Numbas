@@ -16,24 +16,21 @@
 
 R.registerLocale('nb-NO',{
 	'page.loading': "Laster...",
+	"page.saving": "<p>Lagrer.</p> <p>Dette kan ta noen sekunder.</p>",
 
-	"exam.random seed": "Sesjon ID:",
-	"exam.passed": "Bestått",
-	"exam.failed": "Ikke bestått",
-	"exam.review header": "Gjennomgang: ",
-	"result.exit": "Avslutt eksamen",
-	"result.print": "Skriv ut dette sammendraget",
-	"result.performance summary": "Resultatsammendrag",
-	"result.question review title": "Gå igjennom dette spørsmålet",
-	"result.detailed question breakdown": "Detaljert gjennomgang av spørsmål og tilbakemelding",
-	"result.click a question to review": "Klikk på et spørsmålnummer for å se karaktersetting, og om mulig, fullstendig løsning.",
-	"control.back to results": "Go back to results",
-	"control.confirm reveal": "Vil du se svaret på dette spørsmålet? Alle poeng du har fått hittil vil bli låst - og du kan ikke besvare dette spørsmålet senere.",
-	"part.correct answer": "Riktig svar:",
+
 	"question.score feedback.unanswered": "Ikke besvart.",
 	"question.score feedback.correct": "Svaret ditt er riktig",
 	"question.score feedback.partial": "Svaret ditt er delvis riktig",
 	"question.score feedback.wrong": "Svaret ditt er ikke riktig",
+	"question.show steps penalty": "Du vil miste <strong>%s</strong> %s.",
+	"question.show steps no penalty": "Din score blir ikke påvirket.",
+	"question.show steps already penalised": "Du har allerede sett trinnvis gjennomgang. Du kan vise det igjen uten å bli straffet.",
+	"question.hide steps": "Skjul trinn",
+	"question.hide steps no penalty": "Din score vil bli påvirket.",
+	"question.unsubmitted changes.several parts": "Du har endret dine svar uten å lagre dem. Vennligst se igjennom svarene og klikk på <strong>Lagre alle deler</strong> knapp.",
+	"question.unsubmitted changes.one part": "Du har endret ditt svar uten å lagre det. Vennligst se igjennom svaret og klikk på <strong>Lagre svar</strong> knapp.",
+	"question.selector.unsubmitted changes": "Ikke lagrede svar.",
 
 	'exam.exam name': "Eksamen navn:",
 	'exam.number of questions': "Antall spørsmål:",
@@ -41,12 +38,15 @@ R.registerLocale('nb-NO',{
 	'exam.pass percentage': "Grense for bestått:",
 	'exam.time allowed': "Tillatt tid:",
 	'frontpage.start': "Start",
+	"exam.random seed": "Sesjon ID:",
+	"exam.passed": "Bestått",
+	"exam.failed": "Ikke bestått",
+	"exam.review header": "Gjennomgang: ",
 
 	'suspend.exam suspended': "Eksamen er avbrutt. Klikk Fortsett for å gå videre.",
 	'suspend.you can resume': "Du kan fortsette eksamen neste gang du starter denne aktiviteten.",
 	'suspend.resume': "Fortsett",
 
-	'result.exit': "Avslutt",
 	'result.review': "Se igjennom",
 	'result.exam summary': "Eksamen oversikt",
 	'result.exam start': "Eksamen start:",
@@ -58,6 +58,12 @@ R.registerLocale('nb-NO',{
 	'result.detailed question breakdown': "Detaljert eksamensresultat",
 	'result.question number': "Spørsmål nummer",
 	'result.question score': "Poengsum",
+	"result.exit": "Avslutt eksamen",
+	"result.print": "Skriv ut dette sammendraget",
+	"result.performance summary": "Resultatsammendrag",
+	"result.question review title": "Gå igjennom dette spørsmålet",
+	"result.detailed question breakdown": "Detaljert gjennomgang av spørsmål og tilbakemelding",
+	"result.click a question to review": "Klikk på et spørsmålnummer for å se karaktersetting, og om mulig, fullstendig løsning.",
 
 	'end.exam has finished': "Eksamen er avsluttet. Du kan nå lukke vinduet.",
 
@@ -65,7 +71,6 @@ R.registerLocale('nb-NO',{
 	'control.not all questions answered': "Du har ikke svart på alle spørsmålene i denne eksamen.",
 	'control.confirm end': "Er du sikker på at du vil avslutte? Etter dette vil du ikke kunne endre på svarene dine..",
 	'control.confirm regen': "Vil du lage nye tilfeldige tall i denne oppgaven? Hvis du klikker OK vil svarene og oppnådde poeng bli annullert.",
-	'control.confirm reveal': "Vil du se svarforslag til oppgaven? I så fall vil alle oppnådde poeng bli annullert og du vil ikke kunne svare på spørsmålet senere.",
 	'control.regen': "Prøv et lignende spørsmål",
 	'control.submit answer': "Send inn svar",
 	'control.submit all parts': "Send inn alle delsvar",
@@ -78,6 +83,10 @@ R.registerLocale('nb-NO',{
 	'control.total': "Totalt",
 	'control.pause': "Pause",
 	'control.end exam': "Avslutt eksamen",
+	"control.back to results": "Go back to results",
+	"control.not all questions submitted": "Du har endret ett eller flere svar men ikke lagret dem. Vennligst se om svarene er lagret.",
+	"control.proceed anyway": "Fortsett likevel?",
+	"control.confirm reveal": "Vil du se svaret på dette spørsmålet? Alle poeng du har fått hittil vil bli låst - og du kan ikke besvare dette spørsmålet senere.",
 
 	'display.part.jme.error making maths': "Feil i visning av formel",
 	
@@ -160,6 +169,8 @@ R.registerLocale('nb-NO',{
 	'part.marking.incorrect': "Svaret er feil.",
 	'part.marking.correct': "Svaret er riktig.",
 
+	"part.correct answer": "Riktig svar:",
+	"part.with steps answer prompt": "Svar: ",
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
 
@@ -176,6 +187,8 @@ R.registerLocale('nb-NO',{
 	'part.jme.not-allowed bits': '<span class="monospace">%s</span>',
 	'part.jme.not-allowed one': "Svaret må ikke inneholde: %s",
 	'part.jme.not-allowed several': "Svaret må ikke inneholde disse: %s",
+	"part.jme.unexpected variable name": "Svaret ditt er tolket til å bruke det uventede variabelnavnet <code>%s</code>.",
+	"part.jme.unexpected variable name suggestion": "Svaret ditt er tolket til å bruke det uventede variabelnavnet <code>%s</code>. Mente du <code>%s</code>?",
 
 	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
 	'part.patternmatch.correct except case': "Svaret er riktig, unntatt i dette tilfellet.",
@@ -189,6 +202,9 @@ R.registerLocale('nb-NO',{
 	'part.mcq.no choices selected': "Du har ikke merket av i valgmuligheter.",
 	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
 	'part.mcq.correct choice': "Du valgte riktig svar.",
+	"part.mcq.matrix wrong type": "Element av ugyldig type '%s' er brukt i score matrise.",
+	"part.mcq.matrix mix of numbers and lists": "En blanding av tall og lister er brukt i score matrise.",
+	"part.mcq.matrix wrong size": "Score matrise er av feil dimensjon.",
 
 	'part.gapfill.feedback header': '<strong>Boks %i</strong>',
 	
