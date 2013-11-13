@@ -47,6 +47,10 @@ table {
 	background-color: white;
 }
 
+iframe {
+	border: none;
+}
+
 /*main template */
 .mainDiv{ 
 	clear: both;
