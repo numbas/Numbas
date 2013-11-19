@@ -25,7 +25,7 @@ further modified by Philip Hutchison
 
 var pipwerks = {};                                  //pipwerks 'namespace' helps ensure no conflicts with possible other "SCORM" variables
 pipwerks.UTILS = {};                                //For holding UTILS functions
-pipwerks.debug = { isActive: false };                //Enable (true) or disable (false) for debug mode
+pipwerks.debug = { isActive: true };                //Enable (true) or disable (false) for debug mode
 
 pipwerks.SCORM = {                                  //Define the SCORM object
     version:    null,                               //Store SCORM version.
@@ -74,7 +74,7 @@ pipwerks.SCORM.API.find = function(win){
     var API = null,
 		findAttempts = 0,
         findAttemptLimit = 500,
-		errorGettingAPI = false,
+		errorGettingAPI = false;
 		traceMsgPrefix = "SCORM.API.find",
 		trace = pipwerks.UTILS.trace,
 		scorm = pipwerks.SCORM;
@@ -184,19 +184,22 @@ pipwerks.SCORM.API.get = function(){
         find = scorm.API.find,
         trace = pipwerks.UTILS.trace;
 
-    if(win.parent && win.parent != win){
-        API = find(win.parent);
-    }
+	try {
+		if(win.parent && win.parent != win){
+			API = find(win.parent);
+		}
 
-    if(!API && win.top.opener){
-        API = find(win.top.opener);
-    }
+		if(!API && win.top.opener){
+			API = find(win.top.opener);
+		}
 
-    //Special handling for Plateau
-    //Thanks to Joseph Venditti for the patch
-    if(!API && win.top.opener && win.top.opener.document) {
-        API = find(win.top.opener.document);
-    }
+		//Special handling for Plateau
+		//Thanks to Joseph Venditti for the patch
+		if(!API && win.top.opener && win.top.opener.document) {
+			API = find(win.top.opener.document);
+		}
+	}
+	catch(e) {}
 
     if(API){
         scorm.API.isFound = true;
