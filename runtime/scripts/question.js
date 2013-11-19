@@ -812,7 +812,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 	{
 		var nameNodes = expectedVariableNamesNode.selectNodes('string');
 		for(i=0; i<nameNodes.length; i++)
-			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]));
+			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase());
 	}
 
 	this.display = new Numbas.display.JMEPartDisplay(this);
@@ -896,7 +896,7 @@ JMEPart.prototype =
 			var usedvars = jme.findvars(tree);
 			this.failExpectedVariableNames = false;
 			for(var i=0;i<usedvars.length;i++) {
-				if(!this.settings.expectedVariableNames.contains(usedvars[i])) {
+				if(!this.settings.expectedVariableNames.contains(usedvars[i].toLowerCase())) {
 					this.failExpectedVariableNames = true;
 					this.unexpectedVariableName = usedvars[i];
 					break;
