@@ -25,7 +25,7 @@ further modified by Philip Hutchison
 
 var pipwerks = {};                                  //pipwerks 'namespace' helps ensure no conflicts with possible other "SCORM" variables
 pipwerks.UTILS = {};                                //For holding UTILS functions
-pipwerks.debug = { isActive: true };                //Enable (true) or disable (false) for debug mode
+pipwerks.debug = { isActive: false };                //Enable (true) or disable (false) for debug mode
 
 pipwerks.SCORM = {                                  //Define the SCORM object
     version:    null,                               //Store SCORM version.
