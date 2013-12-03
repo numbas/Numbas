@@ -164,11 +164,13 @@ jme.variables = {
 		if($.nodeName(element,'iframe'))
 			return element;
 
+		var re_end;
 		$(element).contents().each(function() {
 			if(this.nodeType==(this.TEXT_NODE || 3)) {
 				var selector = $(this);
 				var str = this.nodeValue;
-				var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+				var bits = util.contentsplitbrackets(str,re_end);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+				re_end = bits.re_end;
 				var i=0;
 				var l = bits.length;
 				for(var i=0; i<l; i+=4) {
@@ -176,7 +178,7 @@ jme.variables = {
 					for(var j=0;j<textsubs.length;j++) {
 						selector.before(textsubs[j]);
 					}
-					var n = this.ownerDocument.createTextNode((bits[i+1]||'')+jme.texsubvars(bits[i+2]||'',scope)+(bits[i+3]||''));
+					var n = this.ownerDocument.createTextNode((bits[i+1]||'')+(jme.texsubvars(bits[i+2]||'',scope))+(bits[i+3]||''));
 					selector.before(n);
 				}
 				selector.remove();

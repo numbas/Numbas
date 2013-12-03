@@ -203,7 +203,7 @@ Question.prototype =
 			}
 
 			//sub into question name
-			q.name = jme.contentsubvars(q.name,q.scope);
+			q.name = jme.subvars(q.name,q.scope);
 		});
 	},
 

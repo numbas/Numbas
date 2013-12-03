@@ -469,7 +469,10 @@ var jme = Numbas.jme = {
 			}
 			return tok;
 		case 'string':
-			return new TString(jme.contentsubvars(tok.value,scope));
+			var value = tok.value;
+			if(value.contains('{'))
+				value = jme.contentsubvars(value,scope)
+			return new TString(value);
 		case 'name':
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
@@ -606,24 +609,11 @@ var jme = Numbas.jme = {
 	contentsubvars: function(str, scope)
 	{
 		var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-		var out='';
-		for(var i=0; i<bits.length; i++)
+		for(var i=0; i<bits.length; i+=4)
 		{
-			switch(i % 4)
-			{
-			case 0:	//plain text - variables inserted by expressions in curly braces
-				out += jme.subvars(bits[i],scope,true);
-				break;
-			case 2:	//a TeX expression - variables inserted with \var and \simplify commands
-				out += jme.texsubvars(bits[i],scope)
-				break;
-			case 1:	//a TeX delimiter
-			case 3:
-				out += bits[i];
-				break;
-			}
+			bits[i] = jme.subvars(bits[i],scope,true);
 		}
-		return out;
+		return bits.join('');
 	},
 
 	texsplit: function(s)
