@@ -675,39 +675,6 @@ var jme = Numbas.jme = {
 		return out;
 	},
 
-	texsubvars: function(s,scope)
-	{
-		var bits = jme.texsplit(s);
-		var out = '';
-		for(var i=0;i<bits.length-3;i+=4)
-		{
-			out+=bits[i];
-			var cmd = bits[i+1],
-				args = bits[i+2],
-				expr = bits[i+3];
-
-			if(expr.length)
-			{
-				switch(cmd)
-				{
-				case 'var':	//substitute a variable
-					var v = jme.evaluate(jme.compile(expr,scope),scope);
-					v = jme.display.texify({tok: v});
-					out += ' '+v+' ';
-					break;
-				case 'simplify': //a JME expression to be simplified
-					expr = jme.subvars(expr,scope);
-					var tex = jme.display.exprToLaTeX(expr,args,scope);
-					out += ' '+tex+' ';
-					break;
-				}
-			}
-			else
-				out+=' ';
-		}
-		return out+bits[bits.length-1];
-	},
-
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
 	subvars: function(str, scope,display)
 	{
@@ -732,10 +699,12 @@ var jme = Numbas.jme = {
 				}
 				else if(v.type=='string')
 				{
-					if(display)
+					if(display) {
 						v = v.value;
-					else
+					}
+					else {
 						v = "'"+v.value+"'";
+					}
 				}
 				else
 				{

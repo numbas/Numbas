@@ -18,7 +18,10 @@ Numbas.queueScript('scripts/jme-variables.js',['jme','util'],function() {
 var jme = Numbas.jme;
 var util = Numbas.util;
 
+
 jme.variables = {
+
+	scope_list: [],
 	
 	makeJMEFunction: function(fn,scope) {
 		fn.tree = jme.compile(fn.definition,scope,true);
@@ -178,7 +181,17 @@ jme.variables = {
 					for(var j=0;j<textsubs.length;j++) {
 						selector.before(textsubs[j]);
 					}
-					var n = this.ownerDocument.createTextNode((bits[i+1]||'')+(jme.texsubvars(bits[i+2]||'',scope))+(bits[i+3]||''));
+					var startDelimiter = bits[i+1] || '';
+					var tex = bits[i+2] || '';
+					var endDelimiter = bits[i+3] || '';
+					if(tex) {
+						jme.variables.scope_list.push(scope);
+						tex = startDelimiter+('\\jmescope['+(jme.variables.scope_list.length-1)+']{'+tex+'}')+endDelimiter;
+					}
+					else {
+						tex = startDelimiter+tex+endDelimiter;
+					}
+					var n = this.ownerDocument.createTextNode(tex);
 					selector.before(n);
 				}
 				selector.remove();
@@ -211,6 +224,15 @@ jme.variables = {
 					break;
 				case 'string':
 					v = v.value.replace(/\\([{}])/g,'$1');
+					if(v.contains('{')) {
+						var bits = util.contentsplitbrackets(v);
+						for(var i=0;i<bits.length;i+=4) {
+							jme.variables.scope_list.push(scope);
+							if(bits[i+2])
+								bits[i+2] = '\\jmescope['+(jme.variables.scope_list.length-1)+']{'+bits[i+2]+'}';
+						}
+						v = bits.join('');
+					}
 					break;
 				default:
 					v = jme.display.treeToJME({tok:v});
@@ -241,6 +263,7 @@ jme.variables = {
 		return out;
 	}
 };
+
 
 // cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
 // because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way

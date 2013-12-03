@@ -18,9 +18,52 @@ Copyright 2011-13 Newcastle University
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
 	
+	var util = Numbas.util;
+	var jme = Numbas.jme;
+
 	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
-	var util = Numbas.util;
+	MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
+
+		var TEX = MathJax.InputJax.TeX;
+
+		TEX.Definitions.Add({macros: {
+			'var': 'JMEvar', 
+			'simplify': 'JMEsimplify',
+			'jmescope': 'JMEscope'
+		}});
+
+		TEX.Parse.Augment({
+			JMEvar: function(name) {
+				var expr = this.GetArgument(name);
+				var scope = this.stack.env.jmescope;
+				var v = jme.evaluate(jme.compile(expr,scope),scope);
+				var tex = jme.display.texify({tok: v});
+				var mml = TEX.Parse(tex,this.stack.env).mml();
+				this.Push(mml);
+			},
+
+			JMEsimplify: function(name) {
+				var rules = this.GetBrackets(name);
+				if(rules===undefined)
+					rules = 'all';
+				var expr = this.GetArgument(name);
+				var scope = this.stack.env.jmescope;
+				expr = jme.subvars(expr,scope);
+				var tex = jme.display.exprToLaTeX(expr,rules,scope);
+				var mml = TEX.Parse(tex,this.stack.env).mml();
+				this.Push(mml);
+			},
+
+			JMEscope: function(name) {
+				var num = this.GetBrackets(name);
+				this.stack.env.jmescope = jme.variables.scope_list[num];
+				var tex = this.GetArgument(name);
+				var mml = TEX.Parse(tex,this.stack.env).mml();
+				this.Push(mml);
+			}
+		})
+	});
 
 function resizeF() {
 	var w = $.textMetrics(this).width;
