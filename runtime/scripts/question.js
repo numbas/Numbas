@@ -203,7 +203,7 @@ Question.prototype =
 			}
 
 			//sub into question name
-			q.name = jme.contentsubvars(q.name,q.scope);
+			q.name = jme.subvars(q.name,q.scope);
 		});
 	},
 
@@ -1867,10 +1867,16 @@ GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAns
 function InformationPart(xml, path, question, parentPart, loading)
 {
 	this.display = new Numbas.display.InformationPartDisplay(this);
+	this.answered = true;
+	this.isDirty = false;
 }
 InformationPart.prototype = {
 	validate: function() {
+		this.answered = true;
 		return true;
+	},
+	setDirty: function() {
+		this.isDirty = false;
 	}
 };
 

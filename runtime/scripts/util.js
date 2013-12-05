@@ -293,10 +293,6 @@ var util = Numbas.util = {
 		return o;
 	},
 
-	//split content text up by TeX maths delimiters
-	//includes delimiters, since there are two kinds
-	//ie.
-	// contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
 	contentsplitbrackets: function(t)
 	{
 		var o=[];
@@ -357,6 +353,78 @@ var util = Numbas.util = {
 
 };
 
+var endDelimiters = {
+    '$': /[^\\]\$/,
+    '\\(': /[^\\]\\\)/,
+    '$$': /[^\\]\$\$/,
+    '\\[': /[^\\]\\\]/
+}
+var re_startMaths = /\$\$|\$|\\\(|\\\[|\\begin\{(\w+)\}/;
+
+//split content text up by TeX maths delimiters
+//includes delimiters, since there are two kinds
+//ie.
+// contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
+//
+//if tex is split across several strings (e.g. text nodes with <br> in the middle), re_end can be used to store the end delimiter for unfinished maths 
+//bits.re_end stores the delimiter if the returned array has unfinished maths at the end
+util.contentsplitbrackets = function(txt,re_end) {
+    var i = 0;
+    var m;
+    var startDelimiter='', endDelimiter='';
+	var startText = '';
+    var start='', end='';
+    var startChop, endChop;
+    var re_end;
+	var bits = [];
+	
+    while(txt.length) {
+		if(!re_end) {
+			m = re_startMaths.exec(txt);
+			
+			if(!m) {     // if no maths delimiters, we're done
+				bits.push(txt);
+				txt = '';
+				break;
+			}
+			
+			startDelimiter = m[0];
+			var start = m.index;
+			
+			startChop = start+startDelimiter.length;
+			startText = txt.slice(0,start);
+			txt = txt.slice(startChop);
+
+			if(startDelimiter.match(/^\\begin/)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
+				var environment = m[1];
+				re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
+			}
+			else {
+				re_end = endDelimiters[startDelimiter];    // get the corresponding end delimiter for the matched start delimiter
+			}
+		}
+        
+        m = re_end.exec(txt);
+        
+        if(!m) {    // if no ending delimiter, the text contains no valid maths
+			bits.push(startText,startDelimiter,txt);
+			bits.re_end = re_end;
+			txt = '';
+			break;
+        }
+        
+        endDelimiter = m[0].slice(1);
+        var end = m.index+1;    // the end delimiter regexp has a "not a backslash" character at the start because JS regexps don't do negative lookbehind
+        endChop = end+endDelimiter.length;
+		var math = txt.slice(0,end);
+		txt = txt.slice(endChop);
+		i += startChop+endChop;
+
+		bits.push(startText,startDelimiter,math,endDelimiter);
+		re_end = null;
+    }
+	return bits;
+}
 
 //Because indexOf not supported in IE
 if(!Array.indexOf)

@@ -469,7 +469,10 @@ var jme = Numbas.jme = {
 			}
 			return tok;
 		case 'string':
-			return new TString(jme.contentsubvars(tok.value,scope));
+			var value = tok.value;
+			if(value.contains('{'))
+				value = jme.contentsubvars(value,scope)
+			return new TString(value);
 		case 'name':
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
@@ -606,24 +609,11 @@ var jme = Numbas.jme = {
 	contentsubvars: function(str, scope)
 	{
 		var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-		var out='';
-		for(var i=0; i<bits.length; i++)
+		for(var i=0; i<bits.length; i+=4)
 		{
-			switch(i % 4)
-			{
-			case 0:	//plain text - variables inserted by expressions in curly braces
-				out += jme.subvars(bits[i],scope,true);
-				break;
-			case 2:	//a TeX expression - variables inserted with \var and \simplify commands
-				out += jme.texsubvars(bits[i],scope)
-				break;
-			case 1:	//a TeX delimiter
-			case 3:
-				out += bits[i];
-				break;
-			}
+			bits[i] = jme.subvars(bits[i],scope,true);
 		}
-		return out;
+		return bits.join('');
 	},
 
 	texsplit: function(s)
@@ -685,39 +675,6 @@ var jme = Numbas.jme = {
 		return out;
 	},
 
-	texsubvars: function(s,scope)
-	{
-		var bits = jme.texsplit(s);
-		var out = '';
-		for(var i=0;i<bits.length-3;i+=4)
-		{
-			out+=bits[i];
-			var cmd = bits[i+1],
-				args = bits[i+2],
-				expr = bits[i+3];
-
-			if(expr.length)
-			{
-				switch(cmd)
-				{
-				case 'var':	//substitute a variable
-					var v = jme.evaluate(jme.compile(expr,scope),scope);
-					v = jme.display.texify({tok: v});
-					out += ' '+v+' ';
-					break;
-				case 'simplify': //a JME expression to be simplified
-					expr = jme.subvars(expr,scope);
-					var tex = jme.display.exprToLaTeX(expr,args,scope);
-					out += ' '+tex+' ';
-					break;
-				}
-			}
-			else
-				out+=' ';
-		}
-		return out+bits[bits.length-1];
-	},
-
 	//substitutes variables into a string "text {expr1} text {expr2} ..."
 	subvars: function(str, scope,display)
 	{
@@ -742,10 +699,12 @@ var jme = Numbas.jme = {
 				}
 				else if(v.type=='string')
 				{
-					if(display)
+					if(display) {
 						v = v.value;
-					else
+					}
+					else {
 						v = "'"+v.value+"'";
+					}
 				}
 				else
 				{
