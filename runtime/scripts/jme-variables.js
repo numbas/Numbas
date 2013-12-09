@@ -186,7 +186,7 @@ jme.variables = {
 					var endDelimiter = bits[i+3] || '';
 					if(tex) {
 						jme.variables.scope_list.push(scope);
-						tex = startDelimiter+('\\jmescope['+(jme.variables.scope_list.length-1)+']{'+tex+'}')+endDelimiter;
+						tex = startDelimiter+('\\jmescope['+(jme.variables.scope_list.length-1)+'] '+tex)+endDelimiter;
 					}
 					else {
 						tex = startDelimiter+tex+endDelimiter;

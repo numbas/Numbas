@@ -36,7 +36,7 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 		TEX.Parse.Augment({
 			JMEvar: function(name) {
 				var expr = this.GetArgument(name);
-				var scope = this.stack.env.jmescope;
+				var scope = this.stack.global.jmescope;
 				var v = jme.evaluate(jme.compile(expr,scope),scope);
 				var tex = jme.display.texify({tok: v});
 				var mml = TEX.Parse(tex,this.stack.env).mml();
@@ -48,7 +48,7 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 				if(rules===undefined)
 					rules = 'all';
 				var expr = this.GetArgument(name);
-				var scope = this.stack.env.jmescope;
+				var scope = this.stack.global.jmescope;
 				expr = jme.subvars(expr,scope);
 				var tex = jme.display.exprToLaTeX(expr,rules,scope);
 				var mml = TEX.Parse(tex,this.stack.env).mml();
@@ -57,10 +57,7 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 
 			JMEscope: function(name) {
 				var num = this.GetBrackets(name);
-				this.stack.env.jmescope = jme.variables.scope_list[num];
-				var tex = this.GetArgument(name);
-				var mml = TEX.Parse(tex,this.stack.env).mml();
-				this.Push(mml);
+				this.stack.global.jmescope = jme.variables.scope_list[num];
 			}
 		})
 	});
