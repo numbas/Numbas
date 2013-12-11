@@ -26,20 +26,27 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 	MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
 
 		var TEX = MathJax.InputJax.TeX;
+		var currentScope = null;
+
+		TEX.prefilterHooks.Add(function(data) {
+			currentScope = $(data.script).parents('.jme-scope').first().data('jme-scope');
+		});
 
 		TEX.Definitions.Add({macros: {
 			'var': 'JMEvar', 
-			'simplify': 'JMEsimplify',
-			'jmescope': 'JMEscope'
+			'simplify': 'JMEsimplify'
 		}});
 
 		TEX.Parse.Augment({
 			JMEvar: function(name) {
 				var expr = this.GetArgument(name);
-				var scope = this.stack.global.jmescope;
+				var scope = currentScope;
+
 				var v = jme.evaluate(jme.compile(expr,scope),scope);
+
 				var tex = jme.display.texify({tok: v});
 				var mml = TEX.Parse(tex,this.stack.env).mml();
+
 				this.Push(mml);
 			},
 
@@ -48,16 +55,14 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 				if(rules===undefined)
 					rules = 'all';
 				var expr = this.GetArgument(name);
-				var scope = this.stack.global.jmescope;
+
+				var scope = currentScope;
 				expr = jme.subvars(expr,scope);
+
 				var tex = jme.display.exprToLaTeX(expr,rules,scope);
 				var mml = TEX.Parse(tex,this.stack.env).mml();
-				this.Push(mml);
-			},
 
-			JMEscope: function(name) {
-				var num = this.GetBrackets(name);
-				this.stack.global.jmescope = jme.variables.scope_list[num];
+				this.Push(mml);
 			}
 		})
 	});
@@ -539,6 +544,7 @@ display.QuestionDisplay.prototype =
 		var q = this.question;
 		var qd = this;
 		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
 		Numbas.schedule.add(function()
