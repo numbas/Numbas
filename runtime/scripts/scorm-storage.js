@@ -234,7 +234,7 @@ SCORMStorage.prototype = {
 			break;
 		case 'numberentry':
 			this.set(prepath+'type','numeric');
-			this.set(prepath+'correct_responses.0.pattern',p.settings.minvalue+'[:]'+p.settings.maxvalue);
+			this.set(prepath+'correct_responses.0.pattern',Numbas.math.niceNumber(p.settings.minvalue)+'[:]'+Numbas.math.niceNumber(p.settings.maxvalue));
 			break;
 		case 'patternmatch':
 			this.set(prepath+'type','fill-in');
