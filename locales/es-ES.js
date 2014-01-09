@@ -21,7 +21,7 @@ R.registerLocale('en-GB',{
 	'exam.random seed': "ID de la Sesión:",
 	'exam.number of questions': "Número de Preguntas:",
 	'exam.marks available': "Puntaje Máximo:",
-	'exam.pass percentage': "Porcentaje de aprobacion:",
+	'exam.pass percentage': "Porcentaje de aprobación:",
 	'exam.time allowed': "Tiempo permitido:",
 	'exam.passed': 'Aprobado... Muy Bien!!!',
 	'exam.failed': 'Reprobado... Intente otra vez',
@@ -29,12 +29,12 @@ R.registerLocale('en-GB',{
 	'frontpage.start': "Comenzar Examen",
 
 	'suspend.exam suspended': "El Examen ha sido suspendido. Presione Reanudar para continuar.",
-	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
+	'suspend.you can resume': "Usted podrá reanudar esta sesión la próxima vez que inicie esta actividad.",
 	'suspend.resume': "Reanudar",
 
 	'result.exit': "Salir",
 	'result.print': "Imprimir informe de resultados",
-	'result.review': "Review",
+	'result.review': "Revisión",
 	'result.exam summary': "Informe del examen",
 	'result.performance summary': "Informe de Rendimiento",
 	'result.exam start': "Inicio del Examen:",
@@ -53,7 +53,7 @@ R.registerLocale('en-GB',{
 
 	'control.confirm leave': "Usted no a terminado de responder su examen.",
 	'control.not all questions answered': "Usted no a constestado todas las preguntas de su examen.",
-	'control.not all questions submitted': "You have made changes to one or more answers but not submitted them. Please check each question has been submitted.",
+	'control.not all questions submitted': "Ha realizado cambios en una o más respuestas, pero no las ha enviado. Por favor, compruebe cada pregunta se ha respondido.",
 	'control.confirm end': "¿Está seguro de terminar su examen? Después que usted finalice el examen, ya no será posible cambiar sus respuestas.",
 	'control.confirm regen': "¿Quiere nuevos valores para la pregunta? Si usted hace click en OK, todas sus respuestas y puntaje para esta pregunta se perderán.",
 	'control.confirm reveal': "¿Quiere mostrar las respuestas a esta pregunta? Perderá el puntaje recibido hasta ahora.",
@@ -75,29 +75,29 @@ R.registerLocale('en-GB',{
 	'display.part.jme.error making maths': "Error making maths display",
 	
 	'exam.xml.bad root': "Root element of exam XML should be 'exam'",
-	'exam.changeQuestion.no questions': "This exam contains no questions! Check the .exam file for errors.",
+	'exam.changeQuestion.no questions': "Este examen no tiene preguntas! Revisar el archivo con extensión .exam .",
 
 	'feedback.marks': "<strong>%s</strong> %s",
-	'feedback.you were awarded': "You were awarded %s.",
-	'feedback.taken away': "%s %s taken away.",
+	'feedback.you were awarded': "Usted ha sido favorecido %s.",
+	'feedback.taken away': "%s %s ha sido quitado.",
 
-	'jme.tokenise.invalid': "Invalid expression: %s",
+	'jme.tokenise.invalid': "Expresión inválida: %s",
 
-	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
+	'jme.shunt.not enough arguments': "No hay suficientes argumentos para la operación %s",
 	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",
 	'jme.shunt.no left square bracket': "No matching left bracket",
 	'jme.shunt.no left bracket': "No matching left bracket",
 	'jme.shunt.no right bracket': "No matching right bracket",
 	'jme.shunt.no right square bracket': "No matching right square bracket to end list",
-	'jme.shunt.missing operator': "Expression can't be evaluated -- missing an operator.",
+	'jme.shunt.missing operator': "La expresión nopuede ser evaluada -- falta un operador.",
 
-	'jme.typecheck.function maybe implicit multiplication': "Operation %s is not defined. Did you mean <br/><code>%s*%s(...)</code>?",
-	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean <br/><code>%s*(...)</code>?",
-	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
+	'jme.typecheck.function maybe implicit multiplication': "La operación %s no está definida. ¿Tal vez quiso decir <br/><code>%s*%s(...)</code>?",
+	'jme.typecheck.function not defined': "La operación '%s' no está definida. Did you mean <br/><code>%s*(...)</code>?",
+	'jme.typecheck.op not defined': "La operación '%s' no está definida.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
 	'jme.typecheck.map not on enumerable': "<code>map</code> operation must work over a list or a range, not %s",
 
-	'jme.evaluate.undefined variable': "Variable %s is undefined",
+	'jme.evaluate.undefined variable': "La variable %s no está definida",
 
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
@@ -106,13 +106,13 @@ R.registerLocale('en-GB',{
 	'jme.func.except.continuous range': "Can't use the 'except' operator on continuous ranges.",
 
 	'jme.texsubvars.no right bracket': "No matching <code>]</code> in %s arguments.",
-	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
-	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
+	'jme.texsubvars.missing parameter': "Falta un parámetro en %s: %s",
+	'jme.texsubvars.no right brace': "No corresponde <code>}</code> en %s",
 
 	'jme.user javascript.error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 	'jme.user javascript.error': "User-defined javascript function <code>%s</code> didn't return anything",
 
-	'jme.variables.variable not defined': "Variable %s is not defined.",
+	'jme.variables.variable not defined': "La variable %s no está definida.",
 	'jme.variables.empty definition': "Definition of variable %s is empty.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 	'jme.variables.error computing dependency': "Error computing referenced variable <code>%s</code>",
@@ -147,14 +147,14 @@ R.registerLocale('en-GB',{
 	'part.marking.revealed steps with penalty single': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> mark. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps with penalty plural': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> marks. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps no penalty': "You revealed the steps.",
-	'part.marking.not submitted': "No answer submitted",
-	'part.marking.did not answer': "You did not answer this question.",
+	'part.marking.not submitted': "No ha enviado respuesta",
+	'part.marking.did not answer': "Usted no ha respondido esta pregunta.",
 	'part.marking.total score single': "You scored <strong>%s</strong> mark for this part.",
 	'part.marking.total score plural': "You scored <strong>%s</strong> marks for this part.",
 	'part.marking.nothing entered': "You did not enter an answer.",
-	'part.marking.incorrect': "Your answer is incorrect.",
-	'part.marking.correct': "Your answer is correct.",
-	'part.correct answer': "Respuesta Correcta:",
+	'part.marking.incorrect': "Su respuesta es incorrecta.",
+	'part.marking.correct': "Su respuesta es correcta.",
+	'part.correct answer': "Respuesta correcta:",
 
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
@@ -189,7 +189,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.matrix wrong type': "Element of invalid type '%s' used in marking matrix.",
 	'part.mcq.matrix mix of numbers and lists': "Mix of numbers and lists used in marking matrix.",
 	'part.mcq.matrix wrong size': "Marking matrix is the wrong size.",
-	'part.mcq.correct choice': "You chose the correct answer.",
+	'part.mcq.correct choice': "Usted eligió la respuesta correcta.",
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
@@ -213,7 +213,7 @@ R.registerLocale('en-GB',{
 	'question.score feedback.show': 'Mostrar Retroalimentación',
 	'question.score feedback.hide': 'Ocultar Retroalimentación',
 	'question.score feedback.answered total actual': "Puntaje: %(score)/%(marks)",
-	'question.score feedback.answered total': "%(marksString). Answered.",
+	'question.score feedback.answered total': "%(marksString). Respondida.",
 	'question.score feedback.answered actual': "Puntaje: %(scoreString)",
 	'question.score feedback.answered': "Respondida.",
 	'question.score feedback.unanswered': "No Respondida.",
@@ -235,6 +235,6 @@ R.registerLocale('en-GB',{
 
 	'mark': 'Punto',
 	'marks': 'Puntos',
-	'was': 'was',
-	'were': 'were'
+	'was': 'fue',
+	'were': 'fueron'
 });
