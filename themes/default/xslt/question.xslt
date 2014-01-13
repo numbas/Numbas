@@ -36,7 +36,7 @@ Copyright 2011-13 Newcastle University
 	</div>
 </xsl:template>
 
-<xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing" />
+<xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
 
 <xsl:template match="statement">
 	<div class="statement">

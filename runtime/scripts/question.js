@@ -27,15 +27,30 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 {
-	var q = this;
+	var q = question = this;
 	q.exam = exam;
 	q.xml = xml;
 	q.originalXML = q.xml;
 	q.number = number;
 	q.scope = new jme.Scope(gscope);
+	q.preamble = {
+		'js': '',
+		'css': ''
+	};
 
 	//get question's name
 	tryGetAttribute(q,q.xml,'.','name');
+
+	job(function() {
+
+		var preambleNodes = q.xml.selectNodes('preambles/preamble');
+		for(var i = 0; i<preambleNodes.length; i++) {
+			var lang = preambleNodes[i].getAttribute('language');
+			q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
+		}
+
+		q.runPreamble();
+	});
 
 	job(function() {
 		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
@@ -45,7 +60,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 
 		var sets = {};
 		sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
-		for( i=0; i<rulesetNodes.length; i++)
+		for(var i=0; i<rulesetNodes.length; i++)
 		{
 			var name = rulesetNodes[i].getAttribute('name');
 			var set = [];
@@ -173,6 +188,12 @@ Question.prototype =
 
 	leave: function() {
 		this.display.leave();
+	},
+
+	runPreamble: function() {
+		var question = this;
+		var js = '(function() {'+this.preamble.js+'})()';
+		eval(js);
 	},
 
 	subvars: function()

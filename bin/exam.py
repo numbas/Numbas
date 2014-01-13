@@ -191,7 +191,6 @@ class Exam:
 			variables = data['variables']
 			for variable in variables.keys():
 				exam.variables.append(Variable(variable,variables[variable]))
-
 		if 'questions' in data:
 			for question in data['questions']:
 				exam.questions.append(Question.fromDATA(question))
@@ -337,6 +336,11 @@ class Question:
 		self.functions = []
 		self.rulesets = {}
 
+		self.preamble = {
+			'js': '',
+			'css': ''
+		}
+
 	@staticmethod
 	def fromDATA(data):
 		question = Question()
@@ -356,6 +360,9 @@ class Question:
 			functions = data['functions']
 			for function in functions.keys():
 				question.functions.append(Function.fromDATA(function,functions[function]))
+
+		if 'preamble' in data:
+			tryLoad(data['preamble'],['js','css'],question.preamble)
 
 		if 'rulesets' in data:
 			rulesets = data['rulesets']
@@ -378,6 +385,7 @@ class Question:
 								['notes'],
 								['variables'],
 								['functions'],
+								['preambles'],
 								['rulesets']
 							])
 
@@ -406,6 +414,23 @@ class Question:
 				else:
 					st.append(rule.toxml())
 			rules.append(st)
+
+		preambles = question.find('preambles')
+		css_preamble = etree.Element('preamble')
+		css_preamble.attrib = {
+			'language': 'css'
+		}
+		css_preamble.text = strcons(self.preamble['css'])
+		preambles.append(css_preamble)
+		js_preamble = etree.Element('preamble')
+		js_preamble.attrib = {
+			'language': 'js'
+		}
+		js_preamble.text = strcons(self.preamble['js'])
+		preambles.append(js_preamble)
+		preambles.attrib = {
+			'nosubvars': 'true'
+		}
 
 		return question
 

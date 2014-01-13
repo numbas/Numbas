@@ -615,16 +615,6 @@ input[type=text],input[type=number] {
 	text-align: center;
 }
 
-div.lemma {
-	margin-left: 2em;
-	font-family: serif;
-	font-size: 115%;
-}
-div.lemma p {
-	font-style: italic;
-	margin-left: 1em;
-}
-
 .monospace {
 	font-family: monospace;
 	font-size: 130%;

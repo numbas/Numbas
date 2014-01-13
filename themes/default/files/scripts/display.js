@@ -547,6 +547,8 @@ display.QuestionDisplay.prototype =
 		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
+		qd.css = $('<style type="text/css">').text(q.preamble.css);
+
 		Numbas.schedule.add(function()
 		{
 			html.each(function(e) {
@@ -563,6 +565,8 @@ display.QuestionDisplay.prototype =
 		var q = this.question;
 		var qd = this;
 		var exam = q.exam;
+
+		this.html.append(this.css);
 
 		this.visited(q.visited);
 
@@ -601,6 +605,7 @@ display.QuestionDisplay.prototype =
 	},
 
 	leave: function() {
+		this.css.remove();
 	},
 
 	//display Advice

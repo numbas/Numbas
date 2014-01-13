@@ -166,6 +166,8 @@ jme.variables = {
 	DOMcontentsubvars: function(element, scope) {
 		if($.nodeName(element,'iframe'))
 			return element;
+		if(element.hasAttribute('nosubvars'))
+			return element;
 
 		var re_end;
 		$(element).contents().each(function() {
