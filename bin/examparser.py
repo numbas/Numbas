@@ -224,13 +224,13 @@ def printdata(data,ntabs=0):
 		first=True
 		for x in data.keys():
 			if not first:
-				s+='\n'+tabs+'\t'
+				s+='\n'
 			if type(data[x])==dict or type(data[x])==list:
-				s+='\n'+tabs+'\t'
+				s+='\n'
 			s+=x+': '+printdata(data[x],ntabs+1)
 			first=False
 		if '\n' in s: 
-			s='{\n'+tabs+'\t'+s+'\n'+tabs+'}'
+			s='{\n'+s+'\n'+'}'
 		else:
 			s='{'+s+'}'
 		return s
@@ -241,13 +241,13 @@ def printdata(data,ntabs=0):
 			if not first:
 				s+=', '
 				if '\n' in s:
-					s+='\n'+tabs+'\t'
+					s+='\n'
 			if type(x)==dict or type(x)==list:
-				s+='\n'+tabs+'\t'
+				s+='\n'
 			s+=printdata(x,ntabs+1)
 			first=False
 		if '\n' in s: 
-			s='[\n'+tabs+'\t'+s+'\n'+tabs+']'
+			s='[\n'+s+'\n'+']'
 		else:
 			s='['+s+']'
 		return s
@@ -258,10 +258,6 @@ def printdata(data,ntabs=0):
 			print("Unexpected type: "+str)
 
 		if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data or '//' in data):
-			if '\n' in data:
-				data = re.sub('(^[\n\t]*)|([\n\t]*$)','',data)
-				data = '\n'+'\n'.join([pad_left(l,'\t',ntabs) for l in data.split('\n')])+'\n'+tabs
-
 			if '"' in data:
 				return '"""'+data+'"""'
 			else:
