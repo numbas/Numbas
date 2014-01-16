@@ -219,6 +219,12 @@ ko.bindingHandlers.visibleIf = {
 	}
 }
 
+ko.bindingHandlers.stopbinding = {
+	init: function() {
+		return {controlsDescendantBindings: true};
+	}
+}
+
 var display = Numbas.display = {
 	localisePage: function() {
 		//localise strings in page HTML
@@ -245,6 +251,9 @@ var display = Numbas.display = {
 		$('#everything').show();
 
 		ko.applyBindings(Numbas.exam.display);
+		for(var i=0;i<Numbas.exam.questionList.length;i++) {
+			Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
+		}
 
 		$(document).keydown( function(e)
 		{
@@ -483,8 +492,12 @@ display.ExamDisplay.prototype =
 	endRegen: function() {
 		var currentQuestion = this.exam.currentQuestion;
 		this.questions.splice(currentQuestion.number,1,currentQuestion.display);
-		ko.applyBindings(this,this.exam.currentQuestion.display.html[0]);
+		this.applyQuestionBindings(currentQuestion);
 		$('#questionDisplay').fadeIn(200);
+	},
+
+	applyQuestionBindings: function(question) {
+		ko.applyBindings({exam: this, question: question.display},question.display.html[0]);
 	},
 
 	end: function() {

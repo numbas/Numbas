@@ -29,8 +29,8 @@ Copyright 2011-13 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div data-bind="visible: $root.currentQuestionNumber()=={@number}">
-	<div class="question clearAfter" data-bind="with: questions()[{@number}]">
+	<div data-bind="visible: exam.currentQuestionNumber()=={@number}">
+	<div class="question clearAfter" data-bind="with: question">
 		<xsl:apply-templates />
 	</div>
 	</div>
