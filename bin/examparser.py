@@ -46,22 +46,12 @@ class ExamParser:
 
 	#parse a string into a data structure
 	def parse(self,source):
-
-		try:
-			if not isinstance(source,unicode):
-				source=unicode(source,encoding='utf-8')
-		except NameError:
-			pass
-
-		source = source.replace('\ufeff','')
-		if len(source)==0:
-			raise ParseError(self,"Empty source string")
-
 		self.source = source
 		self.cursor = 0
 		self.data = self.getthing()
 		if self.source[self.cursor:].strip()!='':
 			raise ParseError(self,"Didn't parse all input","check for unmatched brackets")
+
 		return self.data
 
 	#scan past comments

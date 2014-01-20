@@ -17,7 +17,7 @@
 
 import re
 import xml.etree.ElementTree as etree
-import examparser
+from numbasobject import NumbasObject
 from examparser import fix_number_repr as strcons
 import sys
 import os
@@ -142,8 +142,8 @@ class Exam:
 	
 	@staticmethod
 	def fromstring(string):
-		data = examparser.ExamParser().parse(string)
-		exam = Exam.fromDATA(data)
+		exam_object = NumbasObject(string)
+		exam = Exam.fromDATA(exam_object.data)
 		return exam
 
 	@staticmethod
