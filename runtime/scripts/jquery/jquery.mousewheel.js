@@ -1,3 +1,4 @@
+Numbas.queueScript('jquery.mousewheel',['jquery'],function(module) {
 /*! Copyright (c) 2011 Brandon Aaron (http://brandonaaron.net)
  * Licensed under the MIT License (LICENSE.txt).
  *
@@ -82,3 +83,4 @@ function handler(event) {
 }
 
 })(jQuery);
+});

@@ -1,3 +1,4 @@
+Numbas.queueScript('sarissa',[],function(module) {
 /*
  * ====================================================================
  * About Sarissa: http://dev.abiss.gr/sarissa
@@ -1053,3 +1054,5 @@ Sarissa.setRemoteJsonCallback = function(url, callback, callbackParam) {
 };
 
 //   EOF
+module.exports.Sarissa = Sarissa;
+});

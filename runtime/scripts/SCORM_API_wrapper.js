@@ -1,3 +1,4 @@
+Numbas.queueScript('SCORM_API_wrapper',[],function(module) {
 /* ===========================================================
 
 pipwerks SCORM Wrapper for JavaScript
@@ -837,3 +838,5 @@ pipwerks.UTILS.trace = function(msg){
 
      }
 };
+module.exports.pipwerks = pipwerks
+});

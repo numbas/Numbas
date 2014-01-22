@@ -14,7 +14,7 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
-Numbas.queueScript('scripts/math.js',[],function() {
+Numbas.queueScript('math',['base'],function() {
 
 var math = Numbas.math = {
 

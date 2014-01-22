@@ -1,3 +1,4 @@
+Numbas.queueScript('R',[],function(module) {
 /*jslint white: false, browser: true, devel: true, onevar: true, undef: true,
  nomen: true, eqeqeq: true, plusplus: false, bitwise: true, regexp: true,
  newcap: true, immed: true, maxlen: 100, indent: 4 */
@@ -244,3 +245,4 @@
     exports.R = eR;
 
 }(typeof module !== 'undefined' && module.exports ? module.exports : this));
+});

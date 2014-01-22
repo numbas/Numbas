@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/storage.js',[],function() {
+Numbas.queueScript('storage',['base'],function() {
 
 Numbas.store = {};
 

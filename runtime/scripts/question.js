@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/question.js',['schedule','display','jme','jme-variables','xml','util','scorm-storage'],function() {
+Numbas.queueScript('question',['base','schedule','display','jme','jme-variables','xml','util','scorm-storage'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;

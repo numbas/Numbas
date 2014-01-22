@@ -1,3 +1,4 @@
+Numbas.queueScript('jquery.impromptu',['jquery'],function(module) {
 /*
  * jQuery Impromptu
  * By: Trent Richardson [http://trentrichardson.com]
@@ -452,3 +453,4 @@
 	});
 	
 })(jQuery);
+});

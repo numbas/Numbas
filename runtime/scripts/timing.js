@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/timing.js',[],function() {
+Numbas.queueScript('timing',['base'],function() {
 var timing = Numbas.timing = {
 	//timing
 	displayDate: function()

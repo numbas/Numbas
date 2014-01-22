@@ -1,4 +1,5 @@
-﻿// seedrandom.js version 2.0.
+﻿Numbas.queueScript('seedrandom',[],function(module) {
+// seedrandom.js version 2.0.
 // Author: David Bau 4/2/2011
 //
 // Defines a method Math.seedrandom() that, when called, substitutes
@@ -271,3 +272,4 @@ mixkey(math.random(), pool);
   52    // significance: there are 52 significant digits in a double
 );
 
+});

@@ -17,7 +17,7 @@ Copyright 2011-13 Newcastle University
 // utility.js
 // convenience functions, extensions to javascript built-ins, etc.
 
-Numbas.queueScript('scripts/util.js',['math'],function() {
+Numbas.queueScript('util',['base','math'],function() {
 var util = Numbas.util = {
 
 	// extend(A,B) - derive type B from A
@@ -592,7 +592,7 @@ if(!String.prototype.split)
 // -- kriskowal Kris Kowal Copyright (C) 2009-2011 MIT License
 // -- tlrobinson Tom Robinson Copyright (C) 2009-2010 MIT License (Narwhal Project)
 // -- dantman Daniel Friesen Copyright (C) 2010 XXX TODO License or CLA
-// -- fschaefer Florian Sch‰fer Copyright (C) 2010 MIT License
+// -- fschaefer Florian Sch√§fer Copyright (C) 2010 MIT License
 // -- Gozala Irakli Gozalishvili Copyright (C) 2010 MIT License
 // -- kitcambridge Kit Cambridge Copyright (C) 2011 MIT License
 // -- kossnocorp Sasha Koss XXX TODO License or CLA

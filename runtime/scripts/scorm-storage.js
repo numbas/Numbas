@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/scorm-storage.js',[],function() {
+Numbas.queueScript('scorm-storage',['base','SCORM_API_wrapper','storage'],function() {
 Numbas.storage.clean = function()
 {
 	for(x in localStorage) delete localStorage[x];

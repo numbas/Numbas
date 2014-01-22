@@ -13,7 +13,7 @@ Copyright 2011-13 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-Numbas.queueScript('scripts/jme-variables.js',['jme','util'],function() {
+Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 
 var jme = Numbas.jme;
 var util = Numbas.util;
