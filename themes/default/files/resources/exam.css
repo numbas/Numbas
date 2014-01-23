@@ -26,6 +26,12 @@ o\:* { behavior: url(#default#VML); }
     height: 0;
 }
 
+.invisible {
+    position: absolute !important;
+    left: -20000px;
+    top: -20000px;
+}
+
 html{	
 	font-family: sans-serif;
 }
@@ -715,7 +721,33 @@ div.jqi button.jqidefaultbutton{
 	background-color: #BF5E26;
 }
 
+.print-only {
+	display: none;
+}
+
 @media print {
+	.print-only {
+		display: inherit;
+	}
+
+	.penaltyMessage {
+		display: none;
+	}
+
+	table {
+		page-break-inside: avoid;
+	}
+
+	#questionContainer, .colwrap, .col1wrap {
+		float: none !important;
+	}
+
+	.question.invisible {
+		position: inherit !important;
+		left: inherit;
+		top: inherit;
+	}
+
 	.logo img {
 		height: 50%;
 	}

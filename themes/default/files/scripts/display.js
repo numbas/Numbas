@@ -72,6 +72,8 @@ function resizeF() {
 	$(this).width(Math.max(w+30,60)+'px');
 };
 
+ko.bin
+
 ko.bindingHandlers.horizontalSlideVisible = {
 	init: function(element, valueAccessor) {
 		var containerWidth = $(element).width();
@@ -199,6 +201,16 @@ ko.bindingHandlers.hover = {
 				val(false)
 			}
 		);
+	}
+}
+
+ko.bindingHandlers.visible = {
+	init: function(element,valueAccessor) {
+		$(element).css('display','');
+	},
+	update: function(element,valueAccessor) {
+		var val = ko.unwrap(valueAccessor());
+		$(element).toggleClass('invisible',!val);
 	}
 }
 
@@ -570,6 +582,9 @@ display.QuestionDisplay.prototype =
 
 			$('body').trigger('question-html-attached',q,qd);
 			$('body').unbind('question-html-attached');
+
+			// make mathjax process the question text (render the maths)
+			Numbas.display.typeset(this.html,this.postTypesetF);
 		});
 	},
 
