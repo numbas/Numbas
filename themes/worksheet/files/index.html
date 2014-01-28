@@ -22,32 +22,6 @@ Copyright 2011 Newcastle University
 
 		<meta http-equiv="X-UA-Compatible" content="IE=8">
 
-		<!--Sarissa XML handling-->
-		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
-
-		<!-- Math.seedrandom - seedable pseudorandom number generator -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/seedrandom/seedrandom.js"></script>
-
-		<!-- R.js - localisation -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="locale.js"></script>
-
-		<!--JQuery scripts-->
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery-ui.custom.min.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.mousewheel.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.xslTransform.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
-
-		<!-- pipwerks SCORM wrapper -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
-
-		<!-- numbas stuff -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/numbas.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/start-exam.js" charset="utf-8"></script>
-
 		<!-- mathjax stuff -->
 		<script type="text/x-mathjax-config">
 			MathJax.Hub.Config({
@@ -61,6 +35,13 @@ Copyright 2011 Newcastle University
 		</script>
 		<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="scripts.js" charset="utf-8"></script>
+		<script>
+			Numbas.queueScript('go',['start-exam'],function() {
+				Numbas.init();
+			});
+		</script>
 
 		<!-- CSS -->
 		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />

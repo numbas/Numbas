@@ -1,8 +1,4 @@
-$(document).ready(function() {
-	Numbas.loadScript('settings.js');
-	Numbas.loadScript('scripts/exam.js');
-	Numbas.startOK = true;
-
+Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 	Numbas.init = function() {
 		var job = Numbas.schedule.add;
 
@@ -13,7 +9,5 @@ $(document).ready(function() {
 			Numbas.display.init();
 		});
 	};
-
-	Numbas.tryInit();
 });
 
