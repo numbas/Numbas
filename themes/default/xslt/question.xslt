@@ -29,10 +29,9 @@ Copyright 2011-13 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div data-bind="visible: exam.currentQuestionNumber()=={@number}">
-	<div class="question clearAfter" data-bind="with: question">
+	<div class="question clearAfter" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
+		<h3 data-bind="text: displayName" class="print-only"></h3>
 		<xsl:apply-templates />
-	</div>
 	</div>
 </xsl:template>
 
@@ -130,7 +129,7 @@ Copyright 2011-13 Newcastle University
 	<div class="stepsBtn">
 		<button class="btn" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
 		<button class="btn" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
-		(<span class="penaltyMessage" data-bind="html: stepsPenaltyMessage"></span>)
+		<span class="penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
 	</div>
 </xsl:template>
 
@@ -266,7 +265,7 @@ Copyright 2011-13 Newcastle University
 					<xsl:text>start-column</xsl:text>
 				</xsl:if>
 			</xsl:attribute>
-			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
+			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
 	</li>
