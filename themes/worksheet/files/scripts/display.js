@@ -18,25 +18,35 @@ Copyright 2011 Newcastle University
 
 Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
 	
+	var util = Numbas.util;
+	var jme = Numbas.jme;
+
 	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
 	MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
 
 		var TEX = MathJax.InputJax.TeX;
+		var currentScope = null;
+
+		TEX.prefilterHooks.Add(function(data) {
+			currentScope = $(data.script).parents('.jme-scope').first().data('jme-scope');
+		});
 
 		TEX.Definitions.Add({macros: {
 			'var': 'JMEvar', 
-			'simplify': 'JMEsimplify',
-			'jmescope': 'JMEscope'
+			'simplify': 'JMEsimplify'
 		}});
 
 		TEX.Parse.Augment({
 			JMEvar: function(name) {
 				var expr = this.GetArgument(name);
-				var scope = this.stack.env.jmescope;
+				var scope = currentScope;
+
 				var v = jme.evaluate(jme.compile(expr,scope),scope);
+
 				var tex = jme.display.texify({tok: v});
 				var mml = TEX.Parse(tex,this.stack.env).mml();
+
 				this.Push(mml);
 			},
 
@@ -45,18 +55,13 @@ Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing'
 				if(rules===undefined)
 					rules = 'all';
 				var expr = this.GetArgument(name);
-				var scope = this.stack.env.jmescope;
+
+				var scope = currentScope;
 				expr = jme.subvars(expr,scope);
+
 				var tex = jme.display.exprToLaTeX(expr,rules,scope);
 				var mml = TEX.Parse(tex,this.stack.env).mml();
-				this.Push(mml);
-			},
 
-			JMEscope: function(name) {
-				var num = this.GetBrackets(name);
-				this.stack.env.jmescope = jme.variables.scope_list[num];
-				var tex = this.GetArgument(name);
-				var mml = TEX.Parse(tex,this.stack.env).mml();
 				this.Push(mml);
 			}
 		})
@@ -247,14 +252,23 @@ display.QuestionDisplay.prototype =
 	makeHTML: function() {
 		var q = this.q;
 		var qd = this;
-		q.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
+		html.addClass('jme-scope').data('jme-scope',q.scope);
+		$('#questionDisplay').append(html);
+
+		qd.css = $('<style type="text/css">').text(q.preamble.css);
 
 		Numbas.schedule.add(function()
 		{
-			q.html.each(function(e) {
+			html.each(function(e) {
 				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
 			})
-			qd.examContext.find('.questionList').append(q.html);
+
+			html.append(qd.css);
+
+			$('body').trigger('question-html-attached',q,qd);
+			$('body').unbind('question-html-attached');
+			qd.examContext.find('.questionList').append(html);
 		});
 	},
 
