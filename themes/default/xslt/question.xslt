@@ -265,7 +265,7 @@ Copyright 2011-13 Newcastle University
 					<xsl:text>start-column</xsl:text>
 				</xsl:if>
 			</xsl:attribute>
-			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
+			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
 	</li>
