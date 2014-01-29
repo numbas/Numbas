@@ -738,6 +738,10 @@ div.jqi button.jqidefaultbutton{
 		page-break-inside: avoid;
 	}
 
+	#questionContainer.invisible {
+		position: inherit !important;
+	}
+
 	#questionContainer, .colwrap, .col1wrap {
 		float: none !important;
 	}
