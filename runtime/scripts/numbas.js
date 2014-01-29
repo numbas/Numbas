@@ -114,15 +114,6 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 	*/
 }
 
-var loadCSS = Numbas.loadCSS = function(file)
-{
-	var link = document.createElement('link');
-	link.rel = "stylesheet";
-	link.type = "text/css";
-	link.href = file;
-	document.getElementsByTagName('head')[0].appendChild(link);
-}
-
 Numbas.queueScript = function(file, deps, callback)	
 //queue up a file's code to be executed
 //file is the path of this file

@@ -19,8 +19,6 @@ Copyright 2011 Newcastle University
 */
 
 Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],function() {
-	Numbas.loadCSS('extensions/jsxgraph/jsxgraph.css');
-	
 	var jme = Numbas.jme;	
 	var util = Numbas.util;
 	var math = Numbas.math;
