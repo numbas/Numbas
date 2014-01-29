@@ -217,17 +217,20 @@ ko.bindingHandlers.visible = {
 ko.bindingHandlers.visibleIf = {
 	init: function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 		var val = ko.utils.unwrapObservable(valueAccessor());
-		$(element).toggle(val);
-		if(val)
+		if(val && !ko.utils.domData.get(element,'visible-if-happened')) {
 			ko.applyBindingsToDescendants(bindingContext,element);
-
+			ko.utils.domData.set(element,'visible-if-happened',true);
+		}
+		$(element).toggleClass('invisible',!val);
 		return {controlsDescendantBindings: true};
 	},
 	update:function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 		var val = ko.utils.unwrapObservable(valueAccessor());
-		$(element).toggle(val);
-		if(val)
+		if(val && !ko.utils.domData.get(element,'visible-if-happened')) {
 			ko.applyBindingsToDescendants(bindingContext,element);
+			ko.utils.domData.set(element,'visible-if-happened',true);
+		}
+		$(element).toggleClass('invisible',!val);
 	}
 }
 
