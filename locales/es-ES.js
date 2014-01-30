@@ -1,4 +1,4 @@
-Numbas.queueScript('en-GB',['R'],function() {
+Numbas.queueScript('es-ES',['R'],function() {
 /*
 Copyright 2011 Newcastle University
 

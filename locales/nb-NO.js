@@ -1,4 +1,4 @@
-Numbas.queueScript('en-GB',['R'],function() {
+Numbas.queueScript('nb-NO',['R'],function() {
 /*
    Copyright 2011 Newcastle University & 2013 Tore Gaupseth
 
