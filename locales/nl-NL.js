@@ -1,3 +1,4 @@
+Numbas.queueScript('en-GB',['R'],function() {
 /*
 Copyright 2011 Newcastle University
 
@@ -220,4 +221,5 @@ R.registerLocale('nl-NL',{
 	'marks': 'punten',
 	'was': 'was',
 	'were': 'waren'
+});
 });

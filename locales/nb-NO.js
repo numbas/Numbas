@@ -1,3 +1,4 @@
+Numbas.queueScript('en-GB',['R'],function() {
 /*
    Copyright 2011 Newcastle University & 2013 Tore Gaupseth
 
@@ -239,4 +240,5 @@ R.registerLocale('nb-NO',{
 	'marks': 'poeng',
 	'was': 'var',
 	'were': 'var'
+});
 });
