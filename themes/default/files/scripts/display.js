@@ -17,7 +17,6 @@ Copyright 2011-13 Newcastle University
 //Display code
 
 Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display'],function() {
-	
 	var util = Numbas.util;
 	var jme = Numbas.jme;
 
@@ -587,7 +586,7 @@ display.QuestionDisplay.prototype =
 			$('body').unbind('question-html-attached');
 
 			// make mathjax process the question text (render the maths)
-			Numbas.display.typeset(this.html,this.postTypesetF);
+			Numbas.display.typeset(qd.html,qd.postTypesetF);
 		});
 	},
 
