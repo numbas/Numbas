@@ -1131,12 +1131,12 @@ display.MultipleResponsePartDisplay.prototype =
 			this.studentAnswer(null);
 			for(var i=0;i<part.numAnswers; i++) {
 				if(part.ticks[i][0])
-					this.studentAnswer(i);
+					this.studentAnswer(i+'');
 			}
 			break;
 		case 'm_n_2':
 			for(var i=0; i<part.numAnswers; i++) {
-				this.ticks[i](part.ticks[i][0]);
+				this.ticks[i](part.ticks[i][0]+'');
 			}
 			break;
 		case 'm_n_x':
@@ -1145,7 +1145,7 @@ display.MultipleResponsePartDisplay.prototype =
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
 						if(part.ticks[i][j]) {
-							this.ticks[j](i);
+							this.ticks[j](i+'');
 						}
 					}
 				}
@@ -1153,7 +1153,7 @@ display.MultipleResponsePartDisplay.prototype =
 			case 'checkbox':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
-						this.ticks[i][j](part.ticks[i][j]);
+						this.ticks[i][j](part.ticks[i][j]+'');
 					}
 				}
 				break;
