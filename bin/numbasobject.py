@@ -1,5 +1,6 @@
 # load an exam from a source file, migrating it to the latest version if necessary
 from examparser import ExamParser
+from migrations import migrations
 import json
 
 class VersionError(Exception):
@@ -9,8 +10,7 @@ class VersionError(Exception):
 		return 'Invalid version number %s' % self.version
 
 class NumbasObject:
-	version = 1
-	content = {}
+	version = '1'
 
 	def __init__(self,source=None,data=None,version=1):
 		if data:
@@ -41,12 +41,12 @@ class NumbasObject:
 		if source[:2]=='//':
 			version, json_string = source.split('\n',1)
 			try:
-				version = int(version[2:].strip())
+				version = version[2:].strip()
 			except ValueError:
 				raise VersionError(version)
 			data = json.loads(json_string)
 		else:
-			version = 1
+			version = '1'
 			data = ExamParser().parse(source)
 
 		self.version, self.data = version,data
@@ -59,12 +59,3 @@ class NumbasObject:
 	def __str__(self):
 		return '// %s\n%s' % (self.version,json.dumps(self.data))
 
-migrations = {}
-def migration(version_from,version_to):
-	def migration_decorator(f):
-		def do_migration(data):
-			f(data)
-			return version_to
-		migrations[version_from] = do_migration
-		return do_migration
-	return migration_decorator
