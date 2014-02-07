@@ -39,7 +39,7 @@ def xml2js(options):
 
 	extensionfiles = ['extensions/'+x+'/'+x+'.js'for x in [os.path.split(y)[1] for y in options.extensions]]
 
-	out = """Numbas.queueScript('settings.js',%s,function() {
+	out = """Numbas.queueScript('settings',%s,function() {
 Numbas.rawxml = {
 	templates: {
 		%s

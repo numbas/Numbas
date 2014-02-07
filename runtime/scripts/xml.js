@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/xml.js',['jme'],function() {
+Numbas.queueScript('xml',['base','jme'],function() {
 
 var xml = Numbas.xml = {
 	dp: new DOMParser(),

@@ -14,7 +14,7 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
-$(document).ready(function() {
+Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
 	// Initialise the exam:
 	// - Connect to the LMS, which might have saved student answers
@@ -91,9 +91,4 @@ $(document).ready(function() {
 
 	}
 
-	Numbas.loadScript('settings.js');
-	Numbas.loadScript('scripts/exam.js');
-	Numbas.startOK = true;
-	Numbas.tryInit();
 });
-

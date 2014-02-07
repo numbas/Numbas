@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/schedule.js',[],function() {
+Numbas.queueScript('schedule',['base'],function() {
 //schedule a function to be called
 Numbas.schedule = {
 	calls: [],

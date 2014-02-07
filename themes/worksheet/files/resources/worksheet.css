@@ -1,0 +1,188 @@
+body.worksheet {
+	font-size: 1em;
+}
+body.worksheet .questionList {
+	max-height: none;
+}
+body.worksheet h1,h2,h3,h4,h5,h6 {
+        margin-top: 0;
+        margin-bottom: 0;
+}
+body.worksheet .number {
+        float: left;
+        font-size: 1.1em;
+        margin-right: 0.5em;
+        margin-left: -1.2em;
+}
+body.worksheet #infoDisplay {
+	display: none;
+}
+body.worksheet button {
+	background-color: #a2d1f0;
+	border: 2px solid black;
+	border-radius: 3px;
+}
+body.worksheet button:hover {
+	background-color: #fc0;
+}
+body.worksheet .warning-icon {
+	display:none;
+}
+body.worksheet .steps {
+	display:none;
+}
+body.worksheet .statement {
+	margin: 1em 0;
+	padding-top: 0.2em;
+	padding-left: 1em;
+	padding-bottom: 0.1em;
+	background: none;
+}
+body.worksheet #questionContainer p {
+	line-height: 1em;
+}
+body.worksheet hr {
+	max-width: 30em;
+	border: none;
+	height:1px;
+	background: #a2d1f0;
+}
+body.worksheet #questionNameDisplay {
+	font-size:2em;
+}
+body.worksheet .examID {
+	float: left;
+}
+
+body.worksheet .timeBox{
+	text-align:center;
+}
+body.worksheet #examBanner {
+	margin-left: 0;
+	line-height: 1em;
+}
+
+body.worksheet #generatorControls {
+    font-size:  1.5em;
+    margin-bottom: 1em;
+    background: #eee;
+    padding:  0.5em;
+}
+
+body.worksheet #generatorControls p {
+	margin-bottom: 0.3em;
+}
+
+body.worksheet #generatorControls ol {
+	margin-left: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+body.worksheet #generatorControls #print {
+	display: none
+}
+
+body.worksheet #generatorControls #sheettype {
+	list-style-type: none;
+	margin-left: 0;
+	padding-left: 0;
+}
+body.worksheet #generatorControls #sheettype li:hover {
+	cursor: pointer;
+}
+
+body.worksheet #generatorControls input[type=number] {
+    border: none;
+	width: 3em;
+}
+
+body.worksheet .questionsheet .advice {
+	display: none;
+}
+body.worksheet .studentanswers .content {
+	display: none;
+}
+
+
+body.worksheet #examTemplate {
+	display: none;
+}
+
+body.worksheet .exam:not(:last-child) {
+	page-break-after: always;
+}
+
+body.worksheet .logo img {
+	height: 50%;
+}
+body.worksheet .navBar {
+	display:none;
+}
+body.worksheet #questionContainer .colwrap {
+	width: 100%;
+	left: initial;
+}
+body.worksheet #questionContainer .col1wrap {
+	width: 100%;
+	right: auto;
+	padding: initial;
+	position:initial;
+}
+body.worksheet .questionList {
+	margin:initial;
+	right:initial;
+	list-style-type: none;
+}
+body.worksheet #partFeedback {
+	display: none;
+}
+
+body.worksheet .questionMenu {
+	display: none;
+}
+
+body.worksheet input[type="text"], body.worksheet input[type="number"] {
+	border:none;
+	border-bottom: 1px solid;
+	background-color: #fafafa;
+	height: 1.5em;
+	width: 6em;
+}
+body.worksheet .btn {
+	display: none;
+}
+
+@media screen {
+	body.worksheet .exam {
+		display: none;
+	}
+	body.worksheet .exam:not(:last-child) {
+		padding-bottom: 2.5em;
+		margin-bottom: 2.5em;
+		border-bottom: 2px dashed black;
+	}
+}
+
+@media print {
+	body.worksheet {
+		font-size: 0.9em;
+	}
+
+	body.worksheet #generatorControls {
+		display: none;
+	}
+
+
+	body.worksheet input[type="checkbox"], body.worksheet input[type="radio"] {
+		width: 0;
+		margin-right: 1.2em;
+	}
+	body.worksheet input[type="checkbox"]::before, body.worksheet input[type="radio"]::before {
+		content: '';
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		border: 1px solid black;
+		background: white;
+	}
+}

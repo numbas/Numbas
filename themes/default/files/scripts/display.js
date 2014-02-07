@@ -16,8 +16,7 @@ Copyright 2011-13 Newcastle University
 
 //Display code
 
-Numbas.queueScript('scripts/display.js',['controls','math','xml','util','timing','jme','jme-display'],function() {
-	
+Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display'],function() {
 	var util = Numbas.util;
 	var jme = Numbas.jme;
 
@@ -71,6 +70,8 @@ function resizeF() {
 	var w = $.textMetrics(this).width;
 	$(this).width(Math.max(w+30,60)+'px');
 };
+
+ko.bin
 
 ko.bindingHandlers.horizontalSlideVisible = {
 	init: function(element, valueAccessor) {
@@ -202,20 +203,33 @@ ko.bindingHandlers.hover = {
 	}
 }
 
+ko.bindingHandlers.visible = {
+	init: function(element,valueAccessor) {
+		$(element).css('display','');
+	},
+	update: function(element,valueAccessor) {
+		var val = ko.unwrap(valueAccessor());
+		$(element).toggleClass('invisible',!val);
+	}
+}
+
 ko.bindingHandlers.visibleIf = {
 	init: function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 		var val = ko.utils.unwrapObservable(valueAccessor());
-		$(element).toggle(val);
-		if(val)
+		if(val && !ko.utils.domData.get(element,'visible-if-happened')) {
 			ko.applyBindingsToDescendants(bindingContext,element);
-
+			ko.utils.domData.set(element,'visible-if-happened',true);
+		}
+		$(element).toggleClass('invisible',!val);
 		return {controlsDescendantBindings: true};
 	},
 	update:function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 		var val = ko.utils.unwrapObservable(valueAccessor());
-		$(element).toggle(val);
-		if(val)
+		if(val && !ko.utils.domData.get(element,'visible-if-happened')) {
 			ko.applyBindingsToDescendants(bindingContext,element);
+			ko.utils.domData.set(element,'visible-if-happened',true);
+		}
+		$(element).toggleClass('invisible',!val);
 	}
 }
 
@@ -560,6 +574,8 @@ display.QuestionDisplay.prototype =
 		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
+		qd.css = $('<style type="text/css">').text(q.preamble.css);
+
 		Numbas.schedule.add(function()
 		{
 			html.each(function(e) {
@@ -568,6 +584,9 @@ display.QuestionDisplay.prototype =
 
 			$('body').trigger('question-html-attached',q,qd);
 			$('body').unbind('question-html-attached');
+
+			// make mathjax process the question text (render the maths)
+			Numbas.display.typeset(qd.html,qd.postTypesetF);
 		});
 	},
 
@@ -576,6 +595,8 @@ display.QuestionDisplay.prototype =
 		var q = this.question;
 		var qd = this;
 		var exam = q.exam;
+
+		this.html.append(this.css);
 
 		this.visited(q.visited);
 
@@ -614,6 +635,7 @@ display.QuestionDisplay.prototype =
 	},
 
 	leave: function() {
+		this.css.remove();
 	},
 
 	//display Advice
@@ -1109,12 +1131,12 @@ display.MultipleResponsePartDisplay.prototype =
 			this.studentAnswer(null);
 			for(var i=0;i<part.numAnswers; i++) {
 				if(part.ticks[i][0])
-					this.studentAnswer(i);
+					this.studentAnswer(i+'');
 			}
 			break;
 		case 'm_n_2':
 			for(var i=0; i<part.numAnswers; i++) {
-				this.ticks[i](part.ticks[i][0]);
+				this.ticks[i](part.ticks[i][0]+'');
 			}
 			break;
 		case 'm_n_x':
@@ -1123,7 +1145,7 @@ display.MultipleResponsePartDisplay.prototype =
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
 						if(part.ticks[i][j]) {
-							this.ticks[j](i);
+							this.ticks[j](i+'');
 						}
 					}
 				}
@@ -1131,7 +1153,7 @@ display.MultipleResponsePartDisplay.prototype =
 			case 'checkbox':
 				for(var i=0; i<part.numAnswers; i++) {
 					for(var j=0; j<part.numChoices; j++) {
-						this.ticks[i][j](part.ticks[i][j]);
+						this.ticks[i][j](part.ticks[i][j]+'');
 					}
 				}
 				break;

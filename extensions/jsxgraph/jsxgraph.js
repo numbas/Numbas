@@ -19,8 +19,6 @@ Copyright 2011 Newcastle University
 */
 
 Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],function() {
-	Numbas.loadCSS('extensions/jsxgraph/jsxgraph.css');
-	
 	var jme = Numbas.jme;	
 	var util = Numbas.util;
 	var math = Numbas.math;
@@ -28,6 +26,13 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 	var jsxgraph = Numbas.extensions.jsxgraph = {};
 
 	var boards = 0;
+	var boardholder;
+	$(document).ready(function() {
+		boardholder = document.createElement('div');
+		boardholder.id = 'jsxgraphholder';
+		boardholder.setAttribute('class','invisible');
+		document.body.appendChild(boardholder);
+	});
 	jsxgraph.makeBoard = function(width,height,options) {
 		width = width || '600px';
 		height = height || '600px';
@@ -38,7 +43,7 @@ Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],fu
 		div.id = 'jsxgraph'+(boards++);
 		div.style.width = width;
 		div.style.height = height;
-		document.body.appendChild(div);
+		boardholder.appendChild(div);
 		div.board = JXG.JSXGraph.initBoard(div.id,options);
 
 		$(document).on('question-html-attached',function() {

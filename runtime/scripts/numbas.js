@@ -78,7 +78,7 @@ Numbas.Error.prototype.constructor = Numbas.Error;
 //
 
 var scriptreqs = {};
-Numbas.startOK = false;
+Numbas.startOK = true;
 
 function RequireScript(file)
 {
@@ -105,23 +105,14 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 		var req = new RequireScript(file);
 	}
 
+	/*
 	var script = document.createElement("script");
 	script.type = "text/javascript";
 	script.charset="utf-8";
 	script.src = file;
 	document.getElementsByTagName('head')[0].appendChild(script);
+	*/
 }
-
-var loadCSS = Numbas.loadCSS = function(file)
-{
-	var link = document.createElement('link');
-	link.rel = "stylesheet";
-	link.type = "text/css";
-	link.href = file;
-	document.getElementsByTagName('head')[0].appendChild(link);
-}
-
-Numbas.scriptPrefix = 'scripts/';
 
 Numbas.queueScript = function(file, deps, callback)	
 //queue up a file's code to be executed
@@ -129,16 +120,13 @@ Numbas.queueScript = function(file, deps, callback)
 //deps is a list of other files which need to be run before this one can be
 //callback is a function wrapping up this file's code
 {
-	file = file.replace(/^scripts\//,Numbas.scriptPrefix);
-	var req = scriptreqs[file];
+	var req = scriptreqs[file] || new RequireScript(file);
 
 	if(typeof(deps)=='string')
 		deps = [deps];
 	for(var i=0;i<deps.length;i++)
 	{
 		var dep = deps[i];
-		if(!dep.match('/'))				//so can refer to built-in scripts just by name
-			dep = Numbas.scriptPrefix+deps[i]+'.js';
 		deps[i] = dep;
 		loadScript(dep);
 		scriptreqs[dep].backdeps.push(file);
@@ -158,46 +146,50 @@ Numbas.tryInit = function()
 //called when all files have been requested, will try to execute all queued code if all script files have been loaded
 {
 
-	//see if every requested script has been loaded
-	var go=true;
-	for(var x in scriptreqs)
-	{
-		if(!scriptreqs[x].loaded)
-			go=false;
-	}
-	if(!go) { return; }
-
 	//put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
 	var stack = [];
-	for(var x in scriptreqs)
-	{
-		stack.push(scriptreqs[x]);
+	var ind = 0;
+	function get_ind() {
+		return 'margin-left: '+ind+'em';
 	}
 
-
-	while(stack.length)
-	{
-		for(var i=0;i<stack.length;i++)
-		{
-			var req = stack[i];
+	function tryRun(req) {
+		if(req.loaded && !req.executed) {
+			//console.log('%ctryrun '+req.file,get_ind());
 			var go = true;
 			for(var j=0;j<req.fdeps.length;j++)
 			{
-				if(!scriptreqs[req.fdeps[j]].executed)
+				if(!scriptreqs[req.fdeps[j]].executed) {
+					//console.log('%cdon\'t have '+req.fdeps[j],'color: red;'+get_ind());
 					go=false;
+					break;
+				}
+				else {
+					//console.log('%cgot '+req.fdeps[j],'color:green;'+get_ind());
+				}
 			}
 			if(go)
 			{
-				req.callback();
+				//console.log('%crun '+req.file,'background-color: #eee;'+get_ind());
+				req.callback({exports:window});
 				req.executed=true;
-				stack.splice(i,1);
-				break;
+				ind++;
+				for(var j=0;j<req.backdeps.length;j++) {
+					//console.log('%ctry '+req.backdeps[j],get_ind());
+					tryRun(scriptreqs[req.backdeps[j]]);
+				}
+				ind--;
 			}
 		}
 	}
-	Numbas.init();
+	for(var x in scriptreqs)
+	{
+		tryRun(scriptreqs[x]);
+	}
 }
 
+Numbas.queueScript('base',['jquery','R','seedrandom','knockout','sarissa'],function() {
+});
 
 
 })();

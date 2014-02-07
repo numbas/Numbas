@@ -244,6 +244,25 @@ def makeExam(options):
 
 		files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest_string)
 
+	stylesheets = [(dst,src) for dst,src in files.items() if os.path.splitext(dst)[1]=='.css']
+	for dst,src in stylesheets:
+		del files[dst]
+	stylesheets = [src for dst,src in stylesheets]
+	stylesheets = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in stylesheets)
+	files[os.path.join('.','styles.css')] = io.StringIO(stylesheets)
+	
+
+	javascripts = [(dst,src) for dst,src in files.items() if os.path.splitext(dst)[1]=='.js']
+	for dst,src in javascripts:
+		del files[dst]
+
+	javascripts = [src for dst,src in javascripts]
+	numbas_loader_path = os.path.join(options.path,'runtime','scripts','numbas.js')
+	javascripts.remove(numbas_loader_path)
+	javascripts.insert(0,numbas_loader_path)
+	javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
+	files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
+
 	if options.minify:
 		for dst,src in files.items():
 			if isinstance(src,basestring) and os.path.splitext(dst)[1] == '.js':

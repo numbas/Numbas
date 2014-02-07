@@ -20,36 +20,7 @@ Copyright 2011-13 Newcastle University
 
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 
-		<meta http-equiv="X-UA-Compatible" content="IE=9">
-
-		<!--Sarissa XML handling-->
-		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/sarissa/sarissa_ieemu_xpath.js"></script>
-
-		<!-- Math.seedrandom - seedable pseudorandom number generator -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/seedrandom/seedrandom.js"></script>
-
-		<!-- R.js - localisation -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/R/R.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="locale.js"></script>
-
-		<!--JQuery scripts-->
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery-ui.custom.min.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.mousewheel.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.xslTransform.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/jquery.impromptu.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/jquery/json2.js"></script>
-
-		<!-- knockout.js - model/view bindings -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/knockout/knockout.js"></script>
-
-		<!-- pipwerks SCORM wrapper -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/SCORM_API_wrapper.js"></script>
-
-		<!-- numbas stuff -->
-		<script charset="UTF-8" type="text/javascript" src="scripts/numbas.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="scripts/start-exam.js" charset="utf-8"></script>
+		<meta http-equiv="X-UA-Compatible" content="IE=9,10,edge">
 
 		<!-- mathjax stuff -->
 		<script type="text/x-mathjax-config">
@@ -68,11 +39,16 @@ Copyright 2011-13 Newcastle University
 		</script>
 		<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="scripts.js" charset="utf-8"></script>
+		<script>
+			Numbas.queueScript('go',['start-exam'],function() {
+				Numbas.init();
+			});
+		</script>
+
 		<!-- CSS -->
-		<link rel="stylesheet" type="text/css" href="resources/normalize.css" />
-		<link rel="stylesheet" type="text/css" href="resources/typography.css" />
-		<link rel="stylesheet" type="text/css" href="resources/exam.css" />
-		<link rel="stylesheet" type="text/css" href="resources/iconfont/font-awesome.min.css" />
+		<link rel="stylesheet" type="text/css" href="styles.css" />
 	</head>
 	
 	<body style="font-size:1em;">
@@ -174,7 +150,7 @@ Copyright 2011-13 Newcastle University
 						</tr>
 						<tr>
 							<td data-localise="result.time spent"></td>
-							<td class="rtd" data-bind="text: timeSpent" /></td>
+							<td class="rtd" data-bind="text: timeSpent"></td>
 						</tr> 
 						<tr>
 							<td data-localise="result.questions attempted"></td>
@@ -224,7 +200,7 @@ Copyright 2011-13 Newcastle University
 				<!-- top navigation bar - prv/nxt, and question name -->
 				<div class="mainDiv navBar">
 					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="attr: {disabled: !canReverse()}, click: Numbas.controls.previousQuestion"></button>
-					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
+					<button class="btn rightNav" id="nextBtn" data-localise="control.next" data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
 					<div class="titleBits" data-bind="with: currentQuestion">
 						<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
 						<span id="questionNameDisplay" data-bind="text: displayName"></span>
@@ -269,23 +245,23 @@ Copyright 2011-13 Newcastle University
 
 						<div class="menuButtons">
 							<div><button class="btn" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></div>
-							<div><button class="btn" id="endBtn" data-localise="control.end exam", data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></div>
-							<div><button class="btn" data-localise="control.back to results", data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></div>
+							<div><button class="btn" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></div>
+							<div><button class="btn" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></div>
 						</div>
 					</div>
 				</div>
 				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 				<div class="mainDiv navBar">
 					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="visible: $root.canReverse, click: Numbas.controls.previousQuestion"></button>
-					<button class="btn rightNav" id="nextBtn" data-localise="control.next", data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
+					<button class="btn rightNav" id="nextBtn" data-localise="control.next" data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
 					<div class="submitDiv" data-bind="with: currentQuestion">
 						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
 						<div class="marks">
 							<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
 							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
 						</div>
-						<button class="btn" id="regenBtn" data-localise="control.regen", data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
-						<button class="btn" id="revealBtn" data-localise="control.reveal", data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
+						<button class="btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+						<button class="btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
 					</div>
 				</div>
 			</div>

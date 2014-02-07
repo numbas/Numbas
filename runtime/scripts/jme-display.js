@@ -13,7 +13,7 @@ Copyright 2011-13 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-Numbas.queueScript('scripts/jme-display.js',['math','jme','util'],function() {
+Numbas.queueScript('jme-display',['base','math','jme','util'],function() {
 	
 var math = Numbas.math;
 var jme = Numbas.jme;

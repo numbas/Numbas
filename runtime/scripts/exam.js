@@ -15,7 +15,7 @@ Copyright 2011-13 Newcastle University
 */
 
 
-Numbas.queueScript('scripts/exam.js',['timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme'],function() {
+Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme'],function() {
 
 	var job = Numbas.schedule.add;
 

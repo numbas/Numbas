@@ -29,14 +29,13 @@ Copyright 2011-13 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div data-bind="visible: exam.currentQuestionNumber()=={@number}">
-	<div class="question clearAfter" data-bind="with: question">
+	<div class="question clearAfter" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
+		<h3 data-bind="text: displayName" class="print-only"></h3>
 		<xsl:apply-templates />
-	</div>
 	</div>
 </xsl:template>
 
-<xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing" />
+<xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
 
 <xsl:template match="statement">
 	<div class="statement">
@@ -130,7 +129,7 @@ Copyright 2011-13 Newcastle University
 	<div class="stepsBtn">
 		<button class="btn" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
 		<button class="btn" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
-		(<span class="penaltyMessage" data-bind="html: stepsPenaltyMessage"></span>)
+		<span class="penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
 	</div>
 </xsl:template>
 
@@ -266,7 +265,7 @@ Copyright 2011-13 Newcastle University
 					<xsl:text>start-column</xsl:text>
 				</xsl:if>
 			</xsl:attribute>
-			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer" disabled="true" value="{$choicenum}"/>
+			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
 	</li>
@@ -397,10 +396,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}]" disabled="true"/>
+						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}]+''" disabled="true"/>
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" value="{$answernum}"/>
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+''" disabled="true" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>

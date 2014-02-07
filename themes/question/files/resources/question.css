@@ -1,12 +1,12 @@
-#everything {
+.single-question #everything {
 	max-width: 1000px;
 	margin: auto;
 }
 
-#questionContainer {
+.single-question #questionContainer {
 	background: white;
 }
-#questionDisplay {
+.single-question #questionDisplay {
 	margin: inherit;
 	position: inherit;
 	right: inherit;

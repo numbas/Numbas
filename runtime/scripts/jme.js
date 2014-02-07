@@ -14,7 +14,7 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
-Numbas.queueScript('scripts/jme.js',['math','util'],function() {
+Numbas.queueScript('jme',['base','math','util'],function() {
 
 var util = Numbas.util;
 var math = Numbas.math;
@@ -918,7 +918,7 @@ var symbols = {
 	'subsetequal': '\\supseteq','subset': '\\supset',				'notsubset': '\\not \\subset',
 	'supersetequal': '\\subseteq','superset': '\\subset',			'notin': '\\not \\in',
 	'product': '\\prod',		'sqrt': '\\sqrt',					'dot': '\\cdot',
-	'¬': '\\neg',				'logicaland': '\\wedge',			'logicalor': '\\vee',
+	'\u00AC': '\\neg',				'logicaland': '\\wedge',			'logicalor': '\\vee',
 	'doubleimplies': '\\Leftrightarrow',							'impliesby': '\\Leftarrow',
 	'impliesup': '\\Uparrow', 	'impliesdown': '\\Downarrow',		'implies': '\\Rightarrow',
 	'rightanglebracket': '\\rangle',								'integral': '\\int',

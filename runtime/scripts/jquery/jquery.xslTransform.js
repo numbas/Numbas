@@ -1,3 +1,4 @@
+Numbas.queueScript('jquery.xslTransform',['jquery','sarissa'],function(module) {
 /**
  * xslTransform
  * Tools for XSLT transformations; jQuery wrapper for Sarissa <http://sarissa.sourceforge.net/>.
@@ -420,3 +421,4 @@
 	$.xsl.init();
 
 })(jQuery);
+});
