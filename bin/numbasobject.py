@@ -3,6 +3,8 @@ from examparser import ExamParser
 from migrations import migrations
 import json
 
+NUMBAS_FILE_PREFIX = '// Numbas version: '
+
 class VersionError(Exception):
 	def __init__(self,version):
 		self.version = version
@@ -36,12 +38,12 @@ class NumbasObject:
 			raise Exception("Empty source string")
 
 		# Files with version numbers have a line of the format	 
-		# // <version number> 
+		# // Numbas version: <version string> 
 		# at the start, and are encoded in JSON. Older files have no version number and are in the .exam format
-		if source[:2]=='//':
+		if source.startswith(NUMBAS_FILE_PREFIX):
 			version, json_string = source.split('\n',1)
 			try:
-				version = version[2:].strip()
+				version = version[len(NUMBAS_FILE_PREFIX):].strip()
 			except ValueError:
 				raise VersionError(version)
 			data = json.loads(json_string)
@@ -57,5 +59,5 @@ class NumbasObject:
 			self.version = migrations[self.version](self)
 
 	def __str__(self):
-		return '// %s\n%s' % (self.version,json.dumps(self.data))
+		return '%s%s\n%s' % (NUMBAS_FILE_PREFIX,self.version,json.dumps(self.data))
 
