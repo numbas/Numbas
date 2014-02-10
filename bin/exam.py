@@ -190,7 +190,7 @@ class Exam:
 		if 'variables' in data:
 			variables = data['variables']
 			for variable in variables.keys():
-				exam.variables.append(Variable(variable,variables[variable]))
+				exam.variables.append(Variable(variables[variable]))
 		if 'questions' in data:
 			for question in data['questions']:
 				exam.questions.append(Question.fromDATA(question))
@@ -354,7 +354,7 @@ class Question:
 		if 'variables' in data:
 			variables = data['variables']
 			for variable in variables.keys():
-				question.variables.append(Variable(variable,variables[variable]))
+				question.variables.append(Variable(variables[variable]))
 		
 		if 'functions' in data:
 			functions = data['functions']
@@ -438,9 +438,9 @@ class Variable:
 	name = ''
 	definition = ''
 
-	def __init__(self,name,definition):
-		self.name = name
-		self.definition = definition
+	def __init__(self,data):
+		self.name = data.get('name')
+		self.definition = data.get('definition')
 	
 	def toxml(self):
 		variable = makeTree(['variable',['value']])
