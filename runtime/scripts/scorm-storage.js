@@ -330,8 +330,8 @@ SCORMStorage.prototype = {
 		case '1_n_2':
 		case 'm_n_2':
 		case 'm_n_x':
-			pobj.shuffleChoices = part.shuffleChoices;
-			pobj.shuffleAnswers = part.shuffleAnswers;
+			pobj.shuffleChoices = Numbas.math.inverse(part.shuffleChoices);
+			pobj.shuffleAnswers = Numbas.math.inverse(part.shuffleAnswers);
 			break;
 		}
 
