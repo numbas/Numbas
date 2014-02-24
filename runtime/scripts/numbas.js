@@ -155,27 +155,20 @@ Numbas.tryInit = function()
 
 	function tryRun(req) {
 		if(req.loaded && !req.executed) {
-			//console.log('%ctryrun '+req.file,get_ind());
 			var go = true;
 			for(var j=0;j<req.fdeps.length;j++)
 			{
 				if(!scriptreqs[req.fdeps[j]].executed) {
-					//console.log('%cdon\'t have '+req.fdeps[j],'color: red;'+get_ind());
 					go=false;
 					break;
-				}
-				else {
-					//console.log('%cgot '+req.fdeps[j],'color:green;'+get_ind());
 				}
 			}
 			if(go)
 			{
-				//console.log('%crun '+req.file,'background-color: #eee;'+get_ind());
 				req.callback({exports:window});
 				req.executed=true;
 				ind++;
 				for(var j=0;j<req.backdeps.length;j++) {
-					//console.log('%ctry '+req.backdeps[j],get_ind());
 					tryRun(scriptreqs[req.backdeps[j]]);
 				}
 				ind--;
