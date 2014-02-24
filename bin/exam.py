@@ -50,6 +50,10 @@ def tryLoad(data,attr,obj,altname=''):
 				obj[altname]=data[attr]
 			else:
 				setattr(obj,altname,data[attr])
+		else:
+			for key in data.keys():
+				if key.lower() == attr:
+					setattr(obj,altname,data[key])
 
 #convert a block of content into html, wrapped in a <content> tag
 def makeContentNode(s):
