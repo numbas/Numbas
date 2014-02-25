@@ -25,7 +25,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 	// It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
 	var init = Numbas.init = function()
 	{
-
+	$(document).ready(function() {
 		var seed = Math.seedrandom();
 
 		var job = Numbas.schedule.add;
@@ -89,6 +89,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 			//job(function(){Numbas.timing.end('init');});			//end performance timing 
 		});
 
+	});
 	}
 
 });
