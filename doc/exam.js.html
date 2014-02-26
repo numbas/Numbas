@@ -1,4 +1,31 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: exam.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: exam.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
 Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +73,7 @@ function Exam()
 	settings.navigationEvents = {};
 
 	var navigationEventNodes = xml.selectNodes('settings/navigation/event');
-	for( var i=0; i<navigationEventNodes.length; i++ )
+	for( var i=0; i&lt;navigationEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(navigationEventNodes[i]);
 		settings.navigationEvents[e.type] = e;
@@ -60,7 +87,7 @@ function Exam()
 	//get timing events
 	settings.timerEvents = {};
 	var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-	for( i=0; i<timerEventNodes.length; i++ )
+	for( i=0; i&lt;timerEventNodes.length; i++ )
 	{
 		var e = new ExamEvent(timerEventNodes[i]);
 		settings.timerEvents[e.type] = e;
@@ -92,20 +119,20 @@ function Exam()
 
 	var sets = {};
 	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
-	for( i=0; i<rulesetNodes.length; i++)
+	for( i=0; i&lt;rulesetNodes.length; i++)
 	{
 		var name = rulesetNodes[i].getAttribute('name');
 		var set = [];
 
 		//get new rule definitions
 		defNodes = rulesetNodes[i].selectNodes('ruledef');
-		for( var j=0; j<defNodes.length; j++ )
+		for( var j=0; j&lt;defNodes.length; j++ )
 		{
 			var pattern = defNodes[j].getAttribute('pattern');
 			var result = defNodes[j].getAttribute('result');
 			var conditions = [];
 			var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-			for(var k=0; k<conditionNodes.length; k++)
+			for(var k=0; k&lt;conditionNodes.length; k++)
 			{
 				conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
 			}
@@ -115,7 +142,7 @@ function Exam()
 
 		//get included sets
 		var includeNodes = rulesetNodes[i].selectNodes('include');
-		for(var j=0; j<includeNodes.length; j++ )
+		for(var j=0; j&lt;includeNodes.length; j++ )
 		{
 			set.push(includeNodes[j].getAttribute('name'));
 		}
@@ -290,7 +317,7 @@ Exam.prototype = {
 		this.questionList = [];
 		
 		var questions = this.xml.selectNodes("questions/question");
-		for(var i = 0; i<this.questionSubset.length; i++) 
+		for(var i = 0; i&lt;this.questionSubset.length; i++) 
 		{
 			job(function(i)
 			{
@@ -307,7 +334,7 @@ Exam.prototype = {
 			this.mark = 0;
 
 			//go through the questions and recalculate the part scores, then the question scores, then the exam score
-			for( i=0; i<this.settings.numQuestions; i++ )
+			for( i=0; i&lt;this.settings.numQuestions; i++ )
 			{
 				this.mark += this.questionList[i].marks;
 			}
@@ -385,11 +412,11 @@ Exam.prototype = {
 			this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
 			this.display.showTiming();
 
-			if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
+			if(this.settings.duration > 300 &amp;&amp; this.timeRemaining&lt;300 &amp;&amp; !this.showedTimeWarning)
 			{
 				this.showedTimeWarning = true;
 				var e = this.settings.timerEvents['timedwarning'];
-				if(e && e.action=='warn')
+				if(e &amp;&amp; e.action=='warn')
 				{
 					Numbas.display.showAlert(e.message);
 				}
@@ -397,7 +424,7 @@ Exam.prototype = {
 			else if(this.timeRemaining===0)
 			{
 				var e = this.settings.timerEvents['timeout'];
-				if(e && e.action=='warn')
+				if(e &amp;&amp; e.action=='warn')
 				{
 					Numbas.display.showAlert(e.message);
 				}
@@ -425,7 +452,7 @@ Exam.prototype = {
 	calculateScore: function()
 	{
 		this.score=0;
-		for(var i=0; i<this.questionList.length; i++)
+		for(var i=0; i&lt;this.questionList.length; i++)
 			this.score += this.questionList[i].score;
 		this.percentScore = Math.round(100*this.score/this.mark);
 	},
@@ -434,12 +461,12 @@ Exam.prototype = {
 	//will check move is allowed and if so change question and update display
 	tryChangeQuestion: function(i)
 	{
-		if(i<0 || i>=this.settings.numQuestions)
+		if(i&lt;0 || i>=this.settings.numQuestions)
 			return;
 
 		if( ! (this.settings.navigateBrowse 	// is browse navigation enabled?
-			|| (this.questionList[i].visited && this.settings.navigateReverse)	// if not, we can still move backwards to questions already seen if reverse navigation is enabled
-			|| (i>this.currentQuestion.number && this.questionList[i-1].visited)	// or you can always move to the next question
+			|| (this.questionList[i].visited &amp;&amp; this.settings.navigateReverse)	// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+			|| (i>this.currentQuestion.number &amp;&amp; this.questionList[i-1].visited)	// or you can always move to the next question
 		))
 		{
 			return;
@@ -474,7 +501,7 @@ Exam.prototype = {
 				go();
 				break;
 			case 'warnifunattempted':
-				Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+				Numbas.display.showConfirm(eventObj.message+'&lt;p>'+R('control.proceed anyway')+'&lt;/p>',go);
 				break;
 			case 'preventifunattempted':
 				Numbas.display.showAlert(eventObj.message);
@@ -523,7 +550,7 @@ Exam.prototype = {
 		var message = R('control.confirm end');
 		var answeredAll = true;
 		var submittedAll = true;
-		for(var i=0;i<this.questionList.length;i++) {
+		for(var i=0;i&lt;this.questionList.length;i++) {
 			if(!this.questionList[i].answered) {
 				answeredAll = false;
 				break;
@@ -535,10 +562,10 @@ Exam.prototype = {
 		if(this.currentQuestion.leavingDirtyQuestion())
 			return;
 		if(!answeredAll) {
-			message = R('control.not all questions answered') + '<br/>' + message;
+			message = R('control.not all questions answered') + '&lt;br/>' + message;
 		}
 		else if(!submittedAll) {
-			message = R('control.not all questions submitted') + '<br/>' + message;
+			message = R('control.not all questions submitted') + '&lt;br/>' + message;
 		}
 		Numbas.display.showConfirm(
 			message,
@@ -571,7 +598,7 @@ Exam.prototype = {
 		this.display.end();
 		this.display.showInfoPage( 'result' );
 
-		for(var i=0;i<this.questionList.length;i++) {
+		for(var i=0;i&lt;this.questionList.length;i++) {
 			this.questionList[i].revealAnswer(true);
 		}
 	},
@@ -595,3 +622,26 @@ ExamEvent.prototype = {
 };
 
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="RequireScript.html">RequireScript</a></li></ul><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Wed Feb 26 2014 16:51:22 GMT+0000 (GMT Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
