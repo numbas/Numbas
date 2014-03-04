@@ -1,4 +1,31 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jme-display.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: jme-display.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
 Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,7 +114,7 @@ jme.display = {
 		while( applied )
 		{
 			//the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
-			if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')	
+			if(exprTree.tok.type=='function' &amp;&amp; exprTree.tok.name=='eval')	
 			{
 				exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
 			}
@@ -95,13 +122,13 @@ jme.display = {
 			{
 				if(exprTree.args)	//if this token is an operation with arguments, try to simplify the arguments first
 				{
-					for(var i=0;i<exprTree.args.length;i++)
+					for(var i=0;i&lt;exprTree.args.length;i++)
 					{
 						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope);
 					}
 				}
 				applied = false;
-				for( var i=0; i<rules.length;i++)	//check each rule
+				for( var i=0; i&lt;rules.length;i++)	//check each rule
 				{
 					var match;
 					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
@@ -141,11 +168,11 @@ function texifyOpArg(thing,texArgs,i)
 		var p2 = precedence[op2];	//precedence of parent op
 
 		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-		if( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
+		if( p1 > p2 || (p1==p2 &amp;&amp; i>0 &amp;&amp; !jme.commutative[op2]) || (op1=='-u' &amp;&amp; precedence[op2]&lt;=precedence['*']) )	
 			tex = '\\left ( '+tex+' \\right )';
 	}
 	//complex numbers might need brackets round them when multiplied with something else or unary minusing
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') )	
+	else if(thing.args[i].tok.type=='number' &amp;&amp; thing.args[i].tok.value.complex &amp;&amp; thing.tok.type=='op' &amp;&amp; (thing.tok.name=='*' || thing.tok.name=='-u') )	
 	{
 		var v = thing.args[i].tok.value;
 		if(!(v.re==0 || v.im==0))
@@ -206,12 +233,12 @@ var texOps = jme.display.texOps = {
 		if( thing.args[0].tok.type=='op' )
 		{
 			var op = thing.args[0].tok.name;
-			if(!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
+			if(!(op=='/' || op=='*') &amp;&amp; jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
 			{
 				tex='\\left ( '+tex+' \\right )';
 			}
 		}
-		else if(thing.args[0].tok.type=='number' && thing.args[0].tok.value.complex) {
+		else if(thing.args[0].tok.type=='number' &amp;&amp; thing.args[0].tok.value.complex) {
 			var value = thing.args[0].tok.value;
 			return settings.texNumber({complex:true,re:-value.re,im:-value.im});
 		}
@@ -230,7 +257,7 @@ var texOps = jme.display.texOps = {
 
 	'*': (function(thing,texArgs) {
 		var s = texifyOpArg(thing,texArgs,0);
-		for(var i=1; i<thing.args.length; i++ )
+		for(var i=1; i&lt;thing.args.length; i++ )
 		{
 			//specials or subscripts
 			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
@@ -238,33 +265,33 @@ var texOps = jme.display.texOps = {
 				s+=' ';
 			}
 			//anything times e^(something) or (not number)^(something)
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
+			else if (thing.args[i].tok.type=='op' &amp;&amp; thing.args[i].tok.name=='^' &amp;&amp; (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
 			{
 				s+=' ';
 			}
 			//real number times Pi or E
-			else if (thing.args[i].tok.type=='number' && (thing.args[i].tok.value==Math.PI || thing.args[i].tok.value==Math.E || thing.args[i].tok.value.complex) && thing.args[i-1].tok.type=='number' && !(thing.args[i-1].tok.value.complex))	
+			else if (thing.args[i].tok.type=='number' &amp;&amp; (thing.args[i].tok.value==Math.PI || thing.args[i].tok.value==Math.E || thing.args[i].tok.value.complex) &amp;&amp; thing.args[i-1].tok.type=='number' &amp;&amp; !(thing.args[i-1].tok.value.complex))	
 			{
 				s+=' ';
 			}
 			//number times a power of i
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	
+			else if (thing.args[i].tok.type=='op' &amp;&amp; thing.args[i].tok.name=='^' &amp;&amp; thing.args[i].args[0].tok.type=='number' &amp;&amp; math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) &amp;&amp; thing.args[i-1].tok.type=='number')	
 			{
 				s+=' ';
 			}
-			else if ( !(thing.args[i-1].tok.type=='number' && math.eq(thing.args[i-1].tok.value,math.complex(0,1))) && thing.args[i].tok.type=='number' && math.eq(thing.args[i].tok.value,math.complex(0,1)))	//(anything except i) times i
+			else if ( !(thing.args[i-1].tok.type=='number' &amp;&amp; math.eq(thing.args[i-1].tok.value,math.complex(0,1))) &amp;&amp; thing.args[i].tok.type=='number' &amp;&amp; math.eq(thing.args[i].tok.value,math.complex(0,1)))	//(anything except i) times i
 			{
 				s+=' ';
 			}
 			else if ( thing.args[i].tok.type=='number'
 					||
-						thing.args[i].tok.type=='op' && thing.args[i].tok.name=='-u'
+						thing.args[i].tok.type=='op' &amp;&amp; thing.args[i].tok.name=='-u'
 					||
 					(
-						!(thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='-u') 
-						&& (thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] 
-							&& (thing.args[i].args[0].tok.type=='number' 
-							&& thing.args[i].args[0].tok.value!=Math.E)
+						!(thing.args[i-1].tok.type=='op' &amp;&amp; thing.args[i-1].tok.name=='-u') 
+						&amp;&amp; (thing.args[i].tok.type=='op' &amp;&amp; jme.precedence[thing.args[i].tok.name]&lt;=jme.precedence['*'] 
+							&amp;&amp; (thing.args[i].args[0].tok.type=='number' 
+							&amp;&amp; thing.args[i].args[0].tok.value!=Math.E)
 						)
 					)
 			)
@@ -282,12 +309,12 @@ var texOps = jme.display.texOps = {
 	'-': (function(thing,texArgs,settings) {
 		var a = thing.args[0];
 		var b = thing.args[1];
-		if(b.tok.type=='number' && b.tok.value.complex && b.tok.value.re!=0) {
+		if(b.tok.type=='number' &amp;&amp; b.tok.value.complex &amp;&amp; b.tok.value.re!=0) {
 			var texb = settings.texNumber(math.complex(b.tok.value.re,-b.tok.value.im));
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			if(b.tok.type=='op' && b.tok.name=='+')
+			if(b.tok.type=='op' &amp;&amp; b.tok.name=='+')
 				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
 			else
 				return texArgs[0]+' - '+texArgs[1];
@@ -303,11 +330,11 @@ var texOps = jme.display.texOps = {
 	}),
 	'..': infixTex('\\dots'),
 	'except': infixTex('\\operatorname{except}'),
-	'<': infixTex('\\lt'),
+	'&lt;': infixTex('\\lt'),
 	'>': infixTex('\\gt'),
-	'<=': infixTex('\\leq'),
+	'&lt;=': infixTex('\\leq'),
 	'>=': infixTex('\\geq'),
-	'<>': infixTex('\neq'),
+	'&lt;>': infixTex('\neq'),
 	'=': infixTex('='),
 	'and': infixTex('\\wedge'),
 	'or': infixTex('\\vee'),
@@ -317,11 +344,11 @@ var texOps = jme.display.texOps = {
 		var arg;
 		if(thing.args[0].tok.type=='vector')
 			arg = texVector(thing.args[0].tok.value,settings);
-		else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='vector')
+		else if(thing.args[0].tok.type=='function' &amp;&amp; thing.args[0].tok.name=='vector')
 			arg = texVector(thing.args[0],settings);
 		else if(thing.args[0].tok.type=='matrix')
 			arg = texMatrix(thing.args[0].tok.value,settings);
-		else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='matrix')
+		else if(thing.args[0].tok.type=='function' &amp;&amp; thing.args[0].tok.name=='matrix')
 			arg = texMatrix(thing.args[0],settings);
 		else
 			arg = texArgs[0];
@@ -346,7 +373,7 @@ var texOps = jme.display.texOps = {
 	'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
 	'diff': (function(thing,texArgs) 
 			{
-				var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
+				var degree = (thing.args[2].tok.type=='number' &amp;&amp; thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
 				if(thing.args[0].tok.type=='name')
 				{
 					return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
@@ -358,7 +385,7 @@ var texOps = jme.display.texOps = {
 			}),
 	'partialdiff': (function(thing,texArgs) 
 			{ 
-				var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
+				var degree = (thing.args[2].tok.type=='number' &amp;&amp; thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
 				if(thing.args[0].tok.type=='name')
 				{
 					return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
@@ -375,7 +402,7 @@ var texOps = jme.display.texOps = {
 	'root': (function(thing,texArgs) { return '\\sqrt['+texArgs[0]+']{'+texArgs[1]+'}'; }),
 	'if': (function(thing,texArgs) 
 			{
-				for(var i=0;i<3;i++)
+				for(var i=0;i&lt;3;i++)
 				{
 					if(thing.args[i].args!==undefined)
 						texArgs[i] = '\\left ( '+texArgs[i]+' \\right )';
@@ -423,7 +450,7 @@ var texOps = jme.display.texOps = {
 	'arccosh': funcTex('\\operatorname{arccosh}'),
 	'arctanh': funcTex('\\operatorname{arctanh}'),
 	'ln': function(thing,texArgs,settings) {
-		if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='abs')
+		if(thing.args[0].tok.type=='function' &amp;&amp; thing.args[0].tok.name=='abs')
 			return '\\ln '+texArgs[0];
 		else
 			return '\\ln \\left( '+texArgs[0]+' \\right)';
@@ -466,7 +493,7 @@ function texRationalNumber(n)
 			else
 				return im;
 		}
-		else if(n.im<0)
+		else if(n.im&lt;0)
 		{
 			if(n.im==-1)
 				return re+' - i';
@@ -503,7 +530,7 @@ function texRationalNumber(n)
 			out = Math.abs(f[0]).toString();
 		else
 			out = '\\frac{'+f[0]+'}{'+f[1]+'}';
-		if(n<0)
+		if(n&lt;0)
 			out=' - '+out;
 
 		switch(piD)
@@ -535,7 +562,7 @@ function texRealNumber(n)
 			else
 				return im;
 		}
-		else if(n.im<0)
+		else if(n.im&lt;0)
 		{
 			if(n.im==-1)
 				return re+' - i';
@@ -630,11 +657,11 @@ function texMatrix(m,settings,parens)
 	}
 
 	if(rows.length==1) {
-		out = rows[0].join(', & ');
+		out = rows[0].join(', &amp; ');
 	}
 	else {
 		rows = rows.map(function(x) {
-			return x.join(' & ');
+			return x.join(' &amp; ');
 		});
 		out = rows.join(' \\\\ ');
 	}
@@ -653,7 +680,7 @@ function texName(name,annotation)
 	if(!annotation)
 		return name;
 
-	for(var i=0;i<annotation.length;i++)
+	for(var i=0;i&lt;annotation.length;i++)
 	{
 		switch(annotation[i])
 		{
@@ -699,7 +726,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	if(thing.args)
 	{
 		var texArgs = [];
-		for(var i=0; i<thing.args.length; i++ )
+		for(var i=0; i&lt;thing.args.length; i++ )
 		{
 			texArgs[i] = texify(thing.args[i],settings);
 		}
@@ -733,7 +760,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		if(!texArgs)
 		{
 			texArgs = [];
-			for(var i=0;i<tok.vars;i++)
+			for(var i=0;i&lt;tok.vars;i++)
 			{
 				texArgs[i] = texify(tok.value[i],settings);
 			}
@@ -794,7 +821,7 @@ function jmeRationalNumber(n)
 			else
 				return im;
 		}
-		else if(n.im<0)
+		else if(n.im&lt;0)
 		{
 			if(n.im==-1)
 				return re+' - i';
@@ -832,7 +859,7 @@ function jmeRationalNumber(n)
 			out = Math.abs(f[0]).toString();
 		else
 			out = f[0]+'/'+f[1];
-		if(n<0)
+		if(n&lt;0)
 			out=' - '+out;
 
 		switch(piD)
@@ -869,7 +896,7 @@ function jmeRealNumber(n)
 			else
 				return im;
 		}
-		else if(n.im<0)
+		else if(n.im&lt;0)
 		{
 			if(n.im==-1)
 				return re+' - i';
@@ -938,7 +965,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 
 	var args=tree.args, l;
 
-	if(args!==undefined && ((l=args.length)>0))
+	if(args!==undefined &amp;&amp; ((l=args.length)>0))
 	{
 		var bits = args.map(function(i){return treeToJME(i,settings)});
 	}
@@ -964,7 +991,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 		var str = tok.value.replace(/\\/g,'\\\\').replace(/\\([{}])/g,'$1').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
 		return '"'+str+'"';
 	case 'html':
-		var html = $(tok.value).clone().wrap('<div>').parent().html();
+		var html = $(tok.value).clone().wrap('&lt;div>').parent().html();
 		html = html.replace(/"/g,'\\"');
 		return 'html("'+html+'")';
 	case 'boolean':
@@ -991,14 +1018,14 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'op':
 		var op = tok.name;
 
-		for(var i=0;i<l;i++)
+		for(var i=0;i&lt;l;i++)
 		{
-			if(args[i].tok.type=='op' && opBrackets[op][i][args[i].tok.name]==true)
+			if(args[i].tok.type=='op' &amp;&amp; opBrackets[op][i][args[i].tok.name]==true)
 			{
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
 			}
-			else if(args[i].tok.type=='number' && args[i].tok.value.complex && (op=='*' || op=='-u' || op=='/'))
+			else if(args[i].tok.type=='number' &amp;&amp; args[i].tok.value.complex &amp;&amp; (op=='*' || op=='-u' || op=='/'))
 			{
 				if(!(args[i].tok.value.re==0 || args[i].tok.value.im==0))
 				{
@@ -1012,8 +1039,8 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 		if(op=='*')
 		{
 			//number or brackets followed by name or brackets doesn't need a times symbol
-			//except <anything>*(-<something>) does
-			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !(args[1].tok.type=='op' && args[1].tok.name=='-u')) )	
+			//except &lt;anything>*(-&lt;something>) does
+			if( (args[0].tok.type=='number' || args[0].bracketed) &amp;&amp; (args[1].tok.type == 'name' || args[1].bracketed &amp;&amp; !(args[1].tok.type=='op' &amp;&amp; args[1].tok.name=='-u')) )	
 			{
 				op = '';
 			}
@@ -1026,12 +1053,12 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 			break;
 		case '-u':
 			op='-';
-			if(args[0].tok.type=='number' && args[0].tok.value.complex)
+			if(args[0].tok.type=='number' &amp;&amp; args[0].tok.value.complex)
 				return jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
 			break;
 		case '-':
 			var b = args[1].tok.value;
-			if(args[1].tok.type=='number' && args[1].tok.value.complex && args[1].tok.value.re!=0) {
+			if(args[1].tok.type=='number' &amp;&amp; args[1].tok.value.complex &amp;&amp; args[1].tok.value.re!=0) {
 				return bits[0]+' - '+jmeNumber(math.complex(b.re,-b.im));
 			}
 			op = ' - ';
@@ -1078,7 +1105,7 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 	this.result = jme.compile(result,{},true);
 
 	this.conditions = [];
-	for(var i=0;i<conditions.length;i++)
+	for(var i=0;i&lt;conditions.length;i++)
 	{
 		this.conditions.push(jme.compile(conditions[i],{},true));
 	}
@@ -1102,7 +1129,7 @@ Rule.prototype = {
 
 	matchConditions: function(match,scope)
 	{
-		for(var i=0;i<this.conditions.length;i++)
+		for(var i=0;i&lt;this.conditions.length;i++)
 		{
 			var c = Numbas.util.copyobj(this.conditions[i],true);
 			c = jme.substituteTree(c,new jme.Scope([{variables:match}]));
@@ -1165,7 +1192,7 @@ function matchTree(ruleTree,exprTree)
 		if(ruleTok.name != exprTok.name)
 			return false;
 		
-		for(var i=0;i<ruleTree.args.length;i++)
+		for(var i=0;i&lt;ruleTree.args.length;i++)
 		{
 			var m = matchTree(ruleTree.args[i],exprTree.args[i]);
 			if(m==false)
@@ -1189,11 +1216,11 @@ var simplificationRules = jme.display.simplificationRules = {
 	basic: [
 		['+x',[],'x'],					//get rid of unary plus
 		['x+(-y)',[],'x-y'],			//plus minus = minus
-		['x+y',['y<0'],'x-eval(-y)'],
-		['x-y',['y<0'],'x+eval(-y)'],
+		['x+y',['y&lt;0'],'x-eval(-y)'],
+		['x-y',['y&lt;0'],'x+eval(-y)'],
 		['x-(-y)',[],'x+y'],			//minus minus = plus
 		['-(-x)',[],'x'],				//unary minus minus = plus
-		['-x',['x isa "complex"','re(x)<0'],'eval(-x)'],
+		['-x',['x isa "complex"','re(x)&lt;0'],'eval(-x)'],
 		['x+y',['x isa "number"','y isa "complex"','re(y)=0'],'eval(x+y)'],
 		['-x+y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
 		['(-x)/y',[],'-(x/y)'],			//take negation to left of fraction
@@ -1259,7 +1286,7 @@ var simplificationRules = jme.display.simplificationRules = {
 		['(x-n)-y',['n isa "number"'],'(x-y)-n'],
 
 		['n*m',['n isa "number"','m isa "number"'],'eval(n*m)'],		//multiply numbers
-		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x'],			//shift numbers to left hand side
+		['x*n',['n isa "number"','!(x isa "number")','n&lt;>i'],'n*x'],			//shift numbers to left hand side
 		['m*(n*x)',['m isa "number"','n isa "number"'],'eval(n*m)*x']
 	],
 
@@ -1275,8 +1302,8 @@ var simplificationRules = jme.display.simplificationRules = {
 	],
 
 	constantsFirst: [
-		['x*n',['n isa "number"','!(x isa "number")','n<>i'],'n*x'],
-		['x*(n*y)',['n isa "number"','n<>i','!(x isa "number")'],'n*(x*y)']
+		['x*n',['n isa "number"','!(x isa "number")','n&lt;>i'],'n*x'],
+		['x*(n*y)',['n isa "number"','n&lt;>i','!(x isa "number")'],'n*(x*y)']
 	],
 
 	sqrtProduct: [
@@ -1309,7 +1336,7 @@ var simplificationRules = jme.display.simplificationRules = {
 
 var compileRules = jme.display.compileRules = function(rules)
 {
-	for(var i=0;i<rules.length;i++)
+	for(var i=0;i&lt;rules.length;i++)
 	{
 		pattern = rules[i][0];
 		conditions = rules[i][1];
@@ -1330,3 +1357,26 @@ simplificationRules = nsimplificationRules;
 simplificationRules['all']=new jme.Ruleset(all,{});
 Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li><li><a href="RequireScript.html">RequireScript</a></li></ul><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.jme.html">jme</a></li><li><a href="Numbas.jme.types.html">types</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Tue Mar 04 2014 17:23:43 GMT+0000 (GMT Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

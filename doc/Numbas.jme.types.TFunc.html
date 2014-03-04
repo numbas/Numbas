@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: RequireScript</title>
+    <title>JSDoc: Class: TFunc</title>
     
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Class: RequireScript</h1>
+    <h1 class="page-title">Class: TFunc</h1>
     
     
 
@@ -27,7 +27,9 @@
     
 <header>
     <h2>
-    RequireScript
+        <span class="ancestors"><a href="Numbas.html">Numbas</a><a href="Numbas.jme.html">.jme</a><a href="Numbas.jme.types.html">.types</a>.</span>
+    
+    TFunc
     </h2>
     
 </header>  
@@ -39,7 +41,7 @@
     
         
 <dt>
-    <h4 class="name" id="RequireScript"><span class="type-signature"></span>new RequireScript<span class="signature">(file)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="TFunc"><span class="type-signature"></span>new TFunc<span class="signature">(name, annotation)</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -47,7 +49,7 @@
     
     
     <div class="description">
-        <p>Keep track of loading status of a script and its dependencies</p>
+        <p>JME function token</p>
     </div>
     
 
@@ -81,7 +83,7 @@
 	
         <tr>
             
-                <td class="name"><code>file</code></td>
+                <td class="name"><code>name</code></td>
             
             
             <td class="type">
@@ -97,7 +99,30 @@
             
             
             
-            <td class="description last"><p>name of script</p></td>
+            <td class="description last"></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>annotation</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string[]</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"></td>
         </tr>
 	
 	
@@ -135,7 +160,7 @@
 	
         <tr>
             
-                <td class="name"><code>file</code></td>
+                <td class="name"><code>name</code></td>
             
             
             <td class="type">
@@ -151,20 +176,20 @@
             
             
             
-            <td class="description last"><p>Name of script</p></td>
+            <td class="description last"></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>loaded</code></td>
+                <td class="name"><code>annotation</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">string[]</span>
 
 
             
@@ -174,20 +199,20 @@
             
             
             
-            <td class="description last"><p>Has the script been loaded yet?</p></td>
+            <td class="description last"><p>List of annotations (used to modify display)</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>executed</code></td>
+                <td class="name"><code>vars</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">number</span>
 
 
             
@@ -197,22 +222,17 @@
             
             
             
-            <td class="description last"><p>Has the script been run?</p></td>
+            <td class="description last"><p>Arity of the function</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>backdeps</code></td>
+                <td class="name"><code>type</code></td>
             
             
             <td class="type">
-            
-                
-<span class="param-type">Array.string</span>
-
-
             
             </td>
             
@@ -220,53 +240,7 @@
             
             
             
-            <td class="description last"><p>Scripts which depend on this one (need this one to run first)</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>fdeps</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Array.string</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>Scripts which this one depends on (it must run after them)</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>The function to run when all this script's dependencies have run (this is the script itself)</p></td>
+            <td class="description last"><p>&quot;function&quot;</p></td>
         </tr>
 	
 	
@@ -294,7 +268,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="numbas.js.html">numbas.js</a>, <a href="numbas.js.html#line97">line 97</a>
+        <a href="jme.js.html">jme.js</a>, <a href="jme.js.html#line1260">line 1260</a>
     </li></ul></dd>
     
     
@@ -322,6 +296,12 @@
     
     </div>
     
+    
+        <h3 class="subsection-title">Extends</h3>
+        
+        <ul>
+            <li><a href="Numbas.jme.html#token">Numbas.jme.token</a></li>
+        </ul>
     
     
     

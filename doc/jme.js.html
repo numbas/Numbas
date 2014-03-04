@@ -1,4 +1,31 @@
-TT/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: jme.js</title>
+    
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+    
+    <h1 class="page-title">Source: jme.js</h1>
+    
+    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>TT/*
 Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,10 +71,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_bool: /^true|^false/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
 		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
+		re_op: /^(\.\.|#|&lt;=|>=|&lt;>|&amp;&amp;|\|\||[\|*+\-\/\^&lt;>=!&amp;]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
-		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/,
+		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&amp;&lt;>\|~\(\)]|\d|([a-zA-Z]+))/,
 		re_comment: /^\/\/.*(?:\n|$)/
 	},
 
@@ -85,7 +112,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			{
 				token = new TNum(result[0]);
 
-				if(tokens.length>0 && (tokens[tokens.length-1].type==')' || tokens[tokens.length-1].type=='name'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
+				if(tokens.length>0 &amp;&amp; (tokens[tokens.length-1].type==')' || tokens[tokens.length-1].type=='name'))	//right bracket followed by a number is interpreted as multiplying contents of brackets by number
 				{
 					tokens.push(new TOp('*'));
 				}
@@ -102,7 +129,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				//work out if operation is being used prefix or postfix
 				var nt;
 				var postfix = false;
-				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) )
+				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' &amp;&amp; !tokens[tokens.length-1].postfix) )
 				{
 					if(token in prefixForm)
 						token = prefixForm[token];
@@ -135,13 +162,13 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					token = new TName(name,annotation);
 				}
 				
-				if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
+				if(tokens.length>0 &amp;&amp; (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {	//number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
 					tokens.push(new TOp('*'));
 				}
 			}
 			else if (result = expr.match(jme.re.re_punctuation))
 			{
-				if(result[0]=='(' && tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type==')')) {	//number or right bracket followed by left parenthesis is also interpreted to mean multiplication
+				if(result[0]=='(' &amp;&amp; tokens.length>0 &amp;&amp; (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type==')')) {	//number or right bracket followed by left parenthesis is also interpreted to mean multiplication
 					tokens.push(new TOp('*'));
 				}
 
@@ -214,7 +241,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		}
 
 		//rewrite some synonyms
-		for(var i=0; i<tokens.length; i++)
+		for(var i=0; i&lt;tokens.length; i++)
 		{
 			if(tokens[i].name)
 			{
@@ -245,7 +272,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		{
 			if(tok.vars!==undefined)
 			{
-				if(output.length<tok.vars)
+				if(output.length&lt;tok.vars)
 					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name || tok.type));
 
 				var thing = {tok: tok,
@@ -257,7 +284,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				output.push({tok:tok});
 		}
 
-		for(var i = 0;i < tokens.length; i++ )
+		for(var i = 0;i &lt; tokens.length; i++ )
 		{
 			var tok = tokens[i];
 			
@@ -269,14 +296,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				addoutput(tok);
 				break;
 			case 'special':
-				while( stack.length && stack[stack.length-1].type != "(" )
+				while( stack.length &amp;&amp; stack[stack.length-1].type != "(" )
 				{
 					addoutput(stack.pop());
 				}
 				addoutput(tok);
 				break;
 			case "name":
-				if( i<tokens.length-1 && tokens[i+1].type=="(")
+				if( i&lt;tokens.length-1 &amp;&amp; tokens[i+1].type=="(")
 				{
 						stack.push(new TFunc(tok.name,tok.annotation));
 						numvars.push(0);
@@ -289,7 +316,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				break;
 				
 			case ",":
-				while( stack.length && stack[stack.length-1].type != "(" && stack[stack.length-1].type != '[')
+				while( stack.length &amp;&amp; stack[stack.length-1].type != "(" &amp;&amp; stack[stack.length-1].type != '[')
 				{	//reached end of expression defining function parameter, so pop all of its operations off stack and onto output
 					addoutput(stack.pop())
 				}
@@ -305,7 +332,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			case "op":
 
 				var o1 = precedence[tok.name];
-				while(stack.length && stack[stack.length-1].type=="op" && ((o1 > precedence[stack[stack.length-1].name]) || (leftAssociative(tok.name) && o1 == precedence[stack[stack.length-1].name]))) 
+				while(stack.length &amp;&amp; stack[stack.length-1].type=="op" &amp;&amp; ((o1 > precedence[stack[stack.length-1].name]) || (leftAssociative(tok.name) &amp;&amp; o1 == precedence[stack[stack.length-1].name]))) 
 				{	//while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
 					addoutput(stack.pop());
 				}
@@ -326,7 +353,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				break;
 
 			case ']':
-				while( stack.length && stack[stack.length-1].type != "[" ) 
+				while( stack.length &amp;&amp; stack[stack.length-1].type != "[" ) 
 				{
 					addoutput(stack.pop());
 				}
@@ -363,7 +390,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				break;
 				
 			case ")":
-				while( stack.length && stack[stack.length-1].type != "(" ) 
+				while( stack.length &amp;&amp; stack[stack.length-1].type != "(" ) 
 				{
 					addoutput(stack.pop());
 				}
@@ -376,7 +403,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					stack.pop();	//get rid of left bracket
 
 					//if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-					if( stack.length && stack[stack.length-1].type=="function") 
+					if( stack.length &amp;&amp; stack[stack.length-1].type=="function") 
 					{	
 						//work out arity of function
 						var n = numvars.pop();
@@ -456,7 +483,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		{
 			tree = {tok: tree.tok,
 					args: tree.args.slice()};
-			for(var i=0;i<tree.args.length;i++)
+			for(var i=0;i&lt;tree.args.length;i++)
 				tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
 			return tree;
 		}
@@ -489,7 +516,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(tok.value===undefined)
 			{
 				var value = [];
-				for(var i=0;i<tree.args.length;i++)
+				for(var i=0;i&lt;tree.args.length;i++)
 				{
 					value[i] = jme.evaluate(tree.args[i],scope);
 				}
@@ -515,7 +542,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			}
 			else {
 
-				for(var i=0;i<tree.args.length;i++) {
+				for(var i=0;i&lt;tree.args.length;i++) {
 					tree.args[i] = jme.evaluate(tree.args[i],scope);
 				}
 
@@ -533,7 +560,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 						throw(new Numbas.Error('jme.typecheck.op not defined',op));
 				}
 
-				for(var j=0;j<scope.functions[op].length; j++)
+				for(var j=0;j&lt;scope.functions[op].length; j++)
 				{
 					var fn = scope.functions[op][j];
 					if(fn.typecheck(tree.args))
@@ -623,14 +650,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			{	// if variables are used,  evaluate both expressions over a random selection of values and compare results
 				var errors = 0;
 				var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
-				for(var i = 0; i<rs.length; i++) {
+				for(var i = 0; i&lt;rs.length; i++) {
 					var nscope = new jme.Scope([scope,{variables:rs[i]}]);
 					util.copyinto(scope.variables,rs[i]);
 					var r1 = evaluate(tree1,nscope);
 					var r2 = evaluate(tree2,nscope);
 					if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
 				}
-				if(errors < settings.failureRate) {
+				if(errors &lt; settings.failureRate) {
 					return true;
 				}else{
 					return false;
@@ -656,7 +683,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	contentsubvars: function(str, scope)
 	{
 		var bits = util.contentsplitbrackets(str);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-		for(var i=0; i<bits.length; i+=4)
+		for(var i=0; i&lt;bits.length; i+=4)
 		{
 			bits[i] = jme.subvars(bits[i],scope,true);
 		}
@@ -686,7 +713,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			{
 				argbrackets = true;
 				var si = i+1;
-				while(i<s.length && s.charAt(i)!=']')
+				while(i&lt;s.length &amp;&amp; s.charAt(i)!=']')
 					i++;
 				if(i==s.length)
 					throw(new Numbas.Error('jme.texsubvars.no right bracket',cmd));
@@ -707,7 +734,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 			var brackets=1;
 			var si = i+1;
-			while(i<s.length-1 && brackets>0)
+			while(i&lt;s.length-1 &amp;&amp; brackets>0)
 			{
 				i++;
 				if(s.charAt(i)=='{')
@@ -715,7 +742,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				else if(s.charAt(i)=='}')
 					brackets--;
 			}
-			if(i == s.length-1 && brackets>0)
+			if(i == s.length-1 &amp;&amp; brackets>0)
 				throw(new Numbas.Error('jme.texsubvars.no right brace',cmd));
 
 			var expr = s.slice(si,i);
@@ -739,7 +766,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			return str;
 		}
 		var out = '';
-		for(var i=0; i<bits.length; i++)
+		for(var i=0; i&lt;bits.length; i++)
 		{
 			if(i % 2)
 			{
@@ -809,7 +836,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	}
 };
 
-jme.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
+jme.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&amp;nbsp;))';
 jme.re.re_strip_whitespace = new RegExp('^'+jme.re.re_whitespace+'+|'+jme.re.re_whitespace+'+$','g');
 
 
@@ -863,7 +890,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 			set = set.rules;
 	}
 
-	for(var i=0; i<set.length; i++ )
+	for(var i=0; i&lt;set.length; i++ )
 	{
 		if(typeof(set[i])=='string')
 		{
@@ -888,7 +915,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 				scopeSets[name] = sub;
 				if(neg)
 				{
-					for(var j=0; j<sub.rules.length; j++)
+					for(var j=0; j&lt;sub.rules.length; j++)
 					{
 						if((m=rules.indexOf(sub.rules[j]))>=0)
 						{
@@ -898,7 +925,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 				}
 				else
 				{
-					for(var j=0; j<sub.rules.length; j++)
+					for(var j=0; j&lt;sub.rules.length; j++)
 					{
 						if(!(rules.contains(sub.rules[j])))
 						{
@@ -927,7 +954,7 @@ var Scope = jme.Scope = function(scopes) {
 	if(!$.isArray(scopes))
 		scopes = [scopes];
 
-	for(var i=0;i<scopes.length;i++) {
+	for(var i=0;i&lt;scopes.length;i++) {
 		var scope = scopes[i];
 		if(scope) {
 			if('variables' in scope) {
@@ -969,8 +996,8 @@ Scope.prototype = {
 var varsymbols = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','psi','chi','phi','omega','=','space'];
 var samesymbols = '!+-,./0123456789:;?[]=';
 var symbols = {
-	'space': ' ',				'&': '\\&',							'contains': '\\ni',
-	'*': '\\ast',				'<': '\\lt',						'>': '\\gt',
+	'space': ' ',				'&amp;': '\\&amp;',							'contains': '\\ni',
+	'*': '\\ast',				'&lt;': '\\lt',						'>': '\\gt',
 	'congruent': '\\cong',		'perpendicular': '\\perp',			'uptee': '\\perp',
 	'overscore': '\\bar',		'|': '\\mid',						'~': '\\sim',
 	'dash': '^{\\prime}',			'leftanglebracket': '\\langle',		'le': '\\leq',
@@ -998,9 +1025,9 @@ builtinsbylength.add = function(e)
 {
 	if(!e.match(/^[a-zA-Z]+$/)){return;}
 	var l = e.length;
-	for(var i=0;i<this.length;i++)
+	for(var i=0;i&lt;this.length;i++)
 	{
-		if(this[i].length<=l)
+		if(this[i].length&lt;=l)
 		{
 			this.splice(i,0,e);
 			builtinsre = new RegExp('('+builtinsbylength.join('|')+')$');
@@ -1097,7 +1124,7 @@ var THTML = types.THTML = types.html = function(html) {
 THTML.prototype.type = 'html';
 THTML.doc = {
 	name: 'html',
-	usage: ['html(\'<div>things</div>\')'],
+	usage: ['html(\'&lt;div>things&lt;/div>\')'],
 	description: "An HTML DOM node."
 }
 
@@ -1194,7 +1221,7 @@ var TRange = types.TRange = types.range = function(range)
 		{
 			var n = (end-start)/step;
 			this.size = n+1;
-			for(var i=0;i<=n;i++)
+			for(var i=0;i&lt;=n;i++)
 			{
 				this.value[i+3] = start+i*step;
 			}
@@ -1242,7 +1269,7 @@ Names can be given _annotations_ to change how they are displayed. The following
 * @dot@ - places a dot above the name when displayed, for example when representing a derivative\n\
 * @m@ or @matrix@ - denote the name as representing a matrix -- displayed using a non-italic font\
 \n\n\
-Any other annotation is taken to be a LaTeX command. For example, a name @vec:x@ is rendered in LaTeX as <code>\\vec{x}</code>, which places an arrow above the name.\
+Any other annotation is taken to be a LaTeX command. For example, a name @vec:x@ is rendered in LaTeX as &lt;code>\\vec{x}&lt;/code>, which places an arrow above the name.\
 	'
 };
 
@@ -1364,11 +1391,11 @@ var precedence = jme.precedence = {
 	'..': 5,
 	'#':6,
 	'except': 6.5,
-	'<': 7,
+	'&lt;': 7,
 	'>': 7,
-	'<=': 7,
+	'&lt;=': 7,
 	'>=': 7,
-	'<>': 8,
+	'&lt;>': 8,
 	'=': 8,
 	'isa': 9,
 	'and': 11,
@@ -1382,8 +1409,8 @@ var precedence = jme.precedence = {
  * @readonly
  */
 var synonyms = {
-	'&':'and',
-	'&&':'and',
+	'&amp;':'and',
+	'&amp;&amp;':'and',
 	'divides': '|',
 	'||':'or',
 	'sqr':'sqrt',
@@ -1447,7 +1474,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	 */
 	this.id = funcObjAcc++;
 	options = options || {};
-	for(var i=0;i<intype.length;i++)
+	for(var i=0;i&lt;intype.length;i++)
 	{
 		if(intype[i]!='?')
 		{
@@ -1478,7 +1505,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	{
 		variables = variables.slice();	//take a copy of the array
 
-		for( var i=0; i<this.intype.length; i++ )
+		for( var i=0; i&lt;this.intype.length; i++ )
 		{
 			if(this.intype[i][0]=='*')	//arbitrarily many
 			{
@@ -1509,7 +1536,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	this.evaluate = options.evaluate || function(args,scope)
 	{
 		var nargs = [];
-		for(var i=0; i<args.length; i++) {
+		for(var i=0; i&lt;args.length; i++) {
 			if(options.unwrapValues)
 				nargs.push(jme.unwrapValue(args[i]));
 			else
@@ -1630,8 +1657,8 @@ newBuiltin('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', descriptio
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}}); 
 
-newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
-newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
+newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'&lt;div>things&lt;/div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
+newBuiltin('image',[TString],THTML,function(url){ return $('&lt;img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
 
 newBuiltin('latex',[TString],TString,null,{
 	evaluate: function(args,scope) {
@@ -1657,7 +1684,7 @@ newBuiltin('except', [TRange,TRange], TList,
 		range = range.slice(3);
 		if(except[2]==0)
 		{
-			return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new TNum(i)});
+			return range.filter(function(i){return i&lt;except[0] || i>except[1]}).map(function(i){return new TNum(i)});
 		}
 		else
 		{
@@ -1744,16 +1771,16 @@ newBuiltin('except',[TList,'?'], TList, null, {
 	}
 });
 
-newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
+newBuiltin('&lt;', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x&lt;y','1&lt;2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
+newBuiltin('&lt;=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x &lt;= y','1&lt;=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
 newBuiltin('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('<>', ['?','?'], TBool, null, {
+newBuiltin('&lt;>', ['?','?'], TBool, null, {
 	evaluate: function(args,scope) {
 		return new TBool(util.neq(args[0],args[1]));
 	},
 	doc: {
-		usage: ['\'this string\' <> \'that string\'', 'a <> b', '1<>2','sin(90)<>1'], 
+		usage: ['\'this string\' &lt;> \'that string\'', 'a &lt;> b', '1&lt;>2','sin(90)&lt;>1'], 
 		description: 'Inequality test.', 
 		tags: ['comparison','not equal']
 	}
@@ -1769,10 +1796,10 @@ newBuiltin('=', ['?','?'], TBool, null, {
 	}
 });
 
-newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
+newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&amp;&amp;b;}, {doc: {usage: ['true &amp;&amp; true','true and true'], description: 'Logical AND.'}} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );	
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
-newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
+newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) &amp;&amp; !(a &amp;&amp; b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
 
 newBuiltin('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
 newBuiltin('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
@@ -1852,14 +1879,14 @@ newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumb
 newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeroes if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
 newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
-newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
+newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$&lt;sup>th&lt;/sup> root.', tags: ['cube']}} );
 newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
 newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
 newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @x@ divides @y@.', tags: ['multiple of']}} );
 
-newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
-newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
+newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$&lt;sup>th&lt;/sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
+newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$&lt;sup>th&lt;/sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
 newBuiltin('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
 newBuiltin('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
 
@@ -1911,7 +1938,7 @@ newBuiltin('switch',[],'?', null, {
 	{
 		//should take alternating booleans and [any value]
 		//final odd-numbered argument is the 'otherwise' option
-		if(variables.length <2)
+		if(variables.length &lt;2)
 			return false;
 
 		var check=0;
@@ -1920,7 +1947,7 @@ newBuiltin('switch',[],'?', null, {
 		else
 			check = variables.length-1;
 
-		for( var i=0; i<check; i+=2 )
+		for( var i=0; i&lt;check; i+=2 )
 		{
 			switch(variables[i].tok.type)
 			{
@@ -1935,7 +1962,7 @@ newBuiltin('switch',[],'?', null, {
 	},
 	evaluate: function(args,scope)
 	{
-		for(var i=0; i<args.length-1; i+=2 )
+		for(var i=0; i&lt;args.length-1; i+=2 )
 		{
 			var result = jme.evaluate(args[i],scope).value;
 			if(result)
@@ -1958,13 +1985,13 @@ newBuiltin('isa',['?',TString],TBool, null, {
 	evaluate: function(args,scope)
 	{
 		var kind = jme.evaluate(args[1],scope).value;
-		if(args[0].tok.type=='name' && scope.variables[args[0].tok.name.toLowerCase()]==undefined )
+		if(args[0].tok.type=='name' &amp;&amp; scope.variables[args[0].tok.name.toLowerCase()]==undefined )
 			return new TBool(kind=='name');
 
 		var match = false;
 		if(kind=='complex')
 		{
-			match = args[0].tok.type=='number' && args[0].tok.value.complex || false;
+			match = args[0].tok.type=='number' &amp;&amp; args[0].tok.value.complex || false;
 		}
 		else
 		{
@@ -1986,7 +2013,7 @@ newBuiltin('repeat',['?',TNum],TList, null, {
 	{
 		var size = jme.evaluate(args[1],scope).value;
 		var value = [];
-		for(var i=0;i<size;i++)
+		for(var i=0;i&lt;size;i++)
 		{
 			value[i] = jme.evaluate(args[0],scope);
 		}
@@ -2010,7 +2037,7 @@ newBuiltin('listval',[TList,TNum],'?', null, {
 			else
 				throw(new Numbas.Error('jme.func.listval.not a list'));
 		}
-		if(index<0)
+		if(index&lt;0)
 			index += list.vars;
 		if(index in list.value)
 			return list.value[index];
@@ -2033,9 +2060,9 @@ newBuiltin('listval',[TList,TRange],TList, null, {
 		var start = range[0];
 		var end = range[1];
 		var size = list.vars;
-		if(start<0)
+		if(start&lt;0)
 			start += size;
-		if(end<0)
+		if(end&lt;0)
 			end += size;
 		var value = list.value.slice(start,end);
 		return new TList(value);
@@ -2088,7 +2115,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 			break;
 		case 'range':
 			list = list.value.slice(3);
-			for(var i=0;i<list.length;i++) {
+			for(var i=0;i&lt;list.length;i++) {
 				list[i] = new TNum(list[i]);
 			}
 			break;
@@ -2098,7 +2125,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 		var value = [];
 		var name = args[1].tok.name;
 		scope = new Scope(scope);
-		for(var i=0;i<list.length;i++)
+		for(var i=0;i&lt;list.length;i++)
 		{
 			scope.variables[name] = list[i];
 			value[i] = jme.evaluate(args[0],scope);
@@ -2120,7 +2147,7 @@ newBuiltin('map',['?',TName,TRange],TList, null, {
 		var newlist = new TList(range.size);
 		newlist.value = [];
 		scope = new Scope(scope);
-		for(var i=3;i<range.value.length;i++)
+		for(var i=3;i&lt;range.value.length;i++)
 		{
 			scope.variables[name] = new TNum(range.value[i]);
 			newlist.value[i-3] = jme.evaluate(args[0],scope);
@@ -2160,7 +2187,7 @@ newBuiltin('vector',['*TNum'],TVector, null, {
 	evaluate: function(args,scope)
 	{
 		var value = [];
-		for(var i=0;i<args.length;i++)
+		for(var i=0;i&lt;args.length;i++)
 		{
 			value.push(args[i].value);
 		}
@@ -2204,7 +2231,7 @@ newBuiltin('matrix',[TList],TMatrix,null, {
 			columns = list.vars;
 			break;
 		case 'list':
-			for(var i=0;i<rows;i++)
+			for(var i=0;i&lt;rows;i++)
 			{
 				var row = list.value[i].value;
 				value.push(row.map(function(x){return x.value}));
@@ -2232,7 +2259,7 @@ newBuiltin('matrix',['*list'],TMatrix, null, {
 		var rows = args.length;
 		var columns = 0;
 		var value = [];
-		for(var i=0;i<args.length;i++)
+		for(var i=0;i&lt;args.length;i++)
 		{
 			var row = args[i].value;
 			value.push(row.map(function(x){return x.value}));
@@ -2254,7 +2281,7 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
 	evaluate: function(args,scope)
 	{
 		var row = [];
-		for(var i=0;i<args.length;i++)
+		for(var i=0;i&lt;args.length;i++)
 		{
 			row.push(args[i].value);
 		}
@@ -2311,7 +2338,7 @@ newBuiltin('list',[TMatrix],TList,null, {
 	{
 		var matrix = args[0];
 		var value = [];
-		for(var i=0;i<matrix.value.rows;i++)
+		for(var i=0;i&lt;matrix.value.rows;i++)
 		{
 			var row = new TList(matrix.value[i].map(function(n){return new TNum(n)}));
 			value.push(row);
@@ -2328,27 +2355,27 @@ newBuiltin('list',[TMatrix],TList,null, {
 
 newBuiltin('table',[TList,TList],THTML,
 	function(data,headers) {
-		var table = $('<table/>');
+		var table = $('&lt;table/>');
 
-		var thead = $('<thead/>');
+		var thead = $('&lt;thead/>');
 		table.append(thead);
-		for(var i=0;i<headers.length;i++) {
+		for(var i=0;i&lt;headers.length;i++) {
 			var cell = headers[i];
 			if(typeof cell=='number')
 				cell = Numbas.math.niceNumber(cell);
-			thead.append($('<th/>').html(cell));
+			thead.append($('&lt;th/>').html(cell));
 		}
 
-		var tbody=$('<tbody/>');
+		var tbody=$('&lt;tbody/>');
 		table.append(tbody);
-		for(var i=0;i<data.length;i++) {
-			var row = $('<tr/>');
+		for(var i=0;i&lt;data.length;i++) {
+			var row = $('&lt;tr/>');
 			tbody.append(row);
-			for(var j=0;j<data[i].length;j++) {
+			for(var j=0;j&lt;data[i].length;j++) {
 				var cell = data[i][j];
 				if(typeof cell=='number')
 					cell = Numbas.math.niceNumber(cell);
-				row.append($('<td/>').html(cell));
+				row.append($('&lt;td/>').html(cell));
 			}
 		}
 
@@ -2373,10 +2400,10 @@ function randoms(varnames,min,max,times)
 {
 	times *= varnames.length;
 	var rs = [];
-	for( var i=0; i<times; i++ )
+	for( var i=0; i&lt;times; i++ )
 	{
 		var r = {};
-		for( var j=0; j<varnames.length; j++ )
+		for( var j=0; j&lt;varnames.length; j++ )
 		{
 			r[varnames[j]] = new TNum(Numbas.math.randomrange(min,max));
 		}
@@ -2388,8 +2415,8 @@ function randoms(varnames,min,max,times)
 
 function varnamesAgree(array1, array2) {
 	var name;
-	for(var i=0; i<array1.length; i++) {
-		if( (name=array1[i])[0]!='$' && !array2.contains(name) )
+	for(var i=0; i&lt;array1.length; i++) {
+		if( (name=array1[i])[0]!='$' &amp;&amp; !array2.contains(name) )
 			return false;
 	}
 	
@@ -2445,7 +2472,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	if(boundvars===undefined)
 		boundvars = [];
 
-	if(tree.tok.type=='function' && tree.tok.name=='map')
+	if(tree.tok.type=='function' &amp;&amp; tree.tok.name=='map')
 	{
 		boundvars = boundvars.slice();
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
@@ -2465,7 +2492,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 		case 'string':
 			var bits = jme.texsplit(tree.tok.value);
 			var out = [];
-			for(var i=0;i<bits.length-3;i+=4)
+			for(var i=0;i&lt;bits.length-3;i+=4)
 			{
 				var cmd = bits[i+1];
 				var expr = bits[i+3];
@@ -2477,7 +2504,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 					break;
 				case 'simplify':
 					var sbits = util.splitbrackets(expr,'{','}');
-					for(var i=1;i<sbits.length-1;i+=2)
+					for(var i=1;i&lt;sbits.length-1;i+=2)
 					{
 						var tree2 = jme.compile(sbits[i],scope,true);
 						out = out.merge(findvars(tree2,boundvars));
@@ -2493,7 +2520,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	else
 	{
 		var vars = [];
-		for(var i=0;i<tree.args.length;i++)
+		for(var i=0;i&lt;tree.args.length;i++)
 			vars = vars.merge(findvars(tree.args[i],boundvars));
 		return vars;
 	}
@@ -2518,7 +2545,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 				v1 = {re:v1, im:0, complex:true};
 			if(!v2.complex)
 				v2 = {re:v2, im:0, complex:true};
-			return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
+			return checkingFunction(v1.re, v2.re, checkingAccuracy) &amp;&amp; checkingFunction(v1.im,v2.im,checkingAccuracy);
 		}
 		else
 		{
@@ -2528,7 +2555,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 	case 'vector':
 		if(v1.length != v2.length)
 			return false;
-		for(var i=0;i<v1.length;i++)
+		for(var i=0;i&lt;v1.length;i++)
 		{
 			if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
 				return false;
@@ -2538,9 +2565,9 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 	case 'matrix':
 		if(v1.rows != v2.rows || v1.columns != v2.columns)
 			return false;
-		for(var i=0;i<v1.rows;i++)
+		for(var i=0;i&lt;v1.rows;i++)
 		{
-			for(var j=0;j<v1.columns;j++)
+			for(var j=0;j&lt;v1.columns;j++)
 			{
 				if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
 					return false;
@@ -2551,7 +2578,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 	case 'list':
 		if(v1.length != v2.length)
 			return false;
-		for(var i=0;i<v1.length;i++)
+		for(var i=0;i&lt;v1.length;i++)
 		{
 			if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
 				return false;
@@ -2563,3 +2590,26 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 };
 
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li><li><a href="RequireScript.html">RequireScript</a></li></ul><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.jme.html">jme</a></li><li><a href="Numbas.jme.types.html">types</a></li></ul>
+</nav>
+
+<br clear="both">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha4</a> on Tue Mar 04 2014 17:23:43 GMT+0000 (GMT Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
