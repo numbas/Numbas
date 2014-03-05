@@ -809,6 +809,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	}
 };
 
+/** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
 jme.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
 jme.re.re_strip_whitespace = new RegExp('^'+jme.re.re_whitespace+'+|'+jme.re.re_whitespace+'+$','g');
 
@@ -819,11 +820,19 @@ var displayFlags = {
 };
 
 var ruleSort = util.sortBy('patternString');
+
+/** Set of simplification rules
+ * @constructor
+ * @memberof Numbas.jme
+ * @param {rule[]} rules
+ * @param {object} flags
+ */
 var Ruleset = jme.Ruleset = function(rules,flags) {
 	this.rules = rules;
 	this.flags = $.extend({},displayFlags,flags);
 }
-Ruleset.prototype = {
+Ruleset.prototype = /** @lends Numbas.jme.Ruleset.prototype */ {
+	/** Test whether flag is set */
 	flagSet: function(flag) {
 		flag = flag.toLowerCase();
 		if(this.flags.hasOwnProperty(flag))
@@ -2396,22 +2405,28 @@ function varnamesAgree(array1, array2) {
 	return true;
 };
 
+/** 
+ * Numerical comparison functions
+ * @enum {function}
+ * @memberof Numbas.jme 
+ */
 var checkingFunctions = 
 {
+	/** Absolute difference between variables - fail if bigger than tolerance */
 	absdiff: function(r1,r2,tolerance) 
 	{
 		if(r1===Infinity || r1===-Infinity)
 			return r1===r2;
 
-		// finds absolute difference between values, fails if bigger than tolerance
 		return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
 	},
 
+	/** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than tolerance */
 	reldiff: function(r1,r2,tolerance) {
 		if(r1===Infinity || r1===-Infinity)
 			return r1===r2;
 
-		// fails if (r1/r2 - 1) is bigger than tolerance
+		// 
 		if(r2!=0) {
 			return math.leq(Math.abs(math.sub(r1,r2)), Math.abs(math.mul(tolerance,r2)));
 		} else {	//or if correct answer is 0, checks abs difference
@@ -2419,25 +2434,33 @@ var checkingFunctions =
 		}
 	},
 
+	/** Round both values to given number of decimal places, and fail if unequal. */
 	dp: function(r1,r2,tolerance) {
 		if(r1===Infinity || r1===-Infinity)
 			return r1===r2;
 
-		//rounds both values to 'tolerance' decimal places, and fails if unequal 
 		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
 	},
 
+	/** Round both values to given number of significant figures, and fail if unequal. */
 	sigfig: function(r1,r2,tolerance) {
 		if(r1===Infinity || r1===-Infinity)
 			return r1===r2;
 
-		//rounds both values to 'tolerance' sig figs, and fails if unequal
 		tolerance = Math.floor(Math.abs(tolerance));
 		return math.eq(math.siground(r1,tolerance), math.siground(r2,tolerance));
 	}
 };
 
+/** Find all variables used in given syntax tree
+ * @memberof Numbas.jme
+ * @method
+ * @param {Numbas.jme.tree} tree
+ * @param {string[]} boundvars - variables to be considered as bound (don't include them)
+ * @param {Numbas.jme.Scope} scope
+ * @returns {string[]}
+ */
 var findvars = jme.findvars = function(tree,boundvars,scope)
 {
 	if(!scope)
@@ -2499,7 +2522,15 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	}
 }
 
-
+/** Check that two values are equal 
+ * @memberof Numbas.jme
+ * @method
+ * @param {Numbas.jme.token} r1
+ * @param {Numbas.jme.token} r2
+ * @param {function} checkingFunction - one of {@link Numbas.jme.checkingFunctions}
+ * @param {number} checkingAccuracy
+ * @returns {boolean}
+ */
 function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 {	// first checks both expressions are of same type, then uses given checking type to compare results
 

@@ -1,0 +1,621 @@
+%Copyright 2011 Newcastle University
+%
+%   Licensed under the Apache License, Version 2.0 (the "License");
+%   you may not use this file except in compliance with the License.
+%   You may obtain a copy of the License at
+%
+%       http://www.apache.org/licenses/LICENSE-2.0
+%
+%   Unless required by applicable law or agreed to in writing, software
+%   distributed under the License is distributed on an "AS IS" BASIS,
+%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%   See the License for the specific language governing permissions and
+%   limitations under the License.
+
+\begin{chapter}{\label{cha:question_parts}Question parts and types}
+  Each exam consists of a number of questions which, in turn, consist of a
+  number of parts.  A part will generally be where the student will need to
+  provide some input as their answer.
+
+  \numbas\ supports a variety of part types.  This chapter describes each
+  part type in detail, explaining under which circumstances you might use each
+  type, and how to define the properties of a \codeobject{part} object.
+  
+  Each \codeobject{part} object is an element of the \verb"parts" array, within
+  a \codeobject{question} object.  Parts will typically be defined as follows
+  (see, for example, listing~\ref{lst:example}):
+  %
+  \begin{Verbatim}
+    parts: [
+      {
+        type: <parttype>
+        <other_properties>
+      }
+    ]
+  \end{Verbatim}
+  %
+  The \codeprop{type} property is mandatory; other properties are optional.
+  Table~\ref{tab:part_object} lists the \codeobject{part} object properties
+  which can be used independently of the part type.  Properties which are
+  specific to particular part types are explained in the following sections.
+
+  \section{\label{sec:number_entry_part}Number entry}
+  In a \emph{Number entry} part, the student's answer should be a number
+  (integer or real), which either matches the correct answer exactly, or lies
+  within a particular range of the correct answer.  The correct answer cannot
+  be a fraction or a complex number; use the JME part type for these cases ---
+  see \S\ref{sec:jme_part}.
+
+  For a number entry part, set \codeprop{type} to \verb"numberentry".
+  Table~\ref{tab:number_entry_part} lists the properties of this part type.
+  (All properties are optional, unless otherwise stated, and if not set, will
+  take the default value listed.)
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{minvalue}* & The student's answer must be greater than or equal
+      to this value for the answer to be considered correct. & \verb"0" \\
+      \codeprop{maxvalue}* & The student's answer must be less than or equal to
+      this value for the answer to be considered correct. & \verb"0" \\
+      \codeprop{answer}* & The student's answer must be exactly equal to this
+      value for the answer to be considered correct. & \verb"0" \\
+      \codeprop{integeranswer} & This specifies whether the answer must be an
+      integer. & \verb"false" \\
+      \codeprop{partialcredit} & This specifies the percentage of the total
+      part mark to be awarded, if \codeprop{integeranswer} is set, and the
+      student's answer is within the allowable range, but not an integer. &
+      \verb"0" \\
+			\codeprop{inputStep} & The amount to change the entered number by when the student clicks on the up or down arrows in the input field. & \verb"1" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:number_entry_part}
+      The valid properties of a number entry part.  *Note that if
+      \codeprop{answer} is set, then \codeprop{minvalue} and
+      \codeprop{maxvalue} need not be.  If \codeprop{answer} is not set, then
+      both \codeprop{minvalue} and \codeprop{maxvalue} must be.
+    }
+  \end{table}
+
+  Declared variables and functions can be used in the \codeprop{answer},
+  \codeprop{minvalue}, and \codeprop{maxvalue} properties, and the result of
+  any variable evaluation must be a pure number (integer or real).
+
+  The example exam (listing~\ref{lst:example}) includes two number entry parts,
+  where exact answers are required.  Another example of a number entry part is
+  the following:
+  %
+  \begin{Verbatim}
+    {
+      type: numberentry
+      marks: 1
+      prompt: "What is $\sqrt{2}$?"
+      minvalue: 1.41
+      maxvalue: 1.415
+    }
+  \end{Verbatim}
+  %
+  Here, the student's answer must lie in the range $[1.41,1.415]$ for it to be
+  marked correct, and one mark awarded.
+
+  \section{\label{sec:jme_part}Judged mathematical expression}
+  In a \emph{Judged Mathematical Expression (JME)} part, the student must enter
+  a mathematical expression, which is equivalent to an expression defined to be
+  correct.  You should use this part type when the answer needs to be a
+  mathematical expression, \eg rearranging algebra, integrating a function,
+  stating an identity, or when you need to use complex numbers.
+
+  For a JME part, set the part \codeprop{type} to \verb"jme".
+  Table~\ref{tab:jme_object} lists the properties of the JME part object, and
+  table~\ref{tab:restriction_object} lists the properties of the
+  \codeobject{restriction} object, which is used to define constraints on the
+  student's answer in a JME part.  How this object is used is described later.
+
+  Subsequent sections will describe various aspects of the JME part in greater
+  detail.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{18em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codepropreq{answer} & A JME expression defining the correct answer (see
+      chapter~\ref{cha:jme_syntax}). & \nodef \\
+      \footnotesize{\codeprop{answersimplification}} & The simplification rules
+      that should be applied to the revealed answer.  For display purposes
+      only.  A string of 0s and 1s, or the names of simplification rules to
+      enable & \mbox{see \S\ref{sec:answer_simplification}} \\
+      \codeprop{checkingtype} & The method to use when comparing the student's
+      answer to the correct answer (see \S\ref{sec:accuracy}). &
+      \verb"reldiff" \\
+      \codeprop{checkingaccuracy} & The inaccuracy tolerance when checking the
+      student's answer against the correct answer.  What value this takes
+      depends on the \codeprop{checkingtype} (see
+      \S\ref{sec:accuracy}). & \mbox{see \S\ref{sec:accuracy}} \\
+      \codeprop{failurerate} & The number of comparison failures to allow,
+      before the student's answer is deemed incorrect (see
+      \S\ref{sec:answer_comparison}). & \verb"1" \\
+      \codeprop{vsetrangepoints} & The number of values to randomly choose from
+      \codeprop{vsetrange}, for each unknown, when evaluating variables in an
+      answer comparison (see \S\ref{sec:answer_comparison}). & \verb"5" \\
+      \codeprop{vsetrange} & A 2-element array defining the start and end
+      points from which \codeprop{vsetrangepoints} values should be chosen, in
+      an answer comparison (see \S\ref{sec:answer_comparison}). &
+      \verb"[0,1]" \\
+      \codeprop{maxlength} & A \codeobject{restriction} object defining the
+      maximum length, in characters, which a student's answer can be, or zero
+      if there should be no restrictions (see
+      \S\ref{sec:length_restrictions}).  & \verb"{}" \\
+      \codeprop{minlength} & A \codeobject{restriction} object defining the
+      minimum length, in characters, which a student's answer can be, or zero
+      if there should be no restrictions (see
+      \S\ref{sec:length_restrictions}). & \verb"{}" \\
+      \codeprop{musthave} & A \codeobject{restriction} object defining the
+      \codeprop{strings} which a student's answer must contain (see
+      \S\ref{sec:string_restrictions}). & \verb"{}" \\
+      \codeprop{notallowed} & A \codeobject{restriction} object defining the
+      \codeprop{strings} which a student's answer must not contain (see
+      \S\ref{sec:string_restrictions}). & \verb"{}" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:jme_object}
+    The valid properties of a JME object.  The \codeprop{answer} property is
+    required, as denoted by the italic typeface.
+    }
+  \end{table}
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codeprop{message} & \emph{(Content)} A message to display to the
+      student, when this particular restriction is violated. & \nodef \\
+      \codeprop{partialcredit} & Percentage of the available marks to award, if
+      this restriction is violated.  Note that \codeprop{partialcredit} is
+      compounded if multiple restrictions are in use. & \verb"0" \\
+      \codeprop{length} & If this is a length restriction, then the length
+      restriction of the student's answer, in characters. & \verb"0" \\
+      \codeprop{strings} & If this is a string restriction, then an array of
+      strings, which must, or must not, be included in the student's answer. &
+      \verb"[]" \\
+      \codeprop{showstrings} & If this is a string restriction, determines
+      whether the list of \codeprop{strings} is displayed to the student, if
+      \codeprop{strings} is set, and the student violates the string
+      restriction. & \verb"false" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:restriction_object}
+    The valid properties of a restriction object.  The \codeprop{message}
+    property is a \codecontent{content} block --- see
+    chapter~\ref{cha:content_blocks}.
+    }
+  \end{table}
+
+  \subsection{\label{sec:answer_comparison}Answer comparison}
+  To determine whether the student's answer matches the correct answer, both
+  expressions are evaluated several times, by substituting a set of randomly
+  chosen values for the unknowns in each expression.  These randomly chosen
+  values are controlled by the \codeprop{vsetrangepoints} and
+  \codeprop{vsetrange} properties.
+
+  As an example, suppose that the correct answer were $3x^{2}$, where the numbers 3 and 2
+  may or may not have been randomly chosen.  In this expression $x$ is the only
+  unknown.  The default comparison check is to randomly choose five values from
+  the range $[0,1]$, and substitute them for $x$ in the expression.  The same
+  is done for the student's answer (using the same five values); for each
+  evaluation, the student's answer must be sufficiently close to the correct
+  answer for it to be considered correct.
+
+  Because evaluation in this way can lead to rounding errors, there are a
+  number of available ``checking methods,'' to overcome any possible problems.
+  You can also decide that the comparison is allowed to fail up to a certain
+  number of times before the student's answer is deemed incorrect.  See
+  \S\ref{sec:accuracy} for more on this.
+
+  A consequence of this method of comparison is that any mathematical
+  expression which is equivalent to the correct answer is permitted.  For
+  example, if the correct answer were $3x^{2}$ (\verb"3*x^2" in JME syntax),
+  then the following student answers would all be marked correct:
+  \verb"2*1.5*x^2", \verb"3*x*x", \verb"2*x^2+x^2".
+
+  This behaviour can be prevented by restricting the student's answer in
+  various ways, \eg by defining string restrictions, length restrictions, and
+  accuracy settings.
+
+  \subsubsection{\label{sec:string_restrictions}String restrictions}
+  It is possible to restrict the characters and strings a student can enter as
+  part of their answer.  In contrast, you can also specify that the student's
+  answer must contain particular characters or strings.  This is done through
+  the \codeprop{notallowed} and \codeprop{musthave} properties of the JME
+  \codeobject{part} object.  These properties are \codeobject{restriction}
+  objects as shown in table~\ref{tab:restriction_object}.  Consider the
+  following example:
+  %
+  \begin{Verbatim}
+    musthave: {
+      strings: [hello,goodbye]
+      message: Your answer is missing some words.
+    }
+    notallowed: {
+      strings: [+,*,-]
+      message: You have included forbidden characters in your answer.
+      showstrings: true
+    }
+  \end{Verbatim}
+  %
+  For this particular part, the student's answer must contain the strings
+  \verb"hello" and \verb"goodbye", and must not include \verb"+", \verb"*", or
+  \verb"-".  If the student's answer violates any of these restrictions, then
+  the appropriate message is shown, and in the \codeprop{notallowed} case, the
+  student will also be shown which strings are not allowed.  In both cases the
+  student would receive no marks for the part, since the
+  \codeprop{partialcredit} property is set to \verb"0" by default.
+
+  \subsubsection{\label{sec:length_restrictions}Length restrictions}
+  In certain circumstances, you might decide that the student's answer must be
+  shorter or longer than a set number of characters.
+  
+  Consider asking the student to expand $(x+1)^{2}$.  The correct answer is
+  $x^{2}+2x+1$, but due to the comparison method, the student could enter the
+  original expression, and be awarded the marks, since the two expressions are
+  equivalent.
+ 
+  One way to solve the problem (not necessarily the best) is to require that
+  the student's answer is longer than seven characters, which is the number of
+  characters required to enter \verb"(x+1)^2" (in JME syntax).  You could also
+  combine the length restriction with a string restriction, forbidding left or
+  right parentheses.  The JME part object would then contain the following:
+  %
+  \begin{Verbatim}
+    minlength: {length: 8}
+    notallowed: {strings: [(,)]}
+  \end{Verbatim}
+  %
+  In this case, the other properties of the \codeobject{restriction} object
+  take their default values.
+
+  \subsubsection{\label{sec:accuracy}Accuracy}
+  As briefly mentioned earlier, evaluation and comparison of the correct answer
+  and student's answer can lead to rounding errors.  Several checking methods
+  are available to help alleviate this problem.  The \codeprop{checkingtype}
+  property controls the method, of which there are four --- relative difference
+  (\codeprop{reldiff}), absolute difference (\codeprop{absdiff}), decimal
+  points (\codeprop{dp}), and significant figures (\codeprop{sigfig}).  The
+  \codeprop{checkingaccuracy} property controls the tolerance involved in the
+  method.  See table~\ref{tab:checking_types} for a summary of the checking
+  methods.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{llp{18em}}
+      \hline
+      \multicolumn{3}{c}{Correct answer: $a_{\mathrm{c}}$; Student answer:
+      $a_{\mathrm{s}}$} \\ Checking method & Description & When comparison
+      fails \\
+      \hline
+      \codeprop{reldiff} & \small{Relative difference} & $\abs{(a_{\mathrm{c}}
+      - a_{\mathrm{s}}) / a_{\mathrm{s}}} > \codeprop{checkingaccuracy}$ \\
+      \codeprop{absdiff} & \small{Absolute difference} &
+      $\abs{a_{c}-a_{s}}>\codeprop{checkingaccuracy}$ \\
+      \codeprop{dp} & \small{Decimal points} & $a_{\mathrm{c}}$ and
+      $a_{\mathrm{s}}$ rounded to \codeprop{checkingaccuracy} decimal points.
+      Failure if the rounded numbers are not exactly equal. \\
+      \codeprop{sigfig} & \small{Significant figures} & $a_{\mathrm{c}}$ and
+      $a_{\mathrm{s}}$ rounded to \codeprop{checkingaccuracy} significant
+      figures.  Failure if the rounded numbers are not exactly equal. \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:checking_types}
+      The available checking methods, and the methods for determining when the
+      comparison between the correct answer and student's answer fails (see
+      \S\ref{sec:accuracy}).
+    }
+  \end{table}
+
+  In each of the checking methods described below, the comparison is performed
+  a number of times (determined by the \codeprop{vsetrangepoints} property, for
+  which the default is $5$).  The student's answer is deemed incorrect as soon
+  as a comparison fails, unless the \codeprop{failurerate} property is set to a
+  value other than the default of $1$.  In this case the comparison is allowed
+  to fail a certain number of times before the student's answer is deemed
+  incorrect.  You might do this if you know the comparison will probably fail
+  so many times over the range \codeprop{vsetrange}.
+
+  Be wary of setting a comparison range including points on which the correct
+  answer is not defined.  For example, if the correct answer were $1/(2x-1)$,
+  then the default comparison range of $[0,1]$ is not acceptable, because the
+  expression is not defined on $x=1/2$.
+
+  The \emph{relative difference} checking method calculates
+  %
+  \begin{equation*}
+    \abs{\left( a_{\mathrm{c}} - a_{\mathrm{s}} \right) / a_{\mathrm{s}}}
+  \end{equation*}
+  %
+  (where $a_{\mathrm{c}}$ is the correct answer and $a_{\mathrm{s}}$ is the
+  student's answer), and compares this value to \codeprop{checkingaccuracy}.
+  If it is strictly greater than \codeprop{checkingaccuracy} (for which the
+  default is $0.0001$) then the comparison has failed, and the student's answer
+  is deemed incorrect.
+
+  The \emph{absolute difference} checking method is very similar to the
+  relative difference method, except the value compared to
+  \codeprop{checkingaccuracy} is
+  %
+  \begin{equation*}
+    \abs{a_{\mathrm{c}} - a_{\mathrm{s}}}.
+  \end{equation*}
+  %
+  If this value is strictly greater than \codeprop{checkingaccuracy} (for which
+  the default is again $0.0001$), then the comparison fails, and the student's
+  answer is deemed incorrect.
+
+  In the \emph{decimal points} checking method, the two answers
+  $a_{\mathrm{c}}$ and $a_{\mathrm{s}}$ are both rounded to
+  \codeprop{checkingaccuracy} decimal points (the default is $5$ decimal
+  points).  If, after rounding, the two answers are not exactly equal, the
+  comparison has failed, and the student's answer is deemed incorrect.
+
+  The final checking method, \emph{significant figures}, works in much the same
+  way as the decimal points method, except the two answers are rounded to
+  \codeprop{checkingaccuracy} significant figures (the default is $5$
+  significant figures).  If the two rounded answers are not exactly equal, then
+  the comparison has failed, and the student's answer is deemed incorrect.
+
+  \subsection{\label{sec:answer_simplification}Revealed answer simplification}
+  The simplification rules applied to the displayed answer in a JME part can be
+  specified using the \codeprop{answersimplification} property of the JME part.
+  The available rules are identical to those explained in
+  \S\ref{sec:simplification}.  The property itself is defined as
+  %
+  \begin{Verbatim}
+    answersimplification: 1111111011111011
+    answersimplification: "sqrtProduct,unitPower"
+  \end{Verbatim}
+  %
+  where the string of 1s and 0s shown here defines the default set of rules.
+
+  \subsection{JME example}
+  The following example of a JME question part brings together a number of the
+  topics explained in the preceding sections.
+  %
+  \begin{Verbatim}
+  {
+    type: jme
+    marks: 2
+    prompt: "What is the length of the vector $(x,y)$?"
+    answer: sqrt(x^2+y^2)
+    checkingtype: absdiff
+    checkingaccuracy: 0.01
+    failurerate: 1
+    vsetrangepoints: 5
+    vsetrange: [-10,10]
+    maxlength: {
+      length: 20
+      partialcredit: 50
+      message: Your answer shouldn't be very complicated.
+    }
+    notallowed: {
+      strings: [-,/]
+      message: Please write your answer in the usual way.
+    }
+  }
+  \end{Verbatim}
+  %
+  This JME part asks the question ``What is the length of the vector
+  $(x,y)$?'', for which the correct answer is $\sqrt{x^{2}+y^{2}}$.  Two marks
+  are awarded for a correct answer.  The absolute difference method of
+  comparison will be used; this difference should be less than $0.01$.  If any
+  comparison does not match, the student's answer is deemed incorrect.  Five
+  points are randomly chosen over the range $[-10,10]$ for the comparison.
+
+  The student's answer can be no longer than 20 characters; if it is, then a
+  message is shown, and only 50\% of marks will be awarded for an otherwise
+  correct answer.
+
+  The student's answer cannot include \verb"-" or \verb"/"; if it does, then a
+  message is shown, and no marks are awarded.
+
+  \section{\label{sec:pattern_match_part}Pattern match}
+  In a \emph{Pattern match} part the student must enter a string which matches
+  a regular expression.  The valid properties of the pattern match part are
+  given in table~\ref{tab:pattern_match_part}.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codepropreq{answer} & A regular expression against which to test the
+      student answer. & \nodef \\
+      \codepropreq{displayanswer} & \emph{(Content)} The string to display as
+      the correct answer, when the correct answer is revealed. & \nodef \\
+      \codeprop{casesensitive} & Whether the use of upper or lower case
+      characters matters. & \verb"false" \\
+      \codeprop{partialcredit} & The percentage of the original part mark to
+      award, if \codeprop{casesensitive} is \verb"true", and the student is
+      only incorrect because of a difference in character case. & \verb"0" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:pattern_match_part}
+      The valid properties of a pattern match part.  The \codeprop{answer} and
+      \codeprop{displayanswer} properties are required, as denoted by the
+      italic typeface.  In addition \codeprop{displayanswer} is a
+      \codecontent{content} block --- see chapter~\ref{cha:content_blocks}.
+    }
+  \end{table}
+
+  An example of a pattern match part might be the following.
+  %
+  {\small
+  \begin{Verbatim}
+    {
+      type: patternmatch
+      marks: 1
+      prompt: Write the name of a Top Gear presenter.
+      answer: (James( May)?)|(Richard( Hammond)?)|(Jeremy( Clarkson)?)
+      displayanswer: Jeremy
+      casesensitive: false
+    }
+  \end{Verbatim}
+  }
+  %
+  In this example, the valid answers are \verb"James", \verb"Richard", \verb"Jeremy", \verb"James May", \verb"Richard Hammond", \verb"Jeremy Clarkson".  The matches to the correct answers are not case-sensitive.  Example invalid answers include \verb"JamesMay", \verb"Richard Clarkson", and \verb"Hammond Richard".
+
+  When the correct answer is revealed, the name \verb"Jeremy" is shown.  It is
+  up to you to define a \codeprop{displayanswer} which describes the possible
+  correct answers.
+
+  \textbf{Note:} How to write regular expressions is beyond the scope of this
+  manual, but when using this part type, be absolutely sure that your regular
+  expression is correct.  It is very easy to construct a regular expression
+  which looks correct, but in fact, does not capture what you intend.
+
+  \section{\label{sec:multiple_choice_part}Multiple choice}
+  There are three part types which can be thought of as \emph{Multiple choice}.
+  %
+  \begin{description}
+    \item[1\_n\_2] There are several answers, of which the student must pick
+      one.  (For example,  a list of statements, only one of which is true.)
+    \item[m\_n\_2] There are several answers, of which the student can pick any
+      number. (For example, a list of statements, several of which are true.)
+    \item[m\_n\_x] There is an $M \times N$ matrix of choice/answer pairs. The
+      student will either have to select one cell from each row, or select any
+      number of cells. (This type is equivalent to the previous two types, but
+      repeated for multiple situations/objects.)
+  \end{description}
+  %
+  In each case a marking matrix must be defined, which determines how many
+  marks should be awarded for a particular choice.  For each choice that the
+  student selects, the corresponding marks in the marking matrix are added to
+  (or subtracted from) the score for the part.
+  Table~\ref{tab:multiple_choice_part} details the available properties for
+  this part type.
+  %
+  \begin{table}[ht]
+    \centering
+    \begin{tabular}{lp{20em}l}
+      \hline
+      Property & Description & Default value \\
+      \hline
+      \codepropreq{choices} & \emph{(Content)} An array of strings representing
+      the available choices. & \nodef \\
+      \codeprop{answers} & \emph{(Content)} If the part type is \verb"m_n_x",
+      then an array of strings representing the possible answers to choose. &
+      \verb"[]" \\
+      \codepropreq{matrix} & The marking matrix.  An array of numbers giving
+      the marks awarded for selecting each choice.  Negative numbers are
+      allowed. If the part type is \verb"m_n_x", then the marking matrix must
+      be an array of arrays, where each array corresponds to the marks for a
+      row of choices.  & \nodef \\
+      \codeprop{maxmarks} & The maximum number of marks which can be awarded
+      for this part.  A value of 0 means no restriction. & \verb"0" \\
+      \codeprop{maxanswers} & The maximum number of answers the student can
+      select for each choice.  A value of 0 means no restriction. & \verb"0" \\
+      \codeprop{minanswers} & The minimum number of answers the student can
+      select for each choice. & \verb"0" \\
+      \codeprop{shufflechoices} & Determines whether the choices should be
+      displayed randomly. & \verb"false" \\
+      \codeprop{shuffleanswers} & Determines whether the answers should be
+      displayed randomly. & \verb"false" \\
+      \codeprop{displaytype} & How to display the choices.  Possible values are
+      \verb"radiogroup", \verb"dropdownlist", and \verb"checkbox". &
+      \verb"radiogroup" \\
+      \codeprop{displaycolumns} & Choices in the \verb"1_n_2" and \verb"m_n_2"
+      part types are spread over this many columns, or if the value is 0 displayed in a single
+      row. & \verb"1" \\
+      \hline\hline
+    \end{tabular}
+    \caption{\label{tab:multiple_choice_part}
+      The valid properties of a multiple choice part.  The \codeprop{choices}
+      and \codeprop{matrix} properties are required, as denoted by the italic
+      typeface.  The \codeprop{choices} and \codeprop{answers} properties are
+      \codecontent{content} blocks --- see chapter~\ref{cha:content_blocks}.
+    }
+  \end{table}
+
+  An example of an \verb"m_n_2" part type might be the following.
+  %
+  \begin{Verbatim}
+    {
+      type: m_n_2
+      marks: 2
+      prompt: Which of the following are true?
+      choices: [
+        "$\sqrt{4} = 2$"
+        "$x^2 = x$"
+        "$x^2+x+1 = 0$ has no real solutions"
+      ]
+      matrix: [1,-1,1]
+      minimummarks: 0
+      shufflechoices: true
+      displaycolumns: 3
+    }
+  \end{Verbatim}
+  %
+  Here, we have chosen the \verb"m_n_2" part type, so the student must select a
+  number of choices.  If the student chooses the first and third choices (as
+  defined in the question), then they will be awarded one mark for each.
+  Choosing the second choice will result in the student having one mark
+  deducted.  The student will see the choices displayed in a random order, and
+  the student's mark for this part cannot be negative, owing to the
+  \codeprop{minmummarks} property being set to zero (the default).
+
+  \section{\label{sec:gapfill_part}Gap fill}
+  The \emph{Gap fill} part type presents a block of content to the student,
+  with ``gaps'' which they must fill in.  Each gap is defined in the same way
+  as any other part.  This part type makes it possible to combine several other
+  part types in a single question part.  The following example will better
+  illustrate how to use this part type.
+  %
+  \begin{Verbatim}
+    {
+      type: gapfill
+      prompt: "
+        The equation $x^2 + 3x + 2 = 0$ has [[0]] linear factors.
+
+        The least solution is $x = $[[1]]
+
+        The greatest solution is $x = $[[2]]
+      "
+      gaps: [
+        { type: numberentry, answer: 2, marks: 1 }
+        { type: jme, answer: x + 1, marks: 1 }
+        { type: jme, answer: x + 2, marks: 1 }
+      ]
+    }
+  \end{Verbatim}
+  %
+  The gap fill part type has only one property, namely \codeprop{gaps}, which
+  is an array of \codeobject{part} objects.  In the example above there are
+  three gaps.  The first is a number entry part, which corresponds to the
+  placeholder given by \verb"[[0]]".  In other words, the student will be
+  expected to enter an answer in the input box which will appear between the
+  words \emph{has} and \emph{linear}.
+
+  Similarly, input boxes will appear in place of \verb"[[1]]" and \verb"[[2]]",
+  for which the student is expected to enter JME expressions.
+
+  The total number of marks available for the part is calculated automatically
+  from the marks available for each gap.
+
+  \section{\label{sec:information_part}Information}
+  The \emph{Information} part is not really a part type in the same sense as
+  the others.  It is simply a block of content with no special properties,
+  often used to give students hints in more difficult questions, \eg
+  %
+  \begin{Verbatim}
+    {
+      type: information
+      prompt: "Pythagoras' Theorem states: $a^2 = \sqrt{b^2 + c^2}$"
+    }
+  \end{Verbatim}
+
+\end{chapter}
