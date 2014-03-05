@@ -922,9 +922,19 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 	}
 	return new Ruleset(rules,flags);
 }
-//evaluation environment
-//if called with a list of scopes, they will be combined into this new one
+
 var fnSort = util.sortBy('id');
+
+/**
+ * JME evaluation environment.
+ * @memberof Numbas.jme
+ * @constructor
+ * @property {object} variables - dictionary of {@link Numbas.jme.token} objects
+ * @property {object} functions - dictionary of arrays of {@link Numbas.jme.funcObj} objects. There can be more than one function for each name because of signature overloading.
+ * @property {objects} rulesets - dictionary of {@link Numbas.jme.Ruleset} objects
+ *
+ * @param {Numbas.jme.Scope[]} scopes - List of scopes to combine into this one. Scopes appearing later in the list override ones appearing earlier, in case variable/ruleset names conflict.
+ */
 var Scope = jme.Scope = function(scopes) {
 	this.variables = {};
 	this.functions = {};
@@ -963,7 +973,7 @@ var Scope = jme.Scope = function(scopes) {
 		}
 	}
 }
-Scope.prototype = {
+Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 	addFunction: function(fn) {
 		if(!(fn.name in this.functions))
 			this.functions[fn.name] = [fn];
@@ -972,8 +982,6 @@ Scope.prototype = {
 	}
 };
 
-//dictionary mapping numbas symbols to LaTeX symbols
-//symbols \\x not in this dictionary will be mapped to \x.
 
 var varsymbols = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','psi','chi','phi','omega','=','space'];
 var samesymbols = '!+-,./0123456789:;?[]=';
