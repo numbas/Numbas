@@ -13,16 +13,26 @@ Copyright 2011-14 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+
+/** @file Stuff to do with making new functions from JME or JavaScript code, 
+ * generating question variables, 
+ * and substituting variables into maths or the DOM 
+ * */
+
 Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 
 var jme = Numbas.jme;
 var util = Numbas.util;
 
+/** @namespace Numbas.jme.variables */
 
-jme.variables = {
+jme.variables = /** @lends Numbas.jme.variables */ {
 
-	scope_list: [],
-	
+	/** Make a new function, whose definition is written in JME.
+	 * @param {object} fn - contains `definition` and `paramNames`.
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
+	 */
 	makeJMEFunction: function(fn,scope) {
 		fn.tree = jme.compile(fn.definition,scope,true);
 		return function(args,scope) {
@@ -37,7 +47,14 @@ jme.variables = {
 		}
 	},
 
-	makeJavascriptFunction: function(fn,scope) {
+	/** Make a new function, whose definition is written in JavaScript.
+	 *
+	 * The JavaScript is wrapped with `(function(<paramNames>){ ` and ` }`)
+	 *
+	 * @param {object} fn - contains `definition` and `paramNames`.
+	 * @returns {function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
+	 */
+	makeJavascriptFunction: function(fn) {
 		var paramNames = fn.paramNames.slice();
 		paramNames.push('scope');
 		var preamble='fn.jfn=(function('+paramNames.join(',')+'){';
@@ -64,6 +81,12 @@ jme.variables = {
 		}
 	},
 
+	/** Make a custom function.
+	 *
+	 * @param {object} tmpfn - contains `definition`, `name`, `language`, `parameters`
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {object} - contains `outcons`, `intype`, `evaluate`
+	 */
 	makeFunction: function(tmpfn,scope) {
 		var intype = [],
 			paramNames = [];
@@ -96,6 +119,12 @@ jme.variables = {
 		return fn
 	},
 
+	/** Make up custom functions
+	 * @param {object[]} tmpFunctions
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {object[]}
+	 * @see Numbas.jme.variables.makeFunction
+	 */
 	makeFunctions: function(tmpFunctions,scope)
 	{
 		scope = new jme.Scope(scope);
@@ -113,6 +142,13 @@ jme.variables = {
 		return functions;
 	},
 
+	/** Evaluate a variable, evaluating all its dependencies first.
+	 * @param {string} name - the name of the variable to evaluate
+	 * @param {object} todo - dictionary of variables still to evaluate
+	 * @param {Numbas.jme.Scope} scope
+	 * @param {string[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
+	 * @return {Numbas.jme.token}
+	 */
 	computeVariable: function(name,todo,scope,path)
 	{
 		if(scope.variables[name]!==undefined)
@@ -153,6 +189,11 @@ jme.variables = {
 		return scope.variables[name];
 	},
 
+	/** Evaluate dictionary of variables
+	 * @param {object} todo - dictionary of variables mapped to their definitions
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {object} - dictionary of evaluated variables
+	 */
 	makeVariables: function(todo,scope)
 	{
 		scope = new jme.Scope(scope);
@@ -163,6 +204,12 @@ jme.variables = {
 		return scope.variables;
 	},
 
+	/** Substitute variables into a DOM element (works recursively on the element's children)
+	 *
+	 * Ignores iframes and elements with the attribute `nosubvars`.
+	 * @param {Element} element
+	 * @param {Numbas.jme.Scope} scope
+	 */
 	DOMcontentsubvars: function(element, scope) {
 		if($.nodeName(element,'iframe'))
 			return element;
@@ -197,6 +244,12 @@ jme.variables = {
 		return element;
 	},
 
+	/** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
+	 * @param {string} str - the contents of the text node
+	 * @param {Numbas.jme.Scope} scope
+	 * @param {Document} doc - the document the text node belongs to.
+	 * @returns {Node[]} - array of DOM nodes to replace the string with
+	 */
 	DOMsubvars: function(str,scope,doc) {
 		doc = doc || document;
 		var bits = util.splitbrackets(str,'{','}');

@@ -13,19 +13,33 @@ Copyright 2011-14 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+
+/** @file Stuff to do with displaying JME expressions - convert to TeX, simplify, or convert syntax trees back to JME */
+
 Numbas.queueScript('jme-display',['base','math','jme','util'],function() {
 	
 var math = Numbas.math;
 var jme = Numbas.jme;
 
-jme.display = {
-	/** 
-	 * @memberof Numbas.jme
-	 * */
+/** A JME expression
+ * @typedef JME
+ * @type {string}
+ */
 
+/** A LaTeX string
+ * @typedef TeX
+ * @type {string}
+ */
+
+/** @namespace Numbas.jme.display */
+
+jme.display = /** @lends Numbas.jme.display */ {
 	/** Convert a JME expression to LaTeX.
-	 * @param ruleset can be anything accepted by jme.display.collectRuleset
-	 * @param settings are also passed through to the texify function
+	 *
+	 * @param {JME} expr
+	 * @param {string[]|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {TeX}
 	 */
 	exprToLaTeX: function(expr,ruleset,scope)
 	{
@@ -42,7 +56,15 @@ jme.display = {
 		return tex;
 	},
 
-	//simplify a JME expression string according to given ruleset and return it as a JME string
+	/** Simplify a JME expression string according to the given ruleset and return it as a JME string
+	 * 
+	 * @param {JME} expr
+	 * @param {string[]|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {JME}
+	 *
+	 * @see Numbas.jme.display.simplify
+	 */
 	simplifyExpression: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
@@ -50,7 +72,16 @@ jme.display = {
 		return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset.flags);
 	},
 
-	//simplify a JME expression string according to given ruleset and return it as a syntax tree
+	/** Simplify a JME expression string according to given ruleset and return it as a syntax tree
+	 *
+	 * @param {JME} expr 
+	 * @param {string[]|Numbas.jme.Ruleset} ruleset
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {Numbas.jme.tree}
+	 *
+	 * @see Numbas.jme.display.simplifyExpression
+	 * @see Numbas.jme.display.simplifyTree
+	 */
 	simplify: function(expr,ruleset,scope)
 	{
 		if(expr.trim()=='')
@@ -72,7 +103,15 @@ jme.display = {
 		}
 	},
 
-	//simplify a syntax tree according to given ruleset
+	/** Simplify a syntax tree according to the given ruleset
+	 * 
+	 * @param {Numbas.jme.tree} exprTree
+	 * @param {string[]|Numbas.jme.Ruleset} ruleset
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {Numbas.jme.tree}
+	 *
+	 * @see Numbas.jme.display.simplify
+	 */
 	simplifyTree: function(exprTree,ruleset,scope)
 	{
 		if(!scope)
@@ -122,13 +161,15 @@ jme.display = {
 
 
 
-// texify turns a syntax tree into a TeX string
-//
-// data types can be converted to TeX straightforwardly, but operations and functions need a bit more care
-// the idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
-
-
-//apply brackets to an op argument if appropraite
+/** Apply brackets to an op argument if appropriate
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {Numbas.jme.tree} thing
+ * @param {string[]} texArgs - the arguments of `thing`, as TeX
+ * @param {number} i - the index of the argument to bracket
+ * @returns {TeX}
+ */
 function texifyOpArg(thing,texArgs,i)
 {
 	var precedence = jme.precedence;
@@ -154,9 +195,13 @@ function texifyOpArg(thing,texArgs,i)
 	return tex;
 }
 
-// helper function for texing infix operators
-// returns a function which will convert a syntax tree with the operator at the top to TeX
-// 'code' is the TeX code for the operator
+/** Helper function for texing infix operators
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {TeX} code - the TeX command for the operator
+ * @returns {function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
+ */
 function infixTex(code)
 {
 	return function(thing,texArgs)
@@ -173,14 +218,25 @@ function infixTex(code)
 	}
 }
 
-//helper for texing nullary functions
-//returns a function which returns the appropriate (constant) code
+/** Helper for texing nullary functions
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {TeX} code - the TeX command for the function
+ * @returns {function} - a function which returns the appropriate (constant) TeX code
+ */
 function nullaryTex(code)
 {
 	return function(thing,texArgs){ return '\\textrm{'+code+'}'; };
 }
 
-//helper function for texing functions
+/** Helper function for texing functions
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {TeX} code - the TeX command for the function
+ * @returns {function} - a function which converts a syntax tree to the appropriate TeX
+ */
 function funcTex(code)
 {
 	return function(thing,texArgs)
@@ -189,18 +245,21 @@ function funcTex(code)
 	}
 }
 
-// define how to texify each operation and function
+/** Define how to texify each operation and function
+ * @enum {function}
+ * @memberof Numbas.jme.display
+ */
 var texOps = jme.display.texOps = {
-	//range definition. Should never really be seen
+	/** range definition. Should never really be seen */
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
-	//logical negation
+	/** logical negation */
 	'!': infixTex('\\neg '),	
 
-	//unary addition
+	/** unary addition */
 	'+u': infixTex('+'),	
 
-	//unary minus
+	/** unary minus */
 	'-u': (function(thing,texArgs,settings) {
 		var tex = texArgs[0];
 		if( thing.args[0].tok.type=='op' )
@@ -218,7 +277,7 @@ var texOps = jme.display.texOps = {
 		return '-'+tex;
 	}),
 
-	//exponentiation
+	/** exponentiation */
 	'^': (function(thing,texArgs) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
@@ -449,6 +508,13 @@ var texOps = jme.display.texOps = {
 	})
 }
 
+/** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
+ * @memberof Numbas.jme.display
+ * @private
+ * 
+ * @param {number} n
+ * @returns {TeX}
+ */
 function texRationalNumber(n)
 {
 	if(n.complex)
@@ -518,6 +584,13 @@ function texRationalNumber(n)
 	}
 }
 
+/** Convert a number to TeX, displaying it as a decimal.
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {number} n
+ * @returns {TeX}
+ */
 function texRealNumber(n)
 {
 	if(n.complex)
@@ -591,6 +664,14 @@ function texRealNumber(n)
 	}
 }
 
+/** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
+ * @memberof Numbas.jme.display
+ * @private
+ * 
+ * @param {number[]|Numbas.jme.tree} v
+ * @param {object} settings
+ * @returns {TeX}
+ */
 function texVector(v,settings)
 {
 	var out;
@@ -611,6 +692,15 @@ function texVector(v,settings)
 	return out;
 }
 
+/** Convert a matrix to TeX.
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {Array.Array.<number>|Numbas.jme.tree} m
+ * @param {object} settings
+ * @param {boolean} parens - enclose the matrix in parentheses?
+ * @returns {TeX}
+ */
 function texMatrix(m,settings,parens)
 {
 	var out;
@@ -645,6 +735,14 @@ function texMatrix(m,settings,parens)
 		return '\\begin{matrix} '+out+' \\end{matrix}';
 }
 
+/** Convert a variable name to TeX
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {string} name
+ * @param {string[]} annotation - 
+ * @returns {TeX}
+ */
 function texName(name,annotation)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
@@ -688,6 +786,18 @@ function texName(name,annotation)
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
+/** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
+ *
+ * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
+ *
+ * @memberof Numbas.jme.display
+ * @method
+ *
+ * @param {Numbas.jme.tree} thing
+ * @param {object} settings
+ *
+ * @returns {TeX}
+ */
 var texify = Numbas.jme.display.texify = function(thing,settings)
 {
 	if(!thing)
@@ -777,6 +887,14 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	}
 }
 
+/** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}
+ *
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {number} n
+ * @returns {JME}
+ */
 function jmeRationalNumber(n)
 {
 	if(n.complex)
@@ -847,6 +965,14 @@ function jmeRationalNumber(n)
 	}
 }
 
+/** Write a number in JME syntax as a decimal.
+ *
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {number} n
+ * @returns {JME}
+ */
 function jmeRealNumber(n)
 {
 	if(n.complex)
@@ -927,8 +1053,14 @@ function jmeRealNumber(n)
 }
 
 
-//turns an evaluation tree back into a JME expression
-//(used when an expression is simplified)
+/** Turn a syntax tree back into a JME expression (used when an expression is simplified)
+ * @memberof Numbas.jme.display
+ * @method
+ * 
+ * @param {Numbas.jme.tree} tree
+ * @param {object} settings
+ * @returns {JME}
+ */
 var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
 	if(!tree)
@@ -1054,8 +1186,14 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	}
 }
 
-//does each argument (of an operation) need brackets around it?
-//arrays consisting of one object for each argument of the operation
+
+/** Does each argument (of an operation) need brackets around it?
+ *
+ * Arrays consisting of one object for each argument of the operation
+ * @enum
+ * @memberof Numbas.jme.display
+ * @private
+ */
 var opBrackets = {
 	'+u':[{}],
 	'-u':[{'+':true,'-':true}],
@@ -1070,6 +1208,19 @@ var opBrackets = {
 	'=': [{},{}]
 };
 
+/** Simplification rule
+ * @memberof Numbas.jme.display
+ * @constructor
+ *
+ * @param {JME} pattern - expression pattern to match. Variables will match any sub-expression.
+ * @param {JME[]} conditions - conditions as expressions in JME expressions on the matched variables, which must all evaluate to true for the rule to match.
+ * @param {JME} result - expression pattern to rewrite to.
+ * 
+ * @property {JME} patternString
+ * @property {Numbas.jme.tree} tree - `patternString` compiled to a syntax tree
+ * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
+ * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
+ */
 var Rule = jme.display.Rule = function(pattern,conditions,result)
 {
 	this.patternString = pattern;
@@ -1084,7 +1235,13 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 	}
 }
 
-Rule.prototype = {
+Rule.prototype = /** @lends Numbas.jme.display.Rule.prototype */ {
+	/** Match a rule on given syntax tree.
+	 * @memberof Numbas.jme.display.Rule.prototype
+	 * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+	 * @param {Numbas.jme.Scope} scope - used when checking conditions
+	 * @returns {boolean|object} - `false` if no match, or a dictionary of matched subtrees
+	 */
 	match: function(exprTree,scope)
 	{
 		//see if expression matches rule
@@ -1100,6 +1257,12 @@ Rule.prototype = {
 			return false;
 	},
 
+	/** Check that a matched pattern satisfies all the rule's conditions
+	 * @memberof Numbas.jme.display.Rule.prototype
+	 * @param {object} match
+	 * @param {Numbas.jme.Scope} scope
+	 * @returns {boolean}
+	 */
 	matchConditions: function(match,scope)
 	{
 		for(var i=0;i<this.conditions.length;i++)
@@ -1121,13 +1284,18 @@ Rule.prototype = {
 	}
 }
 
-
+/** Recusrively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ */
 function matchTree(ruleTree,exprTree)
 {
 	if(!exprTree)
 		return false;
-
-	//Numbas.debug("matching "+treeToJME(ruleTree)+" with "+treeToJME(exprTree));
 
 	var ruleTok = ruleTree.tok;
 	var exprTok = exprTree.tok;
@@ -1184,7 +1352,10 @@ function matchTree(ruleTree,exprTree)
 	}
 }
 
-
+/** Built-in simplification rules
+ * @enum {Numbas.jme.display.Rule[]}
+ * @memberof Numbas.jme.display
+ */
 var simplificationRules = jme.display.simplificationRules = {
 	basic: [
 		['+x',[],'x'],					//get rid of unary plus
@@ -1307,6 +1478,10 @@ var simplificationRules = jme.display.simplificationRules = {
 	]
 };
 
+/** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.display.Rule} objects
+ * @param {Array} rules
+ * @returns {Numbas.jme.Ruleset}
+ */
 var compileRules = jme.display.compileRules = function(rules)
 {
 	for(var i=0;i<rules.length;i++)
@@ -1328,5 +1503,6 @@ for(var x in simplificationRules)
 }
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=new jme.Ruleset(all,{});
+
 Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
 });

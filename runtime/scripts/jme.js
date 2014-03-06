@@ -1,4 +1,4 @@
-TT/*
+/*
 Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
+/** @file Sets up most of the JME stuff: compiler, built-in functions, and expression comparison functions. */
+
 Numbas.queueScript('jme',['base','math','util'],function() {
 
 var util = Numbas.util;
@@ -23,8 +25,8 @@ var matrixmath = Numbas.matrixmath;
 
 /** @typedef Numbas.jme.tree
   * @type {object}
-  * @property {tree[]} args
-  * @property {Numbas.jme.token} tok
+  * @property {tree[]} args - the token's arguments (if it's an op or function)
+  * @property {Numbas.jme.token} tok - the token at this node
   */
 
 /** @namespace Numbas.jme */
@@ -52,7 +54,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	},
 
 	/** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
-	 * @param {string} expr 
+	 * @param {JME} expr 
 	 * @returns {token[]}
 	 * @see Numbas.jme.compile
 	 */
@@ -553,7 +555,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	},
 
 	/** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt})
-	 * @param {string} expr
+	 * @param {JME} expr
 	 * @param {Numbas.jme.Scope} scope
 	 * @see Numbas.jme.tokenise
 	 * @see Numbas.jme.shunt
@@ -581,8 +583,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	},
 
 	/** Compare two expressions over some randomly selected points in the space of variables, to decide if they're equal.
-	 * @param {string} expr1
-	 * @param {string} expr2
+	 * @param {JME} expr1
+	 * @param {JME} expr2
 	 * @param {object} settings
 	 * @param {Numbas.jme.Scope} scope
 	 * @returns {boolean}
@@ -832,7 +834,9 @@ var Ruleset = jme.Ruleset = function(rules,flags) {
 	this.flags = $.extend({},displayFlags,flags);
 }
 Ruleset.prototype = /** @lends Numbas.jme.Ruleset.prototype */ {
-	/** Test whether flag is set */
+	/** Test whether flag is set 
+	 * @memberof Numbas.jme.Ruleset.prototype
+	 */
 	flagSet: function(flag) {
 		flag = flag.toLowerCase();
 		if(this.flags.hasOwnProperty(flag))
@@ -1172,12 +1176,12 @@ TVector.doc = {
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {Array.Array.number} value - Array of rows (which are arrays of numbers)
+ * @property {Array.Array.<number>} value - Array of rows (which are arrays of numbers)
  * @property {number} rows
  * @property {number} columns
  * @property type "matrix"
  * @constructor
- * @param {Array.Array.number} value
+ * @param {Array.Array.<number>} value
  */
 var TMatrix = types.TMatrix = types.matrix = function(value)
 {
