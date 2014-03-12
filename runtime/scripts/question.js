@@ -25,6 +25,21 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
+/** A unique identifier for a {@link Numbas.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
+ * @typedef partpath
+ * @type {string}
+ */
+
+/** Keeps track of all info to do with an instance of a single question
+ *
+ * @constructor
+ * @memberof Numbas
+ * @param {Numbas.Exam} exam - parent exam
+ * @param {Element} xml
+ * @param {number} number - index of this question in the exam (starting at 0)
+ * @param {boolean} loading - is this question being resumed from an existing session?
+ * @param {Numbas.jme.Scope} gscope - global JME scope
+ */
 var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 {
 	var q = question = this;
@@ -165,37 +180,92 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 	});
 
 }
-Question.prototype = 
+Question.prototype = /** @lends Numbas.Question.prototype */ 
 {
-	xml: '',
+	/** XML definition of this question 
+	 * @type {Element}
+	 */
+	xml: null,
+	/** Position of this question in the exam
+	 * @type {number}
+	 */
 	number: -1,
+	/** Name - shouldn't be shown to students
+	 * @type {string}
+	 */
 	name: '',
 	
-	marks: 0,				//max. marks available for this question
-	score: 0,				//student's score on this question
-	adviceThreshold: 0,		//percentage score below which the advice is revealed.
+	/** Maximum marks available for this question
+	 * @type {number}
+	 */
+	marks: 0,
 
-	visited: false,			//has this question been seen by the student? For determining if you can jump back to this question, when navigateBrowse is disabled
-	answered: false,		//has question been answered satisfactorily?
-	submitted: 0,			//number of times question submitted
-	adviceDisplayed: false,	//has question advice been displayed?
-	revealed: false,		//has correct answer been revealed?
+	/** Student's score on this question
+	 * @type {number}
+	 */
+	score: 0,
 
-	parts: [],				//array containing all key parts
-	partDictionary: {},		//dictionary mapping part addresses to objects
+	/** Percentage score below which the advice is revealed
+	 * @type {number}
+	 */
+	adviceThreshold: 0,
 
-	display: undefined,		//display code
+	/** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
+	 * @type {boolean}
+	 */
+	visited: false,			//has this question been 
 
+	/** Has this question been answered satisfactorily?
+	 * @type {boolean}
+	 */
+	answered: false,
+
+	/** Number of times this question has been submitted.
+	 * @type {number}
+	 */
+	submitted: 0,
+
+	/** Has the advice been displayed?
+	 * @type {boolean}
+	 */
+	adviceDisplayed: false,
+
+	/** Have correct answers been revealed?
+	 * @type {boolean}
+	 */
+	revealed: false,
+
+	/** Parts belonging to this question, in the order they're displayed.
+	 * @type {Numbas.Part}
+	 */
+	parts: [],
+
+	/** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.Part} objects.
+	 * @type {object}
+	 */
+	partDictionary: {},
+
+	/** Associated display object
+	 * @type {Numbas.display.QuestionDisplay}
+	 */
+	display: undefined,
+
+	/** Leave this question - called when moving to another question, or showing an info page. 
+	 * @see Numbas.display.QuestionDisplay.leave
+	 */
 	leave: function() {
 		this.display.leave();
 	},
 
+	/** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
 	runPreamble: function() {
 		var question = this;
 		var js = '(function() {'+this.preamble.js+'})()';
 		eval(js);
 	},
 
+	/** Substitute the question's variables into its XML - clones the XML so the original is untouched.
+	 */
 	subvars: function()
 	{
 		var q = this;
@@ -228,13 +298,18 @@ Question.prototype =
 		});
 	},
 
-	//get the part object corresponding to a path
+	/** Get the part object corresponding to a path
+	 * @param {partpath} path
+	 * @returns {Numbas.Part}
+	 */
 	getPart: function(path)
 	{
 		return this.partDictionary[path];
 	},
 
-	//trigger advice
+	/** Show the question's advice
+	 * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+	 */
 	getAdvice: function(dontStore)
 	{
 		this.adviceDisplayed = true;
@@ -243,7 +318,9 @@ Question.prototype =
 			Numbas.store.adviceDisplayed(this);
 	},
 
-	//reveal correct answer to student
+	/** Reveal the correct answers to the student
+	 * @param {booelan} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+	 */
 	revealAnswer: function(dontStore)
 	{
 		this.revealed = true;
@@ -267,7 +344,9 @@ Question.prototype =
 		this.exam.updateScore();
 	},
 
-	//validate question - returns true if all parts completed
+	/** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
+	 * @returns {boolean}
+	 */
 	validate: function()
 	{
 		var success = true;
@@ -278,7 +357,9 @@ Question.prototype =
 		return success;
 	},
 
-	//if any part has unsubmitted answers, return true
+	/** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
+	 * @returns {boolean}
+	 */
 	isDirty: function()
 	{
 		for(var i=0;i<this.parts.length; i++) {
@@ -288,7 +369,10 @@ Question.prototype =
 		return false;
 	},
 
-	// show a warning and return true if question is dirty
+	/** Show a warning and return true if the question is dirty.
+	 * @see Numbas.Question.isDirty
+	 * @returns {boolean}
+	 */
 	leavingDirtyQuestion: function() {
 		if(this.answered && this.isDirty()) {
 			Numbas.display.showAlert(R(this.parts.length>1 ? 'question.unsubmitted changes.several parts' : 'question.unsubmitted changes.one part'));
@@ -296,7 +380,8 @@ Question.prototype =
 		}
 	},
 
-	//mark the student's answer to a given part/gap/step
+	/** Mark the student's answer to a given part/gap/step.
+	 */
 	doPart: function(answerList, partRef)
 	{
 		var part = this.getPart(partRef);
@@ -305,15 +390,10 @@ Question.prototype =
 		part.storeAnswer(answerList);
 	},
 
-	//calculate score - adds up all part scores
-	calculateScore: function(uiWarning)
+	/** Calculate the student's total score for this questoin - adds up all part scores 
+	 */
+	calculateScore: function()
 	{
-		/*if(this.revealed)
-		{
-			this.score = 0;
-			return 0;
-		}*/
-
 		var tmpScore=0;
 		var answered = true;
 		for(var i=0; i<this.parts.length; i++)
@@ -323,18 +403,11 @@ Question.prototype =
 		}
 		this.answered = answered;
 		
-		if( uiWarning!="uwPrevent" )
-		{
-			this.score = tmpScore;
-		}
-		else 
-		{
-			this.score = 0;
-		}
+		this.score = tmpScore;
 	},
 
 
-	//submit question answers
+	/** Submit every part in the question */
 	submit: function()
 	{
 		//submit every part
@@ -369,7 +442,7 @@ Question.prototype =
 		Numbas.store.questionSubmitted(this);
 	},
 
-	//recalculate score, display, notify storage
+	/** Recalculate the student's score, update the display, and notify storage. */
 	updateScore: function()
 	{
 		//calculate score - if warning is uiPrevent then score is 0
@@ -388,7 +461,15 @@ Question.prototype =
 };
 
 
-
+/** Create a new question part. Automatically picks the right constructor based on the type defined in the XML.
+ * @param {Element} xml
+ * @param {partpath} path
+ * @param {Numbas.Question} question
+ * @param {Numbas.Part} parentPart
+ * @param {boolean} loading
+ * @returns {Numbas.Part}
+ * @throws {NumbasError} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ */
 function createPart(xml, path, question, parentPart, loading)
 {
 	var type = tryGetAttribute(null,xml,'.','type',[]);
