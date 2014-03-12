@@ -1341,16 +1341,30 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
 
+/** A list of the vector's components. 
+ * @typedef vector
+ *  @type {number[]}
+ */
+
 /** Vector operations.
  *
  * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of vectors don't line up exactly
  * @namespace Numbas.vectormath
  */
 var vectormath = Numbas.vectormath = {
+	/** Negate a vector - negate each of its components
+	 * @param {vector} v
+	 * @returns {vector}
+	 */
 	negate: function(v) {
 		return v.map(function(x) { return negate(x); });
 	},
 
+	/** Add two vectors
+	 * @param {vector} a
+	 * @param {vector} b
+	 * @returns {vector}
+	 */
 	add: function(a,b) {
 		if(b.length>a.length)
 		{
@@ -1361,6 +1375,11 @@ var vectormath = Numbas.vectormath = {
 		return a.map(function(x,i){ return add(x,b[i]||0) });
 	},
 
+	/** Subtract one vector from another
+	 * @param {vector} a
+	 * @param {vector} b
+	 * @returns {vector}
+	 */
 	sub: function(a,b) {
 		if(b.length>a.length)
 		{
@@ -1372,12 +1391,21 @@ var vectormath = Numbas.vectormath = {
 		}
 	},
 
-	//scalar multiplication - a should just be a number
+	/** Scalar multiplication
+	 * @param {number} k
+	 * @param {vector} v
+	 * @returns {vector}
+	 */
 	mul: function(k,v) {
 		return v.map(function(x){ return mul(k,x) });
 	},
 
-	//dot product
+	/** Vector dot product - each argument can be a vector, or a matrix with one row or one column, which is converted to a vector.
+	 * @param {vector|matrix} a
+	 * @param {vector|matrix} b
+	 * @returns {number}
+	 * @throws {NumbasError} "vectormaths.dot.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+	 */
 	dot: function(a,b) {
 
 		//check if A is a matrix object. If it's the right shape, we can use it anyway
@@ -1409,7 +1437,15 @@ var vectormath = Numbas.vectormath = {
 		return a.reduce(function(s,x,i){ return add(s,mul(x,b[i]||0)) },0);
 	},
 
-	//cross product
+	/** Vector cross product - each argument can be a vector, or a matrix with one row, which is converted to a vector.
+	 *
+	 * @param {vector|matrix} a
+	 * @param {vector|matrix} b
+	 * @returns {vector}
+	 *
+	 * @throws {NumbasError} "vectormaths.cross.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+	 * @throws {NumbasError} "vectormath.cross.not 3d" if either of the vectors is not 3D.
+	 */
 	cross: function(a,b) {
 		//check if A is a matrix object. If it's the right shape, we can use it anyway
 		if('rows' in a)
@@ -1442,10 +1478,19 @@ var vectormath = Numbas.vectormath = {
 				];
 	},
 
+	/** Length of a vector
+	 * @param {vector} a
+	 * @returns {number}
+	 */
 	abs: function(a) {
 		return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
 	},
 
+	/** Are two vectors equal? True if each pair of corresponding components is equal.
+	 * @param {vector} a
+	 * @param {vector} b
+	 * @returns {boolean}
+	 */
 	eq: function(a,b) {
 		if(b.length>a.length)
 		{
@@ -1456,17 +1501,31 @@ var vectormath = Numbas.vectormath = {
 		return a.reduce(function(s,x,i){return s && eq(x,b[i]||0)},true);
 	},
 
+	/** Are two vectors unequal?
+	 * @param {vector} a
+	 * @param {vector} b
+	 * @returns {boolean}
+	 * @see {Numbas.vectormath.eq}
+	 */
 	neq: function(a,b) {
 		return !vectormath.eq(a,b);
 	},
 
-	//multiply vector v by matrix m
+	/** Multiply a vector on the left by a matrix
+	 * @param {matrix} m
+	 * @param {vector} v
+	 * @returns {vector}
+	 */
 	matrixmul: function(m,v) {
 		return m.map(function(row){
 			return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
 		});
 	},
 
+	/** Transpose of a vector
+	 * @param {vector} v
+	 * @returns {matrix}
+	 */
 	transpose: function(v) {
 		var matrix = v.map(function(x){ return [x]; });
 		matrix.rows = 1;
@@ -1475,9 +1534,20 @@ var vectormath = Numbas.vectormath = {
 	}
 }
 
-//matrix operations
-//again, these operations are lax about the sizes of things
+/** An array of rows (each of which is an array of numbers) 
+ * @typedef matrix
+ * @type {Array.Array.<number>}
+ * @property {number} rows
+ * @property {number} columns
+ */
+
+/** Matrix operations.
+ *
+ * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of matrices don't line up exactly
+ * @namespace Numbas.matrixmath
+ */
 var matrixmath = Numbas.matrixmath = {
+	/** Negate a matrix - negate each of its elements */
 	negate: function(m) {
 		var matrix = [];
 		for(var i=0;i<m.rows;i++) {
@@ -1488,6 +1558,12 @@ var matrixmath = Numbas.matrixmath = {
 		return matrix;
 	},
 
+	/** Add two matrices.
+	 *
+	 * @param {matrix} a
+	 * @param {matrix} b
+	 * @returns {matrix}
+	 */
 	add: function(a,b) {
 		var rows = Math.max(a.rows,b.rows);
 		var columns = Math.max(a.columns,b.columns);
@@ -1505,6 +1581,13 @@ var matrixmath = Numbas.matrixmath = {
 		matrix.columns = columns;
 		return matrix;
 	},
+
+	/** Subtract one matrix from another
+	 *
+	 * @param {matrix} a
+	 * @param {matrix} b
+	 * @returns {matrix}
+	 */
 	sub: function(a,b) {
 		var rows = Math.max(a.rows,b.rows);
 		var columns = Math.max(a.columns,b.columns);
@@ -1523,9 +1606,11 @@ var matrixmath = Numbas.matrixmath = {
 		return matrix;
 	},
 	
-	//determinant
-	//it pains me, but I'm only going to do up to 3x3 matrices here
-	//maybe later I will do the LU-decomposition thing
+	/** Matrix determinant. Only works up to 3x3 matrices.
+	 * @param {matrix} m
+	 * @returns {number}
+	 * @throws {NumbasError} "matrixmath.abs.too big" if the matrix has more than 3 rows.
+	 */
 	abs: function(m) {
 		if(m.rows!=m.columns)
 			throw(new Numbas.Error('matrixmath.abs.non-square'));
@@ -1549,6 +1634,11 @@ var matrixmath = Numbas.matrixmath = {
 		}
 	},
 
+	/** Multiply a matrix by a scalar
+	 * @param {number} k
+	 * @param {number} m
+	 * @returns {matrix}
+	 */
 	scalarmul: function(k,m) {
 		var out = m.map(function(row){ return row.map(function(x){ return mul(k,x); }); });
 		out.rows = m.rows;
@@ -1556,6 +1646,12 @@ var matrixmath = Numbas.matrixmath = {
 		return out;
 	},
 
+	/** Multiply two matrices
+	 * @param {matrix} a
+	 * @param {matrix} b
+	 * @returns {matrix}
+	 * @throws {NumbasError} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
+	 */
 	mul: function(a,b) {
 		if(a.columns!=b.rows)
 			throw(new Numbas.Error('matrixmath.mul.different sizes'));
@@ -1580,6 +1676,11 @@ var matrixmath = Numbas.matrixmath = {
 		return out;
 	},
 
+	/** Are two matrices equal? True if each pair of corresponding elements is equal.
+	 * @param {matrix} a
+	 * @param {matrix} b
+	 * @returns {boolean}
+	 */
 	eq: function(a,b) {
 		var rows = Math.max(a.rows,b.rows);
 		var columns = Math.max(a.columns,b.columns);
@@ -1595,10 +1696,21 @@ var matrixmath = Numbas.matrixmath = {
 		}
 		return true;
 	},
+
+	/** Are two matrices unequal?
+	 * @param {matrix} a
+	 * @param {matrix} b
+	 * @returns {boolean}
+	 * @see {Numbas.matrixmath.eq}
+	 */
 	neq: function(a,b) {
 		return !matrixmath.eq(a,b);
 	},
 
+	/** Make an `NxN` identity matrix.
+	 * @param {number} n
+	 * @returns {matrix}
+	 */
 	id: function(n) {
 		var out = [];
 		out.rows = out.columns = n;
@@ -1612,6 +1724,10 @@ var matrixmath = Numbas.matrixmath = {
 		return out;
 	},
 
+	/** Matrix transpose
+	 * @param {matrix}
+	 * @returns {matrix}
+	 */
 	transpose: function(m) {
 		var out = [];
 		out.rows = m.columns;

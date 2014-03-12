@@ -1176,12 +1176,10 @@ TVector.doc = {
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {Array.Array.<number>} value - Array of rows (which are arrays of numbers)
- * @property {number} rows
- * @property {number} columns
+ * @property {matrix} value - Array of rows (which are arrays of numbers)
  * @property type "matrix"
  * @constructor
- * @param {Array.Array.<number>} value
+ * @param {matrix} value
  */
 var TMatrix = types.TMatrix = types.matrix = function(value)
 {
