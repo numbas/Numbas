@@ -469,6 +469,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
  * @param {boolean} loading
  * @returns {Numbas.Part}
  * @throws {NumbasError} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ * @memberof Numbas
  */
 function createPart(xml, path, question, parentPart, loading)
 {
@@ -487,7 +488,17 @@ function createPart(xml, path, question, parentPart, loading)
 	}
 }
 
-//base Question Part object
+/** Base question part object
+ * @mixin
+ * @constructor
+ * @memberof Numbas
+ * @param {Element} xml
+ * @param {partpath} path
+ * @param {Numbas.Question} Question
+ * @param {Numbas.Part} parentPart
+ * @param {boolean} loading
+ * @see {Numbas.createPart}
+ */
 function Part( xml, path, question, parentPart, loading )
 {
 	//remember XML
@@ -537,41 +548,118 @@ function Part( xml, path, question, parentPart, loading )
 	}
 }
 
-Part.prototype = {
-	xml: '',				//XML defining this part
-	question: undefined,	//reference to parent question object
-	parentPart: undefined,	//reference to 'parent' part object - GapFillPart if this is a gap, the main keypart if this is a step
-	path: '',				//a question-wide unique 'address' for this part 
-	type: '',				//this part's type
-	marks: 0,				//max. marks available for this part
-	stepsMarks: 0,			//marks available in the steps, if any
-	credit: 0,				//proportion of availabe marks awarded to student
-	score: 0,				//student's score on this part
-	markingFeedback: [],	//messages explaining awarded marks
-	isDirty: false,			//is the student's answer different than the last submitted one?
+Part.prototype = /** @lends Numbas.Part.prototype */ {
+	/** XML defining this part
+	 * @type {Element}
+	 */
+	xml: '',				
+	
+	/** The question this part belongs to
+	 * @type {Numbas.Question}
+	 */
+	question: undefined,
 
-	stagedAnswer: undefined,	//student's answers as visible on screen (not yet submitted)
-	answerList: undefined,	//student's last submitted answer
-	answered: false,		//has this part been answered
+	/** Reference to parent of this part, if this is a gap or a step
+	 * @type {Numbas.Part}
+	 */
+	parentPart: undefined,
 
-	gaps: [],				//child gapfills, if any
-	steps: [],				//child steps, if any
-	stepsShown: false,		//have steps for this part been shown?
+	/** A question-wide unique 'address' for this part.
+	 * @type {partpath}
+	 */
+	path: '',
+
+	/** This part's type
+	 * @type {string}
+	 */
+	type: '',
+
+	/** Maximum marks available for this part
+	 * @type {number}
+	 */
+	marks: 0,
+	
+	/** Marks available for the steps, if any
+	 * @type {number}
+	 */
+	stepsMarks: 0,
+
+	/** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
+	 * @type {number}
+	 */
+	credit: 0,
+
+	/** Student's score on this part
+	 * @type {number}
+	 */
+	score: 0,
+	
+	/** Messages explaining how marks were awarded
+	 * @type {feedbackmessage}
+	 */
+	markingFeedback: [],
+
+	/** Has the student changed their answer since last submitting?
+	 * @type {boolean}
+	 */
+	isDirty: false,
+
+	/** Student's answers as visible on the screen (not necessarily yet submitted)
+	 * @type {string[]}
+	 */
+	stagedAnswer: undefined,
+
+	/** Student's last submitted answer - a copy of {@link Numbas.Part.stagedAnswer} taken when they submitted.
+	 * @type {string[]}
+	 */
+	answerList: undefined,
+
+	/** Has this part been answered?
+	 * @type {boolean}
+	 */
+	answered: false,
+
+	/** Child gapfill parts
+	 * @type {Numbas.Part[]}
+	 */
+	gaps: [],
+
+	/** Child step parts
+	 * @type {Numbas.Part[]}
+	 */
+	steps: [],
+
+	/** Have the steps been show for this part?
+	 * @type {boolean}
+	 */
+	stepsShown: false,
+
+	/** Is the steps display open? (Students can toggle it, but that doesn't affect whether they get the penalty)
+	 * @type {boolean}
+	 */
 	stepsOpen: false,
 
+	/** Properties set when the part is generated
+	 * @type {object}
+	 * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown
+	 * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
+	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
+	 */
 	settings: 
 	{
-		stepsPenalty: 0,		//number of marks to deduct when steps shown
+		stepsPenalty: 0,
 		enableMinimumMarks: false,
-		minimumMarks: 0		//minimum marks to award
-	},			//store part's settings in here
+		minimumMarks: 0
+	},
 
-	display: undefined,		//code to do with displaying this part
+	/** Associated display object
+	 * @type {Numbas.display.PartDisplay}
+	 */
+	display: undefined,
 
-	//give the student a warning about this part
-	//might want to do some logging at some point,
-	//so this is a method of the part object, which
-	//then calls the display code
+	/** Give the student a warning about this part. 	
+	 * @see {Numbas.display.PartDisplay.warning}
+	 */
 	giveWarning: function(warning)
 	{
 		this.display.warning(warning);
