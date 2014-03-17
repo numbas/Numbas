@@ -203,13 +203,23 @@ ko.bindingHandlers.hover = {
 	}
 }
 
+ko.bindingHandlers.realVisible = ko.bindingHandlers.visible;
+
 ko.bindingHandlers.visible = {
 	init: function(element,valueAccessor) {
 		$(element).css('display','');
+		ko.utils.domData.set(element,'tabindex',$(element).attr('tabindex'));
 	},
 	update: function(element,valueAccessor) {
 		var val = ko.unwrap(valueAccessor());
 		$(element).toggleClass('invisible',!val);
+		$(element).attr('disabled',!val);
+		if(val) {
+			$(element).attr('tabindex',ko.utils.domData.get(element,'tabindex'));
+		}
+		else {
+			$(element).removeAttr('tabindex');
+		}
 	}
 }
 
