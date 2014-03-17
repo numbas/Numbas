@@ -25,7 +25,7 @@ var job = Numbas.schedule.add;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-/** A unique identifier for a {@link Numbas.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
+/** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
  * @typedef partpath
  * @type {string}
  */
@@ -236,11 +236,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	revealed: false,
 
 	/** Parts belonging to this question, in the order they're displayed.
-	 * @type {Numbas.Part}
+	 * @type {Numbas.parts.Part}
 	 */
 	parts: [],
 
-	/** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.Part} objects.
+	/** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
 	 * @type {object}
 	 */
 	partDictionary: {},
@@ -300,7 +300,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 	/** Get the part object corresponding to a path
 	 * @param {partpath} path
-	 * @returns {Numbas.Part}
+	 * @returns {Numbas.parts.Part}
 	 */
 	getPart: function(path)
 	{
@@ -465,9 +465,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
  * @param {Element} xml
  * @param {partpath} path
  * @param {Numbas.Question} question
- * @param {Numbas.Part} parentPart
+ * @param {Numbas.parts.Part} parentPart
  * @param {boolean} loading
- * @returns {Numbas.Part}
+ * @returns {Numbas.parts.Part}
  * @throws {NumbasError} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  * @memberof Numbas
  */
@@ -488,14 +488,16 @@ function createPart(xml, path, question, parentPart, loading)
 	}
 }
 
+/** Question part types
+ * @namespace Numbas.parts */
+
 /** Base question part object
- * @mixin
  * @constructor
- * @memberof Numbas
+ * @memberof Numbas.parts
  * @param {Element} xml
  * @param {partpath} path
  * @param {Numbas.Question} Question
- * @param {Numbas.Part} parentPart
+ * @param {Numbas.parts.Part} parentPart
  * @param {boolean} loading
  * @see {Numbas.createPart}
  */
@@ -548,7 +550,7 @@ function Part( xml, path, question, parentPart, loading )
 	}
 }
 
-Part.prototype = /** @lends Numbas.Part.prototype */ {
+Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	/** XML defining this part
 	 * @type {Element}
 	 */
@@ -560,7 +562,7 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 	question: undefined,
 
 	/** Reference to parent of this part, if this is a gap or a step
-	 * @type {Numbas.Part}
+	 * @type {Numbas.parts.Part}
 	 */
 	parentPart: undefined,
 
@@ -569,7 +571,7 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 	 */
 	path: '',
 
-	/** This part's type
+	/** This part's type, e.g. "jme", "numberentry", ...
 	 * @type {string}
 	 */
 	type: '',
@@ -609,7 +611,7 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 	 */
 	stagedAnswer: undefined,
 
-	/** Student's last submitted answer - a copy of {@link Numbas.Part.stagedAnswer} taken when they submitted.
+	/** Student's last submitted answer - a copy of {@link Numbas.parts.Part.stagedAnswer} taken when they submitted.
 	 * @type {string[]}
 	 */
 	answerList: undefined,
@@ -620,12 +622,12 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 	answered: false,
 
 	/** Child gapfill parts
-	 * @type {Numbas.Part[]}
+	 * @type {Numbas.parts.Part[]}
 	 */
 	gaps: [],
 
 	/** Child step parts
-	 * @type {Numbas.Part[]}
+	 * @type {Numbas.parts.Part[]}
 	 */
 	steps: [],
 
@@ -665,7 +667,10 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		this.display.warning(warning);
 	},
 
-	//calculate student's score for given answer.
+	/** Calculate the student's score based on their submitted answers
+	 *
+	 * Calls the parent part's `calculateScore` method at the end.
+	 */
 	calculateScore: function()
 	{
 		if(this.steps.length && this.stepsShown)
@@ -716,13 +721,17 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 			this.parentPart.calculateScore();
 	},
 
-	//update the stored answer from the student (called when student changes their answer, before submitting)
+	/** Update the stored answer from the student (called when the student changes their answer, but before submitting) 
+	 */
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
 		this.setDirty(true);
 		this.display.removeWarnings();
 	},
 
+	/** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
+	 * @param {boolean} dirty
+	 */
 	setDirty: function(dirty) {
 		this.isDirty = dirty;
 		if(this.display) {
@@ -735,7 +744,8 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 	},
 
 
-	//submit answer to this part - save answer, mark, update score
+	/** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
+	 */
 	submit: function() {
 		this.display.removeWarnings();
 		this.credit = 0;
@@ -801,21 +811,15 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		this.submitting = false;
 	},
 
-	//save the student's answer as a question variable
-	//so it can be used for carry-over marking
-	reportStudentAnswer: function(answer) {
-		var val;
-		if(util.isFloat(answer))
-			val = new Numbas.jme.types.TNum(answer);
-		else
-			val = new Numbas.jme.types.TString(answer);
-		this.question.followVariables['$'+this.path] = val;
-	},
-
-	//function which marks the student's answer
+	/* Function which marks the student's answer
+	 * @abstract
+	 */
 	mark: function() {},
 
-	////////marking feedback helpers
+	/** Set the `credit` to an absolute value
+	 * @param {number} credit
+	 * @param {string} message - message to show in feedback to explain this action
+	 */
 	setCredit: function(credit,message)
 	{
 		var oCredit = this.credit;
@@ -827,6 +831,10 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		});
 	},
 
+	/** Add an absolute value to `credit`
+	 * @param {number} credit - amount to add
+	 * @param {string} message - message to show in feedback to explain this action
+	 */
 	addCredit: function(credit,message)
 	{
 		this.credit += credit;
@@ -837,6 +845,10 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		});
 	},
 
+	/** Multiply `credit` by the given amount - use to apply penalties
+	 * @param {number} factor
+	 * @param {string} message - message to show in feedback to explain this action
+	 */
 	multCredit: function(factor,message)
 	{
 		var oCredit = this.credit
@@ -848,6 +860,9 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		});
 	},
 
+	/** Add a comment to the marking feedback
+	 * @param {string} message
+	 */
 	markingComment: function(message)
 	{
 		this.markingFeedback.push({
@@ -856,10 +871,15 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		});
 	},
 
-	//is student's answer acceptable?
+	/** Is the student's answer acceptable?
+	 * @abstract
+	 * @returns {boolean}
+	 */
 	validate: function() { return true; },
 
-	//reveal the steps
+	/** Show the steps
+	 * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+	 */
 	showSteps: function(dontStore)
 	{
 		this.stepsShown = true;
@@ -878,6 +898,8 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		}
 	},
 
+	/** Close the steps box. This doesn't affect the steps penalty.
+	 */
 	hideSteps: function()
 	{
 		this.stepsOpen = false;
@@ -885,7 +907,9 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 		Numbas.store.stepsHidden(this);
 	},
 
-	//reveal the correct answer
+	/** Reveal the correct answer to this part
+	 * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+	 */
 	revealAnswer: function(dontStore)
 	{
 		this.display.revealAnswer();
@@ -903,10 +927,13 @@ Part.prototype = /** @lends Numbas.Part.prototype */ {
 
 };
 
-//Judged Mathematical Expression
-//student enters a string representing a mathematical expression, eg.
-//		'x^2+x+1'
-//and it is compared with the correct answer by evaluating over a range of values
+/** Judged Mathematical Expression
+ *
+ * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
 function JMEPart(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
@@ -1018,50 +1045,75 @@ function JMEPart(xml, path, question, parentPart, loading)
 	}
 }
 
-JMEPart.prototype = 
+JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */ 
 {
+	/** Student's answer
+	 * @type {string}
+	 */
 	studentAnswer: '',
 
+	/** Properties set when the part is generated.
+	 *
+	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
+	 * @property {string[]} names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
+	 * @property {string} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
+	 * @property {number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
+	 * @property {number} failureRate - comparison failures allowed before we decide answers are different
+	 * @property {number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
+	 * @property {number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
+	 * @property {number} vsetRangePoints - number of points to compare answers on
+	 * @property {number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+	 * @property {number} maxLengthPC - partial credit if the student's answer is too long
+	 * @property {string} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
+	 * @property {number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+	 * @property {number} minLengthPC - partial credit if the student's answer is too short
+	 * @property {string} minLengthMessage - message to add to the marking feedback if the student's answer is too short
+	 * @property {string[]} mustHave - strings which must be present in the student's answer
+	 * @property {number} mustHavePC - partial credit to award if any must-have string is missing
+	 * @property {string} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
+	 * @property {boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
+	 * @property {string[]} notAllowed - strings which must not be present in the student's answer
+	 * @property {number} notAllowedPC - partial credit to award if any not-allowed string is present
+	 * @property {string} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
+	 * @property {boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+	 */
 	settings: 
 	{
-		//string representing correct answer to question
 		correctAnswer: '',
 
-		//default simplification rules to use on correct answer
 		answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
 		
-		//	checking type : SigFig (round answers to x sig figs)
-		//					RelDiff (compare ratio of student answer to correct answer)
-		//					AbsDiff (compare absolute difference between answers)
-		//					Dp (round answers to x decimal places)
 		checkingType: 'RelDiff',
 
-		checkingAccuracy: 0,	//accuracy for checking - depends on checking type
-		failureRate: 0,			//comparison failures allowed before we decide answers are different
+		checkingAccuracy: 0,
+		failureRate: 0,
 
-		vsetRangeStart: 0,		//range to pick variable values from
+		vsetRangeStart: 0,
 		vsetRangeEnd: 1,
-		vsetRangePoints: 1,		//number of points to compare answers on
+		vsetRangePoints: 1,
 		
-		maxLength: 0,		//max length of student's answer
-		maxLengthPC: 0,		//partial credit if student's answer too long
+		maxLength: 0,
+		maxLengthPC: 0,
 		maxLengthMessage: 'Your answer is too long',
 
-		minLength: 0,		//min length of student's answer
-		minLengthPC: 0,		//partial credit if student's answer too short
+		minLength: 0,
+		minLengthPC: 0,
 		minLengthMessage: 'Your answer is too short',
 
-		mustHave: [],				//strings which must be present in student's answer
-		mustHavePC: 0,				//partial credit if a must-have is missing
-		mustHaveMessage: '',		//warning message if missing a must-have
-		mustHaveShowStrings: false,	//tell students which strings must be included?
+		mustHave: [],
+		mustHavePC: 0,
+		mustHaveMessage: '',
+		mustHaveShowStrings: false,
 
-		notAllowed: [],				//strings which must not be present in student's answer
-		notAllowedPC: 0,			//partial credit if a not-allowed string is present
-		notAllowedMessage: '',		//warning message if not-allowed string present
-		notAllowedShowStrings: false//tell students which strings are not allowed?
+		notAllowed: [],
+		notAllowedPC: 0,
+		notAllowedMessage: '',
+		notAllowedShowStrings: false
 	},
 
+	/** Mark the student's answer
+	 */
 	mark: function()
 	{
 		if(this.answerList==undefined)
@@ -1162,6 +1214,9 @@ JMEPart.prototype =
 
 	},
 
+	/** Is the student's answer valid? False if student hasn't submitted an answer
+	 * @returns {boolean}
+	 */
 	validate: function()
 	{
 		if(this.studentAnswer.length===0)
@@ -1237,7 +1292,11 @@ JMEPart.prototype =
 	}
 };
 
-
+/** Text-entry part - student's answer must match the given regular expression
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
 function PatternMatchPart(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
@@ -1264,9 +1323,19 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 			this.submit();
 	}
 }
-PatternMatchPart.prototype = {
+PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
+	/** The student's answer 
+	 * @type {string}
+	 */
 	studentAnswer: '',
 
+	/** Properties set when the part is generated.
+	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
+	 * @property {string} displayAnswer - a representative correct answer to display when answers are revealed
+	 * @property {boolean} caseSensitive - does case matter?
+	 * @property {number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
+	 */
 	settings: 
 	{
 		correctAnswer: /.*/,
@@ -1275,6 +1344,8 @@ PatternMatchPart.prototype = {
 		partialCredit: 0
 	},
 
+	/** Mark the student's answer
+	 */
 	mark: function ()
 	{
 		if(this.answerList==undefined)
@@ -1314,6 +1385,9 @@ PatternMatchPart.prototype = {
 		}
 	},
 
+	/** Is the student's answer valid? False if the part hasn't been submitted.
+	 * @returns {boolean}
+	 */
 	validate: function()
 	{
 		if(!this.answered)
@@ -1323,6 +1397,11 @@ PatternMatchPart.prototype = {
 	}
 };
 
+/** Number entry part - student's answer must be within given range, and written to required precision.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
 function NumberEntryPart(xml, path, question, parentPart, loading)
 {
 	var evaluate = jme.evaluate, compile = jme.compile;
