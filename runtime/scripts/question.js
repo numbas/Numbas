@@ -793,7 +793,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.answered)
 		{
-			this.reportStudentAnswer(this.studentAnswer);
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
 				this.markingComment(
 					util.pluralise(this.score,
@@ -802,8 +801,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					)
 				);
 		}
-		else
-			this.reportStudentAnswer('');
 
 		Numbas.store.partAnswered(this);
 		this.display.showScore(this.answered);
@@ -1047,7 +1044,7 @@ function JMEPart(xml, path, question, parentPart, loading)
 
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */ 
 {
-	/** Student's answer
+	/** Student's last submitted answer
 	 * @type {string}
 	 */
 	studentAnswer: '',
@@ -1324,7 +1321,7 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	}
 }
 PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
-	/** The student's answer 
+	/** The student's last submitted answer 
 	 * @type {string}
 	 */
 	studentAnswer: '',
@@ -1463,10 +1460,24 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 			this.submit();
 	}
 }
-NumberEntryPart.prototype =
+NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
+	/** The student's last submitted answer */
 	studentAnswer: '',
 
+	/** Properties set when the part is generated
+	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
+	 * @property {number} minvalue - minimum value marked correct
+	 * @property {number} maxvalue - maximum value marked correct
+	 * @property {boolean} integerAnswer - must the answer be an integer?
+	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
+	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
+	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {number] precision - how many decimal places or significant figures to require
+	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 */
 	settings:
 	{
 		inputStep: 1,
@@ -1481,6 +1492,7 @@ NumberEntryPart.prototype =
 		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
 	},
 
+	/** Mark the student's answer */
 	mark: function()
 	{
 		if(this.answerList==undefined)
@@ -1543,6 +1555,9 @@ NumberEntryPart.prototype =
 		}
 	},
 
+	/** Is the student's answer valid? False if the part hasn't been submitted.
+	 * @returns {boolean}
+	 */
 	validate: function()
 	{
 		if(!this.answered)
@@ -1553,6 +1568,17 @@ NumberEntryPart.prototype =
 };
 
 
+/** Multiple choice part - either pick one from a list, pick several from a list, or match choices with answers (2d grid, either pick one from each row or tick several from each row)
+ *
+ * Types:
+ * * `1_n_2`: pick one from a list. Represented as N answers, 1 choice
+ * * `m_n_2`: pick several from a list. Represented as N answers, 1 choice
+ * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
+ *
+ * @constructor
+ * @augments Numbas.parts.Part
+ * @memberof Numbas.parts
+ */
 function MultipleResponsePart(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
@@ -1923,18 +1949,45 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 			this.submit();
 	}
 }
-MultipleResponsePart.prototype =
+MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
-	ticks: [],						//store student's responses here - array to say if each response has been selected or not
-	wrongNumber: false,				//has student given the wrong number of responses?
-	numChoices: 0,					//number of choices
-	numAnswers: 0,					//number of possible answers
+	/** Student's last submitted answer/choice selections
+	 * @type {Array.Array.<boolean>}
+	 */
+	ticks: [],
+	
+	/** Has the student given the wrong number of responses?
+	 * @type {boolean}
+	 */
+	wrongNumber: false,
 
+	/** Number of choices - used by `m_n_x` parts
+	 * @type {number}
+	 */
+	numChoices: 0,
+
+	/** Number of answers
+	 * @type {number}
+	 */
+	numAnswers: 0,
+
+	/** Properties set when the part is generated
+	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
+	 * @property {number} minAnswers - minimum number of responses the student must select
+	 * @property {number} maxAnswers - maxmimum number of responses the student must select
+	 * @property {string} choiceOrder - order in which to display choices - either `random` or `fixed`
+	 * @property {string} answerOrder - order in which to display answers - either `random` or `fixed`
+	 * @property {Array.Array.<number>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
+	 * @property {string} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
+	 * @property {string} warningType - what to do if the student picks the wrong number of responses? Either `uwNone` (do nothing), `uwPrevent` (don't let the student submit), or `uwWarn` (show a warning but let them submit)
+	 * @property {string} warningMessage - warning message to display if the student picks the wrong number of responses
+	 */
 	settings:
 	{
 		maxMarksEnabled: false,		//is there a maximum number of marks the student can get?
-		minAnswers: '0',				//minimum number of responses student must select
-		maxAnswers: '0',				//maximum ditto
+		minAnswers: 0,				//minimum number of responses student must select
+		maxAnswers: 0,				//maximum ditto
 		choiceOrder: '',			//order in which to display choices
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
@@ -1943,6 +1996,7 @@ MultipleResponsePart.prototype =
 		warningMessage: ''			//message to display if wrong number of responses
 	},
 
+	/** Store the student's choices */
 	storeAnswer: function(answerList)
 	{
 		this.setDirty(true);
@@ -1965,6 +2019,7 @@ MultipleResponsePart.prototype =
 		}
 	},
 
+	/** Mark the student's choices */
 	mark: function()
 	{
 		if(this.stagedAnswer==undefined)
@@ -2014,6 +2069,7 @@ MultipleResponsePart.prototype =
 			this.setCredit(0,R('part.mcq.wrong number of choices'));
 	},
 
+	/** Are the student's answers valid? Show a warning if they've picked the wrong number */
 	validate: function()
 	{
 		if(this.wrongNumber)
@@ -2037,6 +2093,9 @@ MultipleResponsePart.prototype =
 			return false;
 	},
 
+	/** Reveal the correct answers, and any distractor messages for the student's choices 
+	 * Extends {@link Numbas.parts.Part.revealAnswer}
+	 */
 	revealAnswer: function()
 	{
 		var row,message;
@@ -2054,6 +2113,11 @@ MultipleResponsePart.prototype =
 };
 MultipleResponsePart.prototype.revealAnswer = util.extend(MultipleResponsePart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
+/** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
 function GapFillPart(xml, path, question, parentPart, loading)
 {
 	var gapXML = this.xml.selectNodes('gaps/part');
@@ -2076,16 +2140,21 @@ function GapFillPart(xml, path, question, parentPart, loading)
 			this.submit();
 	}
 }	
-GapFillPart.prototype =
+GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 {
-	stagedAnswer: 'something',
-
+	/** Reveal the answers to all of the child gaps 
+	 * Extends {@link Numbas.parts.Part.revealAnswer}
+	 */
 	revealAnswer: function(dontStore)
 	{
 		for(var i=0; i<this.gaps.length; i++)
 			this.gaps[i].revealAnswer(dontStore);
 	},
 
+	/** Submit all of the child gaps.
+	 *
+	 * Sets `this.submitting = true` while submitting, so that child parts don't try to recalculate the score during marking.
+	 */
 	submit: function()
 	{
 		this.submitting = true;
@@ -2096,6 +2165,8 @@ GapFillPart.prototype =
 		this.submitting = false;
 	},
 
+	/** Mark this part - add up the scores from each of the child gaps.
+	 */
 	mark: function()
 	{
 		this.credit=0;
@@ -2118,7 +2189,9 @@ GapFillPart.prototype =
 		}
 	},
 
-
+	/** Are the student's answers to all of the gaps valid?
+	 * @returns {boolean}
+	 */
 	validate: function()
 	{
 		//go through all gaps, and if any one fails to validate then
@@ -2133,24 +2206,37 @@ GapFillPart.prototype =
 GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
 GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
+/** Information only part - no input, no marking, just display some content to the student. 
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
 function InformationPart(xml, path, question, parentPart, loading)
 {
 	this.display = new Numbas.display.InformationPartDisplay(this);
 	this.answered = true;
 	this.isDirty = false;
 }
-InformationPart.prototype = {
+InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
+	/** This part is always valid
+	 * @returns {boolean} true
+	 */
 	validate: function() {
 		this.answered = true;
 		return true;
 	},
+
+	/** This part is never dirty
+	 */
 	setDirty: function() {
 		this.isDirty = false;
 	}
 };
 
 
-//associate part type names with their object constructors
+/** Associate part type names with their object constructors
+ * @memberof Numbas.Question
+ */
 var partConstructors = Numbas.Question.partConstructors = {
 	'CUEdt.JMEPart': JMEPart, 
 	'jme': JMEPart,
