@@ -14,7 +14,10 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
-/** @file Mathematical functions, providing stuff that the built-in `Math` object doesn't, as well as vector and matrix math operations. */
+/** @file Mathematical functions, providing stuff that the built-in `Math` object doesn't, as well as vector and matrix math operations. 
+ *
+ * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
+ */
 
 Numbas.queueScript('math',['base'],function() {
 

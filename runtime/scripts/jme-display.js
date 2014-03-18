@@ -14,7 +14,10 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
-/** @file Stuff to do with displaying JME expressions - convert to TeX, simplify, or convert syntax trees back to JME */
+/** @file Stuff to do with displaying JME expressions - convert to TeX, simplify, or convert syntax trees back to JME 
+ *
+ * Provides {@link Numbas.jme.display}
+ */
 
 Numbas.queueScript('jme-display',['base','math','jme','util'],function() {
 	

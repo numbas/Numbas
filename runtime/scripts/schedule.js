@@ -14,16 +14,44 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
+/** @file Provides {@link Numbas.schedule} */
 
 Numbas.queueScript('schedule',['base'],function() {
-//schedule a function to be called
-Numbas.schedule = {
+
+/** Schedule functions to be called. The scheduler can put tiny timeouts in between function calls so the browser doesn't become unresponsive. It also updates the loading bar.
+ * @namespace Numbas.schedule 
+ */
+
+Numbas.schedule = /** @lends Numbas.schedule */ {
+
+	/** Functions to call 
+	 * @type {function[]}
+	 */
 	calls: [],
+
+	/** Bits of queue that have been picked up while a task performs sub-tasks 
+	 * @type {Array.Array.<function>} */
 	lifts: [],
+
+	/** Number of tasks completed 
+	 * @type {number}
+	 */
 	completed: 0,
+
+	/** Total number of tasks ever scheduled
+	 * @type {number}
+	 */
 	total: 0,
+
+	/** Should the scheduler stop running tasks?
+	 * @type {boolean}
+	 */
 	halt:false,
 
+	/** Add a task to the queue
+	 * @param {function} fn - the function to run
+	 * @param {object} that - what `this` should be when the function is called
+	 */
 	add: function(fn,that)
 	{
 		var schedule = Numbas.schedule;
@@ -49,6 +77,10 @@ Numbas.schedule = {
 		schedule.total++;
 	},
 
+	/** Pop the first task off the queue and run it.
+	 *
+	 * If there's an error, the scheduler halts and shows the error.
+	 */
 	pop: function()
 	{
 		var schedule = Numbas.schedule;
@@ -73,7 +105,7 @@ Numbas.schedule = {
 		Numbas.display.showLoadProgress();
 	},
 
-	//'pick up' the current queue and put stuff in front - if a queued job wants to queue some things which must be done before the rest of the queue is called
+	/** 'pick up' the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called */
 	lift: function()
 	{
 		var schedule = Numbas.schedule;
@@ -82,7 +114,7 @@ Numbas.schedule = {
 		schedule.calls=new Array();
 	},
 
-	//put a previously lifted queue back on the end of the real queue
+	/** Put the last lifted queue back on the end of the real queue */
 	drop:function()
 	{
 		var schedule = Numbas.schedule;

@@ -14,6 +14,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
+/** @file The {@link Numbas.Question} object, and {@link Numbas.parts} */
 
 Numbas.queueScript('question',['base','schedule','display','jme','jme-variables','xml','util','scorm-storage'],function() {
 
@@ -213,7 +214,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	/** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
 	 * @type {boolean}
 	 */
-	visited: false,			//has this question been 
+	visited: false,
 
 	/** Has this question been answered satisfactorily?
 	 * @type {boolean}
@@ -1474,7 +1475,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
 	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-	 * @property {number] precision - how many decimal places or significant figures to require
+	 * @property {number} precision - how many decimal places or significant figures to require
 	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
 	 */

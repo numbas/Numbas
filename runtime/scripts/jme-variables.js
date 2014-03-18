@@ -17,7 +17,9 @@ Copyright 2011-14 Newcastle University
 /** @file Stuff to do with making new functions from JME or JavaScript code, 
  * generating question variables, 
  * and substituting variables into maths or the DOM 
- * */
+ *
+ * Provides {@link Numbas.jme.variables}
+ */
 
 Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 

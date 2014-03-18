@@ -15,33 +15,48 @@ Copyright 2011-14 Newcastle University
 */
 
 
-// controls.js
-// wrappers for the various navigation actions the user can do
-// the assumption is that these should only be called in response to some event the user triggers, by clicking or whatever.
+/** @file Wrappers for the various navigation actions the user can do.
+ * 
+ * The assumption is that these should only be called in response to some event the user triggers, by clicking or whatever.
+ * 
+ * Provides {@link Numbas.controls}
+ */
 
 Numbas.queueScript('controls',['base','schedule'],function() {
 
 var job = Numbas.schedule.add;
 
-Numbas.controls = {
-//user controls - these wrap the exam methods so I can just bind buttons once to these
+/** @namespace Numbas.controls */
 
+Numbas.controls = /** @lends Numbas.controls */ {
+
+	/** Start the exam - triggered when user clicks "Start" button on frontpage 
+	 * @see Numbas.Exam#begin
+	 */
 	beginExam: function()
-	//Start the exam - triggered when user clicks "Start" button on frontpage
 	{
 		job(Numbas.exam.begin,Numbas.exam);
 	},
 
+	/** Pause the exam
+	 * @see Numbas.Exam#pause
+	 */
 	pauseExam: function()
 	{
 		job(Numbas.exam.pause,Numbas.exam);
 	},
 
+	/** Resume the paused exam
+	 * @see Numbas.Exam#resume
+	 */
 	resumeExam: function()
 	{
 		job(Numbas.exam.resume,Numbas.exam);
 	},
 
+	/** (Try to) end the exam
+	 * @see Numbas.Exam#tryEnd
+	 */
 	endExam: function()
 	{
 		job(function() {
@@ -49,6 +64,7 @@ Numbas.controls = {
 		});
 	},
 
+	/** In an ended exam, go back from reviewing a question the results page */
 	backToResults: function()
 	{
 		job(function() {
@@ -56,11 +72,17 @@ Numbas.controls = {
 		});
 	},
 
+	/** "Exit" the exam - really this just shows the "You can close the browser" page
+	 * @see Numbas.Exam#exit
+	 */
 	exitExam: function()
 	{
 		job(Numbas.exam.exit,Numbas.exam);
 	},
 
+	/** Try to move to the next question
+	 * @see Numbas.Exam#tryChangeQuestion
+	 */
 	nextQuestion: function( )
 	{
 		job(function() {
@@ -68,7 +90,9 @@ Numbas.controls = {
 		});
 	},
 
-
+	/** Try to move to the previous question
+	 * @see Numbas.Exam#tryChangeQuestion
+	 */
 	previousQuestion: function()
 	{
 		job(function() {
@@ -76,13 +100,21 @@ Numbas.controls = {
 		});
 	},
 
+	/** Make a function which tries to jump to question N
+	 * @param {number} n - number of the question to jump to
+	 * @returns {function}
+	 * @see Numbas.controls.jumpQuestion
+	 */
 	makeQuestionJumper: function(n) {
 		return function() {
 			Numbas.controls.jumpQuestion(n);
 		}
 	},
 
-	// move directly to a particular question
+	/* Try to move directly to a particular question
+	 * @param {number} jumpTo - number of the question to jump to
+	 * @see Numbas.Exam#tryChangeQuestion
+	 */
 	jumpQuestion: function( jumpTo )
 	{
 		job(function() {
@@ -93,6 +125,9 @@ Numbas.controls = {
 		});
 	},
 
+	/** Regenerate the current question
+	 * @see Numbas.Exam#regenQuestion
+	 */
 	regenQuestion: function() 
 	{
 		job(function() {
@@ -102,13 +137,17 @@ Numbas.controls = {
 		});
 	},
 
-	//show the advice for this question
+	/** Show the advice for the current question
+	 * @see Numbas.Question#getAdvice
+	 */
 	getAdvice: function()
 	{
 		job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam.currentQuestion);
 	},
 
-	//reveal the answers to all parts in this question
+	/** Reveal the answers to the current question
+	 * @see Numbas.Question#revealAnswer
+	 */
 	revealAnswer: function()
 	{
 		job(function() {
@@ -118,13 +157,19 @@ Numbas.controls = {
 		});
 	},
 
-	//submit student's answers, and then update exam total
+	/** Submit student's answers to all parts in the current question
+	 * @see Numbas.Question#submit
+	 */
 	submitQuestion: function()
 	{
 		job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
 	},
 
-	//student has changed answer to part - record it and calculate new score
+	/** Call when the student has changed their answer to a part
+	 * @param {Array} answerList - student's answer
+	 * @param {partpath} - id of the part being answered
+	 * @see Numbas.Question#doPart
+	 */
 	doPart: function( answerList, partRef )
 	{
 		job(function() {
@@ -132,7 +177,10 @@ Numbas.controls = {
 		});
 	},
 
-	//show steps for a question part
+	/* Show steps for a question part
+	 * @param {partpath} partRef - id of the part
+	 * @see Numbas.parts.Part#showSteps
+	 */
 	showSteps: function( partRef )
 	{
 		job(function() {
@@ -140,7 +188,10 @@ Numbas.controls = {
 		});
 	},
 
-	//hide steps for a question part
+	/** Hide the steps for a question part
+	 * @param {partpath} partRef - id of the part
+	 * @see Numbas.parts.Part#hideSteps
+	 */
 	hideSteps: function( partRef )
 	{
 		job(function() {

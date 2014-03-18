@@ -17,12 +17,53 @@ Copyright 2011-14 Newcastle University
 
 Numbas.queueScript('storage',['base'],function() {
 
-Numbas.store = {};
+/** @namespace Numbas.storage */
+
+/** @typedef exam_suspend_data
+ * @memberof Numbas.storage
+ * @property {number} timeRemaining - seconds until exam timer runs out
+ * @property {number[]} questionSubset - order of questions
+ * @property {number} start - time the exam started
+ * @property {number} score - student's current score
+ * @property {number} currentQuestion - number of the question the student was looking at before suspending
+ */
+
+/** @typedef question_suspend_data
+ * @memberof Numbas.storage
+ * @property {number} score - student's current score on this question ({@link Numbas.Question#score})
+ * @property {boolean} visited - has the student looked at this question? ({@link Numbas.Question#visited})
+ * @property {boolean} answered - has the student answered this question? ({@link Numbas.Question#answered})
+ * @property {boolean} submitted - how many times has the student submitted this question? ({@link Numbas.Question#submitted})
+ * @property {boolean} adviceDisplayed - has the advice been shown to the student? ({@link Numbas.Question#adviceDisplayed})
+ * @property {boolean} revealed - have the correct answers been revealed to the student? ({@link Numbas.Question#revealed})
+ * @property {object} variables - dictionary mapping variable names to values, in {@link JME} format.
+ */
+
+/** @typedef part_suspend_data
+ * @memberof Numbas.storage
+ * @property {string} answer - student's answer to the part, as encoded for saving
+ * @property {boolean} answered - has the student answered this part? ({@link Numbas.parts.Part#answered})
+ * @property {boolean} stepsShown - have the steps been shown? ({@link Numbas.parts.Part#stepsShown})
+ * @property {boolean} stepsOpen - are the steps currently visible? ({@link Numbas.parts.Part#stepsOpen})
+ * @property {part_suspend_data[]} gaps - data for gaps, if this is a gapfill part
+ * @property {part_suspend_data[]} steps - data for steps, if this part has steps
+ * @property {string} studentAnswer - student's answer, for {@link Numbas.parts.JMEPart}, {@link Numbas.parts.NumberEntryPart} or {@link Numbas.parts.PatternMatchPart} parts
+ * @property {number[]} shuffleChoices - order of choices, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {number[]} shuffleAnswers - order of answers, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {Array.Array.<number>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
+ */
+
+
+/** The active storage object to be used by the exam */
+Numbas.store = null;
 
 Numbas.storage = {};
 
-//a blank storage object which does nothing
-//any real storage object needs to implement the methods in this object's prototype
+/** A blank storage object which does nothing.
+ *
+ * Any real storage object needs to implement all of this object's methods.
+ * @memberof Numbas.storage
+ */
 Numbas.storage.BlankStorage = function() {}
 Numbas.storage.BlankStorage.prototype = {
 
