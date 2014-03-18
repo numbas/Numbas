@@ -109,6 +109,22 @@ RequireScript.prototype = {
 	callback: null
 };
 
+
+/** Ask to load a javascript file. Unless `noreq` is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter.
+ * @memberof Numbas
+ * @param {string} file
+ * @param {boolean} noreq - don't create a {@link Numbas.RequireScript} object
+ */
+var loadScript = Numbas.loadScript = function(file,noreq)	
+{
+	if(!noreq)
+	{
+		if(scriptreqs[file]!==undefined)
+			return;
+		var req = new RequireScript(file);
+	}
+}
+
 /**
  * Queue up a file's code to be executed.
  * Each script should be wrapped in this function
