@@ -14,16 +14,26 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
+/** @file A few functions to do with time and date, and also performance timing. Provides {@link Numbas.timing}. */
 
 Numbas.queueScript('timing',['base'],function() {
-var timing = Numbas.timing = {
-	//timing
+
+/** @namespace Numbas.timing */
+
+var timing = Numbas.timing = /** @lends Numbas.timing */ {
+	
+	/** Get the current date as a string in the user's locale
+	 * @returns {string}
+	 */
 	displayDate: function()
 	{
 		return (new Date()).toLocaleDateString();
 	},
 
-
+	/** Convert a number of seconds to a string in `HH:MM:SS` format
+	 * @param {number} time
+	 * @returns {string}
+	 */
 	secsToDisplayTime: function( time )
 	{		
 		if(time<0)
@@ -63,12 +73,23 @@ var timing = Numbas.timing = {
 		return displayTime;	
 	},
 
+	/** A queue of timers
+	 * @type {Date[]}
+	 */
 	timers: [],
+
+	/** Timing messages - how long did each timer take?
+	 * @type {string[]}
+	 */
 	messages: [],
 	start: function()
 	{
 		timing.timers.push(new Date());
 	},
+
+	/** End the top timer on the queue
+	 * @param {string} label - a description of the timer
+	 */
 	end: function(label)
 	{
 		var s='';
@@ -79,6 +100,7 @@ var timing = Numbas.timing = {
 		if(!timing.timers.length){timing.show();}
 	},
 
+	/** Show all timing messages through {@link Numbas.debug}*/
 	show: function()
 	{
 		for(var x in timing.accs)
@@ -95,7 +117,10 @@ var timing = Numbas.timing = {
 
 	},
 
-	//stress test a function by running it a lot of times and seeing how long it takes
+	/** Stress test a function by running it a lot of times and seeing how long it takes
+	 * @param {function} f
+	 * @param {number} times
+	 */
 	stress: function(f,times)
 	{
 		timing.start();
@@ -106,11 +131,18 @@ var timing = Numbas.timing = {
 		timing.end();
 	},
 
-
-	//accumulators are for counting time spent in functions which don't take long to evaluate, but are called repeatedly
-	//call startacc with the function's name at the start of the function, and endacc with the same name just before returning a value
-	//it copes with recursion automatically, so you don't need to worry about double counting
+	/** Timing accumulators
+	 * @see Numbas.timing.startacc}
+	 */
 	accs: {},
+
+	/** Accumulators are for counting time spent in functions which don't take long to evaluate, but are called repeatedly.
+	 * 
+	 * Call this with the function's name when you start the function, and {@link Numbas.timing.endacc} with the same name just before returning a value.
+	 *
+	 * It copes with recursion automatically, so you don't need to worry about double counting
+	 * @param {string} name
+	 */
 	startacc: function(name)
 	{
 		if(timing.accs[name]==undefined)
@@ -126,6 +158,10 @@ var timing = Numbas.timing = {
 		acc.start = new Date();
 	},
 
+	/** Stop accumulating runtime for a function
+	 * @param {string} name
+	 * @see Numbas.timing.startacc
+	 */
 	endacc: function(name)
 	{
 		var acc = timing.accs[name];
