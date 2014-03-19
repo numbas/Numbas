@@ -1994,8 +1994,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	settings:
 	{
 		maxMarksEnabled: false,		//is there a maximum number of marks the student can get?
-		minAnswers: 0,				//minimum number of responses student must select
-		maxAnswers: 0,				//maximum ditto
+		minAnswers: '0',				//minimum number of responses student must select
+		maxAnswers: '0',				//maximum ditto
 		choiceOrder: '',			//order in which to display choices
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
