@@ -54,7 +54,7 @@ Numbas.queueScript('storage',['base'],function() {
  */
 
 
-/** The active storage object to be used by the exam */
+/** The active storage object ({@link Numbas.storage}) to be used by the exam */
 Numbas.store = null;
 
 Numbas.storage = {};
@@ -63,86 +63,133 @@ Numbas.storage = {};
  *
  * Any real storage object needs to implement all of this object's methods.
  * @memberof Numbas.storage
+ * @constructor
  */
 Numbas.storage.BlankStorage = function() {}
-Numbas.storage.BlankStorage.prototype = {
+Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.prototype */ {
 
-	//when starting a new exam, must initialise storage
-	//pass in ref to exam object because global var will not be set yet
+	/** Initialise the SCORM data model and this storage object.
+	 * @param {Numbas.Exam} exam
+	 */
 	init: function(exam) {},
 
-	//get suspended exam info
-	//returns an object 
-	//{ timeRemaining: ...,
-	//	questionSubset: ...,
-	//	start: ...,
-	//}
+	/** Get suspended exam info
+	 * @param {Numbas.Exam} exam
+	 * @returns {exam_suspend_data}
+	 */
 	load: function() {},
 
-	//save data. Normally the storage should save as it goes, but this forces a save
+	/** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store */
 	save: function() {
 	},
 
-	//get suspended info for a question
-	//questionNumber is the one in exam.questionSubset, not the original order
+	/** Get suspended info for a question
+	 * @param {Numbas.Question} question
+	 * @returns {question_suspend_data}
+	 */
 	loadQuestion: function(questionNumber) {},
 
-	//get suspended info for a part
+	/** Get suspended info for a part
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
 	loadPart: function(part) {},
 
+	/** Load a {@link Numbas.parts.JMEPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
 	loadJMEPart: function(part) {},
+
+	/** Load a {@link Numbas.parts.PatternMatchPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
 	loadPatternMatchPart: function(part) {},
+
+	/** Load a {@link Numbas.parts.NumberEntryPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
 	loadNumberEntryPart: function(part) {},
+
+	/** Load a {@link Numbas.parts.MultipleResponsePart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
 	loadMultipleResponsePart: function(part) {},
 
-	//this is called when the exam is started
+	/** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads) */
 	start: function() {},
 
-	//this is called when the exam is paused
+	/** Call this when the exam is paused ({@link Numbas.Exam#pause}) */
 	pause: function() {},
 
-	//this is called when the exam is resumed
+	/** Call this when the exam is resumed ({@link Numbas.Exam#resume}) */
 	resume: function() {},
 
-	//this is called when the exam is ended
+	/** Call this when the exam ends ({@link Numbas.Exam#end}) */
 	end: function() {},
 
-	//get entry state: 'ab-initio' or 'resume'
+	/** Get entry state: `ab-initio`, or `resume`
+	 * @returns {string}
+	 */
 	getEntry: function() { 
 		return 'ab-initio';
 	},
 
-	//get viewing mode: 
-	// 'browse' - see exam info, not questions
-	// 'normal' - sit exam
-	// 'review' - look at answers
+	/** Get viewing mode: 
+	 *
+	 * * `browse` - see exam info, not questions
+	 * * `normal` - sit exam
+	 * * `review` - look at completed exam
+	 * @returns {string}
+	 */
 	getMode: function() {},
 
-	//called when question is changed
+	/** Call this when the student moves to a different question
+	 * @param {Numbas.Question} question
+	 */
 	changeQuestion: function(question) {},
 
-	//called when a part is answered
+	/** Call this when a part is answered
+	 * @param {Numbas.parts.Part} part
+	 */
 	partAnswered: function(part) {},
 
-	//called when exam is changed
+	/** Save exam-level details (just score at the mo)
+	 * @param {Numbas.Exam} exam
+	 */
 	saveExam: function(exam) {},
 
-	//called when current question is changed
+	/* Save details about a question - save score and success status
+	 * @param {Numbas.Question} question
+	 */
 	saveQuestion: function(question) {},
 
-	//record that a question has been submitted
+	/** Record that a question has been submitted
+	 * @param {Numbas.Question} question
+	 */
 	questionSubmitted: function(question) {},
 
-	//record that the student displayed question advice
+	/** Rcord that the student displayed question advice
+	 * @param {Numbas.Question} question
+	 */
 	adviceDisplayed: function(question) {},
 
-	//record that the student revealed the answer to a question
+	/** Record that the student revealed the answers to a question
+	 * @param {Numbas.Question} question
+	 */
 	answerRevealed: function(question) {},
 
-	//record that the student showed the steps for a part
+	/** Record that the student showed the steps for a part
+	 * @param {Numbas.parts.Part} part
+	 */
 	stepsShown: function(part) {},
 
-	//record that the student closed the steps for a part
+	/** Record that the student hid the steps for a part
+	 * @param {Numbas.parts.Part} part
+	 */
 	stepsHidden: function(part) {}
 };
 });

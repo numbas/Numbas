@@ -597,14 +597,18 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		return this.get('mode');
 	},
 
-	//called when question is changed
+	/** Call this when the student moves to a different question
+	 * @param {Numbas.Question} question
+	 */
 	changeQuestion: function(question)
 	{
 		this.set('location',question.number);	//set bookmark
 		this.setSuspendData();	//because currentQuestion.visited has changed
 	},
 
-	//called when a part is answered
+	/** Call this when a part is answered
+	 * @param {Numbas.parts.Part} part
+	 */
 	partAnswered: function(part)
 	{
 		var id = this.getPartId(part);
@@ -646,6 +650,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		this.setSuspendData();
 	},
 
+	/** Save exam-level details (just score at the mo)
+	 * @param {Numbas.Exam} exam
+	 */
 	saveExam: function(exam)
 	{
 		if(exam.loading)
@@ -656,7 +663,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		this.set('score.scaled',exam.score/exam.mark || 0);
 	},
 
-	//called when current question is submitted
+	/* Save details about a question - save score and success status
+	 * @param {Numbas.Question} question
+	 */
 	saveQuestion: function(question) 
 	{
 		if(question.exam.loading)
@@ -678,33 +687,43 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
 	},
 
-	//record that a question has been submitted
+	/** Record that a question has been submitted
+	 * @param {Numbas.Question} question
+	 */
 	questionSubmitted: function(question)
 	{
 		this.save();
 	},
 
-	//record that the student displayed question advice
+	/** Record that the student displayed question advice
+	 * @param {Numbas.Question} question
+	 */
 	adviceDisplayed: function(question)
 	{
 		this.setSuspendData();
 	},
 
-	//record that the student revealed the answer to a question
+	/** Record that the student revealed the answers to a question
+	 * @param {Numbas.Question} question
+	 */
 	answerRevealed: function(question)
 	{
 		this.setSuspendData();
 		this.save();
 	},
 
-	//record that the student showed the steps for a part
+	/** Record that the student showed the steps for a part
+	 * @param {Numbas.parts.Part} part
+	 */
 	stepsShown: function(part)
 	{
 		this.setSuspendData();
 		this.save();
 	},
 	
-	//record that the student hid the steps for a part
+	/** Record that the student hid the steps for a part
+	 * @param {Numbas.parts.Part} part
+	 */
 	stepsHidden: function(part)
 	{
 		this.setSuspendData();
