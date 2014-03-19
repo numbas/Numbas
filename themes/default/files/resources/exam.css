@@ -63,12 +63,13 @@ iframe {
 	overflow: hidden;
 }
 
-.type-jme .preview {
+.type-jme .preview, .type-numberentry .preview {
 	background-color: #eee;
 	padding: 0.2em;
 	font-family: serif;
 	display: inline-block;
 	font-size: 120%;
+	margin-left: 0.2em;
 }
 
 button {

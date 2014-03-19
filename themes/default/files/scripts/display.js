@@ -928,7 +928,7 @@ display.JMEPartDisplay = function()
 
 		}
 		catch(e) {
-			this.warning(e);
+			this.warning(e.message);
 			return '';
 		}
 
@@ -1011,6 +1011,21 @@ display.NumberEntryPartDisplay = function()
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
+
+	this.showPreview = true //p.settings.showPreview;
+	this.studentAnswerLaTeX = ko.computed(function() {
+		var n = parseFloat(p.cleanAnswer(this.studentAnswer()));
+		if(isNaN(n)) {
+			this.warning(R('part.numberentry.answer not integer or decimal'));
+			return '';
+		}
+		return n+'';
+	},this);
+
+	this.inputHasFocus = ko.observable(false);
+	this.focusInput = function() {
+		this.inputHasFocus(true);
+	}
 }
 display.NumberEntryPartDisplay.prototype =
 {

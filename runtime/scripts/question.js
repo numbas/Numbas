@@ -1127,7 +1127,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		}
 		catch(e)
 		{
-			this.setCredit(0,R('part.jme.answer invalid'));
+			this.setCredit(0,R('part.jme.answer invalid',e.message));
 			return;
 		}
 
@@ -1493,6 +1493,18 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
 	},
 
+	/** Tidy up the student's answer - remove space, and get rid of comma separators
+	 * @param {string} answer}
+	 * @returns {string}
+	 */
+	cleanAnswer: function(answer) {
+		// do a bit of string tidy up
+		// uk number format only for now - get rid of any UK 1000 separators	
+		answer = (answer+'').replace(/,/g, '');
+		answer = $.trim(answer);
+		return answer;
+	},
+
 	/** Mark the student's answer */
 	mark: function()
 	{
@@ -1501,13 +1513,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		this.studentAnswer = this.answerList[0];
+		this.studentAnswer = this.cleanAnswer(this.answerList[0]);
 		
-		// do a bit of string tidy up
-		// uk number format only for now - get rid of any UK 1000 separators	
-		this.studentAnswer = (this.studentAnswer+'').replace(/,/g, '');
-		this.studentAnswer = $.trim(this.studentAnswer);
-
 		if( this.studentAnswer.length>0 && !isNaN(this.studentAnswer) )
 		{
 			var answerFloat = parseFloat(this.studentAnswer);
