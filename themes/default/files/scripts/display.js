@@ -14,7 +14,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
-//Display code
+/** @file Display code. Provides {@link Numbas.display} */
 
 Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display'],function() {
 	var util = Numbas.util;
@@ -70,8 +70,6 @@ function resizeF() {
 	var w = $.textMetrics(this).width;
 	$(this).width(Math.max(w+30,60)+'px');
 };
-
-ko.bin
 
 ko.bindingHandlers.horizontalSlideVisible = {
 	init: function(element, valueAccessor) {
@@ -239,23 +237,29 @@ ko.bindingHandlers.stopbinding = {
 	}
 }
 
-var display = Numbas.display = {
+/** @namespace Numbas.display */
+
+var display = Numbas.display = /** @lends Numbas.display */ {
+
+	/** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result
+	 */
 	localisePage: function() {
-		//localise strings in page HTML
 		$('[data-localise]').each(function() {
 			var localString = R($(this).data('localise'));
 			$(this).html(localString);
 		})
 	},
 
-	// update progress bar when loading
+	/** Update the progress bar when loading
+	 */
 	showLoadProgress: function()
 	{
 		var p= 100 * Numbas.schedule.completed / Numbas.schedule.total;
 		$('#progressbar #completed').width(p+'%');
 	},
 
-	//display code to be called before anything else has happened
+	/** Initialise the display. Called as soon as the page loads.
+	 */
 	init: function()
 	{
 		//hide the various content-display bits
@@ -291,12 +295,18 @@ var display = Numbas.display = {
 		});
 	},
 
-	// does an input element currently have focus?
+	/** Does an input element currently have focus?
+	 * @type {boolean}
+	 */
 	inInput: false,
 
 	//alert / confirm boxes
 	//
 
+	/** Show an alert dialog
+	 * @param {string} msg - message to show the user
+	 * @param {function} fnOK - callback when OK is clicked
+	 */
 	showAlert: function(msg,fnOK) {
 		fnOK = fnOK || function() {};
 		$.prompt(msg,{overlayspeed: 'fast', close: function() {
@@ -304,6 +314,11 @@ var display = Numbas.display = {
 		}});
 	},
 
+	/** Show a confirmation dialog box
+	 * @param {string} msg - message to show the user
+	 * @param {function} fnOK - callback if OK is clicked
+	 * @param {function} fnCancel - callback if cancelled
+	 */
 	showConfirm: function(msg,fnOK,fnCancel) {
 		fnOK = fnOK || function(){};
 		fnCancel = fnCancel || function(){};
@@ -313,7 +328,10 @@ var display = Numbas.display = {
 		}});
 	},
 
-	//make MathJax typeset any maths in elem (or whole page if elem not given)
+	/** Make MathJax typeset any maths in the selector
+	 * @param {jQuery_selection} [selector] - elements to typeset. If not given, the whole page is typeset
+	 * @param {function} callback - function to call when typesetting is finished
+	 */
 	typeset: function(selector,callback)
 	{
 		try
@@ -343,17 +361,45 @@ var display = Numbas.display = {
 
 };
 
-//display properties of exam object
+/** Display properties of the {@link Numbas.Exam} object.
+ * @name ExamDisplay
+ * @memberof Numbas.display
+ * @constructor
+ * @param {Numbas.Exam} e - associated exam
+ * 
+ */
 display.ExamDisplay = function(e) 
 {
 	this.exam=e;
 
+	/** The exam's mode ({@link Numbas.Exam#mode})
+	 * @member {observable|string} mode
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.mode = ko.observable(e.mode);
 	
+	/** Is {@link Numbas.store} currently saving?
+	 * @member {observable|boolean} saving
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.saving = ko.observable(false);
 
+	/** The name of the currently displayed info page
+	 * @member {observable|string} infoPage
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.infoPage = ko.observable(null);
+
+	/** The current question ({@link Numbas.Exam#currentQuestion})
+	 * @member {observable|Numbas.Question} currentQuestion
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.currentQuestion = ko.observable(null);
+
+	/** The number of the current question
+	 * @member {observable|number} currentQuestionNumber 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.currentQuestionNumber = ko.computed(function() {
 		var q = this.currentQuestion();
 		if(q)
@@ -361,19 +407,51 @@ display.ExamDisplay = function(e)
 		else
 			return null;
 	},this);
+
+	/** All the exam's question display objects
+	 * @member {observable|Numbas.display.QuestionDisplay[]} questions
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.questions = ko.observableArray([]);
 
+	/** Can the student go back to the previous question? (False if the current question is the first one
+	 * @member {observable|boolean} canReverse
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.canReverse = ko.computed(function() {
 		return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
 	},this);
+	
+	/** Can the student go forward to the next question? (False if the current question is the last one)
+	 * @member {observable|boolean} canAdvance
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.canAdvance = ko.computed(function() {
 		return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
 	},this);
 
-
+	/** The student's total score ({@link Numbas.Exam#score})
+	 * @member {observable|number} score
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.score = ko.observable(e.score);
+
+	/** The total marks available for the exam ({@link Numbas.Exam#mark})
+	 * @member {observable|number} marks
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.marks = ko.observable(e.mark);
+
+	/** The percentage score the student needs to achieve to pass ({@link Numbas.Exam#percentPass}), formatted as a string.
+	 * @member {observable|string} percentPass
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.percentPass = ko.observable(e.settings.percentPass*100+'%');
+
+	/** String displaying the student's current score, and the total marks available, if allowed
+	 * @member {observable|string} examScoreDisplay
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.examScoreDisplay = ko.computed(function() {
 		var niceNumber = Numbas.math.niceNumber;
 		var exam = this.exam;
@@ -388,47 +466,86 @@ display.ExamDisplay = function(e)
 
 		return totalExamScoreDisplay;
 	},this);
+
+	/** The student's total score as a percentage of the total marks available
+	 * @member {observable|number} percentScore
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.percentScore = ko.observable(0);
 
+	/** The time left in the exam
+	 * @member {observable|string} displayTime
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.displayTime = ko.observable('');
+
+	/** The total time the student has spent in the exam
+	 * @member {observable|string} timeSpent
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.timeSpent = ko.observable('');
+
+	/** Is the student allowed to pause the exam?
+	 * @member {boolean} allowPause
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.allowPause = e.settings.allowPause;
 
+	/** Total number of questions the student attempted
+	 * @member {observable|number} questionsAttempted
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.questionsAttempted = ko.computed(function() {
 		return this.questions().reduce(function(s,q) { 
 			return s + (q.answered() ? 1 : 0); 
 		},0);
 	},this);
+
+	/** Total number of questions the student attempted, formatted as a fraction of the total number of questions
+	 * @member {observable|string} questionsAttemptedDisplay
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.questionsAttemptedDisplay = ko.computed(function() {
 		return this.questionsAttempted()+' / '+this.exam.settings.numQuestions;
 	},this);
 
+	/** The result of the exam - passed or failed?
+	 * @member {observable|string} result
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	this.result = ko.observable('');
 
 	document.title = e.settings.name;
 
 }
-display.ExamDisplay.prototype = 
+display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */
 {
-	exam: undefined,	//reference to main exam object
+	/** Reference to the associated exam object
+	 * @type {Numbas.Exam}
+	 */
+	exam: undefined,
 
+	/** Update the timer */
 	showTiming: function()
 	{
 		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
 		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
 	},
 
+	/** Initialise the question list display */
 	initQuestionList: function() {
 		for(var i=0; i<this.exam.questionList.length; i++) {
 			this.questions.push(this.exam.questionList[i].display);
 		}
 	},
 
+	/** Hide the timer */
 	hideTiming: function()
 	{
 		this.displayTime('');
 	},
 
+	/** Show/update the student's total score */
 	showScore: function()
 	{
 		var exam = this.exam;
@@ -437,6 +554,7 @@ display.ExamDisplay.prototype =
 		this.percentScore(exam.percentScore);
 	},
 
+	/** Update the question list display - typically, scroll so the current question is visible */
 	updateQuestionMenu: function()
 	{
 		var exam = this.exam;
@@ -445,6 +563,9 @@ display.ExamDisplay.prototype =
 			display.carouselGo(exam.currentQuestion.number-1,300);
 	},
 
+	/** Show an info page (one of the front page, pause , results, or exit)
+	 * @param {string} page - name of the page to show
+	 */
 	showInfoPage: function(page)
 	{
 		window.onbeforeunload = null;
@@ -479,6 +600,7 @@ display.ExamDisplay.prototype =
 		}
 	},
 
+	/** Show the current question */
 	showQuestion: function()
 	{
 		var exam = this.exam;
@@ -497,12 +619,14 @@ display.ExamDisplay.prototype =
 		}
 	},
 
+	/** Called just before the current question is regenerated */
 	startRegen: function() {
 		$('#questionDisplay').hide();
 		this.exam.currentQuestion.display.html.remove();
 		this.oldQuestion = this.exam.currentQuestion.display;
 	},
 	
+	/** Called after the current question has been regenerated */
 	endRegen: function() {
 		var currentQuestion = this.exam.currentQuestion;
 		this.questions.splice(currentQuestion.number,1,currentQuestion.display);
@@ -514,6 +638,7 @@ display.ExamDisplay.prototype =
 		ko.applyBindings({exam: this, question: question.display},question.display.html[0]);
 	},
 
+	/** Called when the exam ends */
 	end: function() {
 		this.mode(this.exam.mode);
 		this.questions().map(function(q) {
@@ -522,7 +647,12 @@ display.ExamDisplay.prototype =
 	}
 };
 
-//display properties of question object
+/** Display properties of a question object
+ * @name QuestionDisplay
+ * @memberof Numbas.display
+ * @constructor
+ * @param {Numbas.Question} q - the associated question object
+ */
 display.QuestionDisplay = function(q)
 {
 	this.question = q;
@@ -562,11 +692,19 @@ display.QuestionDisplay = function(q)
 		exam.reviewQuestion(q.number);
 	}
 }
-display.QuestionDisplay.prototype =
+display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
 {
+	/** The associated question object
+	 * @type {Numbas.Question}
+	 */
 	question: undefined,			//reference back to the main question object
+
+	/** HTML representing the question
+	 * @type {Element}
+	 */
 	html: '',						//HTML for displaying question
 
+	/** Make the HTML to display the question */
 	makeHTML: function() {
 		var q = this.question;
 		var qd = this;
@@ -590,6 +728,7 @@ display.QuestionDisplay.prototype =
 		});
 	},
 
+	/** Show the question */
 	show: function()
 	{
 		var q = this.question;
@@ -634,16 +773,18 @@ display.QuestionDisplay.prototype =
 		Numbas.display.typeset(this.html,this.postTypesetF);
 	},
 
+	/** Called when the student leaves the question */
 	leave: function() {
 		this.css.remove();
 	},
 
-	//display Advice
+	/** Show this question's advice */
 	showAdvice: function( fromButton )
 	{
 		this.adviceDisplayed(this.question.adviceDisplayed);
 	},
 
+	/** Reveal the answers to this question */
 	revealAnswer: function()
 	{
 		this.revealed(this.question.revealed);
@@ -652,7 +793,7 @@ display.QuestionDisplay.prototype =
 		scroll(0,0);
 	},
 
-	//display question score and answer state
+	/** Display question score and answer state */
 	showScore: function()
 	{
 		var q = this.question;
@@ -671,10 +812,14 @@ display.QuestionDisplay.prototype =
 		this.anyAnswered(anyAnswered);
 	},
 
+	/** Scroll to the first part submission error */
 	scrollToError: function() {
 		scrollTo($('.warning-icon:visible:first'));
 	},
 
+	/* Initialise this question's display 
+	 * @see Numbas.display.ExamDisplay.init
+	 */
 	init: function() {
 		var q = this.question;
 		for(var i=0;i<q.parts.length;i++)
@@ -683,6 +828,7 @@ display.QuestionDisplay.prototype =
 		}
 	},
 
+	/** Called when the exam ends */
 	end: function() {
 		var q = this.question;
 		for(var i=0;i<q.parts.length;i++)
@@ -694,7 +840,12 @@ display.QuestionDisplay.prototype =
 
 var extend = Numbas.util.extend;
 
-//display methods for question parts
+/** Display methods for a generic question part
+ * @name PartDisplay
+ * @memberof Numbas.display
+ * @constructor
+ * @param {Numbas.parts.Part} p - the associated part object
+ */
 display.PartDisplay = function(p)
 {
 	var pd = this;
@@ -776,23 +927,30 @@ display.PartDisplay = function(p)
 		}
 	}
 }
-display.PartDisplay.prototype = 
+display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
 {
-	part: undefined,	//reference back to main part object
+	/** The associated part object
+	 * @type {Numbas.parts.Part}
+	 */
+	part: undefined,
 
+	/** Show a warning message about this part
+	 * @param {string} warning
+	 */
 	warning: function(warning)
 	{
 		this.warnings.push({message:warning+''});
 	},
 
-	//remove all previously displayed warnings
+	/** Remove all previously displayed warnings */
 	removeWarnings: function()
 	{
 		this.warnings([]);
 	},
 
-	//called when part is displayed (basically when question is changed)
-	//show steps if appropriate, restore answers
+	/** Called when the part is displayed (basically when question is changed)
+	 * @see Numbas.display.QuestionDisplay.show
+	 */
 	show: function()
 	{
 		var p = this.part;
@@ -802,7 +960,7 @@ display.PartDisplay.prototype =
 		this.showScore(this.part.answered);
 	},
 
-	//update 
+	/** Show/update the student's score and answer status on this part */
 	showScore: function(valid)
 	{
 		var p = this.part;
@@ -856,7 +1014,7 @@ display.PartDisplay.prototype =
 		}
 	},
 
-	//called when 'show steps' button is pressed, or coming back to a part after steps shown
+	/** Called when 'show steps' button is pressed, or coming back to a part after steps shown */
 	showSteps: function()
 	{
 		this.stepsShown(this.part.stepsShown);
@@ -868,17 +1026,20 @@ display.PartDisplay.prototype =
 		}
 	},
 
+	/** Hide the steps */
 	hideSteps: function()
 	{
 		this.stepsOpen(this.part.stepsOpen);
 	},
 
-	//called when question displayed - fills student's last answer into inputs
+	/** Fill the student's last submitted answer into inputs
+	 * @abstract
+	 */
 	restoreAnswer: function() 
 	{
 	},
 
-	//fills inputs with correct answers
+	/** Show the correct answers to this part */
 	revealAnswer: function() 
 	{
 		this.revealed(true);
@@ -886,6 +1047,9 @@ display.PartDisplay.prototype =
 		this.showScore();
 	},
 
+	/** Initialise this part's display
+	 * @see Numbas.display.QuestionDisplay.init
+	 */
 	init: function() {
 		this.part.setDirty(false);
 		for(var i=0;i<this.part.steps.length;i++) {
@@ -893,6 +1057,7 @@ display.PartDisplay.prototype =
 		}
 	},
 
+	/** Called when the exam ends */
 	end: function() {
 		this.restoreAnswer();
 		for(var i=0;i<this.part.steps.length;i++) {
@@ -901,7 +1066,12 @@ display.PartDisplay.prototype =
 	}
 };
 
-//JME display code
+/** Display code for a {@link Numbas.parts.JMEPart}
+ * @constructor
+ * @augments Numbas.display.PartDisplay
+ * @name JMEPartDisplay
+ * @memberof Numbas.display
+ */
 display.JMEPartDisplay = function()
 {
 	var p = this.part;
@@ -976,7 +1146,12 @@ display.JMEPartDisplay.prototype =
 };
 display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);
 
-//Pattern Match display code
+/** Display code for a {@link Numbas.parts.PatternMatchPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name PatternMatchPartDisplay
+ * @memberof Numbas.display
+ */
 display.PatternMatchPartDisplay = function()
 {
 	var p = this.part;
@@ -999,7 +1174,12 @@ display.PatternMatchPartDisplay.prototype =
 };
 display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);
 
-//Number Entry display code
+/** Display code for a {@link Numbas.parts.NumberEntryPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name NumberEntryPartDisplay
+ * @memberof Numbas.display
+ */
 display.NumberEntryPartDisplay = function()
 {
 	var p = this.part;
@@ -1036,8 +1216,12 @@ display.NumberEntryPartDisplay.prototype =
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
 
-
-//Multiple Response display code
+/** Display code for a {@link Numbas.parts.MultipleResponsePart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name MultipleResponsePartDisplay
+ * @memberof Numbas.display
+ */
 display.MultipleResponsePartDisplay = function()
 {
 	var p = this.part;
@@ -1180,6 +1364,12 @@ display.MultipleResponsePartDisplay.prototype =
 display.MultipleResponsePartDisplay = extend(display.PartDisplay,display.MultipleResponsePartDisplay,true);
 
 
+/** Display code for a {@link Numbas.parts.GapFillPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name GapFillPartDisplay
+ * @memberof Numbas.display
+ */
 display.GapFillPartDisplay = function()
 {
 }
@@ -1213,6 +1403,12 @@ display.GapFillPartDisplay.prototype =
 };
 display.GapFillPartDisplay = extend(display.PartDisplay,display.GapFillPartDisplay,true);
 
+/** Display code for a {@link Numbas.parts.InformationPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name InformationPartDisplay
+ * @memberof Numbas.display
+ */
 display.InformationPartDisplay = function()
 {
 }
@@ -1348,7 +1544,10 @@ function scrollTo(el)
 		$('html,body').animate({scrollTop: $(el).offset().top-50 });
 }
 
-//make a carousel out of a div containing a list
+/** Make a carousel out of a div containing a list
+ * @param {Element} elem - div containing list to turn into a carousel
+ * @param {object} options -`prevBtn`, `nextBtn` - selectors of buttons to move up and down, `speed`, `step`
+ */
 var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 	options = $.extend({
 		prevBtn: null,
