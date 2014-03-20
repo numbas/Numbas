@@ -71,8 +71,6 @@ function resizeF() {
 	$(this).width(Math.max(w+30,60)+'px');
 };
 
-ko.bin
-
 ko.bindingHandlers.horizontalSlideVisible = {
 	init: function(element, valueAccessor) {
 		var containerWidth = $(element).width();
