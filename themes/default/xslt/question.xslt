@@ -203,8 +203,8 @@ Copyright 2011-13 Newcastle University
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice">
-				<option></option>
+			<select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed">
+				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist"/>
 			</select>
 		</xsl:when>
@@ -227,8 +227,8 @@ Copyright 2011-13 Newcastle University
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice">
-				<option></option>
+			<select class="multiplechoice" data-bind="value: correctAnswer" disabled="true">
+				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
 			</select>
 		</xsl:when>
@@ -310,7 +310,15 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="choice" mode="dropdownlist">
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
-	<option>
+	<option value="{$choicenum}">
+		<xsl:apply-templates select="content"/>
+	</option>
+</xsl:template>
+
+<xsl:template match="choice" mode="dropdownlist-correctanswer">
+	
+	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+	<option value="{$choicenum}">
 		<xsl:apply-templates select="content"/>
 	</option>
 </xsl:template>
