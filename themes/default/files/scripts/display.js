@@ -668,34 +668,96 @@ display.QuestionDisplay = function(q)
 	this.question = q;
 	var exam = q.exam;
 
+	/** Has the advice been shown?
+	 * @member {observable|boolean} adviceDisplayed
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.adviceDisplayed = ko.observable(false);
 
+	/** Get the {@link Numbas.display.PartDisplay} object for the given path.
+	 * @param {partpath} path
+	 * @returns {Numbas.display.PartDisplay}
+	 * @method getPart
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.getPart = function(path) {
 		return q.getPart(path).display;
 	}
 
+	/** Text for the "submit all answers" button
+	 * @member {observable|string} submitMessage
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.submitMessage = ko.observable('');
 
+	/** The name to display for this question - in default locale, it's "Question {N}"
+	 * @member {observable|string} displayName
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.displayName = ko.observable(R('question.header',q.number+1));
 
+	/** Has the student looked at this question? ({@link Numbas.Question#visited})
+	 * @member {observable|boolean} visited
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.visited = ko.observable(q.visited);
+
+	/** Is this question visible in the list?
+	 * @member {observable|boolean} visible
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.visible = ko.computed(function() {
 		return this.visited() || exam.settings.navigateBrowse;
 	},this);
 
+	/** Student's current score ({@link Numbas.Question#score})
+	 * @member {observable|number} score
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.score = ko.observable(q.score);
+
+	/** Total marks available for this question ({@link Numbas.Question#marks})
+	 * @member {observable|number} marks
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.marks = ko.observable(q.marks);
+
+	/** Has this question been answered? ({@link Numbas.Question#answered})
+	 * @member {observable|boolean} answered
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.answered = ko.observable(q.answered);
+
+	/** Have the correct answers been revealed? ({@link Numbas.Question#revealed})
+	 * @member {observable|boolean} revealed
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.revealed = ko.observable(q.revealed);
+
+	/** Have any of this question's parts been answered?
+	 * @member {observable|boolean} anyAnswered
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.anyAnswered = ko.observable(false);
 
+	/** Has the student changed any of their answers since submitting?
+	 * @member {observable|boolean} isDirty
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.isDirty = ko.observable(false);
 
+	/** Is the student able to reveal the correct answers?
+	 * @member {observable|boolean} canReveal
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.canReveal = ko.computed(function() {
 		return exam.settings.allowRevealAnswer && !this.revealed();
 	},this);
 
-
+	/** Score feedback string
+	 * @member {{update: function, message: observable|string}} scoreFeedback
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
 
 	this.review = function() {
