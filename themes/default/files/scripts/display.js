@@ -760,6 +760,11 @@ display.QuestionDisplay = function(q)
 	 */
 	this.scoreFeedback = showScoreFeedback(this,q.exam.settings);
 
+	/** Show this question in review mode
+	 * @member {function} review
+	 * @method
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	this.review = function() {
 		exam.reviewQuestion(q.number);
 	}
@@ -920,37 +925,118 @@ var extend = Numbas.util.extend;
  */
 display.PartDisplay = function(p)
 {
+
 	var pd = this;
+	/** The associated part object
+	 * @member {Numbas.parts.Part} part
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.part = p;
+
+	/** The question this part belongs to
+	 * @member {Numbas.Question} question
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.question = p.question;
 
+	/** The student's current score ({@link Numbas.parts.Part#score})
+	 * @member {observable|number} score
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.score = ko.observable(p.score);
+
+	/** The total marks available for this part ({@link Numbas.parts.Part#marks})
+	 * @member {observable|number} marks
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.marks = ko.observable(p.marks);
+
+	/** Has the student answered this part?
+	 * @member {observable|boolean} answered
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.answered = ko.observable(p.answered);
 
+	/** Has the student changed their answer since the last submission?
+	 * @member {observable|boolean} isDirty
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.isDirty = ko.observable(false);
 
+	/** Warnings based on the student's answer
+	 * @member {observable|Array.<{message:string}>} warnings
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.warnings = ko.observableArray([]);
+
+	/** Are the warnings visible?
+	 * @member {observable|boolean} warningsShown
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.warningsShown = ko.observable(false);
 
+	/** Show the warnings
+	 * @member {function} showWarnings
+	 * @method
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.showWarnings = function() {
 		this.warningsShown(true);
 	}
+
+	/** Hide the warnings
+	 * @member {function} hideWarnings
+	 * @method
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.hideWarnings = function() {
 		this.warningsShown(false);
 	}
 
+	/** Are the marking feedback messages visible?
+	 * @member {observable|boolean} feedbackShown
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.feedbackShown = ko.observable(false);
+
+	/** Text for the button to toggle the display of the feedback messages
+	 * @member {observable|string} toggleFeedbackText
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.toggleFeedbackText = ko.computed(function() {
 		return R(this.feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show');
 	},this);
+
+	/** Feedback messages
+	 * @member {observable|string[]} feedbackMessages
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.feedbackMessages = ko.observableArray([]);
+	
+	/** Should the button to toggle feedback messages be shown?
+	 * @member {observable|boolean} showFeedbackToggler
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.showFeedbackToggler = ko.computed(function() {
 		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
 	});
 
+	/** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
+	 * @member {observable|boolean} stepsShown
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.stepsShown = ko.observable(p.stepsShown);
+
+	/** Are the steps currently open? ({@link Numbas.parts.Part#stepsOpen})
+	 * @member {observable|boolean} stepsOpen
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.stepsOpen = ko.observable(p.stepsOpen);
+
+	/** Text to describe the state of the steps penalty
+	 * @member {observable|string} stepsPenaltyMessage
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.stepsPenaltyMessage = ko.computed(function() {
 		if(this.stepsOpen())
 			return R('question.hide steps no penalty');
@@ -962,10 +1048,26 @@ display.PartDisplay = function(p)
 			return R('question.show steps penalty',Numbas.math.niceNumber(this.part.settings.stepsPenalty),util.pluralise(this.part.settings.stepsPenalty,R('mark'),R('marks')));
 	},this);
 
+	/** Have the correct answers been revealed?
+	 * @member {observable|boolean} revealed
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.revealed = ko.observable(false);
 
+	/** Display of this parts's current score / answered status
+	 * @member {observable|object} scoreFeedback
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.scoreFeedback = showScoreFeedback(this,p.question.exam.settings);
 
+	/** Control functions
+	 * @member {object} controls
+	 * @memberof Numbas.display.PartDisplay
+	 * @property {function} toggleFeedback - Toggle the display of the marking feedback messages
+	 * @property {function} submit - Submit the student's answers for marking
+	 * @property {function} showSteps - Show the steps
+	 * @property {function} hideSteps - Hide the steps
+	 */
 	this.controls = {
 		toggleFeedback: function() {
 			pd.feedbackShown(!pd.feedbackShown());
@@ -989,6 +1091,11 @@ display.PartDisplay = function(p)
 			p.hideSteps();
 		}
 	}
+
+	/** Event bindings
+	 * @member {object} inputEvents
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	this.inputEvents = {
 		keypress: function(context,e) {
 			if(e.which==13) {
@@ -1001,11 +1108,6 @@ display.PartDisplay = function(p)
 }
 display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
 {
-	/** The associated part object
-	 * @type {Numbas.parts.Part}
-	 */
-	part: undefined,
-
 	/** Show a warning message about this part
 	 * @param {string} warning
 	 */
@@ -1147,15 +1249,39 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 display.JMEPartDisplay = function()
 {
 	var p = this.part;
+
+	/** The student's current answer (not necessarily submitted)
+	 * @member {observable|JME} studentAnswer
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.studentAnswer = ko.observable('');
+
+	/** The correct answer
+	 * @member {observable|JME} correctAnswer
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.correctAnswer = p.settings.correctAnswer;
+
+	/** Should the LaTeX rendering of the student's answer be shown?
+	 * @member {boolean} showPreview
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.showPreview = p.settings.showPreview;
+
+	/** The correct answer, in LaTeX form
+	 * @member {observable|TeX} correctAnswerLaTeX
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.displaySimplification,p.question.scope);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
 
+	/** The student's answer, in LaTeX form
+	 * @member {observable|TeX} studentAnswerLaTeX
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.studentAnswerLaTeX = ko.computed(function() {
 		var studentAnswer = this.studentAnswer();
 		if(studentAnswer=='')
@@ -1204,7 +1330,17 @@ display.JMEPartDisplay = function()
 		return tex;
 	},this).extend({throttle:100});
 
+	/** Does the input box have focus?
+	 * @member {observable|boolean} inputHasFocus
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.inputHasFocus = ko.observable(false);
+
+	/** Give the input box focus
+	 * @member {function} focusInput
+	 * @method
+	 * @memberof Numbas.display.JMEPartDisplay
+	 */
 	this.focusInput = function() {
 		this.inputHasFocus(true);
 	}
@@ -1228,9 +1364,22 @@ display.PatternMatchPartDisplay = function()
 {
 	var p = this.part;
 
+	/** The student's current answer (not necessarily submitted)
+	 * @member {observable|string} studentAnswer
+	 * @memberof Numbas.display.PatternMatchPartDisplay
+	 */
 	this.studentAnswer = ko.observable(this.part.studentAnswer);
 
+	/** The correct answer regular expression
+	 * @member {observable|RegExp} correctAnswer
+	 * @memberof Numbas.display.PatternMatchPartDisplay
+	 */
 	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+
+	/** A representative correct answer to display when answers are revealed
+	 * @member {observable|string} displayAnswer
+	 * @memberof Numbas.display.PatternMatchPartDisplay
+	 */
 	this.displayAnswer = ko.observable(p.settings.displayAnswer);
 
 	ko.computed(function() {
