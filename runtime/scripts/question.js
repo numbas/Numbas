@@ -765,8 +765,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					: R('part.marking.revealed steps no penalty'));
 		}
 
-		if(this.marks==0)
+		if(this.marks==0) {
+			this.answered = true;
 			return;
+		}
 		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
 		{
 			this.giveWarning(R('part.marking.not submitted'));
