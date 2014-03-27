@@ -1405,15 +1405,32 @@ display.NumberEntryPartDisplay = function()
 {
 	var p = this.part;
 
+	/** The student's current (not necessarily submitted) answer
+	 * @member {observable|string} studentAnswer
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
 	this.studentAnswer = ko.observable(p.studentAnswer);
 
+	/** The correct answer
+	 * @member {observable|number} correctAnswer
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
 	this.correctAnswer = ko.observable(p.settings.displayAnswer);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
 
-	this.showPreview = true //p.settings.showPreview;
+	/** Show a LaTeX rendering of the answer?
+	 * @member {boolean} showPreview
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
+	this.showPreview = true;
+
+	/** TeX version of student's answer
+	 * @member {observable|TeX} studentAnswerLaTeX
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
 	this.studentAnswerLaTeX = ko.computed(function() {
 		var n = parseFloat(p.cleanAnswer(this.studentAnswer()));
 		if(isNaN(n)) {
@@ -1423,7 +1440,17 @@ display.NumberEntryPartDisplay = function()
 		return n+'';
 	},this);
 
+	/** Does the input box have focus?
+	 * @member {observable|boolean} inputHasFocus
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
 	this.inputHasFocus = ko.observable(false);
+
+	/** Give the input box focus
+	 * @member {function} focusInput
+	 * @method
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
 	this.focusInput = function() {
 		this.inputHasFocus(true);
 	}
@@ -1477,6 +1504,10 @@ display.MultipleResponsePartDisplay = function()
 
 	switch(p.type) {
 	case '1_n_2':
+		/** Index of student's current answer choice (not necessarily submitted)
+		 * @member {observable|number} studentAnswer
+		 * @memberof Numbas.display.MultipleResponsePartDisplay
+		 */
 		this.studentAnswer = ko.observable(null);
 		for(var i=0;i<p.numAnswers;i++) {
 			if(p.ticks[i][0])
@@ -1495,11 +1526,28 @@ display.MultipleResponsePartDisplay = function()
 				maxi = i;
 			}
 		}
+		/** Index of the answer which gains the most marks
+		 * @member {observable|number} correctAnswer
+		 * @memberof Numbas.display.MultipleResponsePartDisplay
+		 */
 		this.correctAnswer = ko.observable(maxi);
 
 		break;
 	case 'm_n_2':
+		/** For each choice, has the student selected it?
+		 *
+		 * For m_n_2 parts, this is a list of booleans. For m_n_x radiogroup parts, it's a list of indices. For m_n_x checkbox parts, it's a 2d array of booleans.
+		 * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
+		 * @memberof Numbas.display.MultipleResponsePartDisplay
+		 */
 		this.ticks = [];
+
+		/** For each choice, should it be selected to get the most marks?
+		 *
+		 * For m_n_2 parts, this is a list of booleans. For m_n_x radiogroup parts, it's a list of indices. For m_n_x checkbox parts, it's a 2d array of booleans.
+		 * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
+		 * @memberof Numbas.display.MultipleResponsePartDisplay
+		 */
 		this.correctTicks = [];
 		for(var i=0; i<p.numAnswers; i++) {
 			this.ticks[i] = makeTicker(i,0);
