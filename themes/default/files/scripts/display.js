@@ -1425,14 +1425,19 @@ display.NumberEntryPartDisplay = function()
 	 * @member {boolean} showPreview
 	 * @memberof Numbas.display.NumberEntryPartDisplay
 	 */
-	this.showPreview = true;
+	this.showPreview = false;
 
 	/** TeX version of student's answer
 	 * @member {observable|TeX} studentAnswerLaTeX
 	 * @memberof Numbas.display.NumberEntryPartDisplay
 	 */
 	this.studentAnswerLaTeX = ko.computed(function() {
-		var n = parseFloat(p.cleanAnswer(this.studentAnswer()));
+		var studentAnswer = p.cleanAnswer(this.studentAnswer());
+		if(studentAnswer=='')
+			return '';
+		this.removeWarnings();
+
+		var n = parseFloat(studentAnswer);
 		if(isNaN(n)) {
 			this.warning(R('part.numberentry.answer not integer or decimal'));
 			return '';
