@@ -767,6 +767,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					: R('part.marking.revealed steps no penalty'));
 		}
 
+		this.answerList = util.copyarray(this.stagedAnswer);
+		this.setStudentAnswer();
+
 		if(this.marks==0) {
 			this.answered = true;
 			return;
@@ -779,7 +782,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 		else
 		{
-			this.answerList = util.copyarray(this.stagedAnswer);
 			this.setDirty(false);
 			this.mark();
 			this.answered = this.validate();
@@ -812,6 +814,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		this.submitting = false;
 	},
+
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 * @abstract
+	 */
+	setStudentAnswer: function() {},
 
 	/* Function which marks the student's answer
 	 * @abstract
@@ -1114,6 +1121,12 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		notAllowedShowStrings: false
 	},
 
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 */
+	setStudentAnswer: function() {
+		this.studentAnswer = this.answerList[0];
+	},
+
 	/** Mark the student's answer
 	 */
 	mark: function()
@@ -1123,7 +1136,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		this.studentAnswer = this.answerList[0];
 
 		try
 		{
@@ -1346,6 +1358,12 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		partialCredit: 0
 	},
 
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 */
+	setStudentAnswer: function() {
+		this.studentAnswer = this.answerList[0];
+	},
+
 	/** Mark the student's answer
 	 */
 	mark: function ()
@@ -1355,7 +1373,6 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		this.studentAnswer = this.answerList[0];
 		this.answered = this.studentAnswer.length>0;
 
 		var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );			
@@ -1509,6 +1526,12 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		return answer;
 	},
 
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 */
+	setStudentAnswer: function() {
+		this.studentAnswer = this.cleanAnswer(this.answerList[0]);
+	},
+
 	/** Mark the student's answer */
 	mark: function()
 	{
@@ -1517,7 +1540,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		this.studentAnswer = this.cleanAnswer(this.answerList[0]);
 		
 		if( this.studentAnswer.length>0 && !isNaN(this.studentAnswer) )
 		{
@@ -2031,6 +2053,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		}
 	},
 
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 */
+	setStudentAnswer: function() {
+		this.ticks = util.copyarray(this.stagedAnswer,true);
+	},
+
 	/** Mark the student's choices */
 	mark: function()
 	{
@@ -2039,7 +2067,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			this.setCredit(0,R('part.marking.did not answer'));
 			return false;
 		}
-		this.ticks = util.copyarray(this.stagedAnswer,true);
 		this.setCredit(0);
 
 		this.numTicks = 0;
