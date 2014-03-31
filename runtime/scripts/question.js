@@ -2154,6 +2154,10 @@ function GapFillPart(xml, path, question, parentPart, loading)
 }	
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 {
+	/** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
+	 */
+	stagedAnswer: 'something',
+
 	/** Reveal the answers to all of the child gaps 
 	 * Extends {@link Numbas.parts.Part.revealAnswer}
 	 */
