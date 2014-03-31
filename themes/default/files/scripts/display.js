@@ -1054,6 +1054,14 @@ display.PartDisplay = function(p)
 	 */
 	this.revealed = ko.observable(false);
 
+	/** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true
+	 * @member {observable|boolean} showCorrectAnswer
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showCorrectAnswer = ko.computed(function() {
+		return p.settings.showCorrectAnswer && pd.revealed();
+	});
+
 	/** Display of this parts's current score / answered status
 	 * @member {observable|object} scoreFeedback
 	 * @memberof Numbas.display.PartDisplay

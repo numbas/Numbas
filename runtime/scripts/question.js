@@ -522,7 +522,7 @@ function Part( xml, path, question, parentPart, loading )
 	
 	tryGetAttribute(this,this.xml,'.',['type','marks']);
 
-	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty'],[]);
+	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer'],[]);
 
 	//initialise gap and step arrays
 	this.gaps = [];
@@ -581,7 +581,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @type {number}
 	 */
 	marks: 0,
-	
+
 	/** Marks available for the steps, if any
 	 * @type {number}
 	 */
@@ -647,12 +647,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown
 	 * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
 	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
+	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
 	 */
 	settings: 
 	{
 		stepsPenalty: 0,
 		enableMinimumMarks: false,
-		minimumMarks: 0
+		minimumMarks: 0,
+		showCorrectAnswer: true
 	},
 
 	/** Associated display object

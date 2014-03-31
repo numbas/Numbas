@@ -170,7 +170,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
 	</div>
@@ -182,7 +182,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
 	</div>
@@ -347,7 +347,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<form>
 		<table class="choices-grid">
@@ -423,7 +423,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: displayAnswer, autosize: true"/>
 	</span>
@@ -449,7 +449,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="preview" data-bind="maths: correctAnswerLaTeX"></span>
@@ -464,7 +464,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span data-bind=""></span>

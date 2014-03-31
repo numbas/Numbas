@@ -488,6 +488,7 @@ class Part:
 	stepsPenalty = 0
 	enableMinimumMarks = True
 	minimumMarks = 0
+	showCorrectAnswer = True
 
 	def __init__(self,marks,prompt=''):
 		self.marks = marks
@@ -514,7 +515,7 @@ class Part:
 			)
 		part = partConstructors[kind].fromDATA(data)
 
-		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks'],part);
+		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer'],part);
 
 		if 'marks' in data:
 			part.marks = data['marks']
@@ -532,7 +533,14 @@ class Part:
 	def toxml(self):
 		part = makeTree(['part',['prompt'],['steps']])
 
-		part.attrib = {'type': strcons(self.kind), 'marks': strcons(self.marks), 'stepspenalty': strcons(self.stepsPenalty), 'enableminimummarks': strcons(self.enableMinimumMarks), 'minimummarks': strcons(self.minimumMarks)}
+		part.attrib = {
+			'type': strcons(self.kind), 
+			'marks': strcons(self.marks), 
+			'stepspenalty': strcons(self.stepsPenalty), 
+			'enableminimummarks': strcons(self.enableMinimumMarks), 
+			'minimummarks': strcons(self.minimumMarks), 
+			'showcorrectanswer': strcons(self.showCorrectAnswer)
+		}
 
 		part.find('prompt').append(makeContentNode(self.prompt))
 
