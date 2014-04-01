@@ -804,7 +804,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 * @see Numbas.math.degrees
 	 */
-	radians: function(n) {
+	radians: function(x) {
 		return mul(x,Math.PI/180);
 	},
 
