@@ -181,6 +181,7 @@ R.registerLocale('en-GB',{
 
 	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
 	'part.numberentry.answer invalid': "You did not enter a valid number.",
+	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
 	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
 
 	'part.mcq.choices missing': "Definition of choices is missing from a Multiple Response part (%s)",

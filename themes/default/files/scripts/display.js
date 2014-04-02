@@ -1429,6 +1429,31 @@ display.NumberEntryPartDisplay = function()
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
 
+	/** Cleaned-up version of student answer (remove commas and trim whitespace)
+	 * 
+	 * Also check for validity and give warnings
+	 * @member {observable|string} cleanStudentAnswer
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
+	this.cleanStudentAnswer = ko.computed(function() {
+		var studentAnswer = p.cleanAnswer(this.studentAnswer());
+		this.removeWarnings();
+		if(studentAnswer=='')
+			return '';
+
+		if(p.settings.integerAnswer) {
+			var dp = Numbas.math.countDP(studentAnswer);
+			if(dp>0)
+				this.warning(R('part.numberentry.answer not integer'));
+		}
+		if(!/^[0-9]+(?:\x2E[0-9]+)?$/.test(studentAnswer)) {
+			this.warning(R('part.numberentry.answer not integer or decimal'));
+			return '';
+		}
+		var n = parseFloat(studentAnswer);
+		return n+'';
+	},this);
+
 	/** Show a LaTeX rendering of the answer?
 	 * @member {boolean} showPreview
 	 * @memberof Numbas.display.NumberEntryPartDisplay
@@ -1440,17 +1465,7 @@ display.NumberEntryPartDisplay = function()
 	 * @memberof Numbas.display.NumberEntryPartDisplay
 	 */
 	this.studentAnswerLaTeX = ko.computed(function() {
-		var studentAnswer = p.cleanAnswer(this.studentAnswer());
-		if(studentAnswer=='')
-			return '';
-		this.removeWarnings();
-
-		var n = parseFloat(studentAnswer);
-		if(isNaN(n)) {
-			this.warning(R('part.numberentry.answer not integer or decimal'));
-			return '';
-		}
-		return n+'';
+		return this.cleanStudentAnswer();
 	},this);
 
 	/** Does the input box have focus?
@@ -1748,11 +1763,14 @@ function showScoreFeedback(obj,settings)
 
 	var newScore = ko.observable(false);
 
-	var state = ko.computed(function() {
-		var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
-		answered = answered || score>0;
+	var answered = ko.computed(function() {
+		return !obj.isDirty() && (obj.answered() || obj.score()>0);
+	});
 
-		if( marks>0 && (revealed || (settings.showAnswerState && answered)) ) {
+	var state = ko.computed(function() {
+		var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
+
+		if( marks>0 && (revealed || (settings.showAnswerState && answered())) ) {
 			if(score<=0)
 				return 'wrong';
 			else if(score==marks)
@@ -1775,8 +1793,7 @@ function showScoreFeedback(obj,settings)
 			}
 		}),
 		message: ko.computed(function() {
-			var answered = obj.answered(), revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
-			answered = answered || score>0;
+			var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 
 			var scoreobj = {
 				marks: niceNumber(marks),
@@ -1784,9 +1801,9 @@ function showScoreFeedback(obj,settings)
 				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
 				scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
 			};
-			if(revealed && !answered)
+			if(revealed && !answered())
 				return R('question.score feedback.unanswered');
-			else if(answered && marks>0)
+			else if(answered() && marks>0)
 			{
 				var str = 'question.score feedback.answered'
 							+ (settings.showTotalMark ? ' total' : '')

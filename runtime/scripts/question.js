@@ -1546,7 +1546,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			var answerFloat = parseFloat(this.studentAnswer);
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue )
 			{
-				if(this.settings.integerAnswer && !util.isInt(answerFloat))
+				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0)
 					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except decimal'));
 				else
 					this.setCredit(1,R('part.marking.correct'));
