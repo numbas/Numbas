@@ -767,7 +767,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					: R('part.marking.revealed steps no penalty'));
 		}
 
-		this.answerList = util.copyarray(this.stagedAnswer);
+		if(this.stagedAnswer) {
+			this.answerList = util.copyarray(this.stagedAnswer);
+		}
 		this.setStudentAnswer();
 
 		if(this.marks==0) {
