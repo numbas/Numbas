@@ -266,7 +266,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Format an amount of currency
-	 * @example currecny(5.3,'£','p') => £5.30
+	 * @example currency(5.3,'£','p') => £5.30
 	 * @param {number} n
 	 * @param {string} prefix - symbol to use in front of currency if abs(n) >= 1
 	 * @param {string} suffix - symbol to use in front of currency if abs(n) <= 1
