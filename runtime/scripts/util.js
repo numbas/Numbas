@@ -278,8 +278,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return prefix+'0';
 		}
 
-		var s = Math.floor(100*n)+'';
+		var s = Numbas.math.niceNumber(Math.floor(100*n));
 		if(Math.abs(n)>=1) {
+			if(n%1<0.005)
+				return prefix+Numbas.math.niceNumber(n);
 			s = s.replace(/(..)$/,'.$1');
 			return prefix+s
 		} else {
