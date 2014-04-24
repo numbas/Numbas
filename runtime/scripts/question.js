@@ -481,6 +481,7 @@ function createPart(xml, path, question, parentPart, loading)
 	{
 		var cons = partConstructors[type];
 		var part = new cons(xml, path, question, parentPart, loading);
+		part.applyScripts();
 		return part;
 	}
 	else
@@ -538,6 +539,15 @@ function Part( xml, path, question, parentPart, loading )
 	}
 
 	this.markingFeedback = [];
+
+	this.scripts = {};
+	var scriptNodes = xml.selectNodes('scripts/script');
+	for(var i=0;i<scriptNodes.length; i++) {
+		var name = scriptNodes[i].getAttribute('name');
+		var script = Numbas.xml.getTextContent(scriptNodes[i]);
+		script = eval('(function(){'+script+'})');
+		this.scripts[name] = script;
+	}
 
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
@@ -655,6 +665,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		enableMinimumMarks: false,
 		minimumMarks: 0,
 		showCorrectAnswer: true
+	},
+
+	applyScripts: function() {
+		for(var name in this.scripts) {
+			var script = this.scripts[name];
+			switch(name) {
+				case 'mark':
+				case 'validate':
+					this[name] = script;
+					break;
+			}
+		}
 	},
 
 	/** Associated display object

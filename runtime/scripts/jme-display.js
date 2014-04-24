@@ -518,7 +518,7 @@ var texOps = jme.display.texOps = {
  * @param {number} n
  * @returns {TeX}
  */
-function texRationalNumber(n)
+var texRationalNumber = jme.display.texRationalNumber = function(n)
 {
 	if(n.complex)
 	{
@@ -898,7 +898,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  * @param {number} n
  * @returns {JME}
  */
-function jmeRationalNumber(n)
+var jmeRationalNumber = jme.display.jmeRationalNumber = function(n)
 {
 	if(n.complex)
 	{
@@ -1109,7 +1109,12 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	case 'list':
 		if(!bits)
 		{
-			bits = tok.value.map(function(b){return treeToJME({tok:b},settings);});
+			if(tok.value) {
+				bits = tok.value.map(function(b){return treeToJME({tok:b},settings);});
+			}
+			else {
+				bits = [];
+			}
 		}
 		return '[ '+bits.join(', ')+' ]';
 	case 'vector':

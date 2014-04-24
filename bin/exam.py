@@ -494,6 +494,7 @@ class Part:
 		self.marks = marks
 		self.prompt = prompt
 		self.steps = []
+		self.scripts = {}
 
 	@staticmethod
 	def fromDATA(data):
@@ -528,10 +529,14 @@ class Part:
 			for step in steps:
 				part.steps.append(Part.fromDATA(step))
 
+		if 'scripts' in data:
+			for name,script in data['scripts'].items():
+				part.scripts[name] = script
+
 		return part
 	
 	def toxml(self):
-		part = makeTree(['part',['prompt'],['steps']])
+		part = makeTree(['part',['prompt'],['steps'],['scripts']])
 
 		part.attrib = {
 			'type': strcons(self.kind), 
@@ -547,6 +552,15 @@ class Part:
 		steps = part.find('steps')
 		for step in self.steps:
 			steps.append(step.toxml())
+
+		scripts = part.find('scripts')
+		for name,script in self.scripts.items():
+			script_element = etree.Element('script')
+			script_element.attrib = {
+				'name': name,
+			}
+			script_element.text = strcons(script)
+			scripts.append(script_element)
 
 		return part
 
