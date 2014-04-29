@@ -486,8 +486,10 @@ display.ExamDisplay.prototype =
 		this.infoPage(null);
 		this.currentQuestion(exam.currentQuestion.display);
 
-		if(exam.settings.preventLeave)
+		if(exam.settings.preventLeave && exam.mode=='normal')
 			window.onbeforeunload = function() { return R('control.confirm leave') };
+		else
+			window.onbeforeunload = null;
 
 		exam.currentQuestion.display.show();
 		if(!this.madeCarousel)
