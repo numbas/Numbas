@@ -1419,7 +1419,7 @@ var synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = ['if','switch','repeat','map','isa'];
+var lazyOps = ['if','switch','repeat','map','isa','satisfy'];
 
 
 function leftAssociative(op)
@@ -2021,6 +2021,55 @@ newBuiltin('repeat',['?',TNum],TList, null, {
 	}
 });
 
+function satisfy(names,definitions,conditions,scope,maxRuns) {
+		maxRuns = maxRuns===undefined ? 100 : maxRuns;
+		if(definitions.length!=names.length) {
+			throw(new Numbas.Error('jme.func.satisfy.wrong number of definitions'));
+		}
+
+		var satisfied = false;
+		var runs = 0;
+		while(runs<maxRuns && !satisfied) {
+			runs += 1;
+
+			var variables = {};
+			for(var i=0; i<names.length; i++) {
+				variables[names[i]] = jme.evaluate(definitions[i],scope);
+			}
+			var nscope = new jme.Scope([scope,{variables:variables}]);
+			satisfied = true;
+			for(var i=0; i<conditions.length; i++) {
+				var ok = jme.evaluate(conditions[i],nscope);
+				if(ok.type!='boolean') {
+					throw(new Numbas.Error('jme.func.satisfy.condition not a boolean'));
+				}
+				if(!ok.value) {
+					satisfied = false;
+					break;
+				}
+			}
+		}
+		if(!satisfied) {
+			throw(new Numbas.Error('jme.func.satisfy.took too many runs'));
+		}
+
+		return variables;
+}
+
+newBuiltin('satisfy', [TList,TList,TList,TNum], TList, null, {
+	evaluate: function(args,scope)
+	{
+		var names = args[0].args.map(function(t){ return t.tok.name; });
+		var definitions = args[1].args;
+		var conditions = args[2].args;
+		var maxRuns = args.length>3 ? jme.evaluate(args[3]).value : 100;
+		
+		var variables = satisfy(names,definitions,conditions,scope,maxRuns);
+
+		return new TList(names.map(function(name){ return variables[name]; }));
+	}
+});
+
 newBuiltin('listval',[TList,TNum],'?', null, {
 	evaluate: function(args,scope)
 	{
@@ -2485,6 +2534,11 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	{
 		boundvars = boundvars.slice();
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+	if(tree.tok.type=='function' && tree.tok.name=='satisfy')
+	{
+		var names = tree.args[0].args.map(function(t){return t.tok.name});
+		boundvars = boundvars.concat(0,0,names);
 	}
 
 	if(tree.args===undefined)
