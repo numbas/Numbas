@@ -492,11 +492,13 @@ class Part:
 	stepsPenalty = 0
 	enableMinimumMarks = True
 	minimumMarks = 0
+	showCorrectAnswer = True
 
 	def __init__(self,marks,prompt=''):
 		self.marks = marks
 		self.prompt = prompt
 		self.steps = []
+		self.scripts = {}
 
 	@staticmethod
 	def fromDATA(data):
@@ -518,7 +520,7 @@ class Part:
 			)
 		part = partConstructors[kind].fromDATA(data)
 
-		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks'],part);
+		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer'],part);
 
 		if 'marks' in data:
 			part.marks = data['marks']
@@ -531,18 +533,38 @@ class Part:
 			for step in steps:
 				part.steps.append(Part.fromDATA(step))
 
+		if 'scripts' in data:
+			for name,script in data['scripts'].items():
+				part.scripts[name] = script
+
 		return part
 	
 	def toxml(self):
-		part = makeTree(['part',['prompt'],['steps']])
+		part = makeTree(['part',['prompt'],['steps'],['scripts']])
 
-		part.attrib = {'type': strcons(self.kind), 'marks': strcons(self.marks), 'stepspenalty': strcons(self.stepsPenalty), 'enableminimummarks': strcons(self.enableMinimumMarks), 'minimummarks': strcons(self.minimumMarks)}
+		part.attrib = {
+			'type': strcons(self.kind), 
+			'marks': strcons(self.marks), 
+			'stepspenalty': strcons(self.stepsPenalty), 
+			'enableminimummarks': strcons(self.enableMinimumMarks), 
+			'minimummarks': strcons(self.minimumMarks), 
+			'showcorrectanswer': strcons(self.showCorrectAnswer)
+		}
 
 		part.find('prompt').append(makeContentNode(self.prompt))
 
 		steps = part.find('steps')
 		for step in self.steps:
 			steps.append(step.toxml())
+
+		scripts = part.find('scripts')
+		for name,script in self.scripts.items():
+			script_element = etree.Element('script')
+			script_element.attrib = {
+				'name': name,
+			}
+			script_element.text = strcons(script)
+			scripts.append(script_element)
 
 		return part
 

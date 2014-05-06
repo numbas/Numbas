@@ -1,5 +1,5 @@
 /*
-Copyright 2011-13 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,14 +14,19 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
+/** @file Defines the {@link Numbas.Exam} object. */
+
 
 Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme'],function() {
-
 	var job = Numbas.schedule.add;
 
-
-// exam object keeps track of all info we need to know while exam is running
-var Exam = Numbas.Exam = function()
+/** Keeps track of all info we need to know while exam is running.
+ *
+ * Loads XML from {@link Numbas.xml.examXML}
+ * @constructor
+ * @memberof Numbas
+ */
+function Exam()
 {
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
@@ -129,67 +134,160 @@ var Exam = Numbas.Exam = function()
 	this.display = new Numbas.display.ExamDisplay(this);
 
 }
-Exam.prototype = {
-
+Numbas.Exam = Exam;
+Exam.prototype = /** @lends Numbas.Exam.prototype */ {
+	/** Settings
+	 * @property {string} name - Title of exam
+	 * @property {number} percentPass - Percentage of max. score student must achieve to pass 
+	 * @property {boolean} shuffleQuestions - should the questions be shuffled?
+	 * @property {number} numQuestions - number of questions in this sitting
+	 * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
+	 * @property {boolean} allowRegen -can student re-randomise a question?
+	 * @property {boolean} navigateReverse - can student navigate to previous question?
+	 * @property {boolean} navigateBrowse - can student jump to any question they like?
+	 * @property {boolean} showFrontPage - show the frontpage before starting the exam?
+	 * @property {Array.object} navigationEvents - checks to perform when doing certain navigation action
+	 * @property {Array.object} timerEvents - events based on timing
+	 * @property {number} duration - how long is exam? (seconds)
+	 * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
+	 * @property {boolean} showActualMark - show current score?
+	 * @property {boolean} showTotalMark - show total marks in exam?
+	 * @property {boolean} showAnswerState - tell student if answer is correct/wrong/partial?
+	 * @property {boolean} allowRevealAnswer - allow 'reveal answer' button?
+	 * @property {number} adviceGlobalThreshold - if student scores lower than this percentage on a question, the advice is displayed
+	 */
 	settings: {
-		name: '',					//title of exam
-		percentPass: 0,				//percentage student must achieve to pass
-		shuffleQuestions: false,	//should the questions be shuffled?
-		numQuestions: 0,			//number of questions in this sitting
-		preventLeave: true,			//prevent the browser from leaving the page while the exam is running?
-		allowRegen: false,			//can student re-randomise a question?
-		navigateReverse: false,		//can student navigate to previous question?
-		navigateBrowse: false,		//can student jump to any question they like?
-		showFrontPage: true,		//show the frontpage before starting the exam?
-		navigationEvents: {},		//checks to perform when doing certain navigation action
-		timerEvents: {},			//events based on timing
-		duration: 0,				//how long is exam?
-		allowPause: false,			//can the student suspend the timer with the pause button or by leaving?
-		showActualMark: false,		//show current score?
-		showTotalMark: false,		//show total marks in exam?
-		showAnswerState: false,		//tell student if answer is correct/wrong/partial ?
-		allowRevealAnswer: false,	//allow 'reveal answer' button ?
-		adviceGlobalThreshold: 0, 	//if student scores lower than this percentage on a question, the advice is displayed
+		
+		name: '',					
+		percentPass: 0,				
+		shuffleQuestions: false,	
+		numQuestions: 0,			
+		preventLeave: true,			
+		allowRegen: false,			
+		navigateReverse: false,		
+		navigateBrowse: false,		
+		showFrontPage: true,		
+		navigationEvents: {},		
+		timerEvents: {},			
+		duration: 0,				
+		allowPause: false,			
+		showActualMark: false,		
+		showTotalMark: false,		
+		showAnswerState: false,		
+		allowRevealAnswer: false,	
+		adviceGlobalThreshold: 0, 	
 	},
 
-	xml: undefined,				//base node of exam XML
+	/** Base node of exam XML
+	 * @type Element
+	 */
+	xml: undefined,
 
-	mode: 'normal',				//can be 	"normal" - sitting exam
-                                //			"review" - looking at completed exam
+	/**
+	 * Can be
+	 *  * `"normal"` - Student is currently sitting the exam
+	 *  * `"review"` - Student is reviewing a completed exam
+	 *  @type string
+	 */
+	mode: 'normal',				
+                                
+	/** Total marks available in the exam 
+	 * @type number
+	 */
+	mark: 0,					
 
-	mark: 0,					//total marks available in exam
+	/** Student's current score 
+	 * @type number
+	 */
 	score: 0,					//student's current score
+
+	/** Student's score as a percentage
+	 * @type number
+	 */
+	percentScore: 0,
+	
+	/** Did the student pass the exam? 
+	 * @type boolean
+	 */
 	passed: false,				//did student pass the exam?
 
-	//JME evaluation environment
+	/** JME evaluation environment
+	 *
+	 * Contains variables, rulesets and functions defined by the exam and by extensions.
+	 *
+	 * Inherited by each {@link Numbas.Question}'s scope.
+	 * @type Numbas.jme.Scope
+	 */
 	scope: undefined,
 
-	//exam properties
-	percentScore: 0,			//student's score as a percentage
+	/** Number of the current question
+	 * @type number
+	 */
+	currentQuestionNumber: 0,
+	/**
+	 * Object representing the current question.
+	 * @type Numbas.Question
+	 */
+	currentQuestion: undefined,
 	
-	//question selection
-	currentQuestionNumber: 0,	//number of current question
-	currentQuestion: undefined,	//current question object
-	
-	questionSubset: [],			//which questions from the pool to use? for reconstructing question list on resume
-	questionList: [],			//Question objects, in order student will see them
+	/**
+	 * Which questions are used?
+	 * @type number[]
+	 */
+	questionSubset: [],
+	/**
+	 * Question objects, in the order the student will see them
+	 * @type Numbas.Question[]
+	 */
+	questionList: [],			
 		
+	/** Exam duration in `h:m:s` format
+	 * @type string
+	 */
+	displayDuration: '',
+	/** Stopwatch object - updates the timer every second.
+	 * @property {Date} start
+	 * @property {Date} end
+	 * @property {number} oldTimeSpent - `timeSpent` when the stopwatch was last updated
+	 * @property {number} id - id of the `Interval` which calls {@link Numbas.Exam#countDown}
+	 */
+	stopwatch: undefined,
+	/** Time that the exam should stop
+	 * @type Date
+	 */
+	endTime: undefined,
+	/** Seconds until the end of the exam
+	 * @type number
+	 */
+	timeRemaining: 0,
+	/** Seconds the exam has been in progress
+	 * @type number
+	 */
+	timeSpent: 0,
+	/** Is the exam in progress?
+	 *
+	 * `false` before starting, when paused, and after ending.
+	 * @type boolean
+	 */
+	inProgress: false,
 
-	//timing
-	displayDuration: '',//exam duration in h:m:s format
-	stopwatch: undefined,		//stopwatch object - updates timer every second
-	endTime: undefined,			//time that the exam should stop
-	timeRemaining: 0,			//seconds until end of exam
-	timeSpent: 0,				//seconds exam has been in progress
-	inProgress: false,			//is the exam in progress? False before starting, when paused, and after ending.
-
-	start: Date(),				//time exam started
-	stop: Date(),				//time exam finished
+	/** Time the exam started
+	 * @type Date
+	 */
+	start: Date(),
+	/** Time the exam finished
+	 * @type Date
+	 */
+	stop: Date(),
 	
 
-	display: undefined,			//display code
+	/* Display object for this exam
+	 * @type Numbas.display.ExamDisplay
+	 */
+	display: undefined,
 
-	//stuff to do when starting exam afresh
+	/** Stuff to do when starting exam afresh, before showing the front page.
+	 */
 	init: function()
 	{
 		var exam = this;
@@ -201,7 +299,7 @@ Exam.prototype = {
 		job(Numbas.store.save,Numbas.store);			//make sure data get saved to LMS
 	},
 
-	//restore previously started exam from storage
+	/** Restore previously started exam from storage */
 	load: function()
 	{
 		this.loading = true;
@@ -231,7 +329,7 @@ Exam.prototype = {
 	},
 
 
-	//decide which questions to use and in what order
+	/** Decide which questions to use and in what order */
 	chooseQuestionSubset: function()
 	{
 		//get all questions out of XML
@@ -254,8 +352,13 @@ Exam.prototype = {
 		}
 	},
 
-	//having chosen which questions to use, make question list and create question objects
-	//if loading, need to restore randomised variables instead of generating anew
+	/**
+	 * Having chosen which questions to use, make question list and create question objects
+	 *
+	 * If loading, need to restore randomised variables instead of generating anew
+	 *
+	 * @param {boolean} [loading=true]
+	 */
 	makeQuestionList: function(loading)
 	{
 		this.questionList = [];
@@ -285,13 +388,19 @@ Exam.prototype = {
 		},this);
 	},
 
+	/** 
+	 * Show the given info page
+	 * @param {string} page - Name of the page to show
+	 */
 	showInfoPage: function(page) {
 		if(this.currentQuestion)
 			this.currentQuestion.leave();
 		this.display.showInfoPage(page);
 	},
 	
-	//begin exam
+	/**
+	 * Begin the exam - start timing, go to the first question
+	 */
 	begin: function()
 	{
 		this.start = new Date();        //make a note of when the exam was started
@@ -310,6 +419,9 @@ Exam.prototype = {
 
 	},
 
+	/**
+	 * Pause the exam, and show the `suspend` page
+	 */
 	pause: function()
 	{
 		this.endTiming();
@@ -318,13 +430,18 @@ Exam.prototype = {
 		Numbas.store.pause();
 	},
 
+	/**
+	 * Resume the exam
+	 */
 	resume: function()
 	{
 		this.startTiming();
 		this.display.showQuestion();
 	},
 
-	//set the stopwatch going
+	/** 
+	 * Set the stopwatch going
+	 */
 	startTiming: function()
 	{
 		this.inProgress = true;
@@ -345,7 +462,9 @@ Exam.prototype = {
 		this.countDown();
 	},
 
-	//display time remaining and end exam when timer reaches zero
+	/**
+	 * Calculate time remaining and end the exam when timer reaches zero
+	 */
 	countDown: function()
 	{
 		var t = new Date();
@@ -377,7 +496,7 @@ Exam.prototype = {
 		}
 	},
 
-	//stop the stopwatch
+	/** Stop the stopwatch */
 	endTiming: function()
 	{
 		this.inProgress = false;
@@ -385,7 +504,9 @@ Exam.prototype = {
 	},
 
 
-	//recalculate and display student's total score
+	/** Recalculate and display the student's total score. 
+	 * @see Numbas.Exam#calculateScore
+	 */
 	updateScore: function()
 	{
 		this.calculateScore();
@@ -393,6 +514,7 @@ Exam.prototype = {
 		Numbas.store.saveExam(this);
 	},
 
+	/** Calculate the student's score */
 	calculateScore: function()
 	{
 		this.score=0;
@@ -401,8 +523,14 @@ Exam.prototype = {
 		this.percentScore = Math.round(100*this.score/this.mark);
 	},
 
-	//call this when student wants to move between questions
-	//will check move is allowed and if so change question and update display
+	/**
+	 * Call this when student wants to move between questions.
+	 *
+	 * Will check move is allowed and if so change question and update display
+	 *
+	 * @param {number} i - Number of the question to move to
+	 * @see Numbas.Exam#changeQuestion
+	 */
 	tryChangeQuestion: function(i)
 	{
 		if(i<0 || i>=this.settings.numQuestions)
@@ -454,7 +582,11 @@ Exam.prototype = {
 		}
 	},
 
-	//actually change the current question
+	/**
+	 * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}
+	 *
+	 * @param {number} i - Number of the question to move to
+	 */
 	changeQuestion: function(i)
 	{
 		if(this.currentQuestion) {
@@ -469,11 +601,19 @@ Exam.prototype = {
 		Numbas.store.changeQuestion(this.currentQuestion);
 	},
 
+	/**
+	 * Show a question in review mode
+	 *
+	 * @param {number} i - Number of the question to show
+	 */
 	reviewQuestion: function(i) {
 		this.changeQuestion(i);
 		this.display.showQuestion();
 	},
 
+	/**
+	 * Regenerate the current question
+	 */
 	regenQuestion: function()
 	{
 		var e = this;
@@ -490,6 +630,10 @@ Exam.prototype = {
 		job(e.display.endRegen,e.display);
 	},
 
+	/**
+	 * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
+	 * @see Numbas.Exam#end
+	 */
 	tryEnd: function() {
 		var message = R('control.confirm end');
 		var answeredAll = true;
@@ -519,6 +663,9 @@ Exam.prototype = {
 		);
 	},
 
+	/**
+	 * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}
+	 */
 	end: function(save)
 	{
 		this.mode = 'review';
@@ -547,21 +694,64 @@ Exam.prototype = {
 		}
 	},
 
+	/**
+	 * Exit the exam - show the `exit` page
+	 */
 	exit: function()
 	{
 		this.display.showInfoPage('exit');
 	}
 };
 
+/** Represents what should happen when a particular timing or navigation event happens
+ * @param Element eventNode - XML to load settings from
+ * @constructor
+ * @memberof Numbas
+ */
 function ExamEvent(eventNode)
 {
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
 	tryGetAttribute(this,null,eventNode,['type','action']);
 	this.message = Numbas.xml.serializeMessage(eventNode);
 }
-ExamEvent.prototype = {
+ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
+	/** Name of the event this corresponds to 
+	 *
+	 * Navigation events:
+	 * * `onleave` - the student tries to move to another question without answering the current one.
+	 *
+	 * (there used to be more, but now they're all the same one)
+	 *
+	 * Timer events:
+	 * * `timedwarning` - Five minutes until the exam ends.
+	 * * `timeout` - There's no time left; the exam is over.
+	 * @memberof Numbas.ExamEvent
+	 * @instance
+	 * @type string 
+	 */
 	type: '',
+
+	/** Action to take when the event happens.
+	 *
+	 * Choices for timer events:
+	 * * `none` - don't do anything
+	 * * `warn` - show a message
+	 *
+	 * Choices for navigation events:
+	 * * `none` - just allow the navigation
+	 * * `warnifunattempted` - Show a warning but allow the student to continue.
+	 * * `preventifunattempted` - Show a warning but allow the student to continue.
+	 * @memberof Numbas.ExamEvent
+	 * @instance
+	 * @type string
+	 */
 	action: 'none',
+
+	/** Message to show the student when the event happens.
+	 * @memberof Numbas.ExamEvent
+	 * @instance
+	 * @type string
+	 */
 	message: ''
 };
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-13 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,20 +15,23 @@ Copyright 2011-13 Newcastle University
 */
 
 
-// SCORM EXAM RUNTIME
-// numbas.js
-// Contains code to load in the other script files, and initialise the exam.
-// Creates the global Numbas object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
-//
+/** @file Contains code to load in the other script files, and initialise the exam.
+ *
+ * Creates the global {@link Numbas} object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
+ */
 
-//By wrapping everything in an anonymous function, we avoid filling up the namespace with whatever variables we declare
 (function() {
 
-if(!window.Numbas) { window.Numbas = {} }	// create the Numbas object.
+if(!window.Numbas) { window.Numbas = {} }
+/** @namespace Numbas */
 
+/** Extensions should add objects to this so they can be accessed */
 Numbas.extensions = {};
 
-// Numbas.debug is a function for displaying debug info in the console. It will try to give a reference back to the line that called it, if it can.
+/** A function for displaying debug info in the console. It will try to give a reference back to the line that called it, if it can. 
+ * @param {string} msg - text to display
+ * @param {boolean} [noStack=false] - don't show the stack trace
+ */
 Numbas.debug = function(msg,noStack)
 {
 	if(window.console)
@@ -46,7 +49,9 @@ Numbas.debug = function(msg,noStack)
 	}
 };
 
-// displays an error in a nice alert box. Also sends the error to the console via Numbas.debug
+/** Display an error in a nice alert box. Also sends the error to the console via {@link Numbas.debug} 
+ * @param {error} e
+ */
 Numbas.showError = function(e)
 {
 	var message;
@@ -63,6 +68,10 @@ Numbas.showError = function(e)
 	throw(e);
 };
 
+/** Generic error class. Extends JavaScript's Error
+ * @constructor
+ * @param {string} message - A description of the error. Localised by R.js.
+ */
 Numbas.Error = function(message)
 {
 	this.name="Numbas Error";
@@ -72,14 +81,19 @@ Numbas.Error = function(message)
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
 
-// Script loading system.
-// call loadScript to load a file. It will then call queueScript with a list of its dependencies, and its code wrapped into a callback function.
-// When all the dependencies have been loaded, the callback function is executed. The callback function should finish with a call to scriptLoaded, which keeps track of what's been run.
-//
-
 var scriptreqs = {};
-Numbas.startOK = true;
 
+/** Keep track of loading status of a script and its dependencies
+ * @param {string} file - name of script
+ * @global
+ * @constructor
+ * @property {string} file - Name of script
+ * @property {boolean} loaded - Has the script been loaded yet?
+ * @property {boolean} executed - Has the script been run?
+ * @property {Array.string} backdeps - Scripts which depend on this one (need this one to run first)
+ * @property {Array.string} fdeps - Scripts which this one depends on (it must run after them)
+ * @property {function} callback - The function to run when all this script's dependencies have run (this is the script itself)
+ */
 function RequireScript(file)
 {
 	this.file = file;
@@ -95,8 +109,13 @@ RequireScript.prototype = {
 	callback: null
 };
 
+
+/** Ask to load a javascript file. Unless `noreq` is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter.
+ * @memberof Numbas
+ * @param {string} file
+ * @param {boolean} noreq - don't create a {@link Numbas.RequireScript} object
+ */
 var loadScript = Numbas.loadScript = function(file,noreq)	
-//load a javascript file. Unless noreq is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter
 {
 	if(!noreq)
 	{
@@ -104,22 +123,18 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 			return;
 		var req = new RequireScript(file);
 	}
-
-	/*
-	var script = document.createElement("script");
-	script.type = "text/javascript";
-	script.charset="utf-8";
-	script.src = file;
-	document.getElementsByTagName('head')[0].appendChild(script);
-	*/
 }
 
+/**
+ * Queue up a file's code to be executed.
+ * Each script should be wrapped in this function
+ * @param {string} file - Name of the script
+ * @param {Array.string} deps - A list of other scripts which need to be run before this one can be run
+ * @param {function} callback - A function wrapping up this file's code
+ */
 Numbas.queueScript = function(file, deps, callback)	
-//queue up a file's code to be executed
-//file is the path of this file
-//deps is a list of other files which need to be run before this one can be
-//callback is a function wrapping up this file's code
 {
+	// find a RequireScript
 	var req = scriptreqs[file] || new RequireScript(file);
 
 	if(typeof(deps)=='string')
@@ -136,14 +151,11 @@ Numbas.queueScript = function(file, deps, callback)
 	
 	req.loaded = true;
 
-	if(Numbas.startOK)
-	{
-		Numbas.tryInit();
-	}
+	Numbas.tryInit();
 }
 
+/** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
 Numbas.tryInit = function()
-//called when all files have been requested, will try to execute all queued code if all script files have been loaded
 {
 
 	//put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
@@ -155,27 +167,20 @@ Numbas.tryInit = function()
 
 	function tryRun(req) {
 		if(req.loaded && !req.executed) {
-			//console.log('%ctryrun '+req.file,get_ind());
 			var go = true;
 			for(var j=0;j<req.fdeps.length;j++)
 			{
 				if(!scriptreqs[req.fdeps[j]].executed) {
-					//console.log('%cdon\'t have '+req.fdeps[j],'color: red;'+get_ind());
 					go=false;
 					break;
-				}
-				else {
-					//console.log('%cgot '+req.fdeps[j],'color:green;'+get_ind());
 				}
 			}
 			if(go)
 			{
-				//console.log('%crun '+req.file,'background-color: #eee;'+get_ind());
 				req.callback({exports:window});
 				req.executed=true;
 				ind++;
 				for(var j=0;j<req.backdeps.length;j++) {
-					//console.log('%ctry '+req.backdeps[j],get_ind());
 					tryRun(scriptreqs[req.backdeps[j]]);
 				}
 				ind--;
@@ -188,8 +193,8 @@ Numbas.tryInit = function()
 	}
 }
 
+// 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base',['jquery','R','seedrandom','knockout','sarissa'],function() {
 });
-
 
 })();

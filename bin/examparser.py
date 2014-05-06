@@ -274,6 +274,12 @@ def fix_number_repr(data):
 
 def is_number(s):
 	try:
+		l = s.lower()
+		if l=='infinity' or l=='-infinity':
+			return False
+	except AttributeError:
+		pass
+	try:
 		float(s)
 		return True
 	except (ValueError,OverflowError,TypeError):
