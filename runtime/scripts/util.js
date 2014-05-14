@@ -265,6 +265,30 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return str;
 	},
 
+	/** Format an amount of currency
+	 * @example currency(5.3,'£','p') => £5.30
+	 * @param {number} n
+	 * @param {string} prefix - symbol to use in front of currency if abs(n) >= 1
+	 * @param {string} suffix - symbol to use in front of currency if abs(n) <= 1
+	 */
+	currency: function(n,prefix,suffix) {
+		if(n<0)
+			return '-'+util.currency(-n,prefix,suffix);
+		else if(n==0) {
+			return prefix+'0';
+		}
+
+		var s = Numbas.math.niceNumber(Math.floor(100*n));
+		if(Math.abs(n)>=1) {
+			if(n%1<0.005)
+				return prefix+Numbas.math.niceNumber(n);
+			s = s.replace(/(..)$/,'.$1');
+			return prefix+s
+		} else {
+			return s+suffix;
+		}
+	},
+
 	/** Get rid of the % on the end of percentages and parse as float, then divide by 100
 	 * @example unPercent('50%') => 0.5
 	 * @example unPercent('50') => 0.5
