@@ -53,7 +53,10 @@ def tryLoad(data,attr,obj,altname=''):
 		else:
 			for key in data.keys():
 				if key.lower() == attr:
-					setattr(obj,altname,data[key])
+					if type(obj)==dict:
+						obj[altname] = data[key]
+					else:
+						setattr(obj,altname,data[key])
 
 #convert a block of content into html, wrapped in a <content> tag
 def makeContentNode(s):
