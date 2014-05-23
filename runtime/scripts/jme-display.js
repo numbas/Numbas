@@ -434,7 +434,7 @@ var texOps = jme.display.texOps = {
 	'mod': (function(thing,texArgs) {return texArgs[0]+' \\pmod{'+texArgs[1]+'}';}),
 	'perm': (function(thing,texArgs) { return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';}),
 	'comb': (function(thing,texArgs) { return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';}),
-	'root': (function(thing,texArgs) { return '\\sqrt['+texArgs[0]+']{'+texArgs[1]+'}'; }),
+	'root': (function(thing,texArgs) { return '\\sqrt['+texArgs[1]+']{'+texArgs[0]+'}'; }),
 	'if': (function(thing,texArgs) 
 			{
 				for(var i=0;i<3;i++)
