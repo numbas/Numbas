@@ -19,7 +19,7 @@ def question_migration(f):
 			data['type'] = 'exam' if 'navigation' in data else 'question'
 
 		if data.get('type')=='exam':
-			for question in data.get('questions'):
+			for question in data.setdefault('questions',[]):
 				f(question)
 		elif data.get('type')=='question':
 			f(data)
