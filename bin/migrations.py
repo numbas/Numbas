@@ -15,6 +15,9 @@ def migration(version_from):
 def question_migration(f):
 	@wraps(f)
 	def do_migration(data):
+		if not data.get('type'):
+			data['type'] = 'exam' if 'navigation' in data else 'question'
+
 		if data.get('type')=='exam':
 			for question in data.get('questions'):
 				f(question)
@@ -37,3 +40,13 @@ def variables_as_objects(question):
 				'name': name,
 				'definition': definition,
 			}
+
+@migration('variables_as_objects')
+@question_migration
+def variable_groups_as_arrays(question):
+	if 'variable_groups' in question:
+		variable_groups = question.get('variable_groups')
+		if type(variable_groups)==dict:
+			question['variable_groups'] = [{'name':name,'variables':variables} for name,variables in variable_groups.items()]
+	else:
+		question['variable_groups'] = []
