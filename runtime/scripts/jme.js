@@ -48,8 +48,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	re: {
 		re_bool: /^true|^false/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
+		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
+		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/,
@@ -1373,6 +1373,7 @@ var postfixForm = {
  * @readonly
  */
 var precedence = jme.precedence = {
+	';': 0,
 	'fact': 1,
 	'not': 1,
 	'+u': 2.5,
@@ -1438,7 +1439,8 @@ var commutative = jme.commutative =
 {
 	'*': true,
 	'+': true,
-	'and': true
+	'and': true,
+	'=': true
 };
 
 

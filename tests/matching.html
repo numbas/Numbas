@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+                    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/R/R.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="../locales/en-GB.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
+
+		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0.js"></script>
+
+		<style type="text/css">
+			body {
+				font-size: 18px;
+				font-family: sans-serif;
+				max-width: 700px;
+				margin: 0 auto;
+			}
+			label {
+				display: block;
+				clear: both;
+				line-height: 2em;
+			}
+			label input {
+				float: right;
+				width: 500px;
+				font-family: monospace;
+				padding: 0.5em;
+				margin-bottom: 0.5em;
+			}
+
+			#groups {
+				border-spacing 2px;
+			}
+			#groups .name {
+				min-width: 10em;
+			}
+			#groups td {
+				font-family: monospace;
+				border-bottom: 1px dashed;
+				padding: 0.5em 0;
+			}
+
+		</style>
+	</head>
+	<body>
+		<h1>Pattern-matching algebraic expressions!</h1>
+
+		<form>
+			<div>
+				<label>
+					Pattern:
+					<input type="text" data-bind="value: pattern, valueUpdate: 'afterkeydown'">
+				</label>
+			</div>
+			<div>
+				<label>
+					Expression to test:
+					<input type="text" data-bind="value: expression, valueUpdate: 'afterkeydown'">
+				</label>
+			</div>
+		</form>
+
+		<p data-bind="html: error"></p>
+
+		<div data-bind="if: matches">
+			<p>Match!</p>
+			<h2 data-bind="if: matches().length">Captured groups</h2>
+			<table id="groups">
+				<thead>
+					<th>Group</th>
+					<th>Expression</th>
+				</thead>
+				<tbody data-bind="foreach: matches">
+					<tr>
+						<td class="name" data-bind="text: name"></td>
+						<td data-bind="text: expression"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+
+		<h2>Examples</h2>
+		<ul data-bind="foreach: examples">
+			<li data-bind="text: description, click: $root.setExample"></li>
+		</ul>
+
+
+		<script type="text/javascript">
+			Numbas.queueScript('seedrandom',[],function() {});
+			Numbas.queueScript('knockout',[],function() {});
+			Numbas.queueScript('sarissa',[],function() {});
+			Numbas.queueScript('go',['jme'],function() {
+				function ViewModel() {
+					var vm = this;
+					this.pattern = ko.observable('');
+					this.expression = ko.observable('');
+					this.error = ko.observable('');
+					this.matches = ko.computed(function() {
+						try {
+							var pattern = Numbas.jme.compile(this.pattern());
+							var expression = Numbas.jme.compile(this.expression());
+							var match = Numbas.jme.display.matchTree(pattern,expression);
+							if(match) {
+								var out = [];
+								for(var name in match) {
+									out.push({
+										name: name,
+										expression: Numbas.jme.display.treeToJME(match[name])
+									});
+								}
+								this.error('');
+								return out;
+							} else {
+								this.error('No match');
+								return null;
+							}
+						} catch(e) {
+							this.error('Error');
+							console.log(e.stack);
+							return null;
+						}
+					},this).extend({throttle:100});
+
+					this.examples = [
+						{
+							description: "Get all x terms",
+							pattern: "matchany(??x,??x^??);xs+??;rest",
+							expression: "x+3x^2+(x+1)x^4+c+2"
+						}
+					]
+
+					this.setExample = function(example) {
+						vm.pattern(example.pattern);
+						vm.expression(example.expression);
+					}
+				}
+				var vm = window.vm = new ViewModel();
+				ko.applyBindings(vm);
+			});
+		</script>
+	</body>
+</html>

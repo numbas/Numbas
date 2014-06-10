@@ -1292,6 +1292,47 @@ Rule.prototype = /** @lends Numbas.jme.display.Rule.prototype */ {
 	}
 }
 
+function getCommutingTerms(tree,op,names) {
+	if(names===undefined) {
+		names = [];
+	}
+
+	if(!tree.args || tree.tok.name!=op) {
+		return {terms: [tree], termnames: names.slice()};
+	}
+
+	var terms = [];
+	var termnames = [];
+	var rest = null;
+	var restnames = [];
+	for(var i=0; i<tree.args.length;i++) {
+		var arg = tree.args[i];
+		var oarg = arg;
+		var argnames = names.slice();
+		while(arg.tok.type=='op' && arg.tok.name==';') {
+			argnames.push(arg.args[1].tok.name);
+			arg = arg.args[0];
+		}
+		if(arg.tok.type=='op' && arg.tok.name==op) {
+			var sub = getCommutingTerms(arg,op,argnames);
+			terms = terms.concat(sub.terms);
+			termnames = termnames.concat(sub.termnames);
+		} else if(arg.tok.type=='name' && (arg.tok.name=='?' || arg.tok.name=='??')) {
+			rest = arg;
+			restnames = argnames;
+		} else {
+			terms.push(arg);
+			termnames.push(argnames);
+		}
+	}
+	if(rest) {
+		terms.push(rest);
+		termnames.push(restnames);
+	}
+	return {terms: terms, termnames: termnames};
+}
+Numbas.jme.display.getCommutingTerms = getCommutingTerms;
+
 /** Recusrively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.display
  * @private
@@ -1308,15 +1349,40 @@ function matchTree(ruleTree,exprTree)
 	var ruleTok = ruleTree.tok;
 	var exprTok = exprTree.tok;
 
-	var d = {};
+	if(ruleTok.type=='op' && ruleTok.name == ';') {
+		if(ruleTree.args[1].tok.type!='name') {
+			throw(new Numbas.Error('jme.matchTree.group name not a name'));
+		}
+		var name = ruleTree.args[1].tok.name;
+		var m = matchTree(ruleTree.args[0],exprTree);
+		if(m) {
+			m[name] = exprTree;
+			return m;
+		} else {
+			return false;
+		}
+	}
 
 	if(ruleTok.type=='name')
 	{
-		d[ruleTok.name] = exprTree;
-		return d;
+		if(ruleTok.name=='?' || ruleTok.name=='??') {
+			return {};
+		}
 	}
 
-	if(ruleTok.type != exprTok.type)
+	if(ruleTok.type=='function') {
+		if(ruleTok.name=='matchany') {
+			for(var i=0;i<ruleTree.args.length;i++) {
+				var m;
+				if(m=matchTree(ruleTree.args[i],exprTree)) {
+					return m;
+				}
+			}
+			return false;
+		}
+	}
+
+	if(ruleTok.type!='op' && ruleTok.type != exprTok.type)
 	{
 		return false;
 	}
@@ -1326,7 +1392,7 @@ function matchTree(ruleTree,exprTree)
 	case 'number':
 		if( !math.eq(ruleTok.value,exprTok.value) )
 			return false;
-		return d;
+		return {};
 
 	case 'string':
 	case 'boolean':
@@ -1334,31 +1400,93 @@ function matchTree(ruleTree,exprTree)
 	case 'range':
 		if(ruleTok.value != exprTok.value)
 			return false;
-		return d;
+		return {};
 
 	case 'function':
 	case 'op':
-		if(ruleTok.name != exprTok.name)
-			return false;
-		
-		for(var i=0;i<ruleTree.args.length;i++)
-		{
-			var m = matchTree(ruleTree.args[i],exprTree.args[i]);
-			if(m==false)
-				return false;
-			else
-			{
-				for(var x in m)	//get matched variables
-				{
-					d[x]=m[x];
+		var d = {};
+
+		if(jme.commutative[ruleTok.name]) {
+			var commutingOp = ruleTok.name;
+
+			var ruleTerms = getCommutingTerms(ruleTree,commutingOp);
+			var exprTerms = getCommutingTerms(exprTree,commutingOp);
+			var rest = [];
+
+			var namedTerms = {};
+			var matchedRules = [];
+
+			for(var i=0; i<exprTerms.terms.length; i++) {
+				var m = null;
+				for(var j=0; j<ruleTerms.terms.length; j++) {
+					if(m=matchTree(ruleTerms.terms[j],exprTerms.terms[i])) {
+						matchedRules[j] = true;
+						for(var name in m) {
+							if(!namedTerms[name]) {
+								namedTerms[name] = [];
+							}
+							namedTerms[name].push(m[name]);
+						}
+						var names = ruleTerms.termnames[j];
+						if(names) {
+							for(var k=0;k<names.length;k++) {
+								var name = names[k];
+								if(!namedTerms[name]) {
+									namedTerms[name] = [];
+								}
+								namedTerms[name].push(exprTerms.terms[i]);
+							}
+						}
+						break;
+					}
+				}
+				if(!m) {
+					return false;
 				}
 			}
+			for(var i=0;i<ruleTerms.terms.length;i++) {
+				if(!(ruleTerms.terms[i].tok.type=='name' && ruleTerms.terms[i].tok.name=='??') && !matchedRules[i]) {
+					return false;
+				}
+			}
+			for(var name in namedTerms) {
+				var terms = namedTerms[name];
+				var sub = terms[0];
+				for(var i=1;i<terms.length;i++) {
+					var op = new jme.types.TOp(commutingOp);
+					sub = {tok: op, args: [sub,terms[i]]};
+				}
+				d[name] = sub;
+			}
+			return d;
+		} else {
+			if(ruleTok.type!=exprTok.type) {
+				return false;
+			}
+			for(var i=0;i<ruleTree.args.length;i++)
+			{
+				var m = matchTree(ruleTree.args[i],exprTree.args[i]);
+				if(m==false) {
+					return false;
+				} else {
+					for(var x in m) {
+						d[x]=m[x];
+					}
+				}
+			}
+			return d
 		}
-		return d
+	case 'name':
+		if(ruleTok.name.toLowerCase()==exprTok.name.toLowerCase()) {
+			return {};
+		} else {
+			return false;
+		}
 	default:
-		return d;
+		return {};
 	}
 }
+Numbas.jme.display.matchTree = matchTree;
 
 /** Built-in simplification rules
  * @enum {Numbas.jme.display.Rule[]}
@@ -1485,11 +1613,11 @@ var simplificationRules = jme.display.simplificationRules = {
 		['n^m',['n isa "number"','m isa "number"'],'eval(n^m)']
 	]
 };
-
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.display.Rule} objects
  * @param {Array} rules
  * @returns {Numbas.jme.Ruleset}
  */
+/*
 var compileRules = jme.display.compileRules = function(rules)
 {
 	for(var i=0;i<rules.length;i++)
@@ -1513,4 +1641,5 @@ simplificationRules = nsimplificationRules;
 simplificationRules['all']=new jme.Ruleset(all,{});
 
 Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
+*/
 });
