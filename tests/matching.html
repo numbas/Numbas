@@ -1,5 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
-                    "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 	<head>
 		<!-- numbas stuff -->
@@ -20,7 +19,7 @@
 
 		<style type="text/css">
 			body {
-				font-size: 18px;
+				font-size: 17px;
 				font-family: sans-serif;
 				max-width: 700px;
 				margin: 0 auto;
@@ -38,6 +37,13 @@
 				margin-bottom: 0.5em;
 			}
 
+			.examples .example {
+				cursor: pointer;
+			}
+			.examples .example:hover {
+				background: #eee;
+			}
+
 			#groups {
 				border-spacing 2px;
 			}
@@ -48,6 +54,16 @@
 				font-family: monospace;
 				border-bottom: 1px dashed;
 				padding: 0.5em 0;
+			}
+
+			.commands dt {
+				display: inline-block;
+				background: #eee;
+				padding: 2px 5px;
+				font-family: monospace;
+			}
+			.commands dd {
+				margin-bottom: 0.5em;
 			}
 
 		</style>
@@ -70,31 +86,60 @@
 			</div>
 		</form>
 
-		<p data-bind="html: error"></p>
+		<h2>Match</h2>
 
-		<div data-bind="if: matches">
-			<p>Match!</p>
-			<h2 data-bind="if: matches().length">Captured groups</h2>
-			<table id="groups">
-				<thead>
-					<th>Group</th>
-					<th>Expression</th>
-				</thead>
-				<tbody data-bind="foreach: matches">
-					<tr>
-						<td class="name" data-bind="text: name"></td>
-						<td data-bind="text: expression"></td>
-					</tr>
-				</tbody>
-			</table>
+		<div data-bind="if: !matches()">
+			<p>&#x2717; <span data-bind="html: error"></span></p>
 		</div>
 
+		<div class="matches" data-bind="if: matches">
+			<p>Match! &#x2713;</p>
+			<div data-bind="if: matches().length">
+				<h3>Captured groups</h3>
+				<p style="font-size:small">(The captured expression trees aren't simplified, so they might look a little bit weird.)</p>
+				<table id="groups">
+					<thead>
+						<th>Group</th>
+						<th>Expression</th>
+					</thead>
+					<tbody data-bind="foreach: matches">
+						<tr>
+							<td class="name" data-bind="text: name"></td>
+							<td data-bind="text: expression"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
 
-		<h2>Examples</h2>
-		<ul data-bind="foreach: examples">
-			<li data-bind="text: description, click: $root.setExample"></li>
-		</ul>
+		<div class="examples">
+			<h2>Examples</h2>
+			<ul data-bind="foreach: examples">
+				<li><span class="example" data-bind="text: description, click: $root.setExample"></span></li>
+			</ul>
+		</div>
 
+		<div class="commands">
+			<h2>Special elements</h2>
+			<dl>
+				<dt>?</dt>
+				<dd>Match anything</dd>
+				<dt>??</dt>
+				<dd>Match anything or nothing (optional term)</dd>
+				<dt>expr;g</dt>
+				<dd>Capture <code>expr</code> in the group named <code>g</code>.</dd>
+				<dt>m_any(expr1,expr2,...)</dt>
+				<dd>Match any of the expressions <code>exprN</code></dd>
+				<dt>m_all(expr)</dt>
+				<dd>Capture all terms matching <code>expr</code></dd>
+				<dt>m_neg(expr)</dt>
+				<dd>Capture <code>expr</code> or <code>-(expr)</code>.</dd>
+				<dt>m_not(expr)</dt>
+				<dd>Match anything <em>except</em> <code>expr</code></dd>
+				<dt>m_uses(name1,name2,...)</dt>
+				<dd>Match any expression which uses the named variables</dd>
+			</dl>
+		</div>
 
 		<script type="text/javascript">
 			Numbas.queueScript('seedrandom',[],function() {});
@@ -109,7 +154,17 @@
 					this.matches = ko.computed(function() {
 						try {
 							var pattern = Numbas.jme.compile(this.pattern());
+						} catch(e) {
+							this.error('Invalid pattern');
+							return null;
+						}
+						try {
 							var expression = Numbas.jme.compile(this.expression());
+						} catch(e) {
+							this.error('Invalid expression');
+							return null;
+						}
+						try {
 							var match = Numbas.jme.display.matchTree(pattern,expression);
 							if(match) {
 								var out = [];
@@ -120,6 +175,7 @@
 									});
 								}
 								this.error('');
+								out.sort(function(a,b){return a.name>b.name});
 								return out;
 							} else {
 								this.error('No match');
@@ -127,16 +183,46 @@
 							}
 						} catch(e) {
 							this.error('Error');
+							console.log(e);
 							console.log(e.stack);
 							return null;
 						}
 					},this).extend({throttle:100});
 
+					if(localStorage) {
+						this.pattern(localStorage.pattern || '');
+						this.expression(localStorage.expression || '');
+						ko.computed(function() {
+							localStorage.pattern = this.pattern();
+							localStorage.expression = this.expression();
+						},this);
+					}
+
 					this.examples = [
 						{
 							description: "Get all x terms",
-							pattern: "matchany(??x,??x^??);xs+??;rest",
+							pattern: "m_all(m_any(??x,??x^??));xs+m_all(??;rest)",
 							expression: "x+3x^2+(x+1)x^4+c+2"
+						},
+						{
+							description: "Get both sides of an equation",
+							pattern: "?;left=?;right",
+							expression: "cos(x)^2 + sin(x)^2 = 1"
+						},
+						{
+							description: "Factorised quadratic",
+							pattern: "(m_neg(??*x);a+?;b)*(m_neg(??*x);c+?;d)",
+							expression: "(2x+3)(3-x)"
+						},
+						{
+							description: "Capture multiples of powers of x and y",
+							pattern: "m_all( m_any( ??x, ??y, ??x^??, ??y^??, m_any(x,x^??)*m_any(y,y^??)*?? ) );terms + m_all(??;rest)",
+							expression: "2x*y^2+(2*b)*x+x*y*3+3x^2y^3+c+x^3+3y^2+x+y+3"
+						},
+						{
+							description: "Separate out all x terms",
+							pattern: "m_all(m_uses(x));xs+m_all(??;rest)",
+							expression: "cos(x)^2 + 3y - 2 + x"
 						}
 					]
 

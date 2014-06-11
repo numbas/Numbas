@@ -300,7 +300,7 @@ var texOps = jme.display.texOps = {
 				s+=' ';
 			}
 			//anything times e^(something) or (not number)^(something)
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
+			else if (jme.isOp(thing.args[i].tok,'^') && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
 			{
 				s+=' ';
 			}
@@ -310,7 +310,7 @@ var texOps = jme.display.texOps = {
 				s+=' ';
 			}
 			//number times a power of i
-			else if (thing.args[i].tok.type=='op' && thing.args[i].tok.name=='^' && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	
+			else if (jme.isOp(thing.args[i].tok,'^') && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	
 			{
 				s+=' ';
 			}
@@ -320,10 +320,10 @@ var texOps = jme.display.texOps = {
 			}
 			else if ( thing.args[i].tok.type=='number'
 					||
-						thing.args[i].tok.type=='op' && thing.args[i].tok.name=='-u'
+						jme.isOp(thing.args[i].tok,'-u')
 					||
 					(
-						!(thing.args[i-1].tok.type=='op' && thing.args[i-1].tok.name=='-u') 
+						!jme.isOp(thing.args[i].tok,'-u') 
 						&& (thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] 
 							&& (thing.args[i].args[0].tok.type=='number' 
 							&& thing.args[i].args[0].tok.value!=Math.E)
@@ -349,7 +349,7 @@ var texOps = jme.display.texOps = {
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			if(b.tok.type=='op' && b.tok.name=='+')
+			if(jme.isOp(b.tok,'+'))
 				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
 			else
 				return texArgs[0]+' - '+texArgs[1];
@@ -1153,7 +1153,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 		{
 			//number or brackets followed by name or brackets doesn't need a times symbol
 			//except <anything>*(-<something>) does
-			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !(args[1].tok.type=='op' && args[1].tok.name=='-u')) )	
+			if( (args[0].tok.type=='number' || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(thing.args[1].tok,'-u')) )	
 			{
 				op = '';
 			}
@@ -1297,37 +1297,41 @@ function getCommutingTerms(tree,op,names) {
 		names = [];
 	}
 
+	if(op=='+' && jme.isOp(tree.tok,'-')) {
+		tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],{tok: new jme.types.TOp('-u'), args: [tree.args[1]]}]};
+	}
+
 	if(!tree.args || tree.tok.name!=op) {
 		return {terms: [tree], termnames: names.slice()};
 	}
 
 	var terms = [];
 	var termnames = [];
-	var rest = null;
+	var rest = [];
 	var restnames = [];
 	for(var i=0; i<tree.args.length;i++) {
 		var arg = tree.args[i];
 		var oarg = arg;
 		var argnames = names.slice();
-		while(arg.tok.type=='op' && arg.tok.name==';') {
+		while(jme.isOp(arg.tok,';')) {
 			argnames.push(arg.args[1].tok.name);
 			arg = arg.args[0];
 		}
-		if(arg.tok.type=='op' && arg.tok.name==op) {
+		if(jme.isOp(arg.tok,op) || (op=='+' && jme.isOp(arg.tok,'-'))) {
 			var sub = getCommutingTerms(arg,op,argnames);
 			terms = terms.concat(sub.terms);
 			termnames = termnames.concat(sub.termnames);
-		} else if(arg.tok.type=='name' && (arg.tok.name=='?' || arg.tok.name=='??')) {
-			rest = arg;
-			restnames = argnames;
+		} else if(jme.isName(arg.tok,'?') || jme.isName(arg.tok,'??')) {
+			rest.push(arg);
+			restnames.push(argnames);
 		} else {
 			terms.push(arg);
 			termnames.push(argnames);
 		}
 	}
-	if(rest) {
-		terms.push(rest);
-		termnames.push(restnames);
+	if(rest.length) {
+		terms = terms.concat(rest);
+		termnames = termnames.concat(restnames);
 	}
 	return {terms: terms, termnames: termnames};
 }
@@ -1349,7 +1353,7 @@ function matchTree(ruleTree,exprTree)
 	var ruleTok = ruleTree.tok;
 	var exprTok = exprTree.tok;
 
-	if(ruleTok.type=='op' && ruleTok.name == ';') {
+	if(jme.isOp(ruleTok,';')) {
 		if(ruleTree.args[1].tok.type!='name') {
 			throw(new Numbas.Error('jme.matchTree.group name not a name'));
 		}
@@ -1371,14 +1375,57 @@ function matchTree(ruleTree,exprTree)
 	}
 
 	if(ruleTok.type=='function') {
-		if(ruleTok.name=='matchany') {
-			for(var i=0;i<ruleTree.args.length;i++) {
-				var m;
-				if(m=matchTree(ruleTree.args[i],exprTree)) {
-					return m;
+		switch(ruleTok.name) {
+			case 'm_any':
+				for(var i=0;i<ruleTree.args.length;i++) {
+					var m;
+					if(m=matchTree(ruleTree.args[i],exprTree)) {
+						return m;
+					}
 				}
-			}
-			return false;
+				return false;
+
+			case 'm_all':
+				return matchTree(ruleTree.args[0],exprTree);
+
+			case 'm_neg':
+				if(jme.isOp(exprTok,'-u')) {
+					return matchTree({tok: new jme.types.TOp('-u'),args: [ruleTree.args[0]]},exprTree);
+				} else {
+					return matchTree(ruleTree.args[0],exprTree);
+				}
+
+			case 'm_not':
+				if(!matchTree(ruleTree.args[0],exprTree)) {
+					return {};
+				} else {
+					return false;
+				}
+
+			case 'm_and':
+				var d = {};
+				for(var i=0;i<ruleTree.args.length;i++) {
+					var m = matchTree(ruleTree.args[i],exprTree);
+					if(m) {
+						for(var name in m) {
+							d[name] = m[name];
+						}
+					} else {
+						return false;
+					}
+				}
+				return d;
+
+			case 'm_uses':
+				var vars = jme.findvars(exprTree);
+				for(var i=0;i<ruleTree.args.length;i++) {
+					var name = ruleTree.args[i].tok.name;
+					if(!vars.contains(name)) {
+						return false;
+					}
+				}
+				return {};
+
 		}
 	}
 
@@ -1390,17 +1437,21 @@ function matchTree(ruleTree,exprTree)
 	switch(ruleTok.type)
 	{
 	case 'number':
-		if( !math.eq(ruleTok.value,exprTok.value) )
+		if( !math.eq(ruleTok.value,exprTok.value) ) {
 			return false;
-		return {};
+		} else {
+			return {};
+		}
 
 	case 'string':
 	case 'boolean':
 	case 'special':
 	case 'range':
-		if(ruleTok.value != exprTok.value)
+		if(ruleTok.value != exprTok.value) {
 			return false;
-		return {};
+		} else {
+			return {};
+		}
 
 	case 'function':
 	case 'op':
@@ -1415,11 +1466,16 @@ function matchTree(ruleTree,exprTree)
 
 			var namedTerms = {};
 			var matchedRules = [];
+			var termMatches = [];
 
 			for(var i=0; i<exprTerms.terms.length; i++) {
 				var m = null;
+				var matched = false;
 				for(var j=0; j<ruleTerms.terms.length; j++) {
-					if(m=matchTree(ruleTerms.terms[j],exprTerms.terms[i])) {
+					var ruleTerm = ruleTerms.terms[j];
+					m = matchTree(ruleTerm,exprTerms.terms[i]);
+					if((!matchedRules[j] || ruleTerm.tok.name=='m_all') && m) {
+						matched = true;
 						matchedRules[j] = true;
 						for(var name in m) {
 							if(!namedTerms[name]) {
@@ -1440,12 +1496,16 @@ function matchTree(ruleTree,exprTree)
 						break;
 					}
 				}
-				if(!m) {
+				if(!matched) {
 					return false;
 				}
 			}
 			for(var i=0;i<ruleTerms.terms.length;i++) {
-				if(!(ruleTerms.terms[i].tok.type=='name' && ruleTerms.terms[i].tok.name=='??') && !matchedRules[i]) {
+				var term = ruleTerms.terms[i];
+				while(term.tok.type=='function' && /^m_(?:all|neg)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
+					term = term.args[0];
+				}
+				if(!jme.isName(term.tok,'??') && !matchedRules[i]) {
 					return false;
 				}
 			}
