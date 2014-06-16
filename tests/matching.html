@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+	<title>Pattern-matching algebraic expressions</title>
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
@@ -29,12 +30,18 @@
 				clear: both;
 				line-height: 2em;
 			}
+			label .label-text {
+				display: inline-block;
+				min-width: 150px;
+				margin-right: 1em;
+			}
 			label input {
-				float: right;
-				width: 500px;
 				font-family: monospace;
 				padding: 0.5em;
 				margin-bottom: 0.5em;
+			}
+			label input[type=text] {
+				width: 500px;
 			}
 
 			.examples .example {
@@ -56,11 +63,11 @@
 				padding: 0.5em 0;
 			}
 
-			.commands dt {
+			.commands dt code {
 				display: inline-block;
 				background: #eee;
 				padding: 2px 5px;
-				font-family: monospace;
+				margin-bottom: 0.2em;
 			}
 			.commands dd {
 				margin-bottom: 0.5em;
@@ -74,14 +81,20 @@
 		<form>
 			<div>
 				<label>
-					Pattern:
-					<input type="text" data-bind="value: pattern, valueUpdate: 'afterkeydown'">
+					<span class="label-text">Pattern:</span>
+					<input type="text" data-bind="value: pattern, valueUpdate: 'afterkeydown'"/>
 				</label>
 			</div>
 			<div>
 				<label>
-					Expression to test:
-					<input type="text" data-bind="value: expression, valueUpdate: 'afterkeydown'">
+					<span class="label-text">Expression to test:</span>
+					<input type="text" data-bind="value: expression, valueUpdate: 'afterkeydown'"/>
+				</label>
+			</div>
+			<div>
+				<label>
+					<span class="label-text">Use commutativity?</span>
+					<input type="checkbox" data-bind="checked: doCommute"/>
 				</label>
 			</div>
 		</form>
@@ -96,7 +109,6 @@
 			<p>Match! &#x2713;</p>
 			<div data-bind="if: matches().length">
 				<h3>Captured groups</h3>
-				<p style="font-size:small">(The captured expression trees aren't simplified, so they might look a little bit weird.)</p>
 				<table id="groups">
 					<thead>
 						<th>Group</th>
@@ -122,22 +134,26 @@
 		<div class="commands">
 			<h2>Special elements</h2>
 			<dl>
-				<dt>?</dt>
+				<dt><code>?</code></dt>
 				<dd>Match anything</dd>
-				<dt>??</dt>
+				<dt><code>??</code></dt>
 				<dd>Match anything or nothing (optional term)</dd>
-				<dt>expr;g</dt>
+				<dt><code>expr;g</code></dt>
 				<dd>Capture <code>expr</code> in the group named <code>g</code>.</dd>
-				<dt>m_any(expr1,expr2,...)</dt>
+				<dt><code>m_any(expr1,expr2,...)</code></dt>
 				<dd>Match any of the expressions <code>exprN</code></dd>
-				<dt>m_all(expr)</dt>
+				<dt><code>m_all(expr)</code></dt>
 				<dd>Capture all terms matching <code>expr</code></dd>
-				<dt>m_neg(expr)</dt>
+				<dt><code>m_pm(expr)</code></dt>
 				<dd>Capture <code>expr</code> or <code>-(expr)</code>.</dd>
-				<dt>m_not(expr)</dt>
+				<dt><code>m_not(expr)</code></dt>
 				<dd>Match anything <em>except</em> <code>expr</code></dd>
-				<dt>m_uses(name1,name2,...)</dt>
+				<dt><code>m_uses(name1,name2,...)</code></dt>
 				<dd>Match any expression which uses the named variables</dd>
+				<dt><code>m_commute(expr)</code></dt>
+				<dd>Match the terms in <code>expr</code> in any order, following the laws of commutativity. (Use if you only want to use commutativity in certain places)</dd>
+				<dt><code>m_nothing</code></dt>
+				<dd>Match nothing. Useful as an empty term to set up a sum where you want all terms to match one pattern.</dd>
 			</dl>
 		</div>
 
@@ -150,7 +166,11 @@
 					var vm = this;
 					this.pattern = ko.observable('');
 					this.expression = ko.observable('');
+					this.doCommute = ko.observable(true);
 					this.error = ko.observable('');
+
+					var simplifyRuleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.rulesets);
+
 					this.matches = ko.computed(function() {
 						try {
 							var pattern = Numbas.jme.compile(this.pattern());
@@ -165,13 +185,13 @@
 							return null;
 						}
 						try {
-							var match = Numbas.jme.display.matchTree(pattern,expression);
+							var match = Numbas.jme.display.matchTree(pattern,expression,this.doCommute());
 							if(match) {
 								var out = [];
 								for(var name in match) {
 									out.push({
 										name: name,
-										expression: Numbas.jme.display.treeToJME(match[name])
+										expression: Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(match[name],simplifyRuleset,Numbas.jme.builtinScope))
 									});
 								}
 								this.error('');
@@ -201,8 +221,13 @@
 					this.examples = [
 						{
 							description: "Get all x terms",
-							pattern: "m_all(m_any(??x,??x^??));xs+m_all(??;rest)",
-							expression: "x+3x^2+(x+1)x^4+c+2"
+							pattern: "m_all(m_pm(m_all(??)*m_any(x,x^?)));xs+m_all(??);rest",
+							expression: "C+x-x+2x-2x+(a+1)x+x^2+2x^3+(1+2)x^(n+1)-2"
+						},
+						{
+							description: "Get the coefficient and degree of a term",
+							pattern: "m_pm(m_all(??);coefficient*m_any(x,x^?;degree))",
+							expression: "2*(a+1)x^2*3"
 						},
 						{
 							description: "Get both sides of an equation",
@@ -210,8 +235,13 @@
 							expression: "cos(x)^2 + sin(x)^2 = 1"
 						},
 						{
+							description: "Check x terms are collected on one side",
+							pattern: "m_uses(x);xside = m_not(m_uses(x));otherside",
+							expression: "1=cos(x)^2 + sin(x)^2"
+						},
+						{
 							description: "Factorised quadratic",
-							pattern: "(m_neg(??*x);a+?;b)*(m_neg(??*x);c+?;d)",
+							pattern: "(m_pm(??*x);a+?;b)*(m_pm(??*x);c+?;d)",
 							expression: "(2x+3)(3-x)"
 						},
 						{

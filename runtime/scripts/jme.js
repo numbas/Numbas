@@ -819,6 +819,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 	isName: function(tok,name) {
 		return tok.type=='name' && tok.name==name;
+	},
+
+	isFunction: function(tok,name) {
+		return tok.type=='function' && tok.name==name;
 	}
 };
 
