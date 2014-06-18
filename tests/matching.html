@@ -248,11 +248,6 @@
 							description: "Capture multiples of powers of x and y",
 							pattern: "m_all( m_any( ??x, ??y, ??x^??, ??y^??, m_any(x,x^??)*m_any(y,y^??)*?? ) );terms + m_all(??;rest)",
 							expression: "2x*y^2+(2*b)*x+x*y*3+3x^2y^3+c+x^3+3y^2+x+y+3"
-						},
-						{
-							description: "Separate out all x terms",
-							pattern: "m_all(m_uses(x));xs+m_all(??;rest)",
-							expression: "cos(x)^2 + 3y - 2 + x"
 						}
 					]
 

@@ -1569,7 +1569,13 @@ function matchTree(ruleTree,exprTree,doCommute)
 		return {};
 	}
 }
-Numbas.jme.display.matchTree = matchTree;
+jme.display.matchTree = matchTree;
+
+jme.display.matchExpression = function(pattern,expr,doCommute) {
+	pattern = jme.compile(pattern);
+	expr = jme.compile(expr);
+	return matchTree(pattern,expr,doCommute);
+}
 
 /** Built-in simplification rules
  * @enum {Numbas.jme.display.Rule[]}
