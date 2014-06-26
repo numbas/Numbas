@@ -1766,6 +1766,22 @@ newBuiltin('except',[TList,'?'], TList, null, {
 	}
 });
 
+newBuiltin('distinct',[TList],TList,
+	function(list) {
+		if(list.length==0) {
+			return [];
+		}
+		var out = [list[0]];
+		for(var i=1;i<list.length;i++) {
+			if(!out.contains(list[i])) {
+				out.push(list[i]);
+			}
+		}
+		return out;
+	},
+	{unwrapValues: true}
+);
+
 newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
 newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
