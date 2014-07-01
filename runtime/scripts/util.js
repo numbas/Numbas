@@ -135,27 +135,40 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	eq: function(a,b) {
 		if(a.type != b.type)
 			return false;
-		switch(a.type) {
-			case 'number':
-				return Numbas.math.eq(a.value,b.value);
-			case 'vector': 
-				return Numbas.vectormath.eq(a.value,b.value);
-			case 'matrix':
-				return Numbas.matrixmath.eq(a.value,b.value);
-			case 'list':
-				return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
-			case 'range':
-				return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
-			case 'name':
-				return a.name == b.name;
-			case 'number':
-			case 'string':
-			case 'boolean':
-				return a.value==b.value;
-			default:
-				throw(new Numbas.Error('util.equality not defined for type %s',a.type));
+		if(a.type in util.equalityTests) {
+			return util.equalityTests[a.type](a,b);
+		} else {
+			throw(new Numbas.Error('util.equality not defined for type %s',a.type));
 		}
 	},
+
+	equalityTests: {
+		'number': function(a,b) {
+			return Numbas.math.eq(a.value,b.value);
+		},
+		'vector': function(a,b) {
+			return Numbas.vectormath.eq(a.value,b.value);
+		},
+		'matrix': function(a,b) {
+			return Numbas.matrixmath.eq(a.value,b.value);
+		},
+		'list': function(a,b) {
+			return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+		},
+		'range': function(a,b) {
+			return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
+		},
+		'name': function(a,b) {
+			return a.name == b.name;
+		},
+		'string': function(a,b) {
+			return a.value==b.value;
+		},
+		'boolean': function(a,b) {
+			return a.value==b.value;
+		},
+	},
+
 
 	/** Generic inequality test on {@link Numbas.jme.token}s
 	 * @param {Numbas.jme.token} a

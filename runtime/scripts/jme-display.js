@@ -738,6 +738,36 @@ function texMatrix(m,settings,parens)
 		return '\\begin{matrix} '+out+' \\end{matrix}';
 }
 
+/** Dictionary of functions to convert specific name annotations to TeX
+ *
+ * @enum
+ * @memberof Numbas.jme.display
+ */
+var texNameAnnotations = jme.display.texNameAnnotations = {
+	verbatim: function(name) {	//verbatim - use to get round things like i and e being interpreted as constants
+		return name;
+	},
+	op: function(name) {
+		return '\\operatorname{'+name+'}';
+	},
+	vector: function(name) {
+		return '\\boldsymbol{'+name+'}';
+	},
+	unit: function(name) {	//unit vector
+		return '\\hat{'+name+'}';
+	},
+	dot: function(name) {		//dot on top
+		return '\\dot{'+name+'}';
+	},
+	matrix: function(name) {
+		return '\\mathrm{'+name+'}';
+	}
+}
+texNameAnnotations.verb = texNameAnnotations.verbatim;
+texNameAnnotations.v = texNameAnnotations.vector;
+texNameAnnotations.m = texNameAnnotations.matrix;
+
+
 /** Convert a variable name to TeX
  * @memberof Numbas.jme.display
  * @private
@@ -746,42 +776,23 @@ function texMatrix(m,settings,parens)
  * @param {string[]} annotation - 
  * @returns {TeX}
  */
-function texName(name,annotation)
+
+function texName(name,annotations)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
 	name = name.replace(/(.*)_(.*)('*)$/g,'$1_{$2}$3');	//make numbers at the end of a variable name subscripts
 	name = name.replace(/^(.*?[^_])(\d+)('*)$/,'$1_{$2}$3');	//make numbers at the end of a variable name subscripts
-	if(!annotation)
+
+	if(!annotations)
 		return name;
 
-	for(var i=0;i<annotation.length;i++)
+	for(var i=0;i<annotations.length;i++)
 	{
-		switch(annotation[i])
-		{
-		case 'verb':	//verbatim - use to get round things like i and e being interpreted as constants
-		case 'verbatim':
-			break;
-		case 'op':	//operator name - use non-italic font
-			name = '\\operatorname{'+name+'}';
-			break;
-		case 'v':	//vector
-		case 'vector':
-			name = '\\boldsymbol{'+name+'}';
-			break;
-		case 'unit':	//unit vector
-			name = '\\hat{'+name+'}';
-			break;
-		case 'dot':		//dot on top
-			name = '\\dot{'+name+'}';
-			break;
-		case 'm':	//matrix
-		case 'matrix':
-			name = '\\mathrm{'+name+'}';
-			break;
-		default:
-			if(annotation[i].length)
-				name = '\\'+annotation[i]+'{'+name+'}';
-			break;
+		var annotation = annotations[i];
+		if(annotation in texNameAnnotations) {
+			name = texNameAnnotations[annotation](name);
+		} else {
+			name = '\\'+annotation+'{'+name+'}';
 		}
 	}
 	return name;
@@ -789,6 +800,79 @@ function texName(name,annotation)
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
+/** Dictionary of functions to turn {@link Numbas.jme.types} objects into TeX strings
+ *
+ * @enum
+ * @memberof Numbas.jme.display
+ */
+var typeToTeX = jme.display.typeToTeX = {
+	'number': function(thing,tok,texArgs,settings) {
+		if(tok.value==Math.E)
+			return 'e';
+		else if(tok.value==Math.PI)
+			return '\\pi';
+		else
+			return settings.texNumber(tok.value);
+	},
+	'string': function(thing,tok,texArgs,settings) {
+		if(tok.latex)
+			return tok.value;
+		else
+			return '\\textrm{'+tok.value+'}';
+	},
+	'boolean': function(thing,tok,texArgs,settings) {
+		return tok.value ? 'true' : 'false';
+	},
+	range: function(thing,tok,texArgs,settings) {
+		return tok.value[0]+ ' \\dots '+tok.value[1];
+	},
+	list: function(thing,tok,texArgs,settings) {
+		if(!texArgs)
+		{
+			texArgs = [];
+			for(var i=0;i<tok.vars;i++)
+			{
+				texArgs[i] = texify(tok.value[i],settings);
+			}
+		}
+		return '\\left[ '+texArgs.join(', ')+' \\right]';
+	},
+	vector: function(thing,tok,texArgs,settings) {
+		return ('\\left( ' 
+				+ texVector(tok.value,settings)
+				+ ' \\right)' );
+	},
+	matrix: function(thing,tok,texArgs,settings) {
+		return '\\left( '+texMatrix(tok.value,settings)+' \\right)';
+	},
+	name: function(thing,tok,texArgs,settings) {
+		return texName(tok.name,tok.annotation);
+	},
+	special: function(thing,tok,texArgs,settings) {
+		return tok.value;
+	},
+	conc: function(thing,tok,texArgs,settings) {
+		return texArgs.join(' ');
+	},
+	op: function(thing,tok,texArgs,settings) {
+		return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
+	},
+	'function': function(thing,tok,texArgs,settings) {
+		if(texOps[tok.name.toLowerCase()])
+		{
+			return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
+		}
+		else
+		{
+			if(tok.name.replace(/[^A-Za-z]/g,'').length==1)
+				var texname=tok.name;
+			else
+				var texname='\\operatorname{'+tok.name+'}';
+
+			return texName(texname,tok.annotation)+' \\left ( '+texArgs.join(', ')+' \\right )';
+		}
+	}
+}
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
  *
  * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
@@ -818,74 +902,12 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 		}
 	}
 
-	var texNumber = settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
+	settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 
 	var tok = thing.tok || thing;
-	switch(tok.type)
-	{
-	case 'number':
-		if(tok.value==Math.E)
-			return 'e';
-		else if(tok.value==Math.PI)
-			return '\\pi';
-		else
-			return texNumber(tok.value);
-	case 'string':
-		if(tok.latex)
-			return tok.value;
-		else
-			return '\\textrm{'+tok.value+'}';
-		break;
-	case 'boolean':
-		return tok.value ? 'true' : 'false';
-		break;
-	case 'range':
-		return tok.value[0]+ ' \\dots '+tok.value[1];
-		break;
-	case 'list':
-		if(!texArgs)
-		{
-			texArgs = [];
-			for(var i=0;i<tok.vars;i++)
-			{
-				texArgs[i] = texify(tok.value[i],settings);
-			}
-		}
-		return '\\left[ '+texArgs.join(', ')+' \\right]';
-	case 'vector':
-		return('\\left( ' 
-				+ texVector(tok.value,settings)
-				+ ' \\right)' );
-	case 'matrix':
-		return '\\left( '+texMatrix(tok.value,settings)+' \\right)';
-	case 'name':
-		return texName(tok.name,tok.annotation);
-		break;
-	case 'special':
-		return tok.value;
-		break;
-	case 'conc':
-		return texArgs.join(' ');
-		break;
-	case 'op':
-		return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
-		break;
-	case 'function':
-		if(texOps[tok.name.toLowerCase()])
-		{
-			return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
-		}
-		else
-		{
-			if(tok.name.replace(/[^A-Za-z]/g,'').length==1)
-				var texname=tok.name;
-			else
-				var texname='\\operatorname{'+tok.name+'}';
-
-			return texName(texname,tok.annotation)+' \\left ( '+texArgs.join(', ')+' \\right )';
-		}
-		break;
-	default:
+	if(tok.type in typeToTeX) {
+		return typeToTeX[tok.type](thing,tok,texArgs,settings);
+	} else {
 		throw(new Numbas.Error('jme.display.unknown token type',tok.type));
 	}
 }
@@ -1055,35 +1077,13 @@ function jmeRealNumber(n)
 	}
 }
 
-
-/** Turn a syntax tree back into a JME expression (used when an expression is simplified)
+/** Dictionary of functions to turn {@link Numbas.jme.types} objects into JME strings
+ *
+ * @enum
  * @memberof Numbas.jme.display
- * @method
- * 
- * @param {Numbas.jme.tree} tree
- * @param {object} settings
- * @returns {JME}
  */
-var treeToJME = jme.display.treeToJME = function(tree,settings)
-{
-	if(!tree)
-		return '';
-
-	settings = settings || {};
-
-	var args=tree.args, l;
-
-	if(args!==undefined && ((l=args.length)>0))
-	{
-		var bits = args.map(function(i){return treeToJME(i,settings)});
-	}
-
-    var jmeNumber = settings.fractionnumbers ? jmeRationalNumber : jmeRealNumber;
-
-	var tok = tree.tok;
-	switch(tok.type)
-	{
-	case 'number':
+var typeToJME = Numbas.jme.display.typeToJME = {
+	'number': function(tree,tok,bits,settings) {
 		switch(tok.value)
 		{
 		case Math.E:
@@ -1091,22 +1091,34 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 		case Math.PI:
 			return 'pi';
 		default:
-			return jmeNumber(tok.value);
+			return settings.jmeNumber(tok.value);
 		}
-	case 'name':
+	},
+	name: function(tree,tok,bits,settings) {
 		return tok.name;
-	case 'string':
-		var str = tok.value.replace(/\\/g,'\\\\').replace(/\\([{}])/g,'$1').replace(/\n/g,'\\n').replace(/"/g,'\\"').replace(/'/g,"\\'");
+	},
+	'string': function(tree,tok,bits,settings) {
+		var str = tok.value
+					.replace(/\\/g,'\\\\')
+					.replace(/\\([{}])/g,'$1')
+					.replace(/\n/g,'\\n')
+					.replace(/"/g,'\\"')
+					.replace(/'/g,"\\'")
+		;
 		return '"'+str+'"';
-	case 'html':
+	},
+	html: function(tree,tok,bits,settings) {
 		var html = $(tok.value).clone().wrap('<div>').parent().html();
 		html = html.replace(/"/g,'\\"');
 		return 'html("'+html+'")';
-	case 'boolean':
+	},
+	'boolean': function(tree,tok,bits,settings) {
 		return (tok.value ? 'true' : 'false');
-	case 'range':
+	},
+	range: function(tree,tok,bits,settings) {
 		return tok.value[0]+'..'+tok.value[1]+(tok.value[2]==1 ? '' : '#'+tok.value[2]);
-	case 'list':
+	},
+	list: function(tree,tok,bits,settings) {
 		if(!bits)
 		{
 			if(tok.value) {
@@ -1117,19 +1129,20 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 			}
 		}
 		return '[ '+bits.join(', ')+' ]';
-	case 'vector':
-		return 'vector('+tok.value.map(jmeNumber).join(',')+')';
-	case 'matrix':
+	},
+	vector: function(tree,tok,bits,settings) {
+		return 'vector('+tok.value.map(settings.jmeNumber).join(',')+')';
+	},
+	matrix: function(tree,tok,bits,settings) {
 		return 'matrix('+
-			tok.value.map(function(row){return '['+row.map(jmeNumber).join(',')+']'}).join(',')+')';
-	case 'special':
-		return tok.value;
-	case 'conc':
-		return '';
-	case 'function':
+			tok.value.map(function(row){return '['+row.map(settings.jmeNumber).join(',')+']'}).join(',')+')';
+	},
+	'function': function(tree,tok,bits,settings) {
 		return tok.name+'('+bits.join(',')+')';
-	case 'op':
+	},
+	op: function(tree,tok,bits,settings) {
 		var op = tok.name;
+		var args = tree.args, l = args.length;
 
 		for(var i=0;i<l;i++)
 		{
@@ -1167,12 +1180,12 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 		case '-u':
 			op='-';
 			if(args[0].tok.type=='number' && args[0].tok.value.complex)
-				return jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
+				return settings.jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
 			break;
 		case '-':
 			var b = args[1].tok.value;
 			if(args[1].tok.type=='number' && args[1].tok.value.complex && args[1].tok.value.re!=0) {
-				return bits[0]+' - '+jmeNumber(math.complex(b.re,-b.im));
+				return bits[0]+' - '+settings.jmeNumber(math.complex(b.re,-b.im));
 			}
 			op = ' - ';
 			break;
@@ -1194,6 +1207,38 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	}
 }
 
+/** Turn a syntax tree back into a JME expression (used when an expression is simplified)
+ * @memberof Numbas.jme.display
+ * @method
+ * 
+ * @param {Numbas.jme.tree} tree
+ * @param {object} settings
+ * @returns {JME}
+ */
+var treeToJME = jme.display.treeToJME = function(tree,settings)
+{
+	if(!tree)
+		return '';
+
+	settings = settings || {};
+
+	var args=tree.args, l;
+
+	if(args!==undefined && ((l=args.length)>0))
+	{
+		var bits = args.map(function(i){return treeToJME(i,settings)});
+	}
+
+    settings.jmeNumber = settings.fractionnumbers ? jmeRationalNumber : jmeRealNumber;
+
+	var tok = tree.tok;
+	if(tok.type in typeToJME) {
+		return typeToJME[tok.type](tree,tok,bits,settings);
+	} else {
+		throw(new Numbas.Error('jme.display.unknown token type',tok.type));
+	}
+}
+
 
 /** Does each argument (of an operation) need brackets around it?
  *
@@ -1202,7 +1247,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
  * @memberof Numbas.jme.display
  * @private
  */
-var opBrackets = {
+var opBrackets = Numbas.jme.display.opBrackets = {
 	'+u':[{}],
 	'-u':[{'+':true,'-':true}],
 	'+': [{},{}],
@@ -1292,7 +1337,7 @@ Rule.prototype = /** @lends Numbas.jme.display.Rule.prototype */ {
 	}
 }
 
-/** Recusrively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
+/** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.display
  * @private
  *

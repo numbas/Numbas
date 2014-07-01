@@ -52,7 +52,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
-		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/,
 		re_comment: /^\/\/.*(?:\n|$)/
 	},
 
@@ -124,7 +123,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			else if (result = expr.match(jme.re.re_name))
 			{
 				var name = result[2];
-				var annotation = result[1] ? result[1].split(':') : null;
+				var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
 				if(!annotation)
 				{
 					var lname = name.toLowerCase();
@@ -179,31 +178,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				estr+=str;
 
 				token = new TString(estr);
-			}
-			else if (result = expr.match(jme.re.re_special))
-			{
-				var code = result[1] || result[2];
-				
-				var tex;
-				var cons = TSpecial;
-				if( varsymbols.contains(code) )	//varsymbols letters should act like variable names
-				{
-					cons = TName;
-				}
-				if(samesymbols.contains(code))	//numbers, punctuation, etc. can be left as they are
-				{
-					tex = code;
-				}
-				else if (symbols[code]!==undefined)	//is code in dictionary of things that have a particular translation?
-				{
-					tex = symbols[code];
-				}
-				else	//otherwise latex command must be the same as numbas, so stick a slash in front
-				{
-					tex = '\\'+code;
-				}
-
-				token = new cons(tex);
 			}
 			else if(expr.length)
 			{
@@ -271,13 +245,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			case "number":
 			case "string":
 			case 'boolean':
-				addoutput(tok);
-				break;
-			case 'special':
-				while( stack.length && stack[stack.length-1].type != "(" )
-				{
-					addoutput(stack.pop());
-				}
 				addoutput(tok);
 				break;
 			case "name":
@@ -990,32 +957,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 };
 
 
-var varsymbols = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','psi','chi','phi','omega','=','space'];
-var samesymbols = '!+-,./0123456789:;?[]=';
-var symbols = {
-	'space': ' ',				'&': '\\&',							'contains': '\\ni',
-	'*': '\\ast',				'<': '\\lt',						'>': '\\gt',
-	'congruent': '\\cong',		'perpendicular': '\\perp',			'uptee': '\\perp',
-	'overscore': '\\bar',		'|': '\\mid',						'~': '\\sim',
-	'dash': '^{\\prime}',			'leftanglebracket': '\\langle',		'le': '\\leq',
-	'infinity': '\\infty',		'doublearrow': '\\leftrightarrow',	'degree': '^{\\circ}',
-	'plusorminus': '\\pm',		'doublequotes': '"',				'ge': '\\geq',
-	'proportional': '\\propto',	'filledcircle': '\\bullet',			'divide': '\\div',
-	'notequal': '\\neq',		'identical': '\\equiv',				'approximately': '\\approx',
-	'vbar': '\\mid',			'hbar': '---',						'dots': '\\ldots',
-	'imaginary': '\\mathbb{I}',	'real': '\\mathbb{R}',				'osol': '\\varnothing',
-	'subsetequal': '\\supseteq','subset': '\\supset',				'notsubset': '\\not \\subset',
-	'supersetequal': '\\subseteq','superset': '\\subset',			'notin': '\\not \\in',
-	'product': '\\prod',		'sqrt': '\\sqrt',					'dot': '\\cdot',
-	'\u00AC': '\\neg',				'logicaland': '\\wedge',			'logicalor': '\\vee',
-	'doubleimplies': '\\Leftrightarrow',							'impliesby': '\\Leftarrow',
-	'impliesup': '\\Uparrow', 	'impliesdown': '\\Downarrow',		'implies': '\\Rightarrow',
-	'rightanglebracket': '\\rangle',								'integral': '\\int',
-	'(': '\\left ( \\right .',					')': '\\left ) \\right .'
-};
-
-
-
 //a length-sorted list of all the builtin functions, for recognising stuff like xcos() as x*cos()
 var builtinsbylength=[],builtinsre=new RegExp();
 builtinsbylength.add = function(e)
@@ -1322,19 +1263,6 @@ var TPunc = types.TPunc = function(kind)
 	this.type = kind;
 }
 
-
-//special character
-var TSpecial = jme.types.TSpecial = function(value)
-{
-	this.value = value;
-}
-TSpecial.prototype.type = 'special';
-
-//concatenation - for dealing with special characters
-var TConc = jme.types.TConc = function()
-{
-}
-TConc.prototype.type = 'conc';
 
 /** Arities of built-in operations
  * @readonly

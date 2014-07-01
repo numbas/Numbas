@@ -88,8 +88,6 @@
 					deepCloseEqual(tokenise('pi'),[new types.TNum(Math.PI)],'pi');
 					deepCloseEqual(tokenise('PI'),[new types.TNum(Math.PI)],'PI');
 
-					equal(tokenise('\\\\pi')[0].type,'name','compile "\\pi" returns a TName');
-
 					deepCloseEqual(tokenise('i'),[new types.TNum(math.complex(0,1))],'i');
 
 					deepCloseEqual(tokenise('infinity'),[new types.TNum(Infinity)],'infinity');
