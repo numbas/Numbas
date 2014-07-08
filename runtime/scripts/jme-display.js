@@ -1146,7 +1146,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 
 		for(var i=0;i<l;i++)
 		{
-			if(args[i].tok.type=='op' && opBrackets[op][i][args[i].tok.name]==true)
+			if(args[i].tok.type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true)
 			{
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
