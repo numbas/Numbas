@@ -935,8 +935,6 @@ class GapFillPart(Part):
 	
 	def toxml(self):
 		self.marks = 0
-		for gap in self.gaps:
-			self.marks += gap.marks
 
 		prompt = self.prompt
 
