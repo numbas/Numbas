@@ -141,6 +141,8 @@ R.registerLocale('en-GB',{
 	'vectormath.cross.matrix too big': "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 
 	'part.with steps answer prompt': 'Answer: ',
+	
+	'part.script.error': "Error in part %s custom script %s: %s",
 
 	'part.marking.steps no matter': "Because you received full marks for the part, your answers to the steps aren't counted.",
 	'part.marking.steps change single': "You were awarded <strong>%s</strong> mark for your answers to the steps",

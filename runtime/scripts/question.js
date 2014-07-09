@@ -129,6 +129,11 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		}
 	
 		q.scope = new jme.Scope([gscope,q.scope]);
+
+		q.unwrappedVariables = {};
+		for(var name in q.scope.variables) {
+			q.unwrappedVariables[name] = Numbas.jme.unwrapValue(q.scope.variables[name]);
+		}
 	});
 
 	job(this.subvars,this);
@@ -545,7 +550,12 @@ function Part( xml, path, question, parentPart, loading )
 	for(var i=0;i<scriptNodes.length; i++) {
 		var name = scriptNodes[i].getAttribute('name');
 		var script = Numbas.xml.getTextContent(scriptNodes[i]);
-		script = eval('(function(){'+script+'})');
+		var withEnv = {
+			variables: this.question.unwrappedVariables
+		};
+		with(withEnv) {
+			script = eval('(function(){try{'+script+'}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
+		}
 		this.scripts[name] = script;
 	}
 
