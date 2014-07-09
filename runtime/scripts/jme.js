@@ -813,14 +813,32 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		}
 	},
 
+	/** Is a token a TOp?
+	 *
+	 * @param {Numbas.jme.token} 
+	 * 
+	 * @returns {boolean}
+	 */
 	isOp: function(tok,op) {
 		return tok.type=='op' && tok.name==op;
 	},
 
+	/** Is a token a TName?
+	 *
+	 * @param {Numbas.jme.token} 
+	 * 
+	 * @returns {boolean}
+	 */
 	isName: function(tok,name) {
 		return tok.type=='name' && tok.name==name;
 	},
 
+	/** Is a token a TFunction?
+	 *
+	 * @param {Numbas.jme.token} 
+	 * 
+	 * @returns {boolean}
+	 */
 	isFunction: function(tok,name) {
 		return tok.type=='function' && tok.name==name;
 	}

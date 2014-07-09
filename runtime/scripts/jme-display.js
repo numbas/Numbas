@@ -1355,6 +1355,7 @@ Numbas.jme.display.getCommutingTerms = getCommutingTerms;
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
+ * @param {boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
  * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 function matchTree(ruleTree,exprTree,doCommute)
@@ -1571,6 +1572,14 @@ function matchTree(ruleTree,exprTree,doCommute)
 }
 jme.display.matchTree = matchTree;
 
+/** Match expresison against a pattern. Wrapper for {@link Numbas.jme.display.matchTree}
+ *
+ * @param {JME} pattern
+ * @param {JME} expr
+ * @param {boolean} doCommute
+ *
+ * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ */
 jme.display.matchExpression = function(pattern,expr,doCommute) {
 	pattern = jme.compile(pattern);
 	expr = jme.compile(expr);
