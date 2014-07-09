@@ -1396,7 +1396,6 @@ Numbas.jme.display.getCommutingTerms = getCommutingTerms;
 
 /** Recusrively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.display
- * @private
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
@@ -1618,6 +1617,8 @@ function matchTree(ruleTree,exprTree,doCommute)
 jme.display.matchTree = matchTree;
 
 /** Match expresison against a pattern. Wrapper for {@link Numbas.jme.display.matchTree}
+ *
+ * @memberof Numbas.jme.display
  *
  * @param {JME} pattern
  * @param {JME} expr
