@@ -551,7 +551,9 @@ function Part( xml, path, question, parentPart, loading )
 		var name = scriptNodes[i].getAttribute('name');
 		var script = Numbas.xml.getTextContent(scriptNodes[i]);
 		var withEnv = {
-			variables: this.question.unwrappedVariables
+			variables: this.question.unwrappedVariables,
+			question: this.question,
+			part: this
 		};
 		with(withEnv) {
 			script = eval('(function(){try{'+script+'}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
@@ -684,6 +686,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				case 'mark':
 				case 'validate':
 					this[name] = script;
+					break;
+				case 'constructor':
+					script.apply(this);
 					break;
 			}
 		}
