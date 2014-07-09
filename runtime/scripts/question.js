@@ -45,6 +45,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 {
 	var q = question = this;
 	q.exam = exam;
+	q.adviceThreshold = q.exam.adviceGlobalThreshold;
 	q.xml = xml;
 	q.originalXML = q.xml;
 	q.number = number;
@@ -141,12 +142,12 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 
 	job(function()
 	{
-		q.adviceThreshold = q.exam.adviceGlobalThreshold;
-		q.followVariables = {};
-		
 		//initialise display - get question HTML, make menu item, etc.
 		q.display = new Numbas.display.QuestionDisplay(q);
+	});
 
+	job(function() 
+	{
 		//load parts
 		q.parts=new Array();
 		q.partDictionary = {};
@@ -159,6 +160,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		}
 
 		q.display.makeHTML();
+
 		for(var i=0;i<q.HTMLAttachedCallbacks.length;i++) {
 			q.HTMLAttachedCallbacks[i](q,q.display);
 		}
@@ -274,9 +276,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 	/** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
 	runPreamble: function() {
-		var question = this;
-		var js = '(function() {'+this.preamble.js+'})()';
-		eval(js);
+		with({
+			question: this
+		}) {
+			var js = '(function() {'+this.preamble.js+'})()';
+			try{
+				eval(js);
+			} catch(e) {
+				Numbas.showError(new Numbas.Error('question.preamble.error',this.number+1,e.message));
+			}
+		}
 	},
 
 	/** Substitute the question's variables into its XML - clones the XML so the original is untouched.

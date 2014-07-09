@@ -198,6 +198,8 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.preamble.error': "Error in question %i preamble: %s",
+
 	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
