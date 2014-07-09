@@ -52,7 +52,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
-		re_special: /^\\\\([%!+\-\,\.\/\:;\?\[\]=\*\&<>\|~\(\)]|\d|([a-zA-Z]+))/,
 		re_comment: /^\/\/.*(?:\n|$)/
 	},
 
@@ -124,7 +123,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			else if (result = expr.match(jme.re.re_name))
 			{
 				var name = result[2];
-				var annotation = result[1] ? result[1].split(':') : null;
+				var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
 				if(!annotation)
 				{
 					var lname = name.toLowerCase();
@@ -179,31 +178,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				estr+=str;
 
 				token = new TString(estr);
-			}
-			else if (result = expr.match(jme.re.re_special))
-			{
-				var code = result[1] || result[2];
-				
-				var tex;
-				var cons = TSpecial;
-				if( varsymbols.contains(code) )	//varsymbols letters should act like variable names
-				{
-					cons = TName;
-				}
-				if(samesymbols.contains(code))	//numbers, punctuation, etc. can be left as they are
-				{
-					tex = code;
-				}
-				else if (symbols[code]!==undefined)	//is code in dictionary of things that have a particular translation?
-				{
-					tex = symbols[code];
-				}
-				else	//otherwise latex command must be the same as numbas, so stick a slash in front
-				{
-					tex = '\\'+code;
-				}
-
-				token = new cons(tex);
 			}
 			else if(expr.length)
 			{
@@ -271,13 +245,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			case "number":
 			case "string":
 			case 'boolean':
-				addoutput(tok);
-				break;
-			case 'special':
-				while( stack.length && stack[stack.length-1].type != "(" )
-				{
-					addoutput(stack.pop());
-				}
 				addoutput(tok);
 				break;
 			case "name":
@@ -1020,32 +987,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 };
 
 
-var varsymbols = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','psi','chi','phi','omega','=','space'];
-var samesymbols = '!+-,./0123456789:;?[]=';
-var symbols = {
-	'space': ' ',				'&': '\\&',							'contains': '\\ni',
-	'*': '\\ast',				'<': '\\lt',						'>': '\\gt',
-	'congruent': '\\cong',		'perpendicular': '\\perp',			'uptee': '\\perp',
-	'overscore': '\\bar',		'|': '\\mid',						'~': '\\sim',
-	'dash': '^{\\prime}',			'leftanglebracket': '\\langle',		'le': '\\leq',
-	'infinity': '\\infty',		'doublearrow': '\\leftrightarrow',	'degree': '^{\\circ}',
-	'plusorminus': '\\pm',		'doublequotes': '"',				'ge': '\\geq',
-	'proportional': '\\propto',	'filledcircle': '\\bullet',			'divide': '\\div',
-	'notequal': '\\neq',		'identical': '\\equiv',				'approximately': '\\approx',
-	'vbar': '\\mid',			'hbar': '---',						'dots': '\\ldots',
-	'imaginary': '\\mathbb{I}',	'real': '\\mathbb{R}',				'osol': '\\varnothing',
-	'subsetequal': '\\supseteq','subset': '\\supset',				'notsubset': '\\not \\subset',
-	'supersetequal': '\\subseteq','superset': '\\subset',			'notin': '\\not \\in',
-	'product': '\\prod',		'sqrt': '\\sqrt',					'dot': '\\cdot',
-	'\u00AC': '\\neg',				'logicaland': '\\wedge',			'logicalor': '\\vee',
-	'doubleimplies': '\\Leftrightarrow',							'impliesby': '\\Leftarrow',
-	'impliesup': '\\Uparrow', 	'impliesdown': '\\Downarrow',		'implies': '\\Rightarrow',
-	'rightanglebracket': '\\rangle',								'integral': '\\int',
-	'(': '\\left ( \\right .',					')': '\\left ) \\right .'
-};
-
-
-
 //a length-sorted list of all the builtin functions, for recognising stuff like xcos() as x*cos()
 var builtinsbylength=[],builtinsre=new RegExp();
 builtinsbylength.add = function(e)
@@ -1352,19 +1293,6 @@ var TPunc = types.TPunc = function(kind)
 	this.type = kind;
 }
 
-
-//special character
-var TSpecial = jme.types.TSpecial = function(value)
-{
-	this.value = value;
-}
-TSpecial.prototype.type = 'special';
-
-//concatenation - for dealing with special characters
-var TConc = jme.types.TConc = function()
-{
-}
-TConc.prototype.type = 'conc';
 
 /** Arities of built-in operations
  * @readonly
@@ -1701,6 +1629,7 @@ newBuiltin('latex',[TString],TString,null,{
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the first letter of a string', tags: ['upper-case','case','upper']}});
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
+newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
@@ -1798,6 +1727,22 @@ newBuiltin('except',[TList,'?'], TList, null, {
 	}
 });
 
+newBuiltin('distinct',[TList],TList,
+	function(list) {
+		if(list.length==0) {
+			return [];
+		}
+		var out = [list[0]];
+		for(var i=1;i<list.length;i++) {
+			if(!out.contains(list[i])) {
+				out.push(list[i]);
+			}
+		}
+		return out;
+	},
+	{unwrapValues: true}
+);
+
 newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
 newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
@@ -1872,6 +1817,11 @@ newBuiltin('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', d
 newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
 newBuiltin('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
 
+newBuiltin('factorise',[TNum],TList,function(n) {
+		return math.factorise(n).map(function(n){return new TNum(n)});
+	}
+);
+
 newBuiltin('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
 
 newBuiltin('random',[TList],'?',null, {
@@ -1910,6 +1860,17 @@ newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','roo
 newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
 newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
+newBuiltin('lcm', [TList], TNum, function(l){ 
+		if(l.length==0) {
+			return 1;
+		} else if(l.length==1) {
+			return l[0];
+		} else {
+			return math.lcm.apply(math,l);
+		}
+	},
+	{unwrapValues: true, doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} 
+);
 newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @x@ divides @y@.', tags: ['multiple of']}} );
 
 newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
