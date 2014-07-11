@@ -797,6 +797,8 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 				Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
 			})
 
+			// trigger a signal that the question HTML is attached
+			// DEPRECATED: use question.onHTMLAttached(fn) instead
 			$('body').trigger('question-html-attached',q,qd);
 			$('body').unbind('question-html-attached');
 

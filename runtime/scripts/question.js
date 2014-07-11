@@ -54,7 +54,10 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		'js': '',
 		'css': ''
 	};
-	q.HTMLAttachedCallbacks = [];
+	q.callbacks = {
+		HTMLAttached: [],
+		variablesGenerated: []
+	};
 
 	//get question's name
 	tryGetAttribute(q,q.xml,'.','name');
@@ -136,6 +139,8 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		for(var name in q.scope.variables) {
 			q.unwrappedVariables[name] = Numbas.jme.unwrapValue(q.scope.variables[name]);
 		}
+
+		q.runCallbacks('variablesGenerated');
 	});
 
 	job(this.subvars,this);
@@ -161,9 +166,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 
 		q.display.makeHTML();
 
-		for(var i=0;i<q.HTMLAttachedCallbacks.length;i++) {
-			q.HTMLAttachedCallbacks[i](q,q.display);
-		}
+		q.runCallbacks('HTMLAttached');
 
 		if(loading)
 		{
@@ -263,9 +266,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	display: undefined,
 
 	/** Callbacks to run when the question's HTML is attached to the page
-	 * @type {Array.<function>}
+	 * @type {object.Array.<function>}
 	 */
-	HTMLAttachedCallbacks: [],
+	callbacks: {
+		HTMLAttached: [],
+		variablesGenerated: []
+	},
+
+	/** Run the callbacks for a given event
+	 *
+	 * @param {string} name - name of the event
+	 */
+	runCallbacks: function(name) {
+		var callbacks = this.callbacks[name];
+		for(var i=0;i<callbacks.length;i++) {
+			callbacks[i](this);
+		}
+	},
 
 	/** Leave this question - called when moving to another question, or showing an info page. 
 	 * @see Numbas.display.QuestionDisplay.leave
@@ -487,9 +504,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @param {function} fn
 	 */
 	onHTMLAttached: function(fn) {
-		this.HTMLAttachedCallbacks.push(fn);
-	}
+		this.callbacks.HTMLAttached.push(fn);
+	},
 
+	/** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
+	 *
+	 * @param {function} fn
+	 */
+	onVariablesGenerated: function(fn) {
+		this.callbacks.variablesGenerated.push(fn);
+	}
 };
 
 
