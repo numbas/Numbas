@@ -439,7 +439,7 @@ var endDelimiters = {
     '$$': /[^\\]\$\$/,
     '\\[': /[^\\]\\\]/
 }
-var re_startMaths = /\$\$|\$|\\\(|\\\[|\\begin\{(\w+)\}/;
+var re_startMaths = /(?:^|[^\\])\$\$|(?:^|[^\\])\$|\\\(|\\\[|\\begin\{(\w+)\}/;
 
 /** Split a string up by TeX delimiters (`$`, `\[`, `\]`)
  *
@@ -482,7 +482,9 @@ var contentsplitbrackets = util.contentsplitbrackets = function(txt,re_end) {
 				var environment = m[1];
 				re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
 			}
-			else {
+			else if(startDelimiter.match(/\$/)) {
+				re_end = endDelimiters[startDelimiter.slice(1)];
+			} else {
 				re_end = endDelimiters[startDelimiter];    // get the corresponding end delimiter for the matched start delimiter
 			}
 		}
