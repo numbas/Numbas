@@ -1619,6 +1619,7 @@ jme.display.matchTree = matchTree;
 /** Match expresison against a pattern. Wrapper for {@link Numbas.jme.display.matchTree}
  *
  * @memberof Numbas.jme.display
+ * @method
  *
  * @param {JME} pattern
  * @param {JME} expr
@@ -1626,7 +1627,7 @@ jme.display.matchTree = matchTree;
  *
  * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-jme.display.matchExpression = function(pattern,expr,doCommute) {
+var matchExpression = jme.display.matchExpression = function(pattern,expr,doCommute) {
 	pattern = jme.compile(pattern);
 	expr = jme.compile(expr);
 	return matchTree(pattern,expr,doCommute);

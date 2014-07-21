@@ -20,5 +20,5 @@ Documentation (mainly focusing on the editor) is at [numbas-editor.readthedocs.o
 > See the License for the specific language governing permissions and
 > limitations under the License.
 
-You can see a plain-English explanation of the license and what it allows at [tl;drLegal](https://tldrlegal.com/license/apache-license-2.0-%40apache-2.0%41)
+You can see a plain-English explanation of the license and what it allows at [tl;drLegal](https://tldrlegal.com/license/apache-license-2.0-%28apache-2.0%29)
 
