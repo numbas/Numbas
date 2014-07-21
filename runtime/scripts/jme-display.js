@@ -349,7 +349,7 @@ var texOps = jme.display.texOps = {
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			if(jme.isOp(b.tok,'+'))
+			if(jme.isOp(b.tok,'+') || jme.isOp(b.tok,'-'))
 				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
 			else
 				return texArgs[0]+' - '+texArgs[1];
@@ -1251,7 +1251,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 	'+u':[{}],
 	'-u':[{'+':true,'-':true}],
 	'+': [{},{}],
-	'-': [{},{'+':true}],
+	'-': [{},{'+':true,'-':true}],
 	'*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
 	'/': [{'+u':true,'-u':true,'+':true, '-':true, '*':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
 	'^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],

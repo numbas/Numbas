@@ -752,6 +752,7 @@
 					equals(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
 					equals(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
 					equals(simplifyExpression('-3x-4',['all']),'-3x - 4','-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers');
+					equals(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
@@ -773,6 +774,7 @@
 					equals(exprToLaTeX('4-(x^2+x+1)',[]),'4 - \\left( x^{ 2 } + x + 1 \\right)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
 					equals(exprToLaTeX('(x^2+x+1)-4',[]),'x^{ 2 } + x + 1 - 4','(x^2+x+1)-4 - brackets round left-hand operand in subtraction can be dropped.');
 					equals(exprToLaTeX('x-(-1.5)','fractionnumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
+					equals(exprToLaTeX('x-(5-p)',[]),'x - \\left( 5 - p \\right)','x-(5-p) - keep the brackets on the right');
 				});
 			});
 		</script>
