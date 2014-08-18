@@ -259,12 +259,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -277,12 +277,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -295,12 +295,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
 			<xsl:apply-templates select="content"/>
 		</label>

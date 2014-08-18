@@ -255,19 +255,20 @@ def printdata(data,ntabs=0):
 		elif isinstance(data,basestring) and data.strip()=='':
 			return "'"+data+"'"
 		else:
-			return fix_number_repr(data)
+			return strcons_fix(data)
 
 
 #utility functions
 
 """Force fixed precision output of floats, instead of scientific notation"""
-def fix_number_repr(data):
+def strcons_fix(data):
 	if (data is True) or (data is False):
 		out=data
 	elif is_int(data):
-		out='%i' % int(data)
+		out = '%i' % int(data)
 	elif is_number(data):
-		out='%.14f' % float(data)
+		out = '%.14f' % float(data)
+		out = re.sub(r'(\.\d*[1-9])0*$','\g<1>',out)
 	else:
 		out=data
 	return strcons(out)

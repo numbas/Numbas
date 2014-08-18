@@ -349,7 +349,7 @@ var texOps = jme.display.texOps = {
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			if(jme.isOp(b.tok,'+'))
+			if(jme.isOp(b.tok,'+') || jme.isOp(b.tok,'-'))
 				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
 			else
 				return texArgs[0]+' - '+texArgs[1];
@@ -1251,7 +1251,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 	'+u':[{}],
 	'-u':[{'+':true,'-':true}],
 	'+': [{},{}],
-	'-': [{},{'+':true}],
+	'-': [{},{'+':true,'-':true}],
 	'*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
 	'/': [{'+u':true,'-u':true,'+':true, '-':true, '*':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
 	'^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
@@ -1619,6 +1619,7 @@ jme.display.matchTree = matchTree;
 /** Match expresison against a pattern. Wrapper for {@link Numbas.jme.display.matchTree}
  *
  * @memberof Numbas.jme.display
+ * @method
  *
  * @param {JME} pattern
  * @param {JME} expr
@@ -1626,7 +1627,7 @@ jme.display.matchTree = matchTree;
  *
  * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-jme.display.matchExpression = function(pattern,expr,doCommute) {
+var matchExpression = jme.display.matchExpression = function(pattern,expr,doCommute) {
 	pattern = jme.compile(pattern);
 	expr = jme.compile(expr);
 	return matchTree(pattern,expr,doCommute);
