@@ -1334,8 +1334,8 @@ var precedence = jme.precedence = {
 	';': 0,
 	'fact': 1,
 	'not': 1,
-	'+u': 2.5,
-	'-u': 2.5,
+	'+u': 1.5,
+	'-u': 1.5,
 	'^': 2,
 	'*': 3,
 	'/': 3,
@@ -1380,12 +1380,17 @@ var synonyms = {
  */
 var lazyOps = ['if','switch','repeat','map','isa','satisfy'];
 
+var rightAssociative = {
+	'^': true,
+	'+u': true,
+	'-u': true
+}
 
 function leftAssociative(op)
 {
 	// check for left-associativity because that is the case when you do something more
 	// exponentiation is only right-associative operation at the moment
-	return (op!='^');
+	return !(op in rightAssociative);
 };
 
 /** Operations which commute.
