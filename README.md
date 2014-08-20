@@ -13,7 +13,7 @@
 
 ### Installation
 
-These tools (the Numbas compiler) run as standalone Python 3, but the most convenient way to use Numbas is through the wrb-based editor. A publicly-available version is available at [numbas.mathcentre.ac.uk](http://numbas.mathcentre.ac.uk), or you can get everything you need to set up your own installation at https://github.com/numbas/editor.
+These tools (the Numbas compiler) run as standalone Python 3, but the most convenient way to use Numbas is through the web-based editor. A publicly-available version is available at [numbas.mathcentre.ac.uk](http://numbas.mathcentre.ac.uk), or you can get everything you need to set up your own installation at https://github.com/numbas/editor.
 
 ### Documentation
 
@@ -36,6 +36,6 @@ Documentation (mainly focusing on the editor) is at [numbas-editor.readthedocs.o
 > See the License for the specific language governing permissions and
 > limitations under the License.
 
-You can see a plain-English explanation of the license and what it allows at [tl;drLegal](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+You can see a plain-English explanation of the license and what it allows at [tl;drLegal](https://tldrlegal.com/license/apache-license-2.0-%28apache-2.0%29)
    
 Copyright in the content produced using Numbas resides with the author.

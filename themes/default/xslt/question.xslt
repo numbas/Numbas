@@ -96,7 +96,7 @@ Copyright 2011-13 Newcastle University
 		<xsl:if test="count(steps/part)>0">
 			<xsl:apply-templates select="steps"/>
 		</xsl:if>
-		<span class="student-answer">
+		<span class="student-answer" data-bind="css: {{dirty: isDirty}}">
 			<xsl:apply-templates select="." mode="typespecific"/>
 			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown, event: {{focus: showWarnings, blur: hideWarnings}}" tabindex="0"></span>
 			<span class="warnings" data-bind="foreach: warnings, visible: warningsShown">
@@ -170,7 +170,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
 	</div>
@@ -182,7 +182,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
 	</div>
@@ -203,8 +203,8 @@ Copyright 2011-13 Newcastle University
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice">
-				<option></option>
+			<select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed">
+				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist"/>
 			</select>
 		</xsl:when>
@@ -227,8 +227,8 @@ Copyright 2011-13 Newcastle University
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice">
-				<option></option>
+			<select class="multiplechoice" data-bind="value: correctAnswer" disabled="true">
+				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
 			</select>
 		</xsl:when>
@@ -242,12 +242,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -259,12 +259,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -277,12 +277,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -295,12 +295,12 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 
 	<li>
+		<xsl:attribute name="class">
+			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
+				<xsl:text>start-column</xsl:text>
+			</xsl:if>
+		</xsl:attribute>
 		<label>
-			<xsl:attribute name="class">
-				<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-					<xsl:text>start-column</xsl:text>
-				</xsl:if>
-			</xsl:attribute>
 			<input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
 			<xsl:apply-templates select="content"/>
 		</label>
@@ -310,7 +310,15 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="choice" mode="dropdownlist">
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
-	<option>
+	<option value="{$choicenum}">
+		<xsl:apply-templates select="content"/>
+	</option>
+</xsl:template>
+
+<xsl:template match="choice" mode="dropdownlist-correctanswer">
+	
+	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+	<option value="{$choicenum}">
 		<xsl:apply-templates select="content"/>
 	</option>
 </xsl:template>
@@ -339,7 +347,7 @@ Copyright 2011-13 Newcastle University
 
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<div class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<form>
 		<table class="choices-grid">
@@ -415,7 +423,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="patternmatch" data-bind="value: displayAnswer, autosize: true"/>
 	</span>
@@ -441,7 +449,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="part[@type='jme']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span class="preview" data-bind="maths: correctAnswerLaTeX"></span>
@@ -451,11 +459,12 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
 	<xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
+	<span class="preview" data-bind="visible: showPreview &amp;&amp; studentAnswerLaTeX(), maths: showPreview ? studentAnswerLaTeX() : '', click: focusInput"></span>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 
 <xsl:template match="part[@type='numberentry']" mode="correctanswer">
-	<span class="correct-answer" data-bind="visibleIf: revealed, typeset: revealed">
+	<span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
 		<span data-bind=""></span>

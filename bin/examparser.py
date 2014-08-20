@@ -46,22 +46,12 @@ class ExamParser:
 
 	#parse a string into a data structure
 	def parse(self,source):
-
-		try:
-			if not isinstance(source,unicode):
-				source=unicode(source,encoding='utf-8')
-		except NameError:
-			pass
-
-		source = source.replace('\ufeff','')
-		if len(source)==0:
-			raise ParseError(self,"Empty source string")
-
 		self.source = source
 		self.cursor = 0
 		self.data = self.getthing()
 		if self.source[self.cursor:].strip()!='':
 			raise ParseError(self,"Didn't parse all input","check for unmatched brackets")
+
 		return self.data
 
 	#scan past comments
@@ -265,24 +255,31 @@ def printdata(data,ntabs=0):
 		elif isinstance(data,basestring) and data.strip()=='':
 			return "'"+data+"'"
 		else:
-			return fix_number_repr(data)
+			return strcons_fix(data)
 
 
 #utility functions
 
 """Force fixed precision output of floats, instead of scientific notation"""
-def fix_number_repr(data):
+def strcons_fix(data):
 	if (data is True) or (data is False):
 		out=data
 	elif is_int(data):
-		out='%i' % int(data)
+		out = '%i' % int(data)
 	elif is_number(data):
-		out='%.14f' % float(data)
+		out = '%.14f' % float(data)
+		out = re.sub(r'(\.\d*[1-9])0*$','\g<1>',out)
 	else:
 		out=data
 	return strcons(out)
 
 def is_number(s):
+	try:
+		l = s.lower()
+		if l=='infinity' or l=='-infinity':
+			return False
+	except AttributeError:
+		pass
 	try:
 		float(s)
 		return True

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-13 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,12 +14,21 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
+/** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
 
 Numbas.queueScript('xml',['base','jme'],function() {
 
+/** @namespace Numbas.xml */
+
 var xml = Numbas.xml = {
+
+	/** DOM parser to use to parse XML
+	 * @type {DOMParser}
+	 * @private
+	 */
 	dp: new DOMParser(),
-	//load in all the XSLT/XML documents
+
+	/** Load in all the XSLT/XML documents from {@link Numbas.rawxml} */
 	loadXMLDocs: function()
 	{
 		var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
@@ -30,11 +39,12 @@ var xml = Numbas.xml = {
 			templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
 			xml.localise(templates[x]);
 		}
-
-		return;
 	},
 
-	//load in a single XML document
+	/** Load in a single XML document
+	 * @param {string} xmlstring
+	 * @returns {XMLDocument}
+	 */
 	loadXML: function(xmlstring)
 	{
 		//parse the XML document
@@ -75,7 +85,20 @@ var xml = Numbas.xml = {
 		return doc;
 	},
 
-	loadFunctions: function(xml,scope)
+	/** @typedef func_data
+	 * @type {object}
+	 * @property {string} name
+	 * @property {string} definition - definition, either in {@link JME} or JavaScript
+	 * @property {string} language - either `jme` or `javascript`
+	 * @property {string} outtype - name of the {@link Numbas.jme.token} type this function returns
+	 * @property {object[]} parameters - dicts of `name` and `type` for the function's parameters.
+	 */
+
+	/** Load user-defined functions from an XML node
+	 * @param {Element} xml
+	 * @returns {func_data[]}
+	 */
+	loadFunctions: function(xml)
 	{
 		var tmpFunctions = [];
 
@@ -114,6 +137,18 @@ var xml = Numbas.xml = {
 		}
 		return tmpFunctions;
 	},
+
+	/** @typedef variable_data_dict
+	 * @type {object}
+	 * @property {Numbas.jme.tree} tree
+	 * @property {string[]} vars - names of variables this variable depends on
+	 */
+
+	/** Load variable definitions from an XML node
+	 * @param {Element} xml
+	 * @param {Numbas.jme.Scope} - scope to compile relative to
+	 * @returns {variable_data_dict[]}
+	 */
 	loadVariables: function(xml,scope) {
 		var variableNodes = xml.selectNodes('variables/variable');	//get variable definitions out of XML
 		if(!variableNodes)
@@ -149,18 +184,30 @@ var xml = Numbas.xml = {
 	},
 
 
-	//lots of the time we have a message stored inside content/html/.. structure
-	//this pulls the message out and serializes it so it can be inserted easily with jQuery
+	/** Lots of the time we have a message stored inside content/html/.. structure.
+	 *
+	 * This pulls the message out and serializes it so it can be inserted easily with jQuery
+	 * @param {Element} node
+	 * @returns {string}
+	 */
 	serializeMessage: function(node)
 	{
 		return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
 	},
 
+	/** Get all the text belonging to an element
+	 * @param {Element} elem
+	 * @returns {string}
+	 */
 	getTextContent: function(elem)
 	{
 		return $(elem).text();
 	},
 
+	/** Set the text content of an element
+	 * @param {Element} elem
+	 * @param {string} text
+	 */
 	setTextContent: function(elem,text)
 	{
 		if(elem.textContent!==undefined)
@@ -169,7 +216,15 @@ var xml = Numbas.xml = {
 			elem.text = text;
 	},
 
-	//try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If obj is null, then the loaded value is just returned
+	/** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
+	 * @param {object} obj - object to fill up
+	 * @param {Element} xmlroot - root XML element
+	 * @param {Element|string} elem - either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`
+	 * @param {string[]} names - names of attributes to load
+	 * @param {string[]} [altnames] - names of object properties to associate with attribute names. If undefined, the attribute name is used.
+	 * @param {object} options - `string` means always return the attribute as a string
+	 * @returns {object} - last attribute loaded
+	 */
 	tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
 	{
 		if(!options)
@@ -245,6 +300,9 @@ var xml = Numbas.xml = {
 		return value;
 	},
 
+	/** Replace every `<localise>` tag with its contents, run through R.js, i.e. get localised strings.
+	 * @param {Element} template
+	 */
 	localise: function(template) {
 		$(template).find('localise').each(function() {
 			var localString = R($(this).text());

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-13 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,18 +14,21 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
-// utility.js
-// convenience functions, extensions to javascript built-ins, etc.
+/** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
 
 Numbas.queueScript('util',['base','math'],function() {
-var util = Numbas.util = {
 
-	// extend(A,B) - derive type B from A
-	// (class inheritance, really)
-	// A should be the constructor for the parent class
-	// B should be a constructor to be called after A's constructor is done.
-	// B's prototype supercedes A's.
-	// returns a constructor for the derived class
+/** @namespace Numbas.util */
+
+var util = Numbas.util = /** @lends Numbas.util */ {
+
+	/** Derive type B from A (class inheritance, really)
+	 *
+	 * B's prototype supercedes A's.
+	 * @param {function} a - the constructor for the parent class
+	 * @param {function} b - a constructor to be called after `a`'s constructor is done.
+	 * @returns {function} a constructor for the derived class
+	 */
 	extend: function(a,b,extendMethods)
 	{ 
 		var c = function() 
@@ -56,10 +59,14 @@ var util = Numbas.util = {
 		return c;
 	},
 
-	//clone an array, with array elements copied too
-	//Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
-	//This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
-	//If 'deep' is true, do a deep copy of each element -- see util.copyobj
+	/** Clone an array, with array elements copied too.
+	 * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
+	 * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
+	 * @param {Array} arr
+	 * @param {boolean} deep - if true, do a deep copy of each element
+	 * @see Numbas.util.copyobj
+	 * @returns {Array}
+	 */
 	copyarray: function(arr,deep)
 	{
 		arr = arr.slice();
@@ -73,8 +80,11 @@ var util = Numbas.util = {
 		return arr;
 	},
 
-	//clone an object
-	//if 'deep' is true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
+	/** Clone an object.
+	 * @param {object} obj
+	 * @param {boolean} deep - if true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
+	 * @returns {object}
+	 */
 	copyobj: function(obj,deep)
 	{
 		switch(typeof(obj))
@@ -103,8 +113,11 @@ var util = Numbas.util = {
 		}
 	},
 
-	//shallow copy object into already existing object
-	//add all src's properties to dest
+	/** Shallow copy an object into an already existing object
+	 * (add all src's properties to dest)
+	 * @param {object} src
+	 * @param {object} dest
+	 */
 	copyinto: function(src,dest)
 	{
 		for(var x in src)
@@ -114,40 +127,64 @@ var util = Numbas.util = {
 		}
 	},
 
-	//generic equality test on JME types
+	/** Generic equality test on {@link Numbas.jme.token}s
+	 * @param {Numbas.jme.token} a
+	 * @param {Numbas.jme.token} b
+	 * @returns {boolean}
+	 */
 	eq: function(a,b) {
 		if(a.type != b.type)
 			return false;
-		switch(a.type) {
-			case 'number':
-				return Numbas.math.eq(a.value,b.value);
-			case 'vector': 
-				return Numbas.vectormath.eq(a.value,b.value);
-			case 'matrix':
-				return Numbas.matrixmath.eq(a.value,b.value);
-			case 'list':
-				return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
-			case 'range':
-				return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
-			case 'name':
-				return a.name == b.name;
-			case 'number':
-			case 'string':
-			case 'boolean':
-				return a.value==b.value;
-			default:
-				throw(new Numbas.Error('util.equality not defined for type %s',a.type));
+		if(a.type in util.equalityTests) {
+			return util.equalityTests[a.type](a,b);
+		} else {
+			throw(new Numbas.Error('util.equality not defined for type %s',a.type));
 		}
 	},
 
-	//and the corresponding not-equal test
+	equalityTests: {
+		'number': function(a,b) {
+			return Numbas.math.eq(a.value,b.value);
+		},
+		'vector': function(a,b) {
+			return Numbas.vectormath.eq(a.value,b.value);
+		},
+		'matrix': function(a,b) {
+			return Numbas.matrixmath.eq(a.value,b.value);
+		},
+		'list': function(a,b) {
+			return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+		},
+		'range': function(a,b) {
+			return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
+		},
+		'name': function(a,b) {
+			return a.name == b.name;
+		},
+		'string': function(a,b) {
+			return a.value==b.value;
+		},
+		'boolean': function(a,b) {
+			return a.value==b.value;
+		},
+	},
+
+
+	/** Generic inequality test on {@link Numbas.jme.token}s
+	 * @param {Numbas.jme.token} a
+	 * @param {Numbas.jme.token} b
+	 * @returns {boolean}
+	 * @see Numbas.util.eq
+	 */
 	neq: function(a,b) {
 		return !util.eq(a,b);
 	},
 
-	//filter out values in `exclude` from the list `list`
-	//`exclude` and `list` are understood to be Numbas TLists, so values are Numbas types
-	//that means, look at element types to decide which equality test to use
+	/** Filter out values in `exclude` from `list`
+	 * @param {Numbas.jme.types.TList} list
+	 * @param {Numbas.jme.types.TList} exclude
+	 * @returns {Array}
+	 */
 	except: function(list,exclude) {
 		return list.filter(function(l) {
 			for(var i=0;i<exclude.length;i++) {
@@ -158,20 +195,28 @@ var util = Numbas.util = {
 		});
 	},
 
-	//test if parameter is an integer
+	/** Test if parameter is an integer
+	 * @param {object} i
+	 * @returns {boolean}
+	 */
 	isInt: function(i)
 	{
 		return parseInt(i,10)==i;
 	},
 
-	//test if parameter is a float
+	/** Test if parameter is a float
+	 * @param {object} f
+	 * @returns {boolean}
+	 */
 	isFloat: function(f)
 	{
 		return parseFloat(f)==f;
 	},
 
-	//test if parameter is a boolean
-	//returns if parameter is a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive
+	/** Test if parameter is a boolean - that is: a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive.
+	 * @param {object} b
+	 * @returns {boolean}
+	 */
 	isBool: function(b)
 	{
 		if(b==null) { return false; }
@@ -181,15 +226,20 @@ var util = Numbas.util = {
 		return b=='false' || b=='true' || b=='yes' || b=='no';
 	},
 
-	// parse a string as HTML, and return true only if it contains non-whitespace text
+	/** Parse a string as HTML, and return true only if it contains non-whitespace text
+	 * @param {string} html
+	 * @returns {boolean}
+	 */
 	isNonemptyHTML: function(html) {
 		var d = document.createElement('div');
 		d.innerHTML = html;
 		return $(d).text().trim().length>0;
 	},
 
-	//parse parameter as a boolean
-	//the boolean value true and the strings 'true' and 'yes' are parsed as the value true, everything else is false.
+	/** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
+	 * @param {object} b
+	 * @returns {boolean}
+	 */
 	parseBool: function(b)
 	{
 		if(!b)
@@ -198,7 +248,12 @@ var util = Numbas.util = {
 		return( b=='true' || b=='yes' );
 	},
 
-	//pad string s on the left with a character p until it is n characters long
+	/** Pad string `s` on the left with a character `p` until it is `n` characters long.
+	 * @param {string} s
+	 * @param {number} n
+	 * @param {string} p
+	 * @returns {string}
+	 */
 	lpad: function(s,n,p)
 	{
 		s=s.toString();
@@ -207,9 +262,12 @@ var util = Numbas.util = {
 		return s;
 	},
 
-	//replace occurences of '%s' with the extra arguments of the function
-	//ie.
-	// formatString('hello %s %s','Mr.','Perfect') => 'hello Mr. Perfect'
+	/** Replace occurences of `%s` with the extra arguments of the function
+	 * @example formatString('hello %s %s','Mr.','Perfect') => 'hello Mr. Perfect'
+	 * @param {string} str
+	 * @param {...string} value - string to substitute
+	 * @returns {string}
+	 */
 	formatString: function(str)
 	{
 		var i=0;
@@ -220,18 +278,50 @@ var util = Numbas.util = {
 		return str;
 	},
 
-	//get rid of the % on the end of percentages and parse as float, then divide by 100
-	//ie.
-	// unPercent('50%') => 0.5
-	// unPercent('50') => 0.5
+	/** Format an amount of currency
+	 * @example currency(5.3,'£','p') => £5.30
+	 * @param {number} n
+	 * @param {string} prefix - symbol to use in front of currency if abs(n) >= 1
+	 * @param {string} suffix - symbol to use in front of currency if abs(n) <= 1
+	 */
+	currency: function(n,prefix,suffix) {
+		if(n<0)
+			return '-'+util.currency(-n,prefix,suffix);
+		else if(n==0) {
+			return prefix+'0';
+		}
+
+		var s = Numbas.math.niceNumber(Math.floor(100*n));
+		if(Math.abs(n)>=1) {
+			if(n%1<0.005)
+				return prefix+Numbas.math.niceNumber(n);
+			s = s.replace(/(..)$/,'.$1');
+			return prefix+s
+		} else {
+			return s+suffix;
+		}
+	},
+
+	/** Get rid of the % on the end of percentages and parse as float, then divide by 100
+	 * @example unPercent('50%') => 0.5
+	 * @example unPercent('50') => 0.5
+	 * @param {string} s
+	 * @returns {number}
+	 */
 	unPercent: function(s)
 	{
 		return (parseFloat(s.replace(/%/,''))/100);
 	},
 
 
-	//pluralise a word
-	//if n is not unity, return plural, else return singular
+	/** Pluralise a word
+	 * 
+	 * If `n` is not unity, return `plural`, else return `singular`
+	 * @param {number} n
+	 * @param {string} singular - string to return if `n` is +1 or -1
+	 * @param {string} plural - string to returns if `n` is not +1 or -1
+	 * @returns {string}
+	 */
 	pluralise: function(n,singular,plural)
 	{
 		n = Numbas.math.precround(n,10);
@@ -241,16 +331,23 @@ var util = Numbas.util = {
 			return plural;
 	},
 
-	//make the first letter in the string a capital
+	/** Make the first letter in the string a capital
+	 * @param {string} str
+	 * @returns {string}
+	 */
 	capitalise: function(str) {
-		return str.replace(/[a-z]/,function(c){return c.toUpperCase()});
+		return str.replace(/^[a-z]/,function(c){return c.toUpperCase()});
 	},
 
-	//split a string up according to brackets
-	//strips out nested brackets
-	//
-	//so 
-	// splitbrackets('a{{b}}c','{','}') => ['a','b','c']
+	/** Split a string up according to brackets
+	 *
+	 * Strips out nested brackets
+	 * @example splitbrackets('a{{b}}c','{','}') => ['a','b','c']
+	 * @param {string} t - string to split
+	 * @param {string} lb - left bracket character
+	 * @param {string} rb - right bracket character
+	 * @returns {string[]} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
+	 */
 	splitbrackets: function(t,lb,rb)
 	{
 		var o=[];
@@ -293,38 +390,19 @@ var util = Numbas.util = {
 		return o;
 	},
 
-	contentsplitbrackets: function(t)
-	{
-		var o=[];
-		var l=t.length;
-		var s=0;
-		for(var i=0;i<l;i++)
-		{
-			if(t.charAt(i)=='$')
-			{
-				o.push(t.slice(s,i));
-				o.push('$');
-				s=i+1;
-			}
-			else if (i<l-1 && t.charAt(i)=='\\' && (t.charAt(i+1)=='[' || t.charAt(i+1)==']'))
-			{
-				o.push(t.slice(s,i));
-				o.push(t.slice(i,i+2));
-				s=i+2;
-			}
-		}
-		if(s<l)
-			o.push(t.slice(s));
-		return o;
-	},
-
-	//because XML doesn't like having ampersands hanging about, replace them with escape codes
+	/** Because XML doesn't like having ampersands hanging about, replace them with escape codes
+	 * @param {string} str - XML string
+	 * @returns {string}
+	 */
 	escapeHTML: function(str)
 	{
 		return str.replace(/&/g,'&amp;');
 	},
 
-	//create a comparison function which sorts objects by a particular property
+	/** Create a comparison function which sorts objects by a particular property
+	 * @param {string} prop - name of the property to sort by
+	 * @returns {function}
+	 */
 	sortBy: function(prop) {
 		return function(a,b) {
 			if(a[prop]>b[prop])
@@ -336,8 +414,10 @@ var util = Numbas.util = {
 		}
 	},
 
-	// from http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-	// got rid of the line to convert to 32 bit, because I don't need it
+	/** Hash a string into a string of digits
+	 * 
+	 * From {@link http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/}
+	 */
 	hashCode: function(str){
 		var hash = 0, i, c;
 		if (str.length == 0) return hash;
@@ -359,16 +439,19 @@ var endDelimiters = {
     '$$': /[^\\]\$\$/,
     '\\[': /[^\\]\\\]/
 }
-var re_startMaths = /\$\$|\$|\\\(|\\\[|\\begin\{(\w+)\}/;
+var re_startMaths = /(?:^|[^\\])\$\$|(?:^|[^\\])\$|\\\(|\\\[|\\begin\{(\w+)\}/;
 
-//split content text up by TeX maths delimiters
-//includes delimiters, since there are two kinds
-//ie.
-// contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
-//
-//if tex is split across several strings (e.g. text nodes with <br> in the middle), re_end can be used to store the end delimiter for unfinished maths 
-//bits.re_end stores the delimiter if the returned array has unfinished maths at the end
-util.contentsplitbrackets = function(txt,re_end) {
+/** Split a string up by TeX delimiters (`$`, `\[`, `\]`)
+ *
+ * `bits.re_end` stores the delimiter if the returned array has unfinished maths at the end
+ * @param {string} txt - string to split up
+ * @param {RegExp} re_end - If tex is split across several strings (e.g. text nodes with <br> in the middle), this can be used to give the end delimiter for unfinished maths 
+ * @returns {string[]} bits - stuff outside TeX, left delimiter, TeX, right delimiter, stuff outside TeX, ...
+ * @example contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
+ * @memberof Numbas.util
+ * @method
+ */
+var contentsplitbrackets = util.contentsplitbrackets = function(txt,re_end) {
     var i = 0;
     var m;
     var startDelimiter='', endDelimiter='';
@@ -399,7 +482,9 @@ util.contentsplitbrackets = function(txt,re_end) {
 				var environment = m[1];
 				re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
 			}
-			else {
+			else if(startDelimiter.match(/.\$/)) {
+				re_end = endDelimiters[startDelimiter.slice(1)];
+			} else {
 				re_end = endDelimiters[startDelimiter];    // get the corresponding end delimiter for the matched start delimiter
 			}
 		}

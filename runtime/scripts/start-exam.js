@@ -1,5 +1,5 @@
 ﻿/*
-Copyright 2011-13 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,23 +14,29 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
+/** @file Start the exam */
+
 Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
-	// Initialise the exam:
-	// - Connect to the LMS, which might have saved student answers
-	// - Load the exam XML and the XSL templates
-	// - create and initialise the exam object
-	// - display the frontpage
-	// This function is called when all the other scripts have been loaded and executed. 
-	// It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
+	/**
+	 * Initialise the exam:
+	 *
+	 * - Connect to the LMS, which might have saved student answers
+	 * - Load the exam XML and the XSL templates
+	 * - create and initialise the exam object
+	 * - display the frontpage
+	 *
+	 * This function is called when all the other scripts have been loaded and executed. 
+	 * It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
+	 * @memberof Numbas
+	 * @method
+	 */
 	var init = Numbas.init = function()
 	{
-
+	$(document).ready(function() {
 		var seed = Math.seedrandom();
 
 		var job = Numbas.schedule.add;
-
-		//job(function(){Numbas.timing.start()});			//start timing (for performance tuning)
 
 		job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
@@ -86,9 +92,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
 				break;
 			}
-			//job(function(){Numbas.timing.end('init');});			//end performance timing 
 		});
 
+	});
 	}
 
 });

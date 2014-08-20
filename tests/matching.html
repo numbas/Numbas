@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Pattern-matching algebraic expressions</title>
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/R/R.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="../locales/en-GB.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
+
+		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0.js"></script>
+
+		<style type="text/css">
+			body {
+				font-size: 17px;
+				font-family: sans-serif;
+				max-width: 700px;
+				margin: 0 auto;
+			}
+			label {
+				display: block;
+				clear: both;
+				line-height: 2em;
+			}
+			label .label-text {
+				display: inline-block;
+				min-width: 150px;
+				margin-right: 1em;
+			}
+			label input {
+				font-family: monospace;
+				padding: 0.5em;
+				margin-bottom: 0.5em;
+			}
+			label input[type=text] {
+				width: 500px;
+			}
+
+			.examples .example {
+				cursor: pointer;
+			}
+			.examples .example:hover {
+				background: #eee;
+			}
+
+			#groups {
+				border-spacing 2px;
+			}
+			#groups .name {
+				min-width: 10em;
+			}
+			#groups td {
+				font-family: monospace;
+				border-bottom: 1px dashed;
+				padding: 0.5em 0;
+			}
+
+			.commands dt code {
+				display: inline-block;
+				background: #eee;
+				padding: 2px 5px;
+				margin-bottom: 0.2em;
+			}
+			.commands dd {
+				margin-bottom: 0.5em;
+			}
+
+		</style>
+	</head>
+	<body>
+		<h1>Pattern-matching algebraic expressions!</h1>
+
+		<form>
+			<div>
+				<label>
+					<span class="label-text">Pattern:</span>
+					<input type="text" data-bind="value: pattern, valueUpdate: 'afterkeydown'"/>
+				</label>
+			</div>
+			<div>
+				<label>
+					<span class="label-text">Expression to test:</span>
+					<input type="text" data-bind="value: expression, valueUpdate: 'afterkeydown'"/>
+				</label>
+			</div>
+			<div>
+				<label>
+					<span class="label-text">Use commutativity?</span>
+					<input type="checkbox" data-bind="checked: doCommute"/>
+				</label>
+			</div>
+		</form>
+
+		<h2>Match</h2>
+
+		<div data-bind="if: !matches()">
+			<p>&#x2717; <span data-bind="html: error"></span></p>
+		</div>
+
+		<div class="matches" data-bind="if: matches">
+			<p>Match! &#x2713;</p>
+			<div data-bind="if: matches().length">
+				<h3>Captured groups</h3>
+				<table id="groups">
+					<thead>
+						<th>Group</th>
+						<th>Expression</th>
+					</thead>
+					<tbody data-bind="foreach: matches">
+						<tr>
+							<td class="name" data-bind="text: name"></td>
+							<td data-bind="text: expression"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="examples">
+			<h2>Examples</h2>
+			<ul data-bind="foreach: examples">
+				<li><span class="example" data-bind="text: description, click: $root.setExample"></span></li>
+			</ul>
+		</div>
+
+		<div class="commands">
+			<h2>Special elements</h2>
+			<dl>
+				<dt><code>?</code></dt>
+				<dd>Match anything</dd>
+				<dt><code>??</code></dt>
+				<dd>Match anything or nothing (optional term)</dd>
+				<dt><code>expr;g</code></dt>
+				<dd>Capture <code>expr</code> in the group named <code>g</code>.</dd>
+				<dt><code>m_any(expr1,expr2,...)</code></dt>
+				<dd>Match any of the expressions <code>exprN</code></dd>
+				<dt><code>m_all(expr)</code></dt>
+				<dd>Capture all terms matching <code>expr</code></dd>
+				<dt><code>m_pm(expr)</code></dt>
+				<dd>Capture <code>expr</code> or <code>-(expr)</code>.</dd>
+				<dt><code>m_not(expr)</code></dt>
+				<dd>Match anything <em>except</em> <code>expr</code></dd>
+				<dt><code>m_uses(name1,name2,...)</code></dt>
+				<dd>Match any expression which uses the named variables</dd>
+				<dt><code>m_commute(expr)</code></dt>
+				<dd>Match the terms in <code>expr</code> in any order, following the laws of commutativity. (Use if you only want to use commutativity in certain places)</dd>
+				<dt><code>m_nothing</code></dt>
+				<dd>Match nothing. Useful as an empty term to set up a sum where you want all terms to match one pattern.</dd>
+			</dl>
+		</div>
+
+		<script type="text/javascript">
+			Numbas.queueScript('seedrandom',[],function() {});
+			Numbas.queueScript('knockout',[],function() {});
+			Numbas.queueScript('sarissa',[],function() {});
+			Numbas.queueScript('go',['jme'],function() {
+				function ViewModel() {
+					var vm = this;
+					this.pattern = ko.observable('');
+					this.expression = ko.observable('');
+					this.doCommute = ko.observable(true);
+					this.error = ko.observable('');
+
+					var simplifyRuleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.rulesets);
+
+					this.matches = ko.computed(function() {
+						try {
+							var pattern = Numbas.jme.compile(this.pattern());
+						} catch(e) {
+							this.error('Invalid pattern');
+							return null;
+						}
+						try {
+							var expression = Numbas.jme.compile(this.expression());
+						} catch(e) {
+							this.error('Invalid expression');
+							return null;
+						}
+						try {
+							var match = Numbas.jme.display.matchTree(pattern,expression,this.doCommute());
+							if(match) {
+								var out = [];
+								for(var name in match) {
+									out.push({
+										name: name,
+										expression: Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(match[name],simplifyRuleset,Numbas.jme.builtinScope))
+									});
+								}
+								this.error('');
+								out.sort(function(a,b){return a.name>b.name});
+								return out;
+							} else {
+								this.error('No match');
+								return null;
+							}
+						} catch(e) {
+							this.error('Error');
+							console.log(e);
+							console.log(e.stack);
+							return null;
+						}
+					},this).extend({throttle:100});
+
+					if(localStorage) {
+						this.pattern(localStorage.pattern || '');
+						this.expression(localStorage.expression || '');
+						ko.computed(function() {
+							localStorage.pattern = this.pattern();
+							localStorage.expression = this.expression();
+						},this);
+					}
+
+					this.examples = [
+						{
+							description: "Get all x terms",
+							pattern: "m_all(m_pm(m_all(??)*m_any(x,x^?)));xs+m_all(??);rest",
+							expression: "C+x-x+2x-2x+(a+1)x+x^2+2x^3+(1+2)x^(n+1)-2"
+						},
+						{
+							description: "Get the coefficient and degree of a term",
+							pattern: "m_pm(m_all(??);coefficient*m_any(x,x^?;degree))",
+							expression: "2*(a+1)x^2*3"
+						},
+						{
+							description: "Get both sides of an equation",
+							pattern: "?;left=?;right",
+							expression: "cos(x)^2 + sin(x)^2 = 1"
+						},
+						{
+							description: "Check x terms are collected on one side",
+							pattern: "m_uses(x);xside = m_not(m_uses(x));otherside",
+							expression: "1=cos(x)^2 + sin(x)^2"
+						},
+						{
+							description: "Factorised quadratic",
+							pattern: "(m_pm(??*x);a+?;b)*(m_pm(??*x);c+?;d)",
+							expression: "(2x+3)(3-x)"
+						},
+						{
+							description: "Capture multiples of powers of x and y",
+							pattern: "m_all( m_any( ??x, ??y, ??x^??, ??y^??, m_any(x,x^??)*m_any(y,y^??)*?? ) );terms + m_all(??;rest)",
+							expression: "2x*y^2+(2*b)*x+x*y*3+3x^2y^3+c+x^3+3y^2+x+y+3"
+						}
+					]
+
+					this.setExample = function(example) {
+						vm.pattern(example.pattern);
+						vm.expression(example.expression);
+					}
+				}
+				var vm = window.vm = new ViewModel();
+				ko.applyBindings(vm);
+			});
+		</script>
+	</body>
+</html>

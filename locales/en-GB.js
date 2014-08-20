@@ -1,6 +1,6 @@
 Numbas.queueScript('en-GB',['R'],function() {
 /*
-Copyright 2011 Newcastle University
+Copyright 2011-14 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ R.registerLocale('en-GB',{
 	'feedback.you were awarded': "You were awarded %s.",
 	'feedback.taken away': "%s %s taken away.",
 
-	'jme.tokenise.invalid': "Invalid expression: %s",
+	'jme.tokenise.invalid': "Invalid expression: <code>%s</code>",
 
 	'jme.shunt.not enough arguments': "Not enough arguments for operation %s",
 	'jme.shunt.no left bracket in function': "No matching left bracket in function application or tuple",
@@ -141,6 +141,8 @@ R.registerLocale('en-GB',{
 	'vectormath.cross.matrix too big': "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 
 	'part.with steps answer prompt': 'Answer: ',
+	
+	'part.script.error': "Error in part %s custom script %s: %s",
 
 	'part.marking.steps no matter': "Because you received full marks for the part, your answers to the steps aren't counted.",
 	'part.marking.steps change single': "You were awarded <strong>%s</strong> mark for your answers to the steps",
@@ -165,7 +167,7 @@ R.registerLocale('en-GB',{
 	'part.jme.answer missing': "Correct answer for a JME part is missing (%s)",
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",
-	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.<br/>%s",
+	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.<br/>%s.",
 	'part.jme.marking.correct': "Your answer is numerically correct.",
 	'part.jme.must-have bits': '<span class="monospace">%s</span>',
 	'part.jme.must-have one': "Your answer must contain: %s",
@@ -181,6 +183,8 @@ R.registerLocale('en-GB',{
 
 	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
 	'part.numberentry.answer invalid': "You did not enter a valid number.",
+	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
+	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
 
 	'part.mcq.choices missing': "Definition of choices is missing from a Multiple Response part (%s)",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
@@ -194,6 +198,8 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.preamble.error': "Error in question %i preamble: %s",
+
 	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
