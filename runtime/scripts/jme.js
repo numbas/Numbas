@@ -106,10 +106,13 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				//work out if operation is being used prefix or postfix
 				var nt;
 				var postfix = false;
+				var prefix = false;
 				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) )
 				{
-					if(token in prefixForm)
+					if(token in prefixForm) {
 						token = prefixForm[token];
+						prefix = true;
+					}
 				}
 				else
 				{
@@ -118,7 +121,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 						postfix = true;
 					}
 				}
-				token=new TOp(token,postfix);
+				token=new TOp(token,postfix,prefix);
 			}
 			else if (result = expr.match(jme.re.re_name))
 			{
@@ -276,10 +279,22 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				
 			case "op":
 
-				var o1 = precedence[tok.name];
-				while(stack.length && stack[stack.length-1].type=="op" && ((o1 > precedence[stack[stack.length-1].name]) || (leftAssociative(tok.name) && o1 == precedence[stack[stack.length-1].name]))) 
-				{	//while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
-					addoutput(stack.pop());
+				if(!tok.prefix) {
+					var o1 = precedence[tok.name];
+					while(
+							stack.length && 
+							stack[stack.length-1].type=="op" && 
+							(
+							 (o1 > precedence[stack[stack.length-1].name]) || 
+							 (
+							  leftAssociative(tok.name) && 
+							  o1 == precedence[stack[stack.length-1].name]
+							 )
+							)
+					) 
+					{	//while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
+						addoutput(stack.pop());
+					}
 				}
 				stack.push(tok);
 				break;
@@ -1264,12 +1279,14 @@ TFunc.prototype.vars = 0;
  * @property {string} name
  * @property {number} vars - Arity of the operation
  * @property {boolean} postfix
+ * @property {boolean} prefix
  * @properrty type "op"
  * @constructor
  * @param {string} op - Name of the operation
  * @param {boolean} postfix
+ * @param {boolean} prefix
  */
-var TOp = types.TOp = types.op = function(op,postfix)
+var TOp = types.TOp = types.op = function(op,postfix,prefix)
 {
 	var arity = 2;
 	if(jme.arity[op]!==undefined)
@@ -1277,6 +1294,7 @@ var TOp = types.TOp = types.op = function(op,postfix)
 
 	this.name = op;
 	this.postfix = postfix || false;
+	this.prefix = prefix || false;
 	this.vars = arity;
 }
 TOp.prototype.type = 'op';
@@ -1334,8 +1352,8 @@ var precedence = jme.precedence = {
 	';': 0,
 	'fact': 1,
 	'not': 1,
-	'+u': 1.5,
-	'-u': 1.5,
+	'+u': 2.5,
+	'-u': 2.5,
 	'^': 2,
 	'*': 3,
 	'/': 3,

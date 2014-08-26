@@ -122,14 +122,14 @@
 					deepCloseEqual(tokenise('||'),[new types.TOp('or')],'||');
 					deepCloseEqual(tokenise('|'),[new types.TOp('|')],'|');
 					deepCloseEqual(tokenise('*'),[new types.TOp('*')],'*');
-					deepCloseEqual(tokenise('+'),[new types.TOp('+u')],'+');
-					deepCloseEqual(tokenise('-'),[new types.TOp('-u')],'-');
+					deepCloseEqual(tokenise('+'),[new types.TOp('+u',false,true)],'+');
+					deepCloseEqual(tokenise('-'),[new types.TOp('-u',false,true)],'-');
 					deepCloseEqual(tokenise('/'),[new types.TOp('/')],'/');
 					deepCloseEqual(tokenise('^'),[new types.TOp('^')],'^');
 					deepCloseEqual(tokenise('<'),[new types.TOp('<')],'<');
 					deepCloseEqual(tokenise('>'),[new types.TOp('>')],'>');
 					deepCloseEqual(tokenise('='),[new types.TOp('=')],'=');
-					deepCloseEqual(tokenise('!'),[new types.TOp('not')],'!');
+					deepCloseEqual(tokenise('!'),[new types.TOp('not',false,true)],'!');
 					deepCloseEqual(tokenise('not'),[new types.TOp('not')],'not');
 					deepCloseEqual(tokenise('and'),[new types.TOp('and')],'and');
 					deepCloseEqual(tokenise('or'),[new types.TOp('or')],'or');
@@ -239,6 +239,8 @@
 					closeEquals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
 					closeEquals(evaluate('3*2^-1').value,1.5,'unary minus with power');
 					closeEquals(evaluate('3+--2').value,5,'lots of unary minus in a chain');
+					closeEquals(evaluate('-2^2').value,-4,'unary minus before a power');
+					closeEquals(evaluate('-2+3').value,1,'unary minus before addition');
 					deepCloseEqual(evaluate('-vector(1,2,-3.3)').value,[-1,-2,3.3],'unary minus: -vector(1,2,-3.3)==vector(-1,-2,3.3)');
 					deepCloseEqual(evaluate('-matrix([1,0],[2,3])').value,[[-1,0],[-2,-3]],'unary minus: -matrix([1,0],[2,3])==matrix([-1,0],[-2,-3]))');
 					ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
