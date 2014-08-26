@@ -688,7 +688,7 @@ class Restriction:
 		restriction = makeTree([self.name,'message'])
 
 		restriction.attrib = {'partialcredit': strcons_fix(self.partialCredit)+'%', 'showstrings': strcons_fix(self.showStrings)}
-		if self.length>=0:
+		if int(self.length)>=0:
 			restriction.attrib['length'] = strcons_fix(self.length)
 
 		for s in self.strings:
