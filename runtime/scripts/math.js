@@ -1234,7 +1234,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
 	 */
-	gcf: function(a,b) {
+	gcd: function(a,b) {
 		if(a.complex || b.complex)
 			throw(new Numbas.Error('math.gcf.complex'));
 
@@ -1388,6 +1388,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	}
 
 };
+math.gcf = math.gcd;
 
 var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
 
