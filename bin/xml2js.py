@@ -4,7 +4,7 @@
 #   you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#	   http://www.apache.org/licenses/LICENSE-2.0
 #
 #   Unless required by applicable law or agreed to in writing, software
 #   distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,7 +37,11 @@ def xml2js(options):
 				s = x[:-5]+': \"'+encode(open(os.path.join(xsltdir,x),encoding='utf-8').read())+'\"'
 				all+=s
 
-	extensionfiles = ['extensions/'+x+'/'+x+'.js'for x in [os.path.split(y)[1] for y in options.extensions]]
+	extensionfiles = []
+	for extension in options.extensions:
+		name = os.path.split(extension)[1]
+		if os.path.exists(os.path.join(extension,name+'.js')):
+			extensionfiles.append('extensions/'+name+'/'+name+'.js')
 
 	out = """Numbas.queueScript('settings',%s,function() {
 Numbas.rawxml = {

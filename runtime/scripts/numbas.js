@@ -193,8 +193,18 @@ Numbas.tryInit = function()
 	}
 }
 
-// 'base' gives the third-party libraries on which Numbas depends
-Numbas.queueScript('base',['jquery','R','seedrandom','knockout','sarissa'],function() {
-});
+/** A wrapper round {@link Numbas.queueScript} to register extensions easily. 
+ * @param {string} name - unique name of the extension
+ * @param {Array.string} deps - A list of other scripts which need to be run before this one can be run
+ * @param {function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
+ */
+Numbas.addExtension = function(name,deps,callback) {
+    Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
+        var extension = Numbas.extensions[name] = {
+            scope: new Numbas.jme.Scope()
+        };
+        callback(extension);
+    });
+}
 
 })();

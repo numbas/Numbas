@@ -18,12 +18,10 @@ Copyright 2011 Newcastle University
  This extension allows you to use jsxGraph to create pretty graphs inside question content.
 */
 
-Numbas.queueScript('extensions/jsxgraph/jsxgraph.js',['display','util','jme'],function() {
+Numbas.addExtension('jsxgraph',['display','util','jme'],function(jsxgraph) {
 	var jme = Numbas.jme;	
 	var util = Numbas.util;
 	var math = Numbas.math;
-
-	var jsxgraph = Numbas.extensions.jsxgraph = {};
 
 	var boards = 0;
 	var boardholder;
