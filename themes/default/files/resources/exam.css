@@ -516,12 +516,6 @@ div.part {
 	font-style: italic;
 }
 
-.advice {
-	background: #cfc;
-	border: 1px solid;
-	margin: 1em 0;
-}
-
 .multiplechoice li {
 	list-style: none;
 	padding-right: 2em;

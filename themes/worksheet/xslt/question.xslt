@@ -132,7 +132,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="advice">
 	<div class="advice">
-		<h3><xsl:value-of select="../@number+1"/>. </h3>
+		<h2 class="number"><xsl:value-of select="../@number+1"/>. </h2>
 		<span id="adviceDisplay">
 			<xsl:apply-templates />
 		</span>

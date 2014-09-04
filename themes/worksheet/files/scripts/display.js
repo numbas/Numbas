@@ -220,7 +220,7 @@ display.ExamDisplay.prototype =
 		var e = this.e;
 
 		//display exam title at top of page
-		this.htmlContext.find('#examBanner .name').html(e.name);
+		this.htmlContext.find('#examBanner .name').html(e.settings.name);
 		this.htmlContext.find('.examID .id').html(e.id);
 
 		for(var i=0;i<e.numQuestions;i++) {
