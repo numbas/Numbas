@@ -1,3 +1,8 @@
+// 'base' gives the third-party libraries on which Numbas depends
+Numbas.queueScript('base',['jquery','R','seedrandom','knockout','sarissa'],function() {
+});
+
+
 Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 	Numbas.init = function() {
 		var job = Numbas.schedule.add;
