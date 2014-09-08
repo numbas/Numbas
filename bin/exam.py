@@ -845,12 +845,12 @@ class MultipleChoicePart(Part):
 	
 		if 'matrix' in data:
 			part.matrix = data['matrix']
-			if isinstance(part.matrix,list) and (not isinstance(part.matrix[0],list)):	#so you can give just one row without wrapping it in another array
+			if isinstance(part.matrix,list) and len(part.matrix)>0 and (not isinstance(part.matrix[0],list)):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
 		if 'distractors' in data:
 			part.distractors = data['distractors']
-			if not isinstance(part.distractors[0],list):
+			if len(part.distractors)>0 and (not isinstance(part.distractors[0],list)):
 				part.distractors = [[x] for x in part.distractors]
 
 		return part
