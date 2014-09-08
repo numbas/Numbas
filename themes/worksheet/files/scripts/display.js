@@ -256,7 +256,14 @@ display.QuestionDisplay.prototype =
 		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
-		qd.css = $('<style type="text/css">').text(q.preamble.css);
+		qd.css = document.createElement('style');
+		qd.css.setAttribute('type','text/css');
+		if(qd.css.styleSheet) {
+			qd.css.styleSheet.cssText = q.preamble.css;
+		} else {
+			qd.css.appendChild(document.createTextNode(q.preamble.css));
+		}
+
 
 		Numbas.schedule.add(function()
 		{
