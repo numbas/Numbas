@@ -478,11 +478,11 @@ var contentsplitbrackets = util.contentsplitbrackets = function(txt,re_end) {
 			startText = txt.slice(0,start);
 			txt = txt.slice(startChop);
 
-			if(startDelimiter.match(/^\\begin/)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
+			if(startDelimiter.match(/^\\begin/m)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
 				var environment = m[1];
 				re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
 			}
-			else if(startDelimiter.match(/.\$/)) {
+			else if(startDelimiter.match(/^(?:.|[\r\n])\$/m)) {
 				re_end = endDelimiters[startDelimiter.slice(1)];
 			} else {
 				re_end = endDelimiters[startDelimiter];    // get the corresponding end delimiter for the matched start delimiter
