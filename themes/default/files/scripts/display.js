@@ -860,7 +860,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 
 	/** Called when the student leaves the question */
 	leave: function() {
-		this.css.remove();
+		$(this.css).remove();
 	},
 
 	/** Show this question's advice */
