@@ -517,8 +517,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		var ticks = [];
 		var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
 		var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
-		if(w==0 || h==0)
-			return;
+		if(w==0 || h==0) {
+			out.ticks = [];
+			return out;
+		}
 		for(var i=0;i<w;i++)
 		{
 			ticks.push([]);
