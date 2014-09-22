@@ -213,13 +213,21 @@ Numbas.addExtension('stats',['math','jme'],function(stats) {
 
 	var statsScope = stats.scope;
 
-	var listFuncs = 'sum sumsqrd sumsqerr product min max mean meansqerr geomean median cumsum diff mode range variance stdev meandev meddev coeffvar quartiles covariance corrcoeff'.split(' ');
+	var listFuncs = 'sum sumsqrd sumsqerr product min max mean meansqerr geomean median cumsum diff range variance stdev meandev meddev coeffvar quartiles covariance corrcoeff'.split(' ');
 	for(var i=0;i<listFuncs.length;i++) {
 		var fn = listFuncs[i];
 		statsScope.addFunction(new funcObj(fn, [TList],TNum, jStat[fn], {unwrapValues:true}));
 	}
 	statsScope.addFunction(new funcObj('stdev', [TList,TBool],TNum, jStat.stdev, {unwrapValues:true}));
 	statsScope.addFunction(new funcObj('variance', [TList,TBool],TNum, jStat.variance, {unwrapValues:true}));
+	statsScope.addFunction(new funcObj('mode',[TList],TList,function(l) { 
+		var modes = jStat.mode(l); 
+		if(typeof(modes)==='number') { 
+			modes = [modes]; 
+		}
+		return modes;
+	}, {unwrapValues: true}
+	));
 
 	// fill in geometric distribution because jStat doesn't have it
 	if(!('geometric' in jStat)) {
