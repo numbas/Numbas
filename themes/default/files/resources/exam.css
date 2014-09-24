@@ -803,6 +803,10 @@ div.jqi button.jqidefaultbutton{
 		display: inherit;
 	}
 
+	.question {
+		overflow-y: hidden;	/* Fixes the fact that Chrome draws a scrollbar in questions, for some reason */
+	}
+
 	.penaltyMessage {
 		display: none;
 	}
