@@ -199,6 +199,7 @@ Numbas.tryInit = function()
  * @param {function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
 Numbas.addExtension = function(name,deps,callback) {
+	deps.push('jme');
     Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
