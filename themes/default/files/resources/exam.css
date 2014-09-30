@@ -528,7 +528,7 @@ button:hover, button:focus {
 
 /* question bits */
 
-.statement table, .prompt table, .advice table {
+.statement table, .prompt table, .adviceDisplay table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -863,5 +863,13 @@ div.jqi button.jqidefaultbutton{
 	}
 	button {
 		display: none;
+	}
+}
+
+/* Try to allow scrolling for statement or prompt elements that are too wide */
+@media screen {
+	.question, .statement > span > p, .prompt > span > p, .adviceDisplay > span > p {
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 }
