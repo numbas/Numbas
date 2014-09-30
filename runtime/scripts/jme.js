@@ -993,6 +993,9 @@ var Scope = jme.Scope = function(scopes) {
 	}
 }
 Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
+	/** Add a JME function to the scope.
+	 * @param {jme.funcObj} fn - function to add
+	 */
 	addFunction: function(fn) {
 		if(!(fn.name in this.functions))
 			this.functions[fn.name] = [fn];
