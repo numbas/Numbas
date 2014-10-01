@@ -565,7 +565,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				}
 				break;
 			default:
-				out = math.precround(n,10)+'';
+				if(Math.abs(n)<1e-8) {
+					out = n+'';
+				} else {
+					out = math.precround(n,10)+'';
+				}
 			}
 			switch(piD)
 			{
