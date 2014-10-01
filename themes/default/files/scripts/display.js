@@ -1807,7 +1807,7 @@ function showScoreFeedback(obj,settings)
 				marks: niceNumber(marks),
 				score: niceNumber(score),
 				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
-				scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
+				scoreString: niceNumber(score)+' '+util.pluralise(score,R('mark'),R('marks'))
 			};
 			if(revealed && !answered())
 				return R('question.score feedback.unanswered');
