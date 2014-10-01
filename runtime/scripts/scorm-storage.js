@@ -284,7 +284,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 			return;
 		var eobj = 
 		{
-			timeRemaining: exam.timeRemaining,
+			timeRemaining: exam.timeRemaining || 0,
+			duration: exam.settings.duration || 0,
 			questionSubset: exam.questionSubset,
 			start: exam.start
 		};
@@ -400,7 +401,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 		var score = parseInt(this.get('score.raw'),10);
 
-		return {timeRemaining: eobj.timeRemaining,
+		return {timeRemaining: eobj.timeRemaining || 0,
+				duration: eobj.duration || 0 ,
 				questionSubset: eobj.questionSubset,
 				start: eobj.start,
 				score: score,
@@ -549,7 +551,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	setSessionTime: function()
 	{
-		var timeSpent = new Date((this.exam.duration - this.exam.timeRemaining)*1000);
+		var timeSpent = new Date((this.exam.settings.duration - this.exam.timeRemaining)*1000);
 		var sessionTime = 'PT'+timeSpent.getHours()+'H'+timeSpent.getMinutes()+'M'+timeSpent.getSeconds()+'S';
 		this.set('session_time',sessionTime);
 	},

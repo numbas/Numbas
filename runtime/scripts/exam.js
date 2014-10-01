@@ -310,7 +310,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 			this.settings.numQuestions = this.questionSubset.length;
 			this.start = new Date(suspendData.start);
 			if(this.settings.allowPause) {
-				this.timeRemaining = suspendData.timeRemaining;
+				this.timeRemaining = this.settings.duration - (suspendData.duration-suspendData.timeRemaining);
 			}
 			else {
 				this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);
