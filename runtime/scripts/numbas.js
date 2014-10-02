@@ -54,16 +54,9 @@ Numbas.debug = function(msg,noStack)
  */
 Numbas.showError = function(e)
 {
-	var message;
-	if(e.stack)
-	{
-		message=e.stack.replace(/\n/g,'<br/>\n');
-	}
-	else
-	{
-		message = (e || e.message)+'';
-	}
-	Numbas.debug(e.stack || message);
+	var message = (e || e.message)+'';
+	message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
+	Numbas.debug(message);
 	Numbas.display.showAlert(message);
 	throw(e);
 };
@@ -74,6 +67,11 @@ Numbas.showError = function(e)
  */
 Numbas.Error = function(message)
 {
+	Error.call(this);
+	if(Error.captureStackTrace) {
+		Error.captureStackTrace(this, this.constructor);
+	}
+
 	this.name="Numbas Error";
 	this.originalMessage = message;
 	this.message = R.apply(this,arguments);
@@ -157,6 +155,9 @@ Numbas.queueScript = function(file, deps, callback)
 /** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
 Numbas.tryInit = function()
 {
+	if(Numbas.dead) {
+		return;
+	}
 
 	//put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
 	var stack = [];
@@ -189,7 +190,14 @@ Numbas.tryInit = function()
 	}
 	for(var x in scriptreqs)
 	{
-		tryRun(scriptreqs[x]);
+		try {
+			tryRun(scriptreqs[x]);
+		} catch(e) {
+			alert(e+'');
+			Numbas.debug(e.stack);
+			Numbas.dead = true;
+			return;
+		}
 	}
 }
 

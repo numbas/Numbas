@@ -492,6 +492,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
 			else
+				tok.unboundName = true;
 				return tok;
 			break;
 		case 'op':
@@ -531,8 +532,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				}
 				if(tok.fn)
 					return tok.fn.evaluate(tree.args,scope);
-				else
+				else {
+					for(var i=0;i<=tree.args.length;i++) {
+						if(tree.args[i].unboundName) {
+							throw(new Numbas.Error('jme.typecheck.no right type unbound name',tree.args[i].name));
+						}
+					}
 					throw(new Numbas.Error('jme.typecheck.no right type definition',op));
+				}
 			}
 		default:
 			return tok;

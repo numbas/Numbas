@@ -62,7 +62,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		var preamble='fn.jfn=(function('+paramNames.join(',')+'){';
 		var math = Numbas.math;
 		var util = Numbas.util;
-		var jfn = eval(preamble+fn.definition+'})');
+		try {
+			var jfn = eval(preamble+fn.definition+'})');
+		} catch(e) {
+			throw(new Numbas.Error('jme.variables.syntax error in function definition'));
+		}
 		return function(args,scope) {
 			args = args.map(function(a){return jme.unwrapValue(a)});
 			args.push(scope);
@@ -109,14 +113,18 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		fn.name = tmpfn.name;
 		fn.language = tmpfn.language;
 
-		switch(fn.language)
-		{
-		case 'jme':
-			fn.evaluate = jme.variables.makeJMEFunction(fn,scope);
-			break;
-		case 'javascript':
-			fn.evaluate = jme.variables.makeJavascriptFunction(fn,scope);
-			break;
+		try {
+			switch(fn.language)
+			{
+			case 'jme':
+				fn.evaluate = jme.variables.makeJMEFunction(fn,scope);
+				break;
+			case 'javascript':
+				fn.evaluate = jme.variables.makeJavascriptFunction(fn,scope);
+				break;
+			}
+		} catch(e) {
+			throw(new Numbas.Error('jme.variables.error making function',fn.name,e.message));
 		}
 		return fn
 	},
@@ -182,12 +190,20 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 					jme.variables.computeVariable(x,todo,scope,newpath);
 				}
 				catch(e) {
-					throw(new Numbas.Error('jme.variables.error computing dependency',x));
+					if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
+						throw(e);
+					} else {
+						throw(new Numbas.Error('jme.variables.error computing dependency',x));
+					}
 				}
 			}
 		}
 
-		scope.variables[name] = jme.evaluate(v.tree,scope);
+		try {
+			scope.variables[name] = jme.evaluate(v.tree,scope);
+		} catch(e) {
+			throw(new Numbas.Error('jme.variables.error evaluating variable',name,e.message));
+		}
 		return scope.variables[name];
 	},
 

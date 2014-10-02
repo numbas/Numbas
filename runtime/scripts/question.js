@@ -62,8 +62,15 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 	//get question's name
 	tryGetAttribute(q,q.xml,'.','name');
 
-	job(function() {
+	job = function(fn,that) {
+		function handleError(e) {
+			e.message = R('question.error',q.number+1,e.message);
+			throw(e);
+		}
+		Numbas.schedule.add({task: fn, error: handleError},that);
+	}
 
+	job(function() {
 		var preambleNodes = q.xml.selectNodes('preambles/preamble');
 		for(var i = 0; i<preambleNodes.length; i++) {
 			var lang = preambleNodes[i].getAttribute('language');
@@ -300,7 +307,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			try{
 				eval(js);
 			} catch(e) {
-				Numbas.showError(new Numbas.Error('question.preamble.error',this.number+1,e.message));
+				var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
+				throw(new Numbas.Error(errorName,this.number+1,e.message));
 			}
 		}
 	},

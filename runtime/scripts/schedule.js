@@ -49,7 +49,7 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	halt:false,
 
 	/** Add a task to the queue
-	 * @param {function} fn - the function to run
+	 * @param {function|object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
 	 * @param {object} that - what `this` should be when the function is called
 	 */
 	add: function(fn,that)
@@ -65,10 +65,21 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 			args[i-2]=arguments[i];
 		}
 
+		if(typeof(fn)=='function') {
+			fn = {task: fn};
+		}
+
 		var task = function()
 		{
-			fn.apply(that,args);
-		
+			try {
+				fn.task.apply(that,args);
+			} catch(e) {
+				if(fn.error) {
+					fn.error(e);
+				} else {
+					throw(e);
+				}
+			}
 		};
 		
 		schedule.calls.push(task);
@@ -97,7 +108,6 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 		catch(e) {
 			Numbas.display.die(e);
 			schedule.halt = true;
-			Numbas.showError(e);
 		}
 		schedule.drop();
 

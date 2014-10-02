@@ -373,22 +373,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	 * @param {Error} e
 	 */
 	die: function(e) {
+		var message = (e || e.message)+'';
+		var stack = e.stack.replace(/\n/g,'<br>\n');
+		Numbas.debug(message+' <br> '+stack);
+
 		//hide all the non-error stuff
 		$('.mainDisplay > *,#loading,#everything').hide();
 
 		//show the error stuff
 		$('#die').show();
 
-		var message;
-		if(e) {
-			if(e.stack) {
-				message=e.stack.replace(/\n/g,'<br/>\n');
-			}
-			else {
-				message = (e || e.message)+'';
-			}
-		}
-		$('#die .error').html(message);
+		$('#die .error .message').html(message);
+		$('#die .error .stack').html(stack);
 	}
 
 };

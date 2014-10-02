@@ -74,6 +74,17 @@ iframe {
 	display: none;
 	padding: 0 2em;
 }
+#die .error {
+	background: #eee;
+	padding: 1em;
+}
+#die .error:focus .stack {
+	display: block;
+}
+#die .error .stack {
+	display: none;
+	font-family: monospace;
+}
 #die h2 {
 	font-size: 1.6em;
 }
