@@ -69,6 +69,15 @@ iframe {
 
 
 /*main template */
+
+#die {
+	display: none;
+	padding: 0 2em;
+}
+#die h2 {
+	font-size: 1.6em;
+}
+
 .mainDiv{ 
 	clear: both;
 	overflow: hidden;

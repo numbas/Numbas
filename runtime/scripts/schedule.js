@@ -95,8 +95,9 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 			task();
 		}
 		catch(e) {
-			Numbas.showError(e);
+			Numbas.display.die(e);
 			schedule.halt = true;
+			Numbas.showError(e);
 		}
 		schedule.drop();
 

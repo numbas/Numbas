@@ -18,6 +18,10 @@ R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
 	'page.saving': "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
 
+	'die.numbas failed': "Numbas has failed",
+	'die.sorry': "Sorry, Numbas has encountered an error which means it can't continue. Below is a description of the error.",
+	'die.error': "Error",
+
 	'exam.exam name': "Exam Name:",
 	'exam.random seed': "Session ID:",
 	'exam.number of questions': "Number of Questions:",
@@ -239,6 +243,12 @@ R.registerLocale('en-GB',{
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
 
 	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
+	'scorm.no suspend data': "Failed to resume: no suspend data.",
+	'scorm.error loading suspend data': "Error loading suspend data: %s",
+	'scorm.error loading question': "Error loading question %s: %s",
+	'scorm.no question suspend data': "No question suspend data",
+	'scorm.error loading part': "Error loading part %s: %s",
+	'scorm.no part suspend data': "No part suspend data",
 
 	'mark': 'mark',
 	'marks': 'marks',

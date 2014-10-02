@@ -374,11 +374,18 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	getSuspendData: function()
 	{
-		if(!this.suspendData)
-		{
-			var suspend_data = this.get('suspend_data');
-			if(suspend_data.length)
-				this.suspendData = JSON.parse(suspend_data);
+		try {
+			if(!this.suspendData)
+			{
+				var suspend_data = this.get('suspend_data');
+				if(suspend_data.length)
+					this.suspendData = JSON.parse(suspend_data);
+			}
+			if(!this.suspendData) {
+				throw(new Numbas.Error('scorm.no exam suspend data'));
+			}
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading suspend data',e.message));
 		}
 		return this.suspendData;
 	},
@@ -416,25 +423,32 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	loadQuestion: function(question) 
 	{
-		var eobj = this.getSuspendData();
-		var qobj = eobj.questions[question.number];
-		var id = this.getQuestionId(question);
-		var index = this.questionIndices[id];
+		try {
+			var eobj = this.getSuspendData();
+			var qobj = eobj.questions[question.number];
+			if(!qobj) {
+				throw(new Numbas.Error('scorm.no question suspend data'));
+			}
+			var id = this.getQuestionId(question);
+			var index = this.questionIndices[id];
 
-		var variables = {};
-		for(var name in qobj.variables)
-		{
-			variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
+			var variables = {};
+			for(var name in qobj.variables)
+			{
+				variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
+			}
+
+			return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+					visited: qobj.visited,
+					answered: qobj.answered,
+					submitted: qobj.submitted,
+					adviceDisplayed: qobj.adviceDisplayed,
+					revealed: qobj.revealed,
+					variables: variables
+			};
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading question',question.number,e.message));
 		}
-
-		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
-				visited: qobj.visited,
-				answered: qobj.answered,
-				submitted: qobj.submitted,
-				adviceDisplayed: qobj.adviceDisplayed,
-				revealed: qobj.revealed,
-				variables: variables
-		};
 	},
 
 	/** Get suspended info for a part
@@ -443,34 +457,41 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	loadPart: function(part)
 	{
-		var eobj = this.getSuspendData();
-		var pobj = eobj.questions[part.question.number];
-		var re = /(p|g|s)(\d+)/g;
-		while(m = re.exec(part.path))
-		{
-			var i = parseInt(m[2]);
-			switch(m[1])
+		try {
+			var eobj = this.getSuspendData();
+			var pobj = eobj.questions[part.question.number];
+			var re = /(p|g|s)(\d+)/g;
+			while(m = re.exec(part.path))
 			{
-			case 'p':
-				pobj = pobj.parts[i];
-				break;
-			case 'g':
-				pobj = pobj.gaps[i];
-				break;
-			case 's':
-				pobj = pobj.steps[i];
-				break;
+				var i = parseInt(m[2]);
+				switch(m[1])
+				{
+				case 'p':
+					pobj = pobj.parts[i];
+					break;
+				case 'g':
+					pobj = pobj.gaps[i];
+					break;
+				case 's':
+					pobj = pobj.steps[i];
+					break;
+				}
 			}
+			if(!pobj) {
+				throw(new Numbas.Error('scorm.no part suspend data'));
+			}
+
+			var id = this.getPartId( part );
+			var index = this.partIndices[id];
+			var sc = this;
+			function get(key) { return sc.get('interactions.'+index+'.'+key); };
+
+			pobj.answer = get('learner_response');
+
+			return pobj;
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading part',part.path,e.message));
 		}
-
-		var id = this.getPartId( part );
-		var index = this.partIndices[id];
-		var sc = this;
-		function get(key) { return sc.get('interactions.'+index+'.'+key); };
-
-		pobj.answer = get('learner_response');
-
-		return pobj;
 	},
 
 	/** Load a {@link Numbas.parts.JMEPart}
