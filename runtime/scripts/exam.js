@@ -484,7 +484,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 					Numbas.display.showAlert(e.message);
 				}
 			}
-			else if(this.timeRemaining===0)
+			else if(this.timeRemaining<=0)
 			{
 				var e = this.settings.timerEvents['timeout'];
 				if(e && e.action=='warn')
