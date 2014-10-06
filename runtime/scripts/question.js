@@ -392,6 +392,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			this.parts[i].revealAnswer(dontStore);
 
 		//display revealed answers
+		this.display.end();
 		this.display.revealAnswer();
 
 		this.display.showScore();
