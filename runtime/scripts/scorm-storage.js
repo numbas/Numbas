@@ -309,6 +309,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	{
 		var qobj = 
 		{
+			name: question.name,
 			visited: question.visited,
 			answered: question.answered,
 			submitted: question.submitted,
@@ -438,7 +439,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 				variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
 			}
 
-			return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+			return {
+					name: qobj.name,
+					score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
 					visited: qobj.visited,
 					answered: qobj.answered,
 					submitted: qobj.submitted,

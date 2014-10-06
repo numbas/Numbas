@@ -206,6 +206,7 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	'question.loaded name mismatch': "Can't resume this attempt - the package has changed since the last session.",
 	'question.error': "Question %i: %s",
 	'question.preamble.error': "Error in preamble: %s",
 	'question.preamble.syntax error': "Syntax error in preamble",

@@ -70,6 +70,16 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		Numbas.schedule.add({task: fn, error: handleError},that);
 	}
 
+	if(loading)
+	{
+		// check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
+		var qobj = Numbas.store.loadQuestion(q);
+
+		if(qobj.name && qobj.name!=q.name) {
+			throw(new Numbas.Error('question.loaded name mismatch'));
+		}
+	}
+
 	job(function() {
 		var preambleNodes = q.xml.selectNodes('preambles/preamble');
 		for(var i = 0; i<preambleNodes.length; i++) {
