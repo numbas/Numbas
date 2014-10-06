@@ -167,6 +167,16 @@ button:hover, button:focus {
 	top: 0;
 }
 
+.copyright-footer {
+    margin-top: 5em;
+    text-align: center;
+    font-size: small;
+    color: #aaa;
+}
+.copyright-footer a {
+	color: #333;
+}
+
 @media (max-width: 980px) {
 	.logo img {
 		max-width: 50%;

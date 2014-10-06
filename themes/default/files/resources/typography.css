@@ -35,7 +35,6 @@ h1 img, h2 img, h3 img, h4 img, h5 img, h6 img {margin:0;}
 p {margin:0 0 1em;}
 p img.primary {float:left;margin:1.5em 1.5em 1.5em 0;padding:0;}
 p img.secondary {float:right;margin:1.5em 0 1.5em 1.5em;}
-a:focus, a:hover {color:#ffffff;}
 a {color:#000000;text-decoration:none;}
 blockquote {margin:1.5em;color:#666;font-style:italic;}
 strong {font-weight:bold;}
