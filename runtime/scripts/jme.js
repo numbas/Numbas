@@ -902,7 +902,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 	{
 		if(typeof(set[i])=='string')
 		{
-			var m = /^(!)?(.*)$/.exec(set[i]);
+			var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
 			var neg = m[1]=='!' ? true : false;
 			var name = m[2].trim().toLowerCase();
 			if(name in displayFlags)
