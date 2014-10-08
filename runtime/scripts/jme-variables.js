@@ -63,7 +63,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		var math = Numbas.math;
 		var util = Numbas.util;
 		try {
-			var jfn = eval(preamble+fn.definition+'})');
+			var jfn = eval(preamble+fn.definition+'\n})');
 		} catch(e) {
 			throw(new Numbas.Error('jme.variables.syntax error in function definition'));
 		}

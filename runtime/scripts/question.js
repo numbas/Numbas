@@ -313,7 +313,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		with({
 			question: this
 		}) {
-			var js = '(function() {'+this.preamble.js+'})()';
+			var js = '(function() {'+this.preamble.js+'\n})()';
 			try{
 				eval(js);
 			} catch(e) {
@@ -625,7 +625,7 @@ function Part( xml, path, question, parentPart, loading )
 			part: this
 		};
 		with(withEnv) {
-			script = eval('(function(){try{'+script+'}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
+			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
 		}
 		this.scripts[name] = script;
 	}
