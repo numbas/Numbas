@@ -555,6 +555,9 @@ function createPart(xml, path, question, parentPart, loading)
 	{
 		var cons = partConstructors[type];
 		var part = new cons(xml, path, question, parentPart, loading);
+		if(part.customConstructor) {
+			part.customConstructor.apply(part);
+		}
 		return part;
 	}
 	else
@@ -758,7 +761,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					this[name] = script;
 					break;
 				case 'constructor':
-					script.apply(this);
+					this.customConstructor = script;
 					break;
 			}
 		}
