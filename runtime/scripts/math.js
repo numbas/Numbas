@@ -1355,6 +1355,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				e = frac[j]+1/e;
 			}
 		}
+		if(l==0) {
+			return [e,1];
+		}
 		var f = [1,0];
 		for(j=l-1;j>=0;j--)
 		{
