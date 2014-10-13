@@ -555,7 +555,6 @@ function createPart(xml, path, question, parentPart, loading)
 	{
 		var cons = partConstructors[type];
 		var part = new cons(xml, path, question, parentPart, loading);
-		part.applyScripts();
 		return part;
 	}
 	else
@@ -629,6 +628,8 @@ function Part( xml, path, question, parentPart, loading )
 		}
 		this.scripts[name] = script;
 	}
+
+	this.applyScripts();
 
 	//initialise display code
 	this.display = new Numbas.display.PartDisplay(this);
