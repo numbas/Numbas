@@ -250,7 +250,7 @@ R.registerLocale('en-GB',{
 	'xml.error in variable definition': "Error in definition of variable <code>%s</code>",
 
 	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
-	'scorm.no suspend data': "Failed to resume: no suspend data.",
+	'scorm.no exam suspend data': "Failed to resume: no exam suspend data.",
 	'scorm.error loading suspend data': "Error loading suspend data: %s",
 	'scorm.error loading question': "Error loading question %s: %s",
 	'scorm.no question suspend data': "No question suspend data",
