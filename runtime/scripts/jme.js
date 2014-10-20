@@ -534,7 +534,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					return tok.fn.evaluate(tree.args,scope);
 				else {
 					for(var i=0;i<=tree.args.length;i++) {
-						if(tree.args[i].unboundName) {
+						if(tree.args[i] && tree.args[i].unboundName) {
 							throw(new Numbas.Error('jme.typecheck.no right type unbound name',tree.args[i].name));
 						}
 					}
