@@ -1766,13 +1766,20 @@ newBuiltin('distinct',[TList],TList,
 		}
 		var out = [list[0]];
 		for(var i=1;i<list.length;i++) {
-			if(!out.contains(list[i])) {
+			var got = false;
+			for(var j=0;j<out.length;j++) {
+				if(util.eq(list[i],out[j])) {
+					got = true;
+					break;
+				}
+			}
+			if(!got) {
 				out.push(list[i]);
 			}
 		}
 		return out;
 	},
-	{unwrapValues: true}
+	{unwrapValues: false}
 );
 
 newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
