@@ -740,11 +740,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
 				if(v.type=='number')
 				{
-					v = Numbas.math.niceNumber(v.value);
 					if(display)
-						v = ''+v+'';
+						v = ''+Numbas.math.niceNumber(v.value)+'';
 					else
-						v = '('+v+')';
+						v = '('+Numbas.jme.display.treeToJME({tok:v})+')';
 				}
 				else if(v.type=='string')
 				{
