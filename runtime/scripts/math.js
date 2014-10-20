@@ -670,18 +670,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		{
 			b = Math.pow(10,b);
 
+			var fracPart = a % 1;
+			var intPart = a - fracPart;
+
 			//test to allow a bit of leeway to account for floating point errors
 			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-			var v = a*b*10 % 1;
-			var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+			var v = fracPart*b*10 % 1;
+			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*b*10 % 10);
 			if(d==4 && 1-v<1e-9) {
-				return Math.round(a*b+1)/b;
+				return intPart + Math.round(fracPart*b+1)/b;
 			}
 			else if(d==-5 && v>-1e-9 && v<0) {
-				return Math.round(a*b+1)/b;
+				return intPart + Math.round(fracPart*b+1)/b;
 			}
 
-			return Math.round(a*b)/b;
+			return intPart + Math.round(fracPart*b)/b;
 		}
 	},
 
