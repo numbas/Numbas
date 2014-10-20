@@ -565,7 +565,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				}
 				break;
 			default:
-				if(Math.abs(n)<1e-8) {
+				var a = Math.abs(n);
+				if(a<1e-15) {
+					out = '0';
+				} else if(Math.abs(n)<1e-8) {
 					out = n+'';
 				} else {
 					out = math.precround(n,10)+'';
