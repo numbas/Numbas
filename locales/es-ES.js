@@ -18,6 +18,10 @@ R.registerLocale('en-GB',{
 	'page.loading': "Cargando...",
 	'page.saving': "<p>Guardando.</p>\n<p>Esto podría tardar unos segundos.</p>",
 
+	"die.numbas failed": "Numbas ha fallado",
+	"die.sorry": "Lo siento, Numbas ha encontrado un error, por lo tanto no puede continuar. A continuación se muestra una descripción del error.",
+	"die.error": "Error",
+
 	'exam.exam name': "Nombre del Examen:",
 	'exam.random seed': "ID de la Sesión:",
 	'exam.number of questions': "Número de Preguntas:",
@@ -96,6 +100,7 @@ R.registerLocale('en-GB',{
 	'jme.typecheck.function not defined': "La operación '%s' no está definida. Did you mean <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "La operación '%s' no está definida.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
+	"jme.typecheck.no right type unbound name": "La variable <code>%s<\/code> no está definida.",
 	'jme.typecheck.map not on enumerable': "<code>map</code> operation must work over a list or a range, not %s",
 
 	'jme.evaluate.undefined variable': "La variable %s no está definida",
@@ -117,6 +122,9 @@ R.registerLocale('en-GB',{
 	'jme.variables.empty definition': "Definition of variable %s is empty.",
 	'jme.variables.circular reference': "Circular variable reference in question %s %s",
 	'jme.variables.error computing dependency': "Error computing referenced variable <code>%s</code>",
+	"jme.variables.error making function": "Hubo un error en la construcción de la función <code>%s<\/code>: %s",
+	"jme.variables.syntax error in function definition": "Error de sintaxis en la definición de la función",
+	"jme.variables.error evaluating variable": "Error al evaluar la variable %s: %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
@@ -141,6 +149,8 @@ R.registerLocale('en-GB',{
 	'vectormath.cross.matrix too big': "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
 
 	'part.with steps answer prompt': 'Answer: ',
+
+	"part.script.error": "Error en la parte %s del script personalizado %s: %s",
 
 	'part.marking.steps no matter': "Because you received full marks for the part, your answers to the steps aren't counted.",
 	'part.marking.steps change single': "You were awarded <strong>%s</strong> mark for your answers to the steps",
@@ -181,6 +191,8 @@ R.registerLocale('en-GB',{
 
 	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
 	'part.numberentry.answer invalid': "You did not enter a valid number.",
+	"part.numberentry.answer not integer": "Su respuesta no es válida. Debe ingresar un número entero, no un decimal.",
+	"part.numberentry.answer not integer or decimal": "Su respuesta no es válida. Debe ingresar un número entero, o un decimal.",
 
 	'part.mcq.choices missing': "Definition of choices is missing from a Multiple Response part (%s)",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
@@ -194,6 +206,10 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
+	"question.loaded name mismatch": "No se puede reanudar este intento - el paquete ha cambiado desde la última sesión.",
+	"question.error": "Pregunta %i: %s",
+	"question.preamble.error": "Error en el preámbulo: %s",
+	"question.preamble.syntax error": "Error de sintaxis en el preámbulo",
 	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Pregunta %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
@@ -231,8 +247,15 @@ R.registerLocale('en-GB',{
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
+	"xml.error in variable definition": "Error en la definición de la variable <code>%s<\/code>",
 
 	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
+	"scorm.no exam suspend data": "No se ha podido reanudar: no hay datos del examen suspendido.",
+	"scorm.error loading suspend data": "Error al cargar datos suspendidos: %s",
+	"scorm.error loading question": "Error al cargar la pregunta %s: %s",
+	"scorm.no question suspend data": "No hay datos de la pregunta suspendida",
+	"scorm.error loading part": "Error ala cargar la parte %s: %s",
+	"scorm.no part suspend data": "No hay datos suspendidos de esta parte",
 
 	'mark': 'Punto',
 	'marks': 'Puntos',
