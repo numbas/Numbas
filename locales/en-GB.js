@@ -249,6 +249,7 @@ R.registerLocale('en-GB',{
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
 	'xml.error in variable definition': "Error in definition of variable <code>%s</code>",
 
+	'scorm.error initialising': "Error initialising SCORM protocol: %s",
 	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
 	'scorm.no exam suspend data': "Failed to resume: no exam suspend data.",
 	'scorm.error loading suspend data': "Error loading suspend data: %s",

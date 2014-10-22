@@ -27,6 +27,11 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 {
 	if(!pipwerks.SCORM.init())
 	{
+		var errorCode = pipwerks.SCORM.debug.getCode();
+		if(errorCode) {
+			throw(new Numbas.Error(R('scorm.error initialising',pipwerks.SCORM.debug.getInfo(errorCode))));
+		}
+
 		//if the pretend LMS extension is loaded, we can start that up
 		if(Numbas.storage.PretendLMS)
 		{
