@@ -256,7 +256,7 @@ R.registerLocale('nb-NO',{
 	"scorm.error loading question": "Feil ved lasting av spørsmål %s: %s",
 	"scorm.no question suspend data": "Ingen sesjonsdata for spørsmål",
 	"scorm.error loading part": "Feil ved lasting av del %s: %s",
-	"scorm.no part suspend data": "Ingen sesjonsdata for delen"
+	"scorm.no part suspend data": "Ingen sesjonsdata for delen",
 	
 	'mark': 'poeng',
 	'marks': 'poeng',
