@@ -636,7 +636,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.infoPage(null);
 		this.currentQuestion(exam.currentQuestion.display);
 
-		if(exam.settings.preventLeave)
+		if(exam.settings.preventLeave && this.mode() != 'review')
 			window.onbeforeunload = function() { return R('control.confirm leave') };
 
 		exam.currentQuestion.display.show();
