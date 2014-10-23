@@ -2145,11 +2145,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	/** Store the student's choices */
 	storeAnswer: function(answerList)
 	{
-		this.setDirty(true);
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
 		var answerIndex = answerList[0];
 		var choiceIndex = answerList[1];
+
+		var changed = false;
 
 		switch(this.settings.displayType)
 		{
@@ -2157,11 +2158,20 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		case 'dropdownlist':
 			for(var i=0; i<this.numAnswers; i++)
 			{
+				var o = this.stagedAnswer[i][choiceIndex];
 				this.stagedAnswer[i][choiceIndex]= i==answerIndex;
+				if(this.stagedAnswer[i][choiceIndex] != o) {
+					changed = true;
+				}
 			}
 			break;
 		default:
+			changed = this.stagedAnswer[answerIndex][choiceIndex] != answerList[2];
 			this.stagedAnswer[answerIndex][choiceIndex] = answerList[2];
+		}
+
+		if(changed) {
+			this.setDirty(true);
 		}
 	},
 
