@@ -1568,9 +1568,13 @@ display.MultipleResponsePartDisplay = function()
 				this.studentAnswer(i);
 		}
 
+		var oldAnswer = null;
 		ko.computed(function() {
 			var i = parseInt(this.studentAnswer());
-			p.storeAnswer([i,0]);
+			if(i!=oldAnswer && !isNaN(i)) {
+				p.storeAnswer([i,0]);
+				oldAnswer = i;
+			}
 		},this);
 
 		var max = 0, maxi = -1;
