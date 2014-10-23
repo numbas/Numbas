@@ -1662,6 +1662,7 @@ newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
+newBuiltin('join',[TList,TString],TString,function(list,delimiter) { return list.join(delimiter); },{unwrapValues:true});
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
@@ -1917,6 +1918,21 @@ newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', '
 newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
 newBuiltin('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
 newBuiltin('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
+
+newBuiltin('sum',[TList],TNum,function(list) {
+	var total = 0;
+	var l = list.length;
+
+	if(l==0) {
+		return 0;
+	}
+
+	for(var i=0;i<l;i++) {
+		total = math.add(total,list[i].value);
+	}
+	
+	return total;
+});
 
 newBuiltin('deal',[TNum],TList, 
 	function(n) {
