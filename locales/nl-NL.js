@@ -16,7 +16,11 @@ Copyright 2011-14 Newcastle University
 */
 R.registerLocale('nl-NL',{
 	'page.loading': "Bezig met laden ...",
+	"page.saving": "<p>Gegevens worden opgeslagen.<\/p>\n<p>Dit kan even duren.<\/p>",
 
+	"die.numbas failed": "Er is een fout opgetreden",
+	"die.sorry": "Sorry, Numbas is een probleem tegengekomen en kan niet verder. Hieronder staat een beschrijving van het probleem.",
+	"die.error": "Probleem",
 
 	"exam.random seed": "Sessie ID:",
 	"exam.passed": "Gehaald",
@@ -54,6 +58,8 @@ R.registerLocale('nl-NL',{
 
 	"control.back to results": "Ga terug naar resultaten",
 	'control.confirm leave': "De toets is nog niet af.",
+	"control.not all questions submitted": "Je hebt een of meer antwoorden gewijzigd maar ze nog niet verzonden. Controleer of elk antwoord verzonden is.",
+	"control.proceed anyway": "Doorgaan?",
 	'control.not all questions answered': "Je hebt niet alle vragen in deze toets beantwoord.",
 	'control.confirm end': "Weet je zeker dat je de toets wilt afsluiten? Als je afsluit kun je geen antwoorden meer wijzigen.",
 	'control.confirm regen': "Weet je zeker dat je deze vraag opnieuw wilt maken? Als je opnieuw begint verlies je je huidige score.",
@@ -94,6 +100,7 @@ R.registerLocale('nl-NL',{
 	'jme.typecheck.function not defined': "Operator '%s' is niet gedefinieerd. Bedoel je <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operator '%s' is niet gedefinieerd.",
 	'jme.typecheck.no right type definition': "Geen definitie van '%s' bekend van het juiste type.",
+	"jme.typecheck.no right type unbound name": "Variabele <code>%s<\/code> is niet gedefinieerd.",
 	'jme.typecheck.map not on enumerable': "<code>map</code> operator vereist een list of range, niet %s",
 
 	'jme.evaluate.undefined variable': "Variabele %s is niet gedefinieerd",
@@ -115,6 +122,9 @@ R.registerLocale('nl-NL',{
 	'jme.variables.empty definition': "Definitie van variabele %s is leeg.",
 	'jme.variables.circular reference': "Circulaire verwijzing naar variabele in vraag %s %s",
 	'jme.variables.error computing dependency': "Fout tijdens het berekenen van variabele <code>%s</code>",
+	"jme.variables.error making function": "Fout tijdens genereren functie <code>%s<\/code>: %s",
+	"jme.variables.syntax error in function definition": "Syntax error in functie definitie",
+	"jme.variables.error evaluating variable": "Fout bij berekenen variabele %s: %s",
 
 	'jme.display.unknown token type': "Kan token van type %s niet naar TeX vertalen",
 	'jme.display.collectRuleset.no sets': 'Geen sets opgegeven aan collectRuleset!',
@@ -138,6 +148,8 @@ R.registerLocale('nl-NL',{
 	'vectormath.dot.matrix too big': "Het inproduct is alleen te berekenen voor een matrix met afmetingen $1 \\times N$ of $N \\times 1$.",
 	'vectormath.cross.matrix too big': "Uitproduct is alleen te berekenen voor een matrix met afmetingen $1 \\times N$ of $N \\times 1$.",
 
+	"part.with steps answer prompt": "Antwoord: ",
+	"part.script.error": "Fout in deel %s custom script %s: %s",
 	'part.marking.steps no matter': "Omdat je al alle punten voor dit onderdeel hebt leveren de afzonderlijke stappen geen punten meer op.",
 	'part.marking.steps change single': "Je krijgt <strong>%s</strong> punt voor je antwoorden bij de verschillende stappen",
 	'part.marking.steps change plural': "Je krijgt <strong>%s</strong> punten voor je antwoorden bij de verschillende stappen",
@@ -170,12 +182,16 @@ R.registerLocale('nl-NL',{
 	'part.jme.not-allowed bits': '<span class="monospace">%s</span>',
 	'part.jme.not-allowed one': "In je antwoord mag %s niet voorkomen",
 	'part.jme.not-allowed several': "In je antwoord mag niets uit %s voorkomen",
+	"part.jme.unexpected variable name": "In je antwoord gebruik je de onbekende variabelenaam <code>%s<\/code>.",
+	"part.jme.unexpected variable name suggestion": "In je antwoord gebruik je de onbekende variabelenaam <code>%s<\/code>. Bedoel je <code>%s<\/code>?",
 
 	'part.patternmatch.display answer missing': "Display answer ontbreekt in het Pattern Match onderdeel (%s)",
 	'part.patternmatch.correct except case': "Je antwoord is goed, maar je haalt hoofd- en kleine letters door elkaar.",
 
 	'part.numberentry.correct except decimal': "Je antwoord is goed maar mag geen decimaal getal zijn.",
 	'part.numberentry.answer invalid': "Je hebt geen geldig getal ingevoerd.",
+	"part.numberentry.answer not integer": "Je antwoord is niet correct. Vul een geheel getal in, geen decimaal getal.",
+	"part.numberentry.answer not integer or decimal": "Je antwoord is niet correct. Vul een geheel getal of decimaal getal in.",
 
 	'part.mcq.choices missing': "Antwoordmogelijkheden voor Multiple Response onderdeel (%s) ontbreken",
 	'part.mcq.matrix not a number': "In onderdeel %s specificeert cel %s,%s van de scorematrix geen getal",
@@ -183,9 +199,24 @@ R.registerLocale('nl-NL',{
 	'part.mcq.no choices selected': "Geen keuze gemaakt.",
 	'part.mcq.matrix not a list': "De scorematrix van een Multiple Response onderdeel, gegeven door een JME expressie, moet een list zijn maar is het niet.",
 	'part.mcq.correct choice': "Je hebt het juiste antwoord gekozen.",
+	"part.mcq.matrix wrong type": "Element heeft een verkeerd type '%s' in de score matrix.",
+	"part.mcq.matrix mix of numbers and lists": "Mix van getallen en lijsten gebruikt in de score matrix.",
+	"part.mcq.matrix wrong size": "Score matrix heeft de verkeerde afmetingen.",
 
 	'part.gapfill.feedback header': '<strong>Vak %i</strong>',
 	
+	"question.loaded name mismatch": "Kan deze poging niet hervatten - de toets is veranderd sinds de vorige sessie.",
+	"question.error": "Vraag %i: %s",
+	"question.preamble.error": "Fout in preamble: %s",
+	"question.preamble.syntax error": "Syntax error in preamble",
+	"question.show steps penalty": "Je verliest <strong>%s<\/strong> %s.",
+	"question.show steps no penalty": "Je score verandert niet.",
+	"question.show steps already penalised": "Je hebt de stappen al bekeken. Je kunt ze nog eens bekijken zonder opnieuw punten te verliezen.",
+	"question.hide steps": "Verberg stappen",
+	"question.hide steps no penalty": "Je score blijft ongewijzigd.",
+	"question.unsubmitted changes.several parts": "Je hebt antwoorden gewijzigd maar niet verzonden. Controleer alle antwoorden en klik op <strong>Verzend alles<\/strong>.",
+	"question.unsubmitted changes.one part": "Je hebt je antwoord veranderd maar nog niet verzonden. Controleer je antwoord en klik op <strong>Verzend<\/strong>.",
+	"question.selector.unsubmitted changes": "Niet verzonden wijzigingen.",
 	'question.unsupported part type': "Onbekend onderdeeltype",
 	'question.header': "Vraag %i",
 	'question.substituting': "Fout tijdens uitschrijven: <br/>%s<br/>%s",
@@ -214,8 +245,15 @@ R.registerLocale('nl-NL',{
 	'xml.could not load': "Het XML document kan niet geladen worden: %s",
 	'xml.property not number': "Property %s moet een getal zijn maar is het niet (%s), in node %s",
 	'xml.property not boolean': "Property %s moet een boolean zijn maar is het niet (%s), in node %s",
+	"xml.error in variable definition": "Fout in definitie van variabele <code>%s<\/code>",
 
 	'scorm.failed save': "De gegevens konden niet opgeslagen worden op de server. Je huidige sessie, inclusief antwoorden en scores, is misschien niet bewaard. Je kunt het nog eens proberen. Mail naar <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> als dit vaker voorkomt.",
+	"scorm.no exam suspend data": "Hervatten mislukt: geen toetsgegevens gevonden.",
+	"scorm.error loading suspend data": "Fout bij het laden van toetsgegevens: %s",
+	"scorm.error loading question": "Fout bij het laden van vraag %s: %s",
+	"scorm.no question suspend data": "Geen vraaggegevens",
+	"scorm.error loading part": "Fout bij laden van deel %s: %s",
+	"scorm.no part suspend data": "Geen gegevens van dit deel gevonden",
 
 	'mark': 'punt',
 	'marks': 'punten',
