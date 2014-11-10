@@ -610,6 +610,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		pipwerks.SCORM.quit();
 	},
 
+	/** Get the student's ID
+	 * @returns {string}
+	 */
+	getStudentID: function() {
+		var id = this.get('learner_id');
+		return id || null;
+	},
+
 	/** Get entry state: `ab-initio`, or `resume`
 	 * @returns {string}
 	 */
