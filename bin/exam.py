@@ -113,6 +113,8 @@ class Exam:
 	duration = 0					#allowed time for exam, in seconds
 	percentPass = 0					#percentage classified as a pass
 	shuffleQuestions = False		#randomise question order?
+	allQuestions = True				#use all questions?
+	pickQuestions = 0				#if not using all questions, how many questions to use
 	showactualmark = True			#show student's score to student?
 	showtotalmark = True			#show total marks available to student?
 	showanswerstate = True			#show right/wrong on questions?
@@ -156,7 +158,7 @@ class Exam:
 	@staticmethod
 	def fromDATA(data):
 		exam = Exam()
-		tryLoad(data,['name','duration','percentPass','shuffleQuestions','resources','extensions'],exam)
+		tryLoad(data,['name','duration','percentPass','shuffleQuestions','allQuestions','pickQuestions','resources','extensions'],exam)
 
 		if 'navigation' in data:
 			nav = data['navigation']
@@ -222,7 +224,6 @@ class Exam:
 		root.attrib = {
 				'name': strcons_fix(self.name),
 				'percentPass': strcons_fix(self.percentPass)+'%',
-				'shuffleQuestions': strcons_fix(self.shuffleQuestions),
 			}
 		
 		settings = root.find('settings')
@@ -274,6 +275,12 @@ class Exam:
 			functions.append(function.toxml())
 
 		questions = root.find('questions')
+		questions.attrib = {
+				'shuffle': strcons_fix(self.shuffleQuestions),
+				'all': strcons_fix(self.allQuestions),
+				'pick': strcons_fix(self.pickQuestions),
+		}
+
 		for q in self.questions:
 			questions.append(q.toxml())
 

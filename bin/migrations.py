@@ -5,7 +5,10 @@ def migration(version_from):
 	def migration_decorator(f):
 		@wraps(f)
 		def do_migration(object):
-			f(object.data)
+			data = object.data
+			if not data.get('type'):
+				data['type'] = 'exam' if 'navigation' in data else 'question'
+			f(data)
 			return f.__name__
 		migrations[version_from] = do_migration
 		return do_migration
@@ -50,3 +53,9 @@ def variable_groups_as_arrays(question):
 			question['variable_groups'] = [{'name':name,'variables':variables} for name,variables in variable_groups.items()]
 	else:
 		question['variable_groups'] = []
+
+@migration('variable_groups_as_arrays')
+def pick_questions(data):
+	if data['type']=='exam':
+		data['allQuestions'] = True
+		data['pickQuestions'] = 0

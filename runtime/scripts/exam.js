@@ -40,7 +40,8 @@ function Exam()
 	var settings = this.settings;
 
 	//load settings from XML
-	tryGetAttribute(settings,xml,'.',['name','percentPass','shuffleQuestions']);
+	tryGetAttribute(settings,xml,'.',['name','percentPass']);
+	tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
 
 	tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
 
@@ -74,7 +75,7 @@ function Exam()
 
 	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);	
 
-	this.settings.numQuestions = xml.selectNodes('questions/question').length;
+	settings.numQuestions = xml.selectNodes('questions/question').length;
 
 	var scopes = [Numbas.jme.builtinScope];
 	for(var extension in Numbas.extensions) {
@@ -339,11 +340,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		this.questionSubset = [];
 		if(this.settings.shuffleQuestions)
 		{
-			this.questionSubset=Numbas.math.deal(this.settings.numQuestions);
+			this.questionSubset = Numbas.math.deal(this.settings.numQuestions);
 		}
 		else	//otherwise just pick required number of questions from beginning of list
 		{
 			this.questionSubset = Numbas.math.range(this.settings.numQuestions);
+		}
+		if(!this.settings.allQuestions) {
+			this.questionSubset = this.questionSubset.slice(0,this.settings.pickQuestions);
+			this.settings.numQuestions = this.settings.pickQuestions;
 		}
 
 		if(this.questionSubset.length==0)
