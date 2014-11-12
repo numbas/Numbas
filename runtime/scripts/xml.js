@@ -172,7 +172,11 @@ var xml = Numbas.xml = {
 					throw(new Numbas.Error('jme.variables.empty definition',name));
 				}
 
-				var tree = Numbas.jme.compile(value,scope,true);
+				try {
+					var tree = Numbas.jme.compile(value,scope,true);
+				} catch(e) {
+					throw(new Numbas.Error('xml.error in variable definition',name));
+				}
 				vars = vars.merge(Numbas.jme.findvars(tree));
 				todo[name]={
 					tree: tree,

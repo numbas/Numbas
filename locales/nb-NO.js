@@ -19,6 +19,9 @@ R.registerLocale('nb-NO',{
 	'page.loading': "Laster...",
 	"page.saving": "<p>Lagrer.</p> <p>Dette kan ta noen sekunder.</p>",
 
+	"die.numbas failed": "Numbas har feilet",
+	"die.sorry": "Beklager, det har oppstått en feil, og Numbas kan ikke fortsette. Nedenfor er en beskrivelse av feilen.",
+	"die.error": "Feil",
 
 	"question.score feedback.unanswered": "Ikke besvart.",
 	"question.score feedback.correct": "Svaret ditt er riktig",
@@ -112,6 +115,7 @@ R.registerLocale('nb-NO',{
 	'jme.typecheck.function not defined': "Operasjon '%s' er ikke definert. Mente du <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operasjon '%s' er ikke definert.",
 	'jme.typecheck.no right type definition': "Finner ikke definisjon av '%s' med korrekt type.",
+	"jme.typecheck.no right type unbound name": "Variabel <code>%s<\/code> er ikke definert.",
 	'jme.typecheck.map not on enumerable': "<code>map</code> operasjonen må gjelde en liste eller range, ikke %s",
 
 	'jme.evaluate.undefined variable': "Variabel %s er udefinert",
@@ -133,6 +137,9 @@ R.registerLocale('nb-NO',{
 	'jme.variables.empty definition': "Definisjonen av variabel %s er tom.",
 	'jme.variables.circular reference': "Sirkulær referanse til variabel i spørsmål %s %s",
 	'jme.variables.error computing dependency': "Feil ved beregning av referert variabel <code>%s</code>",
+	"jme.variables.error making function": "Feil med funksjonskode <code>%s<\/code>: %s",
+	"jme.variables.syntax error in function definition": "Syntaxfeil i funksjonssdefinisjon",
+	"jme.variables.error evaluating variable": "Feil ved evaluering av variabel %s: %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
@@ -177,6 +184,8 @@ R.registerLocale('nb-NO',{
 
 	'part.setting not present': "Property '%s' not set in part %s of question \"%s\"",
 
+	"part.script.error": "Feil i del %s av eget skript %s: %s",
+
 	'part.jme.answer missing': "Korrekt svar for et JME felt mangler (%s)",
 	'part.jme.answer too long': "Svaret er for langt.",
 	'part.jme.answer too short': "Svaret er for kort.",
@@ -196,6 +205,8 @@ R.registerLocale('nb-NO',{
 
 	'part.numberentry.correct except decimal': "Svaret er i riktig intervall, men desimaltall er ikke tillatt.",
 	'part.numberentry.answer invalid': "Du svarte ikke med et gyldig tall.",
+	"part.numberentry.answer not integer": "Ditt svar er ikke gyldig. Tast inn et heltall, ikke desimaltall.",
+	"part.numberentry.answer not integer or decimal": "Ditt svar er ikke gyldig. Tast inn et heltall eller et desimaltall.",
 
 	'part.mcq.choices missing': "Svarmuligheter mangler i flervalgstesten (%s)",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
@@ -209,6 +220,10 @@ R.registerLocale('nb-NO',{
 
 	'part.gapfill.feedback header': '<strong>Boks %i</strong>',
 	
+	"question.loaded name mismatch": "Kan ikke fortsette dette forsøket - pakken er endret siden siste sesjon.",
+	"question.error": "Spørsmål %i: %s",
+	"question.preamble.error": "Feil i startkoden: %s",
+	"question.preamble.syntax error": "Syntaks feil i startkoden",
 	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Spørsmål %i",
 	'question.substituting': "Feil ved substituering av innhold: <br/>%s<br/>%s",
@@ -233,8 +248,15 @@ R.registerLocale('nb-NO',{
 	'xml.could not load': "Kan ikke laste et XML dokument: %s",
 	'xml.property not number': "Egenskap %s må være et tall, men er ikke (%s), i node %s",
 	'xml.property not boolean': "Egenskap %s må være en boolsk verdi, men er ikke (%s), i node %s",
+	"xml.error in variable definition": "Feil ved definisjon av variabel <code>%s<\/code>",
 
 	'scorm.failed save': "Skriving av data til serveren feilet. Det er mulig at din økt med svar og poengsum ikke ble lagret. Vennligst send til <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straks og behold dette vinduet i nettleseren åpent om mulig.",
+	"scorm.no exam suspend data": "Kan ikke fortsette: finner ikke sesjonsdata.",
+	"scorm.error loading suspend data": "Feil ved lasting av sesjonsdata: %s",
+	"scorm.error loading question": "Feil ved lasting av spørsmål %s: %s",
+	"scorm.no question suspend data": "Ingen sesjonsdata for spørsmål",
+	"scorm.error loading part": "Feil ved lasting av del %s: %s",
+	"scorm.no part suspend data": "Ingen sesjonsdata for delen",
 	
 	'mark': 'poeng',
 	'marks': 'poeng',

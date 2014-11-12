@@ -198,6 +198,28 @@ var display = Numbas.display = {
 				Numbas.showError(e);
 			}
 		};
+	},
+
+	/** The Numbas exam has failed so much it can't continue - show an error message and the error
+	 * @param {Error} e
+	 */
+	die: function(e) {
+		//hide all the non-error stuff
+		$('.mainDisplay > *,#loading,#everything').hide();
+
+		//show the error stuff
+		$('#die').show();
+
+		var message;
+		if(e) {
+			if(e.stack) {
+				message=e.stack.replace(/\n/g,'<br/>\n');
+			}
+			else {
+				message = (e || e.message)+'';
+			}
+		}
+		$('#die .error').html(message);
 	}
 
 };
@@ -220,7 +242,7 @@ display.ExamDisplay.prototype =
 		var e = this.e;
 
 		//display exam title at top of page
-		this.htmlContext.find('#examBanner .name').html(e.name);
+		this.htmlContext.find('#examBanner .name').html(e.settings.name);
 		this.htmlContext.find('.examID .id').html(e.id);
 
 		for(var i=0;i<e.numQuestions;i++) {
@@ -256,7 +278,14 @@ display.QuestionDisplay.prototype =
 		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
-		qd.css = $('<style type="text/css">').text(q.preamble.css);
+		qd.css = document.createElement('style');
+		qd.css.setAttribute('type','text/css');
+		if(qd.css.styleSheet) {
+			qd.css.styleSheet.cssText = q.preamble.css;
+		} else {
+			qd.css.appendChild(document.createTextNode(q.preamble.css));
+		}
+
 
 		Numbas.schedule.add(function()
 		{

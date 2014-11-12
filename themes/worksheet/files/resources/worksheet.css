@@ -31,7 +31,7 @@ body.worksheet .warning-icon {
 body.worksheet .steps {
 	display:none;
 }
-body.worksheet .statement {
+body.worksheet .statement, body.worksheet .advice {
 	margin: 1em 0;
 	padding-top: 0.2em;
 	padding-left: 1em;
@@ -102,7 +102,6 @@ body.worksheet .questionsheet .advice {
 body.worksheet .studentanswers .content {
 	display: none;
 }
-
 
 body.worksheet #examTemplate {
 	display: none;

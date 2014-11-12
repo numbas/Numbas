@@ -18,6 +18,10 @@ R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
 	'page.saving': "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
 
+	'die.numbas failed': "Numbas has failed",
+	'die.sorry': "Sorry, Numbas has encountered an error which means it can't continue. Below is a description of the error.",
+	'die.error': "Error",
+
 	'exam.exam name': "Exam Name:",
 	'exam.random seed': "Session ID:",
 	'exam.number of questions': "Number of Questions:",
@@ -96,6 +100,7 @@ R.registerLocale('en-GB',{
 	'jme.typecheck.function not defined': "Operation '%s' is not defined. Did you mean <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operation '%s' is not defined.",
 	'jme.typecheck.no right type definition': "No definition of '%s' of correct type found.",
+	'jme.typecheck.no right type unbound name': "Variable <code>%s</code> is not defined.",
 	'jme.typecheck.map not on enumerable': "<code>map</code> operation must work over a list or a range, not %s",
 
 	'jme.evaluate.undefined variable': "Variable %s is undefined",
@@ -113,10 +118,13 @@ R.registerLocale('en-GB',{
 	'jme.user javascript.error': "Error in user-defined javascript function <code>%s</code><br/>%s",
 	'jme.user javascript.error': "User-defined javascript function <code>%s</code> didn't return anything",
 
-	'jme.variables.variable not defined': "Variable %s is not defined.",
+	'jme.variables.error making function': "Error making function <code>%s</code>: %s",
+	'jme.variables.syntax error in function definition': "Syntax error in function definition",
+	'jme.variables.variable not defined': "Variable <code>%s</code> is not defined.",
 	'jme.variables.empty definition': "Definition of variable %s is empty.",
-	'jme.variables.circular reference': "Circular variable reference in question %s %s",
+	'jme.variables.circular reference': "Circular variable reference in definition of %s",
 	'jme.variables.error computing dependency': "Error computing referenced variable <code>%s</code>",
+	'jme.variables.error evaluating variable': "Error evaluating variable %s: %s",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
@@ -198,8 +206,10 @@ R.registerLocale('en-GB',{
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
-	'question.preamble.error': "Error in question %i preamble: %s",
-
+	'question.loaded name mismatch': "Can't resume this attempt - the package has changed since the last session.",
+	'question.error': "Question %i: %s",
+	'question.preamble.error': "Error in preamble: %s",
+	'question.preamble.syntax error': "Syntax error in preamble",
 	'question.unsupported part type': "Unsupported part type",
 	'question.header': "Question %i",
 	'question.substituting': "Error substituting content: <br/>%s<br/>%s",
@@ -237,8 +247,16 @@ R.registerLocale('en-GB',{
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",
 	'xml.property not boolean': "Property %s should be a boolean, but isn't (%s), in node %s",
+	'xml.error in variable definition': "Error in definition of variable <code>%s</code>",
 
+	'scorm.error initialising': "Error initialising SCORM protocol: %s",
 	'scorm.failed save': "<p>The request to save data to the server failed. Press <b>OK</b> to try again.</p>\n<p>If you get this message repeatedly, check your internet connection or use a different computer. Your previously submitted answers have been successfully saved and will be restored if you resume this session on a different computer.</p>\n<p>If this message appears persistently and you can't save <em>any</em> answers, please email <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a>.</p>",
+	'scorm.no exam suspend data': "Failed to resume: no exam suspend data.",
+	'scorm.error loading suspend data': "Error loading suspend data: %s",
+	'scorm.error loading question': "Error loading question %s: %s",
+	'scorm.no question suspend data': "No question suspend data",
+	'scorm.error loading part': "Error loading part %s: %s",
+	'scorm.no part suspend data': "No part suspend data",
 
 	'mark': 'mark',
 	'marks': 'marks',

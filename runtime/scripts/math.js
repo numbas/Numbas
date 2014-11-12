@@ -565,7 +565,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				}
 				break;
 			default:
-				out = math.precround(n,10)+'';
+				var a = Math.abs(n);
+				if(a<1e-15) {
+					out = '0';
+				} else if(Math.abs(n)<1e-8) {
+					out = n+'';
+				} else {
+					out = math.precround(n,10)+'';
+				}
 			}
 			switch(piD)
 			{
@@ -663,18 +670,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		{
 			b = Math.pow(10,b);
 
+			var fracPart = a % 1;
+			var intPart = a - fracPart;
+
 			//test to allow a bit of leeway to account for floating point errors
 			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-			var v = a*b*10 % 1;
-			var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+			var v = fracPart*b*10 % 1;
+			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*b*10 % 10);
 			if(d==4 && 1-v<1e-9) {
-				return Math.round(a*b+1)/b;
+				return intPart + Math.round(fracPart*b+1)/b;
 			}
 			else if(d==-5 && v>-1e-9 && v<0) {
-				return Math.round(a*b+1)/b;
+				return intPart + Math.round(fracPart*b+1)/b;
 			}
 
-			return Math.round(a*b)/b;
+			return intPart + Math.round(fracPart*b)/b;
 		}
 	},
 
@@ -1234,7 +1244,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
 	 */
-	gcf: function(a,b) {
+	gcd: function(a,b) {
 		if(a.complex || b.complex)
 			throw(new Numbas.Error('math.gcf.complex'));
 
@@ -1351,6 +1361,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				e = frac[j]+1/e;
 			}
 		}
+		if(l==0) {
+			return [e,1];
+		}
 		var f = [1,0];
 		for(j=l-1;j>=0;j--)
 		{
@@ -1388,6 +1401,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	}
 
 };
+math.gcf = math.gcd;
 
 var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
 

@@ -30,9 +30,7 @@
 		<div id="qunit-fixture">test markup, will be hidden</div>
 
 		<script type="text/javascript">
-			Numbas.queueScript('seedrandom',[],function() {});
-			Numbas.queueScript('knockout',[],function() {});
-			Numbas.queueScript('sarissa',[],function() {});
+			Numbas.queueScript('base',[],function() {});
 			Numbas.queueScript('go',['jme'],function() {
 				var jme = Numbas.jme;
 				var math = Numbas.math;
@@ -122,14 +120,14 @@
 					deepCloseEqual(tokenise('||'),[new types.TOp('or')],'||');
 					deepCloseEqual(tokenise('|'),[new types.TOp('|')],'|');
 					deepCloseEqual(tokenise('*'),[new types.TOp('*')],'*');
-					deepCloseEqual(tokenise('+'),[new types.TOp('+u')],'+');
-					deepCloseEqual(tokenise('-'),[new types.TOp('-u')],'-');
+					deepCloseEqual(tokenise('+'),[new types.TOp('+u',false,true)],'+');
+					deepCloseEqual(tokenise('-'),[new types.TOp('-u',false,true)],'-');
 					deepCloseEqual(tokenise('/'),[new types.TOp('/')],'/');
 					deepCloseEqual(tokenise('^'),[new types.TOp('^')],'^');
 					deepCloseEqual(tokenise('<'),[new types.TOp('<')],'<');
 					deepCloseEqual(tokenise('>'),[new types.TOp('>')],'>');
 					deepCloseEqual(tokenise('='),[new types.TOp('=')],'=');
-					deepCloseEqual(tokenise('!'),[new types.TOp('not')],'!');
+					deepCloseEqual(tokenise('!'),[new types.TOp('not',false,true)],'!');
 					deepCloseEqual(tokenise('not'),[new types.TOp('not')],'not');
 					deepCloseEqual(tokenise('and'),[new types.TOp('and')],'and');
 					deepCloseEqual(tokenise('or'),[new types.TOp('or')],'or');
@@ -239,6 +237,8 @@
 					closeEquals(evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
 					closeEquals(evaluate('3*2^-1').value,1.5,'unary minus with power');
 					closeEquals(evaluate('3+--2').value,5,'lots of unary minus in a chain');
+					closeEquals(evaluate('-2^2').value,-4,'unary minus before a power');
+					closeEquals(evaluate('-2+3').value,1,'unary minus before addition');
 					deepCloseEqual(evaluate('-vector(1,2,-3.3)').value,[-1,-2,3.3],'unary minus: -vector(1,2,-3.3)==vector(-1,-2,3.3)');
 					deepCloseEqual(evaluate('-matrix([1,0],[2,3])').value,[[-1,0],[-2,-3]],'unary minus: -matrix([1,0],[2,3])==matrix([-1,0],[-2,-3]))');
 					ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
@@ -511,11 +511,12 @@
 					equals(evaluate('precround(1.1234567891011121314151617181920,20)').value,1.12345678910111213142,'precround(1.1234567891011121314151617181920,20)');
 					equals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3)');
 					equals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3)');
+					equals(evaluate('precround(123456789012,8)').value,123456789012,'precround(123456789012,8) - only multiply fractional part, to get better precision');
 
 					equals(evaluate('precround(237.55749999999998,3)').value,237.558,'precround(237.55749999999998,3)==237.558');
 					equals(evaluate('precround(237.55748999999998,3)').value,237.557,'precround(237.55748999999998,3)==237.557');
-					equals(evaluate('precround(-237.55750000000001,3)').value,-237.557,'precround(237.55750000000001,3)==-237.557');
-					equals(evaluate('precround(-237.55751000000001,3)').value,-237.558,'precround(237.55751000000001,3)==-237.558');
+					equals(evaluate('precround(-237.55750000000001,3)').value,-237.557,'precround(-237.55750000000001,3)==-237.557');
+					equals(evaluate('precround(-237.55751000000001,3)').value,-237.558,'precround(-237.55751000000001,3)==-237.558');
 
 					equals(evaluate('siground(0.123,2)').value,0.12,'siground(0.123,2)');
 					equals(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');

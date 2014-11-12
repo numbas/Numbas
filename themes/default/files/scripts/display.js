@@ -367,6 +367,24 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 				Numbas.showError(e);
 			}
 		};
+	},
+
+	/** The Numbas exam has failed so much it can't continue - show an error message and the error
+	 * @param {Error} e
+	 */
+	die: function(e) {
+		var message = (e || e.message)+'';
+		var stack = e.stack.replace(/\n/g,'<br>\n');
+		Numbas.debug(message+' <br> '+stack);
+
+		//hide all the non-error stuff
+		$('.mainDisplay > *,#loading,#everything').hide();
+
+		//show the error stuff
+		$('#die').show();
+
+		$('#die .error .message').html(message);
+		$('#die .error .stack').html(stack);
 	}
 
 };
@@ -618,7 +636,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.infoPage(null);
 		this.currentQuestion(exam.currentQuestion.display);
 
-		if(exam.settings.preventLeave && exam.mode=='normal')
+		if(exam.settings.preventLeave && this.mode() != 'review')
 			window.onbeforeunload = function() { return R('control.confirm leave') };
 		else
 			window.onbeforeunload = null;
@@ -791,7 +809,13 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		html.addClass('jme-scope').data('jme-scope',q.scope);
 		$('#questionDisplay').append(html);
 
-		qd.css = $('<style type="text/css">').text(q.preamble.css);
+		qd.css = document.createElement('style');
+		qd.css.setAttribute('type','text/css');
+		if(qd.css.styleSheet) {
+			qd.css.styleSheet.cssText = q.preamble.css;
+		} else {
+			qd.css.appendChild(document.createTextNode(q.preamble.css));
+		}
 
 		Numbas.schedule.add(function()
 		{
@@ -856,7 +880,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 
 	/** Called when the student leaves the question */
 	leave: function() {
-		this.css.remove();
+		$(this.css).remove();
 	},
 
 	/** Show this question's advice */
@@ -1546,9 +1570,13 @@ display.MultipleResponsePartDisplay = function()
 				this.studentAnswer(i);
 		}
 
+		var oldAnswer = null;
 		ko.computed(function() {
 			var i = parseInt(this.studentAnswer());
-			p.storeAnswer([i,0]);
+			if(i!=oldAnswer && !isNaN(i)) {
+				p.storeAnswer([i,0]);
+				oldAnswer = i;
+			}
 		},this);
 
 		var max = 0, maxi = -1;
@@ -1803,7 +1831,7 @@ function showScoreFeedback(obj,settings)
 				marks: niceNumber(marks),
 				score: niceNumber(score),
 				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
-				scoreString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks'))
+				scoreString: niceNumber(score)+' '+util.pluralise(score,R('mark'),R('marks'))
 			};
 			if(revealed && !answered())
 				return R('question.score feedback.unanswered');

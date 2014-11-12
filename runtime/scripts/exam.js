@@ -40,7 +40,8 @@ function Exam()
 	var settings = this.settings;
 
 	//load settings from XML
-	tryGetAttribute(settings,xml,'.',['name','percentPass','shuffleQuestions']);
+	tryGetAttribute(settings,xml,'.',['name','percentPass']);
+	tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
 
 	tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
 
@@ -74,7 +75,7 @@ function Exam()
 
 	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);	
 
-	this.settings.numQuestions = xml.selectNodes('questions/question').length;
+	settings.numQuestions = xml.selectNodes('questions/question').length;
 
 	var scopes = [Numbas.jme.builtinScope];
 	for(var extension in Numbas.extensions) {
@@ -310,7 +311,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 			this.settings.numQuestions = this.questionSubset.length;
 			this.start = new Date(suspendData.start);
 			if(this.settings.allowPause) {
-				this.timeRemaining = suspendData.timeRemaining;
+				this.timeRemaining = this.settings.duration - (suspendData.duration-suspendData.timeRemaining);
 			}
 			else {
 				this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);
@@ -339,11 +340,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		this.questionSubset = [];
 		if(this.settings.shuffleQuestions)
 		{
-			this.questionSubset=Numbas.math.deal(this.settings.numQuestions);
+			this.questionSubset = Numbas.math.deal(this.settings.numQuestions);
 		}
 		else	//otherwise just pick required number of questions from beginning of list
 		{
 			this.questionSubset = Numbas.math.range(this.settings.numQuestions);
+		}
+		if(!this.settings.allQuestions) {
+			this.questionSubset = this.questionSubset.slice(0,this.settings.pickQuestions);
+			this.settings.numQuestions = this.settings.pickQuestions;
 		}
 
 		if(this.questionSubset.length==0)
@@ -484,7 +489,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 					Numbas.display.showAlert(e.message);
 				}
 			}
-			else if(this.timeRemaining===0)
+			else if(this.timeRemaining<=0)
 			{
 				var e = this.settings.timerEvents['timeout'];
 				if(e && e.action=='warn')
@@ -620,7 +625,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		var n = e.currentQuestion.number;
 		job(e.display.startRegen,e.display);
 		job(function() {
-			e.questionList[n] = new Numbas.Question(e, e.xml.selectNodes('questions/question')[n], n, false, e.scope);
+			var on = e.questionSubset.indexOf(n);
+			e.questionList[n] = new Numbas.Question(e, e.xml.selectNodes('questions/question')[on], n, false, e.scope);
 		})
 		job(function() {
 			e.changeQuestion(n);

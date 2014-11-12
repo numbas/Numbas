@@ -16,6 +16,10 @@ Copyright 2011-14 Newcastle University
 
 /** @file Start the exam */
 
+// 'base' gives the third-party libraries on which Numbas depends
+Numbas.queueScript('base',['jquery','R','seedrandom','knockout','sarissa'],function() {
+});
+
 Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
 	/**

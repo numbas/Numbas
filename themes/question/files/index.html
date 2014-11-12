@@ -38,7 +38,7 @@ Copyright 2011-14 Newcastle University
 				displayIndent: "0.1em"
 			});
 		</script>
-		<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
+		<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="scripts.js" charset="utf-8"></script>
@@ -53,6 +53,15 @@ Copyright 2011-14 Newcastle University
 	</head>
 	
 	<body style="font-size:1em;" class="single-question">
+
+		<div id="die">
+			<h1 data-localise="die.numbas failed">Numbas failed</h1>
+			<p data-localise="die.sorry"></p>
+			<div class="error" tabindex="1">
+				<div class="message"></div>
+				<div class="stack"></div>
+			</div>
+		</div>
 
 		<div id="loading">
 			<div id="progressbar">

@@ -21,6 +21,7 @@ Copyright 2011-14 Newcastle University
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
 
 		<meta http-equiv="X-UA-Compatible" content="IE=9,10,edge">
+		<meta name="viewport" content="width=device-width, user-scalable=no">
 
 		<!-- mathjax stuff -->
 		<script type="text/x-mathjax-config">
@@ -38,7 +39,7 @@ Copyright 2011-14 Newcastle University
 				displayIndent: "0.1em"
 			});
 		</script>
-		<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
+		<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
 
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="scripts.js" charset="utf-8"></script>
@@ -53,6 +54,15 @@ Copyright 2011-14 Newcastle University
 	</head>
 	
 	<body style="font-size:1em;">
+
+		<div id="die">
+			<h1 data-localise="die.numbas failed">Numbas failed</h1>
+			<p data-localise="die.sorry"></p>
+			<div class="error" tabindex="1">
+				<div class="message"></div>
+				<div class="stack"></div>
+			</div>
+		</div>
 
 		<div id="loading">
 			<div id="progressbar">
@@ -212,7 +222,21 @@ Copyright 2011-14 Newcastle University
 
 					<!-- question and advice go in here -->
 					<div class="col1wrap">
-						<div id="questionDisplay" data-bind="stopbinding: true">
+						<div class="contentArea">
+							<div id="questionDisplay" data-bind="stopbinding: true">
+							</div>
+							<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
+							<div class="mainDiv bottom navBar">
+								<div class="submitDiv" data-bind="with: currentQuestion">
+									<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
+									<div class="marks">
+										<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
+										<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
+									</div>
+									<button class="btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+									<button class="btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -220,7 +244,7 @@ Copyright 2011-14 Newcastle University
 					<!-- also timing controls -->
 					<div class="questionMenu">
 						<div class="carousel">
-							<div class="carouselBtn prev icon-caret-up"></div>
+							<div class="carouselBtn prev"><span class="icon-caret-up"></span></div>
 							<div class="questionList">
 								<ul id="questionList" data-bind="foreach: questions">
 									<li id="questionSelector" class="questionSelector" data-bind="visible: visible, css: {current: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
@@ -233,7 +257,7 @@ Copyright 2011-14 Newcastle University
 									</li>
 								</ul>
 							</div>
-							<div class="carouselBtn next icon-caret-down" data-bind="attr: {disabled: currentQuestionNumber()==exam.questionList.length-1}"></div>
+							<div class="carouselBtn next"><span class="icon-caret-down"></span></div>
 						</div>
 
 						<!-- total exam score display -->
@@ -251,21 +275,11 @@ Copyright 2011-14 Newcastle University
 						</div>
 					</div>
 				</div>
-				<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
-				<div class="mainDiv navBar">
-					<button class="btn leftNav" id="prevBtn" data-localise="control.previous" data-bind="visible: $root.canReverse, click: Numbas.controls.previousQuestion"></button>
-					<button class="btn rightNav" id="nextBtn" data-localise="control.next" data-bind="visible: $root.canAdvance, click: Numbas.controls.nextQuestion"></button>
-					<div class="submitDiv" data-bind="with: currentQuestion">
-						<button class="btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
-						<div class="marks">
-							<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
-							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
-						</div>
-						<button class="btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
-						<button class="btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
-					</div>
-				</div>
 			</div>
+		</div>
+
+		<div class="copyright-footer">
+			Created using <a target="_blank" href="http://www.ncl.ac.uk/maths/numbas">Numbas</a>, developed by <a target="_blank" href="http://www.newcastle.ac.uk">Newcastle University</a>.
 		</div>
 <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>

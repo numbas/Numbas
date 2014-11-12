@@ -36,8 +36,17 @@ html{
 	font-family: sans-serif;
 }
 
-#everything, #loading {
-	padding: 1em;
+@media (min-width: 981px) {
+	#everything, #loading {
+		padding: 1em;
+	}
+	.titleBits {
+		margin: 0 10em;
+	}
+
+	.feedbackMessages {
+		width: 50em;
+	}
 }
 
 a {
@@ -55,9 +64,31 @@ th, td {
 
 iframe {
 	border: none;
+	max-width: 100%;
 }
 
+
 /*main template */
+
+#die {
+	display: none;
+	padding: 0 2em;
+}
+#die .error {
+	background: #eee;
+	padding: 1em;
+}
+#die .error:focus .stack {
+	display: block;
+}
+#die .error .stack {
+	display: none;
+	font-family: monospace;
+}
+#die h2 {
+	font-size: 1.6em;
+}
+
 .mainDiv{ 
 	clear: both;
 	overflow: hidden;
@@ -80,7 +111,6 @@ button {
 .btn {
 	margin: 0.1em 0.3em;
 	min-width: 7em;
-	/*border: 1px solid #999999*/;
 	background: #f5f5f5;
 	border: 1px solid #999;
 	border-radius: 0;
@@ -97,7 +127,6 @@ button:hover, button:focus {
     height: 100%;
     text-align: center;
     background: rgba(200,200,200,0.7);
-    /* opacity: 0.5; */
     z-index: 1;
 }
 #saving .text {
@@ -138,22 +167,46 @@ button:hover, button:focus {
 	top: 0;
 }
 
-/* title bar */
-.titleBar{
-	position: relative;
-	height: 75px;
+.copyright-footer {
+    margin-top: 5em;
+    text-align: center;
+    font-size: small;
+    color: #aaa;
 }
-.logo{
-	position: absolute;
-	top: 0;
-	left: 0;
+.copyright-footer a {
+	color: #333;
+}
+
+@media (max-width: 980px) {
+	.logo img {
+		max-width: 50%;
+		max-height: 50px;
+	}
+	.titleBar {
+		margin-bottom: 1em;
+	}
+}
+@media (min-width: 981px) {
+	.titleBar {
+		position: relative;
+		height: 75px;
+	}
+	.logo {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+
+	#examBanner {
+		margin-left: 250px;
+		line-height: 1em;
+		text-align: right;
+		font-size: 2em;
+	}
 }
 
 #examBanner {
-	margin-left: 250px;
-	line-height: 1em;
-	text-align: right;
-	font-size: 2em;
+	font-size: 1.5em;
 	font-weight: bold;
 }
 
@@ -188,7 +241,6 @@ button:hover, button:focus {
 
 .titleBits {
 	text-align: center;
-	margin: 0 10em;
 	font-size: 2em;
 }
 
@@ -202,11 +254,10 @@ button:hover, button:focus {
 	margin: 1em auto;
 }
 
-.submitDiv {
-	text-align: center;
-}
-#submitBtn {
-	width: 9em;
+@media (min-width: 981px) {
+	.submitDiv {
+		text-align: center;
+	}
 }
 
 #regenBtn {
@@ -267,7 +318,7 @@ button:hover, button:focus {
 }
 
 .questionSelector .dirty-message {
-    float: right;
+    text-align: right;
     clear: both;
 }
 .questionSelector .dirty-message .warning-icon {
@@ -283,7 +334,6 @@ button:hover, button:focus {
 	max-height: 20em;
 	overflow-y: auto;
 	margin: 0 0 0 auto;
-	width: 50em;
 	list-style-type: none;
 }
 
@@ -298,58 +348,96 @@ button:hover, button:focus {
 
 
 /* column container */
-#questionContainer {
-	position: relative;		/* This fixes the IE7 overflow hidden bug and stops the layout jumping out of place */
-	clear: both;
-	float: left;
-	width: 100%;			/* width of whole page */
-	background: #A2D1F0;
-}
-
 #questionContainer p {
 	line-height: 1.3em;
 }
 
-/* 2 column left menu settings */
 #questionContainer .colwrap {
-	float: left;
-	width: 200%;
-	position: relative;
-	left: 13em;
 	background: #fff;
 }
-#questionContainer .col1wrap {
-	float: right;
-	width: 50%;
-	position: relative;
-	right: 13em;
+#questionContainer .questionMenu {
 	padding-bottom: 1em;
+	margin: 0 auto;
 }
 
-#questionDisplay {
-	margin: 1em 0.5em 0 14.5em;
-	position: relative;
-	right: 100%;
-	overflow-x: auto;
-	overflow-y: hidden;
+@media (max-width: 980px) {
+	.contentArea {
+		padding: 0 0.2em;
+		margin-bottom: 2em;
+	}
 }
-#questionContainer .questionMenu {
-	float: left;
-	width: 12em;
-	position: relative;
-	right: 12.5em;
-	padding-bottom: 1em;
+
+@media (min-width: 981px) {
+	#questionContainer {
+		position: relative;		/* This fixes the IE7 overflow hidden bug and stops the layout jumping out of place */
+		clear: both;
+		float: left;
+		width: 100%;			/* width of whole page */
+		background: #A2D1F0;
+	}
+
+	/* 2 column left menu settings */
+	#questionContainer .colwrap {
+		float: left;
+		width: 200%;
+		position: relative;
+		left: 13em;
+		background: #fff;
+	}
+	#questionContainer .col1wrap {
+		float: right;
+		width: 50%;
+		position: relative;
+		right: 13em;
+		padding-bottom: 1em;
+	}
+
+	.contentArea {
+		margin: 1em 0.5em 0 14.5em;
+		position: relative;
+		right: 100%;
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
+	#questionContainer .questionMenu {
+		float: left;
+		width: 12em;
+		position: relative;
+		right: 12.5em;
+	}
 }
 
 .carousel {
 	margin-bottom: 1em;
 }
 
+@media (max-width: 980px) {
+	.questionMenu {
+		border-top: 1px solid #999;
+		background-color: #a2d1f0;
+		padding-top: 1em;
+	}
+	.carousel {
+		padding-left: 2em;
+		padding-right: 2em;
+	}
+	.submitDiv > * {
+		display: block;
+		margin: 0.2em 0;
+	}
+	.submitDiv {
+		width: 20em;
+		display: block;
+		margin:  0 auto;
+	}
+
+}
+
 .carouselBtn {
 	text-align: center;
 	margin: 0 auto;
 	cursor: pointer;
-	display: block !important;
+	display: none;
 	padding: 0.2em;
 	font-size: 1.3em;
 	background-repeat: no-repeat;
@@ -359,8 +447,21 @@ button:hover, button:focus {
 	background-color: #f90;
 }
 
+@media (max-width: 980px) {
+	.questionList {
+		overflow-y: scroll;
+	}
+}
+@media (min-width: 981px) {
+	.questionList {
+		overflow: hidden;
+	}
+	.carouselBtn {
+		display: block !important;
+	}
+}
+
 .questionList {
-	overflow: hidden;
 	max-height: 20em;
 }
 
@@ -372,16 +473,15 @@ button:hover, button:focus {
 }
 
 .questionSelector {
-	display: inline-block;
+	display: block;
 	font-size: 0.8em;
 	padding: 0.5em 0;
+	min-height: 3em;
 }
 
 .questionSelector .score {
 	float: right;
 }
-
-
 
 .questionSelector.current {
 	background: #94B4F7;
@@ -403,6 +503,14 @@ button:hover, button:focus {
 }
 
 /* front/exit pages */
+
+#infoDisplay table td.rtd {
+	text-align: right;
+}
+#infoDisplay table td.qtd {
+	text-align: center;
+}
+
 .startBtn {
 	text-align: center;
 }
@@ -412,13 +520,6 @@ button:hover, button:focus {
 }
 .resultBtns div {
 	margin-top: 2em;
-}
-
-.rtd {
-	text-align: right;
-}
-.qtd {
-	text-align: center;
 }
 
 .resultrow td {
@@ -442,10 +543,13 @@ button:hover, button:focus {
 	padding-left: 5em;
 }
 
-#results table tr:nth-child(even) {
-	background-color: #eee;
+#results table td {
+	border-bottom: 2px solid #eee;
 }
 
+#results table td:nth-child(n+2) {
+	border-bottom-color: #ddd;
+}
 
 /* exit page */
 #exit {
@@ -454,7 +558,7 @@ button:hover, button:focus {
 
 /* question bits */
 
-.statement table, .prompt table, .advice table {
+.statement table, .prompt table, .adviceDisplay table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
@@ -514,12 +618,6 @@ div.part {
 
 .stepsBtn .penaltyMessage {
 	font-style: italic;
-}
-
-.advice {
-	background: #cfc;
-	border: 1px solid;
-	margin: 1em 0;
 }
 
 .multiplechoice li {
@@ -665,8 +763,12 @@ div.jqi .jqititle{
 	position: absolute;
 	background-color: #aaaaaa;
 }
+@media (min-width: 981px) {
+	div.jqi {
+		max-width: 40%;
+	}
+}
 div.jqi{
-	max-width: 40%;
 	min-width: 10%;
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	position: absolute;
@@ -731,6 +833,10 @@ div.jqi button.jqidefaultbutton{
 		display: inherit;
 	}
 
+	.question {
+		overflow-y: hidden;	/* Fixes the fact that Chrome draws a scrollbar in questions, for some reason */
+	}
+
 	.penaltyMessage {
 		display: none;
 	}
@@ -769,7 +875,7 @@ div.jqi button.jqidefaultbutton{
 		padding: initial;
 		position: initial;
 	}
-	#questionDisplay {
+	.contentArea {
 		margin: initial;
 		right: initial;
 	}
@@ -787,5 +893,13 @@ div.jqi button.jqidefaultbutton{
 	}
 	button {
 		display: none;
+	}
+}
+
+/* Try to allow scrolling for statement or prompt elements that are too wide */
+@media screen {
+	.question, .statement > span > p, .prompt > span > p, .adviceDisplay > span > p {
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 }

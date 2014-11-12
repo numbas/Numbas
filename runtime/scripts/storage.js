@@ -131,6 +131,13 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 	/** Call this when the exam ends ({@link Numbas.Exam#end}) */
 	end: function() {},
 
+	/** Get the student's ID
+	 * @returns {string}
+	 */
+	getStudentID: function() {
+		return '';
+	},
+
 	/** Get entry state: `ab-initio`, or `resume`
 	 * @returns {string}
 	 */

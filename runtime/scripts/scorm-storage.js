@@ -27,6 +27,11 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 {
 	if(!pipwerks.SCORM.init())
 	{
+		var errorCode = pipwerks.SCORM.debug.getCode();
+		if(errorCode) {
+			throw(new Numbas.Error(R('scorm.error initialising',pipwerks.SCORM.debug.getInfo(errorCode))));
+		}
+
 		//if the pretend LMS extension is loaded, we can start that up
 		if(Numbas.storage.PretendLMS)
 		{
@@ -284,7 +289,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 			return;
 		var eobj = 
 		{
-			timeRemaining: exam.timeRemaining,
+			timeRemaining: exam.timeRemaining || 0,
+			duration: exam.settings.duration || 0,
 			questionSubset: exam.questionSubset,
 			start: exam.start
 		};
@@ -308,6 +314,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	{
 		var qobj = 
 		{
+			name: question.name,
 			visited: question.visited,
 			answered: question.answered,
 			submitted: question.submitted,
@@ -373,11 +380,18 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	getSuspendData: function()
 	{
-		if(!this.suspendData)
-		{
-			var suspend_data = this.get('suspend_data');
-			if(suspend_data.length)
-				this.suspendData = JSON.parse(suspend_data);
+		try {
+			if(!this.suspendData)
+			{
+				var suspend_data = this.get('suspend_data');
+				if(suspend_data.length)
+					this.suspendData = JSON.parse(suspend_data);
+			}
+			if(!this.suspendData) {
+				throw(new Numbas.Error('scorm.no exam suspend data'));
+			}
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading suspend data',e.message));
 		}
 		return this.suspendData;
 	},
@@ -400,7 +414,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 		var score = parseInt(this.get('score.raw'),10);
 
-		return {timeRemaining: eobj.timeRemaining,
+		return {timeRemaining: eobj.timeRemaining || 0,
+				duration: eobj.duration || 0 ,
 				questionSubset: eobj.questionSubset,
 				start: eobj.start,
 				score: score,
@@ -414,25 +429,34 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	loadQuestion: function(question) 
 	{
-		var eobj = this.getSuspendData();
-		var qobj = eobj.questions[question.number];
-		var id = this.getQuestionId(question);
-		var index = this.questionIndices[id];
+		try {
+			var eobj = this.getSuspendData();
+			var qobj = eobj.questions[question.number];
+			if(!qobj) {
+				throw(new Numbas.Error('scorm.no question suspend data'));
+			}
+			var id = this.getQuestionId(question);
+			var index = this.questionIndices[id];
 
-		var variables = {};
-		for(var name in qobj.variables)
-		{
-			variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
+			var variables = {};
+			for(var name in qobj.variables)
+			{
+				variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
+			}
+
+			return {
+					name: qobj.name,
+					score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+					visited: qobj.visited,
+					answered: qobj.answered,
+					submitted: qobj.submitted,
+					adviceDisplayed: qobj.adviceDisplayed,
+					revealed: qobj.revealed,
+					variables: variables
+			};
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading question',question.number,e.message));
 		}
-
-		return {score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
-				visited: qobj.visited,
-				answered: qobj.answered,
-				submitted: qobj.submitted,
-				adviceDisplayed: qobj.adviceDisplayed,
-				revealed: qobj.revealed,
-				variables: variables
-		};
 	},
 
 	/** Get suspended info for a part
@@ -441,34 +465,41 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	loadPart: function(part)
 	{
-		var eobj = this.getSuspendData();
-		var pobj = eobj.questions[part.question.number];
-		var re = /(p|g|s)(\d+)/g;
-		while(m = re.exec(part.path))
-		{
-			var i = parseInt(m[2]);
-			switch(m[1])
+		try {
+			var eobj = this.getSuspendData();
+			var pobj = eobj.questions[part.question.number];
+			var re = /(p|g|s)(\d+)/g;
+			while(m = re.exec(part.path))
 			{
-			case 'p':
-				pobj = pobj.parts[i];
-				break;
-			case 'g':
-				pobj = pobj.gaps[i];
-				break;
-			case 's':
-				pobj = pobj.steps[i];
-				break;
+				var i = parseInt(m[2]);
+				switch(m[1])
+				{
+				case 'p':
+					pobj = pobj.parts[i];
+					break;
+				case 'g':
+					pobj = pobj.gaps[i];
+					break;
+				case 's':
+					pobj = pobj.steps[i];
+					break;
+				}
 			}
+			if(!pobj) {
+				throw(new Numbas.Error('scorm.no part suspend data'));
+			}
+
+			var id = this.getPartId( part );
+			var index = this.partIndices[id];
+			var sc = this;
+			function get(key) { return sc.get('interactions.'+index+'.'+key); };
+
+			pobj.answer = get('learner_response');
+
+			return pobj;
+		} catch(e) {
+			throw(new Numbas.Error('scorm.error loading part',part.path,e.message));
 		}
-
-		var id = this.getPartId( part );
-		var index = this.partIndices[id];
-		var sc = this;
-		function get(key) { return sc.get('interactions.'+index+'.'+key); };
-
-		pobj.answer = get('learner_response');
-
-		return pobj;
 	},
 
 	/** Load a {@link Numbas.parts.JMEPart}
@@ -517,8 +548,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		var ticks = [];
 		var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
 		var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
-		if(w==0 || h==0)
-			return;
+		if(w==0 || h==0) {
+			out.ticks = [];
+			return out;
+		}
 		for(var i=0;i<w;i++)
 		{
 			ticks.push([]);
@@ -547,7 +580,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	setSessionTime: function()
 	{
-		var timeSpent = new Date((this.exam.duration - this.exam.timeRemaining)*1000);
+		var timeSpent = new Date((this.exam.settings.duration - this.exam.timeRemaining)*1000);
 		var sessionTime = 'PT'+timeSpent.getHours()+'H'+timeSpent.getMinutes()+'M'+timeSpent.getSeconds()+'S';
 		this.set('session_time',sessionTime);
 	},
@@ -575,6 +608,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		this.set('success_status',this.exam.passed ? 'passed' : 'failed');
 		this.set('completion_status','completed');
 		pipwerks.SCORM.quit();
+	},
+
+	/** Get the student's ID
+	 * @returns {string}
+	 */
+	getStudentID: function() {
+		var id = this.get('learner_id');
+		return id || null;
 	},
 
 	/** Get entry state: `ab-initio`, or `resume`
