@@ -1900,6 +1900,17 @@ newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,
 newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
 newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
 newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
+newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {	// take out factors of pi or i before working out gcd. Used by the fraction simplification rules
+		if(a.complex && a.re==0) {
+			a = a.im;
+		}
+		if(b.complex && b.re==0) {
+			b = b.im;
+		}
+		a = a/math.pow(Math.PI,math.piDegree(a));
+		b = b/math.pow(Math.PI,math.piDegree(b));
+		return math.gcf(a,b);
+} );
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
 newBuiltin('lcm', [TList], TNum, function(l){ 
 		if(l.length==0) {
