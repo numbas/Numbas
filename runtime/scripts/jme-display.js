@@ -1500,7 +1500,13 @@ function matchTree(ruleTree,exprTree,doCommute)
 			case 'm_commute':
 				return matchTree(ruleTree.args[0],exprTree,true);
 
-
+			case 'm_type':
+				var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
+				if(exprTok.type==wantedType) {
+					return {};
+				} else {
+					return false;
+				}
 		}
 	}
 	if(jme.isName(ruleTok,'m_nothing')) {
