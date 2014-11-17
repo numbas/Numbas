@@ -1505,6 +1505,12 @@ function matchTree(ruleTree,exprTree,doCommute)
 	}
 	if(jme.isName(ruleTok,'m_nothing')) {
 		return false;
+	} else if(jme.isName(ruleTok,'m_number')) {
+		if(exprTok.type=='number') {
+			return {};
+		} else {
+			return false;
+		}
 	}
 
 	if(ruleTok.type!='op' && ruleTok.type != exprTok.type)
