@@ -813,6 +813,7 @@ class MultipleChoicePart(Part):
 	shuffleAnswers = False
 	displayType = 'radiogroup'
 	displayColumns = 1
+	warningType = 'none'
 	
 	def __init__(self,kind,marks=0,prompt=''):
 		self.kind = kind
@@ -835,7 +836,7 @@ class MultipleChoicePart(Part):
 		}
 
 		part.displayType = displayTypes[kind]
-		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns'],part)
+		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType'],part)
 
 		if 'minmarks' in data:
 			part.minMarksEnabled = True
@@ -864,7 +865,7 @@ class MultipleChoicePart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors']])
+		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors','warning']])
 
 		choices = part.find('choices')
 		choices.attrib = {
@@ -908,6 +909,9 @@ class MultipleChoicePart(Part):
 				})
 				distractor.append(makeContentNode(self.distractors[i][j]))
 				distractors.append(distractor)
+
+		warning = marking.find('warning')
+		warning.attrib = {'type': self.warningType}
 
 		return part
 

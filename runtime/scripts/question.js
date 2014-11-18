@@ -1789,11 +1789,10 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	}
 
 	//get warning type and message for wrong number of choices
-	warningNode = this.xml.selectSingleNode('uiwarning');
+	warningNode = this.xml.selectSingleNode('marking/warning');
 	if(warningNode)
 	{
 		tryGetAttribute(settings,null,warningNode,'type','warningType');
-		settings.warningMessage = $.xsl.transform(Numbas.xml.templates.question,warningNode).string;
 	}
 	
 	if(loading)
@@ -2126,8 +2125,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	 * @property {string} answerOrder - order in which to display answers - either `random` or `fixed`
 	 * @property {Array.Array.<number>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
 	 * @property {string} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
-	 * @property {string} warningType - what to do if the student picks the wrong number of responses? Either `uwNone` (do nothing), `uwPrevent` (don't let the student submit), or `uwWarn` (show a warning but let them submit)
-	 * @property {string} warningMessage - warning message to display if the student picks the wrong number of responses
+	 * @property {string} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
 	 */
 	settings:
 	{
@@ -2138,8 +2136,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		answerOrder: '',			//order in which to display answers
 		matrix: [],					//marks matrix
 		displayType: '',			//how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-		warningType: '',			//what to do if wrong number of responses
-		warningMessage: ''			//message to display if wrong number of responses
+		warningType: ''				//what to do if wrong number of responses
 	},
 
 	/** Store the student's choices */
@@ -2189,8 +2186,24 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			{
 				if(this.ticks[i][j])
 				{
-					partScore += this.settings.matrix[i][j];
 					this.numTicks += 1;
+				}
+			}
+		}
+
+		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
+		if(this.wrongNumber) {
+			this.setCredit(0,R('part.mcq.wrong number of choices'));
+			return;
+		}
+
+		for( i=0; i<this.numAnswers; i++ )
+		{
+			for(var j=0; j<this.numChoices; j++ )
+			{
+				if(this.ticks[i][j])
+				{
+					partScore += this.settings.matrix[i][j];
 
 					var row = this.settings.distractors[i];
 					if(row)
@@ -2210,14 +2223,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		if(this.credit<=0)
 			this.markingComment(R('part.marking.incorrect'));
 
-		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
-
-		if(this.marks>0 && !this.wrongNumber)
+		if(this.marks>0)
 		{
 			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		}
-		else
-			this.setCredit(0,R('part.mcq.wrong number of choices'));
 	},
 
 	/** Are the student's answers valid? Show a warning if they've picked the wrong number */
@@ -2227,12 +2236,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		{
 			switch(this.settings.warningType)
 			{
-			case 'uwPrevent':
-				this.giveWarning(this.settings.warningMessage);
+			case 'prevent':
+				this.giveWarning(R('part.mcq.wrong number of choices'));
 				return false;
 				break;
-			case 'uwWarn':
-				this.giveWarning(this.settings.warningMessage);
+			case 'warn':
+				this.giveWarning(R('part.mcq.wrong number of choices'));
 				break;
 			}
 		}

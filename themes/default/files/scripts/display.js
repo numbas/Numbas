@@ -1613,6 +1613,21 @@ display.MultipleResponsePartDisplay = function()
 			this.ticks[i] = makeTicker(i,0);
 			this.correctTicks[i] = p.settings.matrix[i][0]>0;
 		}
+
+		if(p.settings.warningType!='none') {
+			ko.computed(function() {
+				this.removeWarnings();
+				var ticked = 0;
+				this.ticks.map(function(tick) {
+					ticked += tick() ? 1 : 0;
+				});
+
+				if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
+					this.warning(R('part.mcq.wrong number of choices'));
+				};
+			},this);
+		}
+
 		break;
 	case 'm_n_x':
 		switch(p.settings.displayType) {
@@ -1644,6 +1659,23 @@ display.MultipleResponsePartDisplay = function()
 					correctRow.push(p.settings.matrix[i][j]>0);
 				}
 			}
+
+			if(p.settings.warningType!='none') {
+				ko.computed(function() {
+					this.removeWarnings();
+					var ticked = 0;
+					this.ticks.map(function(row) {
+						row.map(function(tick) {
+							ticked += tick() ? 1 : 0;
+						});
+					});
+
+					if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
+						this.warning(R('part.mcq.wrong number of choices'));
+					};
+				},this);
+			}
+
 			break;
 		}
 		break;
