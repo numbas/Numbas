@@ -558,6 +558,9 @@ function createPart(xml, path, question, parentPart, loading)
 		if(part.customConstructor) {
 			part.customConstructor.apply(part);
 		}
+		if(loading && part.answered) {
+			part.submit();
+		}
 		return part;
 	}
 	else
@@ -1158,8 +1161,6 @@ function JMEPart(xml, path, question, parentPart, loading)
 	if(loading)	{
 		var pobj = Numbas.store.loadJMEPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
-		if(this.answered)
-			this.submit();
 	}
 	else {
 		this.stagedAnswer = [''];
@@ -1445,8 +1446,6 @@ function PatternMatchPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadPatternMatchPart(this);
 		this.stagedAnswer = [pobj.studentAnswer];
-		if(this.answered)
-			this.submit();
 	}
 }
 PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
@@ -1590,8 +1589,6 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	{
 		var pobj = Numbas.store.loadNumberEntryPart(this);
 		this.stagedAnswer = [pobj.studentAnswer+''];
-		if(this.answered)
-			this.submit();
 	}
 }
 NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
@@ -2089,10 +2086,6 @@ function MultipleResponsePart(xml, path, question, parentPart, loading)
 	this.wrongNumber = settings.minAnswers > 0;
 
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
-	if(loading) {
-		if(this.answered)
-			this.submit();
-	}
 }
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
@@ -2293,12 +2286,6 @@ function GapFillPart(xml, path, question, parentPart, loading)
 	}
 
 	this.display = new Numbas.display.GapFillPartDisplay(this);
-
-	if(loading)
-	{
-		if(this.answered)
-			this.submit();
-	}
 }	
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 {
