@@ -22,6 +22,10 @@ Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme
 
 	var MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
+MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
+	throw(new Numbas.Error(message[2].message));
+});
+
 	MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
 
 		var TEX = MathJax.InputJax.TeX;
@@ -41,9 +45,13 @@ Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme
 				var expr = this.GetArgument(name);
 				var scope = currentScope;
 
-				var v = jme.evaluate(jme.compile(expr,scope),scope);
+				try {
+					var v = jme.evaluate(jme.compile(expr,scope),scope);
 
-				var tex = jme.display.texify({tok: v});
+					var tex = jme.display.texify({tok: v});
+				}catch(e) {
+					throw(new Numbas.Error('mathjax.math processing error',e.message,expr));
+				}
 				var mml = TEX.Parse(tex,this.stack.env).mml();
 
 				this.Push(mml);
