@@ -710,9 +710,17 @@ function texMatrix(m,settings,parens)
 
 	if(m.args)
 	{
+		var all_lists = true;
 		var rows = m.args.map(function(x) {
-			return x.args.map(function(y){ return texify(y,settings); });
+			if(x.tok.type=='list') {
+				return x.args.map(function(y){ return texify(y,settings); });
+			} else {
+				all_lists = false;
+			}
 		})
+		if(!all_lists) {
+			return '\\operatorname{matrix}(' + m.args.map(function(x){return texify(x,settings);}).join(',') +')';
+		}
 	}
 	else
 	{

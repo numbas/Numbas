@@ -107,6 +107,14 @@ def indent(elem, level=0):
 def appendMany(element,things):
 	[element.append(x if etree.iselement(x) else makeTree(x)) for x in things]
 
+
+def haskey(data,key):
+	key = key.lower()
+	for k in data.keys():
+		if k.lower()==key:
+			return True
+	return False
+
 #exam object
 class Exam:
 	name = ''						#title of exam
@@ -160,27 +168,27 @@ class Exam:
 		exam = Exam()
 		tryLoad(data,['name','duration','percentPass','shuffleQuestions','allQuestions','pickQuestions','resources','extensions'],exam)
 
-		if 'navigation' in data:
+		if haskey(data,'navigation'):
 			nav = data['navigation']
 			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','preventleave'],exam.navigation)
 			if 'onleave' in nav:
 				tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
-		if 'timing' in data:
+		if haskey(data,'timing'):
 			timing = data['timing']
 			tryLoad(timing,['allowPause'],exam.timing)
 			for event in ['timeout','timedwarning']:
 				if event in timing:
 					tryLoad(timing[event],['action','message'],exam.timing[event])
 
-		if 'feedback' in data:
+		if haskey(data,'feedback'):
 			tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],exam)
-			if 'advice' in data['feedback']:
+			if haskey(data['feedback'],'advice'):
 				advice = data['feedback']['advice']
 				tryLoad(advice,'type',exam,'adviceType')
 				tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
 
-		if 'rulesets' in data:
+		if haskey(data,'rulesets'):
 			rulesets = data['rulesets']
 			for name in rulesets.keys():
 				l=[]
@@ -191,16 +199,16 @@ class Exam:
 						l.append(SimplificationRule.fromDATA(rule))
 				exam.rulesets[name] = l
 
-		if 'functions' in data:
+		if haskey(data,'functions'):
 			functions = data['functions']
 			for function in functions.keys():
 				exam.functions.append(Function.fromDATA(function,functions[function]))
 
-		if 'variables' in data:
+		if haskey(data,'variables'):
 			variables = data['variables']
 			for variable in variables.keys():
 				exam.variables.append(Variable(variables[variable]))
-		if 'questions' in data:
+		if haskey(data,'questions'):
 			for question in data['questions']:
 				exam.questions.append(Question.fromDATA(question))
 
@@ -360,25 +368,25 @@ class Question:
 		question = Question()
 		tryLoad(data,['name','statement','advice'],question)
 
-		if 'parts' in data:
+		if haskey(data,'parts'):
 			parts = data['parts']
 			for part in parts:
 				question.parts.append(Part.fromDATA(part))
 
-		if 'variables' in data:
+		if haskey(data,'variables'):
 			variables = data['variables']
 			for variable in variables.keys():
 				question.variables.append(Variable(variables[variable]))
 		
-		if 'functions' in data:
+		if haskey(data,'functions'):
 			functions = data['functions']
 			for function in functions.keys():
 				question.functions.append(Function.fromDATA(function,functions[function]))
 
-		if 'preamble' in data:
+		if haskey(data,'preamble'):
 			tryLoad(data['preamble'],['js','css'],question.preamble)
 
-		if 'rulesets' in data:
+		if haskey(data,'rulesets'):
 			rulesets = data['rulesets']
 			for name in rulesets.keys():
 				l=[]
@@ -532,18 +540,18 @@ class Part:
 
 		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer'],part);
 
-		if 'marks' in data:
+		if haskey(data,'marks'):
 			part.marks = data['marks']
 
-		if 'prompt' in data:
+		if haskey(data,'prompt'):
 			part.prompt = data['prompt']
 
-		if 'steps' in data:
+		if haskey(data,'steps'):
 			steps = data['steps']
 			for step in steps:
 				part.steps.append(Part.fromDATA(step))
 
-		if 'scripts' in data:
+		if haskey(data,'scripts'):
 			for name,script in data['scripts'].items():
 				part.scripts[name] = script
 
@@ -615,22 +623,22 @@ class JMEPart(Part):
 		#get checking accuracy from data, if defined
 		tryLoad(data,'checkingAccuracy',part)
 
-		if 'maxlength' in data:
+		if haskey(data,'maxlength'):
 			part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
-		if 'minlength' in data:
+		if haskey(data,'minlength'):
 			part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLength)
-		if 'musthave' in data:
+		if haskey(data,'musthave'):
 			part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
-		if 'notallowed' in data:
+		if haskey(data,'notallowed'):
 			part.notAllowed = Restriction.fromDATA('notallowed',data['notallowed'],part.notAllowed)
-		if 'expectedvariablenames' in data:
+		if haskey(data,'expectedvariablenames'):
 			part.expectedVariableNames = Restriction('expectedvariablenames')
 			try:
 				part.expectedVariableNames.strings = list(data['expectedvariablenames'])#
 			except TypeError:
 				raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
 
-		if 'vsetrange' in data and len(data['vsetrange']) == 2:
+		if haskey(data,'vsetrange') and len(data['vsetrange']) == 2:
 			part.vsetRangeStart = data['vsetrange'][0]
 			part.vsetRangeEnd = data['vsetrange'][1]
 
@@ -685,7 +693,7 @@ class Restriction:
 		if restriction==None:
 			restriction = Restriction(name)
 		tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
-		if 'strings' in data:
+		if haskey(data,'strings'):
 			for string in data['strings']:
 				restriction.strings.append(string)
 
@@ -762,7 +770,7 @@ class NumberEntryPart(Part):
 		part = NumberEntryPart()
 		tryLoad(data,['integerAnswer','integerPartialCredit','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 		if part.checkingType == 'range':
-			if 'answer' in data:
+			if haskey(data,'answer'):
 				part.maxvalue = part.minvalue = data['answer']
 			else:
 				tryLoad(data,['minvalue','maxvalue'],part)
@@ -838,25 +846,25 @@ class MultipleChoicePart(Part):
 		part.displayType = displayTypes[kind]
 		tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType'],part)
 
-		if 'minmarks' in data:
+		if haskey(data,'minmarks'):
 			part.minMarksEnabled = True
-		if 'maxmarks' in data:
+		if haskey(data,'maxmarks'):
 			part.maxMarksEnabled = True
 
-		if 'choices' in data:
+		if haskey(data,'choices'):
 			for choice in data['choices']:
 				part.choices.append(choice)
 
-		if 'answers' in data:
+		if haskey(data,'answers'):
 			for answer in data['answers']:
 				part.answers.append(answer)
 	
-		if 'matrix' in data:
+		if haskey(data,'matrix'):
 			part.matrix = data['matrix']
 			if isinstance(part.matrix,list) and len(part.matrix)>0 and (not isinstance(part.matrix[0],list)):	#so you can give just one row without wrapping it in another array
 				part.matrix = [[x] for x in part.matrix]
 
-		if 'distractors' in data:
+		if haskey(data,'distractors'):
 			part.distractors = data['distractors']
 			if len(part.distractors)>0 and (not isinstance(part.distractors[0],list)):
 				part.distractors = [[x] for x in part.distractors]
@@ -937,7 +945,7 @@ class GapFillPart(Part):
 	def fromDATA(data):
 		part = GapFillPart()
 
-		if 'gaps' in data:
+		if haskey(data,'gaps'):
 			gaps = data['gaps']
 			for gap in gaps:
 				part.gaps.append(Part.fromDATA(gap))
