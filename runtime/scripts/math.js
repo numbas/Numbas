@@ -533,8 +533,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		}
 		else	
 		{
-			if(n==Infinity)
+			if(n==Infinity) {
 				return 'infinity';
+			} else if(n==-Infinity) {
+				return '-infinity';
+			}
 
 			var piD;
 			if((piD = math.piDegree(n)) > 0)
@@ -545,7 +548,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			case 'sigfig':
 				var precision = options.precision;
 				out = math.siground(n,precision)+'';
-				var sigFigs = math.countSigFigs(out);
+				var sigFigs = math.countSigFigs(out,true);
 				if(sigFigs<precision) {
 					if(out.indexOf('.')==-1)
 						out += '.';
@@ -735,10 +738,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	
 	/** Calculate the significant figures precision of a number.
 	 * @param {number|string} n
+	 * @param {number} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
 	 * @returns {number}
 	 */
-	countSigFigs: function(n) {
-		var m = n.match(/^-?(?:(\d$)|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))$)/);
+	countSigFigs: function(n,max) {
+		var m;
+		if(max) {
+			m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))$)/);
+		} else {
+			m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))$)/);
+		}
 		if(!m)
 			return 0;
 		var sigFigs = m[1] || m[2] || m[3] || m[4] || m[5];
