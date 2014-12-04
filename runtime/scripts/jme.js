@@ -487,7 +487,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			var value = tok.value;
 			if(value.contains('{'))
 				value = jme.contentsubvars(value,scope)
-			return new TString(value);
+			var t = new TString(value);
+			t.latex = tok.latex;
+			return t;
 		case 'name':
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
@@ -1539,6 +1541,10 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 		}
 		else
 			result = new this.outcons(result);
+
+		if(options.latex) {
+			result.latex = true;
+		}
 
 		return result;
 	}	
