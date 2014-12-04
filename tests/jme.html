@@ -734,6 +734,13 @@
 
 				module('Display');
 
+				test('niceNumber',function() {
+					equals(Numbas.math.niceNumber(1000,{precisionType:'sigfig',precision:2}),'1000','niceNumber with sigfig precision calculates number of zeroes to add correctly');
+					equals(Numbas.math.niceNumber(1010,{precisionType:'sigfig',precision:6}),'1010.00','niceNumber with sigfig precision calculates number of zeroes to add correctly');
+					equals(Numbas.math.niceNumber(Infinity),'infinity','niceNumber recognises infinity');
+					equals(Numbas.math.niceNumber(-Infinity),'-infinity','niceNumber recognises -infinity');
+				});
+
 				test('subvars',function() {
 					ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
 				});
