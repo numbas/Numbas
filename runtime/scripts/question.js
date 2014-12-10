@@ -2307,6 +2307,7 @@ function GapFillPart(xml, path, question, parentPart, loading)
 		gap.isGap = true;
 		this.marks += gap.marks;
 		this.gaps[i]=gap;
+		this.answered = this.answered || gap.answered;
 	}
 
 	this.display = new Numbas.display.GapFillPartDisplay(this);
