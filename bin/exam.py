@@ -355,6 +355,10 @@ class Question:
 
 		self.parts = []
 		self.variables = []
+		self.variablesTest = {
+			'condition': '',
+			'maxRuns': 10,
+		}
 		self.functions = []
 		self.rulesets = {}
 
@@ -377,6 +381,9 @@ class Question:
 			variables = data['variables']
 			for variable in variables.keys():
 				question.variables.append(Variable(variables[variable]))
+
+		if haskey(data,'variablesTest'):
+			tryLoad(data['variablesTest'],['condition','maxRuns'],question.variablesTest)
 		
 		if haskey(data,'functions'):
 			functions = data['functions']
@@ -422,6 +429,10 @@ class Question:
 		variables = question.find('variables')
 		for variable in self.variables:
 			variables.append(variable.toxml())
+		variables.attrib = {
+			'condition': strcons_fix(self.variablesTest['condition']),
+			'maxRuns': strcons_fix(self.variablesTest['maxRuns']),
+		}
 
 		functions = question.find('functions')
 		for function in self.functions:

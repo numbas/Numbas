@@ -147,7 +147,31 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		else
 		{
 			var variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
-			q.scope.variables = Numbas.jme.variables.makeVariables(variablesTodo,q.scope);
+			q.variablesTest = {
+				condition: '',
+				maxRuns: 10
+			};
+			tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
+			var conditionSatisfied = false;
+			var condition = jme.compile(q.variablesTest.condition);
+			var runs = 0;
+			var scope;
+			while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
+				runs += 1;
+				scope = new jme.Scope([q.scope]);
+				scope.variables = jme.variables.makeVariables(variablesTodo,q.scope);
+				if(condition) {
+					conditionSatisfied = jme.evaluate(condition,scope).value;
+				} else {
+					conditionSatisfied = true;
+				}
+			}
+			if(runs==q.variablesTest.maxRuns) {
+				throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
+			} else {
+				console.log(runs);
+				q.scope = scope;
+			}
 		}
 	
 		q.scope = new jme.Scope([gscope,q.scope]);

@@ -18,6 +18,8 @@ R.registerLocale('en-GB',{
 	'page.loading': "Loading...",
 	'page.saving': "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
 
+	'mathjax.math processing error': "MathJax processing error: \"%s\" when texifying <code>%s</code>",
+
 	'die.numbas failed': "Numbas has failed",
 	'die.sorry': "Sorry, Numbas has encountered an error which means it can't continue. Below is a description of the error.",
 	'die.error': "Error",
@@ -125,6 +127,7 @@ R.registerLocale('en-GB',{
 	'jme.variables.circular reference': "Circular variable reference in definition of %s",
 	'jme.variables.error computing dependency': "Error computing referenced variable <code>%s</code>",
 	'jme.variables.error evaluating variable': "Error evaluating variable %s: %s",
+	'jme.variables.question took too many runs to generate variables': "A valid set of question variables was not generated in time.",
 
 	'jme.display.unknown token type': "Can't texify token type %s",
 	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
