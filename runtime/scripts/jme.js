@@ -2312,10 +2312,10 @@ newBuiltin('set', ['?'], TSet, null, {
 });
 newBuiltin('list',[TSet],TList,function(set) {
 	var l = [];
-	for(var element in set) {
-		l.push(set[element]);
+	for(i=0;i<set.length;i++) {
+		l.push(set[i]);
 	}
-	return new TList(l);
+	return l;
 });
 
 newBuiltin('union',[TSet,TSet],TSet,setmath.union);
