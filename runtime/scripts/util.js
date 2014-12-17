@@ -155,6 +155,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		'list': function(a,b) {
 			return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
 		},
+		'set': function(a,b) {
+			return Numbas.setmath.eq(a.value,b.value);
+		},
 		'range': function(a,b) {
 			return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
 		},
@@ -193,6 +196,31 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			}
 			return true;
 		});
+	},
+
+	/** Return a copy of the input list with duplicates removed
+	 * @param {array} list
+	 * @returns {list}
+	 * @see Numbas.util.eq
+	 */
+	distinct: function(list) {
+		if(list.length==0) {
+			return [];
+		}
+		var out = [list[0]];
+		for(var i=1;i<list.length;i++) {
+			var got = false;
+			for(var j=0;j<out.length;j++) {
+				if(util.eq(list[i],out[j])) {
+					got = true;
+					break;
+				}
+			}
+			if(!got) {
+				out.push(list[i]);
+			}
+		}
+		return out;
 	},
 
 	/** Test if parameter is an integer
@@ -429,8 +457,139 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return '0'+(-hash);
 		else
 			return '1'+hash;
-	}
+	},
 
+	/** Cartesian product of one or more lists
+	 * @param {array} lists - list of arrays
+	 * @returns {array}
+	 */
+	product: function(lists) {
+		var indexes = lists.map(function(){return 0});
+		var lengths = lists.map(function(l){return l.length});
+		var end = lists.length-1;
+
+		var out = [];
+		while(indexes[0]!=lengths[0]) {
+			out.push(indexes.map(function(i,n){return lists[n][i]}));
+			var k = end;
+			indexes[k] += 1;
+			while(k>0 && indexes[k]==lengths[k]) {
+				indexes[k] = 0;
+				k -= 1;
+				indexes[k] += 1;
+			}
+		}
+		return out;
+	},
+
+	/** All combinations of r items from given array, without replacement
+	 * @param {array} list
+	 * @param {number} r
+	 */
+	combinations: function(list,r) {
+		var indexes = [];
+		for(var i=0;i<r;i++) {
+			indexes.push(i);
+		}
+		var length = list.length;
+		var end = r-1;
+
+		var out = [];
+		var steps = 0;
+		while(steps<1000 && indexes[0]<length+1-r) {
+			steps += 1;
+
+			out.push(indexes.map(function(i){return list[i]; }));
+			indexes[end] += 1;
+			if(indexes[end]==length) {
+				var k = end;
+				while(k>=0 && indexes[k]==length+1-r+k) {
+					k -= 1;
+					indexes[k] += 1;
+				}
+				for(k=k+1;k<r;k++) {
+					indexes[k] = indexes[k-1]+1;
+				}
+			}
+		}
+		return out;
+	},
+
+	
+	/** All combinations of r items from given array, with replacement
+	 * @param {array} list
+	 * @param {number} r
+	 */
+	combinations_with_replacement: function(list,r) {
+		var indexes = [];
+		for(var i=0;i<r;i++) {
+			indexes.push(0);
+		}
+		var length = list.length;
+		var end = r-1;
+
+		var out = [];
+		while(indexes[0]<length) {
+			out.push(indexes.map(function(i){return list[i]; }));
+			indexes[end] += 1;
+			if(indexes[end]==length) {
+				var k = end;
+				while(k>=0 && indexes[k]==length) {
+					k -= 1;
+					indexes[k] += 1;
+				}
+				for(k=k+1;k<r;k++) {
+					indexes[k] = indexes[k-1];
+				}
+			}
+		}
+		return out;
+	},
+
+
+	/** All permutations of all choices of r elements from list
+	 *
+	 * Inspired by the algorithm in Python's itertools library
+	 * @param {array} list - elements to choose and permute
+	 * @param {number} r - number of elements to choose
+	 */
+	permutations: function(list,r) {
+		var n = list.length;
+		if(r===undefined) {
+			r = n;
+		}
+		var indices = [];
+		var cycles = [];
+		for(var i=0;i<n;i++) {
+			indices.push(i);
+		}
+		for(var i=n;i>=n-r+1;i--) {
+			cycles.push(i);
+		}
+
+		var out = [indices.slice(0,r).map(function(v){return list[v]})];
+
+		while(n) {
+			for(var i=r-1;i>=0;i--) {
+				cycles[i] -= 1
+				if(cycles[i]==0) {
+					indices.push(indices.splice(i,1)[0]);
+					cycles[i] = n-i
+				} else {
+					var j = cycles[i];
+					var t = indices[i];
+					indices[i] = indices[n-j];
+					indices[n-j] = t;
+					out.push(indices.slice(0,r).map(function(v){return list[v]}));
+					break;
+				}
+			}
+			if(i==-1) {
+				return out;
+			}
+		}
+	}
+	
 };
 
 var endDelimiters = {

@@ -25,6 +25,7 @@ var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
 var matrixmath = Numbas.matrixmath;
+var setmath = Numbas.setmath;
 
 /** @typedef Numbas.jme.tree
   * @type {object}
@@ -1009,6 +1010,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 			this.functions[fn.name] = [fn];
 		else
 			this.functions[fn.name].push(fn);
+	},
+
+	/** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
+	 * @param {JME} expr
+	 * @returns {token}
+	 */
+	evaluate: function(expr) {
+		return jme.evaluate(expr,this);
 	}
 };
 
@@ -1153,6 +1162,19 @@ TList.doc = {
 	usage: ['[0,1,2,3]','[a,b,c]','[true,false,false]'],
 	description: "A list of elements of any data type."
 };
+
+/** Set type
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {object[]} value - Array of elements. Constructor assumes all elements are distinct
+ * @property type "set"
+ * @constructor
+ * @param {object[]} value
+ */
+var TSet = types.TSet = types.set = function(value) {
+	this.value = value;
+}
+TSet.prototype.type = 'set';
 
 /** Vector type
  * @memberof Numbas.jme.types
@@ -1465,16 +1487,16 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	options = options || {};
 	for(var i=0;i<intype.length;i++)
 	{
-		if(intype[i]!='?')
+		if(intype[i]!='?' && intype[i]!='?*')
 		{
 			if(intype[i][0]=='*')
 			{
 				var type = types[intype[i].slice(1)];
-				intype[i] = '*'+(new type()).type;
+				intype[i] = '*'+type.prototype.type;
 			}
 			else
 			{
-				intype[i]=new intype[i]().type;
+				intype[i]=intype[i].prototype.type;
 			}
 		}
 	}
@@ -1766,28 +1788,7 @@ newBuiltin('except',[TList,'?'], TList, null, {
 	}
 });
 
-newBuiltin('distinct',[TList],TList,
-	function(list) {
-		if(list.length==0) {
-			return [];
-		}
-		var out = [list[0]];
-		for(var i=1;i<list.length;i++) {
-			var got = false;
-			for(var j=0;j<out.length;j++) {
-				if(util.eq(list[i],out[j])) {
-					got = true;
-					break;
-				}
-			}
-			if(!got) {
-				out.push(list[i]);
-			}
-		}
-		return out;
-	},
-	{unwrapValues: false}
-);
+newBuiltin('distinct',[TList],TList, util.distinct,{unwrapValues: false});
 
 newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
@@ -2293,6 +2294,74 @@ newBuiltin('sort',[TList],TList, null, {
 	}
 });
 
+newBuiltin('set',[TList],TSet,function(l) {
+	return util.distinct(l);
+});
+
+newBuiltin('set', ['?'], TSet, null, {
+	evaluate: function(args,scope) {
+		return new TSet(util.distinct(args));
+	},
+	typecheck: function() {
+		return true;
+	}
+
+});
+newBuiltin('list',[TSet],TList,function(set) {
+	var l = [];
+	for(var element in set) {
+		l.push(set[element]);
+	}
+	return new TList(l);
+});
+
+newBuiltin('union',[TSet,TSet],TSet,setmath.union);
+newBuiltin('intersection',[TSet,TSet],TSet,setmath.intersection);
+newBuiltin('-',[TSet,TSet],TSet,setmath.minus);
+
+newBuiltin('product',['?'],TList,function() {
+	var lists = Array.prototype.slice.call(arguments);
+	var prod = util.product(lists);
+	return prod.map(function(l){ return new TList(l); });
+}, {
+	typecheck: function(variables) {
+		for(var i=0;i<variables.length;i++) {
+			var t = variables[i].type;
+			if(!(t=='list' || t=='set')) {
+				return false;
+			}
+		}
+		return true;
+	}
+});
+
+newBuiltin('combinations',['?',TNum],TList,function(list,r) {
+	var prod = util.combinations(list,r);
+	return prod.map(function(l){ return new TList(l); });
+}, {
+	typecheck: function(variables) {
+		return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+	}
+});
+
+newBuiltin('combinations_with_replacement',['?',TNum],TList,function(list,r) {
+	var prod = util.combinations_with_replacement(list,r);
+	return prod.map(function(l){ return new TList(l); });
+}, {
+	typecheck: function(variables) {
+		return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+	}
+});
+
+newBuiltin('permutations',['?',TNum],TList,function(list,r) {
+	var prod = util.permutations(list,r);
+	return prod.map(function(l){ return new TList(l); });
+}, {
+	typecheck: function(variables) {
+		return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+	}
+});
+
 newBuiltin('vector',['*TNum'],TVector, null, {
 	evaluate: function(args,scope)
 	{
@@ -2722,7 +2791,7 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 		}
 		return true;
 	default:
-		return v1 == v2;
+		return util.eq(r1,r2);
 	}
 };
 

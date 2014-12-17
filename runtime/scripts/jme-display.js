@@ -508,7 +508,14 @@ var texOps = jme.display.texOps = {
 	}),
 	'verbatim': (function(thing,texArgs) {
 		return thing.args[0].tok.value;
-	})
+	}),
+	'set': function(thing,texArgs,settings) {
+		if(thing.args.length==1 && thing.args[0].tok.type=='list') {
+			return '\\left\\{ '+texify(thing.args[0],settings)+' \\right\\}';
+		} else {
+			return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+		}
+	}
 }
 
 /** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
@@ -879,6 +886,13 @@ var typeToTeX = jme.display.typeToTeX = {
 
 			return texName(texname,tok.annotation)+' \\left ( '+texArgs.join(', ')+' \\right )';
 		}
+	},
+	set: function(thing,tok,texArgs,settings) {
+		texArgs = [];
+		for(var i=0;i<tok.value.length;i++) {
+			texArgs.push(texify(tok.value[i],settings));
+		}
+		return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
 	}
 }
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
@@ -916,7 +930,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	if(tok.type in typeToTeX) {
 		return typeToTeX[tok.type](thing,tok,texArgs,settings);
 	} else {
-		throw(new Numbas.Error('jme.display.unknown token type',tok.type));
+		throw(new Numbas.Error(R('jme.display.unknown token type',tok.type)));
 	}
 }
 
@@ -1219,6 +1233,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			{return op+bits[0];}
 		else
 			{return bits[0]+op+bits[1];}
+	},
+	set: function(tree,tok,bits,settings) {
+		return 'set('+tok.value.map(function(thing){return treeToJME({tok:thing},settings);}).join(',')+')';
 	}
 }
 
@@ -1250,7 +1267,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	if(tok.type in typeToJME) {
 		return typeToJME[tok.type](tree,tok,bits,settings);
 	} else {
-		throw(new Numbas.Error('jme.display.unknown token type',tok.type));
+		throw(new Numbas.Error(R('jme.display.unknown token type',tok.type)));
 	}
 }
 

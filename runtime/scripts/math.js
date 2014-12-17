@@ -1819,4 +1819,48 @@ var matrixmath = Numbas.matrixmath = {
 	}
 }
 
+
+/** Set operations.
+ *
+ * @namespace Numbas.setmath
+ */
+var setmath = Numbas.setmath = {
+	/** Does the set contain the given element?
+	 * @param {set} set
+	 * @param {object} element
+	 * @returns {bool}
+	 */
+	contains: function(set,element) {
+		for(var i=0,l=set.length;i<l;i++) {
+			if(Numbas.util.eq(set[i],element)) {
+				return true;
+			}
+		}
+	},
+
+	union: function(a,b) {
+		var out = a.slice();
+		for(var i=0,l=b.length;i<l;i++) {
+			if(!setmath.contains(a,b[i])) {
+				out.push(b[i]);
+			}
+		}
+		return out;
+	},
+	
+	intersection: function(a,b) {
+		return a.filter(function(v) {
+			return setmath.contains(b,v);
+		});
+	},
+
+	eq: function(a,b) {	
+		return a.length==b.length && setmath.intersection(a,b).length==a.length;
+	},
+
+	minus: function(a,b) {
+		return a.filter(function(v){ return !setmath.contains(b,v); });
+	}
+}
+
 });
