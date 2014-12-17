@@ -2297,6 +2297,9 @@ newBuiltin('sort',[TList],TList, null, {
 newBuiltin('set',[TList],TSet,function(l) {
 	return util.distinct(l);
 });
+newBuiltin('set',[TRange],TSet,function(r) {
+	return r.slice(3).map(function(n){return new TNum(n)});
+});
 
 newBuiltin('set', ['?'], TSet, null, {
 	evaluate: function(args,scope) {
