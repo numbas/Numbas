@@ -50,7 +50,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_bool: /^true|^false/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
 		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|isa|except)([^a-zA-Z0-9]|$)))/i,
+		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|isa|except|in)([^a-zA-Z0-9]|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_comment: /^\/\/.*(?:\n|$)/
@@ -1396,6 +1396,7 @@ var precedence = jme.precedence = {
 	'..': 5,
 	'#':6,
 	'except': 6.5,
+	'in': 6.5,
 	'<': 7,
 	'>': 7,
 	'<=': 7,
@@ -1672,6 +1673,18 @@ newBuiltin('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', descriptio
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}}); 
 
+newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
+	var start = r[0];
+	var end = r[1];
+	var step = r[2];
+	var max_steps = Math.floor(end-start)/step;
+	if(x>end) {
+		return false;
+	}
+	var steps = Math.floor((x-start)/step);
+	return step*steps+start==x && steps <= max_steps;
+});
+
 newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
 newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
 
@@ -1789,6 +1802,12 @@ newBuiltin('except',[TList,'?'], TList, null, {
 });
 
 newBuiltin('distinct',[TList],TList, util.distinct,{unwrapValues: false});
+
+newBuiltin('in',['?',TList],TBool,null,{
+	evaluate: function(args,scope) {
+		return new TBool(util.contains(args[1].value,args[0]));
+	}
+});
 
 newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
 newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
@@ -2320,7 +2339,15 @@ newBuiltin('list',[TSet],TList,function(set) {
 
 newBuiltin('union',[TSet,TSet],TSet,setmath.union);
 newBuiltin('intersection',[TSet,TSet],TSet,setmath.intersection);
+newBuiltin('or',[TSet,TSet],TSet,setmath.union);
+newBuiltin('and',[TSet,TSet],TSet,setmath.intersection);
 newBuiltin('-',[TSet,TSet],TSet,setmath.minus);
+
+newBuiltin('in',['?',TSet],TBool,null,{
+	evaluate: function(args,scope) {
+		return new TBool(util.contains(args[1].value,args[0]));
+	}
+});
 
 newBuiltin('product',['?'],TList,function() {
 	var lists = Array.prototype.slice.call(arguments);

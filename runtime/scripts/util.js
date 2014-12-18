@@ -223,6 +223,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return out;
 	},
 
+	/** Is value in the list?
+	 * @param {array} list
+	 * @param {Numbas.jme.token} value
+	 * @returns {boolean}
+	 */
+	contains: function(list,value) {
+		for(var i=0;i<list.length;i++) {
+			if(util.eq(value,list[i])) {
+				return true;
+			}
+		}
+		return false;
+	},
+
 	/** Test if parameter is an integer
 	 * @param {object} i
 	 * @returns {boolean}
