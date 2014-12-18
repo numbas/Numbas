@@ -2238,6 +2238,56 @@ newBuiltin('listval',[TMatrix,TNum],TVector, null, {
 newBuiltin('map',['?',TName,'?'],TList, null, {
 	evaluate: function(args,scope)
 	{
+		var lambda = args[0];
+
+		var list = jme.evaluate(args[2],scope);
+		switch(list.type) {
+		case 'list':
+		case 'set':
+			list = list.value;
+			break;
+		case 'range':
+			list = list.value.slice(3);
+			for(var i=0;i<list.length;i++) {
+				list[i] = new TNum(list[i]);
+			}
+			break;
+		default:
+			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+		}
+		var value = [];
+		scope = new Scope(scope);
+
+		var names_tok = args[1].tok;
+		if(names_tok.type=='name') {
+			var name = names_tok.name;
+			for(var i=0;i<list.length;i++)
+			{
+				scope.variables[name] = list[i];
+				value[i] = jme.evaluate(lambda,scope);
+			}
+		} else if(names_tok.type=='list') {
+			var names = args[1].args.map(function(t){return t.tok.name;});
+			for(var i=0;i<list.length;i++)
+			{
+				names.map(function(name,j) {
+					scope.variables[name] = list[i].value[j];
+				});
+				value[i] = jme.evaluate(lambda,scope);
+			}
+		}
+		return new TList(value);
+	},
+	
+	doc: {
+		usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
+		description: 'Apply the given expression to every value in a list.'
+	}
+});
+
+newBuiltin('map',['?',TList,'?'],TList,null, {
+	evaluate: function(args,scope)
+	{
 		var list = jme.evaluate(args[2],scope);
 		switch(list.type) {
 		case 'list':
@@ -2253,41 +2303,18 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
 		}
 		var value = [];
-		var name = args[1].tok.name;
+		var names = args[1].tok.args.map(function(t){return t.tok.name;});
 		scope = new Scope(scope);
 		for(var i=0;i<list.length;i++)
 		{
+			names.map(function(name,j) {
+				console.log(name,list[i].value[j]);
+				scope.variables[name] = list[i].value[j];
+			});
 			scope.variables[name] = list[i];
 			value[i] = jme.evaluate(args[0],scope);
 		}
 		return new TList(value);
-	},
-	
-	doc: {
-		usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
-		description: 'Apply the given expression to every value in a list.'
-	}
-});
-
-newBuiltin('map',['?',TName,TRange],TList, null, {
-	evaluate: function(args,scope)
-	{
-		var range = jme.evaluate(args[2],scope);
-		var name = args[1].tok.name;
-		var newlist = new TList(range.size);
-		newlist.value = [];
-		scope = new Scope(scope);
-		for(var i=3;i<range.value.length;i++)
-		{
-			scope.variables[name] = new TNum(range.value[i]);
-			newlist.value[i-3] = jme.evaluate(args[0],scope);
-		}
-		return newlist;
-	},
-
-	doc: {
-		usage: ['map(expr,x,range)','map(x^2,x,0..5)'],
-		description: 'Apply the given expression to every value in a range.'
 	}
 });
 
