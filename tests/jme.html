@@ -512,6 +512,7 @@
 					equals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3)');
 					equals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3)');
 					equals(evaluate('precround(123456789012,8)').value,123456789012,'precround(123456789012,8) - only multiply fractional part, to get better precision');
+					equals(evaluate('precround(4+488/1000,3)').value,4.488,'precround(4+488/1000,3) - try not to add floating point error in the middle of precround');
 
 					equals(evaluate('precround(237.55749999999998,3)').value,237.558,'precround(237.55749999999998,3)==237.558');
 					equals(evaluate('precround(237.55748999999998,3)').value,237.557,'precround(237.55748999999998,3)==237.557');

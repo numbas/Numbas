@@ -680,14 +680,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
 			var v = fracPart*b*10 % 1;
 			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*b*10 % 10);
-			if(d==4 && 1-v<1e-9) {
-				return intPart + Math.round(fracPart*b+1)/b;
+			fracPart *= b;
+			if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
+				fracPart += 1;
 			}
-			else if(d==-5 && v>-1e-9 && v<0) {
-				return intPart + Math.round(fracPart*b+1)/b;
+			fracPart = Math.abs(Math.round(fracPart));
+			if(fracPart==b) {
+				return intPart+math.sign(fracPart);
 			}
-
-			return intPart + Math.round(fracPart*b)/b;
+			return parseFloat(intPart+'.'+Math.round(fracPart));
 		}
 	},
 
