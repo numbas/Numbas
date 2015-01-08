@@ -671,24 +671,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			return math.complex(math.precround(a.re,b),math.precround(a.im,b));
 		else
 		{
-			b = Math.pow(10,b);
+			var be = Math.pow(10,b);
 
 			var fracPart = a % 1;
 			var intPart = a - fracPart;
 
 			//test to allow a bit of leeway to account for floating point errors
 			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-			var v = fracPart*b*10 % 1;
-			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*b*10 % 10);
-			fracPart *= b;
+			var v = fracPart*be*10 % 1;
+			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
+			fracPart *= be;
 			if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
 				fracPart += 1;
 			}
 			fracPart = Math.abs(Math.round(fracPart));
-			if(fracPart==b) {
+			if(fracPart==be) {
 				return intPart+math.sign(fracPart);
 			}
-			return parseFloat(intPart+'.'+Math.round(fracPart));
+			var fracPartString = Math.round(fracPart)+'';
+			while(fracPartString.length<b) {
+				fracPartString = '0'+fracPartString;
+			}
+			return parseFloat(intPart+'.'+fracPartString);
 		}
 	},
 
