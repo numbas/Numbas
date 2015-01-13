@@ -692,7 +692,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			while(fracPartString.length<b) {
 				fracPartString = '0'+fracPartString;
 			}
-			return parseFloat(intPart+'.'+fracPartString);
+			var out = parseFloat(intPart+'.'+fracPartString);
+			if(intPart==0 && a<0) {
+				return -out;
+			} else {
+				return out;
+			}
 		}
 	},
 
