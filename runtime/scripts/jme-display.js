@@ -23,6 +23,7 @@ Numbas.queueScript('jme-display',['base','math','jme','util'],function() {
 	
 var math = Numbas.math;
 var jme = Numbas.jme;
+var util = Numbas.util;
 
 /** A JME expression
  * @typedef JME
@@ -295,7 +296,11 @@ var texOps = jme.display.texOps = {
 		for(var i=1; i<thing.args.length; i++ )
 		{
 			//specials or subscripts
-			if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
+			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)))
+			{ 
+				s+=' \\times ';
+			}
+			else if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
 			{
 				s+=' ';
 			}
