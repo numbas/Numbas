@@ -169,7 +169,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 			if(runs==q.variablesTest.maxRuns) {
 				throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
 			} else {
-				console.log(runs);
 				q.scope = scope;
 			}
 		}
