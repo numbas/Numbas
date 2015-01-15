@@ -1382,6 +1382,14 @@ function isEndTerm(term) {
 	while(term.tok.type=='function' && /^m_(?:all|pm|not|commute)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
 		term = term.args[0];
 	}
+	if(term.tok.type=='function' && term.tok.name=='m_any') {
+		for(var i=0;i<term.args.length;i++) {
+			if(isEndTerm(term.args[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
 	return term.tok.type=='name' && endTermNames[term.tok.name];
 }
 
