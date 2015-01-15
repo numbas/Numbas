@@ -790,14 +790,13 @@ texNameAnnotations.m = texNameAnnotations.matrix;
 
 /** Convert a variable name to TeX
  * @memberof Numbas.jme.display
- * @private
  *
  * @param {string} name
  * @param {string[]} annotation - 
  * @returns {TeX}
  */
 
-function texName(name,annotations)
+var texName = jme.display.texName = function(name,annotations)
 {
 	var name = greek.contains(name) ? '\\'+name : name;
 	name = name.replace(/(.*)_(.*)('*)$/g,'$1_{$2}$3');	//make numbers at the end of a variable name subscripts
