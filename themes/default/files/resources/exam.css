@@ -102,13 +102,30 @@ iframe {
 	font-size: 120%;
 	margin-left: 0.2em;
 }
-.type-matrix .matrix-input table.matrix{
+
+.matrix-input {
+	display: inline-block;
+}
+.matrix-input table.matrix {
     width: auto;
     display: inline-block;
     margin: 0.5em 0;
 }
 .matrix-input .matrix td {
 	text-align: center;
+}
+.matrix-input .matrix-wrapper .left-bracket, .matrix-input .matrix-wrapper .matrix, .matrix-input .matrix-wrapper .right-bracket {
+	display: table-cell;
+}
+.matrix-input .left-bracket, .matrix-input .right-bracket {
+	border-radius: 50%;
+	width: 10px;
+}
+.matrix-input .left-bracket {
+	border-left: 2px solid;
+}
+.matrix-input .right-bracket {
+	border-right: 2px solid;
 }
 
 button {
@@ -719,7 +736,7 @@ div.part {
 }
 
 
-#questionDisplay .question td, #questionDisplay .adviceDisplay td {
+.question td, .adviceDisplay td {
 	text-align: right;
 }
 

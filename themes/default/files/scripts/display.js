@@ -257,7 +257,7 @@ ko.bindingHandlers.stopbinding = {
 
 ko.components.register('matrix-input',{
 	viewModel: function(params) {
-		this.allowResize = ko.observable(params.allowResize || false)
+		this.allowResize = params.allowResize ? params.allowResize : ko.observable(false);
 		if(typeof params.rows=='function') {
 			this.numRows = params.rows;
 		} else {
@@ -269,6 +269,8 @@ ko.components.register('matrix-input',{
 			this.numColumns = ko.observable(params.columns || 2);
 		}
 		this.value = ko.observableArray([]);
+
+		this.disable = params.disable || false;
 		
 		this.update = function() {
 			var numRows = parseInt(this.numRows());
@@ -312,7 +314,7 @@ ko.components.register('matrix-input',{
 		ko.computed(function() {
 			var v = params.value();
 			this.numRows(v.length);
-			this.numColumns(v[0].length);
+			this.numColumns(v[0] ? v[0].length : 0);
 			for(var i=0;i<v.length;i++) {
 				var row = v[i];
 				for(var j=0;j<row.length;j++) {
@@ -324,15 +326,19 @@ ko.components.register('matrix-input',{
 	},
 	template: 
 	 '<div class="matrix-input">'
-	+'<table class="matrix" data-bind="foreach: value">'
-	+'	<tr data-bind="foreach: $data">'
-	+'		<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true"></td>'
-	+'	</tr>'
-	+'</table>'
-	+'<div class="matrix-size">'
-	+'<label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true"/></label>'
-	+'<label class="num-columns">Columns: <input type="number" data-bind="value: numColumns, autosize: true"/></label>'
-	+'</div>'
+	+'	<div class="matrix-size" data-bind="if: allowResize">'
+	+'		<label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
+	+'		<label class="num-columns">Columns: <input type="number" data-bind="value: numColumns, autosize: true, disable: disable"/></label>'
+	+'	</div>'
+	+'	<div class="matrix-wrapper">'
+	+'		<span class="left-bracket"></span>'
+	+'		<table class="matrix" data-bind="foreach: value">'
+	+'			<tr data-bind="foreach: $data">'
+	+'				<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true, disable: $parents[1].disable"></td>'
+	+'			</tr>'
+	+'		</table>'
+	+'		<span class="right-bracket"></span>'
+	+'	</div>'
 	+'</div>'
 	}
 )
@@ -1631,9 +1637,15 @@ display.MatrixEntryPartDisplay = function()
 	 * @memberof Numbas.display.MatrixEntryPartDisplay
 	 */
 	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+	this.correctAnswerLaTeX = ko.computed(function() {
+		var correctAnswer = this.correctAnswer();
+		var m = new Numbas.jme.types.TMatrix(correctAnswer);
+		return Numbas.jme.display.texify({tok:m});
+	},this);
 
-	this.studentAnswerRows = ko.observable(3);
-	this.studentAnswerColumns = ko.observable(3);
+	this.studentAnswerRows = ko.observable(p.settings.numRows);
+	this.studentAnswerColumns = ko.observable(p.settings.numColumns);
+	this.allowResize = ko.observable(p.settings.allowResize);
 
 	ko.computed(function() {
 		p.storeAnswer([this.studentAnswerRows(),this.studentAnswerColumns(),this.studentAnswer()]);

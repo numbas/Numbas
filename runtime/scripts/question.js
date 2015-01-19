@@ -1744,6 +1744,7 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
+	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize'],['numRows','numColumns','allowResize']);
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);
@@ -1753,6 +1754,8 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 		throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
 
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+
+	this.studentAnswer = [['',''],['','']];
 	
 	if(loading)
 	{
@@ -1770,7 +1773,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 * @property {matrix} correctAnswer - the correct answer to the part
 	 */
 	settings: {
-		correctAnswer: null
+		correctAnswer: null,
+		numRows: 3,
+		numColumns: 3,
+		allowResize: true
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -1784,7 +1790,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Mark the student's answer */
 	mark: function()
 	{
-		if(this.answerList==undefined)
+		if(this.answerList===undefined)
 		{
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
@@ -1799,7 +1805,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 				var row = [];
 				for(var j=0;j<columns;j++) {
 					var n = parseFloat(this.studentAnswer[i][j]);
-					console.log(i,j,n);
 					if(isNaN(n)) {
 						if(minColumns===undefined) {
 							minColumns = j;
@@ -1816,6 +1821,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 					}
 				}
 				if(row.length) {
+					if(minColumns===undefined) {
+						minColumns = row.length;
+					}
 					matrix.push(row);
 				}
 			}
@@ -1827,8 +1835,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			matrix.rows = matrix.length;
 			matrix.columns = minColumns;
 
-			console.log(matrix);
-			
 			if(Numbas.matrixmath.eq(matrix,this.settings.correctAnswer)) {
 				this.setCredit(1,R('part.marking.correct'));
 			} else {

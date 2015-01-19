@@ -825,6 +825,9 @@ class NumberEntryPart(Part):
 class MatrixEntryPart(Part):
 	kind = 'matrix'
 	correctAnswer = ''
+	numRows = 3
+	numColumns = 3
+	allowResize = True
 
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
@@ -832,7 +835,7 @@ class MatrixEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = MatrixEntryPart()
-		tryLoad(data,['correctAnswer'],part)
+		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize'],part)
 
 		return part
 
@@ -842,7 +845,10 @@ class MatrixEntryPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-			'correctanswer': strcons_fix(self.correctAnswer)
+			'correctanswer': strcons_fix(self.correctAnswer),
+			'rows': strcons_fix(self.numRows),
+			'columns': strcons_fix(self.numColumns),
+			'allowresize': strcons_fix(self.allowResize)
 		}
 
 		return part
