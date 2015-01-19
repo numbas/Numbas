@@ -535,6 +535,7 @@ class Part:
 		partConstructors = {
 				'jme': JMEPart,
 				'numberentry': NumberEntryPart,
+				'matrix': MatrixEntryPart,
 				'patternmatch': PatternMatchPart,
 				'1_n_2': MultipleChoicePart,
 				'm_n_2': MultipleChoicePart,
@@ -818,6 +819,31 @@ class NumberEntryPart(Part):
 			'strict': strcons_fix(self.strictPrecision)
 		}
 		answer.find('precision/message').append(makeContentNode(self.precisionMessage))
+
+		return part
+
+class MatrixEntryPart(Part):
+	kind = 'matrix'
+	correctAnswer = ''
+
+	def __init__(self,marks=0,prompt=''):
+		Part.__init__(self,marks,prompt)
+
+	@staticmethod
+	def fromDATA(data):
+		part = MatrixEntryPart()
+		tryLoad(data,['correctAnswer'],part)
+
+		return part
+
+	def toxml(self):
+		part = Part.toxml(self)
+		part.append(makeTree(['answer']))
+
+		answer = part.find('answer')
+		answer.attrib = {
+			'correctanswer': strcons_fix(self.correctAnswer)
+		}
 
 		return part
 

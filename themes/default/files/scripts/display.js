@@ -255,6 +255,17 @@ ko.bindingHandlers.stopbinding = {
 	}
 }
 
+ko.bindingHandlers.matrixInput = {
+	init: function(element,valueAccessor) {
+		valueAccessor = valueAccessor();
+
+		$(element).html('hi');
+	},
+	update: function(element,valueAccessor) {
+
+	}
+}
+
 /** @namespace Numbas.display */
 
 var display = Numbas.display = /** @lends Numbas.display */ {
@@ -1527,6 +1538,58 @@ display.NumberEntryPartDisplay.prototype =
 	}
 };
 display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
+
+/** Display code for a {@link Numbas.parts.MatrixEntryPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name MatrixEntryPartDisplay
+ * @memberof Numbas.display
+ */
+display.MatrixEntryPartDisplay = function()
+{
+	var p = this.part;
+
+	/** The student's current (not necessarily submitted) answer
+	 * @member {observable|string} studentAnswer
+	 * @memberof Numbas.display.MatrixEntryPartDisplay
+	 */
+	this.studentAnswer = ko.observable(p.studentAnswer);
+
+	/** The correct answer
+	 * @member {observable|number} correctAnswer
+	 * @memberof Numbas.display.MatrixEntryPartDisplay
+	 */
+	this.correctAnswer = ko.observable(p.settings.correctAnswer);
+
+	this.studentAnswerRows = ko.observable(3);
+	this.studentAnswerColumns = ko.observable(3);
+
+	ko.computed(function() {
+		p.storeAnswer([this.studentAnswer()]);
+	},this);
+
+	/** Show a LaTeX rendering of the answer?
+	 * @member {boolean} showPreview
+	 * @memberof Numbas.display.MatrixEntryPartDisplay
+	 */
+	this.showPreview = false;
+
+	/** TeX version of student's answer
+	 * @member {observable|TeX} studentAnswerLaTeX
+	 * @memberof Numbas.display.MatrixEntryPartDisplay
+	 */
+	this.studentAnswerLaTeX = ko.computed(function() {
+		return 'student answer latex';
+	},this);
+}
+display.MatrixEntryPartDisplay.prototype =
+{
+	restoreAnswer: function()
+	{
+		this.studentAnswer(this.part.studentAnswer);
+	}
+};
+display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
 
 /** Display code for a {@link Numbas.parts.MultipleResponsePart}
  * @augments Numbas.display.PartDisplay

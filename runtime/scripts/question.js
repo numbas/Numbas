@@ -1733,6 +1733,120 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	}
 };
 
+/** Matrix entry part - student enters a matrix of numbers
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+function MatrixEntryPart(xml, path, question, parentPart, loading) {
+	var evaluate = jme.evaluate, compile = jme.compile;
+	var settings = this.settings;
+	util.copyinto(MatrixEntryPart.prototype.settings,settings);
+
+	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
+
+	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
+	correctAnswer = evaluate(correctAnswer,this.question.scope);
+	if(correctAnswer && correctAnswer.type=='matrix')
+		settings.correctAnswer = correctAnswer.value;
+	else
+		throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
+
+	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+	
+	if(loading)
+	{
+		var pobj = Numbas.store.loadMatrixEntryPart(this);
+		this.stagedAnswer = [pobj.studentAnswer+''];
+	}
+}
+MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
+{
+	/** The student's last submitted answer */
+	studentAnswer: '',
+
+	/** Properties set when part is generated
+	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {matrix} correctAnswer - the correct answer to the part
+	 */
+	settings: {
+		correctAnswer: null
+	},
+
+	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	 */
+	setStudentAnswer: function() {
+		this.studentAnswerRows = this.stagedAnswer[0];
+		this.studentAnswerColumns = this.stagedAnswer[1];
+		this.studentAnswer = util.copyarray(this.stagedAnswer.slice(2),true);
+	},
+
+	/** Mark the student's answer */
+	mark: function()
+	{
+		if(this.answerList==undefined)
+		{
+			this.setCredit(0,R('part.marking.nothing entered'));
+			return false;
+		}
+		
+		if( this.studentAnswer.length>0) {
+			var rows = this.studentAnswerRows;
+			var columns = this.studentAnswerColumns;
+			var minColumns = undefined;
+			var matrix = [];
+			for(var i=0;i<rows;i++) {
+				var row = [];
+				matrix.push(row);
+				for(var j=0;j<columns;j++) {
+					var n = parseFloat(this.studentAnswer[i*columns+j]);
+					if(isNaN(n)) {
+						if(minColumns===undefined) {
+							minColumns = j;
+							break;
+						} else if(j<minColumns) {
+							this.setCredit(0,R('part.matrix.not all filled in'));
+							return;
+						}
+					} else if(j>=minColumns) {
+						this.setCredit(0,R('part.matrix.not all filled in'));
+						return;
+					} else {
+						row.push(n);
+					}
+				}
+			}
+			if(!minColumns) {
+				this.setCredit(0,R('part.marking.nothing entered'));
+				return;
+			}
+
+			matrix.rows = matrix.length;
+			matrix.columns = minColumns;
+
+			console.log(matrix);
+			
+			if(Numbas.matrixmath.eq(matrix,this.settings.correctAnswer)) {
+				this.setCredit(1,R('part.marking.correct'));
+			} else {
+				this.setCredit(0,R('part.marking.incorrect'));
+			}
+			this.answered = true;
+		}
+	},
+
+	/** Is the student's answer valid? False if the part hasn't been submitted.
+	 * @returns {boolean}
+	 */
+	validate: function()
+	{
+		if(!this.answered)
+			this.giveWarning(R('part.marking.not submitted'));
+		
+		return this.answered;
+	}
+}
+
 
 /** Multiple choice part - either pick one from a list, pick several from a list, or match choices with answers (2d grid, either pick one from each row or tick several from each row)
  *
@@ -2421,6 +2535,7 @@ var partConstructors = Numbas.Question.partConstructors = {
 
 	'CUEdt.NumberEntryPart': NumberEntryPart,
 	'numberentry': NumberEntryPart,
+	'matrix': MatrixEntryPart,
 
 	'CUEdt.MR1_n_2Part': MultipleResponsePart,
 	'CUEdt.MRm_n_2Part': MultipleResponsePart,
