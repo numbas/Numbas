@@ -102,6 +102,14 @@ iframe {
 	font-size: 120%;
 	margin-left: 0.2em;
 }
+.type-matrix .matrix-input table.matrix{
+    width: auto;
+    display: inline-block;
+    margin: 0.5em 0;
+}
+.matrix-input .matrix td {
+	text-align: center;
+}
 
 button {
 	background: none;

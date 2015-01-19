@@ -1776,9 +1776,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
 	 */
 	setStudentAnswer: function() {
-		this.studentAnswerRows = this.stagedAnswer[0];
-		this.studentAnswerColumns = this.stagedAnswer[1];
-		this.studentAnswer = util.copyarray(this.stagedAnswer.slice(2),true);
+		this.studentAnswerRows = parseInt(this.stagedAnswer[0]);
+		this.studentAnswerColumns = parseInt(this.stagedAnswer[1]);
+		this.studentAnswer = this.stagedAnswer[2];
 	},
 
 	/** Mark the student's answer */
@@ -1790,30 +1790,33 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			return false;
 		}
 		
-		if( this.studentAnswer.length>0) {
+		if(this.studentAnswer) {
 			var rows = this.studentAnswerRows;
 			var columns = this.studentAnswerColumns;
 			var minColumns = undefined;
 			var matrix = [];
 			for(var i=0;i<rows;i++) {
 				var row = [];
-				matrix.push(row);
 				for(var j=0;j<columns;j++) {
-					var n = parseFloat(this.studentAnswer[i*columns+j]);
+					var n = parseFloat(this.studentAnswer[i][j]);
+					console.log(i,j,n);
 					if(isNaN(n)) {
 						if(minColumns===undefined) {
 							minColumns = j;
-							break;
-						} else if(j<minColumns) {
+						} else if(j>0 && j<minColumns) {
 							this.setCredit(0,R('part.matrix.not all filled in'));
 							return;
 						}
+						break;
 					} else if(j>=minColumns) {
 						this.setCredit(0,R('part.matrix.not all filled in'));
 						return;
 					} else {
 						row.push(n);
 					}
+				}
+				if(row.length) {
+					matrix.push(row);
 				}
 			}
 			if(!minColumns) {

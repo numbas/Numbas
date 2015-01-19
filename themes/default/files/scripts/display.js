@@ -255,16 +255,87 @@ ko.bindingHandlers.stopbinding = {
 	}
 }
 
-ko.bindingHandlers.matrixInput = {
-	init: function(element,valueAccessor) {
-		valueAccessor = valueAccessor();
+ko.components.register('matrix-input',{
+	viewModel: function(params) {
+		this.allowResize = ko.observable(params.allowResize || false)
+		if(typeof params.rows=='function') {
+			this.numRows = params.rows;
+		} else {
+			this.numRows = ko.observable(params.rows || 2);
+		}
+		if(typeof params.columns=='function') {
+			this.numColumns = params.columns;
+		} else {
+			this.numColumns = ko.observable(params.columns || 2);
+		}
+		this.value = ko.observableArray([]);
+		
+		this.update = function() {
+			var numRows = parseInt(this.numRows());
+			var numColumns = parseInt(this.numColumns());
+			
+			var value = this.value();
+			value.splice(numRows,value.length-numRows);
+			for(var i=0;i<numRows;i++) {
+				var row;
+				if(value.length<=i) {
+					row = [];
+					value.push(ko.observableArray(row));
+				} else {
+					row = value[i]();
+				}
+				row.splice(numColumns,row.length-numColumns);
+				
+				for(var j=0;j<numColumns;j++) {
+					var cell;
+					if(row.length<=j) {
+						cell = ko.observable();
+						row.push({cell:cell});
+					} else {
+						cell = row[j];
+					}
+				}
+				value[i](row);
+			}
+			this.value(value);
+		}
 
-		$(element).html('hi');
+		ko.computed(this.update,this);
+		
+		ko.computed(function() {
+			var v = this.value().map(function(row,i){
+				return row().map(function(cell,j){return cell.cell()})
+			})
+			params.value(v);
+		},this)
+		
+		ko.computed(function() {
+			var v = params.value();
+			this.numRows(v.length);
+			this.numColumns(v[0].length);
+			for(var i=0;i<v.length;i++) {
+				var row = v[i];
+				for(var j=0;j<row.length;j++) {
+					var cell = row[j];
+					this.value()[i]()[j].cell(cell);
+				}
+			}
+		},this);
 	},
-	update: function(element,valueAccessor) {
-
+	template: 
+	 '<div class="matrix-input">'
+	+'<table class="matrix" data-bind="foreach: value">'
+	+'	<tr data-bind="foreach: $data">'
+	+'		<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true"></td>'
+	+'	</tr>'
+	+'</table>'
+	+'<div class="matrix-size">'
+	+'<label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true"/></label>'
+	+'<label class="num-columns">Columns: <input type="number" data-bind="value: numColumns, autosize: true"/></label>'
+	+'</div>'
+	+'</div>'
 	}
-}
+)
 
 /** @namespace Numbas.display */
 
@@ -1565,7 +1636,7 @@ display.MatrixEntryPartDisplay = function()
 	this.studentAnswerColumns = ko.observable(3);
 
 	ko.computed(function() {
-		p.storeAnswer([this.studentAnswer()]);
+		p.storeAnswer([this.studentAnswerRows(),this.studentAnswerColumns(),this.studentAnswer()]);
 	},this);
 
 	/** Show a LaTeX rendering of the answer?
