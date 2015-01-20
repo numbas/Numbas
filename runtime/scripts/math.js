@@ -1614,6 +1614,17 @@ var vectormath = Numbas.vectormath = {
 		matrix.rows = 1;
 		matrix.columns = v.length;
 		return matrix;
+	},
+
+	/** Convert a vector to a 1-column matrix
+	 * @param {vector} v
+	 * @returns {matrix}
+	 */
+	toMatrix: function(v) {
+		var m = v.map(function(n){return [n]});
+		m.rows = m.length;
+		m.columns = 1;
+		return m;
 	}
 }
 

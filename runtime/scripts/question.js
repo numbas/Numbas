@@ -1748,10 +1748,13 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);
-	if(correctAnswer && correctAnswer.type=='matrix')
+	if(correctAnswer && correctAnswer.type=='matrix') {
 		settings.correctAnswer = correctAnswer.value;
-	else
+	} else if(correctAnswer && correctAnswer.type=='vector') {
+		settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
+	} else {
 		throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
+	}
 
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
 
