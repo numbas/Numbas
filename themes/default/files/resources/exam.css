@@ -105,6 +105,7 @@ iframe {
 
 .matrix-input {
 	display: inline-block;
+	vertical-align: bottom;
 }
 .matrix-input table.matrix {
     width: auto;
@@ -126,6 +127,13 @@ iframe {
 }
 .matrix-input .right-bracket {
 	border-right: 2px solid;
+}
+
+.matrix-input .matrix-size {
+    background: #a2d1f0;
+    padding: 0.2em;
+    margin-bottom: 0.2em;
+    border: 1px solid #999;
 }
 
 button {
