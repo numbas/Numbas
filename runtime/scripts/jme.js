@@ -1430,7 +1430,7 @@ var synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = ['if','switch','repeat','map','isa','satisfy'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','isa','satisfy'];
 
 var rightAssociative = {
 	'^': true,
