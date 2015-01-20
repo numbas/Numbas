@@ -1758,7 +1758,14 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
 
-	this.studentAnswer = [['',''],['','']];
+	this.studentAnswer = [];
+	for(var i=0;i<this.settings.numRows;i++) {
+		var row = [];
+		for(var j=0;j<this.settings.numColumns;j++) {
+			row.push('');
+		}
+		this.studentAnswer.push(row);
+	}
 	
 	if(loading)
 	{
