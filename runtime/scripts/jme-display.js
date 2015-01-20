@@ -285,7 +285,7 @@ var texOps = jme.display.texOps = {
 	'^': (function(thing,texArgs) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-		if(thing.args[0].tok.type=='op')
+		if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp'))
 			tex0 = '\\left ( ' +tex0+' \\right )';	
 		return (tex0+'^{ '+texArgs[1]+' }');
 	}),
