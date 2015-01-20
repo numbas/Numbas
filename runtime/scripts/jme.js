@@ -1410,11 +1410,11 @@ var precedence = jme.precedence = {
 };
 
 /** Synonyms of names - keys in this dictionary are translated to their corresponding values after tokenising.
- * @enum {number}
+ * @enum {string}
  * @memberof Numbas.jme
  * @readonly
  */
-var synonyms = {
+var synonyms = jme.synonyms = {
 	'&':'and',
 	'&&':'and',
 	'divides': '|',
@@ -2707,6 +2707,29 @@ var checkingFunctions =
 	}
 };
 
+/** Custom findvars behaviour for specific functions - for a given usage of a function, work out which variables it depends on.
+ * 
+ * Functions have the signature <tree with function call at top, list of bound variable names, scope>.
+ *
+ * tree.args is a list of the function's arguments.
+ *
+ * @memberof Numbas.jme
+ * @enum {function}
+ * @see Numbas.jme.findvars
+ */
+var findvarsOps = jme.findvarsOps = {
+	'map': function(tree,boundvars,scope) {
+		boundvars = boundvars.slice();
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+		return findvars(tree,boundvars,scope);
+	},
+	'satisfy': function(tree,boundvars,scope) {
+		var names = tree.args[0].args.map(function(t){return t.tok.name});
+		boundvars = boundvars.concat(0,0,names);
+		return findvars(tree,boundvars,scope);
+	}
+}
+
 /** Find all variables used in given syntax tree
  * @memberof Numbas.jme
  * @method
@@ -2722,15 +2745,8 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	if(boundvars===undefined)
 		boundvars = [];
 
-	if(tree.tok.type=='function' && tree.tok.name=='map')
-	{
-		boundvars = boundvars.slice();
-		boundvars.push(tree.args[1].tok.name.toLowerCase());
-	}
-	if(tree.tok.type=='function' && tree.tok.name=='satisfy')
-	{
-		var names = tree.args[0].args.map(function(t){return t.tok.name});
-		boundvars = boundvars.concat(0,0,names);
+	if(tree.tok.type=='function' && tree.tok.name in findvarsOps) {
+		return findvarsOps[tree.tok.name](tree,boundvars,scope);
 	}
 
 	if(tree.args===undefined)
