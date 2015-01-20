@@ -326,10 +326,10 @@ ko.components.register('matrix-input',{
 	},
 	template: 
 	 '<div class="matrix-input">'
-	+'	<div class="matrix-size" data-bind="if: allowResize">'
-	+'		<label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
-	+'		<label class="num-columns">Columns: <input type="number" data-bind="value: numColumns, autosize: true, disable: disable"/></label>'
-	+'	</div>'
+	+'	<!-- ko if: allowResize --><div class="matrix-size">'
+	+'		<label class="num-rows">Rows: <input type="number" min="1" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
+	+'		<label class="num-columns">Columns: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable"/></label>'
+	+'	</div><!-- /ko -->'
 	+'	<div class="matrix-wrapper">'
 	+'		<span class="left-bracket"></span>'
 	+'		<table class="matrix" data-bind="foreach: value">'
