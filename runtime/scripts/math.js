@@ -584,11 +584,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			case 1:
 				if(n==1)
 					return 'pi';
+				else if(n==-1)
+					return '-pi';
 				else
 					return out+'*pi';
 			default:
 				if(n==1)
 					return 'pi^'+piD;
+				else if(n==-1)
+					return '-pi^'+piD;
 				else
 					return out+'*pi'+piD;
 			}

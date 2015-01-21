@@ -1410,11 +1410,11 @@ var precedence = jme.precedence = {
 };
 
 /** Synonyms of names - keys in this dictionary are translated to their corresponding values after tokenising.
- * @enum {number}
+ * @enum {string}
  * @memberof Numbas.jme
  * @readonly
  */
-var synonyms = {
+var synonyms = jme.synonyms = {
 	'&':'and',
 	'&&':'and',
 	'divides': '|',
@@ -1430,7 +1430,7 @@ var synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = ['if','switch','repeat','map','isa','satisfy'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','isa','satisfy'];
 
 var rightAssociative = {
 	'^': true,
@@ -2709,6 +2709,34 @@ var checkingFunctions =
 	}
 };
 
+/** Custom findvars behaviour for specific functions - for a given usage of a function, work out which variables it depends on.
+ * 
+ * Functions have the signature <tree with function call at top, list of bound variable names, scope>.
+ *
+ * tree.args is a list of the function's arguments.
+ *
+ * @memberof Numbas.jme
+ * @enum {function}
+ * @see Numbas.jme.findvars
+ */
+var findvarsOps = jme.findvarsOps = {
+	'map': function(tree,boundvars,scope) {
+		boundvars = boundvars.slice();
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+		var vars = findvars(tree.args[0],boundvars,scope);
+		vars = vars.merge(findvars(tree.args[2],boundvars));
+		return vars;
+	},
+	'satisfy': function(tree,boundvars,scope) {
+		var names = tree.args[0].args.map(function(t){return t.tok.name});
+		boundvars = boundvars.concat(0,0,names);
+		var vars = [];
+		for(var i=1;i<tree.args.length;i++)
+			vars = vars.merge(findvars(tree.args[i],boundvars));
+		return vars;
+	}
+}
+
 /** Find all variables used in given syntax tree
  * @memberof Numbas.jme
  * @method
@@ -2724,15 +2752,8 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 	if(boundvars===undefined)
 		boundvars = [];
 
-	if(tree.tok.type=='function' && tree.tok.name=='map')
-	{
-		boundvars = boundvars.slice();
-		boundvars.push(tree.args[1].tok.name.toLowerCase());
-	}
-	if(tree.tok.type=='function' && tree.tok.name=='satisfy')
-	{
-		var names = tree.args[0].args.map(function(t){return t.tok.name});
-		boundvars = boundvars.concat(0,0,names);
+	if(tree.tok.type=='function' && tree.tok.name in findvarsOps) {
+		return findvarsOps[tree.tok.name](tree,boundvars,scope);
 	}
 
 	if(tree.args===undefined)
