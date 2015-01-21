@@ -742,6 +742,7 @@
 					equals(Numbas.math.niceNumber(1010,{precisionType:'sigfig',precision:6}),'1010.00','niceNumber with sigfig precision calculates number of zeroes to add correctly');
 					equals(Numbas.math.niceNumber(Infinity),'infinity','niceNumber recognises infinity');
 					equals(Numbas.math.niceNumber(-Infinity),'-infinity','niceNumber recognises -infinity');
+					equals(Numbas.math.niceNumber(-Math.PI),'-pi','niceNumber on -pi doesn\'t say -1pi');
 				});
 
 				test('subvars',function() {
