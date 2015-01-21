@@ -1837,6 +1837,38 @@ var matrixmath = Numbas.matrixmath = {
 			}
 		}
 		return out;
+	},
+
+	/** Apply given function to each element
+	 * @param {matrix}
+	 * @param {function}
+	 * @returns {matrix}
+	 */
+	map: function(m,fn) {
+		var out = m.map(function(row){
+			return row.map(fn);
+		});
+		out.rows = m.rows;
+		out.columns = m.columns;
+		return out;
+	},
+
+	/** Round each element to given number of decimal places
+	 * @param {matrix}
+	 * @param {number} - number of decimal places
+	 * @returns {matrix}
+	 */
+	precround: function(m,dp) {
+		return matrixmath.map(m,function(n){return math.precround(n,dp);});
+	},
+
+	/** Round each element to given number of significant figures
+	 * @param {matrix}
+	 * @param {number} - number of decimal places
+	 * @returns {matrix}
+	 */
+	siground: function(m,sf) {
+		return matrixmath.map(m,function(n){return math.siground(n,sf);});
 	}
 }
 
