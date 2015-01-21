@@ -2721,7 +2721,9 @@ var findvarsOps = jme.findvarsOps = {
 	'map': function(tree,boundvars,scope) {
 		boundvars = boundvars.slice();
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
-		return findvars(tree.args[0],boundvars,scope);
+		var vars = findvars(tree.args[0],boundvars,scope);
+		vars = vars.merge(findvars(tree.args[2],boundvars));
+		return vars;
 	},
 	'satisfy': function(tree,boundvars,scope) {
 		var names = tree.args[0].args.map(function(t){return t.tok.name});
