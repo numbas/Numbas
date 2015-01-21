@@ -1687,30 +1687,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			}
 			this.answered = true;
 
-			var failedPrecision = false;
-			switch(this.settings.precisionType) {
-			case 'dp':
-				var studentDP = math.countDP(this.studentAnswer);
-				if(this.settings.strictPrecision)
-					failedPrecision = studentDP != this.settings.precision;
-				else
-					failedPrecision = studentDP > this.settings.precision;
-				break;
-			case 'sigfig':
-				var sigFigs = math.countSigFigs(this.studentAnswer);
-
-				if(this.settings.strictPrecision)
-					failedPrecision = sigFigs != this.settings.precision;
-				else
-					failedPrecision = sigFigs > this.settings.precision;
-
-				if(failedPrecision && sigFigs < this.settings.precision && /[1-9]\d*0+$/.test(this.studentAnswer)) {	// in cases like 2070, which could be to either 3 or 4 sig figs
-					var trailingZeroes = this.studentAnswer.match(/0*$/)[0].length;
-					if(sigFigs + trailingZeroes >= this.settings.precision)
-						failedPrecision = false;
-				}
-				break;
-			}
+			var failedPrecision = !math.toGivenPrecision(this.studentAnswer,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision);
 			
 			if(failedPrecision) {
 				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
@@ -1756,6 +1733,22 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 		throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
 	}
 
+	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
+	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
+	settings.precision = jme.subvars(settings.precision, this.question.scope);
+	settings.precision = evaluate(settings.precision,this.question.scope).value;
+
+	switch(settings.precisionType) {
+	case 'dp':
+		settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+		break;
+	case 'sigfig':
+		settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+		break;
+	}
+
+	var messageNode = this.xml.selectSingleNode('answer/precision/message');
+	if(messageNode)
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
 
 	this.studentAnswer = [];
@@ -1781,12 +1774,23 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Properties set when part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {matrix} correctAnswer - the correct answer to the part
+	 * @property {number} numRows - default number of rows in the student's answer
+	 * @property {number} numColumns - default number of columns in the student's answer
+	 * @property {boolean} allowResize - allow the student to change the dimensions of their answer?
+	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {number} precision - how many decimal places or significant figures to require
+	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
 	 */
 	settings: {
 		correctAnswer: null,
 		numRows: 3,
 		numColumns: 3,
-		allowResize: true
+		allowResize: true,
+		precisionType: 'none',	//'none', 'dp' or 'sigfig'
+		precision: 0,
+		precisionPC: 0,	//fraction of credit to take away if precision wrong
+		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -1805,52 +1809,52 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		
+
 		if(this.studentAnswer) {
+			var precisionOK = true;
 			var rows = this.studentAnswerRows;
 			var columns = this.studentAnswerColumns;
-			var minColumns = undefined;
 			var matrix = [];
+			this.invalidCell = false;
 			for(var i=0;i<rows;i++) {
 				var row = [];
 				for(var j=0;j<columns;j++) {
-					var n = parseFloat(this.studentAnswer[i][j]);
-					if(isNaN(n)) {
-						if(minColumns===undefined) {
-							minColumns = j;
-						} else if(j>0 && j<minColumns) {
-							this.setCredit(0,R('part.matrix.not all filled in'));
-							return;
-						}
-						break;
-					} else if(j>=minColumns) {
-						this.setCredit(0,R('part.matrix.not all filled in'));
+					var cell = this.studentAnswer[i][j];
+					
+					if(isNaN(cell) || cell.trim().length==0) {
+						this.setCredit(0,R('part.matrix.answer invalid'));
+						this.invalidCell = true;
 						return;
 					} else {
+						var n = parseFloat(cell);
 						row.push(n);
+						precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
 					}
 				}
-				if(row.length) {
-					if(minColumns===undefined) {
-						minColumns = row.length;
-					}
-					matrix.push(row);
-				}
-			}
-			if(!minColumns) {
-				this.setCredit(0,R('part.marking.nothing entered'));
-				return;
+				matrix.push(row);
 			}
 
-			matrix.rows = matrix.length;
-			matrix.columns = minColumns;
+			matrix.rows = rows;
+			matrix.columns = columns;
+
+			var rounders = {'dp': Numbas.matrixmath.precround, 'sigfig': Numbas.matrixmath.siground, 'none': function(x){return x}};
+			var round = rounders[this.settings.precisionType];
+			matrix = round(matrix,this.settings.precision);
 
 			if(Numbas.matrixmath.eq(matrix,this.settings.correctAnswer)) {
 				this.setCredit(1,R('part.marking.correct'));
 			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
+
+			if(!precisionOK) {
+				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
+			}
+
 			this.answered = true;
+		} else {
+			this.answered = false;
+			this.setCredit(0,R('part.matrix.answer invalid'));
 		}
 	},
 
@@ -1859,8 +1863,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 */
 	validate: function()
 	{
-		if(!this.answered)
-			this.giveWarning(R('part.marking.not submitted'));
+		if(this.invalidCell) {
+			this.giveWarning(R('part.matrix.invalid cell'));
+		} else if(!this.answered) {
+			this.giveWarning(R('part.matrix.empty cell'));
+		}
 		
 		return this.answered;
 	}

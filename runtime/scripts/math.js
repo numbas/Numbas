@@ -768,6 +768,41 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return sigFigs.replace('.','').length;
 	},
 
+	/** Is n given to the desired precision?
+	 * @param {number|string} n
+	 * @param {string} precisionType - either 'dp' or 'sigfig'
+	 * @param {number} precision - number of desired digits of precision
+	 * @param {boolean} strictPrecision - must trailing zeroes be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
+	 * @returns {boolean}
+	 */
+	toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
+		if(precisionType=='none') {
+			return true;
+		}
+
+		n += '';
+
+		var precisionOK = false;
+
+		var counters = {'dp': math.countDP, 'sigfig': math.countSigFigs};
+		var counter = counters[precisionType];
+		var digits = counter(n);
+
+		if(strictPrecision)
+			precisionOK = digits == precision;
+		else
+			precisionOK = digits <= precision;
+
+		if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {	// in cases like 2070, which could be to either 3 or 4 sig figs
+			var trailingZeroes = n.match(/0*$/)[0].length;
+			if(sigFigs + trailingZeroes >= precision) {
+				precisionOK = true;
+			}
+		}
+
+		return precisionOK;
+	},
+
 	/** Factorial, or Gamma(n+1) if n is not a positive integer.
 	 * @param {number} n
 	 * @returns {number}

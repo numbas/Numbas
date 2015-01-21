@@ -829,19 +829,28 @@ class MatrixEntryPart(Part):
 	numColumns = 3
 	allowResize = True
 
+	precisionType = 'none'
+	precision = 0
+	precisionPartialCredit = 0
+	precisionMessage = ''
+	strictPrecision = True
+
 	def __init__(self,marks=0,prompt=''):
 		Part.__init__(self,marks,prompt)
 
 	@staticmethod
 	def fromDATA(data):
 		part = MatrixEntryPart()
-		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize'],part)
+		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 
 		return part
 
 	def toxml(self):
 		part = Part.toxml(self)
-		part.append(makeTree(['answer']))
+		part.append(makeTree(['answer',
+								['precision','message'],
+							]
+		))
 
 		answer = part.find('answer')
 		answer.attrib = {
@@ -850,6 +859,14 @@ class MatrixEntryPart(Part):
 			'columns': strcons_fix(self.numColumns),
 			'allowresize': strcons_fix(self.allowResize)
 		}
+
+		answer.find('precision').attrib = {
+			'type': strcons_fix(self.precisionType), 
+			'precision': strcons_fix(self.precision), 
+			'partialcredit': strcons_fix(self.precisionPartialCredit)+'%',
+			'strict': strcons_fix(self.strictPrecision)
+		}
+		answer.find('precision/message').append(makeContentNode(self.precisionMessage))
 
 		return part
 
