@@ -250,6 +250,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return b;
 	},
 
+	/** a mod b. Always returns a positive number
+	 * @param {number} a
+	 * @param {number} b
+	 * @returns {number}
+	 */
+	mod: function(a,b) {
+		b = math.abs(b);
+		return ((a%b)+b)%b;
+	},
+
 	/** Calculate the `b`-th root of `a`
 	 * @param {number} a
 	 * @param {number} b
