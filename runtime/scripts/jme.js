@@ -2721,12 +2721,15 @@ var findvarsOps = jme.findvarsOps = {
 	'map': function(tree,boundvars,scope) {
 		boundvars = boundvars.slice();
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
-		return findvars(tree,boundvars,scope);
+		return findvars(tree.args[0],boundvars,scope);
 	},
 	'satisfy': function(tree,boundvars,scope) {
 		var names = tree.args[0].args.map(function(t){return t.tok.name});
 		boundvars = boundvars.concat(0,0,names);
-		return findvars(tree,boundvars,scope);
+		var vars = [];
+		for(var i=1;i<tree.args.length;i++)
+			vars = vars.merge(findvars(tree.args[i],boundvars));
+		return vars;
 	}
 }
 
