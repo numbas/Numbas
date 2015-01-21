@@ -592,9 +592,15 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
 		case 0:
 			return out;
 		case 1:
-			return out+' \\pi';
+			if(n==-1)
+				return '-\\pi';
+			else
+				return out+' \\pi';
 		default:
-			return out+' \\pi^{'+piD+'}';
+			if(n==-1)
+				return '-\\pi^{'+piD+'}';
+			else
+				return out+' \\pi^{'+piD+'}';
 		}
 	}
 }
@@ -668,11 +674,15 @@ function texRealNumber(n)
 		case 1:
 			if(n==1)
 				return '\\pi';
+			else if(n==-1)
+				return '-\\pi';
 			else
 				return out+' \\pi';
 		default:
 			if(n==1)
 				return '\\pi^{'+piD+'}';
+			else if(n==-1)
+				return '-\\pi^{'+piD+'}';
 			else
 				return out+' \\pi^{'+piD+'}';
 		}
