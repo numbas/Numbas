@@ -803,6 +803,22 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return precisionOK;
 	},
 
+	/** Is a within +/- tolerance of b?
+	 * @param {number} a
+	 * @param {number} b
+	 * @param {number} tolerance
+	 * @returns {boolean}
+	 */
+	withinTolerance: function(a,b,tolerance) {
+		if(tolerance==0) {
+			return math.eq(a,b);
+		} else {
+			var upper = math.add(b,tolerance);
+			var lower = math.sub(b,tolerance);
+			return math.geq(a,lower) && math.leq(a,upper);
+		}
+	},
+
 	/** Factorial, or Gamma(n+1) if n is not a positive integer.
 	 * @param {number} n
 	 * @returns {number}

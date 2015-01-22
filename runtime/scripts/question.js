@@ -1721,7 +1721,7 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize'],['numRows','numColumns','allowResize']);
+	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize','tolerance'],['numRows','numColumns','allowResize','tolerance']);
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);
@@ -1777,6 +1777,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 * @property {number} numRows - default number of rows in the student's answer
 	 * @property {number} numColumns - default number of columns in the student's answer
 	 * @property {boolean} allowResize - allow the student to change the dimensions of their answer?
+	 * @property {number} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
 	 * @property {number} precision - how many decimal places or significant figures to require
 	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
@@ -1787,6 +1788,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		numRows: 3,
 		numColumns: 3,
 		allowResize: true,
+		tolerance: 0,
 		precisionType: 'none',	//'none', 'dp' or 'sigfig'
 		precision: 0,
 		precisionPC: 0,	//fraction of credit to take away if precision wrong
@@ -1814,7 +1816,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			var precisionOK = true;
 			var rows = this.studentAnswerRows;
 			var columns = this.studentAnswerColumns;
-			var matrix = [];
+			var studentMatrix = [];
 			this.invalidCell = false;
 			for(var i=0;i<rows;i++) {
 				var row = [];
@@ -1831,17 +1833,30 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 						precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
 					}
 				}
-				matrix.push(row);
+				studentMatrix.push(row);
 			}
 
-			matrix.rows = rows;
-			matrix.columns = columns;
+			studentMatrix.rows = rows;
+			studentMatrix.columns = columns;
 
 			var rounders = {'dp': Numbas.matrixmath.precround, 'sigfig': Numbas.matrixmath.siground, 'none': function(x){return x}};
 			var round = rounders[this.settings.precisionType];
-			matrix = round(matrix,this.settings.precision);
+			studentMatrix = round(studentMatrix,this.settings.precision);
 
-			if(Numbas.matrixmath.eq(matrix,this.settings.correctAnswer)) {
+			var correctMatrix = this.settings.correctAnswer;
+
+			var numIncorrect = 0;
+			for(var i=0;i<rows;i++) {
+				for(var j=0;j<rows;j++) {
+					var studentCell = studentMatrix[i][j];
+					var correctCell = correctMatrix[i][j];
+					if(!math.withinTolerance(studentCell,correctCell,this.settings.tolerance)) {
+						numIncorrect += 1;
+					}
+				}
+			}
+
+			if(numIncorrect==0) {
 				this.setCredit(1,R('part.marking.correct'));
 			} else {
 				this.setCredit(0,R('part.marking.incorrect'));

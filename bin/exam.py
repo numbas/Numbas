@@ -829,6 +829,8 @@ class MatrixEntryPart(Part):
 	numColumns = 3
 	allowResize = True
 
+	tolerance = 0
+
 	precisionType = 'none'
 	precision = 0
 	precisionPartialCredit = 0
@@ -841,7 +843,7 @@ class MatrixEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = MatrixEntryPart()
-		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','tolerance','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 
 		return part
 
@@ -857,7 +859,8 @@ class MatrixEntryPart(Part):
 			'correctanswer': strcons_fix(self.correctAnswer),
 			'rows': strcons_fix(self.numRows),
 			'columns': strcons_fix(self.numColumns),
-			'allowresize': strcons_fix(self.allowResize)
+			'allowresize': strcons_fix(self.allowResize),
+			'tolerance': strcons_fix(self.tolerance),
 		}
 
 		answer.find('precision').attrib = {
