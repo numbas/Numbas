@@ -1826,7 +1826,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 					var cell = this.studentAnswer[i][j];
 					
 					if(isNaN(cell) || cell.trim().length==0) {
-						this.setCredit(0,R('part.matrix.answer invalid'));
+						this.setCredit(0,R('part.matrix.invalid cell'));
 						this.invalidCell = true;
 						return;
 					} else {
@@ -1858,10 +1858,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 				}
 			}
 
+			var numCells = rows*columns;
+
 			if(numIncorrect==0) {
 				this.setCredit(1,R('part.marking.correct'));
-			} else if(this.settings.markPerCell) {
-				var numCells = rows*columns;
+			} else if(this.settings.markPerCell && numIncorrect<numCells) {
 				this.setCredit( (numCells-numIncorrect)/numCells, R('part.matrix.some incorrect',numIncorrect) );
 			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
