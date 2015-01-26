@@ -830,6 +830,7 @@ class MatrixEntryPart(Part):
 	allowResize = True
 
 	tolerance = 0
+	markPerCell = False
 
 	precisionType = 'none'
 	precision = 0
@@ -843,7 +844,7 @@ class MatrixEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = MatrixEntryPart()
-		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','tolerance','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','tolerance','markPerCell','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 
 		return part
 
@@ -861,6 +862,7 @@ class MatrixEntryPart(Part):
 			'columns': strcons_fix(self.numColumns),
 			'allowresize': strcons_fix(self.allowResize),
 			'tolerance': strcons_fix(self.tolerance),
+			'markpercell': strcons_fix(self.markPerCell),
 		}
 
 		answer.find('precision').attrib = {
