@@ -276,7 +276,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 			return [doc.createTextNode(str)];
 
 		function doToken(token) {
-			console.log(token);
 			switch(token.type){ 
 			case 'html':
 				return token.value;
