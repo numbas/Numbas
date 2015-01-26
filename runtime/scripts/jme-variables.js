@@ -275,25 +275,29 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		if(bits.length==1)
 			return [doc.createTextNode(str)];
 
+		function doToken(token) {
+			console.log(token);
+			switch(token.type){ 
+			case 'html':
+				return token.value;
+			case 'number':
+				return Numbas.math.niceNumber(token.value);
+			case 'string':
+				return token.value.replace(/\\([{}])/g,'$1');
+			case 'list':
+				return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
+			default:
+				return jme.display.treeToJME({tok:token});
+			}
+		}
+
 		var out = [];
 		for(var i=0; i<bits.length; i++)
 		{
 			if(i % 2)
 			{
 				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
-				switch(v.type){ 
-				case 'html':
-					v = v.value;
-					break;
-				case 'number':
-					v = Numbas.math.niceNumber(v.value);
-					break;
-				case 'string':
-					v = v.value.replace(/\\([{}])/g,'$1');
-					break;
-				default:
-					v = jme.display.treeToJME({tok:v});
-				}
+				v = doToken(v);
 			}
 			else
 			{
