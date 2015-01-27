@@ -1814,10 +1814,20 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			return false;
 		}
 
+		var correctMatrix = this.settings.correctAnswer;
+
 		if(this.studentAnswer) {
 			var precisionOK = true;
 			var rows = this.studentAnswerRows;
 			var columns = this.studentAnswerColumns;
+
+			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
+			if(this.wrongSize) {
+				this.answered = true;
+				this.setCredit(0,R('part.matrix.incorrect'));
+				return;
+			}
+
 			var studentMatrix = [];
 			this.invalidCell = false;
 			for(var i=0;i<rows;i++) {
