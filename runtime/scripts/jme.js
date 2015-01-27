@@ -2468,6 +2468,10 @@ newBuiltin('matrix',[TList],TMatrix,null, {
 			rows = 1;
 			columns = list.vars;
 			break;
+		case 'vector':
+			value = list.value.map(function(v){return v.value});
+			columns = list.value[0].value.length;
+			break;
 		case 'list':
 			for(var i=0;i<rows;i++)
 			{
