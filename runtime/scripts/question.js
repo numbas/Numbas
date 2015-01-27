@@ -1824,7 +1824,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
 			if(this.wrongSize) {
 				this.answered = true;
-				this.setCredit(0,R('part.matrix.incorrect'));
+				this.setCredit(0,R('part.marking.incorrect'));
 				return;
 			}
 
