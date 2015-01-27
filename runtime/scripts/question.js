@@ -1855,11 +1855,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			var round = rounders[this.settings.precisionType];
 			studentMatrix = round(studentMatrix,this.settings.precision);
 
-			var correctMatrix = this.settings.correctAnswer;
-
 			var numIncorrect = 0;
 			for(var i=0;i<rows;i++) {
-				for(var j=0;j<rows;j++) {
+				for(var j=0;j<columns;j++) {
 					var studentCell = studentMatrix[i][j];
 					var correctCell = correctMatrix[i][j];
 					if(!math.withinTolerance(studentCell,correctCell,this.settings.tolerance)) {
