@@ -1727,7 +1727,7 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize','tolerance','markpercell'],['numRows','numColumns','allowResize','tolerance','markPerCell']);
+	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize','tolerance','markpercell','allowfractions'],['numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);
@@ -1743,6 +1743,10 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
 	settings.precision = jme.subvars(settings.precision, this.question.scope);
 	settings.precision = evaluate(settings.precision,this.question.scope).value;
+
+	if(settings.precisionType!='none') {
+		settings.allowFractions = false;
+	}
 
 	switch(settings.precisionType) {
 	case 'dp':
@@ -1785,6 +1789,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 * @property {boolean} allowResize - allow the student to change the dimensions of their answer?
 	 * @property {number} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
 	 * @property {boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
+	 * @property {boolean} allowFractions - can the student enter a fraction as their answer for a cell?
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
 	 * @property {number} precision - how many decimal places or significant figures to require
 	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
@@ -1797,6 +1802,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		allowResize: true,
 		tolerance: 0,
 		markPerCell: false,
+		allowFractions: false,
 		precisionType: 'none',	//'none', 'dp' or 'sigfig'
 		precision: 0,
 		precisionPC: 0,	//fraction of credit to take away if precision wrong
@@ -1840,13 +1846,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 				var row = [];
 				for(var j=0;j<columns;j++) {
 					var cell = this.studentAnswer[i][j];
+					var n = util.parseNumber(cell,this.settings.allowFractions);
 					
-					if(isNaN(cell) || cell.trim().length==0) {
+					if(isNaN(n)) {
 						this.setCredit(0,R('part.matrix.invalid cell'));
 						this.invalidCell = true;
 						return;
 					} else {
-						var n = parseFloat(cell);
 						row.push(n);
 						precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
 					}
