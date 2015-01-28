@@ -1562,13 +1562,17 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer','inputstep','inputStep');
+	tryGetAttribute(settings,this.xml,'answer',['inputstep','allowfractions'],['inputStep','allowFractions']);
 
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
 	settings.precision = jme.subvars(settings.precision, this.question.scope);
 	settings.precision = evaluate(settings.precision,this.question.scope).value;
+
+	if(settings.precisionType!='none') {
+		settings.allowFractions = false;
+	}
 
 	var minvalue = jme.subvars(settings.minvalue,this.question.scope);
 	minvalue = evaluate(minvalue,this.question.scope);
@@ -1625,6 +1629,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} minvalue - minimum value marked correct
 	 * @property {number} maxvalue - maximum value marked correct
 	 * @property {boolean} integerAnswer - must the answer be an integer?
+	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
 	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
 	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
@@ -1637,13 +1642,14 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		inputStep: 1,
 		minvalue: 0,
 		maxvalue: 0,
-		integerAnswer: false,//must answer be an integer?
-		integerPC: 0,	//partial credit to award if answer is not an integer
-		displayAnswer: 0,	//number to display if revealing answer
-		precisionType: 'none',	//'none', 'dp' or 'sigfig'
+		integerAnswer: false,
+		allowFractions: false,
+		integerPC: 0,
+		displayAnswer: 0,
+		precisionType: 'none',
 		precision: 0,
-		precisionPC: 0,	//fraction of credit to take away if precision wrong
-		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
+		precisionPC: 0,
+		precisionMessage: R('You have not given your answer to the correct precision.')
 	},
 
 	/** Tidy up the student's answer - remove space, and get rid of comma separators
@@ -1673,9 +1679,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			return false;
 		}
 		
-		if( this.studentAnswer.length>0 && !isNaN(this.studentAnswer) )
+		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions) )
 		{
-			var answerFloat = parseFloat(this.studentAnswer);
+			var answerFloat = util.parseNumber(this.studentAnswer,this.settings.allowFractions);
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0)

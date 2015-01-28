@@ -1570,7 +1570,7 @@ display.NumberEntryPartDisplay = function()
 			if(dp>0)
 				this.warning(R('part.numberentry.answer not integer'));
 		}
-		if(!/^[\-+]?[0-9]+(?:\x2E[0-9]+)?$/.test(studentAnswer)) {
+		if(!util.isNumber(studentAnswer,p.settings.allowFractions)) {
 			this.warning(R('part.numberentry.answer not integer or decimal'));
 			return '';
 		}

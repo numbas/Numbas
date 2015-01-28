@@ -761,6 +761,7 @@ class NumberEntryPart(Part):
 	kind = 'numberentry'
 	integerAnswer = False
 	integerPartialCredit = 0
+	allowFractions = False
 	checkingType = 'range'
 	answer = 0
 	checkingAccuracy = 0
@@ -780,7 +781,7 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','integerPartialCredit','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+		tryLoad(data,['integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 		if part.checkingType == 'range':
 			if haskey(data,'answer'):
 				part.maxvalue = part.minvalue = data['answer']
@@ -803,7 +804,8 @@ class NumberEntryPart(Part):
 		answer = part.find('answer')
 		answer.attrib = {
 				'checkingType': strcons_fix(self.checkingType),
-				'inputstep': strcons_fix(self.inputStep)
+				'inputstep': strcons_fix(self.inputStep),
+				'allowfractions': strcons_fix(self.allowFractions),
 				}
 		if self.checkingType == 'range':
 			answer.attrib['minvalue'] = strcons_fix(self.minvalue)

@@ -255,6 +255,25 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return parseFloat(f)==f;
 	},
 
+	/** Is `n` a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
+	 * @param {number} n
+	 * @param {boolean} allowFractions
+	 * @returns {boolean}
+	 */
+	isNumber: function(n,allowFractions) {
+		if(!isNaN(n)) {
+			return true;
+		}
+		n = n.toString().trim();
+		if(/-?infinity/i.test(n)) {
+			return true;
+		} else if(allowFractions && util.re_fraction.test(n)) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+
 	/** Test if parameter is a boolean - that is: a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive.
 	 * @param {object} b
 	 * @returns {boolean}
@@ -288,6 +307,30 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return false;
 		b = b.toString().toLowerCase();
 		return( b=='true' || b=='yes' );
+	},
+
+	/** Regular expression recognising a fraction */
+	re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
+
+	/** Parse a number - either parseFloat, or parse a fraction
+	 * @param {string} s
+	 * @returns {number}
+	 */
+	parseNumber: function(s,allowFractions) {
+		s = s.toString().trim();
+		var m;
+		if(util.isFloat(s)) {
+			return parseFloat(s);
+		} else if(s.toLowerCase()=='infinity') {
+			return Infinity;
+		} else if(s.toLowerCase()=='-infinity') {
+			return -Infinity;
+		} else if(allowFractions && (m = util.re_fraction.exec(s))) {
+			var n = parseInt(m[2])/parseInt(m[3]);
+			return m[1] ? -n : n;
+		} else {
+			return NaN;
+		}
 	},
 
 	/** Pad string `s` on the left with a character `p` until it is `n` characters long.
