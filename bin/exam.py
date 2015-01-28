@@ -767,6 +767,7 @@ class NumberEntryPart(Part):
 	checkingAccuracy = 0
 	minvalue = 0
 	maxvalue = 0
+	correctAnswerFraction = False
 	inputStep = 1
 
 	precisionType = 'none'
@@ -781,7 +782,7 @@ class NumberEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = NumberEntryPart()
-		tryLoad(data,['integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+		tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 		if part.checkingType == 'range':
 			if haskey(data,'answer'):
 				part.maxvalue = part.minvalue = data['answer']
@@ -806,6 +807,7 @@ class NumberEntryPart(Part):
 				'checkingType': strcons_fix(self.checkingType),
 				'inputstep': strcons_fix(self.inputStep),
 				'allowfractions': strcons_fix(self.allowFractions),
+				'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
 				}
 		if self.checkingType == 'range':
 			answer.attrib['minvalue'] = strcons_fix(self.minvalue)
@@ -827,6 +829,7 @@ class NumberEntryPart(Part):
 class MatrixEntryPart(Part):
 	kind = 'matrix'
 	correctAnswer = ''
+	correctAnswerFractions = False
 	numRows = 3
 	numColumns = 3
 	allowResize = True
@@ -847,7 +850,7 @@ class MatrixEntryPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		part = MatrixEntryPart()
-		tryLoad(data,['correctAnswer','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+		tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
 
 		return part
 
@@ -861,6 +864,7 @@ class MatrixEntryPart(Part):
 		answer = part.find('answer')
 		answer.attrib = {
 			'correctanswer': strcons_fix(self.correctAnswer),
+			'correctanswerfractions': strcons_fix(self.correctAnswerFractions),
 			'rows': strcons_fix(self.numRows),
 			'columns': strcons_fix(self.numColumns),
 			'allowresize': strcons_fix(self.allowResize),

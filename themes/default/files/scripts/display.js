@@ -1640,7 +1640,7 @@ display.MatrixEntryPartDisplay = function()
 	this.correctAnswerLaTeX = ko.computed(function() {
 		var correctAnswer = this.correctAnswer();
 		var m = new Numbas.jme.types.TMatrix(correctAnswer);
-		return Numbas.jme.display.texify({tok:m});
+		return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
 	},this);
 
 	this.studentAnswerRows = ko.observable(p.settings.numRows);

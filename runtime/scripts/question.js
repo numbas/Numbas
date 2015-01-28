@@ -1562,7 +1562,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['inputstep','allowfractions'],['inputStep','allowFractions']);
+	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','inputstep','allowfractions'],['correctAnswerFraction','inputStep','allowFractions']);
 
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
@@ -1608,7 +1608,11 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 
 	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
-	settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision});
+	if(settings.correctAnswerFraction) {
+		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer);
+	} else {
+		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision});
+	}
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
@@ -1628,6 +1632,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
 	 * @property {number} minvalue - minimum value marked correct
 	 * @property {number} maxvalue - maximum value marked correct
+	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
 	 * @property {boolean} integerAnswer - must the answer be an integer?
 	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
 	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
@@ -1642,6 +1647,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		inputStep: 1,
 		minvalue: 0,
 		maxvalue: 0,
+		correctAnswerFraction: false,
 		integerAnswer: false,
 		allowFractions: false,
 		integerPC: 0,
@@ -1727,7 +1733,7 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['rows','columns','allowresize','tolerance','markpercell','allowfractions'],['numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+	tryGetAttribute(settings,this.xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);
@@ -1797,6 +1803,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 */
 	settings: {
 		correctAnswer: null,
+		correctAnswerFractions: false,
 		numRows: 3,
 		numColumns: 3,
 		allowResize: true,
