@@ -274,6 +274,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		}
 	},
 
+	/** Wrap a list index so -1 maps to length-1
+	 * @param {number} n
+	 * @param {number} size
+	 * @returns {number}
+	 */
+	wrapListIndex: function(n,size) {
+		if(n<0) {
+			n += size;
+		}
+		return n;
+	},
+
 	/** Test if parameter is a boolean - that is: a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive.
 	 * @param {object} b
 	 * @returns {boolean}
