@@ -256,6 +256,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 */
 	mod: function(a,b) {
+		if(b==Infinity) {
+			return a;
+		}
 		b = math.abs(b);
 		return ((a%b)+b)%b;
 	},
