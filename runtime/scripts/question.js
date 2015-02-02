@@ -1763,10 +1763,6 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 		break;
 	}
 
-	var messageNode = this.xml.selectSingleNode('answer/precision/message');
-	if(messageNode)
-	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
-
 	this.studentAnswer = [];
 	for(var i=0;i<this.settings.numRows;i++) {
 		var row = [];
@@ -1776,6 +1772,13 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 		this.studentAnswer.push(row);
 	}
 	
+	var messageNode = this.xml.selectSingleNode('answer/precision/message');
+	if(messageNode) {
+		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+	}
+
+	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+
 	if(loading)
 	{
 		var pobj = Numbas.store.loadMatrixEntryPart(this);

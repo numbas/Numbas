@@ -273,6 +273,7 @@ ko.components.register('matrix-input',{
 		this.disable = params.disable || false;
 		
 		this.update = function() {
+			// update value when number of rows or columns changes
 			var numRows = parseInt(this.numRows());
 			var numColumns = parseInt(this.numColumns());
 			
@@ -291,7 +292,7 @@ ko.components.register('matrix-input',{
 				for(var j=0;j<numColumns;j++) {
 					var cell;
 					if(row.length<=j) {
-						cell = ko.observable();
+						cell = ko.observable('');
 						row.push({cell:cell});
 					} else {
 						cell = row[j];
@@ -304,25 +305,35 @@ ko.components.register('matrix-input',{
 
 		ko.computed(this.update,this);
 		
-		ko.computed(function() {
-			var v = this.value().map(function(row,i){
-				return row().map(function(cell,j){return cell.cell()})
-			})
-			params.value(v);
-		},this)
-		
+		// update model with value
 		ko.computed(function() {
 			var v = params.value();
+			var ov = this.value();
 			this.numRows(v.length);
 			this.numColumns(v[0] ? v[0].length : 0);
 			for(var i=0;i<v.length;i++) {
 				var row = v[i];
 				for(var j=0;j<row.length;j++) {
 					var cell = row[j];
-					this.value()[i]()[j].cell(cell);
+					if(i<ov.length && j<ov[i]().length) {
+						ov[i]()[j].cell(cell);
+					}
 				}
 			}
 		},this);
+		
+		var firstGo = true;
+		//update value with model
+		ko.computed(function() {
+			var v = this.value().map(function(row,i){
+				return row().map(function(cell,j){return cell.cell()})
+			})
+			if(firstGo) {
+				firstGo = false;
+				return;
+			}
+			params.value(v);
+		},this)
 	},
 	template: 
 	 '<div class="matrix-input">'
