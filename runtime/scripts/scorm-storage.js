@@ -255,6 +255,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 			this.set(prepath+'type','numeric');
 			this.set(prepath+'correct_responses.0.pattern',Numbas.math.niceNumber(p.settings.minvalue)+'[:]'+Numbas.math.niceNumber(p.settings.maxvalue));
 			break;
+		case 'matrix':
+			this.set(prepath+'type','fill-in');
+			this.set(prepath+'correct_responses.0.pattern','{case_matters=false}{order_matters=false}'+JSON.stringify(p.settings.correctAnswer));
+			break;
 		case 'patternmatch':
 			this.set(prepath+'type','fill-in');
 			this.set(prepath+'correct_responses.0.pattern','{case_matters='+p.settings.caseSensitive+'}{order_matters=false}'+p.settings.correctAnswer);
@@ -535,6 +539,21 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		return out;
 	},
 
+	/** Load a {@link Numbas.parts.NumberEntryPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
+	loadMatrixEntryPart: function(part)
+	{
+		var out = this.loadPart(part);
+		if(out.answer) {
+			out.studentAnswer = JSON.parse(out.answer);
+		} else {
+			out.studentAnswer = null;
+		}
+		return out;
+	},
+
 	/** Load a {@link Numbas.parts.MultipleResponsePart}
 	 * @param {Numbas.parts.Part} part
 	 * @returns {part_suspend_data}
@@ -669,6 +688,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 			break;
 		case 'numberentry':
 			this.set(prepath+'learner_response',part.studentAnswer);
+			break;
+		case 'matrix':
+			this.set(prepath+'learner_response',JSON.stringify(part.studentAnswer));
 			break;
 		case '1_n_2':
 		case 'm_n_2':

@@ -113,6 +113,12 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 	 */
 	loadNumberEntryPart: function(part) {},
 
+	/** Load a {@link Numbas.parts.MatrixEntryPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
+	loadMatrixEntryPart: function(part) {},
+
 	/** Load a {@link Numbas.parts.MultipleResponsePart}
 	 * @param {Numbas.parts.Part} part
 	 * @returns {part_suspend_data}

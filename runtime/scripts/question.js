@@ -1782,7 +1782,11 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 	if(loading)
 	{
 		var pobj = Numbas.store.loadMatrixEntryPart(this);
-		this.stagedAnswer = [pobj.studentAnswer+''];
+		if(pobj.studentAnswer) {
+			var rows = pobj.studentAnswer.length;
+			var columns = rows>0 ? pobj.studentAnswer[0].length : 0;
+			this.stagedAnswer = [rows, columns, pobj.studentAnswer];
+		}
 	}
 }
 MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
