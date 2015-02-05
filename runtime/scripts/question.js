@@ -1847,13 +1847,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			var rows = this.studentAnswerRows;
 			var columns = this.studentAnswerColumns;
 
-			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
-			if(this.wrongSize) {
-				this.answered = true;
-				this.setCredit(0,R('part.marking.incorrect'));
-				return;
-			}
-
 			var studentMatrix = [];
 			this.invalidCell = false;
 			for(var i=0;i<rows;i++) {
@@ -1876,6 +1869,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
 			studentMatrix.rows = rows;
 			studentMatrix.columns = columns;
+
+			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
+			if(this.wrongSize) {
+				this.answered = true;
+				this.setCredit(0,R('part.marking.incorrect'));
+				return;
+			}
 
 			var rounders = {'dp': Numbas.matrixmath.precround, 'sigfig': Numbas.matrixmath.siground, 'none': function(x){return x}};
 			var round = rounders[this.settings.precisionType];
