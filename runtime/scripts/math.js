@@ -465,6 +465,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return Math.max(a,b);
 	},
 
+	/** Greatest of a list of numbers
+	 * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
+	 * @param {Array} numbers
+	 * @returns {number}
+	 */
+	listmax: function(numbers) {
+		if(numbers.length==0) {
+			return;
+		}
+		var best = numbers[0];
+		for(var i=1;i<numbers.length;i++) {
+			best = math.max(best,numbers[i]);
+		}
+		return best;
+	},
 
 	/** Least of two numbers - wraps `Math.min`
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
@@ -479,6 +494,22 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return Math.min(a,b);
 	},
 	
+	/** Least of a list of numbers
+	 * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
+	 * @param {Array} numbers
+	 * @returns {number}
+	 */
+	listmin: function(numbers) {
+		if(numbers.length==0) {
+			return;
+		}
+		var best = numbers[0];
+		for(var i=1;i<numbers.length;i++) {
+			best = math.min(best,numbers[i]);
+		}
+		return best;
+	},
+
 	/** Are `a` and `b` unequal?
 	 * @param {number} a
 	 * @param {number} b
