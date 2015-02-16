@@ -1959,6 +1959,11 @@ var setmath = Numbas.setmath = {
 		}
 	},
 
+	/** Union of two sets
+	 * @param {set} a
+	 * @param {set} b
+	 * @returns {set}
+	 */
 	union: function(a,b) {
 		var out = a.slice();
 		for(var i=0,l=b.length;i<l;i++) {
@@ -1969,16 +1974,31 @@ var setmath = Numbas.setmath = {
 		return out;
 	},
 	
+	/** Intersection of two sets
+	 * @param {set} a
+	 * @param {set} b
+	 * @returns {set}
+	 */
 	intersection: function(a,b) {
 		return a.filter(function(v) {
 			return setmath.contains(b,v);
 		});
 	},
 
+	/** Are two sets equal? Yes if a,b and (a intersect b) all have the same length
+	 * @param {set} a
+	 * @param {set} b
+	 * @returns {bool}
+	 */
 	eq: function(a,b) {	
 		return a.length==b.length && setmath.intersection(a,b).length==a.length;
 	},
 
+	/** Set minus - remove b's elements from a
+	 * @param {set} a
+	 * @param {set} b
+	 * @returns {set}
+	 */
 	minus: function(a,b) {
 		return a.filter(function(v){ return !setmath.contains(b,v); });
 	}
