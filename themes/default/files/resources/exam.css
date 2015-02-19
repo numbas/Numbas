@@ -610,7 +610,7 @@ div.part {
 	margin-left: 1em;
 }
 
-.part.type-gapfill .part {
+.part.type-gapfill > .prompt .part {
 	display: inline-block;
 }
 
