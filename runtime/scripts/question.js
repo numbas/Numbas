@@ -1588,7 +1588,7 @@ function NumberEntryPart(xml, path, question, parentPart, loading)
 	else
 		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
 
-	var fudge = 0.00000000001
+	var fudge = 0.00000000001;
 	switch(settings.precisionType) {
 	case 'dp':
 		minvalue = math.precround(minvalue,settings.precision);
@@ -1734,6 +1734,7 @@ function MatrixEntryPart(xml, path, question, parentPart, loading) {
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+	settings.tolerance = Math.max(settings.tolerance,0.00000000001);
 
 	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
 	correctAnswer = evaluate(correctAnswer,this.question.scope);

@@ -1573,13 +1573,22 @@ var vectormath = Numbas.vectormath = {
 		}
 	},
 
-	/** Scalar multiplication
+	/** Multiply by a scalar
 	 * @param {number} k
 	 * @param {vector} v
 	 * @returns {vector}
 	 */
 	mul: function(k,v) {
 		return v.map(function(x){ return mul(k,x) });
+	},
+
+	/** Divide by a scalar
+	 * @param {vector} v
+	 * @param {number} k
+	 * @returns {vector}
+	 */
+	div: function(v,k) {
+		return v.map(function(x){ return div(x,k); });
 	},
 
 	/** Vector dot product - each argument can be a vector, or a matrix with one row or one column, which is converted to a vector.
@@ -1829,11 +1838,23 @@ var matrixmath = Numbas.matrixmath = {
 
 	/** Multiply a matrix by a scalar
 	 * @param {number} k
-	 * @param {number} m
+	 * @param {matrix} m
 	 * @returns {matrix}
 	 */
 	scalarmul: function(k,m) {
 		var out = m.map(function(row){ return row.map(function(x){ return mul(k,x); }); });
+		out.rows = m.rows;
+		out.columns = m.columns;
+		return out;
+	},
+
+	/** Divide a matrix by a scalar
+	 * @param {matrix} m
+	 * @param {number} k
+	 * @returns {matrix}
+	 */
+	scalardiv: function(m,k) {
+		var out = m.map(function(row){ return row.map(function(x){ return div(x,k); }); });
 		out.rows = m.rows;
 		out.columns = m.columns;
 		return out;
