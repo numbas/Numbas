@@ -1687,6 +1687,11 @@ newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 	return step*steps+start==x && steps <= max_steps;
 });
 
+newBuiltin('list',[TRange],TList,function(range) {
+	var numbers = range.slice(3).map(function(n){ return new TNum(n); });
+	return numbers;
+});
+
 newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
 newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
 
