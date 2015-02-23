@@ -1174,7 +1174,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			tok.value.map(function(row){return '['+row.map(settings.jmeNumber).join(',')+']'}).join(',')+')';
 	},
 	'function': function(tree,tok,bits,settings) {
-		return tok.name+'('+bits.join(',')+')';
+		if(!bits) {
+			return tok.name+'()';
+		} else {
+			return tok.name+'('+bits.join(',')+')';
+		}
 	},
 	op: function(tree,tok,bits,settings) {
 		var op = tok.name;
