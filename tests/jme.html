@@ -59,6 +59,11 @@
 					return deepEqual(value,expect,message);
 				}
 
+				module('Subvars');
+				test('contentsplitbrackets',function() {
+					deepCloseEqual(Numbas.util.contentsplitbrackets('{a}$x$'),["{a}","$","x","$"],'return the character before the maths delimiter to the plain text part');
+				});
+
 				module('Compiling');
 
 				test('Booleans', function() {

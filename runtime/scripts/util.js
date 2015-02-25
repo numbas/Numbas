@@ -667,7 +667,7 @@ var endDelimiters = {
     '$$': /[^\\]\$\$/,
     '\\[': /[^\\]\\\]/
 }
-var re_startMaths = /(?:^|[^\\])\$\$|(?:^|[^\\])\$|\\\(|\\\[|\\begin\{(\w+)\}/;
+var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
 
 /** Split a string up by TeX delimiters (`$`, `\[`, `\]`)
  *
@@ -704,6 +704,10 @@ var contentsplitbrackets = util.contentsplitbrackets = function(txt,re_end) {
 			
 			startChop = start+startDelimiter.length;
 			startText = txt.slice(0,start);
+			if(m[1]) {
+				startText += m[1];
+				startDelimiter = startDelimiter.slice(m[1].length);
+			}
 			txt = txt.slice(startChop);
 
 			if(startDelimiter.match(/^\\begin/m)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
