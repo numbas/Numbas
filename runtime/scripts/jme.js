@@ -2424,6 +2424,22 @@ newBuiltin('product',['?'],TList,function() {
 	}
 });
 
+newBuiltin('zip',['?'],TList,function() {
+	var lists = Array.prototype.slice.call(arguments);
+	var zipped = util.zip(lists);
+	return zipped.map(function(l){ return new TList(l); });
+}, {
+	typecheck: function(variables) {
+		for(var i=0;i<variables.length;i++) {
+			var t = variables[i].type;
+			if(!(t=='list' || t=='set')) {
+				return false;
+			}
+		}
+		return true;
+	}
+});
+
 newBuiltin('combinations',['?',TNum],TList,function(list,r) {
 	var prod = util.combinations(list,r);
 	return prod.map(function(l){ return new TList(l); });
