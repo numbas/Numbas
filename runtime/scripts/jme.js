@@ -437,15 +437,23 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 						return {tok: scope.variables[name]};
 				}
 			}
-			else
+			else {
 				return tree;
-		}
-		else
-		{
+			}
+		} else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
 			tree = {tok: tree.tok,
 					args: tree.args.slice()};
-			for(var i=0;i<tree.args.length;i++)
+			substituteTreeOps[tree.tok.name](tree,scope,allowUnbound);
+			return tree;
+		} else
+		{
+			tree = {
+				tok: tree.tok,
+				args: tree.args.slice()
+			};
+			for(var i=0;i<tree.args.length;i++) {
 				tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+			}
 			return tree;
 		}
 	},
@@ -1430,7 +1438,7 @@ var synonyms = jme.synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','isa','satisfy'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy'];
 
 var rightAssociative = {
 	'^': true,
@@ -2350,6 +2358,34 @@ newBuiltin('map',['?',TList,'?'],TList,null, {
 	}
 });
 
+newBuiltin('let',['?'],TList, null, {
+	evaluate: function(args,scope)
+	{
+		var lambda = args[args.length-1];
+
+		var variables = {};
+		for(var i=0;i<args.length-1;i+=2) {
+			var name = args[i].tok.name;
+			var value = scope.evaluate(args[i+1]);
+			variables[name] = value;
+		}
+		var nscope = new Scope([scope,{variables:variables}]);
+
+		return nscope.evaluate(lambda);
+	},
+
+	typecheck: function(variables) {
+		if(variables.length<3 || (variables.length%2)!=1) {
+			return false;
+		}
+		for(var i=0;i<variables.length-1;i+=2) {
+			if(variables[i].tok.type!='name') {
+				return false;
+			}
+		}
+	}
+});
+
 newBuiltin('sort',[TList],TList, null, {
 	evaluate: function(args,scope)
 	{
@@ -2759,6 +2795,26 @@ var checkingFunctions =
 	}
 };
 
+/** Custom substituteTree behaviour for specific functions - for a given usage of a function, substitute in variable values from the scope.
+ *
+ * Functions have the signature <tree with function call at the top, scope, allowUnbound>
+ *
+ * @memberof Numbas.jme
+ * @enum {function}
+ * @see Numbas.jme.substituteTree
+ */
+var substituteTreeOps = jme.substituteTreeOps = {
+	'map': function(tree,scope,allowUnbound) {
+		tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+		return tree;
+	},
+	'let': function(tree,scope,allowUnbound) {
+		for(var i=1;i<tree.args.length-1;i+=2) {
+			tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+		}
+	}
+};
+
 /** Custom findvars behaviour for specific functions - for a given usage of a function, work out which variables it depends on.
  * 
  * Functions have the signature <tree with function call at top, list of bound variable names, scope>.
@@ -2775,6 +2831,24 @@ var findvarsOps = jme.findvarsOps = {
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
 		var vars = findvars(tree.args[0],boundvars,scope);
 		vars = vars.merge(findvars(tree.args[2],boundvars));
+		return vars;
+	},
+	'let': function(tree,boundvars,scope) {
+		// find vars used in variable assignments
+		var vars = [];
+		for(var i=0;i<tree.args.length-1;i+=2) {
+			vars = vars.merge(findvars(tree.args[i+1],boundvars,scope));
+		}
+
+		// find variable names assigned by let
+		boundvars = boundvars.slice();
+		for(var i=0;i<tree.args.length-1;i+=2) {
+			boundvars.push(tree.args[i].tok.name.toLowerCase());
+		}
+
+		// find variables used in the lambda expression, excluding the ones assigned by let
+		vars = vars.merge(findvars(tree.args[tree.args.length-1],boundvars,scope));
+
 		return vars;
 	},
 	'satisfy': function(tree,boundvars,scope) {
