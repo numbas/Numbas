@@ -2828,7 +2828,14 @@ var substituteTreeOps = jme.substituteTreeOps = {
 var findvarsOps = jme.findvarsOps = {
 	'map': function(tree,boundvars,scope) {
 		boundvars = boundvars.slice();
-		boundvars.push(tree.args[1].tok.name.toLowerCase());
+		if(tree.args[1].tok.type=='list') {
+			var names = tree.args[1].args;
+			for(var i=0;i<names.length;i++) {
+				boundvars.push(names[i].tok.name.toLowerCase());
+			}
+		} else {
+			boundvars.push(tree.args[1].tok.name.toLowerCase());
+		}
 		var vars = findvars(tree.args[0],boundvars,scope);
 		vars = vars.merge(findvars(tree.args[2],boundvars));
 		return vars;
