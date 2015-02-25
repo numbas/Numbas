@@ -551,6 +551,25 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return out;
 	},
 
+	/** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
+	 * @param {array} lists - list of arrays
+	 * @returns {array}
+	 */
+	zip: function(lists) {
+		var out = [];
+		for(var i=0;true;i++) {
+			var z = [];
+			for(var j=0;j<lists.length;j++) {
+				if(i<lists[j].length) {
+					z.push(lists[j][i]);
+				} else {
+					return out;
+				}
+			}
+			out.push(z);
+		}
+	},
+
 	/** All combinations of r items from given array, without replacement
 	 * @param {array} list
 	 * @param {number} r
