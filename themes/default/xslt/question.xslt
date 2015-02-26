@@ -38,7 +38,7 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
 
 <xsl:template match="statement">
-	<div class="statement">
+	<div class="statement content-area">
 		<xsl:apply-templates />
 	</div>
 </xsl:template>
@@ -134,7 +134,7 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="prompt">
-	<span class="prompt">
+	<span class="prompt content-area">
 		<xsl:apply-templates />
 	</span>
 </xsl:template>
@@ -149,7 +149,7 @@ Copyright 2011-13 Newcastle University
 
 
 <xsl:template match="advice">
-	<div class="adviceContainer" data-bind="visible: adviceDisplayed">
+	<div class="adviceContainer content-area" data-bind="visible: adviceDisplayed">
 		<h3><localise>question.advice</localise></h3>
 		<span class="adviceDisplay">
 			<xsl:apply-templates />
