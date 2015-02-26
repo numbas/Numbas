@@ -931,7 +931,8 @@ div.jqi button.jqidefaultbutton{
 
 /* Try to allow scrolling for statement or prompt elements that are too wide */
 @media screen {
-	.question, .statement > span > p, .prompt > span > p, .adviceDisplay > span > p {
+	.question, .statement > span > p, .prompt > span > p, .adviceDisplay > span > p,
+	.question, .statement > span > div, .prompt > span > div, .adviceDisplay > span > div {
 		overflow-x: auto;
 		overflow-y: hidden;
 	}
