@@ -441,50 +441,69 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * Strips out nested brackets
 	 * @example splitbrackets('a{{b}}c','{','}') => ['a','b','c']
 	 * @param {string} t - string to split
-	 * @param {string} lb - left bracket character
-	 * @param {string} rb - right bracket character
+	 * @param {string} lb - left bracket string
+	 * @param {string} rb - right bracket string
 	 * @returns {string[]} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
 	 */
-	splitbrackets: function(t,lb,rb)
+	splitbrackets: function(str,lb,rb)
 	{
-		var o=[];
-		var l=t.length;
-		var s=0;
-		var depth=0;
-		for(var i=0;i<l;i++)
-		{
-			if(t.charAt(i)==lb && !(i>0 && t.charAt(i-1)=='\\'))
-			{
-				depth+=1;
-				if(depth==1)
-				{
-					o.push(t.slice(s,i));
-					s=i+1;
-				}
-				else
-				{
-					t = t.slice(0,i)+t.slice(i+1);
-					i-=1;
-				}
-			}
-			else if(depth>0 && t.charAt(i)==rb && !(i>0 && t.charAt(i-1)=='\\'))
-			{
-				depth-=1;
-				if(depth==0)
-				{
-					o.push(t.slice(s,i));
-					s=i+1;
-				}
-				else
-				{
-					t = t.slice(0,i)+t.slice(i+1);
-					i -= 1;
+		var length = str.length;
+		var lb_length = lb.length;
+		var rb_length = rb.length;
+
+		var out = [];	// bits to return
+		var end = 0;	// end of the last pair of bracket
+
+		for(var i=0;i<length;i++) {
+			// if last character wasn't an escape
+			if(i==0 || str.charAt(i-1)!='\\') {
+				// if cursor is at a left bracket
+				if(str.slice(i,i+lb_length)==lb) {
+					var j = i+lb_length;
+					var depth = 1;
+					var shortened = str.slice();	// this will store the contents of the brackets, with nested brackets removed
+					var acc = 0;	// number of characters removed in shortened text
+
+					// scan along until matching right bracket found
+					while(j<length && depth>0) {
+						if(j==0 || str.charAt(j-1)!='\\') {
+							if(str.slice(j,j+lb_length)==lb) {
+								// remove this bracket from shortened
+								shortened = shortened.slice(0,j-acc)+shortened.slice(j+lb_length-acc);
+								acc += lb_length;
+								// add 1 to depth
+								depth += 1;
+								j += lb_length;
+							} else if(str.slice(j,j+rb_length)==rb) {
+								// remove this bracket from shortened
+								shortened = shortened.slice(0,j-acc)+shortened.slice(j+rb_length-acc);
+								acc += rb_length;
+								// subtract 1 from depth
+								depth -= 1;
+								j += rb_length;
+							} else {
+								j += 1;
+							}
+						} else {
+							j += 1;
+						}
+					}
+					// if matching right bracket found
+					if(depth==0) {
+						// output plain text found before bracket
+						out.push(str.slice(end,i));
+						// output contents of bracket
+						out.push(shortened.slice(i+lb_length,j-acc));
+						// remember the position of the end of the bracket
+						end = j;
+						i = j-1;
+					}
 				}
 			}
 		}
-		if(s<l)
-			o.push(t.slice(s));
-		return o;
+		// output the remaining plain text
+		out.push(str.slice(end));
+		return out;
 	},
 
 	/** Because XML doesn't like having ampersands hanging about, replace them with escape codes
