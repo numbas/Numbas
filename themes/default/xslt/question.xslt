@@ -407,7 +407,7 @@ Copyright 2011-13 Newcastle University
 						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}]" disabled="true"/>
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" value="{$answernum}"/>
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+''" disabled="true" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
