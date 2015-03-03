@@ -558,6 +558,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	}
 };
 
+Numbas.parts = {};
+
 
 /** Create a new question part. Automatically picks the right constructor based on the type defined in the XML.
  * @param {Element} xml
@@ -605,7 +607,7 @@ function createPart(xml, path, question, parentPart, loading)
  * @param {boolean} loading
  * @see {Numbas.createPart}
  */
-function Part( xml, path, question, parentPart, loading )
+var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loading )
 {
 	//remember XML
 	this.xml = xml;
@@ -1081,7 +1083,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function JMEPart(xml, path, question, parentPart, loading)
+var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
 	util.copyinto(JMEPart.prototype.settings,settings);
@@ -1447,7 +1449,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function PatternMatchPart(xml, path, question, parentPart, loading)
+var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
@@ -1555,7 +1557,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function NumberEntryPart(xml, path, question, parentPart, loading)
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
 {
 	var evaluate = jme.evaluate, compile = jme.compile;
 	var settings = this.settings;
@@ -1727,7 +1729,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function MatrixEntryPart(xml, path, question, parentPart, loading) {
+var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
 	var evaluate = jme.evaluate, compile = jme.compile;
 	var settings = this.settings;
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
@@ -1941,7 +1943,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
  * @augments Numbas.parts.Part
  * @memberof Numbas.parts
  */
-function MultipleResponsePart(xml, path, question, parentPart, loading)
+var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, path, question, parentPart, loading)
 {
 	var settings = this.settings;
 	util.copyinto(MultipleResponsePart.prototype.settings,settings);
@@ -2490,7 +2492,7 @@ MultipleResponsePart.prototype.revealAnswer = util.extend(MultipleResponsePart.p
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function GapFillPart(xml, path, question, parentPart, loading)
+var GapFillPart = Numbas.parts.GapFillPart = function(xml, path, question, parentPart, loading)
 {
 	var gapXML = this.xml.selectNodes('gaps/part');
 
@@ -2582,7 +2584,7 @@ GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAns
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-function InformationPart(xml, path, question, parentPart, loading)
+var InformationPart = Numbas.parts.InformationPart = function(xml, path, question, parentPart, loading)
 {
 	this.display = new Numbas.display.InformationPartDisplay(this);
 	this.answered = true;
@@ -2609,27 +2611,19 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
  * @memberof Numbas.Question
  */
 var partConstructors = Numbas.Question.partConstructors = {
-	'CUEdt.JMEPart': JMEPart, 
 	'jme': JMEPart,
 
-	'CUEdt.PatternMatchPart': PatternMatchPart,
 	'patternmatch': PatternMatchPart,
 
-	'CUEdt.NumberEntryPart': NumberEntryPart,
 	'numberentry': NumberEntryPart,
 	'matrix': MatrixEntryPart,
 
-	'CUEdt.MR1_n_2Part': MultipleResponsePart,
-	'CUEdt.MRm_n_2Part': MultipleResponsePart,
-	'CUEdt.MRm_n_xPart': MultipleResponsePart,
 	'1_n_2': MultipleResponsePart,
 	'm_n_2': MultipleResponsePart,
 	'm_n_x': MultipleResponsePart,
 
-	'CUEdt.GapFillPart': GapFillPart,
 	'gapfill': GapFillPart,
 
-	'CUEdt.InformationOnlyPart': InformationPart,
 	'information': InformationPart
 };
 
