@@ -183,6 +183,32 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return !util.eq(a,b);
 	},
 
+	/** Are two arrays equal? True if their elements are all equal
+	 * @param {Array} a
+	 * @param {Array} b
+	 * @returns {boolean}
+	 */
+	arraysEqual: function(a,b) {
+		if(a.length!=b.length) {
+			return false;
+		}
+		var l = a.length;
+		for(var i=0;i<l;i++) {
+			if(Array.isArray(a[i])) {
+				if(!Array.isArray(b[i])) {
+					return false;
+				} else if(!util.arraysEqual(a[i],b[i])) {
+					return false;
+				}
+			} else {
+				if(a!=b) {
+					return false;
+				}
+			}
+		}
+		return true;
+	},
+
 	/** Filter out values in `exclude` from `list`
 	 * @param {Numbas.jme.types.TList} list
 	 * @param {Numbas.jme.types.TList} exclude

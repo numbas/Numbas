@@ -1659,7 +1659,16 @@ display.MatrixEntryPartDisplay = function()
 	this.allowResize = ko.observable(p.settings.allowResize);
 
 	ko.computed(function() {
-		p.storeAnswer([this.studentAnswerRows(),this.studentAnswerColumns(),this.studentAnswer()]);
+		var stagedAnswer = p.stagedAnswer || [null,null,null];
+		var oldRows = stagedAnswer[0];
+		var oldColumns = stagedAnswer[1];
+		var oldMatrix = stagedAnswer[2];
+		var newRows = this.studentAnswerRows();
+		var newColumns = this.studentAnswerColumns();
+		var newMatrix = this.studentAnswer();
+		if(newRows != oldRows || newColumns != oldColumns || !util.arraysEqual(oldMatrix,newMatrix)) {
+			p.storeAnswer([this.studentAnswerRows(),this.studentAnswerColumns(),this.studentAnswer()]);
+		}
 	},this);
 
 	/** Show a LaTeX rendering of the answer?
