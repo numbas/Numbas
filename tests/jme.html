@@ -513,16 +513,17 @@
 					closeEquals(evaluate('round(-50)').value,-50,'round(-50)');
 					deepCloseEqual(evaluate('round(1.4-6.7i)').value,math.complex(1,-7),'round(1.4-6.7i)');
 
-					equals(evaluate('precround(1.1234567891011121314151617181920,0)').value,1,'precround(1.1234567891011121314151617181920,0)');
-					equals(evaluate('precround(1.1234567891011121314151617181920,1)').value,1.1,'precround(1.1234567891011121314151617181920,1)');
-					equals(evaluate('precround(1.1234567891011121314151617181920,5)').value,1.12346,'precround(1.1234567891011121314151617181920,5)');
+					equals(evaluate('precround(1.1234567891011121314151617181920,0)').value,1,'precround(1.1234567891011121314151617181920,0) - round to integer');
+					equals(evaluate('precround(1.1234567891011121314151617181920,1)').value,1.1,'precround(1.1234567891011121314151617181920,1) - round to 1 d.p.');
+					equals(evaluate('precround(1.1234567891011121314151617181920,5)').value,1.12346,'precround(1.1234567891011121314151617181920,5) - round to 5 d.p. - should round up');
 					equals(evaluate('precround(1.1234567891011121314151617181920,20)').value,1.12345678910111213142,'precround(1.1234567891011121314151617181920,20)');
-					equals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3)');
-					equals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3)');
+					equals(evaluate('precround(1.9999,3)').value,2,'precround(1.9999,3) - round to 3 dp results in integer');
+					equals(evaluate('precround(-132.6545,3)').value,-132.654,'precround(-132.6545,3) - round on 5 in negative number rounds up');
 					equals(evaluate('precround(123456789012,8)').value,123456789012,'precround(123456789012,8) - only multiply fractional part, to get better precision');
 					equals(evaluate('precround(4+488/1000,3)').value,4.488,'precround(4+488/1000,3) - try not to add floating point error in the middle of precround');
 					equals(evaluate('precround(0.05,2)').value,0.05,'precround(0.05,2)');
 					equals(evaluate('precround(-0.05,2)').value,-0.05,'precround(-0.05,2)');
+					equals(evaluate('precround(-2.51,0)').value,-3,'precround(-2.51,0)');
 
 					equals(evaluate('precround(237.55749999999998,3)').value,237.558,'precround(237.55749999999998,3)==237.558');
 					equals(evaluate('precround(237.55748999999998,3)').value,237.557,'precround(237.55748999999998,3)==237.557');
@@ -533,6 +534,7 @@
 					equals(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');
 					equals(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
 					equals(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
+					equals(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
 				});
 
 				test('Random numbers',function() {

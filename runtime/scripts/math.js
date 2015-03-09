@@ -728,19 +728,30 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			//if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
 			var v = fracPart*be*10 % 1;
 			var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
+
+			// multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
 			fracPart *= be;
+
 			if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
 				fracPart += 1;
 			}
-			fracPart = Math.abs(Math.round(fracPart));
-			if(fracPart==be) {
+
+			var rounded_fracPart = Math.round(fracPart);
+			// if the fractional part has rounded up to a whole number, just add sgn(fracPart) to the integer part
+			if(rounded_fracPart==be || rounded_fracPart==-be) {
 				return intPart+math.sign(fracPart);
 			}
-			var fracPartString = Math.round(fracPart)+'';
+
+			// get the fractional part as a string of decimal digits
+			var fracPartString = Math.round(Math.abs(fracPart))+'';
 			while(fracPartString.length<b) {
 				fracPartString = '0'+fracPartString;
 			}
+			
+			// construct the rounded number as a string, then convert it to a JS float
 			var out = parseFloat(intPart+'.'+fracPartString);
+
+			// make sure a negative number remains negative
 			if(intPart==0 && a<0) {
 				return -out;
 			} else {
