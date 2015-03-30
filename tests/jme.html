@@ -708,6 +708,14 @@
 					var n = evaluate('repeat(random(3..6),5)[4]').value;
 					closeEquals(n>=3 && n<=6,true,'last item in repeat(random(3..6),5) is in the correct range');
 				});
+
+				test('wrapValue',function() {
+					var m = [[0]];
+					m.rows = 1;
+					m.columns = 1;
+					equals(jme.wrapValue(m).type,'list','wrapValue on list without type hint gives list');
+					equals(jme.wrapValue(m,'matrix').type,'matrix','wrapValue on list with matrix type hint');
+				});
 				
 				module('Scopes');
 

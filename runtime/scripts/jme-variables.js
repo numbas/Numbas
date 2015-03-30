@@ -75,7 +75,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 				if(val===undefined) {
 					throw(new Numbas.Error('jme.user javascript.returned undefined',fn.name));
 				}
-				val = jme.wrapValue(val);
+				val = jme.wrapValue(val,fn.outtype);
 				if(!val.type)
 					val = new fn.outcons(val);
 				return val;

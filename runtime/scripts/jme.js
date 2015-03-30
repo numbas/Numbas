@@ -793,9 +793,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	
 	/** Wrap up a plain JavaScript value (number, string, bool or array) as a {@link Numbas.jme.token}.
 	 * @param {object} v
+	 * @param {string} typeHint - name of the expected type (to differentiate between, for example, matrices, vectors and lists
 	 * @returns {Numbas.jme.token}
 	 */
-	wrapValue: function(v) {
+	wrapValue: function(v,typeHint) {
 		switch(typeof v) {
 		case 'number':
 			return new jme.types.TNum(v);
@@ -805,8 +806,21 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			return new jme.types.TBool(v);
 		default:
 			if($.isArray(v)) {
-				v = v.map(jme.wrapValue);
-				return new jme.types.TList(v);
+				// it would be nice to abstract this, but some types need the arguments to be wrapped, while others don't
+				switch(typeHint) {
+				case 'matrix':
+					return new jme.types.TMatrix(v);
+				case 'vector':
+					return new jme.types.TVector(v);
+				case 'range':
+					return new jme.types.TRange(v);
+				case 'set':
+					v = v.map(jme.wrapValue);
+					return new jme.types.TSet(v);
+				default:
+					v = v.map(jme.wrapValue);
+					return new jme.types.TList(v);
+				}
 			}
 			return v;
 		}
