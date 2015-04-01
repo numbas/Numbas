@@ -199,6 +199,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 			}
 		}
 
+		if(!v.tree) {
+			throw(new Numbas.Error('jme.variables.empty definition',name));
+		}
 		try {
 			scope.variables[name] = jme.evaluate(v.tree,scope);
 		} catch(e) {
@@ -210,16 +213,29 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	/** Evaluate dictionary of variables
 	 * @param {object} todo - dictionary of variables mapped to their definitions
 	 * @param {Numbas.jme.Scope} scope
-	 * @returns {object} - dictionary of evaluated variables
+	 * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
+	 * @returns {object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
 	 */
-	makeVariables: function(todo,scope)
+	makeVariables: function(todo,scope,condition)
 	{
 		scope = new jme.Scope(scope);
-		for(var x in todo)
-		{
-			jme.variables.computeVariable(x,todo,scope);
+
+		var conditionSatisfied = true;
+		if(condition) {
+			var condition_vars = jme.findvars(condition);
+			condition_vars.map(function(v) {
+				jme.variables.computeVariable(v,todo,scope);
+			});
+			conditionSatisfied = jme.evaluate(condition,scope).value;
 		}
-		return scope.variables;
+
+		if(conditionSatisfied) {
+			for(var x in todo)
+			{
+				jme.variables.computeVariable(x,todo,scope);
+			}
+		}
+		return {variables: scope.variables, conditionSatisfied: conditionSatisfied};
 	},
 
 	/** Substitute variables into a DOM element (works recursively on the element's children)

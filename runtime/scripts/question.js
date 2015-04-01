@@ -159,14 +159,11 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 			while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
 				runs += 1;
 				scope = new jme.Scope([q.scope]);
-				scope.variables = jme.variables.makeVariables(variablesTodo,q.scope);
-				if(condition) {
-					conditionSatisfied = jme.evaluate(condition,scope).value;
-				} else {
-					conditionSatisfied = true;
-				}
+				var result = jme.variables.makeVariables(variablesTodo,q.scope,condition);
+				scope.variables = result.variables;
+				conditionSatisfied = result.conditionSatisfied;
 			}
-			if(runs==q.variablesTest.maxRuns) {
+			if(!conditionSatisfied) {
 				throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
 			} else {
 				q.scope = scope;
