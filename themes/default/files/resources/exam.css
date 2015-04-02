@@ -630,6 +630,8 @@ div.part {
 	border: 1px dashed #999;
 	padding: 0.4em;
 	display: inline-block;
+	max-width: 100%;
+	overflow-x: auto;
 }
 
 .correct-answer .feedback-icon {
