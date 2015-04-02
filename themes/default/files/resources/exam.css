@@ -106,6 +106,8 @@ iframe {
 .matrix-input {
 	display: inline-block;
 	vertical-align: middle;
+	max-width: 100%;
+	overflow-x: auto;
 }
 .matrix-input table.matrix {
     width: auto;
