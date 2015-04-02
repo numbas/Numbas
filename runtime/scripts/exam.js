@@ -293,7 +293,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	{
 		var exam = this;
 		var variablesTodo = Numbas.xml.loadVariables(exam.xml,exam.scope);
-		exam.scope.variables = Numbas.jme.variables.makeVariables(variablesTodo,exam.scope)
+		var result = Numbas.jme.variables.makeVariables(variablesTodo,exam.scope);
+		exam.scope.variables = result.variables;
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
 		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
