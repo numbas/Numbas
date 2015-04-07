@@ -632,6 +632,7 @@ div.part {
 	display: inline-block;
 	max-width: 100%;
 	overflow-x: auto;
+	overflow-y: hidden;
 }
 
 .correct-answer .feedback-icon {
