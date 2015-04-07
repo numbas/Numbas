@@ -271,6 +271,44 @@ ko.components.register('matrix-input',{
 		this.value = ko.observableArray([]);
 
 		this.disable = params.disable || false;
+
+		this.keydown = function(obj,e) {
+			this.oldPos = e.target.selectionStart;
+			return true;
+		}
+
+
+		this.moveArrow = function(obj,e) {
+			var cell = $(e.target).parent('td');
+			var selectionStart = e.target.selectionStart;
+			switch(e.which) {
+			case 39:
+				if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==e.target.value.length) {
+					cell.next().find('input').focus();
+				}
+				break;
+			case 37:
+				if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==0) {
+					cell.prev().find('input').focus();
+				}
+				break;
+			case 38:
+				var e = cell.parents('tr').prev().children().eq(cell.index()).find('input');
+				if(e.length) {
+					e.focus();
+					e[0].setSelectionRange(this.oldPos,this.oldPos);
+				}
+				break;
+			case 40:
+				var e = cell.parents('tr').next().children().eq(cell.index()).find('input');
+				if(e.length) {
+					e.focus();
+					e[0].setSelectionRange(this.oldPos,this.oldPos);
+				}
+				break;
+			}
+			return false;
+		}
 		
 		this.update = function() {
 			// update value when number of rows or columns changes
@@ -343,10 +381,12 @@ ko.components.register('matrix-input',{
 	+'	</div><!-- /ko -->'
 	+'	<div class="matrix-wrapper">'
 	+'		<span class="left-bracket"></span>'
-	+'		<table class="matrix" data-bind="foreach: value">'
-	+'			<tr data-bind="foreach: $data">'
-	+'				<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true, disable: $parents[1].disable"></td>'
-	+'			</tr>'
+	+'		<table class="matrix">'
+	+'			<tbody data-bind="foreach: value">'
+	+'				<tr data-bind="foreach: $data">'
+	+'					<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true, disable: $parents[1].disable, event: {keydown: $parents[1].keydown, keyup: $parents[1].moveArrow}"></td>'
+	+'				</tr>'
+	+'			</tbody>'
 	+'		</table>'
 	+'		<span class="right-bracket"></span>'
 	+'	</div>'
