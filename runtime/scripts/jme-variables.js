@@ -253,7 +253,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		if(element.hasAttribute('data-jme-visible')) {
 			var condition = element.getAttribute('data-jme-visible');
 			var result = scope.evaluate(condition);
-			if(result.type=='boolean' && result.value==true) {
+			if(!(result.type=='boolean' && result.value==true)) {
 				$(element).css('display','none');
 			}
 		}
