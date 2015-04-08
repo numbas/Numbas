@@ -250,6 +250,14 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		if(element.hasAttribute('nosubvars'))
 			return element;
 
+		if(element.hasAttribute('data-jme-visible')) {
+			var condition = element.getAttribute('data-jme-visible');
+			var result = scope.evaluate(condition);
+			if(result.type=='boolean' && result.value==true) {
+				$(element).css('display','none');
+			}
+		}
+
 		var re_end;
 		$(element).contents().each(function() {
 			if(this.nodeType==(this.TEXT_NODE || 3)) {
