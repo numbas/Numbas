@@ -59,7 +59,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	makeJavascriptFunction: function(fn) {
 		var paramNames = fn.paramNames.slice();
 		paramNames.push('scope');
-		var preamble='fn.jfn=(function('+paramNames.join(',')+'){';
+		var preamble='fn.jfn=(function('+paramNames.join(',')+'){\n';
 		var math = Numbas.math;
 		var util = Numbas.util;
 		try {
