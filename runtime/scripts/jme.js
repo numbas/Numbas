@@ -1036,10 +1036,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 
 	/** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
 	 * @param {JME} expr
+	 * @param {object} [variables] - dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
 	 * @returns {token}
 	 */
-	evaluate: function(expr) {
-		return jme.evaluate(expr,this);
+	evaluate: function(expr,variables) {
+		var scope = this;
+		if(variables) {
+			scope = new Scope([this]);
+			for(var name in variables) {
+				scope.variables[name] = jme.wrapValue(variables[name]);
+			}
+		}
+		return jme.evaluate(expr,scope);
 	}
 };
 
