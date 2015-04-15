@@ -118,7 +118,7 @@ R.registerLocale('en-GB',{
 	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
 	'jme.user javascript.error': "Error in user-defined javascript function <code>%s</code><br/>%s",
-	'jme.user javascript.error': "User-defined javascript function <code>%s</code> didn't return anything",
+	'jme.user javascript.error': "Error in user-defined javascript function <code>%s</code>: %s",
 
 	'jme.variables.error making function': "Error making function <code>%s</code>: %s",
 	'jme.variables.syntax error in function definition': "Syntax error in function definition",
