@@ -110,6 +110,7 @@
 					deepCloseEqual(tokenise("f'''"),[new types.TName("f'''")],"f'''");
 					deepCloseEqual(tokenise("_"),[new types.TName("_")],"_");
 					deepCloseEqual(tokenise("a_1"),[new types.TName("a_1")],"a_1");
+					deepCloseEqual(tokenise("in_code"),[new types.TName("in_code")],"in_code");
 				});
 
 				test('Whitespace',function() {
