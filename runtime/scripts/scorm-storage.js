@@ -154,17 +154,21 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		return this.getQuestionId(part.question)+part.path;
 	},
 
+	/** Load student's name and ID
+	 */
+	get_student_name: function() {
+		this.exam.student_name = this.get('learner_name');
+		this.exam.student_id = this.get('learner_id');
+	},
 
 	/** Initialise the SCORM data model and this storage object.
-	 * Should also put the student's name and ID in exam.student_name and exam.student_id.
 	 * @param {Numbas.Exam} exam
 	 */
 	init: function(exam)
 	{
 		this.exam = exam;
 
-		exam.student_name = this.get('learner_name');
-		exam.student_id = this.get('learner_id');
+		this.get_student_name();
 
 		var set = this.set;
 
@@ -411,6 +415,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	load: function(exam) 
 	{
 		this.exam = exam;
+
+		this.get_student_name();
+
 		var eobj = this.getSuspendData();
 		this.set('exit','suspend');
 		
