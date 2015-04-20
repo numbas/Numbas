@@ -132,6 +132,10 @@ Copyright 2011-14 Newcastle University
 							<td data-localise="exam.random seed"></td>
 							<td class="rtd" data-bind="html: exam.seed"></td>
 						</tr>
+						<tr data-bind="visible: exam.student_name">
+							<td data-localise="exam.student name"></td>
+							<td class="rtd"><span data-bind="text: exam.student_name"></span> <span data-bind="visible: exam.student_id">(<span data-bind="text: exam.student_id"></span>)</span></td>
+						</tr>
 						<tr>
 							<td data-localise="exam.number of questions"></td>
 							<td class="rtd" data-bind="text: exam.settings.numQuestions"></td>

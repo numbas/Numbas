@@ -156,11 +156,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 
 	/** Initialise the SCORM data model and this storage object.
+	 * Should also put the student's name and ID in exam.student_name and exam.student_id.
 	 * @param {Numbas.Exam} exam
 	 */
 	init: function(exam)
 	{
 		this.exam = exam;
+
+		exam.student_name = this.get('learner_name');
+		exam.student_id = this.get('learner_id');
 
 		var set = this.set;
 

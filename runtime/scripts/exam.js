@@ -212,6 +212,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 */
 	passed: false,				//did student pass the exam?
 
+	/** Student's name
+	 * @type string
+	 */
+	student_name: undefined,
+
+	/** Student's ID
+	 * @type string
+	 */
+	student_id: undefined,
+
 	/** JME evaluation environment
 	 *
 	 * Contains variables, rulesets and functions defined by the exam and by extensions.
