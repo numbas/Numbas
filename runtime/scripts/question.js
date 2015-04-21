@@ -645,6 +645,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	var scriptNodes = xml.selectNodes('scripts/script');
 	for(var i=0;i<scriptNodes.length; i++) {
 		var name = scriptNodes[i].getAttribute('name');
+		var order = scriptNodes[i].getAttribute('order');
 		var script = Numbas.xml.getTextContent(scriptNodes[i]);
 		var withEnv = {
 			variables: this.question.unwrappedVariables,
@@ -654,7 +655,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		with(withEnv) {
 			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
 		}
-		this.scripts[name] = script;
+		this.scripts[name] = {script: script, order: order};
 	}
 
 	this.applyScripts();
@@ -778,16 +779,35 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	applyScripts: function() {
+		this.originalScripts = {
+		}
 		for(var name in this.scripts) {
-			var script = this.scripts[name];
+			var script_dict = this.scripts[name];
+			var order = script_dict.order;
+			var script = script_dict.script;
 			switch(name) {
-				case 'mark':
-				case 'validate':
-					this[name] = script;
-					break;
 				case 'constructor':
 					this.customConstructor = script;
 					break;
+				default:
+					var originalScript = this[name];
+					switch(order) {
+						case 'instead':
+							this[name] = script;
+							break;
+						case 'before':
+							this[name] = function() {
+								script.apply(this,arguments);
+								originalScript.apply(this,arguments);
+							}
+							break;
+						case 'after':
+							this[name] = function() {
+								originalScript.apply(this,arguments);
+								script.apply(this,arguments);
+							}
+							break;
+					}
 			}
 		}
 	},

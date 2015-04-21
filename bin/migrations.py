@@ -59,3 +59,16 @@ def pick_questions(data):
 	if data['type']=='exam':
 		data['allQuestions'] = True
 		data['pickQuestions'] = 0
+
+@migration('pick_questions')
+@question_migration
+def custom_script_order(question):
+	default_orders = {
+		'constructor': 'after',
+		'mark': 'instead',
+		'validate': 'instead',
+	}
+	for part in question['parts']:
+		if 'scripts' in part:
+			for name,script in part['scripts'].items():
+				part['scripts'][name] = {'order': default_orders[name],'script':script}

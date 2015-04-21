@@ -588,12 +588,13 @@ class Part:
 			steps.append(step.toxml())
 
 		scripts = part.find('scripts')
-		for name,script in self.scripts.items():
+		for name,script_dict in self.scripts.items():
 			script_element = etree.Element('script')
 			script_element.attrib = {
 				'name': name,
+				'order': script_dict.get('order','instead')
 			}
-			script_element.text = strcons_fix(script)
+			script_element.text = strcons_fix(script_dict.get('script',''))
 			scripts.append(script_element)
 
 		return part
