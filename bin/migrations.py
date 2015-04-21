@@ -68,7 +68,8 @@ def custom_script_order(question):
 		'mark': 'instead',
 		'validate': 'instead',
 	}
-	for part in question['parts']:
-		if 'scripts' in part:
-			for name,script in part['scripts'].items():
-				part['scripts'][name] = {'order': default_orders[name],'script':script}
+	if 'parts' in question:
+		for part in question['parts']:
+			if 'scripts' in part:
+				for name,script in part['scripts'].items():
+					part['scripts'][name] = {'order': default_orders[name],'script':script}
