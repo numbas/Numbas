@@ -1197,7 +1197,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			}
 			else if(arg_type=='number' && arg_value.complex && (op=='*' || op=='-u' || op=='/'))	// put brackets round a complex number
 			{
-				if(arg_value.im!=0 && arg_value.im!=1)
+				if(arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0))
 				{
 					bits[i] = '('+bits[i]+')';
 					args[i].bracketed = true;

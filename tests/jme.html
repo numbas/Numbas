@@ -797,6 +797,7 @@
 					equals(simplifyExpression('2i/4',['all']),'i/2','2*i/4 cancels the integer factor');
 					equals(simplifyExpression('2/(4i)',['all']),'1/(2i)','2/(4i) cancels the integer factor');
 					equals(simplifyExpression('2i/(4i)',['all']),'1/2','2i/(4i) cancels the i');
+					equals(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
