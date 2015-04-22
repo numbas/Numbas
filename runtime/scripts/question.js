@@ -357,7 +357,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		job(function() {
 			//sub vars into math nodes
 			var mathsNodes = q.xml.selectNodes('descendant::math');
-			for( i=0; i<mathsNodes.length; i++ )
+			for( var i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
 				expr = jme.subvars(expr,q.scope);
@@ -365,7 +365,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			}
 			//turn content maths into LaTeX
 			mathsNodes = q.xml.selectNodes('descendant::content/descendant::math');
-			for( i=0; i<mathsNodes.length; i++ )
+			for( var i=0; i<mathsNodes.length; i++ )
 			{
 				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
 				expr = jme.subvars(expr,q.scope);

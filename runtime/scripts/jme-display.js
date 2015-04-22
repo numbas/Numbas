@@ -1837,9 +1837,9 @@ var compileRules = jme.display.compileRules = function(rules)
 {
 	for(var i=0;i<rules.length;i++)
 	{
-		pattern = rules[i][0];
-		conditions = rules[i][1];
-		result = rules[i][2];
+		var pattern = rules[i][0];
+		var conditions = rules[i][1];
+		var result = rules[i][2];
 		rules[i] = new Rule(pattern,conditions,result);
 	}
 	return new jme.Ruleset(rules,{});
