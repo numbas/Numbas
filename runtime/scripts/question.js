@@ -43,7 +43,8 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
  */
 var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 {
-	var q = question = this;
+	var question = this;
+	var q = question;
 	q.exam = exam;
 	q.adviceThreshold = q.exam.adviceGlobalThreshold;
 	q.xml = xml;
@@ -92,7 +93,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 
 	job(function() {
 		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
-		q.scope.functions = Numbas.jme.variables.makeFunctions(functionsTodo,q.scope);
+		q.scope.functions = Numbas.jme.variables.makeFunctions(functionsTodo,q.scope,{question:q});
 		//make rulesets
 		var rulesetNodes = q.xml.selectNodes('rulesets/set');
 

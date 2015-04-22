@@ -54,16 +54,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * The JavaScript is wrapped with `(function(<paramNames>){ ` and ` }`)
 	 *
 	 * @param {object} fn - contains `definition` and `paramNames`.
+	 * @param {object} withEnv - dictionary of local variables for javascript functions
 	 * @returns {function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
 	 */
-	makeJavascriptFunction: function(fn) {
+	makeJavascriptFunction: function(fn,withEnv) {
 		var paramNames = fn.paramNames.slice();
 		paramNames.push('scope');
 		var preamble='fn.jfn=(function('+paramNames.join(',')+'){\n';
 		var math = Numbas.math;
 		var util = Numbas.util;
+		withEnv = withEnv || {};
+
 		try {
-			var jfn = eval(preamble+fn.definition+'\n})');
+			with(withEnv) {
+				var jfn = eval(preamble+fn.definition+'\n})');
+			}
 		} catch(e) {
 			throw(new Numbas.Error('jme.variables.syntax error in function definition'));
 		}
@@ -91,9 +96,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 *
 	 * @param {object} tmpfn - contains `definition`, `name`, `language`, `parameters`
 	 * @param {Numbas.jme.Scope} scope
+	 * @param {object} withEnv - dictionary of local variables for javascript functions
 	 * @returns {object} - contains `outcons`, `intype`, `evaluate`
 	 */
-	makeFunction: function(tmpfn,scope) {
+	makeFunction: function(tmpfn,scope,withEnv) {
 		var intype = [],
 			paramNames = [];
 
@@ -120,7 +126,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 				fn.evaluate = jme.variables.makeJMEFunction(fn,scope);
 				break;
 			case 'javascript':
-				fn.evaluate = jme.variables.makeJavascriptFunction(fn,scope);
+				fn.evaluate = jme.variables.makeJavascriptFunction(fn,withEnv);
 				break;
 			}
 		} catch(e) {
@@ -132,17 +138,18 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	/** Make up custom functions
 	 * @param {object[]} tmpFunctions
 	 * @param {Numbas.jme.Scope} scope
+	 * @param {object} withEnv - dictionary of local variables for javascript functions
 	 * @returns {object[]}
 	 * @see Numbas.jme.variables.makeFunction
 	 */
-	makeFunctions: function(tmpFunctions,scope)
+	makeFunctions: function(tmpFunctions,scope,withEnv)
 	{
 		scope = new jme.Scope(scope);
 		var functions = scope.functions;
 		var tmpFunctions2 = [];
 		for(var i=0;i<tmpFunctions.length;i++)
 		{
-			var cfn = jme.variables.makeFunction(tmpFunctions[i],scope);
+			var cfn = jme.variables.makeFunction(tmpFunctions[i],scope,withEnv);
 
 			if(functions[cfn.name]===undefined)
 				functions[cfn.name] = [];
