@@ -68,8 +68,18 @@ def custom_script_order(question):
 		'mark': 'instead',
 		'validate': 'instead',
 	}
+
+	def fix_part(part):
+		if 'scripts' in part:
+			for name,script in part['scripts'].items():
+				part['scripts'][name] = {'order': default_orders[name],'script':script}
+
 	if 'parts' in question:
 		for part in question['parts']:
-			if 'scripts' in part:
-				for name,script in part['scripts'].items():
-					part['scripts'][name] = {'order': default_orders[name],'script':script}
+			fix_part(part)
+			if 'steps' in part:
+				for step in part['steps']:
+					fix_part(step)
+			if 'gaps' in part:
+				for gap in part['gaps']:
+					fix_part(gap)
