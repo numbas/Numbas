@@ -169,7 +169,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		},
 		'boolean': function(a,b) {
 			return a.value==b.value;
-		},
+		}
 	},
 
 
