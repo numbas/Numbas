@@ -579,7 +579,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 */
 	product: function(lists) {
 		var indexes = lists.map(function(){return 0});
-		var lengths = lists.map(function(l){return l.length});
+		var zero = false;
+		var lengths = lists.map(function(l){
+			if(l.length==0) {
+				zero = true;
+			}
+			return l.length
+		});
+		if(zero) {
+			return [];
+		}
 		var end = lists.length-1;
 
 		var out = [];
