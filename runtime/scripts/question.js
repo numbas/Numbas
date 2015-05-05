@@ -1331,11 +1331,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			return;
 		}
 
-		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'');
+		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'').toLowerCase();
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ )
 		{
-			if(noSpaceAnswer.contains(this.settings.notAllowed[i])) { this.failNotAllowed = true; }
+			if(noSpaceAnswer.contains(this.settings.notAllowed[i].toLowerCase())) { this.failNotAllowed = true; }
 		}
 
 		if(!this.failNotAllowed)
@@ -1343,7 +1343,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ )
 			{
-				if(!noSpaceAnswer.contains(this.settings.mustHave[i])) { this.failMustHave = true; }
+				if(!noSpaceAnswer.contains(this.settings.mustHave[i].toLowerCase())) { this.failMustHave = true; }
 			}
 		}
 
