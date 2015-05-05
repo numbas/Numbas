@@ -850,7 +850,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 		if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {	// in cases like 2070, which could be to either 3 or 4 sig figs
 			var trailingZeroes = n.match(/0*$/)[0].length;
-			if(sigFigs + trailingZeroes >= precision) {
+			if(digits + trailingZeroes >= precision) {
 				precisionOK = true;
 			}
 		}
