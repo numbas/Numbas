@@ -1460,7 +1460,7 @@ var synonyms = jme.synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter'];
 
 var rightAssociative = {
 	'^': true,
@@ -2370,12 +2370,39 @@ newBuiltin('map',['?',TList,'?'],TList,null, {
 		for(var i=0;i<list.length;i++)
 		{
 			names.map(function(name,j) {
-				console.log(name,list[i].value[j]);
 				scope.variables[name] = list[i].value[j];
 			});
 			scope.variables[name] = list[i];
 			value[i] = jme.evaluate(args[0],scope);
 		}
+		return new TList(value);
+	}
+});
+
+newBuiltin('filter',['?',TName,'?'],TList,null, {
+	evaluate: function(args,scope) {
+		var lambda = args[0];
+
+		var list = jme.evaluate(args[2],scope);
+		switch(list.type) {
+		case 'list':
+			list = list.value;
+			break;
+		case 'range':
+			list = list.value.slice(3);
+			for(var i=0;i<list.length;i++) {
+				list[i] = new TNum(list[i]);
+			}
+			break;
+		default:
+			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+		}
+		scope = new Scope(scope);
+		var name = args[1].tok.name;
+		var value = list.filter(function(v) {
+			scope.variables[name] = v;
+			return jme.evaluate(lambda,scope).value;
+		});
 		return new TList(value);
 	}
 });
