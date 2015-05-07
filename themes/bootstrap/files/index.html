@@ -120,35 +120,11 @@ Copyright 2011-14 Newcastle University
 		</nav>
 
 		<div class="navbar navbar-default navbar-fixed-top hidden-lg">
-			<div class="container">
-				<button type="button" class="navbar-toggle navbar-left" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span> 	
-					<span class="icon-bar"></span>
-				</button>
-
-				<div class="navbar-header logo">
-					<img src="resources/numbas-logo.gif"/>
-				</div>
-
-				<div class="navbar-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name">Exam name</div>
-
-				<ul class="nav navbar-nav navbar-right hidden-sm hidden-md hidden-lg">
-
-					<li>
-						<button class="btn navbar-btn navbar-left" id="prevBtn" data-localise="control.previous" data-bind="attr: {disabled: !canReverse()}, click: Numbas.controls.previousQuestion"></button>
-					</li>
-					<li>
-					<div class="titleBits navbar-text" data-bind="with: currentQuestion">
-						<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
-						<span id="questionNameDisplay" data-bind="text: displayName"></span>
-					</div>
-					</li>
-					<li>
-						<button class="btn navbar-btn navbar-right" id="nextBtn" data-localise="control.next" data-bind="attr: {disabled: !canAdvance()}, click: Numbas.controls.nextQuestion"></button>
-					</li>
-				</ul>
-			</div>
+			<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span> 	
+				<span class="icon-bar"></span>
+			</button>
 		</div>
 
 		<!-- main content area - info pages or questions go in here -->
@@ -278,7 +254,7 @@ Copyright 2011-14 Newcastle University
 			</div>
 
 
-			<div id="questionContainer" class="container" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
+			<div id="questionContainer" class="container-fluid" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
 				<!-- top navigation bar - prv/nxt, and question name -->
 
 				<div class="contentArea">

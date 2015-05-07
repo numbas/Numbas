@@ -70,12 +70,19 @@ iframe {
 #everything {
 	padding-left: 300px;
 }
+
+#questionContainer {
+	margin-left: 0;
+}
 @media screen and (max-width: 1200px) {
 	.mainDisplay {
 		padding-top: 95px;
 	}
 	#everything {
 		padding-left: 0;
+	}
+	#questionContainer {
+		margin-left: auto;
 	}
 }
 
@@ -94,8 +101,4 @@ iframe {
 
 .navmenu-default .navmenu-nav > li > a.fake-link, .navmenu-default .navmenu-nav > li > a.fake-link:hover {
 	color: inherit;
-}
-
-#questionContainer {
-	margin-left: 0;
 }
