@@ -112,14 +112,14 @@ Copyright 2011-14 Newcastle University
 				<li id="stopWatch" data-bind="visible: displayTime, text: displayTime"></li>
 
 				<div class="menuButtons">
-					<li><button class="btn navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-					<li><button class="btn navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
-					<li><button class="btn navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
+					<li><button class="btn btn-primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
+					<li><button class="btn btn-primary navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
+					<li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
 				</div>
 			</ul>
 		</nav>
 
-		<div class="navbar navbar-default navbar-fixed-top hidden-lg">
+		<div class="hamburger navbar navbar-default navbar-fixed-top hidden-lg">
 			<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span> 	
@@ -154,13 +154,13 @@ Copyright 2011-14 Newcastle University
 						</tr>
 					</table>
 					<div class="startBtn">
-						<button class="btn" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
+						<button class="btn btn-primary" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
 					</div>
 				</div>
 				<div id="suspend" data-bind="visible: infoPage()=='suspend', if: infoPage()=='suspend'">
 					<p data-localise="suspend.exam suspended"></p>
 					<p data-localise="suspend.you can resume"></p>
-					<button class="btn" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam" data-localise="suspend.resume"></button>
+					<button class="btn btn-primary" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam" data-localise="suspend.resume"></button>
 				</div>
 				<div id="results" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
 					<h3 data-localise="result.exam summary"></h3>
@@ -244,8 +244,8 @@ Copyright 2011-14 Newcastle University
 					</table>
 							
 					<div class="resultBtns">
-						<div><button class="btn" data-bind="click: function(){ window.print(); }" data-localise="result.print"></button></div>
-						<div><button class="btn" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button></div>
+						<div><button class="btn btn-primary" data-bind="click: function(){ window.print(); }" data-localise="result.print"></button></div>
+						<div><button class="btn btn-primary" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button></div>
 					</div>
 				</div>
 				<div id="exit" data-bind="visible: infoPage()=='exit', if: infoPage()=='exit'">
@@ -263,13 +263,13 @@ Copyright 2011-14 Newcastle University
 					<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 					<div class="navbar navbar-default">
 						<div class="container" data-bind="with: currentQuestion">
-									<button class="btn navbar-btn navbar-left" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
+									<button class="btn btn-primary navbar-btn navbar-left" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.parts.length, click: Numbas.controls.submitQuestion, disable: revealed, text: submitMessage"></button>
 									<p class="marks navbar-text">
 										<span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
 										<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
 									</p>
-									<button class="btn navbar-btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
-									<button class="btn navbar-btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
+									<button class="btn btn-primary navbar-btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
+									<button class="btn btn-primary navbar-btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
 						</div>
 					</div>
 				</div>

@@ -106,13 +106,13 @@ Copyright 2011-13 Newcastle University
 		<xsl:apply-templates select="." mode="correctanswer"/>
 		<xsl:if test="not(ancestor::gaps)">
 			<br/>
-			<div class="partFeedback well pull-right" data-bind="visible: marks()>0">
-				<button class="btn submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
+			<div class="partFeedback pull-right" data-bind="visible: marks()>0">
+				<button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
 				<div class="marks" data-bind="pulse: scoreFeedback.update">
 					<span class="score" data-bind="html: scoreFeedback.message"></span>
 					<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 				</div>
-				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
+				<button class="btn btn-primary" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 			</div>
 			<ol class="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
 				<li class="feedbackMessage" data-bind="latex: $data"></li>
@@ -127,8 +127,8 @@ Copyright 2011-13 Newcastle University
 		<xsl:apply-templates select="part"/>
 	</div>
 	<div class="stepsBtn">
-		<button class="btn" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
-		<button class="btn" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
+		<button class="btn btn-primary" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
+		<button class="btn btn-primary" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
 		<span class="penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
 	</div>
 </xsl:template>

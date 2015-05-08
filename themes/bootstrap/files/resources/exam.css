@@ -67,17 +67,21 @@ iframe {
 	display: block;
 }
 
+.hamburger {
+	background: none;
+	border: none;
+}
+
 #everything {
 	padding-left: 300px;
+	overflow-x: hidden;
 }
 
 #questionContainer {
 	margin-left: 0;
+	max-width: 1170px;
 }
 @media screen and (max-width: 1200px) {
-	.mainDisplay {
-		padding-top: 95px;
-	}
 	#everything {
 		padding-left: 0;
 	}
@@ -102,3 +106,480 @@ iframe {
 .navmenu-default .navmenu-nav > li > a.fake-link, .navmenu-default .navmenu-nav > li > a.fake-link:hover {
 	color: inherit;
 }
+
+.type-jme .preview, .type-numberentry .preview {
+	background-color: #eee;
+	padding: 0.2em;
+	font-family: serif;
+	display: inline-block;
+	font-size: 120%;
+	margin-left: 0.2em;
+}
+
+.matrix-input {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 100%;
+	overflow-x: auto;
+}
+.matrix-input table.matrix {
+    width: auto;
+    display: inline-block;
+    margin: 0.5em 0;
+}
+.matrix-input .matrix td {
+	text-align: center;
+}
+.matrix-input .matrix-wrapper .left-bracket, .matrix-input .matrix-wrapper .matrix, .matrix-input .matrix-wrapper .right-bracket {
+	display: table-cell;
+}
+.matrix-input .left-bracket, .matrix-input .right-bracket {
+	border-radius: 50%;
+	width: 10px;
+}
+.matrix-input .left-bracket {
+	border-left: 2px solid;
+}
+.matrix-input .right-bracket {
+	border-right: 2px solid;
+}
+
+.matrix-input .matrix-size {
+    background: #a2d1f0;
+    padding: 0.2em;
+    margin-bottom: 0.2em;
+    border: 1px solid #999;
+}
+
+#saving {
+    width: 100%;
+    position: fixed;
+    height: 100%;
+    text-align: center;
+    background: rgba(200,200,200,0.7);
+    z-index: 1;
+}
+#saving .text {
+    background: white;
+    padding: 1em;
+    display: inline-block;
+    border-radius: 5px;
+    margin-top: 1em;
+}
+
+.copyright-footer {
+    margin-top: 5em;
+    text-align: center;
+    font-size: small;
+    color: #aaa;
+}
+.copyright-footer a {
+	color: #333;
+}
+
+.mainDisplay {
+	margin: 0 0;
+	overflow-x: hidden;
+}
+
+.marks {
+	display: inline;
+	vertical-align: middle;
+}
+.marks .score {
+	padding-right: 0.5em;
+}
+
+.feedback-icon {
+	font-size: 1.2em;
+	display: inline-block;
+	-webkit-text-stroke: 1px #222;
+}
+.feedback-icon.icon-ok {
+	color: lime;
+}
+.feedback-icon.partial {
+	color: lightslategrey;
+}
+.feedback-icon.icon-remove {
+	color: red;
+}
+.feedback-icon.none {
+	display: none;
+}
+.student-answer .feedback-icon {
+    margin-left: 0.2em;
+}
+
+.questionSelector .feedback-icon {
+	float: right;
+	padding: 0;
+	font-size: 1.5em;
+}
+
+.questionSelector .marks {
+	float: right;
+}
+
+.questionSelector .dirty-message {
+    text-align: right;
+}
+.questionSelector .dirty-message .warning-icon {
+	font-size: 18px;
+	margin: 0 0 0 0.3em;
+}
+
+.questionList {
+	max-height: 20em;
+}
+
+.questionSelector .score {
+	float: right;
+}
+
+.examScore {
+	font-weight: bold;
+	font-size: 1.2em;
+	text-align: center;
+}
+
+/* front/exit pages */
+
+#infoDisplay table td.rtd {
+	text-align: right;
+}
+#infoDisplay table td.qtd {
+	text-align: center;
+}
+
+/* results page */
+
+.resultBtns div {
+	margin-top: 2em;
+}
+
+.resultrow td {
+	font-weight: bold;
+	font-size: 1.3em;
+}
+
+/* question bits */
+
+.content-area ul > li, .content-area ol > li {
+	margin-bottom: 0.3em;
+}
+
+.statement {
+	margin: 1em 0;
+	padding-left: 1em;
+	background: #cfc;
+}
+.part {
+	margin: .5em 0;
+}
+
+div.part {
+	margin-left: 1em;
+}
+
+.part.type-gapfill > .prompt .part {
+	display: inline-block;
+}
+
+.partheader {
+	clear: both;
+}
+
+.correct-answer {
+	vertical-align: bottom;
+	margin-left: 1em;
+	border: 1px dashed #999;
+	padding: 0.4em;
+	display: inline-block;
+	max-width: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.correct-answer .feedback-icon {
+	margin-left: 0.2em;
+}
+
+.steps {
+	border: 1px solid;
+	padding: 0.5em 0.5em;
+}
+
+.steps .prompt {
+	display: inline-block;
+	padding-right: 1em;
+}
+
+.steps {
+	margin-bottom: 1em;
+	margin-left: 0;
+}
+
+.stepsBtn .penaltyMessage {
+	font-style: italic;
+}
+
+.multiplechoice li {
+	list-style: none;
+	padding-right: 2em;
+	line-height: 1.5em;
+	float: left;
+}
+
+.multiplechoice li.start-column {
+	clear: both;
+}
+
+.multiplechoice p {
+	display: inline;
+}
+
+.multiplechoice .choice {
+	margin-right: 0.3em;
+}
+
+.part.type-m_n_x form, .part.type-1_n_2 form, .part.type-m_n_2 form {
+	display: inline-block;
+}
+
+.part.type-m_n_x .choices-grid {
+	margin-left: 1em;
+	width: auto;
+}
+
+.part.type-m_n_x table.choices-grid td.option {
+	text-align: center;
+}
+
+.part.type-m_n_x .choices-grid th {
+	background: inherit;
+	font-weight: normal;
+	text-align: center;
+}
+.part.type-m_n_x .choices-grid .choice {
+	text-align: left;
+	max-width: 40em;
+}
+
+.warning-icon {
+	margin: 0 0.2em;
+	color: red;
+}
+
+.warnings {
+	color: red;
+	font-size: 1em;
+	position: absolute;
+	background-color: #ddd;
+	z-index: 1;
+	padding: 0.2em;
+	max-width: 20em;
+	display: inline-block;
+	list-style-type: none;
+}
+.warning {
+	margin: 0.1em;
+	display: block;
+}
+
+.part .partFeedback {
+	background: #A2D1F0;
+	border: 1px solid #999999;
+	padding: 0.2em 0.2em 0.2em 0.1em;
+	float: right;
+	text-align: center;
+}
+
+.part .submitPart {
+	display: block;
+	margin: 0 auto 0.3em auto;
+}
+
+.feedbackToggle {
+	width: 9em;
+}
+
+.part .marks {
+	font-weight: bold;
+	margin: 0 0.3em;
+}
+
+.question td, .adviceDisplay td {
+	text-align: right;
+}
+
+.question td, .question th, .adviceDisplay td, .adviceDisplay th {
+	padding: 4px 10px 4px 5px;
+}
+
+input[type=text], input[type=number] {
+	width: 60px;
+	text-align: center;
+}
+
+.monospace {
+	font-family: monospace;
+	font-size: 130%;
+	background: #f5f5f5;
+	padding: 0em 0.2em;
+}
+
+.print-only {
+	display: none;
+}
+
+@media print {
+	.print-only {
+		display: inherit;
+	}
+
+	.question {
+		overflow-y: hidden;	/* Fixes the fact that Chrome draws a scrollbar in questions, for some reason */
+	}
+
+	.penaltyMessage {
+		display: none;
+	}
+
+	table {
+		page-break-inside: avoid;
+	}
+
+	#questionContainer.invisible {
+		position: inherit !important;
+	}
+
+	#questionContainer, .colwrap, .col1wrap {
+		float: none !important;
+	}
+
+	.question.invisible {
+		position: inherit !important;
+		left: inherit;
+		top: inherit;
+	}
+
+	.partFeedback {
+		display: none;
+	}
+
+	input[type="text"], input[type="number"] {
+		border: none;
+		border-bottom: 1px solid;
+	}
+	button {
+		display: none;
+	}
+}
+
+/* Try to allow scrolling for statement or prompt elements that are too wide */
+@media screen {
+	.content-area > span > p, .content-area > span > div {
+		overflow-x: auto;
+		overflow-y: hidden;
+	}
+}
+
+
+/*
+------------------------------
+	Impromptu
+------------------------------
+*/
+div.jqi .jqititle{
+	padding: 5px 10px;
+	font-size: 16px; 
+	line-height: 20px; 
+	border-bottom: solid 1px #eeeeee;
+}
+
+.jqi .jqiarrow{ position: absolute; height: 0; width:0; line-height: 0; font-size: 0; border: solid 10px transparent;}
+
+.jqi .jqiarrowtl{ left: 10px; top: -20px; border-bottom-color: #ffffff; }
+.jqi .jqiarrowtc{ left: 50%; top: -20px; border-bottom-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowtr{ right: 10px; top: -20px; border-bottom-color: #ffffff; }
+
+.jqi .jqiarrowbl{ left: 10px; bottom: -20px; border-top-color: #ffffff; }
+.jqi .jqiarrowbc{ left: 50%; bottom: -20px; border-top-color: #ffffff; margin-left: -10px; }
+.jqi .jqiarrowbr{ right: 10px; bottom: -20px; border-top-color: #ffffff; }
+
+.jqi .jqiarrowlt{ left: -20px; top: 10px; border-right-color: #ffffff; }
+.jqi .jqiarrowlm{ left: -20px; top: 50%; border-right-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowlb{ left: -20px; bottom: 10px; border-right-color: #ffffff; }
+
+.jqi .jqiarrowrt{ right: -20px; top: 10px; border-left-color: #ffffff; }
+.jqi .jqiarrowrm{ right: -20px; top: 50%; border-left-color: #ffffff; margin-top: -10px; }
+.jqi .jqiarrowrb{ right: -20px; bottom: 10px; border-left-color: #ffffff; }
+
+/* jquery.impromptu dialog boxes */
+
+.jqifade{
+	position: absolute;
+	background-color: #aaaaaa;
+}
+@media (min-width: 981px) {
+	div.jqi {
+		max-width: 40%;
+	}
+}
+div.jqi{
+	min-width: 10%;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	position: absolute;
+	background-color: #ffffff;
+	font-size: 11px;
+	text-align: left;
+	border: solid 1px #eeeeee;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	padding: 7px;
+}
+div.jqi .jqicontainer{
+	/*font-weight: bold;*/
+}
+div.jqi .jqiclose{
+	position: absolute;
+	top: 4px; right: -2px;
+	width: 18px;
+	cursor: default;
+	color: #bbbbbb;
+	font-weight: bold;
+}
+div.jqi .jqimessage{
+	padding: 10px;
+	line-height: 20px;
+	color: #444444;
+	font-weight: normal;
+	font-size: 150%;
+}
+div.jqi .jqibuttons{
+	text-align: right;
+	padding: 5px 0 5px 0;
+	border: solid 1px #eeeeee;
+	background-color: #f4f4f4;
+}
+div.jqi button{
+	padding: 3px 10px;
+	margin: 0 10px;
+	background-color: #2F6073;
+	border: solid 1px #f4f4f4;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 12px;
+}
+div.jqi button:hover{
+	background-color: #728A8C;
+}
+div.jqi button.jqidefaultbutton{
+	background-color: #BF5E26;
+}
+.jqiwarning .jqi .jqibuttons{
+	background-color: #BF5E26;
+}
+
