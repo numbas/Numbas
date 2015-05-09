@@ -571,6 +571,18 @@ display.ExamDisplay = function(e)
 	 */
 	this.currentQuestion = ko.observable(null);
 
+	/** What kind of view are we in at the moment? 'infopage' or 'question'
+	 * @member {observable|string} viewType
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	this.viewType = ko.computed(function() {
+		if(this.infoPage()) {
+			return 'infopage';
+		} else if(this.currentQuestion()) {
+			return 'question';
+		}
+	},this);
+
 	/** The number of the current question
 	 * @member {observable|number} currentQuestionNumber 
 	 * @memberof Numbas.display.ExamDisplay
@@ -703,7 +715,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 	/** Update the timer */
 	showTiming: function()
 	{
-		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
+		this.displayTime(Numbas.timing.secsToDisplayTime(this.exam.timeRemaining));
 		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
 	},
 

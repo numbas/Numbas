@@ -36,7 +36,8 @@ R.registerLocale('en-GB',{
 	'exam.review header': "Review: ",
 	'frontpage.start': "Start",
 
-	'suspend.exam suspended': "The Exam has been suspended. Press Resume to continue.",
+	'suspend.paused header': "Paused",
+	'suspend.exam suspended': "The Exam has been suspended. Press <em>Resume</em> to continue.",
 	'suspend.you can resume': "You will be able to resume this session the next time you start this activity.",
 	'suspend.resume': "Resume",
 
@@ -251,7 +252,7 @@ R.registerLocale('en-GB',{
 	'question.selector.unsubmitted changes': "Unsubmitted changes.",
 	
 	'timing.no accumulator': "no timing accumulator %s",
-	'timing.time remaining': "Time remaining: %s",
+	'timing.time remaining': "Time remaining:",
 	
 	'xml.could not load': "Couldn't load an XML document: %s",
 	'xml.property not number': "Property %s should be a number, but isn't (%s), in node %s",

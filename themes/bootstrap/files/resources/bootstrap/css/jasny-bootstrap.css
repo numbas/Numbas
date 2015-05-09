@@ -17,22 +17,22 @@
   display: inline-block;
   padding: 6px 12px;
   left: -12px;
-  border-radius: 3px 0 0 3px;
+  border-radius: 2px 0 0 2px;
 }
 .btn-label.btn-label-right {
   left: auto;
   right: -12px;
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 2px 2px 0;
 }
 .btn-lg .btn-label {
   padding: 10px 16px;
   left: -16px;
-  border-radius: 5px 0 0 5px;
+  border-radius: 2px 0 0 2px;
 }
 .btn-lg .btn-label.btn-label-right {
   left: auto;
   right: -16px;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 2px 2px 0;
 }
 .btn-sm .btn-label {
   padding: 5px 10px;
@@ -63,7 +63,7 @@
   margin-top: -1px;
 }
 .nav-tabs-bottom > li > a {
-  border-radius: 0 0 4px 4px;
+  border-radius: 0 0 3px 3px;
 }
 .nav-tabs-bottom > li > a:hover,
 .nav-tabs-bottom > li > a:focus,
@@ -83,7 +83,7 @@
   float: none;
 }
 .nav-tabs-left > li > a {
-  border-radius: 4px 0 0 4px;
+  border-radius: 3px 0 0 3px;
   margin-right: 0;
   margin-bottom: 2px;
 }
@@ -115,7 +115,7 @@
   float: none;
 }
 .nav-tabs-right > li > a {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 3px 3px 0;
   margin-left: 0;
   margin-bottom: 2px;
 }
@@ -137,7 +137,7 @@
   height: auto;
   border-width: 1px;
   border-style: solid;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 .navmenu-fixed-left,
 .navmenu-fixed-right,
@@ -162,7 +162,7 @@
   border-width: 0 0 0 1px;
 }
 .navmenu-nav {
-  margin-bottom: 11px;
+  margin-bottom: 12.5px;
 }
 .navmenu-nav.dropdown-menu {
   position: static;
@@ -202,10 +202,10 @@
 }
 .navmenu-brand {
   display: block;
-  font-size: 20px;
-  line-height: 22px;
+  font-size: 23px;
+  line-height: 25px;
   padding: 10px 15px;
-  margin: 11px 0;
+  margin: 12.5px 0;
 }
 .navmenu-brand:hover,
 .navmenu-brand:focus {
@@ -244,7 +244,7 @@
 .navbar-default .navbar-offcanvas .navmenu-nav > .open > a:hover,
 .navmenu-default .navmenu-nav > .open > a:focus,
 .navbar-default .navbar-offcanvas .navmenu-nav > .open > a:focus {
-  background-color: #94b4f7;
+  background-color: #85c3eb;
   color: #333333;
 }
 .navmenu-default .navmenu-nav > .open > a .caret,
@@ -263,7 +263,7 @@
 }
 .navmenu-default .navmenu-nav.dropdown-menu,
 .navbar-default .navbar-offcanvas .navmenu-nav.dropdown-menu {
-  background-color: #94b4f7;
+  background-color: #85c3eb;
 }
 .navmenu-default .navmenu-nav.dropdown-menu > .divider,
 .navbar-default .navbar-offcanvas .navmenu-nav.dropdown-menu > .divider {
@@ -275,7 +275,7 @@
 .navbar-default .navbar-offcanvas .navmenu-nav.dropdown-menu > .active > a:hover,
 .navmenu-default .navmenu-nav.dropdown-menu > .active > a:focus,
 .navbar-default .navbar-offcanvas .navmenu-nav.dropdown-menu > .active > a:focus {
-  background-color: #759ef5;
+  background-color: #69b5e7;
 }
 .navmenu-default .navmenu-nav > li > a,
 .navbar-default .navbar-offcanvas .navmenu-nav > li > a {
@@ -295,7 +295,7 @@
 .navmenu-default .navmenu-nav > .active > a:focus,
 .navbar-default .navbar-offcanvas .navmenu-nav > .active > a:focus {
   color: #333333;
-  background-color: #94b4f7;
+  background-color: #85c3eb;
 }
 .navmenu-default .navmenu-nav > .disabled > a,
 .navbar-default .navbar-offcanvas .navmenu-nav > .disabled > a,
@@ -424,8 +424,8 @@
 }
 @media (min-width: 992px) {
   .alert-fixed-top {
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
     border-width: 0 1px 1px 1px;
   }
 }
@@ -435,8 +435,8 @@
 }
 @media (min-width: 992px) {
   .alert-fixed-bottom {
-    border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
     border-width: 1px 1px 0 1px;
   }
 }
@@ -578,7 +578,7 @@
 }
 .fileinput-new.input-group .btn-file,
 .fileinput-new .input-group .btn-file {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 3px 3px 0;
 }
 .fileinput-new.input-group .btn-file.btn-xs,
 .fileinput-new .input-group .btn-file.btn-xs,
@@ -588,7 +588,7 @@
 }
 .fileinput-new.input-group .btn-file.btn-lg,
 .fileinput-new .input-group .btn-file.btn-lg {
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 3px 3px 0;
 }
 .form-group.has-warning .fileinput .fileinput-preview {
   color: #8a6d3b;

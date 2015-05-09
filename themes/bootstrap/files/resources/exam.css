@@ -32,8 +32,17 @@ o\:* { behavior: url(#default#VML); }
     top: -20000px;
 }
 
-th, td {
+#everything th, #everything td {
 	background-color: white;
+	padding: 0.1em, 0.5em;
+}
+#everything thead th {
+	background-color: #a2d1f0;
+	text-align: center;
+}
+
+ul, ol {
+	padding-left: 0;
 }
 
 iframe {
@@ -41,8 +50,11 @@ iframe {
 	max-width: 100%;
 }
 
-
 /*main template */
+
+#loading .progress-bar {
+	min-width: 8em;
+}
 
 #die {
 	display: none;
@@ -72,13 +84,22 @@ iframe {
 }
 
 #everything {
-	padding-left: 300px;
 	overflow-x: hidden;
 }
 
-#questionContainer, .copyright-footer {
-	margin-left: 0;
-	max-width: 1170px;
+.question-nav {
+	display: none;
+}
+
+@media screen {
+	.show-nav .question-nav {
+		display: inherit;
+	}
+
+	.show-nav #questionContainer, .show-nav .copyright-footer {
+		margin-left: 300px;
+		max-width: 1170px;
+	}
 }
 
 @media screen and (max-width: 1200px) {
@@ -98,14 +119,6 @@ iframe {
 	position: absolute;
 	height: 100%;
 	back
-}
-
-.questionSelector .marks {
-	text-align: right;
-}
-
-.navmenu-default .navmenu-nav > li > a.fake-link, .navmenu-default .navmenu-nav > li > a.fake-link:hover {
-	color: inherit;
 }
 
 .navbar.question-nav .nav {
@@ -178,6 +191,7 @@ iframe {
 
 .copyright-footer {
     margin-top: 5em;
+	margin-bottom: 1em;
     text-align: center;
     font-size: small;
     color: #aaa;
@@ -223,6 +237,10 @@ iframe {
     margin-left: 0.2em;
 }
 
+.exam-name {
+	font-weight: bold;
+}
+
 .questionSelector .feedback-icon {
 	float: right;
 	padding: 0;
@@ -241,27 +259,60 @@ iframe {
 	margin: 0 0 0 0.3em;
 }
 
-.questionList {
-	max-height: 20em;
-}
-
 .questionSelector .score {
 	float: right;
+}
+
+.questionList {
+	max-height: 20em;
+	padding-top: 1em;
 }
 
 .examScore {
 	font-weight: bold;
 	font-size: 1.2em;
-	text-align: center;
+}
+.examScore .text {
+	float: left;
+}
+.examScore .score {
+	float: right;
+}
+.fake-nav-link > a:hover {
+	background: inherit !important;
+}
+
+.menuButtons {
+	margin-top: 1em;
+}
+.menuButtons button {
+	min-width: 6em;
 }
 
 /* front/exit pages */
 
-#infoDisplay table td.rtd {
+#infoDisplay table .rtd {
 	text-align: right;
 }
-#infoDisplay table td.qtd {
+#infoDisplay table .qtd {
 	text-align: center;
+}
+#frontpage table {
+	font-size: 1.3em;
+}
+#startBtn {
+	font-size: 1.5em;
+}
+#frontpage td {
+	padding-left: 5em;
+}
+
+#infoDisplay .info-buttons {
+	margin-top: 1em;
+	text-align: center;
+}
+#infoDisplay .info-buttons .btn {
+	margin-bottom: 0.5em;
 }
 
 /* results page */
@@ -270,12 +321,19 @@ iframe {
 	margin-top: 2em;
 }
 
-.resultrow td {
+.resultrow td, .resultrow th {
 	font-weight: bold;
 	font-size: 1.3em;
 }
 
 /* question bits */
+
+table {
+	width: auto;
+	margin-left: auto;
+	margin-right: auto;
+}
+}
 
 .content-area ul > li, .content-area ol > li {
 	margin-bottom: 0.3em;
@@ -290,7 +348,7 @@ iframe {
 	margin: .5em 0;
 }
 
-div.part {
+.question .parts {
 	margin-left: 1em;
 }
 
@@ -318,7 +376,6 @@ div.part {
 }
 
 .steps {
-	border: 1px solid;
 	padding: 0.5em 0.5em;
 }
 
@@ -334,6 +391,7 @@ div.part {
 
 .stepsBtn .penaltyMessage {
 	font-style: italic;
+	margin-left: 0.5em;
 }
 
 .multiplechoice li {
@@ -407,6 +465,14 @@ div.part {
 	text-align: center;
 }
 
+.part .feedbackMessages {
+	clear: both;
+	text-align: center;
+	max-height: 20em;
+	overflow-y: auto;
+	list-style-type: none;
+}
+
 .part .submitPart {
 	display: block;
 	margin: 0 auto 0.3em auto;
@@ -464,14 +530,16 @@ input[type=text], input[type=number] {
 
 	#questionContainer.invisible {
 		position: inherit !important;
+		visibility: inherit !important;
 	}
 
-	#questionContainer, .colwrap, .col1wrap {
+	#questionContainer {
 		float: none !important;
 	}
 
 	.question.invisible {
 		position: inherit !important;
+		visibility: inherit !important;
 		left: inherit;
 		top: inherit;
 	}
