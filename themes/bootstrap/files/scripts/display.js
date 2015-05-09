@@ -412,7 +412,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	showLoadProgress: function()
 	{
 		var p= 100 * Numbas.schedule.completed / Numbas.schedule.total;
-		$('#progressbar #completed').width(p+'%');
+		$('#loading .progress-bar').width(p+'%');
 	},
 
 	/** Initialise the display. Called as soon as the page loads.
@@ -2102,6 +2102,8 @@ function showScoreFeedback(obj,settings)
 				return 'icon-ok';
 			case 'partial':
 				return 'icon-ok partial';
+			default:
+				return 'invisible';
 			}
 		}),
 		iconAttr: ko.computed(function() {

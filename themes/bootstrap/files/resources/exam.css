@@ -67,9 +67,8 @@ iframe {
 	display: block;
 }
 
-.hamburger {
-	background: none;
-	border: none;
+.hamburger .navbar-toggle {
+	background: #f5f5f5;
 }
 
 #everything {
@@ -77,13 +76,15 @@ iframe {
 	overflow-x: hidden;
 }
 
-#questionContainer {
+#questionContainer, .copyright-footer {
 	margin-left: 0;
 	max-width: 1170px;
 }
+
 @media screen and (max-width: 1200px) {
 	#everything {
 		padding-left: 0;
+		margin-top: 51px;
 	}
 	#questionContainer {
 		margin-left: auto;
@@ -105,6 +106,14 @@ iframe {
 
 .navmenu-default .navmenu-nav > li > a.fake-link, .navmenu-default .navmenu-nav > li > a.fake-link:hover {
 	color: inherit;
+}
+
+.navbar.question-nav .nav {
+	float: none;
+	text-align: center;
+}
+.navbar.question-nav .nav > .navbar-text {
+	float: none;
 }
 
 .type-jme .preview, .type-numberentry .preview {
@@ -187,7 +196,10 @@ iframe {
 	vertical-align: middle;
 }
 .marks .score {
-	padding-right: 0.5em;
+	font-weight: bold;
+}
+.marks .feedback-icon {
+	padding-left: 0.5em;
 }
 
 .feedback-icon {
