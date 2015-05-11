@@ -425,6 +425,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 		$('#loading').hide();
 		$('#everything').show();
 
+		// hide the side nav when you click a question selector
+		$('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
+			$('#navMenu').offcanvas('hide');
+		});
+
 		ko.applyBindings(Numbas.exam.display);
 		for(var i=0;i<Numbas.exam.questionList.length;i++) {
 			Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
@@ -697,7 +702,7 @@ display.ExamDisplay = function(e)
 		read: function() {
 			var t = _startTime();
 			if(t) {
-				return formatTime(_startTime());
+				return formatTime(new Date(t));
 			} else {
 				return '';
 			}
@@ -714,7 +719,12 @@ display.ExamDisplay = function(e)
 	var _endTime = ko.observable();
 	this.endTime = ko.computed({
 		read: function() {
-			return _endTime();
+			var t = _endTime();
+			if(t) {
+				return formatTime(new Date(t));
+			} else {
+				return '';
+			}
 		},
 		write: function(v) {
 			return _endTime(v);

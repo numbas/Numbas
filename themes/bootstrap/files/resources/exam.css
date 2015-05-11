@@ -34,7 +34,7 @@ o\:* { behavior: url(#default#VML); }
 
 #everything th, #everything td {
 	background-color: white;
-	padding: 0.1em, 0.5em;
+	padding: 2px 9px;
 }
 #everything thead th {
 	background-color: #a2d1f0;
@@ -328,6 +328,14 @@ input.jme {
 .resultrow td, .resultrow th {
 	font-weight: bold;
 	font-size: 1.3em;
+}
+
+#results table tbody th {
+	border-bottom: 2px solid #eee;
+}
+
+#results table tbody td {
+	border-bottom: 2px solid #ddd;
 }
 
 #question-breakdown .question:hover td {

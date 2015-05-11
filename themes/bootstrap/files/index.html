@@ -52,7 +52,7 @@ Copyright 2011-14 Newcastle University
 
 		<!-- CSS -->
 		<link rel="stylesheet" type="text/css" href="styles.css" />
-		<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
 	</head>
 	
 	<body>
@@ -89,7 +89,7 @@ Copyright 2011-14 Newcastle University
 
 					<ul id="questionList" class="nav navmenu-nav">
 						<!-- ko foreach: questions -->
-						<li id="questionSelector" class="questionSelector" data-bind="visible: visible, css: {active: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
+						<li class="questionSelector" data-bind="visible: visible, css: {active: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
 							<a href="#">
 								<span class="name" data-bind="text: displayName"></span>
 								<div class="marks">
@@ -173,7 +173,7 @@ Copyright 2011-14 Newcastle University
 					<h1 data-localise="result.exam summary"></h1>
 
 					<div class="row">
-					<table class="col-xs-6 col-xs-offset-3">
+					<table class="summary col-sm-6 col-sm-offset-3">
 						<tr>
 							<th data-localise="exam.exam name"></th>
 							<td class="rtd" data-bind="html: exam.settings.name"></td>
@@ -207,7 +207,7 @@ Copyright 2011-14 Newcastle University
 
 					<h3 data-localise="result.performance summary"></h3>
 					<div class="row">
-					<table class="col-xs-6 col-xs-offset-3">
+					<table class="summary col-sm-6 col-sm-offset-3">
 						<tr>
 							<th data-localise="result.exam start"></th>
 							<td class="rtd" data-bind="text: startTime"></td>	
@@ -240,7 +240,7 @@ Copyright 2011-14 Newcastle University
 					<h3 data-localise="result.detailed question breakdown"></h3>
 					<p data-localise="result.click a question to review"></p>
 					<div class="row">
-					<table id="question-breakdown" class="col-xs-4 col-xs-offset-4">		
+					<table id="question-breakdown" class="col-sm-4 col-sm-offset-4">		
 						<thead>
 							<th class="qtd" data-localise="result.question number"></th>
 							<th class="qtd" colspan="3" data-localise="result.question score"></th>
@@ -288,6 +288,7 @@ Copyright 2011-14 Newcastle University
 				</div>
 
 			</div>
+		</div>
 		</div>
 
 		<footer>

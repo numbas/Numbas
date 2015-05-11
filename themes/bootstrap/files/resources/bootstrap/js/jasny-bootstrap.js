@@ -109,7 +109,8 @@ if (typeof jQuery === 'undefined') { throw new Error('Jasny Bootstrap\'s JavaScr
     placement: 'auto',
     autohide: true,
     recalc: true,
-    disableScrolling: true
+    disableScrolling: true,
+	exclude: '.modal'
   }
 
   OffCanvas.prototype.offset = function () {

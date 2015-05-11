@@ -578,11 +578,11 @@ button:hover, button:focus {
 	padding-left: 5em;
 }
 
-#results table td {
+#results table.summary td {
 	border-bottom: 2px solid #eee;
 }
 
-#results table td:nth-child(n+2) {
+#results table.summary td:nth-child(n+2) {
 	border-bottom-color: #ddd;
 }
 

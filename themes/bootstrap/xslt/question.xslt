@@ -156,9 +156,9 @@ Copyright 2011-13 Newcastle University
 
 
 <xsl:template match="advice">
-	<div class="adviceContainer content-area" data-bind="visible: adviceDisplayed">
+	<div class="adviceContainer" data-bind="visible: adviceDisplayed">
 		<h3><localise>question.advice</localise></h3>
-		<span class="adviceDisplay">
+		<span class="adviceDisplay content-area">
 			<xsl:apply-templates />
 		</span>
 	</div>
