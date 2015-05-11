@@ -450,6 +450,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 		Numbas.exam.display.questions().map(function(q) {
 			q.init();
 		});
+
+		$('.modal button.ok').on('click',function() {
+			display.modal.ok();
+			display.modal.ok = display.modal.cancel = function() {};
+		})
+		$('.modal button.cancel').on('click',function() {
+			display.modal.cancel();
+			display.modal.ok = display.modal.cancel = function() {};
+		})
 	},
 
 	/** Does an input element currently have focus?
@@ -460,15 +469,23 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	//alert / confirm boxes
 	//
 
+	/** Callback functions for the modals
+	 * @type {object}
+	 */
+	modal: {
+		ok: function() {},
+		cancel: function() {}
+	},
+
 	/** Show an alert dialog
 	 * @param {string} msg - message to show the user
 	 * @param {function} fnOK - callback when OK is clicked
 	 */
 	showAlert: function(msg,fnOK) {
 		fnOK = fnOK || function() {};
-		$.prompt(msg,{overlayspeed: 'fast', close: function() {
-			fnOK();
-		}});
+		this.modal.ok = fnOK;
+		$('#alert-modal .modal-body').html(msg);
+		$('#alert-modal').modal('show');
 	},
 
 	/** Show a confirmation dialog box
@@ -477,12 +494,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	 * @param {function} fnCancel - callback if cancelled
 	 */
 	showConfirm: function(msg,fnOK,fnCancel) {
-		fnOK = fnOK || function(){};
-		fnCancel = fnCancel || function(){};
-
-		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},submit: function(e,val){
-				val ? fnOK() : fnCancel(); 
-		}});
+		this.modal.ok = fnOK || function(){};
+		this.modal.cancel = fnCancel || function(){};
+		$('#confirm-modal .modal-body').html(msg);
+		$('#confirm-modal').modal('show');
 	},
 
 	/** Make MathJax typeset any maths in the selector
@@ -666,6 +681,46 @@ display.ExamDisplay = function(e)
 	 */
 	this.displayTime = ko.observable('');
 
+	function formatTime(t) {
+		var h = t.getHours();
+		var m = t.getMinutes();
+		var s = t.getSeconds();
+		return t.toDateString() + ' ' + h+':'+m+':'+s;
+	}
+
+	/** Time the exam started, formatted for display
+	 * @mamber {observable|string} startTime
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	var _startTime = ko.observable();
+	this.startTime = ko.computed({
+		read: function() {
+			var t = _startTime();
+			if(t) {
+				return formatTime(_startTime());
+			} else {
+				return '';
+			}
+		},
+		write: function(v) {
+			return _startTime(v);
+		}
+	});
+
+	/** Time the exam ended, formatted for display
+	 * @mamber {observable|string} endTime
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	var _endTime = ko.observable();
+	this.endTime = ko.computed({
+		read: function() {
+			return _endTime();
+		},
+		write: function(v) {
+			return _endTime(v);
+		}
+	});
+
 	/** The total time the student has spent in the exam
 	 * @member {observable|string} timeSpent
 	 * @memberof Numbas.display.ExamDisplay
@@ -774,6 +829,8 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 
 		case "result":
 			this.result(exam.result);
+			this.startTime(exam.start);
+			this.endTime(exam.stop);
 			
 			break;
 

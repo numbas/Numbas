@@ -24,6 +24,9 @@ R.registerLocale('en-GB',{
 	'die.sorry': "Sorry, Numbas has encountered an error which means it can't continue. Below is a description of the error.",
 	'die.error': "Error",
 
+	'modal.ok': "OK",
+	'modal.cancel': "Cancel",
+
 	'exam.exam name': "Exam Name:",
 	'exam.random seed': "Session ID:",
 	'exam.student name': "Student's Name:",

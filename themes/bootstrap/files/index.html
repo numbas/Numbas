@@ -169,10 +169,11 @@ Copyright 2011-14 Newcastle University
 					<p data-localise="suspend.you can resume"></p>
 					<button class="btn btn-primary" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam" data-localise="suspend.resume"></button>
 				</div>
-				<div id="results" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
+				<div id="results" class="container-fluid" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
 					<h1 data-localise="result.exam summary"></h1>
 
-					<table>
+					<div class="row">
+					<table class="col-xs-6 col-xs-offset-3">
 						<tr>
 							<th data-localise="exam.exam name"></th>
 							<td class="rtd" data-bind="html: exam.settings.name"></td>
@@ -202,16 +203,18 @@ Copyright 2011-14 Newcastle University
 							<td class="rtd" data-bind="text: exam.displayDuration"></td>
 						</tr>
 					</table>
+					</div>
 
 					<h3 data-localise="result.performance summary"></h3>
-					<table>
+					<div class="row">
+					<table class="col-xs-6 col-xs-offset-3">
 						<tr>
 							<th data-localise="result.exam start"></th>
-							<td class="rtd" data-bind="text: exam.start"></td>	
+							<td class="rtd" data-bind="text: startTime"></td>	
 						</tr>	
 						<tr>
 							<th data-localise="result.exam stop"></th>
-							<td class="rtd" data-bind="text: exam.stop"></td>	
+							<td class="rtd" data-bind="text: endTime"></td>	
 						</tr>
 						<tr>
 							<th data-localise="result.time spent"></th>
@@ -232,10 +235,12 @@ Copyright 2011-14 Newcastle University
 							<td class="rtd" data-bind="html: result"></td>	
 						</tr>							
 					</table>
+					</div>
 
 					<h3 data-localise="result.detailed question breakdown"></h3>
 					<p data-localise="result.click a question to review"></p>
-					<table id="question-breakdown">		
+					<div class="row">
+					<table id="question-breakdown" class="col-xs-4 col-xs-offset-4">		
 						<thead>
 							<th class="qtd" data-localise="result.question number"></th>
 							<th class="qtd" colspan="3" data-localise="result.question score"></th>
@@ -249,6 +254,7 @@ Copyright 2011-14 Newcastle University
 							</tr>
 						</tbody>
 					</table>
+				</div>
 							
 					<div class="info-buttons">
 						<div><button class="btn btn-primary" data-bind="click: function(){ window.print(); }" data-localise="result.print"></button></div>
@@ -289,6 +295,37 @@ Copyright 2011-14 Newcastle University
 				Created using <a target="_blank" href="http://www.ncl.ac.uk/maths/numbas">Numbas</a>, developed by <a target="_blank" href="http://www.newcastle.ac.uk">Newcastle University</a>.
 			</div>
 		</footer>
+
+		<div class="modal fade" id="alert-modal" tabindex="-1" aria-role="dialog" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="confirm-modal" tabindex="-1" aria-role="dialog" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+						<button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+					</div>
+				</div>
+			</div>
+		</div>
 
 <!--[if lt IE 9]>
   <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
