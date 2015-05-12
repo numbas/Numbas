@@ -83,6 +83,20 @@ iframe {
 	background: #f5f5f5;
 }
 
+.hamburger .nav > li {
+    display: inline-block;
+}
+
+.hamburger .nav {
+    margin-left: 15px;
+}
+
+@media screen and (min-width: 480px) {
+	.titleBits {
+	    margin: 0 10px;
+	}
+}
+
 #everything {
 	overflow-x: hidden;
 }
@@ -105,6 +119,8 @@ iframe {
 @media screen and (max-width: 991px) {
 	#everything {
 		padding-left: 0;
+	}
+	#questionContainer {
 		margin-top: 51px;
 	}
 	.show-nav #questionContainer, .show-nav .copyright-footer {
@@ -307,8 +323,9 @@ input.jme {
 #startBtn {
 	font-size: 1.5em;
 }
+
 #frontpage td {
-	padding-left: 5em;
+	padding-left: 1em;
 }
 
 #infoDisplay .info-buttons {
@@ -378,6 +395,10 @@ table {
 
 .part.type-gapfill > .prompt .part {
 	display: inline-block;
+}
+
+.part.type-gapfill > .prompt .part.block {
+	display: block;
 }
 
 .partheader {
@@ -594,7 +615,7 @@ input[type=text], input[type=number] {
 
 /* Try to allow scrolling for statement or prompt elements that are too wide */
 @media screen {
-	.content-area > span > p, .content-area > span > div {
+	.content-area > span > p, .content-area > span > div, .content-area > span > table {
 		overflow-x: auto;
 		overflow-y: hidden;
 	}

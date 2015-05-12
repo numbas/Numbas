@@ -2519,7 +2519,6 @@ table th[class*="col-"] {
     margin-bottom: 18.75px;
     overflow-y: hidden;
     -ms-overflow-style: -ms-autohiding-scrollbar;
-    border: 1px solid #dddddd;
   }
   .table-responsive > .table {
     margin-bottom: 0;

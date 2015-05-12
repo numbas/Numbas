@@ -133,6 +133,17 @@ Copyright 2011-14 Newcastle University
 						<span class="icon-bar"></span> 	
 						<span class="icon-bar"></span>
 					</button>
+
+					<ul class="nav">
+						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion" data-localise="control.previous"></button></li>
+						<li>	
+							<div class="titleBits" data-bind="with: currentQuestion">
+								<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
+								<span id="questionNameDisplay" data-bind="text: displayName"></span>
+							</div>
+						</li>
+						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion" data-localise="control.next"></button></li>
+					</ul>
 				</div>
 			</div>
 

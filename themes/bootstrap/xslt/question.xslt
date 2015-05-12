@@ -82,6 +82,9 @@ Copyright 2011-13 Newcastle University
 			<xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
+	<xsl:variable name="block">
+		<xsl:if test="@type='1_n_2' or @type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:if>
+	</xsl:variable>
 
 	<xsl:if test="parent::parts">
 		<xsl:if test="count(../part) &gt; 1">
@@ -89,7 +92,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/></xsl:attribute>
+		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/></xsl:attribute>
 		<xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">

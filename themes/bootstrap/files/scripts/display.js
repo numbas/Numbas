@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
 
 /** @file Display code. Provides {@link Numbas.display} */
 
-Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display'],function() {
+Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display','hammer'],function() {
 	var util = Numbas.util;
 	var jme = Numbas.jme;
 
@@ -425,11 +425,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 		$('#loading').hide();
 		$('#everything').show();
 
-		// hide the side nav when you click a question selector
-		$('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
-			$('#navMenu').offcanvas('hide');
-		});
-
 		ko.applyBindings(Numbas.exam.display);
 		for(var i=0;i<Numbas.exam.questionList.length;i++) {
 			Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
@@ -456,6 +451,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 			q.init();
 		});
 
+		// hide the side nav when you click a question selector
+		$('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
+		});
+
+		// bind buttons in the modals
 		$('.modal button.ok').on('click',function() {
 			display.modal.ok();
 			display.modal.ok = display.modal.cancel = function() {};
@@ -464,6 +464,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 			display.modal.cancel();
 			display.modal.ok = display.modal.cancel = function() {};
 		})
+
+		// swipe events move question
+		var hammer = new Hammer(document.getElementById('questionDisplay'));
+		hammer.on('swipeleft',function() {
+			Numbas.controls.nextQuestion();
+		});
+		hammer.on('swiperight',function() {
+			Numbas.controls.previousQuestion();
+		});
 	},
 
 	/** Does an input element currently have focus?
@@ -852,6 +861,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		case "exit":
 			break;
 		}
+		this.hideNavMenu();
 	},
 
 	/** Show the current question */
@@ -872,6 +882,14 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		{
 			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
+		}
+		this.hideNavMenu();
+	},
+
+	/* Hide the sliding side menu*/
+	hideNavMenu: function() {
+		if($('#navMenu').data('bs.offcanvas')) {
+			$('#navMenu').offcanvas('hide');
 		}
 	},
 
@@ -1033,6 +1051,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		var qd = this;
 		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
 		html.addClass('jme-scope').data('jme-scope',q.scope);
+		html.find('table').wrap('<div class="table-responsive">');	// wrap tables so they have a scrollbar when they overflow
 		$('#questionDisplay').append(html);
 
 		qd.css = document.createElement('style');
