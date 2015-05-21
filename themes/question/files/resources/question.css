@@ -1,13 +1,20 @@
-.single-question #everything {
-	max-width: 1000px;
-	margin: auto;
+.question-nav {
+	max-width: 1170px;
+	margin: 0 auto;
+	line-height: 68px;
 }
-
-.single-question #questionContainer {
-	background: white;
+.question-nav .navmenu-brand {
+	display: inline-block;
+	margin: 0;
 }
-.single-question #questionDisplay {
-	margin: inherit;
-	position: inherit;
-	right: inherit;
+#questionContainer {
+	margin-top: 0 !important;
+	margin-left: auto !important;
+}
+.question-nav .navbar {
+	margin-bottom: 0;
+	text-align: right;
+}
+.question-nav .logo {
+	float: left;
 }

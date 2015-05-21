@@ -29,7 +29,7 @@ Copyright 2011-13 Newcastle University
 
 <!-- this is the thing that gets used by SCORM -->
 <xsl:template match="question">
-	<div class="question clearAfter" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
+	<div class="question clearfix" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
 		<h3 data-bind="text: displayName" class="print-only"></h3>
 		<xsl:apply-templates />
 	</div>
@@ -44,7 +44,9 @@ Copyright 2011-13 Newcastle University
 </xsl:template>
 
 <xsl:template match="parts">
-	<xsl:apply-templates />
+	<div class="parts">
+		<xsl:apply-templates />
+	</div>
 </xsl:template>
 
 <xsl:template match="part" mode="path">
@@ -77,8 +79,11 @@ Copyright 2011-13 Newcastle University
 	<xsl:variable name="clear">
 		<xsl:choose>
 			<xsl:when test="ancestor::gaps"></xsl:when>
-			<xsl:otherwise><xsl:text>clearAfter</xsl:text></xsl:otherwise>
+			<xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
 		</xsl:choose>
+	</xsl:variable>
+	<xsl:variable name="block">
+		<xsl:if test="@type='1_n_2' or @type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:if>
 	</xsl:variable>
 
 	<xsl:if test="parent::parts">
@@ -87,7 +92,7 @@ Copyright 2011-13 Newcastle University
 		</xsl:if>
 	</xsl:if>
 	<xsl:element name="{$tag}">
-		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/></xsl:attribute>
+		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/></xsl:attribute>
 		<xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
@@ -99,36 +104,41 @@ Copyright 2011-13 Newcastle University
 		<span class="student-answer" data-bind="css: {{dirty: isDirty}}">
 			<xsl:apply-templates select="." mode="typespecific"/>
 			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown, event: {{focus: showWarnings, blur: hideWarnings}}" tabindex="0"></span>
-			<span class="warnings" data-bind="foreach: warnings, visible: warningsShown">
+			<span class="warnings alert alert-danger" data-bind="foreach: warnings, visible: warningsShown">
 				<span class="warning" data-bind="latex: message"></span>
 			</span>
 		</span>
 		<xsl:apply-templates select="." mode="correctanswer"/>
 		<xsl:if test="not(ancestor::gaps)">
-			<br/>
-			<div class="partFeedback" data-bind="visible: marks()>0">
-				<button class="btn submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
-				<div class="marks" data-bind="pulse: scoreFeedback.update">
-					<span class="score" data-bind="html: scoreFeedback.message"></span>
-					<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="partFeedback .col-2 well pull-right" data-bind="visible: marks()>0">
+						<button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
+						<div class="marks" data-bind="pulse: scoreFeedback.update">
+							<span class="score" data-bind="html: scoreFeedback.message"></span>
+							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+						</div>
+						<button class="btn btn-primary" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
+					</div>
 				</div>
-				<button class="btn" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
+				<div class="row">
+					<ol class="feedbackMessages well col-lg-6 col-md-6 col-xs-12 pull-right" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
+						<li class="feedbackMessage" data-bind="latex: $data"></li>
+					</ol>
+				</div>
 			</div>
-			<ol class="feedbackMessages" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
-				<li class="feedbackMessage" data-bind="latex: $data"></li>
-			</ol>
 		</xsl:if>
 	</xsl:element>
 </xsl:template>
 
 <xsl:template match="steps">
 
-	<div class="steps clearAfter" data-bind="slideVisible: stepsOpen">
+	<div class="steps well clearfix" data-bind="slideVisible: stepsOpen">
 		<xsl:apply-templates select="part"/>
 	</div>
 	<div class="stepsBtn">
-		<button class="btn" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
-		<button class="btn" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
+		<button class="btn btn-primary" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
+		<button class="btn btn-primary" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
 		<span class="penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
 	</div>
 </xsl:template>
@@ -149,9 +159,9 @@ Copyright 2011-13 Newcastle University
 
 
 <xsl:template match="advice">
-	<div class="adviceContainer content-area" data-bind="visible: adviceDisplayed">
+	<div class="adviceContainer" data-bind="visible: adviceDisplayed">
 		<h3><localise>question.advice</localise></h3>
-		<span class="adviceDisplay">
+		<span class="adviceDisplay content-area">
 			<xsl:apply-templates />
 		</span>
 	</div>
@@ -193,12 +203,12 @@ Copyright 2011-13 Newcastle University
 	<form>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<ul class="multiplechoice clearAfter">
+			<ul class="multiplechoice clearfix">
 				<xsl:apply-templates select="choice" mode="radiogroup"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<ul class="multiplechoice clearAfter">
+			<ul class="multiplechoice clearfix">
 				<xsl:apply-templates select="choice" mode="checkbox"/>
 			</ul>
 		</xsl:when>
@@ -217,12 +227,12 @@ Copyright 2011-13 Newcastle University
 	<form>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<ul class="multiplechoice clearAfter">
+			<ul class="multiplechoice clearfix">
 				<xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<ul class="multiplechoice clearAfter">
+			<ul class="multiplechoice clearfix">
 				<xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
 			</ul>
 		</xsl:when>
