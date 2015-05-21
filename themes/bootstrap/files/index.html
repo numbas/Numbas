@@ -90,7 +90,7 @@ Copyright 2011-14 Newcastle University
 					<ul id="questionList" class="nav navmenu-nav">
 						<!-- ko foreach: questions -->
 						<li class="questionSelector" data-bind="visible: visible, css: {active: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
-							<a href="#">
+							<a href="#" class="clearfix">
 								<span class="name" data-bind="text: displayName"></span>
 								<div class="marks">
 									<div class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></div>
@@ -135,14 +135,14 @@ Copyright 2011-14 Newcastle University
 					</button>
 
 					<ul class="nav">
-						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion" data-localise="control.previous"></button></li>
+						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}" data-localise="control.previous"></button></li>
 						<li>	
 							<div class="titleBits" data-bind="with: currentQuestion">
 								<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
 								<span id="questionNameDisplay" data-bind="text: displayName"></span>
 							</div>
 						</li>
-						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion" data-localise="control.next"></button></li>
+						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}" data-localise="control.next"></button></li>
 					</ul>
 				</div>
 			</div>

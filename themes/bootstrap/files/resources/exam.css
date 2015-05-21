@@ -273,6 +273,7 @@ input.jme {
 
 .questionSelector .dirty-message {
     text-align: right;
+	float: right;
 }
 .questionSelector .dirty-message .warning-icon {
 	font-size: 18px;
@@ -366,7 +367,7 @@ table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
-}
+	margin-bottom: 1em;
 }
 
 .content-area ul > li, .content-area ol > li {
