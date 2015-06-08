@@ -2064,6 +2064,14 @@ var setmath = Numbas.setmath = {
 	 */
 	minus: function(a,b) {
 		return a.filter(function(v){ return !setmath.contains(b,v); });
+	},
+
+	/** Size of a set
+	 * @param {set} set
+	 * @returns {number}
+	 */
+	size: function(set) {
+		return set.length;
 	}
 }
 
