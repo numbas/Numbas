@@ -391,10 +391,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed" />
+						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" />
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed" value="{$answernum}"/>
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
@@ -414,10 +414,10 @@ Copyright 2011-13 Newcastle University
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}]" disabled="true"/>
+						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}], visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true"/>
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+''" disabled="true" value="{$answernum}"/>
+						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+'', visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>

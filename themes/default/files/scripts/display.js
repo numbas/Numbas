@@ -1870,6 +1870,8 @@ display.MultipleResponsePartDisplay = function()
 		return obs;
 	}
 
+	this.layout = util.copyarray(p.layout);
+
 	switch(p.type) {
 	case '1_n_2':
 		/** Index of student's current answer choice (not necessarily submitted)

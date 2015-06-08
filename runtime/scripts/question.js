@@ -2082,6 +2082,70 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		}
 	}
 
+	// fill layout matrix
+	var layoutNode = this.xml.selectSingleNode('layout');
+	tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
+	var layout = this.layout = [];
+	switch(settings.layoutType) {
+	case 'all':
+		for(var i=0;i<this.numAnswers;i++) {
+			var row = [];
+			for(var j=0;j<this.numChoices;j++) {
+				row.push(true);
+			}
+			layout.push(row);
+		}
+		break;
+	case 'lowertriangle':
+		for(var i=0;i<this.numAnswers;i++) {
+			var row = [];
+			for(var j=0;j<this.numChoices;j++) {
+				row.push(this.shuffleAnswers[i]<=this.shuffleChoices[j]);
+			}
+			layout.push(row);
+		}
+		break;
+	case 'uppertriangle':
+		for(var i=0;i<this.numAnswers;i++) {
+			var row = [];
+			for(var j=0;j<this.numChoices;j++) {
+				row.push(this.shuffleAnswers[i]>=this.shuffleChoices[j]);
+			}
+			layout.push(row);
+		}
+		break;
+	case 'expression':
+		var layoutMatrix = jme.evaluate(settings.layoutExpression,this.question.scope);
+		switch(layoutMatrix.type) {
+		case 'list':
+			// note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row]
+			// I have only myself to thank for this - CP
+			// it's easier for question authors to go [row][column], but it's too late to change the internals of the part to match that now
+			layoutMatrix = jme.unwrapValue(layoutMatrix);
+			for(var i=0;i<this.numAnswers;i++) {
+				var row = [];
+				for(var j=0;j<this.numAnswers;j++) {
+					row.push(layoutMatrix[this.shuffleChoices[j]][this.shuffleAnswers[i]]);
+				}
+				layout.push(row);
+			}
+			break;
+		case 'matrix':
+			layoutMatrix = jme.unwrapValue(layoutMatrix);
+			for(var i=0;i<this.numAnswers;i++) {
+				var row = [];
+				for(var j=0;j<this.numAnswers;j++) {
+					row.push(layoutMatrix[this.shuffleChoices[j]][this.shuffleAnswers[i]]!=0);
+				}
+				layout.push(row);
+			}
+			break;
+		default:
+			throw(new Numbas.Error('part.mcq.layout wrong type',layout.type));
+		}
+		break;
+	}
+
 	//invert the shuffle so we can now tell where particular choices/answers went
 	this.shuffleChoices = math.inverse(this.shuffleChoices);
 	this.shuffleAnswers = math.inverse(this.shuffleAnswers);
@@ -2189,7 +2253,17 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
 		}
 	}
+	for(var i=0;i<matrix.length;i++) {
+		var l = matrix[i].length;
+		for(var j=0;j<l;j++) {
+			if(!this.layout[i][j]) {
+				matrix[i][j] = 0;
+			}
+		}
+	}
+
 	settings.matrix = matrix;
+
 	var distractors=[];
 	var distractorNodes = this.xml.selectNodes('marking/distractors/distractor');
 	for( i=0; i<distractorNodes.length; i++ )
@@ -2251,7 +2325,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 					{
 						row.push(matrix[j][i]);
 					}
-					row.sort();
+					row.sort(function(a,b){return a>b ? 1 : a<b ? -1 : 0});
 					flat.push(row[row.length-1]);
 				}
 			}
@@ -2264,7 +2338,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			}
 			break;
 		}
-		flat.sort();
+		flat.sort(function(a,b){return a>b ? 1 : a<b ? -1 : 0});
 		for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--)
 		{
 			this.marks+=flat[i];
@@ -2276,7 +2350,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	{	//because we swapped answers and choices round in the marking matrix
 		this.numAnswers = this.numChoices;
 		this.numChoices = 1;
-		var flipped=true;
+		var flipped = true;
 	}
 	else
 		var flipped=false;
