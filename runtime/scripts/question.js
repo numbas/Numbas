@@ -2083,67 +2083,41 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	}
 
 	// fill layout matrix
-	var layoutNode = this.xml.selectSingleNode('layout');
-	tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
 	var layout = this.layout = [];
-	switch(settings.layoutType) {
-	case 'all':
+	if(this.type=='m_n_x') {
+		var layoutNode = this.xml.selectSingleNode('layout');
+		tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
+		var layoutTypes = {
+			all: function(row,column){ return true; },
+			lowertriangle: function(row,column) { return row>=column; },
+			strictlowertriangle: function(row,column) { return row>column; },
+			uppertriangle: function(row,column) { return row<=column; },
+			strictuppertriangle: function(row,column) { return row<column; },
+			expression: function(row,column) { return layoutMatrix[row][column]; }
+		};
+		if(settings.layoutType=='expression') {
+			// expression can either give a 2d array (list of lists) or a matrix
+			// note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row]
+			// it's easier for question authors to go [row][column], but it's too late to change the internals of the part to match that now
+			// I have only myself to thank for this - CP
+			var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,this.question.scope));
+		}
+		var layoutFunction = layoutTypes[settings.layoutType];
 		for(var i=0;i<this.numAnswers;i++) {
 			var row = [];
 			for(var j=0;j<this.numChoices;j++) {
+				row.push(layoutFunction(j,i));
+			}
+			layout.push(row);
+		}
+	} else {
+		for(var i=0;i<this.numChoices;i++) {
+			var row = [];
+			for(var j=0;j<this.numAnswers;j++) {
 				row.push(true);
 			}
 			layout.push(row);
 		}
-		break;
-	case 'lowertriangle':
-		for(var i=0;i<this.numAnswers;i++) {
-			var row = [];
-			for(var j=0;j<this.numChoices;j++) {
-				row.push(this.shuffleAnswers[i]<=this.shuffleChoices[j]);
-			}
-			layout.push(row);
-		}
-		break;
-	case 'uppertriangle':
-		for(var i=0;i<this.numAnswers;i++) {
-			var row = [];
-			for(var j=0;j<this.numChoices;j++) {
-				row.push(this.shuffleAnswers[i]>=this.shuffleChoices[j]);
-			}
-			layout.push(row);
-		}
-		break;
-	case 'expression':
-		var layoutMatrix = jme.evaluate(settings.layoutExpression,this.question.scope);
-		switch(layoutMatrix.type) {
-		case 'list':
-			// note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row]
-			// I have only myself to thank for this - CP
-			// it's easier for question authors to go [row][column], but it's too late to change the internals of the part to match that now
-			layoutMatrix = jme.unwrapValue(layoutMatrix);
-			for(var i=0;i<this.numAnswers;i++) {
-				var row = [];
-				for(var j=0;j<this.numAnswers;j++) {
-					row.push(layoutMatrix[this.shuffleChoices[j]][this.shuffleAnswers[i]]);
-				}
-				layout.push(row);
-			}
-			break;
-		case 'matrix':
-			layoutMatrix = jme.unwrapValue(layoutMatrix);
-			for(var i=0;i<this.numAnswers;i++) {
-				var row = [];
-				for(var j=0;j<this.numAnswers;j++) {
-					row.push(layoutMatrix[this.shuffleChoices[j]][this.shuffleAnswers[i]]!=0);
-				}
-				layout.push(row);
-			}
-			break;
-		default:
-			throw(new Numbas.Error('part.mcq.layout wrong type',layout.type));
-		}
-		break;
 	}
 
 	//invert the shuffle so we can now tell where particular choices/answers went
