@@ -200,6 +200,11 @@
 				test('Numbas.math',function() {
 					equals(Numbas.math.countSigFigs('1.10'),3,"math.countSigFigs('1.10')==3");
 					equals(Numbas.math.countSigFigs('-1.10'),3,"math.countSigFigs('-1.10')==3");
+					equals(Numbas.math.countSigFigs('1.23e6'),3,"math.countSigFigs('1.23e6')==3");
+					equals(Numbas.math.countSigFigs('1.23e-6'),3,"math.countSigFigs('1.23e-6')==3");
+					equals(Numbas.math.countSigFigs('1.23E6'),3,"math.countSigFigs('1.23e6')==3");
+					equals(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
+					equals(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
 				});
 
 				var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
