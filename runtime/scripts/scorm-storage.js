@@ -314,6 +314,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		}
 		
 		this.set('suspend_data',JSON.stringify(eobj));
+		this.setSessionTime();
 		this.suspendData = eobj;
 	},
 
@@ -610,7 +611,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 */
 	setSessionTime: function()
 	{
-		var timeSpent = new Date((this.exam.settings.duration - this.exam.timeRemaining)*1000);
+		var timeSpent = new Date(this.exam.timeSpent*1000);
 		var sessionTime = 'PT'+timeSpent.getHours()+'H'+timeSpent.getMinutes()+'M'+timeSpent.getSeconds()+'S';
 		this.set('session_time',sessionTime);
 	},
