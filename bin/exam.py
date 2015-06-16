@@ -137,6 +137,7 @@ class Exam:
 				'reverse': True,
 				'browse': True,
 				'showfrontpage': True,
+				'showresultspage': True,
 				'onleave': Event('onleave','none','You have not finished the current question'),
 				'preventleave': True,
 			}
@@ -170,7 +171,7 @@ class Exam:
 
 		if haskey(data,'navigation'):
 			nav = data['navigation']
-			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','preventleave'],exam.navigation)
+			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave'],exam.navigation)
 			if 'onleave' in nav:
 				tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -242,6 +243,7 @@ class Exam:
 			'reverse': strcons_fix(self.navigation['reverse']), 
 			'browse': strcons_fix(self.navigation['browse']),
 			'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
+			'showresultspage': strcons_fix(self.navigation['showresultspage']),
 			'preventleave': strcons_fix(self.navigation['preventleave'])
 		}
 
