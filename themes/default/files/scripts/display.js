@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
 
 /** @file Display code. Provides {@link Numbas.display} */
 
-Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display','hammer'],function() {
+Numbas.queueScript('display',['controls','math','xml','util','timing','jme','jme-display'],function() {
 	var util = Numbas.util;
 	var jme = Numbas.jme;
 
