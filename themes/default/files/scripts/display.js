@@ -464,15 +464,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 			display.modal.cancel();
 			display.modal.ok = display.modal.cancel = function() {};
 		})
-
-		// swipe events move question
-		var hammer = new Hammer(document.getElementById('questionDisplay'));
-		hammer.on('swipeleft',function() {
-			Numbas.controls.nextQuestion();
-		});
-		hammer.on('swiperight',function() {
-			Numbas.controls.previousQuestion();
-		});
 	},
 
 	/** Does an input element currently have focus?
