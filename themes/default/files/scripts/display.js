@@ -183,8 +183,9 @@ ko.bindingHandlers.pulse = {
 	init: function() {
 	},
 	update: function(element,valueAccessor) {
-		valueAccessor()();
-		$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+		if(valueAccessor()()) {
+			$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+		}
 	}
 };
 
@@ -965,6 +966,12 @@ display.QuestionDisplay = function(q)
 		return this.visited() || exam.settings.navigateBrowse;
 	},this);
 
+	/** Number of parts in this question
+	 * @member {observable|number} numParts
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
+	this.numParts = ko.observable(q.parts.length);
+
 	/** Student's current score ({@link Numbas.Question#score})
 	 * @member {observable|number} score
 	 * @memberof Numbas.display.QuestionDisplay
@@ -1105,7 +1112,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.revealAnswer();
 		
 		//display score if appropriate
-		this.showScore();
+		this.showScore(true);
 		
 		//scroll back to top of page
 		scroll(0,0);
@@ -1135,7 +1142,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 	},
 
 	/** Display question score and answer state */
-	showScore: function()
+	showScore: function(noUpdate)
 	{
 		var q = this.question;
 		var exam = q.exam;
@@ -1143,7 +1150,9 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.score(q.score);
 		this.marks(q.marks);
 		this.answered(q.answered);
-		this.scoreFeedback.update(true);
+		if(!noUpdate) {
+			this.scoreFeedback.update(true);
+		}
 
 		var anyAnswered = false;
 		for(var i=0;i<q.parts.length;i++)
@@ -1167,6 +1176,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		{
 			q.parts[i].display.init();
 		}
+		this.numParts(q.parts.length);
 	},
 
 	/** Called when the exam ends */
@@ -1284,6 +1294,30 @@ display.PartDisplay = function(p)
 	this.showFeedbackToggler = ko.computed(function() {
 		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
 	});
+
+	/* Show the "submit part" button?
+	 * @member {observable|boolean} showSubmitPart
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showSubmitPart = ko.computed(function() {
+		return this.question.display.numParts()>1 && !(this.revealed() || !this.isDirty());
+	},this);
+
+	/* Show the marks feedback?
+	 * @member {observable|boolean} showMarks
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showMarks = ko.computed(function() {
+		return this.question.display.numParts()>1 && this.scoreFeedback.message();
+	}, this);
+
+	/* Should the box containing part marks and the submit and feedback buttons be shown?
+	 * @member {observable|boolean} showFeedbackBox
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showFeedbackBox = ko.computed(function() {
+		return this.marks()>0 && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
+	},this);
 
 	/** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
 	 * @member {observable|boolean} stepsShown
@@ -1403,18 +1437,20 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 		this.feedbackShown(false);
 
-		this.showScore(this.part.answered);
+		this.showScore(this.part.answered,true);
 	},
 
 	/** Show/update the student's score and answer status on this part */
-	showScore: function(valid)
+	showScore: function(valid,noUpdate)
 	{
 		var p = this.part;
 		var exam = p.question.exam;
 
 		this.score(p.score);
 		this.marks(p.marks);
-		this.scoreFeedback.update(true);
+		if(!noUpdate) {
+			this.scoreFeedback.update(true);
+		}
 
 		if(valid===undefined)
 			valid = this.part.validate();
@@ -2158,7 +2194,8 @@ function showScoreFeedback(obj,settings)
 				return newScore();
 			},
 			write: function() {
-				newScore(!newScore());
+				newScore(true);
+				newScore(false);
 			}
 		}),
 		message: ko.computed(function() {

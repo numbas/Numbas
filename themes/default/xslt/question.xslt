@@ -112,13 +112,13 @@ Copyright 2011-13 Newcastle University
 		<xsl:if test="not(ancestor::gaps)">
 			<div class="container-fluid">
 				<div class="row">
-					<div class="partFeedback .col-2 well pull-right" data-bind="visible: marks()>0">
-						<button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: !(revealed() || !isDirty())"><localise>question.submit part</localise></button>
-						<div class="marks" data-bind="pulse: scoreFeedback.update">
+					<div class="partFeedback .col-2 well pull-right" data-bind="visible: showFeedbackBox">
+						<button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: showSubmitPart"><localise>question.submit part</localise></button>
+						<div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks">
 							<span class="score" data-bind="html: scoreFeedback.message"></span>
 							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 						</div>
-						<button class="btn btn-primary" id="feedbackToggle" data-bind="visible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
+						<button class="btn btn-primary" id="feedbackToggle" data-bind="slideVisible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
 					</div>
 				</div>
 				<div class="row">
