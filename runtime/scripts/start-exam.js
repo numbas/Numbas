@@ -38,7 +38,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 	var init = Numbas.init = function()
 	{
 	$(document).ready(function() {
-		var seed = Math.seedrandom();
+		var seed = Math.seedrandom(new Date().getTime());
 
 		var job = Numbas.schedule.add;
 

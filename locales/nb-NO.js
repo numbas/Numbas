@@ -18,63 +18,60 @@ Numbas.queueScript('nb-NO',['R'],function() {
 R.registerLocale('nb-NO',{
 	'page.loading': "Laster...",
 	"page.saving": "<p>Lagrer.</p> <p>Dette kan ta noen sekunder.</p>",
+    
+    'mathjax.math processing error': "MathJax processing error: \"%s\" when texifying <code>%s</code>",
 
 	"die.numbas failed": "Numbas har feilet",
 	"die.sorry": "Beklager, det har oppstått en feil, og Numbas kan ikke fortsette. Nedenfor er en beskrivelse av feilen.",
 	"die.error": "Feil",
-
-	"question.score feedback.unanswered": "Ikke besvart.",
-	"question.score feedback.correct": "Svaret ditt er riktig",
-	"question.score feedback.partial": "Svaret ditt er delvis riktig",
-	"question.score feedback.wrong": "Svaret ditt er ikke riktig",
-	"question.show steps penalty": "Du vil miste <strong>%s</strong> %s.",
-	"question.show steps no penalty": "Din score blir ikke påvirket.",
-	"question.show steps already penalised": "Du har allerede sett trinnvis gjennomgang. Du kan vise det igjen uten å bli straffet.",
-	"question.hide steps": "Skjul trinn",
-	"question.hide steps no penalty": "Din score vil bli påvirket.",
-	"question.unsubmitted changes.several parts": "Du har endret dine svar uten å lagre dem. Vennligst se igjennom svarene og klikk på <strong>Lagre alle deler</strong> knapp.",
-	"question.unsubmitted changes.one part": "Du har endret ditt svar uten å lagre det. Vennligst se igjennom svaret og klikk på <strong>Lagre svar</strong> knapp.",
-	"question.selector.unsubmitted changes": "Ikke lagrede svar.",
-
+    
+	'modal.ok': "OK",
+	'modal.cancel': "Avbryt",
+    
 	'exam.exam name': "Eksamen navn:",
+	'exam.random seed': "Sesjon ID:",
+	'exam.student name': "Studentens navn:",
 	'exam.number of questions': "Antall spørsmål:",
 	'exam.marks available': "Mulige poeng:",
 	'exam.pass percentage': "Grense for bestått:",
 	'exam.time allowed': "Tillatt tid:",
+	'exam.passed': 'Bestått',
+	'exam.failed': 'Ikke bestått',
+	'exam.review header': "Gjennomgang: ",
 	'frontpage.start': "Start",
-	"exam.random seed": "Sesjon ID:",
-	"exam.passed": "Bestått",
-	"exam.failed": "Ikke bestått",
-	"exam.review header": "Gjennomgang: ",
 
+	'suspend.paused header': "Pause",
 	'suspend.exam suspended': "Eksamen er avbrutt. Klikk Fortsett for å gå videre.",
 	'suspend.you can resume': "Du kan fortsette eksamen neste gang du starter denne aktiviteten.",
 	'suspend.resume': "Fortsett",
-
+    
+	'result.exit': "Avslutt eksamen",
+	'result.print': "Skriv ut denne oversikten",
 	'result.review': "Se igjennom",
 	'result.exam summary': "Eksamen oversikt",
+	"result.performance summary": "Resultatsammendrag",    
 	'result.exam start': "Eksamen start:",
 	'result.exam stop': "Eksamen slutt:",
 	'result.time spent': "Tidsbruk:",
 	'result.questions attempted': "Antall besvarte spørsmål:",
 	'result.score': "Poengsum:",
 	'result.result': "Resultat:",
-	'result.detailed question breakdown': "Detaljert eksamensresultat",
+	'result.detailed question breakdown': "Detaljert eksamensresultat og tilbakemelding",
 	'result.question number': "Spørsmål nummer",
 	'result.question score': "Poengsum",
-	"result.exit": "Avslutt eksamen",
-	"result.print": "Skriv ut dette sammendraget",
-	"result.performance summary": "Resultatsammendrag",
 	"result.question review title": "Gå igjennom dette spørsmålet",
-	"result.detailed question breakdown": "Detaljert gjennomgang av spørsmål og tilbakemelding",
 	"result.click a question to review": "Klikk på et spørsmålnummer for å se karaktersetting, og om mulig, fullstendig løsning.",
 
-	'end.exam has finished': "Eksamen er avsluttet. Du kan nå lukke vinduet.",
+	'end.exam has finished': "Eksamen er avsluttet. Du kan nå lukke vinduet.",   
 
 	'control.confirm leave': "Du har ikke levert besvarelse.",
 	'control.not all questions answered': "Du har ikke svart på alle spørsmålene i denne eksamen.",
+	"control.not all questions submitted": "Du har endret ett eller flere svar men ikke lagret dem. Vennligst se om svarene er lagret.",   
 	'control.confirm end': "Er du sikker på at du vil avslutte? Etter dette vil du ikke kunne endre på svarene dine..",
 	'control.confirm regen': "Vil du lage nye tilfeldige tall i denne oppgaven? Hvis du klikker OK vil svarene og oppnådde poeng bli annullert.",
+	"control.confirm reveal": "Vil du se svaret på dette spørsmålet? Alle poeng du har fått hittil vil bli låst - og du kan ikke besvare dette spørsmålet senere.", 
+    
+	"control.proceed anyway": "Fortsett likevel?",     
 	'control.regen': "Prøv et lignende spørsmål",
 	'control.submit answer': "Send inn svar",
 	'control.submit all parts': "Send inn alle delsvar",
@@ -88,18 +85,15 @@ R.registerLocale('nb-NO',{
 	'control.pause': "Pause",
 	'control.end exam': "Avslutt eksamen",
 	"control.back to results": "Go back to results",
-	"control.not all questions submitted": "Du har endret ett eller flere svar men ikke lagret dem. Vennligst se om svarene er lagret.",
-	"control.proceed anyway": "Fortsett likevel?",
-	"control.confirm reveal": "Vil du se svaret på dette spørsmålet? Alle poeng du har fått hittil vil bli låst - og du kan ikke besvare dette spørsmålet senere.",
-
-	'display.part.jme.error making maths': "Feil i visning av formel",
+    
+	'display.part.jme.error making maths': "Feil i visning av matematisk uttrykk",
 	
-	'exam.xml.bad root': "Elementet på øverste nivå må være 'exam'",
-	'exam.changeQuestion.no questions': "Eksamen inneholder ingen spørsmål! Sjekk .exam-fila for feil.",
+	'exam.xml.bad root': "Elementet på øverste nivå i XML må være 'exam'",
+	'exam.changeQuestion.no questions': "Eksamen inneholder ingen spørsmål! Sjekk .exam-fila for feil.",   
 
 	'feedback.marks': "<strong>%s</strong> %s",
 	'feedback.you were awarded': "Du oppnådde %s.",
-	'feedback.taken away': "%s %s er trukket fra.",
+	'feedback.taken away': "%s %s er trukket fra.",   
 
 	'jme.tokenise.invalid': "Ugyldig uttrykk: %s",
 
@@ -109,14 +103,14 @@ R.registerLocale('nb-NO',{
 	'jme.shunt.no left bracket': "Venstre parentes mangler",
 	'jme.shunt.no right bracket': "Høyre parentes mangler",
 	'jme.shunt.no right square bracket': "Høyre parentes mangler i slutten av liste",
-	'jme.shunt.missing operator': "Uttrykket kan ikke evalueres -- operator mangler.",
+	'jme.shunt.missing operator': "Uttrykket kan ikke evalueres -- operator mangler.",   
 
 	'jme.typecheck.function maybe implicit multiplication': "Operasjon %s er ikke definert. Mente du <br/><code>%s*%s(...)</code>?",
 	'jme.typecheck.function not defined': "Operasjon '%s' er ikke definert. Mente du <br/><code>%s*(...)</code>?",
 	'jme.typecheck.op not defined': "Operasjon '%s' er ikke definert.",
 	'jme.typecheck.no right type definition': "Finner ikke definisjon av '%s' med korrekt type.",
-	"jme.typecheck.no right type unbound name": "Variabel <code>%s<\/code> er ikke definert.",
-	'jme.typecheck.map not on enumerable': "<code>map</code> operasjonen må gjelde en liste eller range, ikke %s",
+	"jme.typecheck.no right type unbound name": "Variabel <code>%s</code> er ikke definert.",
+	'jme.typecheck.map not on enumerable': "<code>map</code> operasjonen må gjelde en liste eller range, ikke %s",    
 
 	'jme.evaluate.undefined variable': "Variabel %s er udefinert",
 
@@ -131,20 +125,21 @@ R.registerLocale('nb-NO',{
 	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
 
 	'jme.user javascript.error': "Feil i brukerdefinert javascript funksjon <code>%s</code><br/>%s",
-	'jme.user javascript.error': "Brukerdefinert javascript funksjon <code>%s</code> har ikke returverdi",
+/*	'jme.user javascript.error': "Brukerdefinert javascript funksjon <code>%s</code> har ikke returverdi",  */
 
-	'jme.variables.variable not defined': "Variabel %s er ikke definert.",
+	"jme.variables.error making function": "Feil med funksjonskode <code>%s</code>: %s",
+	'jme.variables.syntax error in function definition': "Syntax feil i definisjonen av funksjon",
+	'jme.variables.variable not defined': "Variabel <code>%s</code> er ikke definert.",
 	'jme.variables.empty definition': "Definisjonen av variabel %s er tom.",
 	'jme.variables.circular reference': "Sirkulær referanse til variabel i spørsmål %s %s",
 	'jme.variables.error computing dependency': "Feil ved beregning av referert variabel <code>%s</code>",
-	"jme.variables.error making function": "Feil med funksjonskode <code>%s<\/code>: %s",
-	"jme.variables.syntax error in function definition": "Syntaxfeil i funksjonssdefinisjon",
 	"jme.variables.error evaluating variable": "Feil ved evaluering av variabel %s: %s",
+	'jme.variables.question took too many runs to generate variables': "Et gyldig sett med variabler i spørsmål ble ikke generert på normal tid",    
 
-	'jme.display.unknown token type': "Can't texify token type %s",
-	'jme.display.collectRuleset.no sets': 'No sets given to collectRuleset!',
+	'jme.display.unknown token type': "Kan ikke lage tekstbilde av token type %s",
+	'jme.display.collectRuleset.no sets': 'Ingen sett ble oppgitt til collectRuleset!',
 	'jme.display.collectRuleset.set not defined': "Regelsett %s er ikke definert",
-	'jme.display.simplifyTree.no scope given': "Numbas.jme.display.simplifyTree must be given a Scope",
+	'jme.display.simplifyTree.no scope given': "Numbas.jme.display.simplifyTree må få angitt et Scope",
 
 	'math.precround.complex': "Kan ikke avrunde til antall desimaler gitt som komplekst tall",
 	'math.siground.complex': "Kan ikke avrunde til antall signifikante siffer gitt som komplekst tall",
@@ -162,6 +157,10 @@ R.registerLocale('nb-NO',{
 	'vectormath.cross.not 3d': "Kan bare beregne kryssprodukt til 3-dimensjonale vektorer.",
 	'vectormath.dot.matrix too big': "Kan ikke beregne prikkproduktet til en matrise som ikke er $1 \\times N$ eller $N \\times 1$.",
 	'vectormath.cross.matrix too big': "Kan ikke beregne kryssproduktet til en matrise som ikke er $1 \\times N$ eller $N \\times 1$.",
+    
+	'part.with steps answer prompt': "Svar: ",
+	
+	'part.script.error': "Feil i del %s brukerdefinert skript %s: %s",    
 
 	'part.marking.steps no matter': "Ettersom du fikk alt riktig i oppgaven blir ikke delsvarene telt opp.",
 	'part.marking.steps change single': "Du oppnådde <strong>%s</strong> poeng for delsvarene",
@@ -176,15 +175,13 @@ R.registerLocale('nb-NO',{
 	'part.marking.nothing entered': "Du svarte ikke.",
 	'part.marking.incorrect': "Svaret er feil.",
 	'part.marking.correct': "Svaret er riktig.",
-
 	"part.correct answer": "Riktig svar:",
-	"part.with steps answer prompt": "Svar: ",
-	'part.missing type attribute': "Missing part type attribute",
-	'part.unknown type': "Unrecognised part type %s",
+    
+/*	"part.with steps answer prompt": "Svar: ",  */
+	'part.missing type attribute': "Spørsmålsdel har feil atributt",
+	'part.unknown type': "Ukjent spørsmålsdel %s",
 
-	'part.setting not present': "Property '%s' not set in part %s of question \"%s\"",
-
-	"part.script.error": "Feil i del %s av eget skript %s: %s",
+	'part.setting not present': "Egenskap '%s' er ikke angitt i del %s av spørsmål \"%s\"",
 
 	'part.jme.answer missing': "Korrekt svar for et JME felt mangler (%s)",
 	'part.jme.answer too long': "Svaret er for langt.",
@@ -211,12 +208,17 @@ R.registerLocale('nb-NO',{
 	'part.mcq.choices missing': "Svarmuligheter mangler i flervalgstesten (%s)",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
 	'part.mcq.wrong number of choices': "Du merket av feil antall valg.",
-	'part.mcq.no choices selected': "Du har ikke merket av i valgmuligheter.",
-	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
-	'part.mcq.correct choice': "Du valgte riktig svar.",
+	'part.mcq.no choices selected': "Ingen av valgene er merket.",
+	'part.mcq.matrix not a list': "Score matrise for flervalg oppgave definert som JME uttrykk er ikke en liste slik den skal være.",
 	"part.mcq.matrix wrong type": "Element av ugyldig type '%s' er brukt i score matrise.",
 	"part.mcq.matrix mix of numbers and lists": "En blanding av tall og lister er brukt i score matrise.",
 	"part.mcq.matrix wrong size": "Score matrise er av feil dimensjon.",
+	'part.mcq.correct choice': "Du valgte riktig svar.",    
+    
+	'part.matrix.invalid cell': "En eller flere av cellene i ditt svar er tomme eller ugyldige",
+	'part.matrix.some incorrect': "En eller flere av cellene i ditt svar er ikke riktig besvart, men du har fått poeng for resten",
+	'part.matrix.empty': "Du har ikke gitt noe svar.",
+	'part.matrix.empty cell': "En eller flere av cellene i ditt svar er tomme.",    
 
 	'part.gapfill.feedback header': '<strong>Boks %i</strong>',
 	
@@ -224,15 +226,22 @@ R.registerLocale('nb-NO',{
 	"question.error": "Spørsmål %i: %s",
 	"question.preamble.error": "Feil i startkoden: %s",
 	"question.preamble.syntax error": "Syntaks feil i startkoden",
-	'question.unsupported part type': "Unsupported part type",
+	'question.unsupported part type': "Ikke gyldig svartype",
 	'question.header': "Spørsmål %i",
 	'question.substituting': "Feil ved substituering av innhold: <br/>%s<br/>%s",
 	'question.submit part': "Send inn svar",
-	'question.show steps': "Vis tips",
+	'question.show steps': "Vis tips", 
+	'question.show steps penalty': "Du vil miste <strong>%s</strong> %s.",
+	'question.show steps no penalty': "Din score vil ikke bli påvirket.",
+	'question.show steps already penalised': "Du har allerede vist tips. Du kan se tips på nytt uten å tape poeng.",
+	'question.hide steps': "Skjul tips",
+	'question.hide steps no penalty': "Din score vil ikke bli påvirket.",    
 	'question.advice': "Tips",
 	'question.no such part': "Finner ikke spørsmål %s",
 	'question.can not submit': "Kan ikke sende inn svar - sjekk mulige feil.",
-	'question.answer submitted': "Svaret er sendt inn",
+	'question.answer submitted': "Svaret er sendt inn",  
+	'question.unsubmitted changes.several parts': "Du har gjort endringer i dine svar, men ikke sendt de inn. Vennligst se over svarene og klikk <strong>Send inn alle delsvar</strong>.",
+	'question.unsubmitted changes.one part': "Du har gjort endring i svaret, men ikke sendt det inn. Vennligst sjekk svaret og klikk <strong>Send inn svar</strong>.",    
 	
 	'question.score feedback.show': 'Vis vurdering',
 	'question.score feedback.hide': 'Skjul vurdering',
@@ -240,8 +249,13 @@ R.registerLocale('nb-NO',{
 	'question.score feedback.answered total': "%(marksString). Besvart.",
 	'question.score feedback.answered actual': "Poengsum: %(scoreString)",
 	'question.score feedback.answered': "Besvart.",
+	'question.score feedback.unanswered': "Ubesvart.",    
 	'question.score feedback.unanswered total': "%(marksString).",
-	
+	'question.score feedback.correct': 'Ditt svar er riktig',
+	'question.score feedback.partial': 'Ditt svar er delvis riktig',
+	'question.score feedback.wrong': 'Ditt svar er feil',  
+	'question.selector.unsubmitted changes': "Endringer som ikke er sendt inn.",    
+    
 	'timing.no accumulator': "no timing accumulator %s",
 	'timing.time remaining': "Tid igjen: %s",
 	
@@ -250,7 +264,9 @@ R.registerLocale('nb-NO',{
 	'xml.property not boolean': "Egenskap %s må være en boolsk verdi, men er ikke (%s), i node %s",
 	"xml.error in variable definition": "Feil ved definisjon av variabel <code>%s<\/code>",
 
-	'scorm.failed save': "Skriving av data til serveren feilet. Det er mulig at din økt med svar og poengsum ikke ble lagret. Vennligst send til <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> straks og behold dette vinduet i nettleseren åpent om mulig.",
+	'scorm.error initialising': "Feil ved initiering av SCORM protokoll: %s",
+    
+	'scorm.failed save': "<p>Skriving av data til serveren feilet. Klikk <b>OK</b> og prøv en gang til.</p>\n<p>Hvis denne feilen gjentar seg ofte bør du sjekke forbindelsen til internet eller prøve en annen datamaskin. Dine tidligere innsendte svar er lagret og blir gjentatt hvis du fortsette økten på en annen datamaskin.</p>\n<p> Hvis denne gjentar seg ofte og du kan ikke lagre <em>noen</em> svar bør du ta kontakt med din lærer.</p>",
 	"scorm.no exam suspend data": "Kan ikke fortsette: finner ikke sesjonsdata.",
 	"scorm.error loading suspend data": "Feil ved lasting av sesjonsdata: %s",
 	"scorm.error loading question": "Feil ved lasting av spørsmål %s: %s",

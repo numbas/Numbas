@@ -183,8 +183,9 @@ ko.bindingHandlers.pulse = {
 	init: function() {
 	},
 	update: function(element,valueAccessor) {
-		valueAccessor()();
-		$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+		if(valueAccessor()()) {
+			$(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+		}
 	}
 };
 
@@ -412,7 +413,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	showLoadProgress: function()
 	{
 		var p= 100 * Numbas.schedule.completed / Numbas.schedule.total;
-		$('#progressbar #completed').width(p+'%');
+		$('#loading .progress-bar').width(p+'%');
 	},
 
 	/** Initialise the display. Called as soon as the page loads.
@@ -450,6 +451,20 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 		Numbas.exam.display.questions().map(function(q) {
 			q.init();
 		});
+
+		// hide the side nav when you click a question selector
+		$('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
+		});
+
+		// bind buttons in the modals
+		$('.modal button.ok').on('click',function() {
+			display.modal.ok();
+			display.modal.ok = display.modal.cancel = function() {};
+		})
+		$('.modal button.cancel').on('click',function() {
+			display.modal.cancel();
+			display.modal.ok = display.modal.cancel = function() {};
+		})
 	},
 
 	/** Does an input element currently have focus?
@@ -460,15 +475,23 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	//alert / confirm boxes
 	//
 
+	/** Callback functions for the modals
+	 * @type {object}
+	 */
+	modal: {
+		ok: function() {},
+		cancel: function() {}
+	},
+
 	/** Show an alert dialog
 	 * @param {string} msg - message to show the user
 	 * @param {function} fnOK - callback when OK is clicked
 	 */
 	showAlert: function(msg,fnOK) {
 		fnOK = fnOK || function() {};
-		$.prompt(msg,{overlayspeed: 'fast', close: function() {
-			fnOK();
-		}});
+		this.modal.ok = fnOK;
+		$('#alert-modal .modal-body').html(msg);
+		$('#alert-modal').modal('show');
 	},
 
 	/** Show a confirmation dialog box
@@ -477,12 +500,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 	 * @param {function} fnCancel - callback if cancelled
 	 */
 	showConfirm: function(msg,fnOK,fnCancel) {
-		fnOK = fnOK || function(){};
-		fnCancel = fnCancel || function(){};
-
-		$.prompt(msg,{overlayspeed: 'fast', buttons:{Ok:true,Cancel:false},submit: function(e,val){
-				val ? fnOK() : fnCancel(); 
-		}});
+		this.modal.ok = fnOK || function(){};
+		this.modal.cancel = fnCancel || function(){};
+		$('#confirm-modal .modal-body').html(msg);
+		$('#confirm-modal').modal('show');
 	},
 
 	/** Make MathJax typeset any maths in the selector
@@ -571,6 +592,18 @@ display.ExamDisplay = function(e)
 	 */
 	this.currentQuestion = ko.observable(null);
 
+	/** What kind of view are we in at the moment? 'infopage' or 'question'
+	 * @member {observable|string} viewType
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	this.viewType = ko.computed(function() {
+		if(this.infoPage()) {
+			return 'infopage';
+		} else if(this.currentQuestion()) {
+			return 'question';
+		}
+	},this);
+
 	/** The number of the current question
 	 * @member {observable|number} currentQuestionNumber 
 	 * @memberof Numbas.display.ExamDisplay
@@ -654,6 +687,51 @@ display.ExamDisplay = function(e)
 	 */
 	this.displayTime = ko.observable('');
 
+	function formatTime(t) {
+		var h = t.getHours();
+		var m = t.getMinutes();
+		var s = t.getSeconds();
+		return t.toDateString() + ' ' + h+':'+m+':'+s;
+	}
+
+	/** Time the exam started, formatted for display
+	 * @mamber {observable|string} startTime
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	var _startTime = ko.observable();
+	this.startTime = ko.computed({
+		read: function() {
+			var t = _startTime();
+			if(t) {
+				return formatTime(new Date(t));
+			} else {
+				return '';
+			}
+		},
+		write: function(v) {
+			return _startTime(v);
+		}
+	});
+
+	/** Time the exam ended, formatted for display
+	 * @mamber {observable|string} endTime
+	 * @memberof Numbas.display.ExamDisplay
+	 */
+	var _endTime = ko.observable();
+	this.endTime = ko.computed({
+		read: function() {
+			var t = _endTime();
+			if(t) {
+				return formatTime(new Date(t));
+			} else {
+				return '';
+			}
+		},
+		write: function(v) {
+			return _endTime(v);
+		}
+	});
+
 	/** The total time the student has spent in the exam
 	 * @member {observable|string} timeSpent
 	 * @memberof Numbas.display.ExamDisplay
@@ -703,7 +781,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 	/** Update the timer */
 	showTiming: function()
 	{
-		this.displayTime(R('timing.time remaining',Numbas.timing.secsToDisplayTime(this.exam.timeRemaining)));
+		this.displayTime(Numbas.timing.secsToDisplayTime(this.exam.timeRemaining));
 		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
 	},
 
@@ -762,6 +840,8 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 
 		case "result":
 			this.result(exam.result);
+			this.startTime(exam.start);
+			this.endTime(exam.stop);
 			
 			break;
 
@@ -773,6 +853,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		case "exit":
 			break;
 		}
+		this.hideNavMenu();
 	},
 
 	/** Show the current question */
@@ -793,6 +874,14 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		{
 			display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
 			this.madeCarousel = true;
+		}
+		this.hideNavMenu();
+	},
+
+	/* Hide the sliding side menu*/
+	hideNavMenu: function() {
+		if($('#navMenu').data('bs.offcanvas')) {
+			$('#navMenu').offcanvas('hide');
 		}
 	},
 
@@ -877,6 +966,12 @@ display.QuestionDisplay = function(q)
 		return this.visited() || exam.settings.navigateBrowse;
 	},this);
 
+	/** Number of parts in this question
+	 * @member {observable|number} numParts
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
+	this.numParts = ko.observable(q.parts.length);
+
 	/** Student's current score ({@link Numbas.Question#score})
 	 * @member {observable|number} score
 	 * @memberof Numbas.display.QuestionDisplay
@@ -954,6 +1049,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		var qd = this;
 		var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
 		html.addClass('jme-scope').data('jme-scope',q.scope);
+		html.find('table').wrap('<div class="table-responsive">');	// wrap tables so they have a scrollbar when they overflow
 		$('#questionDisplay').append(html);
 
 		qd.css = document.createElement('style');
@@ -1016,7 +1112,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.revealAnswer();
 		
 		//display score if appropriate
-		this.showScore();
+		this.showScore(true);
 		
 		//scroll back to top of page
 		scroll(0,0);
@@ -1046,7 +1142,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 	},
 
 	/** Display question score and answer state */
-	showScore: function()
+	showScore: function(noUpdate)
 	{
 		var q = this.question;
 		var exam = q.exam;
@@ -1054,7 +1150,9 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.score(q.score);
 		this.marks(q.marks);
 		this.answered(q.answered);
-		this.scoreFeedback.update(true);
+		if(!noUpdate) {
+			this.scoreFeedback.update(true);
+		}
 
 		var anyAnswered = false;
 		for(var i=0;i<q.parts.length;i++)
@@ -1078,6 +1176,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		{
 			q.parts[i].display.init();
 		}
+		this.numParts(q.parts.length);
 	},
 
 	/** Called when the exam ends */
@@ -1195,6 +1294,30 @@ display.PartDisplay = function(p)
 	this.showFeedbackToggler = ko.computed(function() {
 		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
 	});
+
+	/* Show the "submit part" button?
+	 * @member {observable|boolean} showSubmitPart
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showSubmitPart = ko.computed(function() {
+		return this.question.display.numParts()>1 && !(this.revealed() || !this.isDirty());
+	},this);
+
+	/* Show the marks feedback?
+	 * @member {observable|boolean} showMarks
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showMarks = ko.computed(function() {
+		return this.question.display.numParts()>1 && this.scoreFeedback.message();
+	}, this);
+
+	/* Should the box containing part marks and the submit and feedback buttons be shown?
+	 * @member {observable|boolean} showFeedbackBox
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.showFeedbackBox = ko.computed(function() {
+		return this.marks()>0 && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
+	},this);
 
 	/** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
 	 * @member {observable|boolean} stepsShown
@@ -1314,18 +1437,20 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 		this.feedbackShown(false);
 
-		this.showScore(this.part.answered);
+		this.showScore(this.part.answered,true);
 	},
 
 	/** Show/update the student's score and answer status on this part */
-	showScore: function(valid)
+	showScore: function(valid,noUpdate)
 	{
 		var p = this.part;
 		var exam = p.question.exam;
 
 		this.score(p.score);
 		this.marks(p.marks);
-		this.scoreFeedback.update(true);
+		if(!noUpdate) {
+			this.scoreFeedback.update(true);
+		}
 
 		if(valid===undefined)
 			valid = this.part.validate();
@@ -1772,6 +1897,8 @@ display.MultipleResponsePartDisplay = function()
 		return obs;
 	}
 
+	this.layout = util.copyarray(p.layout);
+
 	switch(p.type) {
 	case '1_n_2':
 		/** Index of student's current answer choice (not necessarily submitted)
@@ -2067,7 +2194,8 @@ function showScoreFeedback(obj,settings)
 				return newScore();
 			},
 			write: function() {
-				newScore(!newScore());
+				newScore(true);
+				newScore(false);
 			}
 		}),
 		message: ko.computed(function() {
@@ -2102,6 +2230,8 @@ function showScoreFeedback(obj,settings)
 				return 'icon-ok';
 			case 'partial':
 				return 'icon-ok partial';
+			default:
+				return 'invisible';
 			}
 		}),
 		iconAttr: ko.computed(function() {

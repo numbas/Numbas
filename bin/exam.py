@@ -137,6 +137,7 @@ class Exam:
 				'reverse': True,
 				'browse': True,
 				'showfrontpage': True,
+				'showresultspage': True,
 				'onleave': Event('onleave','none','You have not finished the current question'),
 				'preventleave': True,
 			}
@@ -170,7 +171,7 @@ class Exam:
 
 		if haskey(data,'navigation'):
 			nav = data['navigation']
-			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','preventleave'],exam.navigation)
+			tryLoad(nav,['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave'],exam.navigation)
 			if 'onleave' in nav:
 				tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -242,6 +243,7 @@ class Exam:
 			'reverse': strcons_fix(self.navigation['reverse']), 
 			'browse': strcons_fix(self.navigation['browse']),
 			'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
+			'showresultspage': strcons_fix(self.navigation['showresultspage']),
 			'preventleave': strcons_fix(self.navigation['preventleave'])
 		}
 
@@ -896,6 +898,8 @@ class MultipleChoicePart(Part):
 	displayType = 'radiogroup'
 	displayColumns = 1
 	warningType = 'none'
+	layoutType = 'all'
+	layoutExpression = ''
 	
 	def __init__(self,kind,marks=0,prompt=''):
 		self.kind = kind
@@ -932,6 +936,10 @@ class MultipleChoicePart(Part):
 		if haskey(data,'answers'):
 			for answer in data['answers']:
 				part.answers.append(answer)
+
+		if haskey(data,'layout'):
+			tryLoad(data['layout'],'type',part,'layoutType')
+			tryLoad(data['layout'],'expression',part,'layoutExpression')
 	
 		if haskey(data,'matrix'):
 			part.matrix = data['matrix']
@@ -947,7 +955,7 @@ class MultipleChoicePart(Part):
 
 	def toxml(self):
 		part = Part.toxml(self)
-		appendMany(part,['choices','answers',['marking','matrix','maxmarks','minmarks','distractors','warning']])
+		appendMany(part,['choices','answers','layout',['marking','matrix','maxmarks','minmarks','distractors','warning']])
 
 		choices = part.find('choices')
 		choices.attrib = {
@@ -965,6 +973,12 @@ class MultipleChoicePart(Part):
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		for answer in self.answers:
 			answers.append(makeTree(['answer',makeContentNode(answer)]))
+
+		layout = part.find('layout')
+		layout.attrib = {
+			'type': self.layoutType,
+			'expression': self.layoutExpression,
+		}
 
 		marking = part.find('marking')
 		marking.find('maxmarks').attrib = {'enabled': strcons_fix(self.maxMarksEnabled), 'value': strcons_fix(self.maxMarks)}

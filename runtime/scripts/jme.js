@@ -2486,6 +2486,7 @@ newBuiltin('intersection',[TSet,TSet],TSet,setmath.intersection);
 newBuiltin('or',[TSet,TSet],TSet,setmath.union);
 newBuiltin('and',[TSet,TSet],TSet,setmath.intersection);
 newBuiltin('-',[TSet,TSet],TSet,setmath.minus);
+newBuiltin('abs',[TSet],TNum,setmath.size);
 
 newBuiltin('in',['?',TSet],TBool,null,{
 	evaluate: function(args,scope) {

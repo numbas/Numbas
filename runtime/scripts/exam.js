@@ -43,7 +43,7 @@ function Exam()
 	tryGetAttribute(settings,xml,'.',['name','percentPass']);
 	tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
 
-	tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','preventLeave']);
+	tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','showResultsPage','preventLeave']);
 
 	//get navigation events and actions
 	settings.navigationEvents = {};
@@ -147,6 +147,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 * @property {boolean} navigateReverse - can student navigate to previous question?
 	 * @property {boolean} navigateBrowse - can student jump to any question they like?
 	 * @property {boolean} showFrontPage - show the frontpage before starting the exam?
+	 * @property {boolean} showResultsPage - show the results page after finishing the exam?
 	 * @property {Array.object} navigationEvents - checks to perform when doing certain navigation action
 	 * @property {Array.object} timerEvents - events based on timing
 	 * @property {number} duration - how long is exam? (seconds)
@@ -168,6 +169,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		navigateReverse: false,		
 		navigateBrowse: false,		
 		showFrontPage: true,		
+		showResultsPage: true,		
 		navigationEvents: {},		
 		timerEvents: {},			
 		duration: 0,				
@@ -702,12 +704,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 			Numbas.store.end();
 		}
 
-		//display the results
 		this.display.end();
-		this.display.showInfoPage( 'result' );
 
 		for(var i=0;i<this.questionList.length;i++) {
 			this.questionList[i].revealAnswer(true);
+		}
+
+		//display the results
+		if(this.settings.showResultsPage) {
+			this.display.showInfoPage( 'result' );
+		} else {
+			this.exit();
 		}
 	},
 

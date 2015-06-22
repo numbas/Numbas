@@ -200,6 +200,11 @@
 				test('Numbas.math',function() {
 					equals(Numbas.math.countSigFigs('1.10'),3,"math.countSigFigs('1.10')==3");
 					equals(Numbas.math.countSigFigs('-1.10'),3,"math.countSigFigs('-1.10')==3");
+					equals(Numbas.math.countSigFigs('1.23e6'),3,"math.countSigFigs('1.23e6')==3");
+					equals(Numbas.math.countSigFigs('1.23e-6'),3,"math.countSigFigs('1.23e-6')==3");
+					equals(Numbas.math.countSigFigs('1.23E6'),3,"math.countSigFigs('1.23e6')==3");
+					equals(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
+					equals(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
 				});
 
 				var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
@@ -798,6 +803,8 @@
 					equals(simplifyExpression('2/(4i)',['all']),'1/(2i)','2/(4i) cancels the integer factor');
 					equals(simplifyExpression('2i/(4i)',['all']),'1/2','2i/(4i) cancels the i');
 					equals(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
+					equals(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
+					equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
