@@ -18,11 +18,17 @@ R.registerLocale('nl-NL',{
 	'page.loading': "Bezig met laden ...",
 	"page.saving": "<p>Gegevens worden opgeslagen.<\/p>\n<p>Dit kan even duren.<\/p>",
 
+	'mathjax.math processing error': "MathJax processing error: \"%s\" when texifying <code>%s</code>",
+
 	"die.numbas failed": "Er is een fout opgetreden",
 	"die.sorry": "Sorry, Numbas is een probleem tegengekomen en kan niet verder. Hieronder staat een beschrijving van het probleem.",
 	"die.error": "Probleem",
 
+	'modal.ok': "OK",
+	'modal.cancel': "Annuleren",
+
 	"exam.random seed": "Sessie ID:",
+	'exam.student name': "Naam student:",
 	"exam.passed": "Gehaald",
 	"exam.failed": "Niet gehaald",
 	"exam.review header": "Review: ",
@@ -33,6 +39,7 @@ R.registerLocale('nl-NL',{
 	'exam.time allowed': "Beschikbare tijd:",
 	'frontpage.start': "Start",
 
+	'suspend.paused header': "Gepauzeerd",
 	'suspend.exam suspended': "De toets is onderbroken. Klik Ga door om verder te gaan.",
 	'suspend.you can resume': "Volgende keer dat je de toets opstart kun je verder gaan met deze sessie.",
 	'suspend.resume': "Ga door",
@@ -125,6 +132,7 @@ R.registerLocale('nl-NL',{
 	"jme.variables.error making function": "Fout tijdens genereren functie <code>%s<\/code>: %s",
 	"jme.variables.syntax error in function definition": "Syntax error in functie definitie",
 	"jme.variables.error evaluating variable": "Fout bij berekenen variabele %s: %s",
+	'jme.variables.question took too many runs to generate variables': "Een geldige set vraag variabelen werd niet gegenereerd in de tijd.",
 
 	'jme.display.unknown token type': "Kan token van type %s niet naar TeX vertalen",
 	'jme.display.collectRuleset.no sets': 'Geen sets opgegeven aan collectRuleset!',
@@ -203,12 +211,17 @@ R.registerLocale('nl-NL',{
 	"part.mcq.matrix mix of numbers and lists": "Mix van getallen en lijsten gebruikt in de score matrix.",
 	"part.mcq.matrix wrong size": "Score matrix heeft de verkeerde afmetingen.",
 
+	'part.matrix.invalid cell': "Eén of meer van de cellen in antwoord leeg of ongeldig.",
+	'part.matrix.some incorrect': "Een of meer van de cellen in uw antwoord onjuist is, maar je hebt gekregen cijfers voor de rest.",
+	'part.matrix.empty': "U hebt geen antwoord ingevuld",
+	'part.matrix.empty cell': "Eén of meer van de cellen in antwoord leeg.",
+
 	'part.gapfill.feedback header': '<strong>Vak %i</strong>',
 	
 	"question.loaded name mismatch": "Kan deze poging niet hervatten - de toets is veranderd sinds de vorige sessie.",
 	"question.error": "Vraag %i: %s",
 	"question.preamble.error": "Fout in preamble: %s",
-	"question.preamble.syntax error": "Syntax error in preamble",
+	"question.preamble.syntax error": "Syntaxisfout in preamble",
 	"question.show steps penalty": "Je verliest <strong>%s<\/strong> %s.",
 	"question.show steps no penalty": "Je score verandert niet.",
 	"question.show steps already penalised": "Je hebt de stappen al bekeken. Je kunt ze nog eens bekijken zonder opnieuw punten te verliezen.",
@@ -247,6 +260,7 @@ R.registerLocale('nl-NL',{
 	'xml.property not boolean': "Property %s moet een boolean zijn maar is het niet (%s), in node %s",
 	"xml.error in variable definition": "Fout in definitie van variabele <code>%s<\/code>",
 
+	'scorm.error initialising': "Fout initialiseren SCORM protocol: %s",
 	'scorm.failed save': "De gegevens konden niet opgeslagen worden op de server. Je huidige sessie, inclusief antwoorden en scores, is misschien niet bewaard. Je kunt het nog eens proberen. Mail naar <a href=\"mailto:numbas@ncl.ac.uk\">numbas@ncl.ac.uk</a> als dit vaker voorkomt.",
 	"scorm.no exam suspend data": "Hervatten mislukt: geen toetsgegevens gevonden.",
 	"scorm.error loading suspend data": "Fout bij het laden van toetsgegevens: %s",
