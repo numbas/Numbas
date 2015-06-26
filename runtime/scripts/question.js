@@ -974,6 +974,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Compute the correct answer, based on the given scope
+	 * Anything to do with marking that depends on the scope should be in this method, and calling it witha new scope should update all the settings used by the marking algorithm.
 	 * @abstract
 	 */
 	getCorrectAnswer: function(scope) {},
@@ -2404,7 +2405,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			default:
 				throw(new Numbas.Error('part.mcq.matrix not a list'));
 			}
-			console.log(this.path,matrix);
 			if(this.flipped) {
 				matrix = Numbas.matrixmath.transpose(matrix);
 			}
