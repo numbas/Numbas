@@ -973,6 +973,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.submitting = false;
 	},
 
+	/** Compute the correct answer, based on the given scope
+	 * @abstract
+	 */
+	getCorrectAnswer: function(scope) {},
+
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
 	 * @abstract
 	 */
@@ -1111,24 +1116,12 @@ var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, l
 	if(!answerMathML)
 		throw(new Numbas.Error('part.jme.answer missing',this.path));
 
-	tryGetAttribute(settings,this.xml,'answer/correctanswer','simplification','answerSimplification');
+	tryGetAttribute(settings,this.xml,'answer/correctanswer','simplification','answerSimplificationString');
 
-	settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplification,this.question.scope.rulesets);
+	settings.correctAnswerString = Numbas.xml.getTextContent(answerMathML).trim();
 
-	settings.correctAnswer = jme.display.simplifyExpression(
-		Numbas.xml.getTextContent(answerMathML).trim(),
-		settings.answerSimplification,
-		this.question.scope
-	);
-	if(settings.correctAnswer == '' && this.marks>0) {
-		throw(new Numbas.Error('part.jme.answer missing',this.path));
-	}
+	this.getCorrectAnswer(this.question.scope);
 
-	this.markingScope = new jme.Scope(this.question.scope);
-	this.markingScope.variables = {};
-
-	settings.displaySimplification = '';
-	
 	//get checking type, accuracy, checking range
 	var parametersPath = 'answer';
 	tryGetAttribute(settings,this.xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
@@ -1220,8 +1213,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	/** Properties set when the part is generated.
 	 *
 	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {jme} correctAnswerString - the definition of the correct answer, without variables substituted into it.
 	 * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-	 * @property {string[]} names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
+	 * @property {string} answerSimplificationString - string from the XML defining which answer simplification rules to use
+	 * @property {string[]} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
 	 * @property {string} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
 	 * @property {number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
 	 * @property {number} failureRate - comparison failures allowed before we decide answers are different
@@ -1245,8 +1240,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	settings: 
 	{
+		correctAnswerString: '',
 		correctAnswer: '',
 
+		answerSimplificationString: '',
 		answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
 		
 		checkingType: 'RelDiff',
@@ -1275,6 +1272,27 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		notAllowedPC: 0,
 		notAllowedMessage: '',
 		notAllowedShowStrings: false
+	},
+
+	/** Compute the correct answer, based on the given scope
+	 */
+	getCorrectAnswer: function(scope) {
+		var settings = this.settings;
+
+		settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.rulesets);
+
+		settings.correctAnswer = jme.display.simplifyExpression(
+			settings.correctAnswerString,
+			settings.answerSimplification,
+			scope
+		);
+		if(settings.correctAnswer == '' && this.marks>0) {
+			throw(new Numbas.Error('part.jme.answer missing',this.path));
+		}
+
+		this.markingScope = new jme.Scope(this.question.scope);
+		this.markingScope.variables = {};
+
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -1472,14 +1490,14 @@ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, quest
 	var settings = this.settings;
 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
-	settings.correctAnswer = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
-	settings.correctAnswer = '^'+jme.contentsubvars(settings.correctAnswer, question.scope)+'$';
+	settings.correctAnswerString = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
 		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
-	settings.displayAnswer = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
-	settings.displayAnswer = jme.contentsubvars(settings.displayAnswer,question.scope);
+	settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+
+	this.getCorrectAnswer(this.question.scope);
 
 	tryGetAttribute(settings,this.xml,'case',['sensitive','partialCredit'],'caseSensitive');
 
@@ -1499,17 +1517,30 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 
 	/** Properties set when the part is generated.
 	 * Extends {@link Numbas.parts.Part#settings}
+	 * @property {string} correctAnswerString - the definition of the correct answer, without variables substituted in.
 	 * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
+	 * @property {string} displayAnswerString - the definition of the display answer, without variables substituted in.
 	 * @property {string} displayAnswer - a representative correct answer to display when answers are revealed
 	 * @property {boolean} caseSensitive - does case matter?
 	 * @property {number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
 	 */
 	settings: 
 	{
+		correctAnswerString: '.*',
 		correctAnswer: /.*/,
+		displayAnswerString: '',
 		displayAnswer: '',
 		caseSensitive: false,
 		partialCredit: 0
+	},
+
+	/** Compute the correct answer, based on the given scope
+	 */
+	getCorrectAnswer: function(scope) {
+		var settings = this.settings;
+
+		settings.correctAnswer = '^'+jme.contentsubvars(settings.correctAnswerString, scope)+'$';
+		settings.displayAnswer = jme.contentsubvars(settings.displayAnswerString,scope);
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -1577,51 +1608,21 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
  */
 var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
 {
-	var evaluate = jme.evaluate, compile = jme.compile;
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalue','maxvalue'],{string:true});
+	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','inputstep','allowfractions'],['correctAnswerFraction','inputStep','allowFractions']);
 
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
-	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
-	settings.precision = jme.subvars(settings.precision, this.question.scope);
-	settings.precision = evaluate(settings.precision,this.question.scope).value;
+	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
 	if(settings.precisionType!='none') {
 		settings.allowFractions = false;
 	}
 
-	var minvalue = jme.subvars(settings.minvalue,this.question.scope);
-	minvalue = evaluate(minvalue,this.question.scope);
-	if(minvalue && minvalue.type=='number')
-		minvalue = minvalue.value;
-	else
-		throw(new Numbas.Error('part.setting not present','minimum value',this.path,this.question.name));
-
-	var maxvalue = jme.subvars(settings.maxvalue,this.question.scope);
-	maxvalue = evaluate(maxvalue,this.question.scope);
-	if(maxvalue && maxvalue.type=='number')
-		maxvalue = maxvalue.value;
-	else
-		throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
-
-	var fudge = 0.00000000001;
-	switch(settings.precisionType) {
-	case 'dp':
-		minvalue = math.precround(minvalue,settings.precision);
-		maxvalue = math.precround(maxvalue,settings.precision);
-		break;
-	case 'sigfig':
-		minvalue = math.siground(minvalue,settings.precision);
-		maxvalue = math.siground(maxvalue,settings.precision);
-		break;
-	}
-
-	settings.minvalue = minvalue - fudge;
-	settings.maxvalue = maxvalue + fudge;
+	this.getCorrectAnswer(this.question.scope);
 
 	var messageNode = this.xml.selectSingleNode('answer/precision/message');
 	if(messageNode)
@@ -1650,7 +1651,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
+	 * @property {number} minvalueString - definition of minimum value, before variables are substituted in
 	 * @property {number} minvalue - minimum value marked correct
+	 * @property {number} maxvalueString - definition of maximum value, before variables are substituted in
 	 * @property {number} maxvalue - maximum value marked correct
 	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
 	 * @property {boolean} integerAnswer - must the answer be an integer?
@@ -1658,6 +1661,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
 	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {number} precisionString - definition of precision setting, before variables are substituted in
 	 * @property {number} precision - how many decimal places or significant figures to require
 	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
@@ -1676,6 +1680,46 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		precision: 0,
 		precisionPC: 0,
 		precisionMessage: R('You have not given your answer to the correct precision.')
+	},
+
+	/** Compute the correct answer, based on the given scope
+	 */
+	getCorrectAnswer: function(scope) {
+		var settings = this.settings;
+
+		var precision = jme.subvars(settings.precisionString, scope);
+		settings.precision = scope.evaluate(precision).value;
+
+		var minvalue = jme.subvars(settings.minvalueString,scope);
+		minvalue = scope.evaluate(minvalue);
+		if(minvalue && minvalue.type=='number') {
+			minvalue = minvalue.value;
+		} else {
+			throw(new Numbas.Error('part.setting not present','minimum value',this.path,this.question.name));
+		}
+
+		var maxvalue = jme.subvars(settings.maxvalueString,scope);
+		maxvalue = scope.evaluate(maxvalue);
+		if(maxvalue && maxvalue.type=='number') {
+			maxvalue = maxvalue.value;
+		} else {
+			throw(new Numbas.Error('part.setting not present','maximum value',this.path,this.question.name));
+		}
+
+		switch(settings.precisionType) {
+		case 'dp':
+			minvalue = math.precround(minvalue,settings.precision);
+			maxvalue = math.precround(maxvalue,settings.precision);
+			break;
+		case 'sigfig':
+			minvalue = math.siground(minvalue,settings.precision);
+			maxvalue = math.siground(maxvalue,settings.precision);
+			break;
+		}
+
+		var fudge = 0.00000000001;
+		settings.minvalue = minvalue - fudge;
+		settings.maxvalue = maxvalue + fudge;
 	},
 
 	/** Tidy up the student's answer - remove space, and get rid of comma separators
@@ -1748,40 +1792,18 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
  * @augments Numbas.parts.Part
  */
 var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
-	var evaluate = jme.evaluate, compile = jme.compile;
 	var settings = this.settings;
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswer'],{string:true});
+	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
 	settings.tolerance = Math.max(settings.tolerance,0.00000000001);
 
-	var correctAnswer = jme.subvars(settings.correctAnswer,this.question.scope);
-	correctAnswer = evaluate(correctAnswer,this.question.scope);
-	if(correctAnswer && correctAnswer.type=='matrix') {
-		settings.correctAnswer = correctAnswer.value;
-	} else if(correctAnswer && correctAnswer.type=='vector') {
-		settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
-	} else {
-		throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
-	}
-
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
-	tryGetAttribute(settings,this.xml,'answer/precision','precision','precision',{'string':true});
-	settings.precision = jme.subvars(settings.precision, this.question.scope);
-	settings.precision = evaluate(settings.precision,this.question.scope).value;
+	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
 	if(settings.precisionType!='none') {
 		settings.allowFractions = false;
-	}
-
-	switch(settings.precisionType) {
-	case 'dp':
-		settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
-		break;
-	case 'sigfig':
-		settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
-		break;
 	}
 
 	this.studentAnswer = [];
@@ -1797,6 +1819,8 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
 	if(messageNode) {
 		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 	}
+
+	this.getCorrectAnswer(this.question.scope);
 
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
 
@@ -1842,6 +1866,35 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		precision: 0,
 		precisionPC: 0,	//fraction of credit to take away if precision wrong
 		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
+	},
+
+	/** Compute the correct answer, based on the given scope
+	 */
+	getCorrectAnswer: function(scope) {
+		var settings = this.settings;
+
+		var correctAnswer = jme.subvars(settings.correctAnswerString,scope);
+		correctAnswer = jme.evaluate(correctAnswer,scope);
+		if(correctAnswer && correctAnswer.type=='matrix') {
+			settings.correctAnswer = correctAnswer.value;
+		} else if(correctAnswer && correctAnswer.type=='vector') {
+			settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
+		} else {
+			throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
+		}
+
+		settings.precision = jme.subvars(settings.precisionString, scope);
+		settings.precision = jme.evaluate(settings.precision,scope).value;
+
+		switch(settings.precisionType) {
+		case 'dp':
+			settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+			break;
+		case 'sigfig':
+			settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+			break;
+		}
+
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -1966,119 +2019,112 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	var settings = this.settings;
 	util.copyinto(MultipleResponsePart.prototype.settings,settings);
 
-
 	//work out marks available
 	tryGetAttribute(settings,this.xml,'marking/maxmarks','enabled','maxMarksEnabled');
-	if(settings.maxMarksEnabled)
-	{
+	if(settings.maxMarksEnabled) {
 		tryGetAttribute(this,this.xml,'marking/maxmarks','value','marks');
-	}
-	else
-	{
+	} else {
 		tryGetAttribute(this,this.xml,'.','marks');
 	}
 
 	//get minimum marks setting
 	tryGetAttribute(settings,this.xml,'marking/minmarks','enabled','minMarksEnabled');
-	if(settings.minMarksEnabled)
-	{
+	if(settings.minMarksEnabled) {
 		tryGetAttribute(this.settings,this.xml,'marking/minmarks','value','minimumMarks');
 	}
 
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
-	if(!choicesNode)
+	if(!choicesNode) {
 		throw(new Numbas.Error('part.mcq.choices missing',this.path));
+	}
 
 	tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
 
-	var minAnswers = jme.subvars(settings.minAnswers, question.scope);
+	var minAnswers = jme.subvars(settings.minAnswers, this.question.scope);
 	minAnswers = jme.evaluate(settings.minAnswers,this.question.scope);
-	if(minAnswers && minAnswers.type=='number')
+	if(minAnswers && minAnswers.type=='number') {
 		settings.minAnswers = minAnswers.value;
-	else
+	} else {
 		throw(new Numbas.Error('part.setting not present','minimum answers',this.path,this.question.name))
+	}
+
 	var maxAnswers = jme.subvars(settings.maxAnswers, question.scope);
 	maxAnswers = jme.evaluate(settings.maxAnswers,this.question.scope);
-	if(maxAnswers && maxAnswers.type=='number')
+	if(maxAnswers && maxAnswers.type=='number') {
 		settings.maxAnswers = maxAnswers.value;
-	else
+	} else {
 		throw(new Numbas.Error('part.setting not present','maximum answers',this.path,this.question.name))
+	}
 
 	var choiceNodes = choicesNode.selectNodes('choice');
-	this.numChoices = choiceNodes.length;
+
+	var answersNode, answerNodes;
 	
 	//get number of answers and answer order setting
-	if(this.type == '1_n_2' || this.type == 'm_n_2')
-	{
-		this.numAnswers = 1;
-	}
-	else
-	{
-		var answersNode = this.xml.selectSingleNode('answers');
-		if(answersNode)
-		{
+	if(this.type == '1_n_2' || this.type == 'm_n_2') {
+		// the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
+		// so swap "answers" and "choices"
+		// this all stems from an extremely bad design decision made very early on
+		this.flipped = true;
+		this.numAnswers = choiceNodes.length;
+		this.numChoices = 1;
+		settings.answerOrder = settings.choiceOrder;
+		settings.choiceOrder = '';
+		answersNode = choicesNode;
+		answerNodes = choiceNodes;
+		choicesNode = null;
+	} else {
+		this.flipped = false;
+		this.numChoices = choiceNodes.length;
+		answersNode = this.xml.selectSingleNode('answers');
+		if(answersNode) {
 			tryGetAttribute(settings,null,answersNode,'order','answerOrder');
-			var answerNodes = answersNode.selectNodes('answer');
+			answerNodes = answersNode.selectNodes('answer');
 			this.numAnswers = answerNodes.length;
 		}
 	}
 
 	//get warning type and message for wrong number of choices
 	warningNode = this.xml.selectSingleNode('marking/warning');
-	if(warningNode)
-	{
+	if(warningNode) {
 		tryGetAttribute(settings,null,warningNode,'type','warningType');
 	}
 	
-	if(loading)
-	{
+	if(loading) {
 		var pobj = Numbas.store.loadMultipleResponsePart(this);
 		this.shuffleChoices = pobj.shuffleChoices;
 		this.shuffleAnswers = pobj.shuffleAnswers;
 		this.ticks = pobj.ticks;
-	}
-	else
-	{
-		this.shuffleChoices=[];
-		if(settings.choiceOrder=='random')
-		{
+	} else {
+		this.shuffleChoices = [];
+		if(settings.choiceOrder=='random') {
 			this.shuffleChoices = math.deal(this.numChoices);
-		}
-		else
-		{
+		} else {
 			this.shuffleChoices = math.range(this.numChoices);
 		}
 
-		this.shuffleAnswers=[];
-		if(settings.answerOrder=='random')
-		{
+		this.shuffleAnswers = [];
+		if(settings.answerOrder=='random') {
 			this.shuffleAnswers = math.deal(this.numAnswers);
-		}
-		else
-		{
+		} else {
 			this.shuffleAnswers = math.range(this.numAnswers);
 		}
 	}
 
-	//apply shuffling to XML nodes
-	for(var i=0;i<this.numChoices;i++)
-	{
-		choicesNode.removeChild(choiceNodes[i]);
+	// apply shuffling to XML nodes, so the HTML to display is generated in the right order
+	for(i=0;i<this.numAnswers;i++) {
+		answersNode.removeChild(answerNodes[i]);
 	}
-	for(i=0;i<this.numChoices;i++)
-	{
-		choicesNode.appendChild(choiceNodes[this.shuffleChoices[i]]);
+	for(i=0;i<this.numAnswers;i++) {
+		answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
 	}
-	if(this.type == 'm_n_x')
-	{
-		for(i=0;i<this.numAnswers;i++)
-		{
-			answersNode.removeChild(answerNodes[i]);
+	if(this.type == 'm_n_x') {
+		for(var i=0;i<this.numChoices;i++) {
+			choicesNode.removeChild(choiceNodes[i]);
 		}
-		for(i=0;i<this.numAnswers;i++)
-		{
-			answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
+		for(i=0;i<this.numChoices;i++) {
+			choicesNode.appendChild(choiceNodes[this.shuffleChoices[i]]);
 		}
 	}
 
@@ -2088,7 +2134,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		var layoutNode = this.xml.selectSingleNode('layout');
 		tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
 		var layoutTypes = {
-			all: function(row,column){ return true; },
+			all: function(row,column) { return true; },
 			lowertriangle: function(row,column) { return row>=column; },
 			strictlowertriangle: function(row,column) { return row>column; },
 			uppertriangle: function(row,column) { return row<=column; },
@@ -2097,8 +2143,8 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		};
 		if(settings.layoutType=='expression') {
 			// expression can either give a 2d array (list of lists) or a matrix
-			// note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row]
-			// it's easier for question authors to go [row][column], but it's too late to change the internals of the part to match that now
+			// note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
+			// it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
 			// I have only myself to thank for this - CP
 			var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,this.question.scope));
 		}
@@ -2111,9 +2157,9 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			layout.push(row);
 		}
 	} else {
-		for(var i=0;i<this.numChoices;i++) {
+		for(var i=0;i<this.numAnswers;i++) {
 			var row = [];
-			for(var j=0;j<this.numAnswers;j++) {
+			for(var j=0;j<this.numChoices;j++) {
 				row.push(true);
 			}
 			layout.push(row);
@@ -2125,173 +2171,86 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	this.shuffleAnswers = math.inverse(this.shuffleAnswers);
 
 	//fill marks matrix
-	var matrix=[];
 	var def;
-	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def'))
-	{
-		matrix = jme.evaluate(def,this.question.scope);
-		switch(matrix.type) {
-		case 'list':
-			var numLists = 0;
-			var numNumbers = 0;
-			for(var i=0;i<matrix.value.length;i++) {
-				switch(matrix.value[i].type) {
-				case 'list':
-					numLists++;
-					break;
-				case 'number':
-					numNumbers++;
-					break;
-				default:
-					throw(new Numbas.Error('part.mcq.matrix wrong type',matrix.value[i].type));
-				}
-			}
-			if(numLists == matrix.value.length)
-			{
-				matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
-					return row.value.map(function(e){return e.value;});
-				});
-			}
-			else if(numNumbers == matrix.value.length)
-			{
-				matrix = matrix.value.map(function(e) {
-					return [e.value];
-				});
-			}
-			else {
-				throw(new Numbas.Error('part.mcq.matrix mix of numbers and lists'));
-			}
-			matrix.rows = matrix.length;
-			matrix.columns = matrix[0].length;
-			break;
-		case 'matrix':
-			matrix = matrix.value;
-			break;
-		default:
-			throw(new Numbas.Error('part.mcq.matrix not a list'));
-		}
-		if(matrix.length!=this.numChoices)
-			throw(new Numbas.Error('part.mcq.matrix wrong size'));
-
-		// take into account shuffling;
-		var omatrix = matrix;
-		var matrix = [];
-		matrix.rows = omatrix.rows;
-		matrix.columns = omatrix.columns;
-		for(var i=0;i<this.numChoices;i++) {
-			matrix[i]=[];
-			if(omatrix[i].length!=this.numAnswers)
-				throw(new Numbas.Error('part.mcq.matrix wrong size'));
-		}
-		for(var i=0; i<this.numChoices; i++) {
-			for(var j=0;j<this.numAnswers; j++) {
-				matrix[this.shuffleChoices[i]][this.shuffleAnswers[j]] = omatrix[i][j];
-			}
-		}
-
-		if(this.type=='m_n_x')
-			matrix = Numbas.matrixmath.transpose(matrix);
-
-	}
-	else
-	{
+	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def')) {
+		settings.markingMatrixString = def;
+	} else {
 		var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
-		for( i=0; i<matrixNodes.length; i++ )
-		{
+		var markingMatrixArray = settings.markingMatrixArray = [];
+		for( i=0; i<this.numAnswers; i++ ) {
+			markingMatrixArray.push([]);
+		}
+		for( i=0; i<matrixNodes.length; i++ ) {
 			var cell = {value: ""};
 			tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
 
-			if(util.isFloat(cell.value))
-				cell.value = parseFloat(cell.value);
-			else
-			{
-				cell.value = jme.evaluate(cell.value,this.question.scope).value;
-				if(!util.isFloat(cell.value))
-					throw(new Numbas.Error('part.mcq.matrix not a number',this.path,cell.answerIndex,cell.choiceIndex));
-				cell.value = parseFloat(cell.value);
+			if(this.flipped) {
+				// possible answers are recorded as choices in the multiple choice types.
+				// switch the indices round, so we don't have to worry about this again
+				cell.answerIndex = cell.choiceIndex;
+				cell.choiceIndex = 0;
 			}
 
 			//take into account shuffling
 			cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
 			cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
 
-			if(this.type == '1_n_2' || this.type == 'm_n_2')
-			{	//for some reason, possible answers are recorded as choices in the multiple choice types.
-				//switch the indices round, so we don't have to worry about this again
-				cell.answerIndex = cell.choiceIndex;
-				cell.choiceIndex = 0;
-			}
-
-			if(!matrix[cell.answerIndex])
-				matrix[cell.answerIndex]=[];
-			matrix[cell.answerIndex][cell.choiceIndex] = cell.value;
-		}
-	}
-	for(var i=0;i<matrix.length;i++) {
-		var l = matrix[i].length;
-		for(var j=0;j<l;j++) {
-			if(!this.layout[i][j]) {
-				matrix[i][j] = 0;
-			}
+			markingMatrixArray[cell.answerIndex][cell.choiceIndex] = cell.value;
 		}
 	}
 
-	settings.matrix = matrix;
-
-	var distractors=[];
+	var distractors = [];
+	for( i=0; i<this.numAnswers; i++ ) {
+		distractors.push([]);
+	}
 	var distractorNodes = this.xml.selectNodes('marking/distractors/distractor');
 	for( i=0; i<distractorNodes.length; i++ )
 	{
 		var cell = {message: ""};
 		tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
-		cell.message= $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
-		cell.message= jme.contentsubvars(cell.message,question.scope);
+		cell.message = $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+		cell.message = jme.contentsubvars(cell.message,question.scope);
+
+		if(this.type == '1_n_2' || this.type == 'm_n_2') {	
+			// possible answers are recorded as choices in the multiple choice types.
+			// switch the indices round, so we don't have to worry about this again
+			cell.answerIndex = cell.choiceIndex;
+			cell.choiceIndex = 0;
+		}
 
 		//take into account shuffling
 		cell.answerIndex = this.shuffleAnswers[cell.answerIndex];
 		cell.choiceIndex = this.shuffleChoices[cell.choiceIndex];
 
-		if(this.type == '1_n_2' || this.type == 'm_n_2')
-		{	//for some reason, possible answers are recorded as choices in the multiple choice types.
-			//switch the indices round, so we don't have to worry about this again
-			cell.answerIndex = cell.choiceIndex;
-			cell.choiceIndex = 0;
-		}
-
-		if(!distractors[cell.answerIndex])
-			distractors[cell.answerIndex]=[];
 		distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
 	}
 	settings.distractors = distractors;
 
-	if(settings.maxAnswers==0)
-	{
-		if(this.type=='1_n_2')
-			settings.maxAnswers = 1;
-		else
-			settings.maxAnswers = this.numAnswers * this.numChoices;
+	if(this.type=='1_n_2') {
+		settings.maxAnswers = 1;
+	} else if(settings.maxAnswers==0) {
+		settings.maxAnswers = this.numAnswers * this.numChoices;
 	}
+
+	this.getCorrectAnswer(this.question.scope);
+	var matrix = this.settings.matrix;
 	
-	if(this.marks == 0)	//if marks not set explicitly
-	{
+	if(this.marks == 0) {	//if marks not set explicitly
 		var flat = [];
 		switch(this.type)
 		{
 		case '1_n_2':
-			for(var i=0;i<matrix.length;i++)
-			{
+			for(var i=0;i<matrix.length;i++) {
 				flat.push(matrix[i][0]);
 			}
 			break;
 		case 'm_n_2':
-			for(var i=0;i<matrix.length;i++)
-			{
+			for(var i=0;i<matrix.length;i++) {
 				flat.push(matrix[i][0]);
 			}
 			break;
 		case 'm_n_x':
-			if(settings.displayType=='radiogroup')
-			{
+			if(settings.displayType=='radiogroup') {
 				for(var i=0;i<this.numChoices;i++)
 				{
 					var row = [];
@@ -2302,71 +2261,48 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 					row.sort(function(a,b){return a>b ? 1 : a<b ? -1 : 0});
 					flat.push(row[row.length-1]);
 				}
-			}
-			else
-			{
-				for(var i=0;i<matrix.length;i++)
-				{
+			} else {
+				for(var i=0;i<matrix.length;i++) {
 					flat = flat.concat(matrix[i]);
 				}
 			}
 			break;
 		}
 		flat.sort(function(a,b){return a>b ? 1 : a<b ? -1 : 0});
-		for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--)
-		{
+		for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
 			this.marks+=flat[i];
 		}
 	}
 
-
-	if(this.type == '1_n_2' || this.type == 'm_n_2')
-	{	//because we swapped answers and choices round in the marking matrix
-		this.numAnswers = this.numChoices;
-		this.numChoices = 1;
-		var flipped = true;
-	}
-	else
-		var flipped=false;
-
 	//restore saved choices
-	if(loading)
-	{
+	if(loading) {
 		this.stagedAnswer = [];
-		for( i=0; i<this.numAnswers; i++ )
-		{
+		for( i=0; i<this.numAnswers; i++ ) {
 			this.stagedAnswer.push([]);
-			for( var j=0; j<this.numChoices; j++ )
-			{
+			for( var j=0; j<this.numChoices; j++ ) {
 				this.stagedAnswer[i].push(false);
 			}
 		}
-		for( i=0;i<this.numAnswers;i++)
-		{
-			for(j=0;j<this.numChoices;j++)
-			{
-				if(pobj.ticks[i][j])
+		for( i=0;i<this.numAnswers;i++) {
+			for(j=0;j<this.numChoices;j++) {
+				if(pobj.ticks[i][j]) {
 					this.stagedAnswer[i][j]=true;
+				}
 			}
 		}
-	}
-	else
-	{
+	} else {
 		//ticks array - which answers/choices are selected?
 		this.ticks = [];
 		this.stagedAnswer = [];
-		for( i=0; i<this.numAnswers; i++ )
-		{
+		for( i=0; i<this.numAnswers; i++ ) {
 			this.ticks.push([]);
 			this.stagedAnswer.push([]);
-			for( var j=0; j<this.numChoices; j++ )
-			{
+			for( var j=0; j<this.numChoices; j++ ) {
 				this.ticks[i].push(false);
 				this.stagedAnswer[i].push(false);
 			}
 		}
 	}
-
 
 	//if this part has a minimum number of answers more than zero, then
 	//we start in an error state
@@ -2396,6 +2332,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	 */
 	numAnswers: 0,
 
+	/** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)
+	 * @type {boolean}
+	 */
+	flipped: false,
+
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
@@ -2417,6 +2358,110 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		matrix: [],					//marks matrix
 		displayType: '',			//how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
 		warningType: ''				//what to do if wrong number of responses
+	},
+
+	/** Compute the correct answer, based on the given scope
+	 */
+	getCorrectAnswer: function(scope) {
+		var settings = this.settings;
+
+		var matrix = [];
+		if(settings.markingMatrixString) {
+			matrix = jme.evaluate(settings.markingMatrixString,scope);
+			switch(matrix.type) {
+			case 'list':
+				var numLists = 0;
+				var numNumbers = 0;
+				for(var i=0;i<matrix.value.length;i++) {
+					switch(matrix.value[i].type) {
+					case 'list':
+						numLists++;
+						break;
+					case 'number':
+						numNumbers++;
+						break;
+					default:
+						throw(new Numbas.Error('part.mcq.matrix wrong type',matrix.value[i].type));
+					}
+				}
+				if(numLists == matrix.value.length) {
+					matrix = matrix.value.map(function(row){	//convert TNums to javascript numbers
+						return row.value.map(function(e){return e.value;});
+					});
+				} else if(numNumbers == matrix.value.length) {
+					matrix = matrix.value.map(function(e) {
+						return [e.value];
+					});
+				} else {
+					throw(new Numbas.Error('part.mcq.matrix mix of numbers and lists'));
+				}
+				matrix.rows = matrix.length;
+				matrix.columns = matrix[0].length;
+				break;
+			case 'matrix':
+				matrix = matrix.value;
+				break;
+			default:
+				throw(new Numbas.Error('part.mcq.matrix not a list'));
+			}
+			console.log(this.path,matrix);
+			if(this.flipped) {
+				matrix = Numbas.matrixmath.transpose(matrix);
+			}
+			if(matrix.length!=this.numChoices) {
+				throw(new Numbas.Error('part.mcq.matrix wrong size'));
+			}
+
+			// take into account shuffling;
+			var omatrix = matrix;
+			var matrix = [];
+			matrix.rows = omatrix.rows;
+			matrix.columns = omatrix.columns;
+			for(var i=0;i<this.numChoices;i++) {
+				matrix[i]=[];
+				if(omatrix[i].length!=this.numAnswers) {
+					throw(new Numbas.Error('part.mcq.matrix wrong size'));
+				}
+			}
+			for(var i=0; i<this.numChoices; i++) {
+				for(var j=0;j<this.numAnswers; j++) {
+					matrix[this.shuffleChoices[i]][this.shuffleAnswers[j]] = omatrix[i][j];
+				}
+			}
+
+			matrix = Numbas.matrixmath.transpose(matrix);
+		} else {
+			for(var i=0;i<this.numAnswers;i++) {
+				var row = [];
+				matrix.push(row);
+				for(var j=0;j<this.numChoices;j++) {
+					var value = settings.markingMatrixArray[i][j];
+
+					if(util.isFloat(value)) {
+						value = parseFloat(value);
+					} else {
+						value = jme.evaluate(value,scope).value;
+						if(!util.isFloat(value)) {
+							throw(new Numbas.Error('part.mcq.matrix not a number',this.path,i,j));
+						}
+						value = parseFloat(value);
+					}
+
+					row[j] = value;
+				}
+			}
+		}
+
+		for(var i=0;i<matrix.length;i++) {
+			var l = matrix[i].length;
+			for(var j=0;j<l;j++) {
+				if(!this.layout[i][j]) {
+					matrix[i][j] = 0;
+				}
+			}
+		}
+
+		settings.matrix = matrix;
 	},
 
 	/** Store the student's choices */
