@@ -245,6 +245,46 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		return {variables: scope.variables, conditionSatisfied: conditionSatisfied};
 	},
 
+	/** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
+	 * @param {object} todo - dictionary of variables mapped to their definitions
+	 * @param {string[]} variables - list of variable names whose dependants we should find
+	 * @returns {object} - a copy of the todo list, only including the dependants of the given variables
+	 */
+	variableDependants: function(todo,ancestors) {
+		var out = {}
+		var dependants = {};
+		function findDependants(name) {
+			if(name in dependants) {
+				return dependants[name];
+			}
+			var d = [];
+			todo[name].vars.map(function(name2) {
+				d = d.concat(name2,findDependants(name2));
+			});
+			var o = [];
+			d.map(function(name2) {
+				if(!o.contains(name2)) {
+					o.push(name2);
+				}
+			});
+			dependants[name] = o;
+			return o;
+		}
+		for(var name in todo) {
+			findDependants(name);
+		}
+		var out = {};
+		for(var name in dependants) {
+			for(i=0;i<ancestors.length;i++) {
+				if(dependants[name].contains(ancestors[i])) {
+					out[name] = todo[name];
+					break;
+				}
+			}
+		}
+		return out;
+	},
+
 	/** Substitute variables into a DOM element (works recursively on the element's children)
 	 *
 	 * Ignores iframes and elements with the attribute `nosubvars`.

@@ -137,6 +137,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 	});
 
 	job(function() {
+		var variablesTodo = q.variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
 		if(loading)
 		{
 			var qobj = Numbas.store.loadQuestion(q);
@@ -147,7 +148,6 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		}
 		else
 		{
-			var variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
 			q.variablesTest = {
 				condition: '',
 				maxRuns: 10
@@ -353,29 +353,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		doc.appendChild(q.originalXML.cloneNode(true));	//get a fresh copy of the original XML, to sub variables into
 		q.xml = doc.selectSingleNode('question');
 		q.xml.setAttribute('number',q.number);
-
-		job(function() {
-			//sub vars into math nodes
-			var mathsNodes = q.xml.selectNodes('descendant::math');
-			for( var i=0; i<mathsNodes.length; i++ )
-			{
-				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-				expr = jme.subvars(expr,q.scope);
-				Numbas.xml.setTextContent(mathsNodes[i],expr);
-			}
-			//turn content maths into LaTeX
-			mathsNodes = q.xml.selectNodes('descendant::content/descendant::math');
-			for( var i=0; i<mathsNodes.length; i++ )
-			{
-				var expr = Numbas.xml.getTextContent(mathsNodes[i]);
-				expr = jme.subvars(expr,q.scope);
-				var tex = jme.display.exprToLaTeX(expr,null,q.scope);
-				Numbas.xml.setTextContent( mathsNodes[i], tex );
-			}
-
-			//sub into question name
-			q.name = jme.subvars(q.name,q.scope);
-		});
+		q.name = jme.subvars(q.name,q.scope);
 	},
 
 	/** Get the part object corresponding to a path
@@ -973,8 +951,45 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.submitting = false;
 	},
 
+	/** Replace variables with student's answers to previous parts
+	 * @returns {Numbas.jme.Scope}
+	 */
+	errorCarriedForwardScope: function() {
+		// dictionary of variables to replace
+		var replace = this.settings.errorCarriedForwardReplacements;
+
+		// fill scope with new values of those variables
+		var new_variables = {}
+		for(var name in replace) {
+		  var p2 = this.question.getPart(replace[name]);
+		  if(p2.answered) {
+			new_variables[name] = p2.studentAnswerAsJME()
+		  }
+		}
+		var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
+
+		// get names of replaced variables
+		var replaced = [];
+		for(var name in replace) {
+		  replaced.push(name);
+		}
+
+		// find dependent variables which need to be recomputed
+		var todo = Numbas.jme.variables.variableDependants(this.question.variablesTodo,replaced);
+		for(var name in todo) {
+		  delete scope.variables[name];
+		}
+
+		// compute those variables
+		var nv = Numbas.jme.variables.makeVariables(todo,scope);
+		scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+
+		return scope;
+	},
+
 	/** Compute the correct answer, based on the given scope
 	 * Anything to do with marking that depends on the scope should be in this method, and calling it witha new scope should update all the settings used by the marking algorithm.
+	 * @param {Numbas.jme.Scope} scope
 	 * @abstract
 	 */
 	getCorrectAnswer: function(scope) {},
@@ -983,6 +998,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @abstract
 	 */
 	setStudentAnswer: function() {},
+
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+	},
 
 	/* Function which marks the student's answer
 	 * @abstract
@@ -1282,8 +1304,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
 		settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.rulesets);
 
+		var expr = jme.subvars(settings.correctAnswerString,scope);
 		settings.correctAnswer = jme.display.simplifyExpression(
-			settings.correctAnswerString,
+			expr,
 			settings.answerSimplification,
 			scope
 		);
@@ -1300,6 +1323,14 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	setStudentAnswer: function() {
 		this.studentAnswer = this.answerList[0];
+	},
+
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return new Numbas.jme.types.TExpression(Numbas.jme.compile(this.studentAnswer));
 	},
 
 	/** Mark the student's answer
@@ -1550,6 +1581,14 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		this.studentAnswer = this.answerList[0];
 	},
 
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return new Numbas.jme.types.TString(this.studentAnswer);
+	},
+
 	/** Mark the student's answer
 	 */
 	mark: function ()
@@ -1741,6 +1780,18 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		this.studentAnswer = this.cleanAnswer(this.answerList[0]);
 	},
 
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return new Numbas.jme.types.TNum(this.studentAnswerAsFloat());
+	},
+
+	studentAnswerAsFloat: function() {
+		return util.parseNumber(this.studentAnswer,this.settings.allowFractions);
+	},
+
 	/** Mark the student's answer */
 	mark: function()
 	{
@@ -1752,7 +1803,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		
 		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions) )
 		{
-			var answerFloat = util.parseNumber(this.studentAnswer,this.settings.allowFractions);
+			var answerFloat = this.studentAnswerAsFloat();
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue )
 			{
 				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0)
@@ -1906,6 +1957,40 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		this.studentAnswer = this.stagedAnswer[2];
 	},
 
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return new Numbas.jme.types.TMatrix(this.studentAnswerAsMatrix());
+	},
+
+	studentAnswerAsMatrix: function() {
+		var rows = this.studentAnswerRows;
+		var columns = this.studentAnswerColumns;
+
+		var studentMatrix = [];
+		for(var i=0;i<rows;i++) {
+			var row = [];
+			for(var j=0;j<columns;j++) {
+				var cell = this.studentAnswer[i][j];
+				var n = util.parseNumber(cell,this.settings.allowFractions);
+				
+				if(isNaN(n)) {
+					return null;
+				} else {
+					row.push(n);
+				}
+			}
+			studentMatrix.push(row);
+		}
+
+		studentMatrix.rows = rows;
+		studentMatrix.columns = columns;
+		
+		return studentMatrix;
+	},
+
 	/** Mark the student's answer */
 	mark: function()
 	{
@@ -1918,32 +2003,26 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		var correctMatrix = this.settings.correctAnswer;
 
 		if(this.studentAnswer) {
-			var precisionOK = true;
-			var rows = this.studentAnswerRows;
-			var columns = this.studentAnswerColumns;
+			var studentMatrix = this.studentAnswerAsMatrix();
 
-			var studentMatrix = [];
-			this.invalidCell = false;
-			for(var i=0;i<rows;i++) {
-				var row = [];
-				for(var j=0;j<columns;j++) {
-					var cell = this.studentAnswer[i][j];
-					var n = util.parseNumber(cell,this.settings.allowFractions);
-					
-					if(isNaN(n)) {
-						this.setCredit(0,R('part.matrix.invalid cell'));
-						this.invalidCell = true;
-						return;
-					} else {
-						row.push(n);
-						precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
-					}
-				}
-				studentMatrix.push(row);
+			if(studentMatrix===null) {
+				this.setCredit(0,R('part.matrix.invalid cell'));
+				this.invalidCell = true;
+				return;
+			} else {
+				this.invalidCell = false;
 			}
 
-			studentMatrix.rows = rows;
-			studentMatrix.columns = columns;
+			var precisionOK = true;
+			for(var i=0;i<rows;i++) {
+				for(var j=0;j<columns;j++) {
+					var cell = this.studentAnswer[i][j];
+					precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
+				}
+			}
+
+			var rows = studentMatrix.rows;
+			var columns = studentMatrix.columns;
 
 			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
 			if(this.wrongSize) {
@@ -2493,6 +2572,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		this.ticks = util.copyarray(this.stagedAnswer,true);
 	},
 
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return Numbas.jme.wrapValue(this.ticks);
+	},
+
 	/** Mark the student's choices */
 	mark: function()
 	{
@@ -2633,6 +2720,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	{
 		for(var i=0; i<this.gaps.length; i++)
 			this.gaps[i].revealAnswer(dontStore);
+	},
+
+	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	studentAnswerAsJME: function() {
+		return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
 	},
 
 	/** Submit all of the child gaps.
