@@ -618,6 +618,15 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		this.stepsMarks += step.marks;
 	}
 
+	var replacementNodes = xml.selectNodes('adaptivemarking/variablereplacements/replace');
+	this.settings.errorCarriedForwardReplacements = {};
+	for(var i=0;i<replacementNodes.length;i++) {
+		var n = replacementNodes[i];
+		var variable = n.getAttribute('variable');
+		var path = n.getAttribute('part');
+		this.settings.errorCarriedForwardReplacements[variable] = path;
+	}
+
 	this.markingFeedback = [];
 
 	this.scripts = {};
@@ -919,6 +928,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		else
 		{
 			this.setDirty(false);
+
+			var scope = this.errorCarriedForwardScope();
+			this.getCorrectAnswer(scope);
+
 			this.mark();
 			this.answered = this.validate();
 		}

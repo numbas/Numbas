@@ -530,6 +530,7 @@ class Part:
 		self.prompt = prompt
 		self.steps = []
 		self.scripts = {}
+		self.variable_replacements = {}
 
 	@staticmethod
 	def fromDATA(data):
@@ -569,10 +570,20 @@ class Part:
 			for name,script in data['scripts'].items():
 				part.scripts[name] = script
 
+		if haskey(data,'variableReplacements'):
+			part.variable_replacements = {vr['variable']:vr['part'] for vr in data['variableReplacements']}
+
 		return part
 	
 	def toxml(self):
-		part = makeTree(['part',['prompt'],['steps'],['scripts']])
+		part = makeTree(['part',
+							['prompt'],
+							['steps'],
+							['scripts'],
+							['adaptivemarking',
+								['variablereplacements'],
+							]
+						])
 
 		part.attrib = {
 			'type': strcons_fix(self.kind), 
@@ -598,6 +609,15 @@ class Part:
 			}
 			script_element.text = strcons_fix(script_dict.get('script',''))
 			scripts.append(script_element)
+
+		variable_replacements = part.find('adaptivemarking/variablereplacements')
+		for variable,path in self.variable_replacements.items():
+			replacement = etree.Element('replace')
+			replacement.attrib = {
+				'variable': variable,
+				'part': path
+			}
+			variable_replacements.append(replacement)
 
 		return part
 
