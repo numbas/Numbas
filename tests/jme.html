@@ -225,6 +225,18 @@
 					closeEquals(evaluate('y',scope).type,'name','undefined variable remains a TName')
 					closeEquals(evaluate('x',scope).value,1,'substitute variable x=1')
 					closeEquals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
+
+					var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+1'));
+					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
+					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
+					var s = Numbas.jme.display.treeToJME(tree);
+					closeEquals(s,'(x + 1)/2','Substitute TExpression')
+
+					var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+n'));
+					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
+					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
+					var s = Numbas.jme.display.treeToJME(tree);
+					closeEquals(s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
 				});
 
 				test('Literals',function() {
