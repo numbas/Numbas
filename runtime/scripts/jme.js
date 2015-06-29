@@ -431,10 +431,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				}
 				else
 				{
-					if(scope.variables[name].tok)
-						return scope.variables[name];
-					else
-						return {tok: scope.variables[name]};
+					var v = scope.variables[name];
+					if(v.type=='expression') {
+						return jme.substituteTree(v.tree,scope,allowUnbound);
+					} else if(v.tok) {
+						return v;
+					} else {
+						return {tok: v};
+					}
 				}
 			}
 			else {
@@ -445,8 +449,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					args: tree.args.slice()};
 			substituteTreeOps[tree.tok.name](tree,scope,allowUnbound);
 			return tree;
-		} else
-		{
+		} else {
 			tree = {
 				tok: tree.tok,
 				args: tree.args.slice()
@@ -1372,6 +1375,13 @@ TOp.prototype.type = 'op';
 var TPunc = types.TPunc = function(kind)
 {
 	this.type = kind;
+}
+
+var TExpression = types.TExpression = function(tree) {
+	this.tree = tree;
+}
+TExpression.prototype = {
+	type: 'expression'
 }
 
 
