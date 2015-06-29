@@ -1460,7 +1460,7 @@ var synonyms = jme.synonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset'];
 
 var rightAssociative = {
 	'^': true,
@@ -2297,6 +2297,13 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
 	}
 });
 
+newBuiltin('isset',[TName],TBool,null, {
+	evaluate: function(args,scope) {
+		var name = args[0].tok.name;
+		return new TBool(name in scope.variables);
+	}
+});
+
 newBuiltin('map',['?',TName,'?'],TList, null, {
 	evaluate: function(args,scope)
 	{
@@ -2862,6 +2869,9 @@ var substituteTreeOps = jme.substituteTreeOps = {
 		for(var i=1;i<tree.args.length-1;i+=2) {
 			tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
 		}
+	},
+	'isset': function(tree,scope,allowUnbound) {
+		return tree;
 	}
 };
 
@@ -2915,6 +2925,9 @@ var findvarsOps = jme.findvarsOps = {
 		for(var i=1;i<tree.args.length;i++)
 			vars = vars.merge(findvars(tree.args[i],boundvars));
 		return vars;
+	},
+	'isset': function(tree,boundvars,scope) {
+		return [];
 	}
 }
 
