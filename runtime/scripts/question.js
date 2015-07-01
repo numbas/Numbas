@@ -767,13 +767,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
 	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
+	 * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
 	 */
 	settings: 
 	{
 		stepsPenalty: 0,
 		enableMinimumMarks: false,
 		minimumMarks: 0,
-		showCorrectAnswer: true
+		showCorrectAnswer: true,
+		hasVariableReplacements: false
 	},
 
 	applyScripts: function() {
