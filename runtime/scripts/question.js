@@ -610,7 +610,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	this.steps = [];
 
 	//load steps
-	var stepNodes = xml.selectNodes('steps/part');
+	var stepNodes = this.xml.selectNodes('steps/part');
 	for(var i=0; i<stepNodes.length; i++)
 	{
 		var step = createPart( stepNodes[i], this.path+'s'+i,this.question, this, loading);
@@ -618,7 +618,10 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		this.stepsMarks += step.marks;
 	}
 
-	var replacementNodes = xml.selectNodes('adaptivemarking/variablereplacements/replace');
+	var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
+	tryGetAttribute(this.settings,this.xml,variableReplacementsNode,['strategy'],['variableReplacementStrategy'])
+
+	var replacementNodes = variableReplacementsNode.selectNodes('replace');
 	this.settings.errorCarriedForwardReplacements = {};
 	for(var i=0;i<replacementNodes.length;i++) {
 		var n = replacementNodes[i];
@@ -628,9 +631,10 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	}
 
 	this.markingFeedback = [];
+	this.warnings = [];
 
 	this.scripts = {};
-	var scriptNodes = xml.selectNodes('scripts/script');
+	var scriptNodes = this.xml.selectNodes('scripts/script');
 	for(var i=0;i<scriptNodes.length; i++) {
 		var name = scriptNodes[i].getAttribute('name');
 		var order = scriptNodes[i].getAttribute('order');
@@ -707,9 +711,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	score: 0,
 	
 	/** Messages explaining how marks were awarded
-	 * @type {feedbackmessage}
+	 * @type {feedbackmessage[]}
 	 */
 	markingFeedback: [],
+
+	/** Warnings shown next to the student's answer
+	 * @type {string[]}
+	 */
+	warnings: [],
 
 	/** Has the student changed their answer since last submitting?
 	 * @type {boolean}
@@ -806,11 +815,29 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	display: undefined,
 
 	/** Give the student a warning about this part. 	
+	 * @param {string} warning
 	 * @see {Numbas.display.PartDisplay.warning}
 	 */
 	giveWarning: function(warning)
 	{
+		this.warnings.push(warning);
 		this.display.warning(warning);
+	},
+
+	/** Set the list of warnings
+	 * @param {string[]} warnings
+	 * @see {Numbas.display.PartDisplay.warning}
+	 */
+	setWarnings: function(warnings) {
+		this.warnings = warnings;
+		this.display.setWarnings(warnings);
+	},
+
+	/** Remove all warnings
+	 * @see {Numbas.display.PartDisplay.warning}
+	 */
+	removeWarnings: function() {
+		this.setWarnings([]);
 	},
 
 	/** Calculate the student's score based on their submitted answers
@@ -929,11 +956,37 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		{
 			this.setDirty(false);
 
-			var scope = this.errorCarriedForwardScope();
-			this.getCorrectAnswer(scope);
+			// adaptive marking:
+			// try marking against correct answer, and then do variable replacements
 
-			this.mark();
-			this.answered = this.validate();
+			// save existing feedback
+			var existing_feedback = {
+				warnings: this.warnings.slice(),
+				markingFeedback: this.markingFeedback.slice()
+			};
+
+			var result;
+
+			switch(this.settings.variableReplacementStrategy) {
+			case 'originalfirst':
+				var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
+				// if less than full credit, try variable replacments
+				if(!result_original.answered || result_original.credit<1) {
+					var result_replacement = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
+					result = result_replacement.answered && result_replacement.credit>result_original.credit ? result_replacement : result_original;
+				} else {
+					result = result_original;
+				}
+				break;
+			case 'alwaysreplace':
+				result = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
+				break;
+			}
+
+			this.setWarnings(result.warnings);
+			this.markingFeedback = result.markingFeedback;
+			this.credit = result.credit;
+			this.answered = result.answered;
 		}
 
 		if(this.stepsShown)
@@ -962,6 +1015,30 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.display.showScore(this.answered);
 
 		this.submitting = false;
+	},
+
+	/** Calculate the correct answer in the given scope, and mark the student's answer
+	 * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
+	 * @param {object} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+	 * @returns {object} - dictionary with `warnings` {string[]}, `markingFeedback` {feedbackmessage[]}, `validation` {object}, `credit` {number} and `answered` {boolean}
+	 */
+	markAgainstScope: function(scope,feedback) {
+		this.setWarnings(feedback.warnings.slice());
+		this.markingFeedback = feedback.markingFeedback.slice();
+		this.validation = {};
+
+		this.getCorrectAnswer(scope);
+
+		this.mark();
+		this.answered = this.validate();
+
+		return {
+			warnings: this.warnings.slice(),
+			markingFeedback: this.markingFeedback.slice(),
+			validation: util.copyobj(this.validation),
+			credit: this.credit,
+			answered: this.answered
+		}
 	},
 
 	/** Replace variables with student's answers to previous parts
@@ -1350,6 +1427,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	mark: function()
 	{
+		var validation = this.validation;
+
 		if(this.answerList==undefined)
 		{
 			this.setCredit(0,R('part.marking.nothing entered'));
@@ -1369,20 +1448,20 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		if(this.settings.checkVariableNames) {
 			var tree = jme.compile(this.studentAnswer,this.question.scope);
 			var usedvars = jme.findvars(tree);
-			this.failExpectedVariableNames = false;
+			validation.failExpectedVariableNames = false;
 			for(var i=0;i<usedvars.length;i++) {
 				if(!this.settings.expectedVariableNames.contains(usedvars[i].toLowerCase())) {
-					this.failExpectedVariableNames = true;
-					this.unexpectedVariableName = usedvars[i];
+					validation.failExpectedVariableNames = true;
+					validation.unexpectedVariableName = usedvars[i];
 					break;
 				}
 			}
 		}
 
-		this.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
-		this.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
-		this.failNotAllowed = false;
-		this.failMustHave = false;
+		validation.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
+		validation.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
+		validation.failNotAllowed = false;
+		validation.failMustHave = false;
 
 		//did student actually write anything?
 		this.answered = this.studentAnswer.length > 0;
@@ -1396,16 +1475,13 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
 		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'').toLowerCase();
 		//see if student answer contains any forbidden strings
-		for( i=0; i<this.settings.notAllowed.length; i++ )
-		{
+		for( i=0; i<this.settings.notAllowed.length; i++ ) {
 			if(noSpaceAnswer.contains(this.settings.notAllowed[i].toLowerCase())) { this.failNotAllowed = true; }
 		}
 
-		if(!this.failNotAllowed)
-		{
+		if(!validation.failNotAllowed) {
 			//see if student answer contains all the required strings
-			for( i=0; i<this.settings.mustHave.length; i++ )
-			{
+			for( i=0; i<this.settings.mustHave.length; i++ ) {
 				if(!noSpaceAnswer.contains(this.settings.mustHave[i].toLowerCase())) { this.failMustHave = true; }
 			}
 		}
@@ -1414,16 +1490,16 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		//(can be modified if answer wrong length or fails string restrictions)
 		this.setCredit(1,R('part.jme.marking.correct'));
 
-		if(this.failMinLength)
+		if(validation.failMinLength)
 		{
 			this.multCredit(this.settings.minLengthPC,this.settings.minLengthMessage);
 		}
-		if(this.failMaxLength)
+		if(validation.failMaxLength)
 		{
 			this.multCredit(this.settings.maxLengthPC,this.settings.maxLengthMessage);
 		}
 
-		if(this.failMustHave)
+		if(validation.failMustHave)
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
@@ -1434,7 +1510,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
 		}
 
-		if(this.failNotAllowed)
+		if(validation.failNotAllowed)
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
@@ -1452,6 +1528,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	validate: function()
 	{
+		var validation = this.validation;
+
 		if(this.studentAnswer.length===0)
 		{
 			this.giveWarning(R('part.marking.not submitted'));
@@ -1463,8 +1541,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
 			var tree = jme.compile(this.studentAnswer,scope);
 			var varnames = jme.findvars(tree);
-			for(i=0;i<varnames.length;i++)
-			{
+			for(i=0;i<varnames.length;i++) {
 				scope.variables[varnames[i]]=new jme.types.TNum(0);
 			}
 			jme.evaluate(tree,scope);
@@ -1475,31 +1552,31 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			return false;
 		}
 
-		if( this.failExpectedVariableNames ) {
-			var suggestedNames = this.unexpectedVariableName.split(jme.re.re_short_name);
+		if( validation.failExpectedVariableNames ) {
+			var suggestedNames = validation.unexpectedVariableName.split(jme.re.re_short_name);
 			if(suggestedNames.length>3) {
 				var suggestion = [];
 				for(var i=1;i<suggestedNames.length;i+=2) {
 					suggestion.push(suggestedNames[i]);
 				}
 				suggestion = suggestion.join('*');
-				this.giveWarning(R('part.jme.unexpected variable name suggestion',this.unexpectedVariableName,suggestion));
+				this.giveWarning(R('part.jme.unexpected variable name suggestion',validation.unexpectedVariableName,suggestion));
 			}
 			else
-				this.giveWarning(R('part.jme.unexpected variable name', this.unexpectedVariableName));
+				this.giveWarning(R('part.jme.unexpected variable name', validation.unexpectedVariableName));
 		}
 
-		if( this.failMinLength)
+		if( validation.failMinLength)
 		{
 			this.giveWarning(this.settings.minLengthMessage);
 		}
 
-		if( this.failMaxLength )
+		if( validation.failMaxLength )
 		{
 			this.giveWarning(this.settings.maxLengthMessage);
 		}
 
-		if( this.failMustHave )
+		if( validation.failMustHave )
 		{
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
@@ -1510,7 +1587,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			}
 		}
 
-		if( this.failNotAllowed )
+		if( validation.failNotAllowed )
 		{
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
@@ -1606,8 +1683,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 */
 	mark: function ()
 	{
-		if(this.answerList==undefined)
-		{
+		var validation = this.validation;
+
+		if(this.answerList==undefined) {
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
@@ -1616,27 +1694,18 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );			
 		var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
 		
-		if( this.settings.caseSensitive )
-		{
-			if( caseSensitiveAnswer.test(this.studentAnswer) )
-			{
+		if( this.settings.caseSensitive ) {
+			if( caseSensitiveAnswer.test(this.studentAnswer) ) {
 				this.setCredit(1,R('part.marking.correct'));
-			}
-			else if(caseInsensitiveAnswer.test(this.studentAnswer))
-			{
+			} else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
 				this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
-			}
-			else
-			{
+			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
-		}else{
-			if(caseInsensitiveAnswer.test(this.studentAnswer))
-			{
+		} else {
+			if(caseInsensitiveAnswer.test(this.studentAnswer)) {
 				this.setCredit(1,R('part.marking.correct'));
-			}
-			else
-			{
+			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
 		}
@@ -1647,8 +1716,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 */
 	validate: function()
 	{
-		if(!this.answered)
+		if(!this.answered) {
 			this.giveWarning(R('part.marking.not submitted'));
+		}
 
 		return this.answered;
 	}
@@ -1808,22 +1878,22 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	/** Mark the student's answer */
 	mark: function()
 	{
-		if(this.answerList==undefined)
-		{
+		var validation = this.validation;
+
+		if(this.answerList==undefined) {
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
 		
-		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions) )
-		{
+		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions) ) {
 			var answerFloat = this.studentAnswerAsFloat();
-			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue )
-			{
-				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0)
+			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue ) {
+				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0) {
 					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except decimal'));
-				else
+				} else {
 					this.setCredit(1,R('part.marking.correct'));
-			}else{
+				}
+			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
 			this.answered = true;
@@ -1844,8 +1914,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 */
 	validate: function()
 	{
-		if(!this.answered)
+		if(!this.answered) {
 			this.giveWarning(R('part.marking.not submitted'));
+		}
 		
 		return this.answered;
 	}
@@ -2007,6 +2078,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Mark the student's answer */
 	mark: function()
 	{
+		var validation = this.validation;
+
 		if(this.answerList===undefined)
 		{
 			this.setCredit(0,R('part.marking.nothing entered'));
@@ -2020,10 +2093,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
 			if(studentMatrix===null) {
 				this.setCredit(0,R('part.matrix.invalid cell'));
-				this.invalidCell = true;
+				validation.invalidCell = true;
 				return;
 			} else {
-				this.invalidCell = false;
+				validation.invalidCell = false;
 			}
 
 			var precisionOK = true;
@@ -2037,8 +2110,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			var rows = studentMatrix.rows;
 			var columns = studentMatrix.columns;
 
-			this.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
-			if(this.wrongSize) {
+			validation.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
+			if(validation.wrongSize) {
 				this.answered = true;
 				this.setCredit(0,R('part.marking.incorrect'));
 				return;
@@ -2085,7 +2158,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 */
 	validate: function()
 	{
-		if(this.invalidCell) {
+		var validation = this.validation;
+
+		if(validation.invalidCell) {
 			this.giveWarning(R('part.matrix.invalid cell'));
 		} else if(!this.answered) {
 			this.giveWarning(R('part.matrix.empty cell'));
@@ -2596,38 +2671,33 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	/** Mark the student's choices */
 	mark: function()
 	{
-		if(this.stagedAnswer==undefined)
-		{
+		var validation = this.validation;
+
+		if(this.stagedAnswer==undefined) {
 			this.setCredit(0,R('part.marking.did not answer'));
 			return false;
 		}
 		this.setCredit(0);
 
-		this.numTicks = 0;
+		validation.numTicks = 0;
 		var partScore = 0;
-		for( i=0; i<this.numAnswers; i++ )
-		{
-			for(var j=0; j<this.numChoices; j++ )
-			{
-				if(this.ticks[i][j])
-				{
-					this.numTicks += 1;
+		for( i=0; i<this.numAnswers; i++ ) {
+			for(var j=0; j<this.numChoices; j++ ) {
+				if(this.ticks[i][j]) {
+					validation.numTicks += 1;
 				}
 			}
 		}
 
-		this.wrongNumber = (this.numTicks<this.settings.minAnswers || (this.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
-		if(this.wrongNumber) {
+		validation.wrongNumber = (validation.numTicks<this.settings.minAnswers || (validation.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
+		if(validation.wrongNumber) {
 			this.setCredit(0,R('part.mcq.wrong number of choices'));
 			return;
 		}
 
-		for( i=0; i<this.numAnswers; i++ )
-		{
-			for(var j=0; j<this.numChoices; j++ )
-			{
-				if(this.ticks[i][j])
-				{
+		for( i=0; i<this.numAnswers; i++ ) {
+			for(var j=0; j<this.numChoices; j++ ) {
+				if(this.ticks[i][j]) {
 					partScore += this.settings.matrix[i][j];
 
 					var row = this.settings.distractors[i];
@@ -2635,8 +2705,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 						var message = row[j];
 					var award = this.settings.matrix[i][j];
 					if(award!=0) {
-						if(!util.isNonemptyHTML(message) && award>0)
+						if(!util.isNonemptyHTML(message) && award>0) {
 							message = R('part.mcq.correct choice');
+						}
 						this.addCredit(award/this.marks,message);
 					} else {
 						this.markingComment(message);
@@ -2645,11 +2716,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			}
 		}
 
-		if(this.credit<=0)
+		if(this.credit<=0) {
 			this.markingComment(R('part.marking.incorrect'));
+		}
 
-		if(this.marks>0)
-		{
+		if(this.marks>0) {
 			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
 		}
 	},
@@ -2657,7 +2728,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	/** Are the student's answers valid? Show a warning if they've picked the wrong number */
 	validate: function()
 	{
-		if(this.wrongNumber)
+		var validation = this.validation;
+
+		if(validation.wrongNumber)
 		{
 			switch(this.settings.warningType)
 			{
@@ -2671,7 +2744,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			}
 		}
 
-		if(this.numTicks>0)
+		if(validation.numTicks>0)
 			return true;
 		else
 			this.giveWarning(R('part.mcq.no choices selected'));
@@ -2761,6 +2834,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	 */
 	mark: function()
 	{
+		var validation = this.validation;
+
 		this.credit=0;
 		if(this.marks>0)
 		{

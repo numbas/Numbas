@@ -524,6 +524,7 @@ class Part:
 	enableMinimumMarks = True
 	minimumMarks = 0
 	showCorrectAnswer = True
+	variableReplacementStrategy = 'originalfirst'
 
 	def __init__(self,marks,prompt=''):
 		self.marks = marks
@@ -553,7 +554,7 @@ class Part:
 			)
 		part = partConstructors[kind].fromDATA(data)
 
-		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer'],part);
+		tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','variableReplacementStrategy'],part);
 
 		if haskey(data,'marks'):
 			part.marks = data['marks']
@@ -611,6 +612,9 @@ class Part:
 			scripts.append(script_element)
 
 		variable_replacements = part.find('adaptivemarking/variablereplacements')
+		variable_replacements.attrib = {
+			'strategy': self.variableReplacementStrategy
+		}
 		for variable,path in self.variable_replacements.items():
 			replacement = etree.Element('replace')
 			replacement.attrib = {

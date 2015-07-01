@@ -1422,10 +1422,17 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 		this.warnings.push({message:warning+''});
 	},
 
+	/** Set the list of warnings
+	 * @param {string[]} warnings
+	 */
+	setWarnings: function(warnings) {
+		this.warnings(warnings.map(function(warning){return {message: warning+''}}));
+	},
+
 	/** Remove all previously displayed warnings */
 	removeWarnings: function()
 	{
-		this.warnings([]);
+		this.part.removeWarnings();
 	},
 
 	/** Called when the part is displayed (basically when question is changed)
@@ -1604,7 +1611,7 @@ display.JMEPartDisplay = function()
 
 		}
 		catch(e) {
-			this.warning(e.message);
+			p.giveWarning(e.message);
 			return '';
 		}
 
@@ -1628,10 +1635,10 @@ display.JMEPartDisplay = function()
 						suggestion.push(suggestedNames[i]);
 					}
 					suggestion = suggestion.join('*');
-					this.warning(R('part.jme.unexpected variable name suggestion',unexpectedVariableName,suggestion));
+					p.giveWarning(R('part.jme.unexpected variable name suggestion',unexpectedVariableName,suggestion));
 				}
 				else
-					this.warning(R('part.jme.unexpected variable name', unexpectedVariableName));
+					p.giveWarning(R('part.jme.unexpected variable name', unexpectedVariableName));
 			}
 		}
 
@@ -1744,10 +1751,10 @@ display.NumberEntryPartDisplay = function()
 		if(p.settings.integerAnswer) {
 			var dp = Numbas.math.countDP(studentAnswer);
 			if(dp>0)
-				this.warning(R('part.numberentry.answer not integer'));
+				p.giveWarning(R('part.numberentry.answer not integer'));
 		}
 		if(!util.isNumber(studentAnswer,p.settings.allowFractions)) {
-			this.warning(R('part.numberentry.answer not integer or decimal'));
+			p.giveWarning(R('part.numberentry.answer not integer or decimal'));
 			return '';
 		}
 		var n = parseFloat(studentAnswer);
@@ -1964,7 +1971,7 @@ display.MultipleResponsePartDisplay = function()
 				});
 
 				if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
-					this.warning(R('part.mcq.wrong number of choices'));
+					p.giveWarning(R('part.mcq.wrong number of choices'));
 				};
 			},this);
 		}
@@ -2012,7 +2019,7 @@ display.MultipleResponsePartDisplay = function()
 					});
 
 					if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
-						this.warning(R('part.mcq.wrong number of choices'));
+						p.giveWarning(R('part.mcq.wrong number of choices'));
 					};
 				},this);
 			}
