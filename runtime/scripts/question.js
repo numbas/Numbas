@@ -1072,7 +1072,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		// find dependent variables which need to be recomputed
 		var todo = Numbas.jme.variables.variableDependants(this.question.variablesTodo,replaced);
 		for(var name in todo) {
-		  delete scope.variables[name];
+			if(name in new_variables) {
+				delete todo[name];
+			} else {
+				delete scope.variables[name];
+			}
 		}
 
 		// compute those variables
