@@ -633,6 +633,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 
 	this.markingFeedback = [];
 	this.warnings = [];
+	this.validation = {};
 
 	this.scripts = {};
 	var scriptNodes = this.xml.selectNodes('scripts/script');
