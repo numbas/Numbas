@@ -623,6 +623,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 
 	var replacementNodes = variableReplacementsNode.selectNodes('replace');
 	this.settings.errorCarriedForwardReplacements = {};
+	this.settings.hasVariableReplacements = replacementNodes.length>0;
 	for(var i=0;i<replacementNodes.length;i++) {
 		var n = replacementNodes[i];
 		var variable = n.getAttribute('variable');
@@ -971,15 +972,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			case 'originalfirst':
 				var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
 				// if less than full credit, try variable replacments
-				if(!result_original.answered || result_original.credit<1) {
+				if(this.settings.hasVariableReplacements && (!result_original.answered || result_original.credit<1)) {
 					var result_replacement = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
 					result = result_replacement.answered && result_replacement.credit>result_original.credit ? result_replacement : result_original;
+					result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
 				} else {
 					result = result_original;
 				}
 				break;
 			case 'alwaysreplace':
 				result = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
+				result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
 				break;
 			}
 

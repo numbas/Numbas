@@ -166,6 +166,7 @@ R.registerLocale('en-GB',{
 	'part.marking.revealed steps with penalty single': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> mark. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps with penalty plural': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> marks. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps no penalty': "You revealed the steps.",
+	'part.marking.used variable replacements': "This part was marked using your answers to previous parts.",
 	'part.marking.not submitted': "No answer submitted",
 	'part.marking.did not answer': "You did not answer this question.",
 	'part.marking.total score single': "You scored <strong>%s</strong> mark for this part.",
@@ -173,7 +174,7 @@ R.registerLocale('en-GB',{
 	'part.marking.nothing entered': "You did not enter an answer.",
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
-	'part.correct answer': "Correct answer:",
+	'part.correct answer': "Expected answer:",
 
 	'part.missing type attribute': "Missing part type attribute",
 	'part.unknown type': "Unrecognised part type %s",
