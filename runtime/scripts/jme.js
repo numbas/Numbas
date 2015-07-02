@@ -870,7 +870,7 @@ var displayFlags = {
 	rowvector: undefined
 };
 
-var ruleSort = util.sortBy('patternString');
+var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
 
 /** Set of simplification rules
  * @constructor
