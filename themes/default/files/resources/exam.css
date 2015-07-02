@@ -43,6 +43,7 @@ o\:* { behavior: url(#default#VML); }
 
 ul, ol {
 	padding-left: 0;
+	list-style-position: inside;
 }
 
 iframe {
