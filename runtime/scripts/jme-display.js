@@ -1319,7 +1319,9 @@ var opBrackets = Numbas.jme.display.opBrackets = {
  * @param {JME[]} conditions - conditions as expressions in JME expressions on the matched variables, which must all evaluate to true for the rule to match.
  * @param {JME} result - expression pattern to rewrite to.
  * 
- * @property {JME} patternString
+ * @property {JME} patternString - the JME string defining the pattern to match
+ * @property {JME} resultString - the JME string defining the result of the rule
+ * @property {JME} conditionStrings - JME strings defining the conditions
  * @property {Numbas.jme.tree} tree - `patternString` compiled to a syntax tree
  * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
  * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
@@ -1329,8 +1331,10 @@ var Rule = jme.display.Rule = function(pattern,conditions,result)
 	this.patternString = pattern;
 	this.tree = jme.compile(pattern,{},true);
 
+	this.resultString = result;
 	this.result = jme.compile(result,{},true);
 
+	this.conditionStrings = conditions.slice();
 	this.conditions = [];
 	for(var i=0;i<conditions.length;i++)
 	{

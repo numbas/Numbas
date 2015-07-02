@@ -542,17 +542,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Create a comparison function which sorts objects by a particular property
-	 * @param {string} prop - name of the property to sort by
+	 * @param {string[]|string} prop - name of the property (or list of names of properties) to sort by
 	 * @returns {function}
 	 */
-	sortBy: function(prop) {
+	sortBy: function(props) {
+		if(typeof props=='string') {
+			props = [props];
+		}
+		var l = props.length;
 		return function(a,b) {
-			if(a[prop]>b[prop])
-				return 1;
-			else if(a[prop]<b[prop])
-				return -1;
-			else
-				return 0;
+			for(var i=0;i<l;i++) {
+				var prop = props[i];
+				if(a[prop]>b[prop])
+					return 1;
+				else if(a[prop]<b[prop])
+					return -1;
+			}
+			return 0;
 		}
 	},
 
