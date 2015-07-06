@@ -461,6 +461,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 			display.modal.ok();
 			display.modal.ok = display.modal.cancel = function() {};
 		})
+		$('#confirm-modal,#alert-modal').on('shown.bs.modal',function() {
+			$(this).find('.modal-footer .ok').focus();
+		});
 		$('.modal button.cancel').on('click',function() {
 			display.modal.cancel();
 			display.modal.ok = display.modal.cancel = function() {};
@@ -492,6 +495,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 		this.modal.ok = fnOK;
 		$('#alert-modal .modal-body').html(msg);
 		$('#alert-modal').modal('show');
+		$('#alert-modal .modal-footer .ok').focus();
 	},
 
 	/** Show a confirmation dialog box
