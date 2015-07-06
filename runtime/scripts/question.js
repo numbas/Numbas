@@ -1977,6 +1977,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	{
 		tryGetAttribute(this,this.xml,'.','marks');
 	}
+	this.marks = util.parseNumber(this.marks) || 0;
 
 	//get minimum marks setting
 	tryGetAttribute(settings,this.xml,'marking/minmarks','enabled','minMarksEnabled');
@@ -1984,6 +1985,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	{
 		tryGetAttribute(this.settings,this.xml,'marking/minmarks','value','minimumMarks');
 	}
+	this.settings.minimumMarks = util.parseNumber(this.settings.minimumMarks) || 0;
 
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
