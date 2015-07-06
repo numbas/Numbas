@@ -212,6 +212,7 @@ R.registerLocale('en-GB',{
 	'part.mcq.matrix wrong size': "Marking matrix is the wrong size.",
 	'part.mcq.correct choice': "You chose the correct answer.",
 
+	'part.matrix.answer invalid': "Your answer is not valid.",
 	'part.matrix.invalid cell': "One or more of the cells in your answer is empty or invalid.",
 	'part.matrix.some incorrect': "One or more of the cells in your answer is incorrect, but you have been awarded marks for the rest.",
 	'part.matrix.empty': "You have not entered an answer.",

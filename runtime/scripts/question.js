@@ -1365,7 +1365,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.mustHaveShowStrings)
 			{
 				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
@@ -1376,7 +1376,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.notAllowedShowStrings)
 			{
 				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
@@ -1442,7 +1442,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.mustHaveShowStrings)
 			{
 				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.giveWarning(message);
 			}
 		}
@@ -1453,7 +1453,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.notAllowedShowStrings)
 			{
 				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.giveWarning(message);
 			}
 		}
