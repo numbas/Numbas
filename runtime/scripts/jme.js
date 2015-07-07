@@ -1709,12 +1709,16 @@ newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 	var start = r[0];
 	var end = r[1];
 	var step = r[2];
-	var max_steps = Math.floor(end-start)/step;
-	if(x>end) {
+	if(x>end || x<start) {
 		return false;
 	}
-	var steps = Math.floor((x-start)/step);
-	return step*steps+start==x && steps <= max_steps;
+	if(step===0) {
+		return true;
+	} else {
+		var max_steps = Math.floor(end-start)/step;
+		var steps = Math.floor((x-start)/step);
+		return step*steps+start==x && steps <= max_steps;
+	}
 });
 
 newBuiltin('list',[TRange],TList,function(range) {
