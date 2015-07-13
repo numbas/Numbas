@@ -2461,6 +2461,28 @@ newBuiltin('sort',[TList],TList, null, {
 	}
 });
 
+newBuiltin('reverse',[TList],TList,null, {
+	evaluate: function(args,scope) {
+		var list = args[0];
+		return new TList(list.value.reverse());
+	}
+});
+
+// indices of given value in given list
+newBuiltin('indices',[TList,'?'],TList,null, {
+	evaluate: function(args,scope) {
+		var list = args[0];
+		var target = args[1];
+		var out = [];
+		list.value.map(function(v,i) {
+			if(util.eq(v,target)) {
+				out.push(new TNum(i));
+			}
+		});
+		return new TList(out);
+	}
+});
+
 newBuiltin('set',[TList],TSet,function(l) {
 	return util.distinct(l);
 });
