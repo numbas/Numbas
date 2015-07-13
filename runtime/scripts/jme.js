@@ -2464,7 +2464,7 @@ newBuiltin('sort',[TList],TList, null, {
 newBuiltin('reverse',[TList],TList,null, {
 	evaluate: function(args,scope) {
 		var list = args[0];
-		return new TList(list.value.reverse());
+		return new TList(list.value.slice().reverse());
 	}
 });
 
