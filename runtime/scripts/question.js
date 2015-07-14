@@ -1196,7 +1196,7 @@ var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, l
 	{
 		var nameNodes = expectedVariableNamesNode.selectNodes('string');
 		for(i=0; i<nameNodes.length; i++)
-			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase());
+			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
 	}
 
 	this.display = new Numbas.display.JMEPartDisplay(this);
