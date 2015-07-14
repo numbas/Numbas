@@ -2792,6 +2792,36 @@ newBuiltin('table',[TList,TList],THTML,
 	}
 );
 
+newBuiltin('table',[TList],THTML,
+	function(data) {
+		var table = $('<table/>');
+
+		var tbody=$('<tbody/>');
+		table.append(tbody);
+		for(var i=0;i<data.length;i++) {
+			var row = $('<tr/>');
+			tbody.append(row);
+			for(var j=0;j<data[i].length;j++) {
+				var cell = data[i][j];
+				if(typeof cell=='number')
+					cell = Numbas.math.niceNumber(cell);
+				row.append($('<td/>').html(cell));
+			}
+		}
+
+		return table;
+	},
+	{
+		unwrapValues: true,
+
+		doc: {
+			usage: ['table([ [1,2,3], [4,5,6] ])', 'table(data)'],
+			tags: ['table','tabular','data','html'],
+			description: 'Create a table to display a list of rows of data.'
+		}
+	}
+);
+
 ///end of builtins
 
 
