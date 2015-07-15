@@ -2059,6 +2059,18 @@ newBuiltin('shuffle',[TList],TList,
 	}}
 );
 
+newBuiltin('shuffle',[TRange],TList,
+	function(range) {
+		var list = range.slice(3).map(function(n){return new TNum(n)})
+		return math.shuffle(list);
+	},
+	{doc: {
+		usage: ['shuffle(list)','shuffle([1,2,3])'],
+		description: 'Randomly reorder a list.',
+		tags: ['permutation','order','shuffle','deal']	
+	}}
+);
+
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
 	evaluate: function(args,scope)
