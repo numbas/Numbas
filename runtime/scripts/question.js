@@ -622,6 +622,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 
 	var replacementNodes = variableReplacementsNode.selectNodes('replace');
 	this.settings.errorCarriedForwardReplacements = [];
+	this.errorCarriedForwardBackReferences = {};
 	this.settings.hasVariableReplacements = replacementNodes.length>0;
 	for(var i=0;i<replacementNodes.length;i++) {
 		var n = replacementNodes[i];
@@ -971,34 +972,34 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			var result;
 			var try_replacement;
 
-			if(this.settings.variableReplacementStrategy=='originalfirst') {
-				var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
-				result = result_original;
-				var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
-			}
-			if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
-				try {
-					var scope = this.errorCarriedForwardScope();
-				} catch(e) {
-					if(!result) {
-						this.giveWarning(e.originalMessage);
-						this.answered = false;
-					}
+			try{
+				if(this.settings.variableReplacementStrategy=='originalfirst') {
+					var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
+					result = result_original;
+					var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
 				}
-				if(scope) {
+				if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+					try {
+						var scope = this.errorCarriedForwardScope();
+					} catch(e) {
+						if(!result) {
+							this.giveWarning(e.originalMessage);
+							this.answered = false;
+							throw(e);
+						}
+					}
 					var result_replacement = this.markAgainstScope(scope,existing_feedback);
 					if(result_original && result_replacement.answered && result_replacement.credit>result_original.credit) {
 						result = result_replacement;
 						result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
 					}
 				}
-			}
 
-			if(result) {
 				this.setWarnings(result.warnings);
 				this.markingFeedback = result.markingFeedback;
 				this.credit = result.credit;
 				this.answered = result.answered;
+			} catch(e) {
 			}
 		}
 
@@ -1028,6 +1029,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.display.showScore(this.answered);
 
 		this.submitting = false;
+
+		if(this.answered) {
+			for(var path in this.errorCarriedForwardBackReferences) {
+				this.question.getPart(path).setDirty(true);
+			}
+		}
 	},
 
 	/** Calculate the correct answer in the given scope, and mark the student's answer
@@ -1073,6 +1080,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			} else if(vr.must_go_first) {
 				throw(new Numbas.Error(R("part.marking.variable replacement part not answered",util.nicePartName(vr.part))));
 			}
+		}
+		for(var i=0;i<replace.length;i++) {
+			var p2 = this.question.getPart(replace[i].part);
+			p2.errorCarriedForwardBackReferences[this.path] = true;
 		}
 		var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
 
