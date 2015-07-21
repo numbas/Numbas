@@ -167,6 +167,7 @@ R.registerLocale('en-GB',{
 	'part.marking.revealed steps with penalty plural': "You revealed the steps. The maximum you can score for this part is <strong>%s</strong> marks. Your scores will be scaled down accordingly.",
 	'part.marking.revealed steps no penalty': "You revealed the steps.",
 	'part.marking.used variable replacements': "This part was marked using your answers to previous parts.",
+	'part.marking.variable replacement part not answered': "You must answer %s first",
 	'part.marking.not submitted': "No answer submitted",
 	'part.marking.did not answer': "You did not answer this question.",
 	'part.marking.total score single': "You scored <strong>%s</strong> mark for this part.",
@@ -275,6 +276,10 @@ R.registerLocale('en-GB',{
 	'mark': 'mark',
 	'marks': 'marks',
 	'was': 'was',
-	'were': 'were'
+	'were': 'were',
+
+	'part': 'part',
+	'gap': 'gap',
+	'step': 'step'
 });
 });

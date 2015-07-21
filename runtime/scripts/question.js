@@ -536,7 +536,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 Numbas.parts = {};
 
-
 /** Create a new question part. Automatically picks the right constructor based on the type defined in the XML.
  * @param {Element} xml
  * @param {partpath} path
@@ -622,13 +621,13 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	tryGetAttribute(this.settings,this.xml,variableReplacementsNode,['strategy'],['variableReplacementStrategy'])
 
 	var replacementNodes = variableReplacementsNode.selectNodes('replace');
-	this.settings.errorCarriedForwardReplacements = {};
+	this.settings.errorCarriedForwardReplacements = [];
 	this.settings.hasVariableReplacements = replacementNodes.length>0;
 	for(var i=0;i<replacementNodes.length;i++) {
 		var n = replacementNodes[i];
-		var variable = n.getAttribute('variable');
-		var path = n.getAttribute('part');
-		this.settings.errorCarriedForwardReplacements[variable] = path;
+		var vr = {}
+		tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
+		this.settings.errorCarriedForwardReplacements.push(vr);
 	}
 
 	this.markingFeedback = [];
@@ -970,29 +969,37 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			};
 
 			var result;
+			var try_replacement;
 
-			switch(this.settings.variableReplacementStrategy) {
-			case 'originalfirst':
+			if(this.settings.variableReplacementStrategy=='originalfirst') {
 				var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
-				// if less than full credit, try variable replacments
-				if(this.settings.hasVariableReplacements && (!result_original.answered || result_original.credit<1)) {
-					var result_replacement = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
-					result = result_replacement.answered && result_replacement.credit>result_original.credit ? result_replacement : result_original;
-					result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
-				} else {
-					result = result_original;
+				result = result_original;
+				var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
+			}
+			if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+				try {
+					var scope = this.errorCarriedForwardScope();
+				} catch(e) {
+					if(!result) {
+						this.giveWarning(e.originalMessage);
+						this.answered = false;
+					}
 				}
-				break;
-			case 'alwaysreplace':
-				result = this.markAgainstScope(this.errorCarriedForwardScope(),existing_feedback);
-				result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
-				break;
+				if(scope) {
+					var result_replacement = this.markAgainstScope(scope,existing_feedback);
+					if(result_original && result_replacement.answered && result_replacement.credit>result_original.credit) {
+						result = result_replacement;
+						result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
+					}
+				}
 			}
 
-			this.setWarnings(result.warnings);
-			this.markingFeedback = result.markingFeedback;
-			this.credit = result.credit;
-			this.answered = result.answered;
+			if(result) {
+				this.setWarnings(result.warnings);
+				this.markingFeedback = result.markingFeedback;
+				this.credit = result.credit;
+				this.answered = result.answered;
+			}
 		}
 
 		if(this.stepsShown)
@@ -1053,22 +1060,21 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	errorCarriedForwardScope: function() {
 		// dictionary of variables to replace
 		var replace = this.settings.errorCarriedForwardReplacements;
+		var replaced = [];
 
 		// fill scope with new values of those variables
 		var new_variables = {}
-		for(var name in replace) {
-		  var p2 = this.question.getPart(replace[name]);
-		  if(p2.answered) {
-			new_variables[name] = p2.studentAnswerAsJME()
-		  }
+		for(var i=0;i<replace.length;i++) {
+			var vr = replace[i];
+			var p2 = this.question.getPart(vr.part);
+			if(p2.answered) {
+				new_variables[vr.variable] = p2.studentAnswerAsJME();
+				replaced.push(vr.variable);
+			} else if(vr.must_go_first) {
+				throw(new Numbas.Error(R("part.marking.variable replacement part not answered",util.nicePartName(vr.part))));
+			}
 		}
 		var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
-
-		// get names of replaced variables
-		var replaced = [];
-		for(var name in replace) {
-		  replaced.push(name);
-		}
 
 		// find dependent variables which need to be recomputed
 		var todo = Numbas.jme.variables.variableDependants(this.question.variablesTodo,replaced);

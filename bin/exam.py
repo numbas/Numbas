@@ -517,6 +517,26 @@ class Function:
 
 		return function
 
+class VariableReplacement:
+	variable = ''
+	part = ''
+	must_go_first = False
+
+	@staticmethod
+	def fromDATA(data):
+		vr = VariableReplacement()
+		tryLoad(data,['variable','part','must_go_first'],vr)
+		return vr
+
+	def toxml(self):
+		replacement = etree.Element('replace')
+		replacement.attrib = {
+			'variable': strcons_fix(self.variable),
+			'part': strcons_fix(self.part),
+			'must_go_first': strcons_fix(self.must_go_first),
+		}
+		return replacement
+
 class Part:
 	prompt = ''
 	kind = ''
@@ -531,7 +551,7 @@ class Part:
 		self.prompt = prompt
 		self.steps = []
 		self.scripts = {}
-		self.variable_replacements = {}
+		self.variable_replacements = []
 
 	@staticmethod
 	def fromDATA(data):
@@ -572,7 +592,7 @@ class Part:
 				part.scripts[name] = script
 
 		if haskey(data,'variableReplacements'):
-			part.variable_replacements = {vr['variable']:vr['part'] for vr in data['variableReplacements']}
+			part.variable_replacements = [VariableReplacement.fromDATA(vr) for vr in data['variableReplacements']]
 
 		return part
 	
@@ -615,12 +635,8 @@ class Part:
 		variable_replacements.attrib = {
 			'strategy': self.variableReplacementStrategy
 		}
-		for variable,path in self.variable_replacements.items():
-			replacement = etree.Element('replace')
-			replacement.attrib = {
-				'variable': variable,
-				'part': path
-			}
+		for vr in self.variable_replacements:
+			replacement = vr.toxml()
 			variable_replacements.append(replacement)
 
 		return part
