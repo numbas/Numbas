@@ -766,7 +766,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * @returns {string}
 	 */
 	nicePartName: function(path) {
-		var re_path = /^p(\d+)(?:g(\d+)|s(\d+))$/;
+		var re_path = /^p(\d+)(?:g(\d+)|s(\d+))?$/;
 		var m = re_path.exec(path);
 		var s = R('part')+' '+util.letterOrdinal(m[1]);
 		if(m[2]) {
