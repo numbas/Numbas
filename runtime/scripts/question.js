@@ -762,6 +762,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	stepsOpen: false,
 
+	/** True if this part should be resubmitted because another part it depended on has changed
+	 * @type {boolean}
+	 */
+	shouldResubmit: false,
+
 	/** Properties set when the part is generated
 	 * @type {object}
 	 * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown
@@ -924,6 +929,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	/** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
 	 */
 	submit: function() {
+		this.shouldResubmit = false;
 		this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
@@ -1032,8 +1038,20 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.answered) {
 			for(var path in this.errorCarriedForwardBackReferences) {
-				this.question.getPart(path).setDirty(true);
+				var p2 = this.question.getPart(path);
+				p2.pleaseResubmit();
 			}
+		}
+	},
+
+	/** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part)
+	 * Sets this part as dirty, and gives a warning explaining why the student must resubmit.
+	 */
+	pleaseResubmit: function() {
+		if(!this.shouldResubmit) {
+			this.shouldResubmit = true;
+			this.setDirty(true);
+			this.giveWarning(R('part.marking.resubmit because of variable replacement'));
 		}
 	},
 

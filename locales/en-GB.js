@@ -168,6 +168,7 @@ R.registerLocale('en-GB',{
 	'part.marking.revealed steps no penalty': "You revealed the steps.",
 	'part.marking.used variable replacements': "This part was marked using your answers to previous parts.",
 	'part.marking.variable replacement part not answered': "You must answer %s first",
+	'part.marking.resubmit because of variable replacement': "This part's marking depends on your answers to other parts, which you have changed. Submit this part again to update your score.",
 	'part.marking.not submitted': "No answer submitted",
 	'part.marking.did not answer': "You did not answer this question.",
 	'part.marking.total score single': "You scored <strong>%s</strong> mark for this part.",
