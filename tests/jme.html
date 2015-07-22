@@ -696,6 +696,9 @@
 					deepCloseEqual(evaluate('-2..11 except []').value.map(getValue),[-2,-1,0,1,2,3,4,5,6,7,8,9,10,11],'-2..11 except []');
 					deepCloseEqual(evaluate('-2..2 except [1,"a",0]').value.map(getValue),[-2,-1,2],'-2..2 except [1,"a",0]');
 					raisesNumbasError(function(){ evaluate('0..5#0 except 1..3') },'jme.func.except.continuous range',"can't use except on continuous range: 0..5#0 except 1..3");
+
+					deepCloseEqual(evaluate('-11 in -9..9').value,false,'-11 not in -9..9');
+					deepCloseEqual(evaluate('3 in -9..9#0').value,true,'3 in -9..9#0');
 				});
 
 

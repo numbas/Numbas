@@ -617,6 +617,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 */
 	zip: function(lists) {
 		var out = [];
+		if(lists.length==0) {
+			return out;
+		}
 		for(var i=0;true;i++) {
 			var z = [];
 			for(var j=0;j<lists.length;j++) {

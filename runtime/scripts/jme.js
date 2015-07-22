@@ -734,6 +734,32 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		return out;
 	},
 
+	/** Dictionary of functions 
+	 * type: function(value,display:boolean) -> string 
+	 * which convert a JME token to a string for display
+	 */
+	typeToDisplayString: {
+		'number': function(v) {
+			return ''+Numbas.math.niceNumber(v.value)+'';
+		},
+		'string': function(v,display) {
+			return v.value;
+		},
+	},
+
+	/** Produce a string representation of the given token, for display
+	 * @param {Numbas.jme.token} v
+	 * @see Numbas.jme.typeToDisplayString
+	 * @returns {string}
+	 */
+	tokenToDisplayString: function(v) {
+		if(v.type in jme.typeToDisplayString) {
+			return jme.typeToDisplayString[v.type](v);
+		} else {
+			return jme.display.treeToJME({tok:v});
+		}
+	},
+
 	/** Substitute variables into a text string (not maths).
 	 * @param {string} str
 	 * @param {Numbas.jme.Scope} scope
@@ -752,25 +778,16 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(i % 2)
 			{
 				var v = jme.evaluate(jme.compile(bits[i],scope),scope);
-				if(v.type=='number')
-				{
-					if(display)
-						v = ''+Numbas.math.niceNumber(v.value)+'';
-					else
+				if(display) {
+					v = jme.tokenToDisplayString(v);
+				} else {
+					if(v.type=='number') {
 						v = '('+Numbas.jme.display.treeToJME({tok:v})+')';
-				}
-				else if(v.type=='string')
-				{
-					if(display) {
-						v = v.value;
-					}
-					else {
+					} else if(v.type=='string') {
 						v = "'"+v.value+"'";
+					} else {
+						v = jme.display.treeToJME({tok:v});
 					}
-				}
-				else
-				{
-					v = jme.display.treeToJME({tok:v});
 				}
 
 				out += v;
@@ -1719,12 +1736,16 @@ newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 	var start = r[0];
 	var end = r[1];
 	var step = r[2];
-	var max_steps = Math.floor(end-start)/step;
-	if(x>end) {
+	if(x>end || x<start) {
 		return false;
 	}
-	var steps = Math.floor((x-start)/step);
-	return step*steps+start==x && steps <= max_steps;
+	if(step===0) {
+		return true;
+	} else {
+		var max_steps = Math.floor(end-start)/step;
+		var steps = Math.floor((x-start)/step);
+		return step*steps+start==x && steps <= max_steps;
+	}
 });
 
 newBuiltin('list',[TRange],TList,function(range) {
@@ -1750,7 +1771,9 @@ newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
-newBuiltin('join',[TList,TString],TString,function(list,delimiter) { return list.join(delimiter); },{unwrapValues:true});
+newBuiltin('join',[TList,TString],TString,function(list,delimiter) { 
+	return list.map(jme.tokenToDisplayString).join(delimiter);
+});
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
@@ -2037,6 +2060,18 @@ newBuiltin('deal',[TNum],TList,
 
 newBuiltin('shuffle',[TList],TList,
 	function(list) {
+		return math.shuffle(list);
+	},
+	{doc: {
+		usage: ['shuffle(list)','shuffle([1,2,3])'],
+		description: 'Randomly reorder a list.',
+		tags: ['permutation','order','shuffle','deal']	
+	}}
+);
+
+newBuiltin('shuffle',[TRange],TList,
+	function(range) {
+		var list = range.slice(3).map(function(n){return new TNum(n)})
 		return math.shuffle(list);
 	},
 	{doc: {
@@ -2474,6 +2509,28 @@ newBuiltin('sort',[TList],TList, null, {
 	}
 });
 
+newBuiltin('reverse',[TList],TList,null, {
+	evaluate: function(args,scope) {
+		var list = args[0];
+		return new TList(list.value.slice().reverse());
+	}
+});
+
+// indices of given value in given list
+newBuiltin('indices',[TList,'?'],TList,null, {
+	evaluate: function(args,scope) {
+		var list = args[0];
+		var target = args[1];
+		var out = [];
+		list.value.map(function(v,i) {
+			if(util.eq(v,target)) {
+				out.push(new TNum(i));
+			}
+		});
+		return new TList(out);
+	}
+});
+
 newBuiltin('set',[TList],TSet,function(l) {
 	return util.distinct(l);
 });
@@ -2779,6 +2836,36 @@ newBuiltin('table',[TList,TList],THTML,
 			usage: ['table([ [1,2,3], [4,5,6] ], [\'Header 1\', \'Header 2\'])', 'table(data,headers)'],
 			tags: ['table','tabular','data','html'],
 			description: 'Create a table to display a list of rows of data, with the given headers.'
+		}
+	}
+);
+
+newBuiltin('table',[TList],THTML,
+	function(data) {
+		var table = $('<table/>');
+
+		var tbody=$('<tbody/>');
+		table.append(tbody);
+		for(var i=0;i<data.length;i++) {
+			var row = $('<tr/>');
+			tbody.append(row);
+			for(var j=0;j<data[i].length;j++) {
+				var cell = data[i][j];
+				if(typeof cell=='number')
+					cell = Numbas.math.niceNumber(cell);
+				row.append($('<td/>').html(cell));
+			}
+		}
+
+		return table;
+	},
+	{
+		unwrapValues: true,
+
+		doc: {
+			usage: ['table([ [1,2,3], [4,5,6] ])', 'table(data)'],
+			tags: ['table','tabular','data','html'],
+			description: 'Create a table to display a list of rows of data.'
 		}
 	}
 );

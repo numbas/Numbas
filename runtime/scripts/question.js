@@ -1347,7 +1347,7 @@ var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, l
 	{
 		var nameNodes = expectedVariableNamesNode.selectNodes('string');
 		for(i=0; i<nameNodes.length; i++)
-			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase());
+			settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
 	}
 
 	this.display = new Numbas.display.JMEPartDisplay(this);
@@ -1549,7 +1549,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.mustHaveShowStrings)
 			{
 				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
@@ -1560,7 +1560,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.notAllowedShowStrings)
 			{
 				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
@@ -1627,7 +1627,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.mustHaveShowStrings)
 			{
 				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('jme.must-have several',strings)
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.giveWarning(message);
 			}
 		}
@@ -1638,7 +1638,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			if(this.settings.notAllowedShowStrings)
 			{
 				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('jme.not-allowed several',strings)
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.giveWarning(message);
 			}
 		}
@@ -2239,12 +2239,14 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	} else {
 		tryGetAttribute(this,this.xml,'.','marks');
 	}
+	this.marks = util.parseNumber(this.marks) || 0;
 
 	//get minimum marks setting
 	tryGetAttribute(settings,this.xml,'marking/minmarks','enabled','minMarksEnabled');
 	if(settings.minMarksEnabled) {
 		tryGetAttribute(this.settings,this.xml,'marking/minmarks','value','minimumMarks');
 	}
+	this.settings.minimumMarks = util.parseNumber(this.settings.minimumMarks) || 0;
 
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
