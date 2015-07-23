@@ -2712,7 +2712,37 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	 * @returns {Numbas.jme.token}
 	 */
 	studentAnswerAsJME: function() {
-		return Numbas.jme.wrapValue(this.ticks);
+		switch(this.type) {
+			case '1_n_2':
+				for(var i=0;i<this.numAnswers;i++) {
+					if(this.ticks[i][0]) {
+						return new jme.types.TNum(i);
+					}
+				}
+				break;
+			case 'm_n_2':
+				var o = [];
+				for(var i=0;i<this.numAnswers;i++) {
+					o.push(new jme.types.TBool(this.ticks[i][0]));
+				}
+				return new jme.types.TList(o);
+			case 'm_n_x':
+				switch(this.settings.displayType) {
+					case 'radiogroup':
+						var o = [];
+						for(var choice=0;choice<this.numChoices;choice++) {
+							for(var answer=0;answer<this.numAnswers;answer++) {
+								if(this.ticks[choice][answer) {
+									o.push(new jme.types.TNum(answer));
+									break;
+								}
+							}
+						}
+						return new jme.types.TList(o);
+					case 'checkbox':
+						return Numbas.jme.wrapValue(this.ticks);
+				}
+		}
 	},
 
 	/** Mark the student's choices */
