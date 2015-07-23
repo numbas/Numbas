@@ -2732,7 +2732,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 						var o = [];
 						for(var choice=0;choice<this.numChoices;choice++) {
 							for(var answer=0;answer<this.numAnswers;answer++) {
-								if(this.ticks[choice][answer) {
+								if(this.ticks[choice][answer]) {
 									o.push(new jme.types.TNum(answer));
 									break;
 								}
