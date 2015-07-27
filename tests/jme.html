@@ -837,13 +837,18 @@
 					equals(exprToLaTeX('10000000000000000000000000'),'1 \\times 10^{25}','scientific notation - 1*e^25');
 					equals(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
 					equals(exprToLaTeX('ln(abs(x))'),'\\ln \\left | x \\right |','ln(abs(x)) - ln of absolute value has no parentheses');
-					equals(exprToLaTeX('ln(x)'),'\\ln \\left( x \\right)','ln(x) - ln of anything else has parentheses');
-					equals(exprToLaTeX('4-(x^2+x+1)',[]),'4 - \\left( x^{ 2 } + x + 1 \\right)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
+					equals(exprToLaTeX('ln(x)'),'\\ln \\left ( x \\right )','ln(x) - ln of anything else has parentheses');
+					equals(exprToLaTeX('4-(x^2+x+1)',[]),'4 - \\left ( x^{ 2 } + x + 1 \\right )','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
 					equals(exprToLaTeX('(x^2+x+1)-4',[]),'x^{ 2 } + x + 1 - 4','(x^2+x+1)-4 - brackets round left-hand operand in subtraction can be dropped.');
 					equals(exprToLaTeX('x-(-1.5)','fractionnumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
-					equals(exprToLaTeX('x-(5-p)',[]),'x - \\left( 5 - p \\right)','x-(5-p) - keep the brackets on the right');
+					equals(exprToLaTeX('x-(5-p)',[]),'x - \\left ( 5 - p \\right )','x-(5-p) - keep the brackets on the right');
 					equals(exprToLaTeX('3*5^2*19',['basic']),'3 \\times 5^{ 2 } \\times 19','3*5^2*19 with basic - always put a \\times between two digits')
 					equals(exprToLaTeX('exp(x)^2'),'\\left ( e^{ x } \\right )^{ 2 }','exp(x)^2 - put brackets round e^x')
+					equals(exprToLaTeX('-(-x)',[]),'-\\left ( -x \\right )','-(-x) - brackets around repeated minus')
+					equals(exprToLaTeX('+(-x)',[]),'+\\left ( -x \\right )','+(-x) - brackets around minus straight after addition')
+					equals(exprToLaTeX('3+(-2)',[]),'3 + \\left ( -2 \\right )','3+(-2) - brackets around minus on right side of addition')
+					equals(exprToLaTeX('3-(-2)',[]),'3 - \\left ( -2 \\right )','3-(-2) - brackets around minus on right side of subtraction')
+					equals(exprToLaTeX('2+(3+2)+(4-5)',[]),'2 + 3 + 2 + 4 - 5','don\'t put brackets round nested addition and subtraction')
 				});
 			});
 		</script>

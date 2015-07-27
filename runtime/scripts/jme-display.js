@@ -261,7 +261,16 @@ var texOps = jme.display.texOps = {
 	'!': infixTex('\\neg '),	
 
 	/** unary addition */
-	'+u': infixTex('+'),	
+	'+u': function(thing,texArgs,settings) {
+		var tex = texArgs[0];
+		if( thing.args[0].tok.type=='op' ) {
+			var op = thing.args[0].tok.name;
+			if( op=='-u' || op=='+u' ) {
+				tex='\\left ( '+tex+' \\right )';
+			}
+		}
+		return '+'+tex;
+	},
 
 	/** unary minus */
 	'-u': (function(thing,texArgs,settings) {
@@ -269,8 +278,10 @@ var texOps = jme.display.texOps = {
 		if( thing.args[0].tok.type=='op' )
 		{
 			var op = thing.args[0].tok.name;
-			if(!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
-			{
+			if(
+				op=='-u' || op=='+u' || 
+				(!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])	//brackets are needed if argument is an operation which would be evaluated after negation
+			) {
 				tex='\\left ( '+tex+' \\right )';
 			}
 		}
@@ -345,7 +356,15 @@ var texOps = jme.display.texOps = {
 		return s;
 	}),
 	'/': (function(thing,texArgs) { return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }'); }),
-	'+': infixTex('+'),
+	'+': (function(thing,texArgs,settings) {
+		var a = thing.args[0];
+		var b = thing.args[1];
+		if(jme.isOp(b.tok,'+u') || jme.isOp(b.tok,'-u')) {
+			return texArgs[0]+' + \\left ( '+texArgs[1]+' \\right )';
+		} else {
+			return texArgs[0]+' + '+texArgs[1];
+		}
+	}),
 	'-': (function(thing,texArgs,settings) {
 		var a = thing.args[0];
 		var b = thing.args[1];
@@ -354,8 +373,8 @@ var texOps = jme.display.texOps = {
 			return texArgs[0]+' - '+texb;
 		}
 		else{
-			if(jme.isOp(b.tok,'+') || jme.isOp(b.tok,'-'))
-				return texArgs[0]+' - \\left( '+texArgs[1]+' \\right)';
+			if(jme.isOp(b.tok,'+') || jme.isOp(b.tok,'-') || jme.isOp(b.tok,'+u') || jme.isOp(b.tok,'-u'))
+				return texArgs[0]+' - \\left ( '+texArgs[1]+' \\right )';
 			else
 				return texArgs[0]+' - '+texArgs[1];
 		}
@@ -404,7 +423,7 @@ var texOps = jme.display.texOps = {
 				}
 				else
 				{
-					return '\\left ('+texArgs[0]+' \\right)!';
+					return '\\left ('+texArgs[0]+' \\right )!';
 				}
 			}),
 	'ceil': (function(thing,texArgs) { return '\\left \\lceil '+texArgs[0]+' \\right \\rceil';}),
@@ -493,11 +512,11 @@ var texOps = jme.display.texOps = {
 		if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='abs')
 			return '\\ln '+texArgs[0];
 		else
-			return '\\ln \\left( '+texArgs[0]+' \\right)';
+			return '\\ln \\left ( '+texArgs[0]+' \\right )';
 	},
 	'log': funcTex('\\log_{10}'),
 	'vector': (function(thing,texArgs,settings) {
-		return '\\left( '+texVector(thing,settings)+' \\right)';
+		return '\\left ( '+texVector(thing,settings)+' \\right )';
 	}),
 	'rowvector': (function(thing,texArgs,settings) {
 		if(thing.args[0].tok.type!='list')
@@ -867,12 +886,12 @@ var typeToTeX = jme.display.typeToTeX = {
 		return '\\left[ '+texArgs.join(', ')+' \\right]';
 	},
 	vector: function(thing,tok,texArgs,settings) {
-		return ('\\left( ' 
+		return ('\\left ( ' 
 				+ texVector(tok.value,settings)
-				+ ' \\right)' );
+				+ ' \\right )' );
 	},
 	matrix: function(thing,tok,texArgs,settings) {
-		return '\\left( '+texMatrix(tok.value,settings)+' \\right)';
+		return '\\left ( '+texMatrix(tok.value,settings)+' \\right )';
 	},
 	name: function(thing,tok,texArgs,settings) {
 		return texName(tok.name,tok.annotation);
