@@ -178,7 +178,9 @@ Numbas.tryInit = function()
 			}
 			if(go)
 			{
-				req.callback({exports:window});
+				if(req.callback) {
+					req.callback({exports:window});
+				}
 				req.executed=true;
 				ind++;
 				for(var j=0;j<req.backdeps.length;j++) {
