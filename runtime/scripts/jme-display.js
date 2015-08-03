@@ -454,6 +454,12 @@ var texOps = jme.display.texOps = {
 					return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
 				}
 			}),
+	'sub': (function(thing,texArgs) {
+		return texArgs[0]+'_{ '+texArgs[1]+' }';
+	}),
+	'sup': (function(thing,texArgs) {
+		return texArgs[0]+'^{ '+texArgs[1]+' }';
+	}),
 	'limit': (function(thing,texArgs) { return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}'); }),
 	'mod': (function(thing,texArgs) {return texArgs[0]+' \\pmod{'+texArgs[1]+'}';}),
 	'perm': (function(thing,texArgs) { return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';}),
