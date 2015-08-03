@@ -1788,6 +1788,20 @@ var findvarsOps = jme.findvarsOps = {
 		vars = vars.merge(findvars(tree.args[2],boundvars));
 		return vars;
 	},
+	'filter': function(tree,boundvars,scope) {
+		boundvars = boundvars.slice();
+		if(tree.args[1].tok.type=='list') {
+			var names = tree.args[1].args;
+			for(var i=0;i<names.length;i++) {
+				boundvars.push(names[i].tok.name.toLowerCase());
+			}
+		} else {
+			boundvars.push(tree.args[1].tok.name.toLowerCase());
+		}
+		var vars = findvars(tree.args[0],boundvars,scope);
+		vars = vars.merge(findvars(tree.args[2],boundvars));
+		return vars;
+	},
 	'let': function(tree,boundvars,scope) {
 		// find vars used in variable assignments
 		var vars = [];
