@@ -1748,20 +1748,7 @@ var checkingFunctions =
  * @enum {function}
  * @see Numbas.jme.substituteTree
  */
-var substituteTreeOps = jme.substituteTreeOps = {
-	'map': function(tree,scope,allowUnbound) {
-		tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
-		return tree;
-	},
-	'let': function(tree,scope,allowUnbound) {
-		for(var i=1;i<tree.args.length-1;i+=2) {
-			tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
-		}
-	},
-	'isset': function(tree,scope,allowUnbound) {
-		return tree;
-	}
-};
+var substituteTreeOps = jme.substituteTreeOps = {};
 
 /** Custom findvars behaviour for specific functions - for a given usage of a function, work out which variables it depends on.
  * 
@@ -1773,65 +1760,7 @@ var substituteTreeOps = jme.substituteTreeOps = {
  * @enum {function}
  * @see Numbas.jme.findvars
  */
-var findvarsOps = jme.findvarsOps = {
-	'map': function(tree,boundvars,scope) {
-		boundvars = boundvars.slice();
-		if(tree.args[1].tok.type=='list') {
-			var names = tree.args[1].args;
-			for(var i=0;i<names.length;i++) {
-				boundvars.push(names[i].tok.name.toLowerCase());
-			}
-		} else {
-			boundvars.push(tree.args[1].tok.name.toLowerCase());
-		}
-		var vars = findvars(tree.args[0],boundvars,scope);
-		vars = vars.merge(findvars(tree.args[2],boundvars));
-		return vars;
-	},
-	'filter': function(tree,boundvars,scope) {
-		boundvars = boundvars.slice();
-		if(tree.args[1].tok.type=='list') {
-			var names = tree.args[1].args;
-			for(var i=0;i<names.length;i++) {
-				boundvars.push(names[i].tok.name.toLowerCase());
-			}
-		} else {
-			boundvars.push(tree.args[1].tok.name.toLowerCase());
-		}
-		var vars = findvars(tree.args[0],boundvars,scope);
-		vars = vars.merge(findvars(tree.args[2],boundvars));
-		return vars;
-	},
-	'let': function(tree,boundvars,scope) {
-		// find vars used in variable assignments
-		var vars = [];
-		for(var i=0;i<tree.args.length-1;i+=2) {
-			vars = vars.merge(findvars(tree.args[i+1],boundvars,scope));
-		}
-
-		// find variable names assigned by let
-		boundvars = boundvars.slice();
-		for(var i=0;i<tree.args.length-1;i+=2) {
-			boundvars.push(tree.args[i].tok.name.toLowerCase());
-		}
-
-		// find variables used in the lambda expression, excluding the ones assigned by let
-		vars = vars.merge(findvars(tree.args[tree.args.length-1],boundvars,scope));
-
-		return vars;
-	},
-	'satisfy': function(tree,boundvars,scope) {
-		var names = tree.args[0].args.map(function(t){return t.tok.name});
-		boundvars = boundvars.concat(0,0,names);
-		var vars = [];
-		for(var i=1;i<tree.args.length;i++)
-			vars = vars.merge(findvars(tree.args[i],boundvars));
-		return vars;
-	},
-	'isset': function(tree,boundvars,scope) {
-		return [];
-	}
-}
+var findvarsOps = jme.findvarsOps = {}
 
 /** Find all variables used in given syntax tree
  * @memberof Numbas.jme

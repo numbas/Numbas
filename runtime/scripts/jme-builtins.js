@@ -653,6 +653,14 @@ newBuiltin('satisfy', [TList,TList,TList,TNum], TList, null, {
 		return new TList(names.map(function(name){ return variables[name]; }));
 	}
 });
+jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
+	var names = tree.args[0].args.map(function(t){return t.tok.name});
+	boundvars = boundvars.concat(0,0,names);
+	var vars = [];
+	for(var i=1;i<tree.args.length;i++)
+		vars = vars.merge(findvars(tree.args[i],boundvars));
+	return vars;
+}
 
 newBuiltin('listval',[TList,TNum],'?', null, {
 	evaluate: function(args,scope)
@@ -760,6 +768,12 @@ newBuiltin('isset',[TName],TBool,null, {
 		return new TBool(name in scope.variables);
 	}
 });
+jme.findvarsOps.isset = function(tree,boundvars,scope) {
+	return [];
+}
+jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
+	return tree;
+}
 
 newBuiltin('map',['?',TName,'?'],TList, null, {
 	evaluate: function(args,scope)
@@ -843,6 +857,25 @@ newBuiltin('map',['?',TList,'?'],TList,null, {
 	}
 });
 
+jme.findvarsOps.map = function(tree,boundvars,scope) {
+	boundvars = boundvars.slice();
+	if(tree.args[1].tok.type=='list') {
+		var names = tree.args[1].args;
+		for(var i=0;i<names.length;i++) {
+			boundvars.push(names[i].tok.name.toLowerCase());
+		}
+	} else {
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+	var vars = findvars(tree.args[0],boundvars,scope);
+	vars = vars.merge(findvars(tree.args[2],boundvars));
+	return vars;
+}
+jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
+	tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+	return tree;
+}
+
 newBuiltin('filter',['?',TName,'?'],TList,null, {
 	evaluate: function(args,scope) {
 		var lambda = args[0];
@@ -870,6 +903,24 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
 		return new TList(value);
 	}
 });
+jme.findvarsOps.filter = function(tree,boundvars,scope) {
+	boundvars = boundvars.slice();
+	if(tree.args[1].tok.type=='list') {
+		var names = tree.args[1].args;
+		for(var i=0;i<names.length;i++) {
+			boundvars.push(names[i].tok.name.toLowerCase());
+		}
+	} else {
+		boundvars.push(tree.args[1].tok.name.toLowerCase());
+	}
+	var vars = findvars(tree.args[0],boundvars,scope);
+	vars = vars.merge(findvars(tree.args[2],boundvars));
+	return vars;
+}
+jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
+	tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+	return tree;
+}
 
 newBuiltin('let',['?'],TList, null, {
 	evaluate: function(args,scope)
@@ -898,6 +949,29 @@ newBuiltin('let',['?'],TList, null, {
 		}
 	}
 });
+jme.findvarsOps.let = function(tree,boundvars,scope) {
+	// find vars used in variable assignments
+	var vars = [];
+	for(var i=0;i<tree.args.length-1;i+=2) {
+		vars = vars.merge(findvars(tree.args[i+1],boundvars,scope));
+	}
+
+	// find variable names assigned by let
+	boundvars = boundvars.slice();
+	for(var i=0;i<tree.args.length-1;i+=2) {
+		boundvars.push(tree.args[i].tok.name.toLowerCase());
+	}
+
+	// find variables used in the lambda expression, excluding the ones assigned by let
+	vars = vars.merge(findvars(tree.args[tree.args.length-1],boundvars,scope));
+
+	return vars;
+}
+jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
+	for(var i=1;i<tree.args.length-1;i+=2) {
+		tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+	}
+}
 
 newBuiltin('sort',[TList],TList, null, {
 	evaluate: function(args,scope)
