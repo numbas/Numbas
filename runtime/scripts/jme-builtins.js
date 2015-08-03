@@ -658,7 +658,7 @@ jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
 	boundvars = boundvars.concat(0,0,names);
 	var vars = [];
 	for(var i=1;i<tree.args.length;i++)
-		vars = vars.merge(findvars(tree.args[i],boundvars));
+		vars = vars.merge(jme.findvars(tree.args[i],boundvars));
 	return vars;
 }
 
@@ -867,8 +867,8 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
 	} else {
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
 	}
-	var vars = findvars(tree.args[0],boundvars,scope);
-	vars = vars.merge(findvars(tree.args[2],boundvars));
+	var vars = jme.findvars(tree.args[0],boundvars,scope);
+	vars = vars.merge(jme.findvars(tree.args[2],boundvars));
 	return vars;
 }
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
@@ -913,8 +913,8 @@ jme.findvarsOps.filter = function(tree,boundvars,scope) {
 	} else {
 		boundvars.push(tree.args[1].tok.name.toLowerCase());
 	}
-	var vars = findvars(tree.args[0],boundvars,scope);
-	vars = vars.merge(findvars(tree.args[2],boundvars));
+	var vars = jme.findvars(tree.args[0],boundvars,scope);
+	vars = vars.merge(jme.findvars(tree.args[2],boundvars));
 	return vars;
 }
 jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
@@ -953,7 +953,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
 	// find vars used in variable assignments
 	var vars = [];
 	for(var i=0;i<tree.args.length-1;i+=2) {
-		vars = vars.merge(findvars(tree.args[i+1],boundvars,scope));
+		vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
 	}
 
 	// find variable names assigned by let
@@ -963,7 +963,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
 	}
 
 	// find variables used in the lambda expression, excluding the ones assigned by let
-	vars = vars.merge(findvars(tree.args[tree.args.length-1],boundvars,scope));
+	vars = vars.merge(jme.findvars(tree.args[tree.args.length-1],boundvars,scope));
 
 	return vars;
 }
