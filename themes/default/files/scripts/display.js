@@ -988,6 +988,22 @@ display.QuestionDisplay = function(q)
 	 */
 	this.marks = ko.observable(q.marks);
 
+	/** Proportion of available marks awarded to the student
+	 * @member {observable|number} credit
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
+	this.credit = ko.computed(function() {
+		return this.score()/this.marks();
+	},this);
+
+	/** Does this question do any marking?
+	 * @member {observable|boolean} doesMarking
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
+	this.doesMarking = ko.computed(function() {
+		return this.marks()>0
+	},this);
+
 	/** Has this question been answered? ({@link Numbas.Question#answered})
 	 * @member {observable|boolean} answered
 	 * @memberof Numbas.display.QuestionDisplay
@@ -1229,6 +1245,19 @@ display.PartDisplay = function(p)
 	 */
 	this.marks = ko.observable(p.marks);
 
+	/** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
+	 * @member {observable|number} credit
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.credit = ko.observable(p.credit);
+
+	/** Does this part do any marking?
+	 * @member {observable|boolean} doesMarking
+	 * @see {Numbas.Part.doesMarking}
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.doesMarking = ko.observable(p.doesMarking);
+
 	/** Has the student answered this part?
 	 * @member {observable|boolean} answered
 	 * @memberof Numbas.display.PartDisplay
@@ -1320,7 +1349,7 @@ display.PartDisplay = function(p)
 	 * @memberof Numbas.display.PartDisplay
 	 */
 	this.showFeedbackBox = ko.computed(function() {
-		return this.marks()>0 && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
+		return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
 	},this);
 
 	/** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
@@ -1459,6 +1488,7 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 		this.score(p.score);
 		this.marks(p.marks);
+		this.credit(p.credit);
 		if(!noUpdate) {
 			this.scoreFeedback.update(true);
 		}
@@ -2165,9 +2195,15 @@ $.textMetrics = function(el) {
 }
 
 //update a score feedback box
-//selector - jQuery selector of element to update
-//score - student's score
-//marks - total marks available
+// obj - object with the following properties representing the score data:
+// 	answered - has the object been answered?
+// 	isDirty - has the student's answer changed?
+// 	score - number of marks awarded
+//  marks - number of marks available
+//  credit - proportion of available marks awarded
+//  doesMarking - does the object do any marking?
+//	revealed - have the correct answers been revealed?
+//
 //settings - object containing the following properties:
 //	showTotalMark
 //	showActualMark
@@ -2184,15 +2220,16 @@ function showScoreFeedback(obj,settings)
 	});
 
 	var state = ko.computed(function() {
-		var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
+		var revealed = obj.revealed(), score = obj.score(), marks = obj.marks(), credit = obj.credit();
 
-		if( marks>0 && (revealed || (settings.showAnswerState && answered())) ) {
-			if(score<=0)
+		if( obj.doesMarking() && (revealed || (settings.showAnswerState && answered())) ) {
+			if(credit<=0) {
 				return 'wrong';
-			else if(score==marks)
+			} else if(credit==1) {
 				return 'correct';
-			else
+			} else {
 				return 'partial';
+			}
 		}
 		else {
 			return 'none';
@@ -2218,16 +2255,14 @@ function showScoreFeedback(obj,settings)
 				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
 				scoreString: niceNumber(score)+' '+util.pluralise(score,R('mark'),R('marks'))
 			};
-			if(revealed && !answered())
+			if(revealed && !answered()) {
 				return R('question.score feedback.unanswered');
-			else if(answered() && marks>0)
-			{
+			} else if(answered() && obj.doesMarking() && marks>0) {
 				var str = 'question.score feedback.answered'
 							+ (settings.showTotalMark ? ' total' : '')
 							+ (settings.showActualMark ? ' actual' : '')
 				return R(str,scoreobj);
-			}
-			else if(settings.showTotalMark) {
+			} else if(settings.showTotalMark) {
 				return R('question.score feedback.unanswered total',scoreobj);
 			}
 			else

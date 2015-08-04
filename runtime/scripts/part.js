@@ -275,6 +275,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	shouldResubmit: false,
 
+	/** Does this mark do any marking? False for information only parts
+	 * @type {boolean}
+	 */
+	doesMarking: true,
+
 	/** Properties set when the part is generated
 	 * @type {object}
 	 * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown
@@ -460,60 +465,52 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 		this.setStudentAnswer();
 
-		if(this.marks==0) {
-			this.answered = true;
-			return;
-		}
-		if(this.stagedAnswer==undefined || this.stagedAnswer=='')
-		{
-			this.giveWarning(R('part.marking.not submitted'));
-			this.setCredit(0,R('part.marking.did not answer'));;
-			this.answered = false;
-		}
-		else
-		{
-			this.setDirty(false);
+		if(this.doesMarking) {
+			if(this.hasStagedAnswer()) {
+				this.setDirty(false);
 
-			// adaptive marking:
-			// try marking against correct answer, and then do variable replacements
+				// save existing feedback
+				var existing_feedback = {
+					warnings: this.warnings.slice(),
+					markingFeedback: this.markingFeedback.slice()
+				};
 
-			// save existing feedback
-			var existing_feedback = {
-				warnings: this.warnings.slice(),
-				markingFeedback: this.markingFeedback.slice()
-			};
+				var result;
+				var try_replacement;
 
-			var result;
-			var try_replacement;
-
-			try{
-				if(this.settings.variableReplacementStrategy=='originalfirst') {
-					var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
-					result = result_original;
-					var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
-				}
-				if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
-					try {
-						var scope = this.errorCarriedForwardScope();
-					} catch(e) {
-						if(!result) {
-							this.giveWarning(e.originalMessage);
-							this.answered = false;
-							throw(e);
+				try{
+					if(this.settings.variableReplacementStrategy=='originalfirst') {
+						var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
+						result = result_original;
+						var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
+					}
+					if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+						try {
+							var scope = this.errorCarriedForwardScope();
+						} catch(e) {
+							if(!result) {
+								this.giveWarning(e.originalMessage);
+								this.answered = false;
+								throw(e);
+							}
+						}
+						var result_replacement = this.markAgainstScope(scope,existing_feedback);
+						if(result_original && result_replacement.answered && result_replacement.credit>result_original.credit) {
+							result = result_replacement;
+							result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
 						}
 					}
-					var result_replacement = this.markAgainstScope(scope,existing_feedback);
-					if(result_original && result_replacement.answered && result_replacement.credit>result_original.credit) {
-						result = result_replacement;
-						result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
-					}
-				}
 
-				this.setWarnings(result.warnings);
-				this.markingFeedback = result.markingFeedback;
-				this.credit = result.credit;
-				this.answered = result.answered;
-			} catch(e) {
+					this.setWarnings(result.warnings);
+					this.markingFeedback = result.markingFeedback;
+					this.credit = result.credit;
+					this.answered = result.answered;
+				} catch(e) {
+				}
+			} else {
+				this.giveWarning(R('part.marking.not submitted'));
+				this.setCredit(0,R('part.marking.did not answer'));;
+				this.answered = false;
 			}
 		}
 
@@ -550,6 +547,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				p2.pleaseResubmit();
 			}
 		}
+	},
+
+	/** Has the student entered an answer to this part?
+	 * @see {Numbas.Part.stagedAnswer}
+	 * @returns {boolean}
+	 */
+	hasStagedAnswer: function() {
+		return !(this.stagedAnswer==undefined || this.stagedAnswer=='');
 	},
 
 	/** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part)

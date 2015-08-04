@@ -49,7 +49,13 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
 	 */
 	setDirty: function() {
 		this.isDirty = false;
-	}
+	},
+
+	hasStagedAnswer: function() {
+		return true;
+	},
+
+	doesMarking: false
 };
 
 Numbas.partConstructors['information'] = util.extend(Part,InformationPart);

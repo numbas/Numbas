@@ -602,12 +602,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			}
 		}
 
-		if(this.credit<=0) {
-			this.markingComment(R('part.marking.incorrect'));
-		}
-
 		if(this.marks>0) {
+			if(this.credit<=0) {
+				this.markingComment(R('part.marking.incorrect'));
+			}
 			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
+		} else {
+			this.setCredit(1,R('part.marking.correct'));
 		}
 	},
 
