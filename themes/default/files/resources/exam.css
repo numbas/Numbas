@@ -436,6 +436,10 @@ table {
 	margin-left: 0;
 }
 
+.stepsBtn {
+	margin-bottom: 1em;
+}
+
 .stepsBtn .penaltyMessage {
 	font-style: italic;
 	margin-left: 0.5em;
