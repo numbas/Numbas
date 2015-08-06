@@ -36,6 +36,15 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
 
 	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+
+	var numRows = jme.subvars(settings.numRows, this.question.scope);
+	settings.numRows = this.question.scope.evaluate(numRows).value;
+
+	var numColumns = jme.subvars(settings.numColumns, this.question.scope);
+	settings.numColumns = this.question.scope.evaluate(numColumns).value;
+
+	var tolerance = jme.subvars(settings.tolerance, this.question.scope);
+	settings.tolerance = this.question.scope.evaluate(tolerance).value;
 	settings.tolerance = Math.max(settings.tolerance,0.00000000001);
 
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
@@ -81,10 +90,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Properties set when part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {matrix} correctAnswer - the correct answer to the part
-	 * @property {number} numRows - default number of rows in the student's answer
-	 * @property {number} numColumns - default number of columns in the student's answer
+	 * @property {jme} numRows - default number of rows in the student's answer
+	 * @property {jme} numColumns - default number of columns in the student's answer
 	 * @property {boolean} allowResize - allow the student to change the dimensions of their answer?
-	 * @property {number} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
+	 * @property {jme} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
 	 * @property {boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
 	 * @property {boolean} allowFractions - can the student enter a fraction as their answer for a cell?
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
@@ -95,10 +104,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	settings: {
 		correctAnswer: null,
 		correctAnswerFractions: false,
-		numRows: 3,
-		numColumns: 3,
+		numRows: '3',
+		numColumns: '3',
 		allowResize: true,
-		tolerance: 0,
+		tolerance: '0',
 		markPerCell: false,
 		allowFractions: false,
 		precisionType: 'none',	//'none', 'dp' or 'sigfig'
