@@ -60,7 +60,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	//get restrictions on number of choices
 	var choicesNode = this.xml.selectSingleNode('choices');
 	if(!choicesNode) {
-		throw(new Numbas.Error('part.mcq.choices missing',this.path));
+		this.error('part.mcq.choices missing');
 	}
 
 	tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
@@ -70,7 +70,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	if(minAnswers && minAnswers.type=='number') {
 		settings.minAnswers = minAnswers.value;
 	} else {
-		throw(new Numbas.Error('part.setting not present','minimum answers',this.path,this.question.name))
+		this.error('part.setting not present','minimum answers');
 	}
 
 	var maxAnswers = jme.subvars(settings.maxAnswers, question.scope);
@@ -78,7 +78,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	if(maxAnswers && maxAnswers.type=='number') {
 		settings.maxAnswers = maxAnswers.value;
 	} else {
-		throw(new Numbas.Error('part.setting not present','maximum answers',this.path,this.question.name))
+		this.error('part.setting not present','maximum answers');
 	}
 
 	var choiceNodes = choicesNode.selectNodes('choice');
@@ -405,7 +405,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 						numNumbers++;
 						break;
 					default:
-						throw(new Numbas.Error('part.mcq.matrix wrong type',matrix.value[i].type));
+						this.error('part.mcq.matrix wrong type',matrix.value[i].type);
 					}
 				}
 				if(numLists == matrix.value.length) {
@@ -417,7 +417,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 						return [e.value];
 					});
 				} else {
-					throw(new Numbas.Error('part.mcq.matrix mix of numbers and lists'));
+					this.error('part.mcq.matrix mix of numbers and lists');
 				}
 				matrix.rows = matrix.length;
 				matrix.columns = matrix[0].length;
@@ -426,13 +426,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 				matrix = matrix.value;
 				break;
 			default:
-				throw(new Numbas.Error('part.mcq.matrix not a list'));
+				this.error('part.mcq.matrix not a list');
 			}
 			if(this.flipped) {
 				matrix = Numbas.matrixmath.transpose(matrix);
 			}
 			if(matrix.length!=this.numChoices) {
-				throw(new Numbas.Error('part.mcq.matrix wrong size'));
+				this.error('part.mcq.matrix wrong size');
 			}
 
 			// take into account shuffling;
@@ -443,7 +443,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 			for(var i=0;i<this.numChoices;i++) {
 				matrix[i]=[];
 				if(omatrix[i].length!=this.numAnswers) {
-					throw(new Numbas.Error('part.mcq.matrix wrong size'));
+					this.error('part.mcq.matrix wrong size');
 				}
 			}
 			for(var i=0; i<this.numChoices; i++) {
@@ -465,7 +465,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 					} else {
 						value = jme.evaluate(value,scope).value;
 						if(!util.isFloat(value)) {
-							throw(new Numbas.Error('part.mcq.matrix not a number',this.path,i,j));
+							this.error('part.mcq.matrix not a number',this.path,i,j);
 						}
 						value = parseFloat(value);
 					}

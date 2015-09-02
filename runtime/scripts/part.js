@@ -57,8 +57,9 @@ var partConstructors = Numbas.partConstructors = {};
 var createPart = Numbas.createPart = function(xml, path, question, parentPart, loading)
 {
 	var type = tryGetAttribute(null,xml,'.','type',[]);
-	if(type==null)
-		throw(new Numbas.Error('part.missing type attribute'));
+	if(type==null) {
+		throw(new Numbas.Error('part.missing type attribute',util.nicePartName(path)));
+	}
 	if(partConstructors[type])
 	{
 		var cons = partConstructors[type];
@@ -71,9 +72,8 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 		}
 		return part;
 	}
-	else
-	{
-		throw(new Numbas.Error('part.unknown type',type));
+	else {
+		throw(new Numbas.Error('part.unknown type',util.nicePartName(path),type));
 	}
 }
 
@@ -155,7 +155,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 			part: this
 		};
 		with(withEnv) {
-			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',this.path,name,e.message))}})');
+			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',util.nicePartName(this.path),name,e.message))}})');
 		}
 		this.scripts[name] = {script: script, order: order};
 	}
@@ -295,6 +295,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		minimumMarks: 0,
 		showCorrectAnswer: true,
 		hasVariableReplacements: false
+	},
+
+	/** Throw an error, with the part's identifier prepended to the message
+	 * @param {string} message
+	 * @returns {Numbas.Error}
+	 */
+	error: function(message) {
+		message = R.apply(this,arguments);
+		var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
+		throw(new Numbas.Error(niceName+': '+message));
 	},
 
 	applyScripts: function() {

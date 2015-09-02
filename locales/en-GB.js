@@ -178,12 +178,12 @@ R.registerLocale('en-GB',{
 	'part.marking.correct': "Your answer is correct.",
 	'part.correct answer': "Expected answer:",
 
-	'part.missing type attribute': "Missing part type attribute",
-	'part.unknown type': "Unrecognised part type %s",
+	'part.missing type attribute': "%s: Missing part type attribute",
+	'part.unknown type': "%s: Unrecognised part type %s",
 
-	'part.setting not present': "Property '%s' not set in part %s of question \"%s\"",
+	'part.setting not present': "Property '%s' not set",
 
-	'part.jme.answer missing': "Correct answer for a JME part is missing (%s)",
+	'part.jme.answer missing': "Correct answer is missing",
 	'part.jme.answer too long': "Your answer is too long.",
 	'part.jme.answer too short': "Your answer is too short.",
 	'part.jme.answer invalid': "Your answer is not a valid mathematical expression.<br/>%s.",
@@ -197,7 +197,7 @@ R.registerLocale('en-GB',{
 	'part.jme.unexpected variable name': "Your answer was interpreted to use the unexpected variable name <code>%s</code>.",
 	'part.jme.unexpected variable name suggestion': "Your answer was interpreted to use the unexpected variable name <code>%s</code>. Did you mean <code>%s</code>?",
 
-	'part.patternmatch.display answer missing': "Display answer is missing from a Pattern Match part (%s)",
+	'part.patternmatch.display answer missing': "Display answer is missing",
 	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",
 
 	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
@@ -205,11 +205,11 @@ R.registerLocale('en-GB',{
 	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
 	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
 
-	'part.mcq.choices missing': "Definition of choices is missing from a Multiple Response part (%s)",
+	'part.mcq.choices missing': "Definition of choices is missing",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
 	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",
 	'part.mcq.no choices selected': "No choices selected.",
-	'part.mcq.matrix not a list': "Marking matrix for a Multiple Response part, defined by JME expression, is not a list but it should be.",
+	'part.mcq.matrix not a list': "Marking matrix, defined by JME expression, is not a list but it should be.",
 	'part.mcq.matrix wrong type': "Element of invalid type '%s' used in marking matrix.",
 	'part.mcq.matrix mix of numbers and lists': "Mix of numbers and lists used in marking matrix.",
 	'part.mcq.matrix wrong size': "Marking matrix is the wrong size.",

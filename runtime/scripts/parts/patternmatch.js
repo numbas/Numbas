@@ -39,7 +39,7 @@ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, quest
 
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
-		throw(new Numbas.Error('part.patternmatch.display answer missing',this.path));
+		this.error('part.patternmatch.display answer missing');
 	settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
 	this.getCorrectAnswer(this.question.scope);

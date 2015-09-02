@@ -22,6 +22,7 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
+var nicePartName = util.nicePartName;
 
 var Part = Numbas.parts.Part;
 
@@ -39,8 +40,9 @@ var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, l
 
 	//parse correct answer from XML
 	answerMathML = this.xml.selectSingleNode('answer/correctanswer');
-	if(!answerMathML)
-		throw(new Numbas.Error('part.jme.answer missing',this.path));
+	if(!answerMathML) {
+		this.error('part.jme.answer missing');
+	}
 
 	tryGetAttribute(settings,this.xml,'answer/correctanswer','simplification','answerSimplificationString');
 
@@ -214,7 +216,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			scope
 		);
 		if(settings.correctAnswer == '' && this.marks>0) {
-			throw(new Numbas.Error('part.jme.answer missing',this.path));
+			this.error('part.jme.answer missing');
 		}
 
 		this.markingScope = new jme.Scope(this.question.scope);

@@ -128,7 +128,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		} else if(correctAnswer && correctAnswer.type=='vector') {
 			settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
 		} else {
-			throw(new Numbas.Error('part.setting not present','correct answer',this.path,this.question.name));
+			this.error('part.setting not present','correct answer');
 		}
 
 		settings.precision = jme.subvars(settings.precisionString, scope);
