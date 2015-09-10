@@ -291,13 +291,13 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'').toLowerCase();
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ ) {
-			if(noSpaceAnswer.contains(this.settings.notAllowed[i].toLowerCase())) { this.failNotAllowed = true; }
+			if(noSpaceAnswer.contains(this.settings.notAllowed[i].toLowerCase())) { validation.failNotAllowed = true; }
 		}
 
 		if(!validation.failNotAllowed) {
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ ) {
-				if(!noSpaceAnswer.contains(this.settings.mustHave[i].toLowerCase())) { this.failMustHave = true; }
+				if(!noSpaceAnswer.contains(this.settings.mustHave[i].toLowerCase())) { validation.failMustHave = true; }
 			}
 		}
 
