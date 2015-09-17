@@ -577,8 +577,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		if(part.numAnswers===undefined)
 			return out;
 		var ticks = [];
-		var w = part.type=='m_n_x' ? part.numAnswers : part.numChoices;
-		var h = part.type=='m_n_x' ? part.numChoices : part.numAnswers;
+		var w = part.numAnswers;
+		var h = part.numChoices;
 		if(w==0 || h==0) {
 			out.ticks = [];
 			return out;
