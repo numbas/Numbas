@@ -398,6 +398,7 @@ var texOps = jme.display.texOps = {
 	'and': infixTex('\\wedge'),
 	'or': infixTex('\\vee'),
 	'xor': infixTex('\\, \\textrm{XOR} \\,'),
+	'implies': infixTex('\\to'),
 	'|': infixTex('|'),
 	'abs': (function(thing,texArgs,settings) { 
 		var arg;
