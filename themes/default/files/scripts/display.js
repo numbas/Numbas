@@ -967,7 +967,13 @@ display.QuestionDisplay = function(q)
 	 * @memberof Numbas.display.QuestionDisplay
 	 */
 	this.visible = ko.computed(function() {
-		return this.visited() || exam.settings.navigateBrowse;
+		var q = this.question;
+		var currentQuestionNumber = exam.display.currentQuestionNumber();
+		return (q.number==currentQuestionNumber
+			|| exam.settings.navigateBrowse 												// is browse navigation enabled?
+			|| this.visited()							// if not, we can still move backwards to questions already seen if reverse navigation is enabled
+			|| (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())	// or you can always move to the next question
+		)
 	},this);
 
 	/** Number of parts in this question
