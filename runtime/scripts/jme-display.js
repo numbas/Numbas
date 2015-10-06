@@ -913,16 +913,19 @@ var typeToTeX = jme.display.typeToTeX = {
 		return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
 	},
 	'function': function(thing,tok,texArgs,settings) {
-		if(texOps[tok.name.toLowerCase()])
-		{
-			return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
+		var lowerName = tok.name.toLowerCase();
+		if(texOps[lowerName]) {
+			return texOps[lowerName](thing,texArgs,settings);
 		}
-		else
-		{
-			if(tok.name.replace(/[^A-Za-z]/g,'').length==1)
-				var texname=tok.name;
-			else
-				var texname='\\operatorname{'+tok.name+'}';
+		else {
+			var texname;
+			if(tok.name.replace(/[^A-Za-z]/g,'').length==1) {
+				texname = tok.name;
+			} else if(greek.contains(lowerName)) {
+				texname = '\\'+lowerName;
+			} else {
+				texname = '\\operatorname{'+tok.name+'}';
+			}
 
 			return texName(texname,tok.annotation)+' \\left ( '+texArgs.join(', ')+' \\right )';
 		}
