@@ -1527,6 +1527,26 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			}
 		}
 		return factors;
+	},
+
+	/** Sum the elements in the given list
+	 *
+	 * @param {list} list
+	 * @returns {number}
+	 */
+	sum: function(list) {
+		var total = 0;
+		var l = list.length;
+
+		if(l==0) {
+			return 0;
+		}
+
+		for(var i=0;i<l;i++) {
+			total = math.add(total,list[i]);
+		}
+		
+		return total;
 	}
 
 };

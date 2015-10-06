@@ -443,20 +443,8 @@ newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,
 newBuiltin('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
 newBuiltin('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
 
-newBuiltin('sum',[TList],TNum,function(list) {
-	var total = 0;
-	var l = list.length;
-
-	if(l==0) {
-		return 0;
-	}
-
-	for(var i=0;i<l;i++) {
-		total = math.add(total,list[i].value);
-	}
-	
-	return total;
-});
+newBuiltin('sum',[TList],TNum,math.sum,{unwrapValues: true});
+newBuiltin('sum',[TVector],TNum,math.sum);
 
 newBuiltin('deal',[TNum],TList, 
 	function(n) {
