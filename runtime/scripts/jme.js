@@ -46,7 +46,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 	/** Regular expressions to match tokens */
 	re: {
-		re_bool: /^true|^false/i,
+		re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
 		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
 		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in)([^a-zA-Z0-9_']|$)))/i,
@@ -97,6 +97,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			else if (result = expr.match(jme.re.re_bool))
 			{
 				token = new TBool(util.parseBool(result[0]));
+				result[0] = result[1];
 			}
 			else if (result = expr.match(jme.re.re_op))
 			{
