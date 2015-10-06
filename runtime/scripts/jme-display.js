@@ -828,18 +828,40 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  * @memberof Numbas.jme.display
  *
  * @param {string} name
- * @param {string[]} annotation - 
+ * @param {string[]} [annotations]
+ * @param {function} [longNameMacro=texttt] - function which returns TeX for a long name
  * @returns {TeX}
  */
 
-var texName = jme.display.texName = function(name,annotations)
+var texName = jme.display.texName = function(name,annotations,longNameMacro)
 {
-	var name = greek.contains(name) ? '\\'+name : name;
-	name = name.replace(/(.*)_(.*)('*)$/g,'$1_{$2}$3');	//make numbers at the end of a variable name subscripts
-	name = name.replace(/^(.*?[^_])(\d+)('*)$/,'$1_{$2}$3');	//make numbers at the end of a variable name subscripts
+	longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
 
-	if(!annotations)
+	var oname = name;
+
+	var num_subscripts = name.length - name.replace('_','').length;
+	var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_(.{1,2}))?('*)$/;
+	var m,isgreek;
+	if((m=name.match(re_math_variable)) && (m[1].length==1 || (isgreek=greek.contains(m[1])))) {
+		console.log(oname,isgreek,m);
+		if(isgreek) {
+			m[1] = '\\'+m[1];
+		}
+		var subscript = (m[2] || m[3] || m[4]);
+		if(subscript) {
+			name = m[1]+'_{'+subscript+'}'+m[5];
+		} else {
+			name = m[1]+m[5];
+		}
+	} else if(!name.match(/^\\/)) {
+		name = longNameMacro(name);
+	}
+
+	console.log(oname,name);
+
+	if(!annotations) {
 		return name;
+	}
 
 	for(var i=0;i<annotations.length;i++)
 	{
@@ -918,16 +940,10 @@ var typeToTeX = jme.display.typeToTeX = {
 			return texOps[lowerName](thing,texArgs,settings);
 		}
 		else {
-			var texname;
-			if(tok.name.replace(/[^A-Za-z]/g,'').length==1) {
-				texname = tok.name;
-			} else if(greek.contains(lowerName)) {
-				texname = '\\'+lowerName;
-			} else {
-				texname = '\\operatorname{'+tok.name+'}';
+			function texOperatorName(name) {
+				return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
 			}
-
-			return texName(texname,tok.annotation)+' \\left ( '+texArgs.join(', ')+' \\right )';
+			return texName(tok.name,tok.annotation,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
 		}
 	},
 	set: function(thing,tok,texArgs,settings) {

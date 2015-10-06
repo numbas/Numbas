@@ -826,12 +826,36 @@
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
 				});
 
+				test('texName', function() {
+					var names = [
+						['x','x'],
+						['xy','\\texttt{xy}'],
+						['xyz','\\texttt{xyz}'],
+						['x1','x_{1}'],
+						['x1234','x_{1234}'],
+						['x1\'','x_{1}\''],
+						['x_1','x_{1}'],
+						['x_12345','x_{12345}'],
+						['x_123\'\'','x_{123}\'\''],
+						['longname','\\texttt{longname}'],
+						['ab_cd_ef','\\texttt{ab_cd_ef}'],
+						['x_abc','\\texttt{x_abc}'],
+						['x_abc\'','\\texttt{x_abc\'}'],
+						['\\operatorname{x}','\\operatorname{x}'],
+						['lambda','\\lambda'],
+						['lambda1','\\lambda_{1}'],
+						['lambda\'','\\lambda\'']
+					]
+
+					names.forEach(function(n) {
+						equals(Numbas.jme.display.texName(n[0]),n[1], n[2] || ('texName '+n[0]));
+					});
+				});
+
 				test('expression to LaTeX', function() {
 					function exprToLaTeX(expr,rules) {
 						return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
 					}
-					equals(exprToLaTeX('a1'),'a_{1}','a1 -- make numbers at the end of variable names subscripts');	
-					equals(exprToLaTeX('a_xx'),'a_{xx}','a_xx -- display subscripts in variable names properly');	
 					equals(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
 					equals(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
 					equals(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
@@ -850,6 +874,8 @@
 					equals(exprToLaTeX('3+(-2)',[]),'3 + \\left ( -2 \\right )','3+(-2) - brackets around minus on right side of addition')
 					equals(exprToLaTeX('3-(-2)',[]),'3 - \\left ( -2 \\right )','3-(-2) - brackets around minus on right side of subtraction')
 					equals(exprToLaTeX('2+(3+2)+(4-5)',[]),'2 + 3 + 2 + 4 - 5','don\'t put brackets round nested addition and subtraction')
+					equals(exprToLaTeX('lambda1\'(x)'),'\\lambda_{1}\' \\left ( x \\right )','texName works on function names');
+					equals(exprToLaTeX('long_function_name(x)'),'\\operatorname{long\\_function\\_name} \\left ( x \\right )','long function names are wrapped in \\operatorname');
 				});
 			});
 		</script>
