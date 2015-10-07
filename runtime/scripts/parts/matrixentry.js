@@ -212,15 +212,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			}
 
 			var precisionOK = true;
+			var rows = studentMatrix.rows;
+			var columns = studentMatrix.columns;
+
 			for(var i=0;i<rows;i++) {
 				for(var j=0;j<columns;j++) {
 					var cell = this.studentAnswer[i][j];
 					precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
 				}
 			}
-
-			var rows = studentMatrix.rows;
-			var columns = studentMatrix.columns;
 
 			validation.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
 			if(validation.wrongSize) {
