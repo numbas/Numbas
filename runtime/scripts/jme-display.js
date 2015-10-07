@@ -999,9 +999,10 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  * @private
  *
  * @param {number} n
+ * @param {object} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
-var jmeRationalNumber = jme.display.jmeRationalNumber = function(n)
+var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 {
 	if(n.complex)
 	{
@@ -1042,7 +1043,12 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n)
 
 		
 		var m;
-		var out = math.niceNumber(n);
+		var out;
+		if(settings.niceNumber===false) {
+			out = n+'';
+		} else {
+			out = math.niceNumber(n);
+		}
 		if(m = out.match(math.re_scientificNumber)) {
 			var mantissa = m[1];
 			var exponent = m[2];
@@ -1077,9 +1083,10 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n)
  * @private
  *
  * @param {number} n
+ * @param {object} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
-function jmeRealNumber(n)
+function jmeRealNumber(n,settings)
 {
 	if(n.complex)
 	{
@@ -1128,7 +1135,12 @@ function jmeRealNumber(n)
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
 
-		var out = math.niceNumber(n);
+		var out;
+		if(settings.niceNumber===false) {
+			out = n+'';
+		} else {
+			out = math.niceNumber(n);
+		}
 
 		var m;
 		if(m = out.match(math.re_scientificNumber)) {
@@ -1172,7 +1184,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		case Math.PI:
 			return 'pi';
 		default:
-			return settings.jmeNumber(tok.value);
+			return settings.jmeNumber(tok.value,settings);
 		}
 	},
 	name: function(tree,tok,bits,settings) {
@@ -1212,11 +1224,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		return '[ '+bits.join(', ')+' ]';
 	},
 	vector: function(tree,tok,bits,settings) {
-		return 'vector('+tok.value.map(settings.jmeNumber).join(',')+')';
+		return 'vector('+tok.value.map(function(n){ return settings.jmeNumber(n,settings)}).join(',')+')';
 	},
 	matrix: function(tree,tok,bits,settings) {
 		return 'matrix('+
-			tok.value.map(function(row){return '['+row.map(settings.jmeNumber).join(',')+']'}).join(',')+')';
+			tok.value.map(function(row){return '['+row.map(function(n){ return settings.jmeNumber(n,settings)}).join(',')+']'}).join(',')+')';
 	},
 	'function': function(tree,tok,bits,settings) {
 		if(!bits) {
@@ -1272,12 +1284,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		case '-u':
 			op='-';
 			if(args[0].tok.type=='number' && args[0].tok.value.complex)
-				return settings.jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im});
+				return settings.jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im},settings);
 			break;
 		case '-':
 			var b = args[1].tok.value;
 			if(args[1].tok.type=='number' && args[1].tok.value.complex && args[1].tok.value.re!=0) {
-				return bits[0]+' - '+settings.jmeNumber(math.complex(b.re,-b.im));
+				return bits[0]+' - '+settings.jmeNumber(math.complex(b.re,-b.im),settings);
 			}
 			op = ' - ';
 			break;
