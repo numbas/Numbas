@@ -840,7 +840,7 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 	var oname = name;
 
 	var num_subscripts = name.length - name.replace('_','').length;
-	var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_(.{1,2}))?('*)$/;
+	var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
 	var m,isgreek;
 	if((m=name.match(re_math_variable)) && (m[1].length==1 || (isgreek=greek.contains(m[1])))) {
 		console.log(oname,isgreek,m);
