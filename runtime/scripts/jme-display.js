@@ -1004,6 +1004,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  */
 var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 {
+	settings = settings || {};
 	if(n.complex)
 	{
 		var re = jmeRationalNumber(n.re);
@@ -1088,6 +1089,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  */
 function jmeRealNumber(n,settings)
 {
+	settings = settings || {};
 	if(n.complex)
 	{
 		var re = jmeRealNumber(n.re);
