@@ -505,6 +505,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
 			else
+				tok = new TName(tok.name);
 				tok.unboundName = true;
 				return tok;
 			break;
@@ -520,6 +521,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					tree.args[i] = jme.evaluate(tree.args[i],scope);
 				}
 
+				var matchedFunction;
 				if(scope.functions[op]===undefined)
 				{
 					if(tok.type=='function') {
@@ -539,12 +541,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					var fn = scope.functions[op][j];
 					if(fn.typecheck(tree.args))
 					{
-						tok.fn = fn;
+						matchedFunction = fn;
 						break;
 					}
 				}
-				if(tok.fn)
-					return tok.fn.evaluate(tree.args,scope);
+				if(matchedFunction)
+					return matchedFunction.evaluate(tree.args,scope);
 				else {
 					for(var i=0;i<=tree.args.length;i++) {
 						if(tree.args[i] && tree.args[i].unboundName) {
