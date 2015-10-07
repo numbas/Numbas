@@ -856,8 +856,6 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 		name = longNameMacro(name);
 	}
 
-	console.log(oname,name);
-
 	if(!annotations) {
 		return name;
 	}
