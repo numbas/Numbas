@@ -116,7 +116,11 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		this.numAnswers = answerStrings.length;
 		answerStrings.map(function(answer) {
 			var node = xml.ownerDocument.createElement(nodeName);
-			node.innerHTML = '<content><span>'+answer+'</span></content>';
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			span.appendChild(xml.ownerDocument.createTextNode(answer));
+			content.appendChild(span);
+			node.appendChild(content);
 			answersNode.appendChild(node);
 		});
 		answerNodes = answersNode.selectNodes(nodeName);
