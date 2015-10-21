@@ -638,7 +638,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		var n = e.currentQuestion.number;
 		job(e.display.startRegen,e.display);
 		job(function() {
-			var on = e.questionSubset.indexOf(n);
+			var on = e.questionSubset[n];
 			e.questionList[n] = new Numbas.Question(e, e.xml.selectNodes('questions/question')[on], n, false, e.scope);
 		})
 		job(function() {
