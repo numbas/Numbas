@@ -108,6 +108,19 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			this.numAnswers = answerNodes.length;
 		}
 	}
+	var def;
+	if(def = answersNode.getAttribute('def')) {
+		settings.answersDef = def;
+		var nodeName = this.flipped ? 'choice' : 'answer';
+		var answerStrings = jme.unwrapValue(jme.evaluate(settings.answersDef,this.question.scope));
+		this.numAnswers = answerStrings.length;
+		answerStrings.map(function(answer) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			node.innerHTML = '<content><span>'+answer+'</span></content>';
+			answersNode.appendChild(node);
+		});
+		answerNodes = answersNode.selectNodes(nodeName);
+	}
 
 	//get warning type and message for wrong number of choices
 	warningNode = this.xml.selectSingleNode('marking/warning');

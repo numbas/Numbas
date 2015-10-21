@@ -970,8 +970,10 @@ class MultipleChoicePart(Part):
 			part.maxMarksEnabled = True
 
 		if haskey(data,'choices'):
-			for choice in data['choices']:
-				part.choices.append(choice)
+			if isinstance(data['choices'],list):
+				part.choices = data['choices'][:]
+			else:
+				part.choices = data['choices']
 
 		if haskey(data,'answers'):
 			for answer in data['answers']:
@@ -1002,12 +1004,15 @@ class MultipleChoicePart(Part):
 			'minimumexpected': strcons_fix(self.minAnswers),
 			'maximumexpected': strcons_fix(self.maxAnswers),
 			'displaycolumns': strcons_fix(self.displayColumns),
-			'order': 'random' if self.shuffleChoices else 'fixed',
+			'order': strcons_fix('random' if self.shuffleChoices else 'fixed'),
 			'displaytype': strcons_fix(self.displayType)
-			}
+		}
 
-		for choice in self.choices:
-			choices.append(makeTree(['choice',makeContentNode(choice)]))
+		if isinstance(self.choices,str):
+			choices.attrib['def'] = strcons_fix(self.choices)
+		else:
+			for choice in self.choices:
+				choices.append(makeTree(['choice',makeContentNode(choice)]))
 
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
