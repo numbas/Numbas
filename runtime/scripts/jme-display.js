@@ -330,7 +330,12 @@ var texOps = jme.display.texOps = {
 			{
 				s+=' ';
 			}
-			else if ( !(thing.args[i-1].tok.type=='number' && math.eq(thing.args[i-1].tok.value,math.complex(0,1))) && thing.args[i].tok.type=='number' && math.eq(thing.args[i].tok.value,math.complex(0,1)))	//(anything except i) times i
+			// times sign when LHS or RHS is a factorial
+			else if((thing.args[i-1].tok.type=='function' && thing.args[i-1].tok.name=='fact') || (thing.args[i].tok.type=='function' && thing.args[i].tok.name=='fact')) {
+				s += ' \\times ';
+			}
+			//(anything except i) times i
+			else if ( !(thing.args[i-1].tok.type=='number' && math.eq(thing.args[i-1].tok.value,math.complex(0,1))) && thing.args[i].tok.type=='number' && math.eq(thing.args[i].tok.value,math.complex(0,1)))
 			{
 				s+=' ';
 			}
@@ -349,8 +354,9 @@ var texOps = jme.display.texOps = {
 			{
 				s += ' \\times ';
 			}
-			else
+			else {
 				s+= ' ';
+			}
 			s += texifyOpArg(thing,texArgs,i);
 		}
 		return s;

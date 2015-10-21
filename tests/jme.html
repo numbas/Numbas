@@ -877,6 +877,7 @@
 					equals(exprToLaTeX('2+(3+2)+(4-5)',[]),'2 + 3 + 2 + 4 - 5','don\'t put brackets round nested addition and subtraction')
 					equals(exprToLaTeX('lambda1\'(x)'),'\\lambda_{1}\' \\left ( x \\right )','texName works on function names');
 					equals(exprToLaTeX('long_function_name(x)'),'\\operatorname{long\\_function\\_name} \\left ( x \\right )','long function names are wrapped in \\operatorname');
+					equals(exprToLaTeX('fact(3)*fact(2)'),'3! \\times 2!','times sign between factorials');
 				});
 			});
 		</script>
