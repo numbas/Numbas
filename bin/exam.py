@@ -976,8 +976,10 @@ class MultipleChoicePart(Part):
 				part.choices = data['choices']
 
 		if haskey(data,'answers'):
-			for answer in data['answers']:
-				part.answers.append(answer)
+			if isinstance(data['answers'],list):
+				part.answers = data['answers'][:]
+			else:
+				part.answers = data['answers']
 
 		if haskey(data,'layout'):
 			tryLoad(data['layout'],'type',part,'layoutType')
@@ -1016,8 +1018,11 @@ class MultipleChoicePart(Part):
 
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
-		for answer in self.answers:
-			answers.append(makeTree(['answer',makeContentNode(answer)]))
+		if isinstance(self.answers,str):
+			answers.attrib['def'] = strcons_fix(self.answers)
+		else:
+			for answer in self.answers:
+				answers.append(makeTree(['answer',makeContentNode(answer)]))
 
 		layout = part.find('layout')
 		layout.attrib = {

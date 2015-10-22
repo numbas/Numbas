@@ -125,6 +125,22 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		});
 		answerNodes = answersNode.selectNodes(nodeName);
 	}
+	if(choicesNode && (def = choicesNode.getAttribute('def'))) {
+		settings.choicesDef = def;
+		var nodeName = 'choice';
+		var choiceStrings = jme.unwrapValue(jme.evaluate(settings.choicesDef,this.question.scope));
+		this.numChoices = choiceStrings.length;
+		choiceStrings.map(function(choice) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			span.appendChild(xml.ownerDocument.createTextNode(choice));
+			content.appendChild(span);
+			node.appendChild(content);
+			choicesNode.appendChild(node);
+		});
+		choiceNodes = choicesNode.selectNodes(nodeName);
+	}
 
 	//get warning type and message for wrong number of choices
 	warningNode = this.xml.selectSingleNode('marking/warning');
