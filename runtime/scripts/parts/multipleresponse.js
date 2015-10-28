@@ -108,6 +108,39 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			this.numAnswers = answerNodes.length;
 		}
 	}
+	var def;
+	if(def = answersNode.getAttribute('def')) {
+		settings.answersDef = def;
+		var nodeName = this.flipped ? 'choice' : 'answer';
+		var answerStrings = jme.unwrapValue(jme.evaluate(settings.answersDef,this.question.scope));
+		this.numAnswers = answerStrings.length;
+		answerStrings.map(function(answer) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			span.appendChild(xml.ownerDocument.createTextNode(answer));
+			content.appendChild(span);
+			node.appendChild(content);
+			answersNode.appendChild(node);
+		});
+		answerNodes = answersNode.selectNodes(nodeName);
+	}
+	if(choicesNode && (def = choicesNode.getAttribute('def'))) {
+		settings.choicesDef = def;
+		var nodeName = 'choice';
+		var choiceStrings = jme.unwrapValue(jme.evaluate(settings.choicesDef,this.question.scope));
+		this.numChoices = choiceStrings.length;
+		choiceStrings.map(function(choice) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			span.appendChild(xml.ownerDocument.createTextNode(choice));
+			content.appendChild(span);
+			node.appendChild(content);
+			choicesNode.appendChild(node);
+		});
+		choiceNodes = choicesNode.selectNodes(nodeName);
+	}
 
 	//get warning type and message for wrong number of choices
 	warningNode = this.xml.selectSingleNode('marking/warning');
