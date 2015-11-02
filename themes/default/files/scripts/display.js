@@ -42,13 +42,22 @@ MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
 
 		TEX.Parse.Augment({
 			JMEvar: function(name) {
+				var settings_string = this.GetBrackets(name);
+				var settings = {};
+				if(settings_string!==undefined) {
+					settings_string.split(/\s*,\s*/g).forEach(function(v) {
+						var setting = v.trim().toLowerCase();
+						settings[setting] = true;
+					});
+				}
 				var expr = this.GetArgument(name);
+
 				var scope = currentScope;
 
 				try {
 					var v = jme.evaluate(jme.compile(expr,scope),scope);
 
-					var tex = jme.display.texify({tok: v});
+					var tex = jme.display.texify({tok: v},settings);
 				}catch(e) {
 					throw(new Numbas.Error('mathjax.math processing error',e.message,expr));
 				}
@@ -59,8 +68,9 @@ MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
 
 			JMEsimplify: function(name) {
 				var rules = this.GetBrackets(name);
-				if(rules===undefined)
+				if(rules===undefined) {
 					rules = 'all';
+				}
 				var expr = this.GetArgument(name);
 
 				var scope = currentScope;
