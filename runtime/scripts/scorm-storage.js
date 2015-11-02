@@ -547,7 +547,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	loadNumberEntryPart: function(part)
 	{
 		var out = this.loadPart(part);
-		out.studentAnswer = parseFloat(out.answer)==out.answer ? parseFloat(out.answer) : '';
+		out.studentAnswer = out.answer || '';
 		return out;
 	},
 
