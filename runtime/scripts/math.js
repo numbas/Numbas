@@ -1744,6 +1744,33 @@ var vectormath = Numbas.vectormath = {
 		});
 	},
 
+	/** Apply given function to each element
+	 * @param {vector}
+	 * @param {function}
+	 * @returns {vector}
+	 */
+	map: function(v,fn) {
+		return v.map(fn);
+	},
+
+	/** Round each element to given number of decimal places
+	 * @param {vector}
+	 * @param {number} - number of decimal places
+	 * @returns {vector}
+	 */
+	precround: function(v,dp) {
+		return vectormath.map(v,function(n){return math.precround(n,dp);});
+	},
+
+	/** Round each element to given number of significant figures
+	 * @param {vector}
+	 * @param {number} - number of decimal places
+	 * @returns {vector}
+	 */
+	siground: function(v,sf) {
+		return vectormath.map(v,function(n){return math.siground(n,sf);});
+	},
+
 	/** Transpose of a vector
 	 * @param {vector} v
 	 * @returns {matrix}
