@@ -823,7 +823,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 		var lambda = args[0];
 
 		var value = jme.evaluate(args[2],scope);
-		if(!(value.type in mapFunctions)) {
+		if(!(value.type in jme.mapFunctions)) {
 			throw(new Numbas.Error('jme.typecheck.map not on enumerable',value.type));
 		}
 		scope = new Scope(scope);
@@ -835,7 +835,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 		} else {
 			names = args[1].args.map(function(t){return t.tok.name;});
 		}
-		return mapFunctions[value.type](lambda,names,value.value,scope);
+		return jme.mapFunctions[value.type](lambda,names,value.value,scope);
 	},
 	
 	doc: {
