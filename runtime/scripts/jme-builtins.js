@@ -770,7 +770,7 @@ function mapOverList(lambda,names,list,scope) {
 	var olist = list.map(function(v) {
 		var d = {}
 		if(typeof(names)=='string') {
-			d[names[0]] = v;
+			d[names] = v;
 		} else {
 			names.forEach(function(name,i) {
 				d[name] = v.value[i];
