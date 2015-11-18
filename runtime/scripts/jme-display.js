@@ -1316,6 +1316,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 	},
 	set: function(tree,tok,bits,settings) {
 		return 'set('+tok.value.map(function(thing){return treeToJME({tok:thing},settings);}).join(',')+')';
+	},
+
+	expression: function(tree,tok,bits,settings) {
+		return treeToJME(tok.tree);
 	}
 }
 

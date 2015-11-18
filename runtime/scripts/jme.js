@@ -431,9 +431,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				else
 				{
 					var v = scope.variables[name];
-					if(v.type=='expression') {
-						return jme.substituteTree(v.tree,scope,allowUnbound);
-					} else if(v.tok) {
+					if(v.tok) {
 						return v;
 					} else {
 						return {tok: v};
@@ -1427,7 +1425,10 @@ var TPunc = types.TPunc = function(kind)
 	this.type = kind;
 }
 
-var TExpression = types.TExpression = function(tree) {
+var TExpression = types.TExpression = types.expression = function(tree) {
+	if(typeof(tree)=='string') {
+		tree = jme.compile(tree);
+	}
 	this.tree = tree;
 }
 TExpression.prototype = {
