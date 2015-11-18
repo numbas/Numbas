@@ -279,7 +279,11 @@ ko.components.register('matrix-input',{
 		} else {
 			this.numColumns = ko.observable(params.columns || 2);
 		}
-		this.value = ko.observableArray([]);
+
+		var v = params.value();
+		this.numRows(v.length || 1);
+		this.numColumns(v.length ? v[0].length : 1);
+		this.value = ko.observableArray(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
 
 		this.disable = params.disable || false;
 
@@ -1911,7 +1915,10 @@ display.MatrixEntryPartDisplay.prototype =
 {
 	restoreAnswer: function()
 	{
-		this.studentAnswer(this.part.studentAnswer);
+		var studentAnswer = this.part.studentAnswer;
+		this.studentAnswerRows(studentAnswer.length || 1);
+		this.studentAnswerColumns(studentAnswer.length ? studentAnswer[0].length : 1);
+		this.studentAnswer(studentAnswer);
 	}
 };
 display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
