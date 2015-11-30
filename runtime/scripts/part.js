@@ -68,7 +68,7 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 			part.customConstructor.apply(part);
 		}
 		if(loading && part.answered) {
-			part.submit();
+			question.onHTMLAttached(function() {part.submit()});
 		}
 		return part;
 	}
