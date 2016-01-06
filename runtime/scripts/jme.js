@@ -722,7 +722,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		return bits.join('');
 	},
 
-	/** Split up a string along TeX delimiters (`$`, `\[`, `\]`)
+	/** Split up a TeX expression, finding the \var and \simplify commands.
+	 * Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a
 	 * @param {string} s
 	 * @returns {string[]}
 	 */
@@ -1798,7 +1799,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 				return [];
 			break;
 		case 'string':
-			var bits = jme.texsplit(tree.tok.value);
+			var bits = util.contentsplitbrackets(tree.tok.value);
 			var out = [];
 			for(var i=0;i<bits.length-3;i+=4)
 			{
