@@ -123,13 +123,9 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 			switch(value.type) {
 			case 'string':
-				var newDoc = Numbas.xml.dp.parseFromString('<content>'+value.value+'</content>','text/xml');
-
-				if(Sarissa.getParseErrorText(newDoc) != Sarissa.PARSED_OK) {
-					throw(new Numbas.Error('xml.could not load',Sarissa.getParseErrorText(newDoc)));
-				}
-
-				var newNode = xml.ownerDocument.importNode(newDoc.documentElement,true);
+				var d = document.createElement('d');
+				d.innerHTML = value.value;
+				var newNode = xml.ownerDocument.importNode(d,true);
 				while(newNode.childNodes.length) {
 					span.appendChild(newNode.childNodes[0]);
 				}
