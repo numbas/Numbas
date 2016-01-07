@@ -109,37 +109,57 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		}
 	}
 	var def;
+
+	function loadDef(def,scope,topNode,nodeName) {
+		var values = jme.evaluate(def,scope);
+		var numValues = values.value.length;
+		values.value.map(function(value) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			content.appendChild(span);
+			node.appendChild(content);
+			topNode.appendChild(node);
+
+			switch(value.type) {
+			case 'string':
+				var newDoc = Numbas.xml.dp.parseFromString('<content>'+value.value+'</content>','text/xml');
+
+				if(Sarissa.getParseErrorText(newDoc) != Sarissa.PARSED_OK) {
+					throw(new Numbas.Error('xml.could not load',Sarissa.getParseErrorText(newDoc)));
+				}
+
+				var newNode = xml.ownerDocument.importNode(newDoc.documentElement,true);
+				while(newNode.childNodes.length) {
+					span.appendChild(newNode.childNodes[0]);
+				}
+
+				break;
+			case 'html':
+				var selection = $(value.value);
+				for(var i=0;i<selection.length;i++) {
+					span.appendChild(xml.ownerDocument.importNode(selection[i],true));
+				}
+				break;
+			default:
+				span.appendChild(xml.ownerDocument.createTextNode(value));
+			}
+		});
+		return numValues;
+	}
+
 	if(def = answersNode.getAttribute('def')) {
 		settings.answersDef = def;
 		var nodeName = this.flipped ? 'choice' : 'answer';
-		var answerStrings = jme.unwrapValue(jme.evaluate(settings.answersDef,this.question.scope));
-		this.numAnswers = answerStrings.length;
-		answerStrings.map(function(answer) {
-			var node = xml.ownerDocument.createElement(nodeName);
-			var content = xml.ownerDocument.createElement('content');
-			var span = xml.ownerDocument.createElement('span');
-			span.appendChild(xml.ownerDocument.createTextNode(answer));
-			content.appendChild(span);
-			node.appendChild(content);
-			answersNode.appendChild(node);
-		});
+		loadDef(settings.answersDef,this.question.scope,answersNode,nodeName);
 		answerNodes = answersNode.selectNodes(nodeName);
+		this.numAnswers = answerNodes.length;
 	}
 	if(choicesNode && (def = choicesNode.getAttribute('def'))) {
 		settings.choicesDef = def;
-		var nodeName = 'choice';
-		var choiceStrings = jme.unwrapValue(jme.evaluate(settings.choicesDef,this.question.scope));
-		this.numChoices = choiceStrings.length;
-		choiceStrings.map(function(choice) {
-			var node = xml.ownerDocument.createElement(nodeName);
-			var content = xml.ownerDocument.createElement('content');
-			var span = xml.ownerDocument.createElement('span');
-			span.appendChild(xml.ownerDocument.createTextNode(choice));
-			content.appendChild(span);
-			node.appendChild(content);
-			choicesNode.appendChild(node);
-		});
-		choiceNodes = choicesNode.selectNodes(nodeName);
+		loadDef(settings.choicesDef,this.question.scope,choicesNode,'choice');
+		choiceNodes = choicesNode.selectNodes('choice');
+		this.numChoices = choiceNodes.length;
 	}
 
 	//get warning type and message for wrong number of choices
