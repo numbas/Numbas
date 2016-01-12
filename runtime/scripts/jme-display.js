@@ -258,7 +258,7 @@ var texOps = jme.display.texOps = {
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
 	/** logical negation */
-	'!': infixTex('\\neg '),	
+	'not': infixTex('\\neg '),	
 
 	/** unary addition */
 	'+u': function(thing,texArgs,settings) {
