@@ -78,8 +78,7 @@ function Exam()
 	settings.numQuestions = xml.selectNodes('questions/question').length;
 
 	var scopes = [
-		Numbas.jme.builtinScope,
-		{rulesets: Numbas.util.copyobj(Numbas.jme.display.simplificationRules)}
+		Numbas.jme.builtinScope
 	];
 	for(var extension in Numbas.extensions) {
 		if('scope' in Numbas.extensions[extension]) {
