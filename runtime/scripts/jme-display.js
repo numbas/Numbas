@@ -845,36 +845,46 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 
 	var oname = name;
 
+	function applyAnnotations(name) {
+		if(!annotations) {
+			return name;
+		}
+
+		for(var i=0;i<annotations.length;i++)
+		{
+			var annotation = annotations[i];
+			if(annotation in texNameAnnotations) {
+				name = texNameAnnotations[annotation](name);
+			} else {
+				name = '\\'+annotation+'{'+name+'}';
+			}
+		}
+		return name;
+	}
+
 	var num_subscripts = name.length - name.replace('_','').length;
 	var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
 	var m,isgreek;
+	// if the name is a single letter or greek letter name, followed by digits, subscripts or primes
+	// m[1]: the "root" name - the bit before any digits, subscripts or primes
+	// m[2]: digits immediately following the root
+	// m[3]: digits in a subscript
+	// m[4]: one or two non-prime characters in a subscript
+	// m[5]: prime characters, at the end of the name
 	if((m=name.match(re_math_variable)) && (m[1].length==1 || (isgreek=greek.contains(m[1])))) {
 		if(isgreek) {
 			m[1] = '\\'+m[1];
 		}
+		name = applyAnnotations(m[1]);
 		var subscript = (m[2] || m[3] || m[4]);
 		if(subscript) {
-			name = m[1]+'_{'+subscript+'}'+m[5];
-		} else {
-			name = m[1]+m[5];
+			name += '_{'+subscript+'}';
 		}
+		name += m[5];
 	} else if(!name.match(/^\\/)) {
-		name = longNameMacro(name);
+		name = applyAnnotations(longNameMacro(name));
 	}
 
-	if(!annotations) {
-		return name;
-	}
-
-	for(var i=0;i<annotations.length;i++)
-	{
-		var annotation = annotations[i];
-		if(annotation in texNameAnnotations) {
-			name = texNameAnnotations[annotation](name);
-		} else {
-			name = '\\'+annotation+'{'+name+'}';
-		}
-	}
 	return name;
 }
 

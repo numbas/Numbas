@@ -833,28 +833,29 @@
 
 				test('texName', function() {
 					var names = [
-						['x','x'],
-						['xy','\\texttt{xy}'],
-						['xyz','\\texttt{xyz}'],
-						['x1','x_{1}'],
-						['x1234','x_{1234}'],
-						['x1\'','x_{1}\''],
-						['x_1','x_{1}'],
-						['x_12345','x_{12345}'],
-						['x_123\'\'','x_{123}\'\''],
-						['longname','\\texttt{longname}'],
-						['ab_cd_ef','\\texttt{ab_cd_ef}'],
-						['x_abc','\\texttt{x_abc}'],
-						['x_abc\'','\\texttt{x_abc\'}'],
-						['\\operatorname{x}','\\operatorname{x}'],
-						['lambda','\\lambda'],
-						['lambda1','\\lambda_{1}'],
-						['lambda\'','\\lambda\''],
-						['x_y\'','x_{y}\'']
+						{name: 'x', tex: 'x'},
+						{name: 'xy', tex: '\\texttt{xy}'},
+						{name: 'xyz', tex: '\\texttt{xyz}'},
+						{name: 'x1', tex: 'x_{1}'},
+						{name: 'x1234', tex: 'x_{1234}'},
+						{name: 'x1\'', tex: 'x_{1}\''},
+						{name: 'x_1', tex: 'x_{1}'},
+						{name: 'x_12345', tex: 'x_{12345}'},
+						{name: 'x_123\'\'', tex: 'x_{123}\'\''},
+						{name: 'longname', tex: '\\texttt{longname}'},
+						{name: 'ab_cd_ef', tex: '\\texttt{ab_cd_ef}'},
+						{name: 'x_abc', tex: '\\texttt{x_abc}'},
+						{name: 'x_abc\'', tex: '\\texttt{x_abc\'}'},
+						{name: '\\operatorname{x}', tex: '\\operatorname{x}'},
+						{name: 'lambda', tex: '\\lambda'},
+						{name: 'lambda1', tex: '\\lambda_{1}'},
+						{name: 'lambda\'', tex: '\\lambda\''},
+						{name: 'x_y\'', tex: 'x_{y}\''},
+						{name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'}
 					]
 
 					names.forEach(function(n) {
-						equals(Numbas.jme.display.texName(n[0]),n[1], n[2] || ('texName '+n[0]));
+						equals(Numbas.jme.display.texName(n.name,n.annotations),n.tex, n.description || ('texName '+n[0]));
 					});
 				});
 
