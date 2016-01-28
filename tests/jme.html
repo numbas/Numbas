@@ -787,6 +787,7 @@
 					equals(Numbas.math.niceNumber(Infinity),'infinity','niceNumber recognises infinity');
 					equals(Numbas.math.niceNumber(-Infinity),'-infinity','niceNumber recognises -infinity');
 					equals(Numbas.math.niceNumber(-Math.PI),'-pi','niceNumber on -pi doesn\'t say -1pi');
+					equals(Numbas.math.niceNumber(Math.PI,{precisionType: 'dp', precision:2}),'3.14','niceNumber doesn\'t show pi when given a precisionType');
 				});
 
 				test('subvars',function() {

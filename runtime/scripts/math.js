@@ -583,8 +583,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				return '-infinity';
 			}
 
-			var piD;
-			if((piD = math.piDegree(n)) > 0)
+			var piD = 0;
+			if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
 			var out;
