@@ -350,7 +350,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		doc.appendChild(q.originalXML.cloneNode(true));	//get a fresh copy of the original XML, to sub variables into
 		q.xml = doc.selectSingleNode('question');
 		q.xml.setAttribute('number',q.number);
-		q.name = jme.subvars(q.name,q.scope);
+		q.name = jme.contentsubvars(q.name,q.scope);
 	},
 
 	/** Get the part object corresponding to a path
