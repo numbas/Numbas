@@ -129,7 +129,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
                 try {
 		    		newNode = xml.ownerDocument.importNode(d,true);
                 } catch(e) {
-                    d = Numbas.xml.dp.parseFromString('<d>'+Sarissa.escape(value.value)+'</d>','text/xml').documentElement;
+                    d = Numbas.xml.dp.parseFromString('<d>'+value.value.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
 		    		newNode = xml.ownerDocument.importNode(d,true);
                 }
 				while(newNode.childNodes.length) {
