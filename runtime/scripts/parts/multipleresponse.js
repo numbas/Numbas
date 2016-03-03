@@ -123,9 +123,15 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 			switch(value.type) {
 			case 'string':
-				var d = document.createElement('d');
-				d.innerHTML = value.value;
-				var newNode = xml.ownerDocument.importNode(d,true);
+                var d = document.createElement('d');
+                d.innerHTML = value.value;
+                var newNode;
+                try {
+		    		newNode = xml.ownerDocument.importNode(d,true);
+                } catch(e) {
+                    d = Numbas.xml.dp.parseFromString('<d>'+value.value+'</d>','text/xml').documentElement;
+		    		newNode = xml.ownerDocument.importNode(d,true);
+                }
 				while(newNode.childNodes.length) {
 					span.appendChild(newNode.childNodes[0]);
 				}
@@ -133,9 +139,17 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 				break;
 			case 'html':
 				var selection = $(value.value);
-				for(var i=0;i<selection.length;i++) {
-					span.appendChild(xml.ownerDocument.importNode(selection[i],true));
-				}
+                for(var i=0;i<selection.length;i++) {
+                    try {
+                        span.appendChild(xml.ownerDocument.importNode(selection[i],true));
+                    } catch(e) {
+                        var d = Numbas.xml.dp.parseFromString('<d>'+selection[i].outerHTML+'</d>','text/xml').documentElement;
+                        var newNode = xml.ownerDocument.importNode(d,true);
+                        while(newNode.childNodes.length) {
+                            span.appendChild(newNode.childNodes[0]);
+                        }
+                    }
+                }
 				break;
 			default:
 				span.appendChild(xml.ownerDocument.createTextNode(value));
