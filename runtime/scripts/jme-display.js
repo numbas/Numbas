@@ -1071,7 +1071,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 			return mantissa+'*10^('+exponent+')';
 		}
 
-		var f = math.rationalApproximation(Math.abs(n));
+		var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
 		if(f[1]==1)
 			out = Math.abs(f[0]).toString();
 		else
