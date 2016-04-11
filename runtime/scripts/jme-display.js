@@ -1789,6 +1789,7 @@ var matchExpression = jme.display.matchExpression = function(pattern,expr,doComm
  */
 var simplificationRules = jme.display.simplificationRules = {
 	basic: [
+        ['?;x',['x isa "number"','x<0'],'-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
 		['+(?;x)',[],'x'],					//get rid of unary plus
 		['?;x+(-?;y)',[],'x-y'],			//plus minus = minus
 		['?;x+?;y',['y<0'],'x-eval(-y)'],

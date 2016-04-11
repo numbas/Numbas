@@ -231,6 +231,9 @@
 					closeEquals(evaluate('x',scope).value,1,'substitute variable x=1')
 					closeEquals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
 
+                    /*
+                    // Removed while I think about how I want this to work
+
 					var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+1'));
 					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
@@ -241,7 +244,9 @@
 					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
 					var s = Numbas.jme.display.treeToJME(tree);
-					closeEquals(s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
+                    closeEquals(s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
+
+                    */
 				});
 
 				test('Literals',function() {
@@ -825,7 +830,11 @@
 					equals(simplifyExpression('2i/(4i)',['all']),'1/2','2i/(4i) cancels the i');
 					equals(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 					equals(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
-					equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+                    equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+
+                    equals(simplifyExpression('x+(1-2)x',['all']),'x - x','Collect numbers resulting in a negative');
+                    equals(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
+
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
