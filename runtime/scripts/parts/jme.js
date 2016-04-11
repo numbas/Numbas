@@ -291,13 +291,24 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'').toLowerCase();
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ ) {
-			if(noSpaceAnswer.contains(this.settings.notAllowed[i].toLowerCase())) { validation.failNotAllowed = true; }
+            var notAllowedString = this.settings.notAllowed[i].toLowerCase();
+			if(checkNotAllowedAnswer.contains(notAllowedString)) { 
+                validation.failNotAllowed = true; 
+                break;
+            }
 		}
 
 		if(!validation.failNotAllowed) {
+            var checkMustHaveAnswer = noSpaceAnswer;
 			//see if student answer contains all the required strings
 			for( i=0; i<this.settings.mustHave.length; i++ ) {
-				if(!noSpaceAnswer.contains(this.settings.mustHave[i].toLowerCase())) { validation.failMustHave = true; }
+                var mustHaveString = this.settings.mustHave[i].toLowerCase();
+				if(!checkMustHaveAnswer.contains(mustHaveString)) { 
+                    validation.failMustHave = true; 
+                    break;
+                } else {
+                    checkMustHaveAnswer = checkMustHaveAnswer.replace(mustHaveString,'');
+                }
 			}
 		}
 
@@ -318,7 +329,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)}).join(', ');
 				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.addCredit(0,message);
 			}
@@ -329,7 +340,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)}).join(', ');
 				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.addCredit(0,message);
 			}
@@ -396,7 +407,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)});
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)}).join(', ');
 				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
 				this.giveWarning(message);
 			}
@@ -407,7 +418,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)});
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)}).join(', ');
 				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
 				this.giveWarning(message);
 			}
