@@ -834,11 +834,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					v = jme.tokenToDisplayString(v);
 				} else {
 					if(v.type=='number') {
-						v = '('+Numbas.jme.display.treeToJME({tok:v})+')';
+						v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false})+')';
 					} else if(v.type=='string') {
 						v = "'"+v.value+"'";
 					} else {
-						v = jme.display.treeToJME({tok:v});
+						v = jme.display.treeToJME({tok:v},{niceNumber: false});
 					}
 				}
 
