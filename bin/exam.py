@@ -231,7 +231,7 @@ class Exam:
 							['questions']
 						])
 		root.attrib = {
-				'name': strcons_fix(self.name),
+				'name': strcons(self.name),
 				'percentPass': strcons_fix(self.percentPass)+'%',
 			}
 		
@@ -264,7 +264,7 @@ class Exam:
 				'showanswerstate': strcons_fix(self.showanswerstate),
 				'allowrevealanswer': strcons_fix(self.allowrevealanswer)
 		}
-		feedback.find('advice').attrib = {'type': strcons_fix(self.adviceType), 'threshold': strcons_fix(self.adviceGlobalThreshold)}
+		feedback.find('advice').attrib = {'type': strcons(self.adviceType), 'threshold': strcons_fix(self.adviceGlobalThreshold)}
 
 		rules = settings.find('rulesets')
 		for name in self.rulesets.keys():
@@ -302,7 +302,7 @@ class Exam:
 			indent(xml)
 			return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
 		except etree.ParseError as err:
-			raise ExamError('XML Error: %s' % strcons_fix(err))
+			raise ExamError('XML Error: %s' % strcons(err))
 
 class SimplificationRule:
 	pattern = ''
@@ -321,8 +321,8 @@ class SimplificationRule:
 		rule = makeTree(['ruledef',
 							['conditions']
 						])
-		rule.attrib = {	'pattern': strcons_fix(self.pattern),
-						'result': strcons_fix(self.result)
+		rule.attrib = {	'pattern': strcons(self.pattern),
+						'result': strcons(self.result)
 						}
 		conditions = rule.find('conditions')
 		for condition in self.conditions:
@@ -343,7 +343,7 @@ class Event:
 
 	def toxml(self):
 		event = makeTree(['event'])
-		event.attrib = {'type': strcons_fix(self.kind), 'action': strcons_fix(self.action)}
+		event.attrib = {'type': strcons(self.kind), 'action': strcons(self.action)}
 		event.append(makeContentNode(self.message))
 		return event
 
@@ -420,7 +420,7 @@ class Question:
 								['rulesets']
 							])
 
-		question.attrib = {'name': strcons_fix(self.name)}
+		question.attrib = {'name': strcons(self.name)}
 		question.find('statement').append(makeContentNode(self.statement))
 		question.find('advice').append(makeContentNode(self.advice))
 
@@ -432,7 +432,7 @@ class Question:
 		for variable in self.variables:
 			variables.append(variable.toxml())
 		variables.attrib = {
-			'condition': strcons_fix(self.variablesTest['condition']),
+			'condition': strcons(self.variablesTest['condition']),
 			'maxRuns': strcons_fix(self.variablesTest['maxRuns']),
 		}
 
@@ -455,13 +455,13 @@ class Question:
 		css_preamble.attrib = {
 			'language': 'css'
 		}
-		css_preamble.text = strcons_fix(self.preamble['css'])
+		css_preamble.text = strcons(self.preamble['css'])
 		preambles.append(css_preamble)
 		js_preamble = etree.Element('preamble')
 		js_preamble.attrib = {
 			'language': 'js'
 		}
-		js_preamble.text = strcons_fix(self.preamble['js'])
+		js_preamble.text = strcons(self.preamble['js'])
 		preambles.append(js_preamble)
 		preambles.attrib = {
 			'nosubvars': 'true'
@@ -479,8 +479,8 @@ class Variable:
 	
 	def toxml(self):
 		variable = makeTree(['variable',['value']])
-		variable.attrib = {'name': strcons_fix(self.name)}
-		variable.find('value').text = strcons_fix(self.definition)
+		variable.attrib = {'name': strcons(self.name)}
+		variable.find('value').text = strcons(self.definition)
 		return variable
 
 class Function:
@@ -503,10 +503,10 @@ class Function:
 		function = makeTree(['function',
 								['parameters']
 							])
-		function.attrib = { 'name': strcons_fix(self.name),
-							'outtype': strcons_fix(self.type),
-							'definition': strcons_fix(self.definition),
-							'language': strcons_fix(self.language)
+		function.attrib = { 'name': strcons(self.name),
+							'outtype': strcons(self.type),
+							'definition': strcons(self.definition),
+							'language': strcons(self.language)
 							}
 		
 		parameters = function.find('parameters')
@@ -531,8 +531,8 @@ class VariableReplacement:
 	def toxml(self):
 		replacement = etree.Element('replace')
 		replacement.attrib = {
-			'variable': strcons_fix(self.variable),
-			'part': strcons_fix(self.part),
+			'variable': strcons(self.variable),
+			'part': strcons(self.part),
 			'must_go_first': strcons_fix(self.must_go_first),
 		}
 		return replacement
@@ -607,7 +607,7 @@ class Part:
 						])
 
 		part.attrib = {
-			'type': strcons_fix(self.kind), 
+			'type': strcons(self.kind), 
 			'marks': strcons_fix(self.marks), 
 			'stepspenalty': strcons_fix(self.stepsPenalty), 
 			'enableminimummarks': strcons_fix(self.enableMinimumMarks), 
@@ -628,7 +628,7 @@ class Part:
 				'name': name,
 				'order': script_dict.get('order','instead')
 			}
-			script_element.text = strcons_fix(script_dict.get('script',''))
+			script_element.text = strcons(script_dict.get('script',''))
 			scripts.append(script_element)
 
 		variable_replacements = part.find('adaptivemarking/variablereplacements')
@@ -714,12 +714,12 @@ class JMEPart(Part):
 				'showPreview': strcons_fix(self.showPreview),
 		}
 		correctAnswer = answer.find('correctanswer')
-		correctAnswer.attrib = {'simplification': strcons_fix(self.answerSimplification)}
-		correctAnswer.find('math').text = strcons_fix(self.answer)
+		correctAnswer.attrib = {'simplification': strcons(self.answerSimplification)}
+		correctAnswer.find('math').text = strcons(self.answer)
 		
 		checking = answer.find('checking')
 		checking.attrib = {
-				'type': strcons_fix(self.checkingType),
+				'type': strcons(self.checkingType),
 				'accuracy': strcons_fix(self.checkingAccuracy),
 				'failurerate': strcons_fix(self.failureRate)
 		}
@@ -763,7 +763,7 @@ class Restriction:
 
 		for s in self.strings:
 			string = etree.Element('string')
-			string.text = strcons_fix(s)
+			string.text = strcons(s)
 			restriction.append(string)
 
 		restriction.find('message').append(makeContentNode(self.message))
@@ -794,7 +794,7 @@ class PatternMatchPart(Part):
 		
 		part.find('displayanswer').append(makeContentNode(self.displayAnswer))
 
-		part.find('correctanswer').text = strcons_fix(self.answer)
+		part.find('correctanswer').text = strcons(self.answer)
 
 		part.find('case').attrib = {'sensitive': strcons_fix(self.caseSensitive), 'partialcredit': strcons_fix(self.partialCredit)+'%'}
 
@@ -847,7 +847,7 @@ class NumberEntryPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-				'checkingType': strcons_fix(self.checkingType),
+				'checkingType': strcons(self.checkingType),
 				'inputstep': strcons_fix(self.inputStep),
 				'allowfractions': strcons_fix(self.allowFractions),
 				'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
@@ -860,7 +860,7 @@ class NumberEntryPart(Part):
 			answer.attrib['accuracy'] = strcons_fix(self.checkingAccuracy)
 		answer.find('allowonlyintegeranswers').attrib = {'value': strcons_fix(self.integerAnswer), 'partialcredit': strcons_fix(self.integerPartialCredit)+'%'}
 		answer.find('precision').attrib = {
-			'type': strcons_fix(self.precisionType), 
+			'type': strcons(self.precisionType), 
 			'precision': strcons_fix(self.precision), 
 			'partialcredit': strcons_fix(self.precisionPartialCredit)+'%',
 			'strict': strcons_fix(self.strictPrecision)
@@ -906,7 +906,7 @@ class MatrixEntryPart(Part):
 
 		answer = part.find('answer')
 		answer.attrib = {
-			'correctanswer': strcons_fix(self.correctAnswer),
+			'correctanswer': strcons(self.correctAnswer),
 			'correctanswerfractions': strcons_fix(self.correctAnswerFractions),
 			'rows': strcons_fix(self.numRows),
 			'columns': strcons_fix(self.numColumns),
@@ -1006,12 +1006,12 @@ class MultipleChoicePart(Part):
 			'minimumexpected': strcons_fix(self.minAnswers),
 			'maximumexpected': strcons_fix(self.maxAnswers),
 			'displaycolumns': strcons_fix(self.displayColumns),
-			'order': strcons_fix('random' if self.shuffleChoices else 'fixed'),
-			'displaytype': strcons_fix(self.displayType)
+			'order': strcons('random' if self.shuffleChoices else 'fixed'),
+			'displaytype': strcons(self.displayType)
 		}
 
 		if isinstance(self.choices,str):
-			choices.attrib['def'] = strcons_fix(self.choices)
+			choices.attrib['def'] = strcons(self.choices)
 		else:
 			for choice in self.choices:
 				choices.append(makeTree(['choice',makeContentNode(choice)]))
@@ -1019,7 +1019,7 @@ class MultipleChoicePart(Part):
 		answers = part.find('answers')
 		answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
 		if isinstance(self.answers,str):
-			answers.attrib['def'] = strcons_fix(self.answers)
+			answers.attrib['def'] = strcons(self.answers)
 		else:
 			for answer in self.answers:
 				answers.append(makeTree(['answer',makeContentNode(answer)]))
@@ -1035,7 +1035,7 @@ class MultipleChoicePart(Part):
 		marking.find('minmarks').attrib = {'enabled': strcons_fix(self.minMarksEnabled), 'value': strcons_fix(self.minMarks)}
 		matrix = marking.find('matrix')
 		if isinstance(self.matrix,str):
-			matrix.attrib = {'def': strcons_fix(self.matrix)}
+			matrix.attrib = {'def': strcons(self.matrix)}
 		else:
 			for i in range(len(self.matrix)):
 				for j in range(len(self.matrix[i])):

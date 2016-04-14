@@ -292,7 +292,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		//see if student answer contains any forbidden strings
 		for( i=0; i<this.settings.notAllowed.length; i++ ) {
             var notAllowedString = this.settings.notAllowed[i].toLowerCase();
-			if(checkNotAllowedAnswer.contains(notAllowedString)) { 
+			if(noSpaceAnswer.contains(notAllowedString)) { 
                 validation.failNotAllowed = true; 
                 break;
             }
