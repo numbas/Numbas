@@ -164,6 +164,24 @@ jme.display = /** @lends Numbas.jme.display */ {
 /// all private methods below here
 
 
+function texifyWouldBracketOpArg(thing,i) {
+	var precedence = jme.precedence;
+	if(thing.args[i].tok.type=='op') {	//if this is an op applied to an op, might need to bracket
+		var op1 = thing.args[i].tok.name;	//child op
+		var op2 = thing.tok.name;			//parent op
+		var p1 = precedence[op1];	//precedence of child op
+		var p2 = precedence[op2];	//precedence of parent op
+
+		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
+		return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
+	}
+	//complex numbers might need brackets round them when multiplied with something else or unary minusing
+	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') ) {
+		var v = thing.args[i].tok.value;
+		return (v.re==0 || v.im==0);
+	}
+	return false;
+}
 
 /** Apply brackets to an op argument if appropriate
  * @memberof Numbas.jme.display
@@ -176,27 +194,11 @@ jme.display = /** @lends Numbas.jme.display */ {
  */
 function texifyOpArg(thing,texArgs,i)
 {
-	var precedence = jme.precedence;
 	var tex = texArgs[i];
-	if(thing.args[i].tok.type=='op')	//if this is an op applied to an op, might need to bracket
-	{
-		var op1 = thing.args[i].tok.name;	//child op
-		var op2 = thing.tok.name;			//parent op
-		var p1 = precedence[op1];	//precedence of child op
-		var p2 = precedence[op2];	//precedence of parent op
-
-		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-		if( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
-			tex = '\\left ( '+tex+' \\right )';
-	}
-	//complex numbers might need brackets round them when multiplied with something else or unary minusing
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') )	
-	{
-		var v = thing.args[i].tok.value;
-		if(!(v.re==0 || v.im==0))
-			tex = '\\left ( '+tex+' \\right )';
-	}
-	return tex;
+    if(texifyWouldBracketOpArg(thing,i)) {
+        tex = '\\left ( '+tex+' \\right )';
+    }
+    return tex;
 }
 
 /** Helper function for texing infix operators
@@ -306,11 +308,12 @@ var texOps = jme.display.texOps = {
 		var s = texifyOpArg(thing,texArgs,0);
 		for(var i=1; i<thing.args.length; i++ )
 		{
-			//specials or subscripts
-			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)))
+            // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
+			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i))
 			{ 
 				s+=' \\times ';
 			}
+			//specials or subscripts
 			else if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
 			{
 				s+=' ';
