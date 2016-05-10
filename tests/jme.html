@@ -682,7 +682,8 @@
 					deepCloseEqual(evaluate('id(1)').value,[[1]],'id(1)');
 					deepCloseEqual(evaluate('id(2)').value,[[1,0],[0,1]],'id(2)');
 					deepCloseEqual(evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
-					deepCloseEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
+                    deepCloseEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
+                    deepCloseEqual(evaluate('vector(1,2)*matrix([[1,2],[3,4]])').value,[7,10],'vector*matrix');
 				});
 
 				test('Range operations',function() {

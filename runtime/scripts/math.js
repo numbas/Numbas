@@ -1744,6 +1744,20 @@ var vectormath = Numbas.vectormath = {
 		});
 	},
 
+    /** Multiply a vector on the right by a matrix.
+     * The vector is considered as a column vector.
+     * @param {vector} v
+     * @param {matrix} v
+     * @returns {vector}
+     */
+    vectormatrixmul: function(v,m) {
+        var out = [];
+        for(var i=0;i<m.columns;i++) {
+            out.push(v.reduce(function(s,x,j){ var c = j<m.rows ? (m[j][i]||0) : 0; return add(s,mul(x,c)); },0));
+        }
+        return out;
+    },
+
 	/** Apply given function to each element
 	 * @param {vector}
 	 * @param {function}
