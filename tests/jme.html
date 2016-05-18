@@ -68,6 +68,10 @@
 					equals(Numbas.jme.subvars('{1}a{',Numbas.jme.builtinScope,true),'1a{','Leave unclosed brackets alone');
 				});
 
+				test('findvars',function() {
+					deepCloseEqual(Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
+				});
+
 				module('Compiling');
 
 				test('Booleans', function() {
@@ -227,6 +231,9 @@
 					closeEquals(evaluate('x',scope).value,1,'substitute variable x=1')
 					closeEquals(evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
 
+                    /*
+                    // Removed while I think about how I want this to work
+
 					var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+1'));
 					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
@@ -237,7 +244,9 @@
 					var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
 					var s = Numbas.jme.display.treeToJME(tree);
-					closeEquals(s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
+                    closeEquals(s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
+
+                    */
 				});
 
 				test('Literals',function() {
@@ -673,7 +682,8 @@
 					deepCloseEqual(evaluate('id(1)').value,[[1]],'id(1)');
 					deepCloseEqual(evaluate('id(2)').value,[[1,0],[0,1]],'id(2)');
 					deepCloseEqual(evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
-					deepCloseEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
+                    deepCloseEqual(evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
+                    deepCloseEqual(evaluate('vector(1,2)*matrix([[1,2],[3,4]])').value,[7,10],'vector*matrix');
 				});
 
 				test('Range operations',function() {
@@ -783,6 +793,7 @@
 					equals(Numbas.math.niceNumber(Infinity),'infinity','niceNumber recognises infinity');
 					equals(Numbas.math.niceNumber(-Infinity),'-infinity','niceNumber recognises -infinity');
 					equals(Numbas.math.niceNumber(-Math.PI),'-pi','niceNumber on -pi doesn\'t say -1pi');
+					equals(Numbas.math.niceNumber(Math.PI,{precisionType: 'dp', precision:2}),'3.14','niceNumber doesn\'t show pi when given a precisionType');
 				});
 
 				test('subvars',function() {
@@ -820,7 +831,11 @@
 					equals(simplifyExpression('2i/(4i)',['all']),'1/2','2i/(4i) cancels the i');
 					equals(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 					equals(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
-					equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+                    equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+
+                    equals(simplifyExpression('x+(1-2)x',['all']),'x - x','Collect numbers resulting in a negative');
+                    equals(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
+
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
@@ -828,28 +843,29 @@
 
 				test('texName', function() {
 					var names = [
-						['x','x'],
-						['xy','\\texttt{xy}'],
-						['xyz','\\texttt{xyz}'],
-						['x1','x_{1}'],
-						['x1234','x_{1234}'],
-						['x1\'','x_{1}\''],
-						['x_1','x_{1}'],
-						['x_12345','x_{12345}'],
-						['x_123\'\'','x_{123}\'\''],
-						['longname','\\texttt{longname}'],
-						['ab_cd_ef','\\texttt{ab_cd_ef}'],
-						['x_abc','\\texttt{x_abc}'],
-						['x_abc\'','\\texttt{x_abc\'}'],
-						['\\operatorname{x}','\\operatorname{x}'],
-						['lambda','\\lambda'],
-						['lambda1','\\lambda_{1}'],
-						['lambda\'','\\lambda\''],
-						['x_y\'','x_{y}\'']
+						{name: 'x', tex: 'x'},
+						{name: 'xy', tex: '\\texttt{xy}'},
+						{name: 'xyz', tex: '\\texttt{xyz}'},
+						{name: 'x1', tex: 'x_{1}'},
+						{name: 'x1234', tex: 'x_{1234}'},
+						{name: 'x1\'', tex: 'x_{1}\''},
+						{name: 'x_1', tex: 'x_{1}'},
+						{name: 'x_12345', tex: 'x_{12345}'},
+						{name: 'x_123\'\'', tex: 'x_{123}\'\''},
+						{name: 'longname', tex: '\\texttt{longname}'},
+						{name: 'ab_cd_ef', tex: '\\texttt{ab_cd_ef}'},
+						{name: 'x_abc', tex: '\\texttt{x_abc}'},
+						{name: 'x_abc\'', tex: '\\texttt{x_abc\'}'},
+						{name: '\\operatorname{x}', tex: '\\operatorname{x}'},
+						{name: 'lambda', tex: '\\lambda'},
+						{name: 'lambda1', tex: '\\lambda_{1}'},
+						{name: 'lambda\'', tex: '\\lambda\''},
+						{name: 'x_y\'', tex: 'x_{y}\''},
+						{name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'}
 					]
 
 					names.forEach(function(n) {
-						equals(Numbas.jme.display.texName(n[0]),n[1], n[2] || ('texName '+n[0]));
+						equals(Numbas.jme.display.texName(n.name,n.annotations),n.tex, n.description || ('texName '+n[0]));
 					});
 				});
 
@@ -878,6 +894,8 @@
 					equals(exprToLaTeX('lambda1\'(x)'),'\\lambda_{1}\' \\left ( x \\right )','texName works on function names');
 					equals(exprToLaTeX('long_function_name(x)'),'\\operatorname{long\\_function\\_name} \\left ( x \\right )','long function names are wrapped in \\operatorname');
 					equals(exprToLaTeX('fact(3)*fact(2)'),'3! \\times 2!','times sign between factorials');
+					equals(exprToLaTeX('not a'),'\\neg a','logical NOT');
+					equals(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
 				});
 			});
 		</script>

@@ -68,7 +68,7 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 			part.customConstructor.apply(part);
 		}
 		if(loading && part.answered) {
-			part.submit();
+			question.onHTMLAttached(function() {part.submit()});
 		}
 		return part;
 	}
@@ -136,6 +136,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		var n = replacementNodes[i];
 		var vr = {}
 		tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
+		vr.variable = vr.variable.toLowerCase();
 		this.settings.errorCarriedForwardReplacements.push(vr);
 	}
 

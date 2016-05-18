@@ -77,7 +77,9 @@ function Exam()
 
 	settings.numQuestions = xml.selectNodes('questions/question').length;
 
-	var scopes = [Numbas.jme.builtinScope];
+	var scopes = [
+		Numbas.jme.builtinScope
+	];
 	for(var extension in Numbas.extensions) {
 		if('scope' in Numbas.extensions[extension]) {
 			scopes.push(Numbas.extensions[extension].scope);
@@ -91,7 +93,6 @@ function Exam()
 
 	//rulesets
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
-	this.scope.rulesets = Numbas.util.copyobj(Numbas.jme.display.simplificationRules);
 
 	var sets = {};
 	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];

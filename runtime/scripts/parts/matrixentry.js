@@ -139,7 +139,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
 			break;
 		case 'sigfig':
-			settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+			settings.correctAnswer = Numbas.matrixmath.siground(settings.correctAnswer,settings.precision);
 			break;
 		}
 

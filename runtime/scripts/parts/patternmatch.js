@@ -84,8 +84,8 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	getCorrectAnswer: function(scope) {
 		var settings = this.settings;
 
-		settings.correctAnswer = '^'+jme.contentsubvars(settings.correctAnswerString, scope)+'$';
-		settings.displayAnswer = jme.contentsubvars(settings.displayAnswerString,scope);
+		settings.correctAnswer = '^'+jme.subvars(settings.correctAnswerString, scope, true)+'$';
+		settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.

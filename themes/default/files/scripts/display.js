@@ -42,13 +42,22 @@ MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
 
 		TEX.Parse.Augment({
 			JMEvar: function(name) {
+				var settings_string = this.GetBrackets(name);
+				var settings = {};
+				if(settings_string!==undefined) {
+					settings_string.split(/\s*,\s*/g).forEach(function(v) {
+						var setting = v.trim().toLowerCase();
+						settings[setting] = true;
+					});
+				}
 				var expr = this.GetArgument(name);
+
 				var scope = currentScope;
 
 				try {
 					var v = jme.evaluate(jme.compile(expr,scope),scope);
 
-					var tex = jme.display.texify({tok: v});
+					var tex = jme.display.texify({tok: v},settings);
 				}catch(e) {
 					throw(new Numbas.Error('mathjax.math processing error',e.message,expr));
 				}
@@ -59,8 +68,9 @@ MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
 
 			JMEsimplify: function(name) {
 				var rules = this.GetBrackets(name);
-				if(rules===undefined)
+				if(rules===undefined) {
 					rules = 'all';
+				}
 				var expr = this.GetArgument(name);
 
 				var scope = currentScope;
@@ -269,7 +279,11 @@ ko.components.register('matrix-input',{
 		} else {
 			this.numColumns = ko.observable(params.columns || 2);
 		}
-		this.value = ko.observableArray([]);
+
+		var v = params.value();
+		this.numRows(v.length || 1);
+		this.numColumns(v.length ? v[0].length : 1);
+		this.value = ko.observableArray(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
 
 		this.disable = params.disable || false;
 
@@ -1331,7 +1345,8 @@ display.PartDisplay = function(p)
 	 * @memberof Numbas.display.PartDisplay
 	 */
 	this.showFeedbackToggler = ko.computed(function() {
-		return p.question.exam.settings.showAnswerState && pd.feedbackMessages().length;
+		var e = p.question.exam;
+		return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
 	});
 
 	/* Show the "submit part" button?
@@ -1503,43 +1518,40 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 			valid = this.part.validate();
 		this.answered(valid);
 
-		if(exam.settings.showAnswerState)
+		if(this.part.markingFeedback.length && !this.part.question.revealed)
 		{
-			if(this.part.markingFeedback.length && !this.part.question.revealed)
+			var messages = [];
+			var maxMarks = this.part.marks - (this.part.stepsShown ? this.part.settings.stepsPenalty : 0);
+			var t = 0;
+			for(var i=0;i<this.part.markingFeedback.length;i++)
 			{
-				var messages = [];
-				var maxMarks = this.part.marks - (this.part.stepsShown ? this.part.settings.stepsPenalty : 0);
-				var t = 0;
-				for(var i=0;i<this.part.markingFeedback.length;i++)
-				{
-					var action = this.part.markingFeedback[i];
-					var change = 0;
+				var action = this.part.markingFeedback[i];
+				var change = 0;
 
-					switch(action.op) {
-					case 'addCredit':
-						change = action.credit*maxMarks;
-						if(action.gap!=undefined)
-							change *= this.part.gaps[action.gap].marks/this.part.marks;
-						t += change;
-						break;
-					}
-
-					var message = action.message || '';
-					if(util.isNonemptyHTML(message))
-					{
-						var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,R('mark'),R('marks')));
-
-						if(change>0)
-							message+='\n\n'+R('feedback.you were awarded',marks);
-						else if(change<0)
-							message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,R('was'),R('were')));
-					}
-					if(util.isNonemptyHTML(message))
-						messages.push(message);
+				switch(action.op) {
+				case 'addCredit':
+					change = action.credit*maxMarks;
+					if(action.gap!=undefined)
+						change *= this.part.gaps[action.gap].marks/this.part.marks;
+					t += change;
+					break;
 				}
-				
-				this.feedbackMessages(messages);
+
+				var message = action.message || '';
+				if(util.isNonemptyHTML(message))
+				{
+					var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,R('mark'),R('marks')));
+
+					if(change>0)
+						message+='\n\n'+R('feedback.you were awarded',marks);
+					else if(change<0)
+						message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,R('was'),R('were')));
+				}
+				if(util.isNonemptyHTML(message))
+					messages.push(message);
 			}
+			
+			this.feedbackMessages(messages);
 		}
 	},
 
@@ -1901,7 +1913,10 @@ display.MatrixEntryPartDisplay.prototype =
 {
 	restoreAnswer: function()
 	{
-		this.studentAnswer(this.part.studentAnswer);
+		var studentAnswer = this.part.studentAnswer;
+		this.studentAnswerRows(studentAnswer.length || 1);
+		this.studentAnswerColumns(studentAnswer.length ? studentAnswer[0].length : 1);
+		this.studentAnswer(studentAnswer);
 	}
 };
 display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
@@ -2265,10 +2280,10 @@ function showScoreFeedback(obj,settings)
 				return R('question.score feedback.unanswered');
 			} else if(answered() && obj.doesMarking() && marks>0) {
 				var str = 'question.score feedback.answered'
-							+ (settings.showTotalMark ? ' total' : '')
-							+ (settings.showActualMark ? ' actual' : '')
+							+ (revealed || settings.showTotalMark ? ' total' : '')
+							+ (revealed || settings.showActualMark ? ' actual' : '')
 				return R(str,scoreobj);
-			} else if(settings.showTotalMark) {
+			} else if(revealed || settings.showTotalMark) {
 				return R('question.score feedback.unanswered total',scoreobj);
 			}
 			else

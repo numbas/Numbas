@@ -108,6 +108,69 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 			this.numAnswers = answerNodes.length;
 		}
 	}
+	var def;
+
+	function loadDef(def,scope,topNode,nodeName) {
+		var values = jme.evaluate(def,scope);
+		var numValues = values.value.length;
+		values.value.map(function(value) {
+			var node = xml.ownerDocument.createElement(nodeName);
+			var content = xml.ownerDocument.createElement('content');
+			var span = xml.ownerDocument.createElement('span');
+			content.appendChild(span);
+			node.appendChild(content);
+			topNode.appendChild(node);
+
+			switch(value.type) {
+			case 'string':
+                var d = document.createElement('d');
+                d.innerHTML = value.value;
+                var newNode;
+                try {
+		    		newNode = xml.ownerDocument.importNode(d,true);
+                } catch(e) {
+                    d = Numbas.xml.dp.parseFromString('<d>'+value.value.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
+		    		newNode = xml.ownerDocument.importNode(d,true);
+                }
+				while(newNode.childNodes.length) {
+					span.appendChild(newNode.childNodes[0]);
+				}
+
+				break;
+			case 'html':
+				var selection = $(value.value);
+                for(var i=0;i<selection.length;i++) {
+                    try {
+                        span.appendChild(xml.ownerDocument.importNode(selection[i],true));
+                    } catch(e) {
+                        var d = Numbas.xml.dp.parseFromString('<d>'+selection[i].outerHTML+'</d>','text/xml').documentElement;
+                        var newNode = xml.ownerDocument.importNode(d,true);
+                        while(newNode.childNodes.length) {
+                            span.appendChild(newNode.childNodes[0]);
+                        }
+                    }
+                }
+				break;
+			default:
+				span.appendChild(xml.ownerDocument.createTextNode(value));
+			}
+		});
+		return numValues;
+	}
+
+	if(def = answersNode.getAttribute('def')) {
+		settings.answersDef = def;
+		var nodeName = this.flipped ? 'choice' : 'answer';
+		loadDef(settings.answersDef,this.question.scope,answersNode,nodeName);
+		answerNodes = answersNode.selectNodes(nodeName);
+		this.numAnswers = answerNodes.length;
+	}
+	if(choicesNode && (def = choicesNode.getAttribute('def'))) {
+		settings.choicesDef = def;
+		loadDef(settings.choicesDef,this.question.scope,choicesNode,'choice');
+		choiceNodes = choicesNode.selectNodes('choice');
+		this.numChoices = choiceNodes.length;
+	}
 
 	//get warning type and message for wrong number of choices
 	warningNode = this.xml.selectSingleNode('marking/warning');

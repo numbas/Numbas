@@ -583,8 +583,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				return '-infinity';
 			}
 
-			var piD;
-			if((piD = math.piDegree(n)) > 0)
+			var piD = 0;
+			if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
 				n /= Math.pow(Math.PI,piD);
 
 			var out;
@@ -1742,6 +1742,47 @@ var vectormath = Numbas.vectormath = {
 		return m.map(function(row){
 			return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
 		});
+	},
+
+    /** Multiply a vector on the right by a matrix.
+     * The vector is considered as a column vector.
+     * @param {vector} v
+     * @param {matrix} v
+     * @returns {vector}
+     */
+    vectormatrixmul: function(v,m) {
+        var out = [];
+        for(var i=0;i<m.columns;i++) {
+            out.push(v.reduce(function(s,x,j){ var c = j<m.rows ? (m[j][i]||0) : 0; return add(s,mul(x,c)); },0));
+        }
+        return out;
+    },
+
+	/** Apply given function to each element
+	 * @param {vector}
+	 * @param {function}
+	 * @returns {vector}
+	 */
+	map: function(v,fn) {
+		return v.map(fn);
+	},
+
+	/** Round each element to given number of decimal places
+	 * @param {vector}
+	 * @param {number} - number of decimal places
+	 * @returns {vector}
+	 */
+	precround: function(v,dp) {
+		return vectormath.map(v,function(n){return math.precround(n,dp);});
+	},
+
+	/** Round each element to given number of significant figures
+	 * @param {vector}
+	 * @param {number} - number of decimal places
+	 * @returns {vector}
+	 */
+	siground: function(v,sf) {
+		return vectormath.map(v,function(n){return math.siground(n,sf);});
 	},
 
 	/** Transpose of a vector

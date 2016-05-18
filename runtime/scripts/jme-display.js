@@ -164,6 +164,24 @@ jme.display = /** @lends Numbas.jme.display */ {
 /// all private methods below here
 
 
+function texifyWouldBracketOpArg(thing,i) {
+	var precedence = jme.precedence;
+	if(thing.args[i].tok.type=='op') {	//if this is an op applied to an op, might need to bracket
+		var op1 = thing.args[i].tok.name;	//child op
+		var op2 = thing.tok.name;			//parent op
+		var p1 = precedence[op1];	//precedence of child op
+		var p2 = precedence[op2];	//precedence of parent op
+
+		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
+		return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
+	}
+	//complex numbers might need brackets round them when multiplied with something else or unary minusing
+	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') ) {
+		var v = thing.args[i].tok.value;
+		return (v.re==0 || v.im==0);
+	}
+	return false;
+}
 
 /** Apply brackets to an op argument if appropriate
  * @memberof Numbas.jme.display
@@ -176,27 +194,11 @@ jme.display = /** @lends Numbas.jme.display */ {
  */
 function texifyOpArg(thing,texArgs,i)
 {
-	var precedence = jme.precedence;
 	var tex = texArgs[i];
-	if(thing.args[i].tok.type=='op')	//if this is an op applied to an op, might need to bracket
-	{
-		var op1 = thing.args[i].tok.name;	//child op
-		var op2 = thing.tok.name;			//parent op
-		var p1 = precedence[op1];	//precedence of child op
-		var p2 = precedence[op2];	//precedence of parent op
-
-		//if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-		if( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
-			tex = '\\left ( '+tex+' \\right )';
-	}
-	//complex numbers might need brackets round them when multiplied with something else or unary minusing
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') )	
-	{
-		var v = thing.args[i].tok.value;
-		if(!(v.re==0 || v.im==0))
-			tex = '\\left ( '+tex+' \\right )';
-	}
-	return tex;
+    if(texifyWouldBracketOpArg(thing,i)) {
+        tex = '\\left ( '+tex+' \\right )';
+    }
+    return tex;
 }
 
 /** Helper function for texing infix operators
@@ -258,7 +260,7 @@ var texOps = jme.display.texOps = {
 	'#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),	
 
 	/** logical negation */
-	'!': infixTex('\\neg '),	
+	'not': infixTex('\\neg '),	
 
 	/** unary addition */
 	'+u': function(thing,texArgs,settings) {
@@ -306,11 +308,12 @@ var texOps = jme.display.texOps = {
 		var s = texifyOpArg(thing,texArgs,0);
 		for(var i=1; i<thing.args.length; i++ )
 		{
-			//specials or subscripts
-			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)))
+            // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
+			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i))
 			{ 
 				s+=' \\times ';
 			}
+			//specials or subscripts
 			else if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
 			{
 				s+=' ';
@@ -845,36 +848,46 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 
 	var oname = name;
 
+	function applyAnnotations(name) {
+		if(!annotations) {
+			return name;
+		}
+
+		for(var i=0;i<annotations.length;i++)
+		{
+			var annotation = annotations[i];
+			if(annotation in texNameAnnotations) {
+				name = texNameAnnotations[annotation](name);
+			} else {
+				name = '\\'+annotation+'{'+name+'}';
+			}
+		}
+		return name;
+	}
+
 	var num_subscripts = name.length - name.replace('_','').length;
 	var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
 	var m,isgreek;
+	// if the name is a single letter or greek letter name, followed by digits, subscripts or primes
+	// m[1]: the "root" name - the bit before any digits, subscripts or primes
+	// m[2]: digits immediately following the root
+	// m[3]: digits in a subscript
+	// m[4]: one or two non-prime characters in a subscript
+	// m[5]: prime characters, at the end of the name
 	if((m=name.match(re_math_variable)) && (m[1].length==1 || (isgreek=greek.contains(m[1])))) {
 		if(isgreek) {
 			m[1] = '\\'+m[1];
 		}
+		name = applyAnnotations(m[1]);
 		var subscript = (m[2] || m[3] || m[4]);
 		if(subscript) {
-			name = m[1]+'_{'+subscript+'}'+m[5];
-		} else {
-			name = m[1]+m[5];
+			name += '_{'+subscript+'}';
 		}
+		name += m[5];
 	} else if(!name.match(/^\\/)) {
-		name = longNameMacro(name);
+		name = applyAnnotations(longNameMacro(name));
 	}
 
-	if(!annotations) {
-		return name;
-	}
-
-	for(var i=0;i<annotations.length;i++)
-	{
-		var annotation = annotations[i];
-		if(annotation in texNameAnnotations) {
-			name = texNameAnnotations[annotation](name);
-		} else {
-			name = '\\'+annotation+'{'+name+'}';
-		}
-	}
 	return name;
 }
 
@@ -1061,7 +1074,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 			return mantissa+'*10^('+exponent+')';
 		}
 
-		var f = math.rationalApproximation(Math.abs(n));
+		var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
 		if(f[1]==1)
 			out = Math.abs(f[0]).toString();
 		else
@@ -1316,6 +1329,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 	},
 	set: function(tree,tok,bits,settings) {
 		return 'set('+tok.value.map(function(thing){return treeToJME({tok:thing},settings);}).join(',')+')';
+	},
+
+	expression: function(tree,tok,bits,settings) {
+		return treeToJME(tok.tree);
 	}
 }
 
@@ -1775,6 +1792,7 @@ var matchExpression = jme.display.matchExpression = function(pattern,expr,doComm
  */
 var simplificationRules = jme.display.simplificationRules = {
 	basic: [
+        ['?;x',['x isa "number"','x<0'],'-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
 		['+(?;x)',[],'x'],					//get rid of unary plus
 		['?;x+(-?;y)',[],'x-y'],			//plus minus = minus
 		['?;x+?;y',['y<0'],'x-eval(-y)'],

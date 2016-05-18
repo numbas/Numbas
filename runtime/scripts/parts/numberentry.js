@@ -54,7 +54,9 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 
 	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
 	if(settings.correctAnswerFraction) {
-		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer);
+        var diff = Math.abs(settings.maxvalue-settings.minvalue)/2;
+        var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
+		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
 	} else {
 		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision});
 	}

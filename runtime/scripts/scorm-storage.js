@@ -260,7 +260,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 			break;
 		case 'numberentry':
-			this.set(prepath+'type','numeric');
+			this.set(prepath+'type','fill-in');
 			this.set(prepath+'correct_responses.0.pattern',Numbas.math.niceNumber(p.settings.minvalue)+'[:]'+Numbas.math.niceNumber(p.settings.maxvalue));
 			break;
 		case 'matrix':
@@ -547,7 +547,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	loadNumberEntryPart: function(part)
 	{
 		var out = this.loadPart(part);
-		out.studentAnswer = parseFloat(out.answer)==out.answer ? parseFloat(out.answer) : '';
+		out.studentAnswer = out.answer || '';
 		return out;
 	},
 

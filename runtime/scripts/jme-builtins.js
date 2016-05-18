@@ -121,6 +121,7 @@ newBuiltin('*', [TMatrix,TVector], TVector, vectormath.matrixmul, {doc: {usage: 
 newBuiltin('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul, {doc: {usage: '3*matrix([1,0],[0,1])', description: 'Multiply a matrix on the left by a scalar.', tags: ['multiplication','composition','compose','times']}} );
 newBuiltin('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
 newBuiltin('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul, {doc: {usage: 'matrix([1,0],[1,1]) * matrix([2,3],[3,4])', description: 'Multiply two matrices.', tags: ['multiplication','composition','compose','times']}});
+newBuiltin('*', [TVector,TMatrix], TVector, vectormath.vectormatrixmul, {doc: {usage: 'vector(1,2) * matrix([2,3],[3,4])', description: 'Multiply a vector by a matrix.', tags: ['multiplication','composition','compose','times']}});
 newBuiltin('/', [TNum,TNum], TNum, math.div, {doc: {usage: ['x/y','3/2'], description: 'Divide two numbers.', tags: ['division','quotient','fraction']}} );
 newBuiltin('/', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalardiv(a,b); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
 newBuiltin('/', [TVector,TNum], TVector, function(a,b){return vectormath.div(a,b)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
@@ -404,8 +405,10 @@ newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
 newBuiltin('precround', [TNum,TNum], TNum, math.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
 newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
+newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
 newBuiltin('siground', [TNum,TNum], TNum, math.siground, {doc: {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']}} );
 newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
+newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
 newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeroes if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
 newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeroes if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
@@ -764,85 +767,81 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 	return tree;
 }
 
+function mapOverList(lambda,names,list,scope) {
+	var olist = list.map(function(v) {
+		var d = {}
+		if(typeof(names)=='string') {
+			d[names] = v;
+		} else {
+			names.forEach(function(name,i) {
+				d[name] = v.value[i];
+			});
+		}
+		return scope.evaluate(lambda,d);
+	});
+	return new TList(olist);
+}
+
+/** Functions for 'map', by the type of the thing being mapped over.
+ * Functions take a JME expression lambda, a name or list of names to map, a value to map over, and a scope to evaluate against.
+ * @memberof Numbas.jme
+ * @enum {function}
+ */
+jme.mapFunctions = {
+	'list': mapOverList,
+	'set': mapOverList,
+	'range': function(lambda,name,range,scope) {
+		var list = range.slice(3).map(function(n){return new TNum(n)});
+		return mapOverList(lambda,name,list,scope);
+	},
+	'matrix': function(lambda,name,matrix,scope) {
+		return new TMatrix(matrixmath.map(matrix,function(n) {
+			var d = {}
+			d[name] = new TNum(n);
+			var o = scope.evaluate(lambda,d);
+			if(o.type!='number') {
+				throw(new Numbas.Error("jme.map.matrix map returned non number"))
+			}
+			return o.value;
+		}));
+	},
+	'vector': function(lambda,name,vector,scope) {
+		return new TVector(vectormath.map(vector,function(n) {
+			var d = {}
+			d[name] = new TNum(n);
+			var o = scope.evaluate(lambda,d);
+			if(o.type!='number') {
+				throw(new Numbas.Error("jme.map.vector map returned non number"))
+			}
+			return o.value;
+		}));
+	}
+}
+
 newBuiltin('map',['?',TName,'?'],TList, null, {
 	evaluate: function(args,scope)
 	{
 		var lambda = args[0];
 
-		var list = jme.evaluate(args[2],scope);
-		switch(list.type) {
-		case 'list':
-		case 'set':
-			list = list.value;
-			break;
-		case 'range':
-			list = list.value.slice(3);
-			for(var i=0;i<list.length;i++) {
-				list[i] = new TNum(list[i]);
-			}
-			break;
-		default:
-			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+		var value = jme.evaluate(args[2],scope);
+		if(!(value.type in jme.mapFunctions)) {
+			throw(new Numbas.Error('jme.typecheck.map not on enumerable',value.type));
 		}
-		var value = [];
 		scope = new Scope(scope);
 
 		var names_tok = args[1].tok;
+		var names;
 		if(names_tok.type=='name') {
-			var name = names_tok.name;
-			for(var i=0;i<list.length;i++)
-			{
-				scope.variables[name] = list[i];
-				value[i] = jme.evaluate(lambda,scope);
-			}
-		} else if(names_tok.type=='list') {
-			var names = args[1].args.map(function(t){return t.tok.name;});
-			for(var i=0;i<list.length;i++)
-			{
-				names.map(function(name,j) {
-					scope.variables[name] = list[i].value[j];
-				});
-				value[i] = jme.evaluate(lambda,scope);
-			}
+			names = names_tok.name;
+		} else {
+			names = args[1].args.map(function(t){return t.tok.name;});
 		}
-		return new TList(value);
+		return jme.mapFunctions[value.type](lambda,names,value.value,scope);
 	},
 	
 	doc: {
 		usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
 		description: 'Apply the given expression to every value in a list.'
-	}
-});
-
-newBuiltin('map',['?',TList,'?'],TList,null, {
-	evaluate: function(args,scope)
-	{
-		var list = jme.evaluate(args[2],scope);
-		switch(list.type) {
-		case 'list':
-			list = list.value;
-			break;
-		case 'range':
-			list = list.value.slice(3);
-			for(var i=0;i<list.length;i++) {
-				list[i] = new TNum(list[i]);
-			}
-			break;
-		default:
-			throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
-		}
-		var value = [];
-		var names = args[1].tok.args.map(function(t){return t.tok.name;});
-		scope = new Scope(scope);
-		for(var i=0;i<list.length;i++)
-		{
-			names.map(function(name,j) {
-				scope.variables[name] = list[i].value[j];
-			});
-			scope.variables[name] = list[i];
-			value[i] = jme.evaluate(args[0],scope);
-		}
-		return new TList(value);
 	}
 });
 

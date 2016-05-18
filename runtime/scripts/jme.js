@@ -431,9 +431,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				else
 				{
 					var v = scope.variables[name];
-					if(v.type=='expression') {
-						return jme.substituteTree(v.tree,scope,allowUnbound);
-					} else if(v.tok) {
+					if(v.tok) {
 						return v;
 					} else {
 						return {tok: v};
@@ -724,7 +722,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		return bits.join('');
 	},
 
-	/** Split up a string along TeX delimiters (`$`, `\[`, `\]`)
+	/** Split up a TeX expression, finding the \var and \simplify commands.
+	 * Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a
 	 * @param {string} s
 	 * @returns {string[]}
 	 */
@@ -835,11 +834,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					v = jme.tokenToDisplayString(v);
 				} else {
 					if(v.type=='number') {
-						v = '('+Numbas.jme.display.treeToJME({tok:v})+')';
+						v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false})+')';
 					} else if(v.type=='string') {
 						v = "'"+v.value+"'";
 					} else {
-						v = jme.display.treeToJME({tok:v});
+						v = jme.display.treeToJME({tok:v},{niceNumber: false});
 					}
 				}
 
@@ -1427,7 +1426,10 @@ var TPunc = types.TPunc = function(kind)
 	this.type = kind;
 }
 
-var TExpression = types.TExpression = function(tree) {
+var TExpression = types.TExpression = types.expression = function(tree) {
+	if(typeof(tree)=='string') {
+		tree = jme.compile(tree);
+	}
 	this.tree = tree;
 }
 TExpression.prototype = {
@@ -1797,26 +1799,39 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 				return [];
 			break;
 		case 'string':
-			var bits = jme.texsplit(tree.tok.value);
+			var bits = util.contentsplitbrackets(tree.tok.value);
 			var out = [];
-			for(var i=0;i<bits.length-3;i+=4)
+			for(var i=0;i<bits.length;i+=4)
 			{
-				var cmd = bits[i+1];
-				var expr = bits[i+3];
-				switch(cmd)
+				var plain = bits[i];
+				var sbits = util.splitbrackets(plain,'{','}');
+				for(var k=1;k<sbits.length-1;k+=2)
 				{
-				case 'var':
-					var tree2 = jme.compile(expr,scope,true);
+					var tree2 = jme.compile(sbits[k],scope,true);
 					out = out.merge(findvars(tree2,boundvars));
-					break;
-				case 'simplify':
-					var sbits = util.splitbrackets(expr,'{','}');
-					for(var i=1;i<sbits.length-1;i+=2)
-					{
-						var tree2 = jme.compile(sbits[i],scope,true);
-						out = out.merge(findvars(tree2,boundvars));
+				}
+				if(i<=bits.length-3) {
+					var tex = bits[i+2];
+					var tbits = jme.texsplit(tex);
+					for(var j=0;j<tbits.length;j+=4) {
+						var cmd = tbits[j+1];
+						var expr = tbits[j+3];
+						switch(cmd)
+						{
+						case 'var':
+							var tree2 = jme.compile(expr,scope,true);
+							out = out.merge(findvars(tree2,boundvars));
+							break;
+						case 'simplify':
+							var sbits = util.splitbrackets(expr,'{','}');
+							for(var k=1;k<sbits.length-1;k+=2)
+							{
+								var tree2 = jme.compile(sbits[k],scope,true);
+								out = out.merge(findvars(tree2,boundvars));
+							}
+							break;
+						}
 					}
-					break;
 				}
 			}
 			return out;
