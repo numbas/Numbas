@@ -1747,7 +1747,7 @@ var vectormath = Numbas.vectormath = {
     /** Multiply a vector on the right by a matrix.
      * The vector is considered as a column vector.
      * @param {vector} v
-     * @param {matrix} v
+     * @param {matrix} m
      * @returns {vector}
      */
     vectormatrixmul: function(v,m) {

@@ -120,9 +120,9 @@ R.registerLocale('nb-NO',{
 	'jme.func.matrix.invalid row type': "Kan ikke danne matrise ut fra rader av type %s",
 	'jme.func.except.continuous range': "Kan ikke bruke operator 'except' på et kontinuerlig område.",
 
-	'jme.texsubvars.no right bracket': "No matching <code>]</code> in %s arguments.",
+	'jme.texsubvars.no right bracket': "Ingen samsvarende <code>]</code> i %s argumenter.",
 	'jme.texsubvars.missing parameter': "Manglende parameter in %s: %s",
-	'jme.texsubvars.no right brace': "No matching <code>}</code> in %s",
+	'jme.texsubvars.no right brace': "Ingen samsvarende <code>}</code> i %s.",
 
 	'jme.user javascript.error': "Feil i brukerdefinert javascript funksjon <code>%s</code><br/>%s",
 /*	'jme.user javascript.error': "Brukerdefinert javascript funksjon <code>%s</code> har ikke returverdi",  */
@@ -206,7 +206,7 @@ R.registerLocale('nb-NO',{
 	"part.numberentry.answer not integer or decimal": "Ditt svar er ikke gyldig. Tast inn et heltall eller et desimaltall.",
 
 	'part.mcq.choices missing': "Svarmuligheter mangler i flervalgstesten (%s)",
-	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
+	'part.mcq.matrix not a number': "Del %s evaluering av matrisecelle %s,%s gir ikke et tall",
 	'part.mcq.wrong number of choices': "Du merket av feil antall valg.",
 	'part.mcq.no choices selected': "Ingen av valgene er merket.",
 	'part.mcq.matrix not a list': "Score matrise for flervalg oppgave definert som JME uttrykk er ikke en liste slik den skal være.",
@@ -236,7 +236,7 @@ R.registerLocale('nb-NO',{
 	'question.show steps already penalised': "Du har allerede vist tips. Du kan se tips på nytt uten å tape poeng.",
 	'question.hide steps': "Skjul tips",
 	'question.hide steps no penalty': "Din score vil ikke bli påvirket.",    
-	'question.advice': "Tips",
+	'question.advice': "Svarforslag",
 	'question.no such part': "Finner ikke spørsmål %s",
 	'question.can not submit': "Kan ikke sende inn svar - sjekk mulige feil.",
 	'question.answer submitted': "Svaret er sendt inn",  
