@@ -138,6 +138,10 @@ iframe {
 	back
 }
 
+#navMenu .logo {
+    max-width: 100%;
+}
+
 .navbar.question-nav .nav {
 	float: none;
 	text-align: center;
