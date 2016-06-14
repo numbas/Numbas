@@ -48,6 +48,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 	q.originalXML = q.xml;
 	q.number = number;
 	q.scope = new jme.Scope(gscope);
+    q.scope.question = q;
 	q.preamble = {
 		'js': '',
 		'css': ''

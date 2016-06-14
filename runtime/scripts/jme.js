@@ -1054,6 +1054,7 @@ var fnSort = util.sortBy('id');
  * @property {object} variables - dictionary of {@link Numbas.jme.token} objects
  * @property {object} functions - dictionary of arrays of {@link Numbas.jme.funcObj} objects. There can be more than one function for each name because of signature overloading.
  * @property {objects} rulesets - dictionary of {@link Numbas.jme.Ruleset} objects
+ * @property {Numbas.Question} question - the question this scope belongs to
  *
  * @param {Numbas.jme.Scope[]} scopes - List of scopes to combine into this one. Scopes appearing later in the list override ones appearing earlier, in case variable/ruleset names conflict.
  */
@@ -1070,6 +1071,7 @@ var Scope = jme.Scope = function(scopes) {
 
 	for(var i=0;i<scopes.length;i++) {
 		var scope = scopes[i];
+        this.question = scope.question || this.question;
 		if(scope) {
 			if('variables' in scope) {
 				for(var x in scope.variables) {
