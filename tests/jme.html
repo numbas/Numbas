@@ -165,6 +165,7 @@
 
 					deepCloseEqual(tokenise('"hi \\"Bob\\""'),[new types.TString('hi "Bob"')],'"hi \\"Bob\\"" -- escape quotes');
 					deepCloseEqual(tokenise("'hi \\'Bob\\''"),[new types.TString("hi 'Bob'")],"'hi \\'Bob\\'' -- escape quotes");
+                    deepCloseEqual(tokenise("'hi \\{Bob\\}'"),[new types.TString("hi \\{Bob\\}")],"'hi \\{Bob\\}' -- keep slashes before braces");
 
 					raisesNumbasError(function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
 					raisesNumbasError(function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');
