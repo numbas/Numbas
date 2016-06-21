@@ -425,6 +425,33 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		}
 	},
 
+    /* Write a number with every three digits separated by the given separator character
+     * @example separateThousands(1234567.1234,',') => '1,234,567.1234'
+     * @param {number} n
+     * @param {string} separator
+     * @returns {string}
+     */
+    separateThousands: function(n,separator) {
+        if(n<0) {
+            return '-'+util.separateThousands(-n,separator);
+        }
+        var s = Numbas.math.niceNumber(n);
+        var bits = s.split('.');
+        var whole = bits[0];
+        var frac = bits[1];
+        var over = whole.length%3;
+        var out = whole.slice(0,over);
+        var i = over;
+        while(i<whole.length) {
+            out += (out ? separator: '')+whole.slice(i,i+3);
+            i += 3;
+        }
+        if(frac>0) {
+            out += '.'+(frac+'');
+        }
+        return out;
+    },
+
 	/** Get rid of the % on the end of percentages and parse as float, then divide by 100
 	 * @example unPercent('50%') => 0.5
 	 * @example unPercent('50') => 0.5

@@ -72,6 +72,17 @@
 					deepCloseEqual(Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
 				});
 
+                test('util',function() {
+                    deepCloseEqual(Numbas.util.separateThousands(0,','),'0','0');
+                    deepCloseEqual(Numbas.util.separateThousands(123,','),'123','123');
+                    deepCloseEqual(Numbas.util.separateThousands(1234,','),'1,234','1234');
+                    deepCloseEqual(Numbas.util.separateThousands(12345,','),'12,345','12345');
+                    deepCloseEqual(Numbas.util.separateThousands(123456,','),'123,456','123456');
+                    deepCloseEqual(Numbas.util.separateThousands(1234567.0123,','),'1,234,567.0123','1234567.0123');
+                    deepCloseEqual(Numbas.util.separateThousands(-1234567.0123,','),'-1,234,567.0123','-1234567.0123');
+                    deepCloseEqual(Numbas.util.separateThousands(-1234567.0123,' '),'-1 234 567.0123','-1234567.0123 with space');
+                });
+
 				module('Compiling');
 
 				test('Booleans', function() {

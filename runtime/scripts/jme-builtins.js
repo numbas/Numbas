@@ -187,6 +187,8 @@ newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural
 newBuiltin('join',[TList,TString],TString,function(list,delimiter) { 
 	return list.map(jme.tokenToDisplayString).join(delimiter);
 });
+newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
+newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
