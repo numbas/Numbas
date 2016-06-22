@@ -6,7 +6,7 @@ Copyright 2011-14 Newcastle University
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -117,6 +117,8 @@ R.registerLocale('en-GB',{
 	'jme.func.listval.not a list': "Object is not subscriptable",
 	'jme.func.matrix.invalid row type': "Can't construct a matrix from rows of type %s",
 	'jme.func.except.continuous range': "Can't use the 'except' operator on continuous ranges.",
+
+	'jme.matrix.reports bad size': "Matrix reports its size incorrectly - must be an error in constructor function",
 
 	'jme.texsubvars.no right bracket': "No matching <code>]</code> in %s arguments.",
 	'jme.texsubvars.missing parameter': "Missing parameter in %s: %s",
