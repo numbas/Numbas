@@ -687,7 +687,7 @@
 					closeEquals(evaluate('det(matrix([2,4],[3,5]))').value,-2,'det(matrix([2,4],[3,5]))');
 					raisesNumbasError(function(){ evaluate('det(matrix([2,4,6],[3,5,7]))') },'matrixmath.abs.non-square','error on non-square matrix: det(matrix([2,4,6],[3,5,7]))');
 					raisesNumbasError(function(){ evaluate('det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))') },'matrixmath.abs.too big',"can't work out determinants of big matrices: det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))");
-					deepCloseEqual(evaluate('transpose(vector(1,2,3))').value,[[1],[2],[3]],'transpose(vector(1,2,3))');
+					deepCloseEqual(evaluate('transpose(vector(1,2,3))').value,[[1,2,3]],'transpose(vector(1,2,3))');
 					deepCloseEqual(evaluate('transpose(matrix([1,2,3]))').value,[[1],[2],[3]],'transpose(matrix([1,2,3]))');
 					deepCloseEqual(evaluate('transpose(matrix([1],[2],[3]))').value,[[1,2,3]],'transpose(matrix([1],[2],[3]))');
 					deepCloseEqual(evaluate('transpose(transpose(matrix([1,2,3])))').value,[[1,2,3]],'transpose(transpose(matrix([1,2,3])))');
