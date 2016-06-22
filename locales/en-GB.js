@@ -222,6 +222,7 @@ R.registerLocale('en-GB',{
 	'part.matrix.some incorrect': "One or more of the cells in your answer is incorrect, but you have been awarded marks for the rest.",
 	'part.matrix.empty': "You have not entered an answer.",
 	'part.matrix.empty cell': "One or more of the cells in your answer is empty.",
+	'part.matrix.size mismatch': "The question author hasn't allowed the student to decide the dimensions of their answer, but the correct answer is %s while the answer input is %s",
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
 	
