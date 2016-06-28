@@ -460,16 +460,12 @@ table {
 	clear: both;
 }
 
-.multiplechoice p:not(:only-child) {
+.multiplechoice p {
     margin-left: 1em;
 }
 
-.multiplechoice p:not(:only-child):first-child {
+.multiplechoice p:first-child {
     margin-top: -1.5em;
-}
-
-.multiplechoice p:only-child {
-	display: inline;
 }
 
 .multiplechoice .choice {
