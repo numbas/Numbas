@@ -208,6 +208,8 @@ R.registerLocale('en-GB',{
 	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
 	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
 
+    'part.mcq.options def not a list': "The expression defining the %ss is not a list.",
+    'part.mcq.marking matrix string empty': "The custom marking matrix expression is empty.",
 	'part.mcq.choices missing': "Definition of choices is missing",
 	'part.mcq.matrix not a number': "Part %s marking matrix cell %s,%s does not evaluate to a number",
 	'part.mcq.wrong number of choices': "You selected the wrong number of choices.",

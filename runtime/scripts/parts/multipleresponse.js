@@ -38,6 +38,7 @@ var Part = Numbas.parts.Part;
  */
 var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, path, question, parentPart, loading)
 {
+    var p = this;
 	var settings = this.settings;
 	util.copyinto(MultipleResponsePart.prototype.settings,settings);
 
@@ -112,6 +113,9 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 	function loadDef(def,scope,topNode,nodeName) {
 		var values = jme.evaluate(def,scope);
+        if(values.type!='list') {
+            p.error('part.mcq.options def not a list',nodeName);
+        }
 		var numValues = values.value.length;
 		values.value.map(function(value) {
 			var node = xml.ownerDocument.createElement(nodeName);
@@ -259,8 +263,13 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 	//fill marks matrix
 	var def;
-	if(def = this.xml.selectSingleNode('marking/matrix').getAttribute('def')) {
-		settings.markingMatrixString = def;
+    var markingMatrixNode = this.xml.selectSingleNode('marking/matrix');
+    var useMarkingString = settings.answersDef || settings.choicesDef || markingMatrixNode.hasAttribute('def');
+	if(useMarkingString) {
+		settings.markingMatrixString = markingMatrixNode.getAttribute('def');
+        if(!settings.markingMatrixString) {
+            this.error('part.mcq.marking matrix string empty')
+        }
 	} else {
 		var matrixNodes = this.xml.selectNodes('marking/matrix/mark');
 		var markingMatrixArray = settings.markingMatrixArray = [];
