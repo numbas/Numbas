@@ -281,6 +281,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return parseFloat(f)==f;
 	},
 
+    /** Test if parameter is a fraction
+     * @param {string} s
+     * @returns {boolean}
+     */
+    isFraction: function(s) {
+		s = s.toString().trim();
+        return util.re_fraction.test(s);
+    },
+
 	/** Is `n` a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
 	 * @param {number} n
 	 * @param {boolean} allowFractions

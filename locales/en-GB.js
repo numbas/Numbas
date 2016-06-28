@@ -203,6 +203,7 @@ R.registerLocale('en-GB',{
 	'part.patternmatch.correct except case': "Your answer is correct, except for the case.",
 
 	'part.numberentry.correct except decimal': "Your answer is within the allowed range, but decimal numbers are not allowed.",
+	'part.numberentry.correct except fraction': "Your answer is within the allowed range, but fractions are not allowed.",
 	'part.numberentry.answer invalid': "You did not enter a valid number.",
 	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
 	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
