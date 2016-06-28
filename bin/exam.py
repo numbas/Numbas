@@ -475,7 +475,7 @@ class Variable:
 
 	def __init__(self,data):
 		self.name = data.get('name')
-		self.definition = data.get('definition')
+		self.definition = data.get('definition','')
 	
 	def toxml(self):
 		variable = makeTree(['variable',['value']])
