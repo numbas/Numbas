@@ -275,6 +275,8 @@ R.registerLocale('en-GB',{
 	'scorm.error loading part': "Error loading part %s: %s",
 	'scorm.no part suspend data': "No part suspend data",
 
+    'util.product.non list': "Passed a non-list to <code>Numbas.util.product</code>",
+
 	'mark': 'mark',
 	'marks': 'marks',
 	'was': 'was',

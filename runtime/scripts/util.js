@@ -584,14 +584,24 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * @returns {array}
 	 */
 	product: function(lists) {
+        if(!Array.isArray(lists)) {
+            throw(new Numbas.Error("util.product.non list"));
+        }
 		var indexes = lists.map(function(){return 0});
 		var zero = false;
+        var nonArray = false;
 		var lengths = lists.map(function(l){
+            if(!Array.isArray(l)) {
+                nonArray = true;
+            }
 			if(l.length==0) {
 				zero = true;
 			}
 			return l.length
 		});
+        if(nonArray) {
+            throw(new Numbas.Error("util.product.non list"));
+        }
 		if(zero) {
 			return [];
 		}
