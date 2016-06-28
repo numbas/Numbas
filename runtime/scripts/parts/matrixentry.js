@@ -70,6 +70,12 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
 
 	this.getCorrectAnswer(this.question.scope);
 
+    if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
+        var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
+        var answerSize = settings.numRows+'×'+settings.numColumns;
+        throw(new Numbas.Error('part.matrix.size mismatch',correctSize,answerSize));
+    }
+
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
 
 	if(loading)

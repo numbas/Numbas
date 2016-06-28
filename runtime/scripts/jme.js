@@ -1290,6 +1290,14 @@ TVector.doc = {
 var TMatrix = types.TMatrix = types.matrix = function(value)
 {
 	this.value = value;
+    if(arguments.length>0) {
+        if(value.length!=value.rows) {
+            throw(new Numbas.Error("jme.matrix.reports bad size"));
+        }
+        if(value.rows>0 && value[0].length!=value.columns) {
+            throw(new Numbas.Error("jme.matrix.reports bad size"));
+        }
+    }
 }
 TMatrix.prototype.type = 'matrix';
 TMatrix.doc = {

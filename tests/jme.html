@@ -72,6 +72,17 @@
 					deepCloseEqual(Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
 				});
 
+                test('util',function() {
+                    deepCloseEqual(Numbas.util.separateThousands(0,','),'0','0');
+                    deepCloseEqual(Numbas.util.separateThousands(123,','),'123','123');
+                    deepCloseEqual(Numbas.util.separateThousands(1234,','),'1,234','1234');
+                    deepCloseEqual(Numbas.util.separateThousands(12345,','),'12,345','12345');
+                    deepCloseEqual(Numbas.util.separateThousands(123456,','),'123,456','123456');
+                    deepCloseEqual(Numbas.util.separateThousands(1234567.0123,','),'1,234,567.0123','1234567.0123');
+                    deepCloseEqual(Numbas.util.separateThousands(-1234567.0123,','),'-1,234,567.0123','-1234567.0123');
+                    deepCloseEqual(Numbas.util.separateThousands(-1234567.0123,' '),'-1 234 567.0123','-1234567.0123 with space');
+                });
+
 				module('Compiling');
 
 				test('Booleans', function() {
@@ -676,7 +687,7 @@
 					closeEquals(evaluate('det(matrix([2,4],[3,5]))').value,-2,'det(matrix([2,4],[3,5]))');
 					raisesNumbasError(function(){ evaluate('det(matrix([2,4,6],[3,5,7]))') },'matrixmath.abs.non-square','error on non-square matrix: det(matrix([2,4,6],[3,5,7]))');
 					raisesNumbasError(function(){ evaluate('det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))') },'matrixmath.abs.too big',"can't work out determinants of big matrices: det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))");
-					deepCloseEqual(evaluate('transpose(vector(1,2,3))').value,[[1],[2],[3]],'transpose(vector(1,2,3))');
+					deepCloseEqual(evaluate('transpose(vector(1,2,3))').value,[[1,2,3]],'transpose(vector(1,2,3))');
 					deepCloseEqual(evaluate('transpose(matrix([1,2,3]))').value,[[1],[2],[3]],'transpose(matrix([1,2,3]))');
 					deepCloseEqual(evaluate('transpose(matrix([1],[2],[3]))').value,[[1,2,3]],'transpose(matrix([1],[2],[3]))');
 					deepCloseEqual(evaluate('transpose(transpose(matrix([1,2,3])))').value,[[1,2,3]],'transpose(transpose(matrix([1,2,3])))');
