@@ -565,7 +565,8 @@ class Part:
 				'm_n_2': MultipleChoicePart,
 				'm_n_x': MultipleChoicePart,
 				'gapfill': GapFillPart,
-				'information': InformationPart
+				'information': InformationPart,
+                'extension': ExtensionPart,
 			}
 		if not kind in partConstructors:
 			raise ExamError(
@@ -1070,6 +1071,16 @@ class InformationPart(Part):
 	@staticmethod
 	def fromDATA(data):
 		return InformationPart()
+
+class ExtensionPart(Part):
+	kind = 'extension'
+
+	def __init__(self,marks=0,prompt=''):
+		Part.__init__(self,marks,prompt)
+	
+	@staticmethod
+	def fromDATA(data):
+		return ExtensionPart()
 
 class GapFillPart(Part):
 	kind = 'gapfill'

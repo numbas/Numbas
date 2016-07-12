@@ -377,6 +377,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 			pobj.shuffleChoices = Numbas.math.inverse(part.shuffleChoices);
 			pobj.shuffleAnswers = Numbas.math.inverse(part.shuffleAnswers);
 			break;
+        case 'extension':
+            pobj.extension_data = part.createSuspendData();
+            break;
 		}
 
 		pobj.steps = [];
@@ -606,6 +609,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		out.ticks = ticks;
 		return out;
 	},
+
+	/** Load a {@link Numbas.parts.ExtensionPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
+	loadExtensionPart: function(part)
+	{
+        var out = this.loadPart(part);
+        return out;
+    },
 
 	/** Record duration of the current session
 	 */

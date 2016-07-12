@@ -2178,6 +2178,17 @@ display.InformationPartDisplay = function()
 }
 display.InformationPartDisplay = extend(display.PartDisplay,display.InformationPartDisplay,true);
 
+/** Display code for a {@link Numbas.parts.ExtensionPart}
+ * @augments Numbas.display.PartDisplay
+ * @constructor
+ * @name ExtensionPartDisplay
+ * @memberof Numbas.display
+ */
+display.ExtensionPartDisplay= function()
+{
+}
+display.ExtensionPartDisplay= extend(display.PartDisplay,display.ExtensionPartDisplay,true);
+
 
 //get size of contents of an input
 //from http://stackoverflow.com/questions/118241/calculate-text-width-with-javascript

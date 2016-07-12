@@ -1206,6 +1206,9 @@ TBool.doc = {
  * @param {element} html
  */
 var THTML = types.THTML = types.html = function(html) {
+    if(html.ownerDocument===undefined) {
+        throw(new Numbas.Error('jme.thtml.not html'));
+    }
 	this.value = $(html);
 }
 THTML.prototype.type = 'html';
@@ -1610,7 +1613,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 	this.name=name;
 	this.intype = intype;
 	if(typeof(outcons)=='function')
-		this.outtype = new outcons().type;
+		this.outtype = outcons.prototype.type;
 	else
 		this.outtype = '?';
 	this.outcons = outcons;

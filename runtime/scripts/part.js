@@ -517,6 +517,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					this.credit = result.credit;
 					this.answered = result.answered;
 				} catch(e) {
+                    throw(new Numbas.Error('part.marking.uncaught error',util.nicePartName(this.path),e.message));
 				}
 			} else {
 				this.giveWarning(R('part.marking.not submitted'));
@@ -647,7 +648,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Compute the correct answer, based on the given scope
-	 * Anything to do with marking that depends on the scope should be in this method, and calling it witha new scope should update all the settings used by the marking algorithm.
+	 * Anything to do with marking that depends on the scope should be in this method, and calling it with a new scope should update all the settings used by the marking algorithm.
 	 * @param {Numbas.jme.Scope} scope
 	 * @abstract
 	 */

@@ -112,6 +112,8 @@ R.registerLocale('en-GB',{
 
 	'jme.evaluate.undefined variable': "Variable %s is undefined",
 
+    'jme.thtml.not html': "Passed a non-HTML value into the THTML constructor.",
+
 	'jme.func.switch.no default case': "No default case for Switch statement",
 	'jme.func.listval.invalid index': "Invalid list index %i on list of size %i",
 	'jme.func.listval.not a list': "Object is not subscriptable",
@@ -178,6 +180,7 @@ R.registerLocale('en-GB',{
 	'part.marking.nothing entered': "You did not enter an answer.",
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
+    'part.marking.uncaught error': "Error when marking %s: %s",
 	'part.correct answer': "Expected answer:",
 
 	'part.missing type attribute': "%s: Missing part type attribute",
@@ -228,6 +231,8 @@ R.registerLocale('en-GB',{
 	'part.matrix.size mismatch': "The question author hasn't allowed the student to decide the dimensions of their answer, but the correct answer is %s while the answer input is %s",
 
 	'part.gapfill.feedback header': '<strong>Gap %i</strong>',
+
+    'part.extension.not implemented': "Part hasn't implemented the <code>%s</code> method.",
 	
 	'question.loaded name mismatch': "Can't resume this attempt - the package has changed since the last session.",
 	'question.error': "Question %i: %s",

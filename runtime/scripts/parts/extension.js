@@ -1,0 +1,69 @@
+/*
+Copyright 2011-15 Newcastle University
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+/** @file The {@link Numbas.parts.} object */
+
+Numbas.queueScript('parts/extension',['base','display','util','scorm-storage','part'],function() {
+
+var util = Numbas.util;
+
+var Part = Numbas.parts.Part;
+
+/** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
+ * The idea 
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, loading)
+{
+	this.display = new Numbas.display.ExtensionPartDisplay(this);
+}
+ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
+	validate: function() {
+        return false;
+	},
+
+	hasStagedAnswer: function() {
+		return true;
+	},
+
+	doesMarking: true,
+
+    mark: function() {
+        this.markingComment(R('part.extension.not implemented','mark'));
+    },
+
+    /* Suspend data for this part - must be implemented by an extension or the question.
+    * @ returns {object}
+    */
+    createSuspendData: function() {
+        return {};
+    },
+
+    /* Apply suspend data to this part, on resuming. Must be implemented by an extension or the question.
+    * @ param {object} data
+    */
+    loadSuspendData: function(data) {
+        var pobj = Numbas.store.loadExtensionPart(this);
+        if(pobj) {
+            return pobj.extension_data;
+        }
+    }
+};
+
+Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
+});

@@ -125,6 +125,12 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 	 */
 	loadMultipleResponsePart: function(part) {},
 
+	/** Load a {@link Numbas.parts.ExtensionPart}
+	 * @param {Numbas.parts.Part} part
+	 * @returns {part_suspend_data}
+	 */
+	loadExtensionPart: function(part) {},
+
 	/** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads) */
 	start: function() {},
 

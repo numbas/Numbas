@@ -501,6 +501,12 @@ Copyright 2011-13 Newcastle University
 <xsl:template match="part[@type='information']" mode="correctanswer">
 </xsl:template>
 
+<xsl:template match="part[@type='extension']" mode="typespecific">
+</xsl:template>
+
+<xsl:template match="part[@type='extension']" mode="correctanswer">
+</xsl:template>
+
 <xsl:template match="part" mode="typespecific">
 	<localise>question.unsupported part type</localise> <xsl:text> </xsl:text> <xsl:value-of select="@type"/>
 </xsl:template>
