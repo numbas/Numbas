@@ -121,6 +121,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	for(var i=0; i<stepNodes.length; i++)
 	{
 		var step = Numbas.createPart( stepNodes[i], this.path+'s'+i,this.question, this, loading);
+        step.isStep = true;
 		this.steps[i] = step;
 		this.stepsMarks += step.marks;
 	}
@@ -666,8 +667,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	studentAnswerAsJME: function() {
 	},
 
-	/* Function which marks the student's answer
+	/** Function which marks the student's answer: set the credit for the student's answer to a number between 0 and 1. Runs before {@link Numbas.parts.Part#validate} - set properties on `this.validation` to record reasons answer is valid/invalid.
 	 * @abstract
+     * @see Numbas.parts.Part#setCredit
+     * @see Numbas.parts.Part#markingComment
+     * @see Numbas.parts.Part#validate
 	 */
 	mark: function() {},
 

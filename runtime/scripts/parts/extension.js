@@ -47,16 +47,16 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         this.markingComment(R('part.extension.not implemented','mark'));
     },
 
-    /* Suspend data for this part - must be implemented by an extension or the question.
-    * @ returns {object}
-    */
+    /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
+     * @ returns {object}
+     */
     createSuspendData: function() {
         return {};
     },
 
-    /* Apply suspend data to this part, on resuming. Must be implemented by an extension or the question.
-    * @ param {object} data
-    */
+    /** Get the suspend data created in a previous session for this part, if it exists.
+     * @ param {object} data
+     */
     loadSuspendData: function(data) {
         var pobj = Numbas.store.loadExtensionPart(this);
         if(pobj) {

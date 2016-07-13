@@ -896,7 +896,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.hideNavMenu();
 	},
 
-	/* Hide the sliding side menu*/
+	/** Hide the sliding side menu*/
 	hideNavMenu: function() {
 		if($('#navMenu').data('bs.offcanvas')) {
 			$('#navMenu').offcanvas('hide');
@@ -1207,7 +1207,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		scrollTo($('.warning-icon:visible:first'));
 	},
 
-	/* Initialise this question's display 
+	/** Initialise this question's display 
 	 * @see Numbas.display.ExamDisplay.init
 	 */
 	init: function() {
@@ -1349,23 +1349,32 @@ display.PartDisplay = function(p)
 		return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
 	});
 
-	/* Show the "submit part" button?
+    /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
+     * True if there's more than one part in the question, or this is a step.
+     * @member {observable|boolean} isNotOnlyPart
+     * @memberof Numbas.display.PartDisplay
+     */
+    this.isNotOnlyPart = ko.computed(function() {
+        return this.question.display.numParts()>1 || this.part.isStep;
+    },this);
+
+	/** Show the "submit part" button?
 	 * @member {observable|boolean} showSubmitPart
 	 * @memberof Numbas.display.PartDisplay
 	 */
 	this.showSubmitPart = ko.computed(function() {
-		return this.question.display.numParts()>1 && !(this.revealed() || !this.isDirty());
+		return this.isNotOnlyPart() && !(this.revealed() || !this.isDirty());
 	},this);
 
-	/* Show the marks feedback?
+	/** Show the marks feedback?
 	 * @member {observable|boolean} showMarks
 	 * @memberof Numbas.display.PartDisplay
 	 */
 	this.showMarks = ko.computed(function() {
-		return this.question.display.numParts()>1 && this.scoreFeedback.message();
+		return this.isNotOnlyPart() && this.scoreFeedback.message();
 	}, this);
 
-	/* Should the box containing part marks and the submit and feedback buttons be shown?
+	/** Should the box containing part marks and the submit and feedback buttons be shown?
 	 * @member {observable|boolean} showFeedbackBox
 	 * @memberof Numbas.display.PartDisplay
 	 */
