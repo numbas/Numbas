@@ -264,9 +264,10 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 	//fill marks matrix
 	var def;
     var markingMatrixNode = this.xml.selectSingleNode('marking/matrix');
-    var useMarkingString = settings.answersDef || settings.choicesDef || markingMatrixNode.hasAttribute('def');
+    var markingMatrixString = markingMatrixNode.getAttribute('def');
+    var useMarkingString = settings.answersDef || settings.choicesDef || (typeof markingMatrixString == "string");
 	if(useMarkingString) {
-		settings.markingMatrixString = markingMatrixNode.getAttribute('def');
+		settings.markingMatrixString = markingMatrixString;
         if(!settings.markingMatrixString) {
             this.error('part.mcq.marking matrix string empty')
         }
