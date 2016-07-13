@@ -938,6 +938,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return mul(math.log(n),Math.LOG10E);
 	},
 
+	/** Arbitrary base logarithm
+	 * @param {number} n
+     * @param {number} b
+	 * @returns {number} log(n)/log(b)
+	 */
+	log_base: function(n,b)
+	{
+		return div(math.log(n),math.log(b));
+	},
+
 	/** Convert from degrees to radians
 	 * @param {number} x
 	 * @returns {number}

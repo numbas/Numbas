@@ -530,7 +530,10 @@ var texOps = jme.display.texOps = {
 		else
 			return '\\ln \\left ( '+texArgs[0]+' \\right )';
 	},
-	'log': funcTex('\\log_{10}'),
+	'log': function(thing,texArgs,settings) {
+        var base = thing.args.length==1 ? '10' : texArgs[1];
+        return '\\log_{'+base+'} \\left ( '+texArgs[0]+' \\right )';
+    },
 	'vector': (function(thing,texArgs,settings) {
 		return '\\left ( '+texVector(thing,settings)+' \\right )';
 	}),
