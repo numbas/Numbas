@@ -773,6 +773,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	{
 		this.display.revealAnswer();
 		this.revealed = true;
+        this.setDirty(false);
 
 		//this.setCredit(0);
 		if(this.steps.length>0) {

@@ -385,8 +385,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		this.getAdvice(dontStore);
 
 		//part-specific reveal code. Might want to do some logging in future? 
-		for(var i=0; i<this.parts.length; i++)
+		for(var i=0; i<this.parts.length; i++) {
 			this.parts[i].revealAnswer(dontStore);
+        }
 
 		//display revealed answers
 		this.display.end();
@@ -419,6 +420,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	isDirty: function()
 	{
+        if(this.revealed) {
+            return false;
+        }
 		for(var i=0;i<this.parts.length; i++) {
 			if(this.parts[i].isDirty)
 				return true;
