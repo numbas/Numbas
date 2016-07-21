@@ -181,6 +181,7 @@ R.registerLocale('en-GB',{
 	'part.marking.incorrect': "Your answer is incorrect.",
 	'part.marking.correct': "Your answer is correct.",
     'part.marking.uncaught error': "Error when marking %s: %s",
+    'part.marking.no result': "This part could not be marked.",
 	'part.correct answer': "Expected answer:",
 
 	'part.missing type attribute': "%s: Missing part type attribute",
@@ -210,6 +211,7 @@ R.registerLocale('en-GB',{
 	'part.numberentry.answer invalid': "You did not enter a valid number.",
 	'part.numberentry.answer not integer': "Your answer is invalid. You must enter a whole number, not a decimal.",
 	'part.numberentry.answer not integer or decimal': "Your answer is invalid. You must enter an integer or a decimal.",
+    'part.numberentry.zero sig fig': "This part is set up to round the student's answer to zero significant figures, which has no meaning.",
 
     'part.mcq.options def not a list': "The expression defining the %ss is not a list.",
     'part.mcq.marking matrix string empty': "The custom marking matrix expression is empty.",

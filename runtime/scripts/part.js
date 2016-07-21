@@ -507,11 +507,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 							}
 						}
 						var result_replacement = this.markAgainstScope(scope,existing_feedback);
-						if(result_original && result_replacement.answered && result_replacement.credit>result_original.credit) {
+						if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
 							result = result_replacement;
 							result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
 						}
 					}
+
+                    if(!result) {
+                        this.error('part.marking.no result');
+                    }
 
 					this.setWarnings(result.warnings);
 					this.markingFeedback = result.markingFeedback;
@@ -591,10 +595,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.markingFeedback = feedback.markingFeedback.slice();
 		this.validation = {};
 
-		this.getCorrectAnswer(scope);
+        try {
+    		this.getCorrectAnswer(scope);
 
-		this.mark();
-		this.answered = this.validate();
+    		this.mark();
+	    	this.answered = this.validate();
+        } catch(e) {
+            this.giveWarning(e.message);
+        }
 
 		return {
 			warnings: this.warnings.slice(),

@@ -46,7 +46,11 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 		settings.allowFractions = false;
 	}
 
-	this.getCorrectAnswer(this.question.scope);
+    try {
+    	this.getCorrectAnswer(this.question.scope);
+    } catch(e) {
+        this.error(e.message);
+    }
 
 	var messageNode = this.xml.selectSingleNode('answer/precision/message');
 	if(messageNode)
@@ -116,12 +120,16 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		var precision = jme.subvars(settings.precisionString, scope);
 		settings.precision = scope.evaluate(precision).value;
 
+        if(settings.precisionType=='sigfig' && settings.precision<=0) {
+            throw(new Numbas.Error('part.numberentry.zero sig fig'));
+        }
+
 		var minvalue = jme.subvars(settings.minvalueString,scope);
 		minvalue = scope.evaluate(minvalue);
 		if(minvalue && minvalue.type=='number') {
 			minvalue = minvalue.value;
 		} else {
-			this.error('part.setting not present','minimum value');
+			throw(new Numbas.Error('part.setting not present','minimum value'));
 		}
 
 		var maxvalue = jme.subvars(settings.maxvalueString,scope);
@@ -129,7 +137,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		if(maxvalue && maxvalue.type=='number') {
 			maxvalue = maxvalue.value;
 		} else {
-			this.error('part.setting not present','maximum value');
+			throw(new Numbas.Error('part.setting not present','maximum value'));
 		}
 
 		switch(settings.precisionType) {
