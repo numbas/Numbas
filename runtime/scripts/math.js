@@ -1710,6 +1710,14 @@ var vectormath = Numbas.vectormath = {
 				];
 	},
 
+	/** Length of a vector, squared
+	 * @param {vector} a
+	 * @returns {number}
+	 */
+	abs_squared: function(a) {
+		return a.reduce(function(s,x){ return s + mul(x,x); },0);
+	},
+
 	/** Length of a vector
 	 * @param {vector} a
 	 * @returns {number}
@@ -1717,6 +1725,22 @@ var vectormath = Numbas.vectormath = {
 	abs: function(a) {
 		return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
 	},
+
+    /** Angle between vectors a and b, in radians, or 0 if either vector has length 0.
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {number}
+     */
+    angle: function(a,b) {
+        var dot = vectormath.dot(a,b);
+        var da = vectormath.abs_squared(a);
+        var db = vectormath.abs_squared(b);
+        if(da*db==0) {
+            return 0;
+        }
+        var d = Math.sqrt(da*db);
+        return math.arccos(dot/d);
+    },
 
 	/** Are two vectors equal? True if each pair of corresponding components is equal.
 	 * @param {vector} a
