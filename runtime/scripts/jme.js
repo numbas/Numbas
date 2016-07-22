@@ -1206,7 +1206,7 @@ TBool.doc = {
  * @param {element} html
  */
 var THTML = types.THTML = types.html = function(html) {
-    if(html.ownerDocument===undefined) {
+    if(html.ownerDocument===undefined && !html.jquery) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
 	this.value = $(html);
