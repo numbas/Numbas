@@ -539,7 +539,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		this.score=0;
 		for(var i=0; i<this.questionList.length; i++)
 			this.score += this.questionList[i].score;
-		this.percentScore = Math.round(100*this.score/this.mark);
+		this.percentScore = this.mark>0 ? Math.round(100*this.score/this.mark) : 0;
 	},
 
 	/**
