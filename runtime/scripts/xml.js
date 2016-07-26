@@ -313,6 +313,14 @@ var xml = Numbas.xml = {
 			$(this).replaceWith(localString);
 		});
 		return template;
+	},
+
+	/** Is the given node empty? True if it has no children.
+	 * @param {Element} node
+	 * @returns {bool}
+	 */
+	isEmpty: function(node) {
+		return node.childNodes.length==0;
 	}
 };
 

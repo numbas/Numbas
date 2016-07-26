@@ -150,9 +150,9 @@ Copyright 2011-14 Newcastle University
 		<!-- main content area - info pages or questions go in here -->
 		<div class="mainDisplay">
 			<div id="infoDisplay" class="container" data-bind="visible: infoPage">
-				<div id="frontpage" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
+				<div id="frontpage" class="row" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
 					<h1 data-bind="html: exam.settings.name"></h1>
-					<table>
+					<table class="col-sm-6 col-sm-offset-3">
 						<tr>
 							<th data-localise="exam.number of questions"></th>
 							<td class="rtd" data-bind="html: exam.settings.numQuestions"></td>
@@ -170,7 +170,8 @@ Copyright 2011-14 Newcastle University
 							<td class="rtd" data-bind="html: exam.displayDuration"></td>
 						</tr>
 					</table>
-					<div class="info-buttons">
+					<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage"></div>
+					<div class="info-buttons col-sm-6 col-sm-offset-3">
 						<button class="btn btn-primary" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
 					</div>
 				</div>
@@ -218,34 +219,36 @@ Copyright 2011-14 Newcastle University
 
 					<h3 data-localise="result.performance summary"></h3>
 					<div class="row">
-					<table class="summary col-sm-6 col-sm-offset-3">
-						<tr>
-							<th data-localise="result.exam start"></th>
-							<td class="rtd" data-bind="text: startTime"></td>	
-						</tr>	
-						<tr>
-							<th data-localise="result.exam stop"></th>
-							<td class="rtd" data-bind="text: endTime"></td>	
-						</tr>
-						<tr>
-							<th data-localise="result.time spent"></th>
-							<td class="rtd" data-bind="text: timeSpent"></td>
-						</tr> 
-						<tr>
-							<th data-localise="result.questions attempted"></th>
-							<td class="rtd" data-bind="html: questionsAttemptedDisplay"></td>
-						</tr>
-						<tr>
-							<th data-localise="result.score"></th>
-							<td class="rtd">
-								<span data-bind="text: examScoreDisplay"></span> (<span data-bind="text: percentScore"></span>%)
-							</td>
-						</tr>
-						<tr class="resultrow" data-bind="visible: exam.settings.percentPass>0">
-							<th data-localise="result.result"></th>
-							<td class="rtd" data-bind="html: result"></td>	
-						</tr>							
-					</table>
+						<table class="summary col-sm-6 col-sm-offset-3">
+							<tr>
+								<th data-localise="result.exam start"></th>
+								<td class="rtd" data-bind="text: startTime"></td>	
+							</tr>	
+							<tr>
+								<th data-localise="result.exam stop"></th>
+								<td class="rtd" data-bind="text: endTime"></td>	
+							</tr>
+							<tr>
+								<th data-localise="result.time spent"></th>
+								<td class="rtd" data-bind="text: timeSpent"></td>
+							</tr> 
+							<tr>
+								<th data-localise="result.questions attempted"></th>
+								<td class="rtd" data-bind="html: questionsAttemptedDisplay"></td>
+							</tr>
+							<tr>
+								<th data-localise="result.score"></th>
+								<td class="rtd">
+									<span data-bind="text: examScoreDisplay"></span> (<span data-bind="text: percentScore"></span>%)
+								</td>
+							</tr>
+							<tr class="resultrow" data-bind="visible: exam.settings.percentPass>0">
+								<th data-localise="result.result"></th>
+								<td class="rtd" data-bind="html: result"></td>	
+							</tr>							
+						</table>
+
+						<div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage"></div>
 					</div>
 
 					<h3 data-localise="result.detailed question breakdown"></h3>

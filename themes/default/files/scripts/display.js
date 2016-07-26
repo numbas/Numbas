@@ -786,6 +786,18 @@ display.ExamDisplay = function(e)
 	 */
 	this.result = ko.observable('');
 
+    /** Did the student pass the exam?
+     * @member {observable|boolean} passed
+     * @memberof Numbas.display.ExamDisplay
+     */
+    this.passed = ko.observable(false);
+
+    /** Message shown to the student based on their total score
+     * @member {observable|string} feedbackMessage
+     * @memberof Numbas.display.ExamDisplay
+     */
+    this.feedbackMessage = ko.observable(null);
+
 	document.title = e.settings.name;
 
 }
@@ -858,6 +870,8 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 
 		case "result":
 			this.result(exam.result);
+            this.passed(exam.passed);
+            this.feedbackMessage(exam.feedbackMessage);
 			this.startTime(exam.start);
 			this.endTime(exam.stop);
 			

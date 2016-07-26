@@ -129,6 +129,9 @@ class Exam:
 	allowrevealanswer = True		#allow student to reveal answer to question?
 	adviceType = 'onreveal'			#when is advice shown? 'onreveal' only option at the moment
 	adviceGlobalThreshold = 0		#reveal advice if student scores less than this percentage
+	intro = ''						#text shown on the front page
+	feedbackMessages = []
+
 
 	def __init__(self,name='Untitled Exam'):
 		self.name = name
@@ -188,6 +191,9 @@ class Exam:
 				advice = data['feedback']['advice']
 				tryLoad(advice,'type',exam,'adviceType')
 				tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
+			tryLoad(data['feedback'],'intro',exam,'intro')
+			if haskey(data['feedback'],'feedbackmessages'):
+				exam.feedbackMessages = [FeedbackMessage.fromDATA(f) for f in data['feedback']['feedbackmessages']]
 
 		if haskey(data,'rulesets'):
 			rulesets = data['rulesets']
@@ -222,7 +228,9 @@ class Exam:
 								['navigation'],
 								['timing'],
 								['feedback',
-									['advice']
+									['advice'],
+									['intro'],
+									['feedbackmessages'],
 								],
 								['rulesets']
 							],
@@ -265,6 +273,10 @@ class Exam:
 				'allowrevealanswer': strcons_fix(self.allowrevealanswer)
 		}
 		feedback.find('advice').attrib = {'type': strcons(self.adviceType), 'threshold': strcons_fix(self.adviceGlobalThreshold)}
+		feedback.find('intro').append(makeContentNode(self.intro))
+		feedbackmessages = feedback.find('feedbackmessages')
+		for fm in self.feedbackMessages:
+			feedbackmessages.append(fm.toxml())
 
 		rules = settings.find('rulesets')
 		for name in self.rulesets.keys():
@@ -346,6 +358,23 @@ class Event:
 		event.attrib = {'type': strcons(self.kind), 'action': strcons(self.action)}
 		event.append(makeContentNode(self.message))
 		return event
+
+class FeedbackMessage:
+	message = ''
+	threshold = 0
+
+	@staticmethod
+	def fromDATA(data):
+		feedbackmessage = FeedbackMessage()
+		tryLoad(data,['message','threshold'],feedbackmessage)
+		return feedbackmessage
+
+	def toxml(self):
+		feedbackmessage = makeTree(['feedbackmessage'])
+		feedbackmessage.attrib = {'threshold': strcons(self.threshold)}
+		feedbackmessage.append(makeContentNode(self.message))
+
+		return feedbackmessage
 
 class Question:
 	name = 'Untitled Question'

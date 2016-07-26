@@ -73,7 +73,25 @@ function Exam()
 	var feedbackPath = 'settings/feedback';
 	tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer']);
 
-	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);	
+	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);
+
+    var serializer = new XMLSerializer();
+    var isEmpty = Numbas.xml.isEmpty;
+
+    var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
+    this.hasIntro = !isEmpty(introNode);
+    this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
+
+    var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
+    this.feedbackMessages = [];
+    for(var i=0;i<feedbackMessageNodes.length;i++) {
+        var feedbackMessageNode = feedbackMessageNodes[i];
+        var feedbackMessage = {threshold: 0, message: ''};
+        feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
+        tryGetAttribute(feedbackMessage,null,feedbackMessageNode,['threshold']);
+        this.feedbackMessages.push(feedbackMessage);
+    }
+    this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
 
 	settings.numQuestions = xml.selectNodes('questions/question').length;
 
@@ -693,6 +711,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		//work out summary info
 		this.passed = (this.percentScore >= this.settings.percentPass*100);
 		this.result = R(this.passed ? 'exam.passed' :'exam.failed')
+
+        var percentScore = this.percentScore;
+        this.feedbackMessage = null;
+        for(var i=0;i<this.feedbackMessages.length;i++) {
+            if(percentScore>=this.feedbackMessages[i].threshold) {
+                this.feedbackMessage = this.feedbackMessages[i].message;
+            } else {
+                break;
+            }
+        }
 
 		if(save) {
 			//get time of finish
