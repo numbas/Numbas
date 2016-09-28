@@ -410,6 +410,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return str;
 	},
 
+    /** String representation of a time, in the format HH:MM:SS
+     * @param {Data} t
+     * @returns {string}
+     */
+    formatTime: function(t) {
+		var h = t.getHours();
+		var m = t.getMinutes();
+		var s = t.getSeconds();
+        var lpad = util.lpad;
+		return t.toDateString() + ' ' + lpad(h,2,'0')+':'+lpad(m,2,'0')+':'+lpad(s,2,'0');
+	},
+
 	/** Format an amount of currency
 	 * @example currency(5.3,'£','p') => £5.30
 	 * @param {number} n

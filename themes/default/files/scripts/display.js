@@ -705,13 +705,6 @@ display.ExamDisplay = function(e)
 	 */
 	this.displayTime = ko.observable('');
 
-	function formatTime(t) {
-		var h = t.getHours();
-		var m = t.getMinutes();
-		var s = t.getSeconds();
-		return t.toDateString() + ' ' + h+':'+m+':'+s;
-	}
-
 	/** Time the exam started, formatted for display
 	 * @mamber {observable|string} startTime
 	 * @memberof Numbas.display.ExamDisplay
@@ -721,7 +714,7 @@ display.ExamDisplay = function(e)
 		read: function() {
 			var t = _startTime();
 			if(t) {
-				return formatTime(new Date(t));
+				return util.formatTime(new Date(t));
 			} else {
 				return '';
 			}
@@ -740,7 +733,7 @@ display.ExamDisplay = function(e)
 		read: function() {
 			var t = _endTime();
 			if(t) {
-				return formatTime(new Date(t));
+				return util.formatTime(new Date(t));
 			} else {
 				return '';
 			}
