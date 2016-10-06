@@ -305,13 +305,14 @@
 				test('Synonyms',function() {
 					closeEquals(evaluate('5!=fact(5)').value,true,'x! == fact(x)');
 					closeEquals(evaluate('true and true = true & true = true && true').value,true,'true == & == &&');
-					closeEquals(evaluate('1|5 = divides(1,5)').value,true,'x|y == divides(x,y)');
+					closeEquals(evaluate('1|5 = 1 divides 5').value,true,'x|y == x divides y');
 					closeEquals(evaluate('true||false = true or false').value,true,'x||y == x or y');
 					closeEquals(evaluate('sqr(2) = sqrt(2)').value,true,'sqr == sqrt');
 					closeEquals(evaluate('gcf(2,3) = gcd(2,3)').value,true,'gcf == gcd');
 					closeEquals(evaluate('sgn(4) = sign(4)').value,true,'sgn == sign');
 					closeEquals(evaluate('len(32) = abs(32) and length(32) = abs(32)').value,true,'len == length == abs');
-					closeEquals(jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
+                    closeEquals(jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
+                    ok(jme.compile('length+1'),'length as a variable name')
 				});
 
 				test('Types (isa)',function() {
