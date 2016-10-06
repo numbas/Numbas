@@ -1,28 +1,32 @@
-**Numbas** is an open-source system for creating SCORM-compliant exams which run entirely in the browser, developed by [Newcastle University's School of Maths and Stats](http://www.ncl.ac.uk/maths).
+<img src="http://numbas.org.uk/numbas-logo.svg" width="100%" alt="Numbas logo">
 
-* Can be run on anything that has a web browser.
-* Compatible with IE8+, Firefox 3+, Chrome, Safari, Opera, iPhone, etc.
-* Implemented entirely in client-side javascript - requires no plugins, no installation on client's machine, no communication with servers.
-* Interacts with LMSs such as Blackboard and Moodle through SCORM.
-* Extensive support for questions of a mathematical nature. Answers to questions can be mathematical expressions.
-* Mathematics display is pure LaTeX, using [MathJax](http://www.mathjax.org).
-* Rich content such as videos, interactive graphs easily added.
-* Questions can be fully randomised.
-* Write questions using simple markup with any text editor.
-* Easily extensible.
+**Numbas** is an open-source system for creating tests which run entirely in the browser. It has been developed by [Newcastle University's School of Mathematics and Statistics](http://www.ncl.ac.uk/maths).
 
-### Installation
-
-These tools (the Numbas compiler) run as standalone Python 3, but the most convenient way to use Numbas is through the web-based editor. A publicly-available version is available at [numbas.mathcentre.ac.uk](http://numbas.mathcentre.ac.uk), or you can get everything you need to set up your own installation at https://github.com/numbas/editor.
+For more information about Numbas and what it does, see our website at [numbas.org.uk](http://www.numbas.org.uk).
 
 ### Documentation
 
-Documentation (mainly focusing on the editor) is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
+Documentation is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
 
+### Installation
+
+This repository contains the Numbas compiler, which runs as standalone Python 3, but the most convenient way to use Numbas is through the web-based editor. 
+
+A publicly-available editor, requiring no set-up, is available at [numbas.mathcentre.ac.uk](http://numbas.mathcentre.ac.uk). Or, you can follow [our instructions for Windows, Mac, or Ubuntu to install your own instance](http://numbas.github.io/editor).
+
+### Development
+
+Numbas is open source, and we welcome contributions of any sort. Bug reports or feature suggestions can be added to [the GitHub issue tracker](https://github.com/numbas/Numbas/issues), or emailed to numbas@ncl.ac.uk. 
+
+See [our page on contributing to Numbas](http://www.numbas.org.uk/contributing-to-numbas/) for more information on how you can help.
+
+We keep a list of tasks specifically for new contributors, under [the up-for-grabs label](https://github.com/numbas/Numbas/labels/up-for-grabs). There's [a corresponding list in the editor repository](https://github.com/numbas/editor/labels/up-for-grabs), too. These tasks should be fairly straightforward to implement without much knowledge of how all the code fits together.
+
+This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
 
 ### Copyright
 
-> Copyright 2011-14 Newcastle University
+> Copyright 2011-16 Newcastle University
 > 
 > Licensed under the Apache License, Version 2.0 (the "License");
 > you may not use this file except in compliance with the License.
