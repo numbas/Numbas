@@ -1862,7 +1862,9 @@ display.NumberEntryPartDisplay = function()
 	 * @member {observable|string} precisionHint
 	 * @memberof Numbas.display.NumberEntryPartDisplay
 	 */
-	this.precisionHint = ko.observable(R('numberentry.give your answer to precision',this.part.settings.precision,this.part.settings.precisionType));
+	this.precisionHint = ko.computed(function() {
+		return R('numberentry.give your answer to precision',this.part.settings.precision,this.part.settings.precisionType);
+	}
 }
 display.NumberEntryPartDisplay.prototype =
 {
