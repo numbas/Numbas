@@ -1857,6 +1857,12 @@ display.NumberEntryPartDisplay = function()
 	this.focusInput = function() {
 		this.inputHasFocus(true);
 	}
+
+	/** The precision hint of the answer
+	 * @member {observable|string} precisionHint
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
+	this.precisionHint = ko.observable(R('numberentry.give your answer to precision',this.part.settings.precision,this.part.settings.precisionType));
 }
 display.NumberEntryPartDisplay.prototype =
 {
