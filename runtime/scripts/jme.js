@@ -49,7 +49,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
 		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in)([^a-zA-Z0-9_']|$)))/i,
+		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_comment: /^\/\/.*(?:\n|$)/
@@ -108,6 +108,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				var nt;
 				var postfix = false;
 				var prefix = false;
+                if(token in opSynonyms) {
+                    token = opSynonyms[token];
+                }
 				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) )
 				{
 					if(token in prefixForm) {
@@ -196,17 +199,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			tokens.push(token);
 		}
 
-		//rewrite some synonyms
-		for(var i=0; i<tokens.length; i++)
-		{
-			if(tokens[i].name)
-			{
-				if(synonyms[tokens[i].name])
-					tokens[i].name=synonyms[tokens[i].name];
-			}
-		}
-
-
 		return(tokens);
 	},
 
@@ -251,8 +243,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				addoutput(tok);
 				break;
 			case "name":
-				if( i<tokens.length-1 && tokens[i+1].type=="(")
+				if( i<tokens.length-1 && tokens[i+1].type=="(") // if followed by an open bracket, this is a function application
 				{
+                        if(funcSynonyms[tok.name]) {
+                            tok.name=funcSynonyms[tok.name];
+                        }
+
 						stack.push(new TFunc(tok.name,tok.annotation));
 						numvars.push(0);
 						olength.push(output.length);
@@ -1515,16 +1511,23 @@ var precedence = jme.precedence = {
 	'implies': 14
 };
 
-/** Synonyms of names - keys in this dictionary are translated to their corresponding values after tokenising.
+/** Synonyms of operator names - keys in this dictionary are translated to their corresponding values
  * @enum {string}
  * @memberof Numbas.jme
  * @readonly
  */
-var synonyms = jme.synonyms = {
+var opSynonyms = jme.opSynonyms = {
 	'&':'and',
 	'&&':'and',
 	'divides': '|',
-	'||':'or',
+	'||':'or'
+}
+/** Synonyms of function names - keys in this dictionary are translated to their corresponding values 
+ * @enum {string}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+var funcSynonyms = jme.funcSynonyms = {
 	'sqr':'sqrt',
 	'gcf': 'gcd',
 	'sgn':'sign',
