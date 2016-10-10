@@ -847,6 +847,7 @@ class NumberEntryPart(Part):
     precision = 0
     precisionPartialCredit = 0
     precisionMessage = ''
+    showPrecisionHint = True
     strictPrecision = True
 
     def __init__(self,marks=0,prompt=''):
@@ -855,7 +856,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
+        tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -893,7 +894,8 @@ class NumberEntryPart(Part):
             'type': strcons(self.precisionType), 
             'precision': strcons_fix(self.precision), 
             'partialcredit': strcons_fix(self.precisionPartialCredit)+'%',
-            'strict': strcons_fix(self.strictPrecision)
+            'strict': strcons_fix(self.strictPrecision),
+            'showprecisionhint': strcons_fix(self.showPrecisionHint),
         }
         answer.find('precision/message').append(makeContentNode(self.precisionMessage))
 

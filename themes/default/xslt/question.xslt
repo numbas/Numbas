@@ -139,7 +139,7 @@ Copyright 2011-13 Newcastle University
 	<div class="stepsBtn">
 		<button class="btn btn-primary" data-bind="visible: !stepsOpen(), click: controls.showSteps"><localise>question.show steps</localise></button>
 		<button class="btn btn-primary" data-bind="visible: stepsOpen(), click: controls.hideSteps"><localise>question.hide steps</localise></button>
-		<span class="penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
+		<span class="help-block hint penaltyMessage">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
 	</div>
 </xsl:template>
 
@@ -470,7 +470,7 @@ Copyright 2011-13 Newcastle University
 	<xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, value: studentAnswer, valueUpdate: 'afterkeydown', autosize: true, disable: revealed"/>
 	<span class="preview" data-bind="visible: showPreview &amp;&amp; studentAnswerLaTeX(), maths: showPreview ? studentAnswerLaTeX() : '', click: focusInput"></span>
-	<span class="" data-bind="html: precisionHint"></span>
+    <span class="help-block hint precision-hint" data-bind="visible: showPrecisionHint, html: precisionHint"></span>
 	<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 

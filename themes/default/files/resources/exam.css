@@ -163,6 +163,13 @@ input.jme {
 	margin-left: 0.2em;
 }
 
+.hint {
+    font-style: italic;
+    font-size: 0.9em;
+    display: inline;
+    margin-left: 0.5em;
+}
+
 .matrix-input {
 	display: inline-block;
 	vertical-align: middle;
@@ -442,11 +449,6 @@ table {
 
 .stepsBtn {
 	margin-bottom: 1em;
-}
-
-.stepsBtn .penaltyMessage {
-	font-style: italic;
-	margin-left: 0.5em;
 }
 
 .multiplechoice li {

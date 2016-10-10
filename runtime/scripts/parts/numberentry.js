@@ -39,7 +39,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','inputstep','allowfractions'],['correctAnswerFraction','inputStep','allowFractions']);
 
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
-	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
+	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
 	if(settings.precisionType!='none') {
@@ -109,7 +109,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		precisionType: 'none',
 		precision: 0,
 		precisionPC: 0,
-		precisionMessage: R('You have not given your answer to the correct precision.')
+		precisionMessage: R('You have not given your answer to the correct precision.'),
+        showPrecisionHint: true
 	},
 
 	/** Compute the correct answer, based on the given scope

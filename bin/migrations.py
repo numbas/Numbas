@@ -28,6 +28,21 @@ def question_migration(f):
             f(data)
     return do_migration
 
+def part_migration(f):
+    @wraps(f)
+    @question_migration
+    def do_migration(question):
+        if 'parts' in question:
+            for part in question['parts']:
+                f(part)
+                if 'steps' in part:
+                    for step in part['steps']:
+                        f(step)
+                if 'gaps' in part:
+                    for gap in part['gaps']:
+                        f(gap)
+    return do_migration
+
 @migration('1')
 def exam_or_question(data):
     if not data.get('type'):
@@ -83,3 +98,11 @@ def custom_script_order(question):
             if 'gaps' in part:
                 for gap in part['gaps']:
                     fix_part(gap)
+
+@migration(version_from='custom_script_order')
+@part_migration
+def show_precision_hint(part):
+    """ For existing questions, set the numberentry property "show precision restriction hint" to False, because most questions already have this text in the prompt. """
+
+    if part['type']=='numberentry':
+        part['showPrecisionHint'] = False

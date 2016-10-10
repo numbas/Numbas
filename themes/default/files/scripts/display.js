@@ -1858,13 +1858,29 @@ display.NumberEntryPartDisplay = function()
 		this.inputHasFocus(true);
 	}
 
-	/** The precision hint of the answer
+	/** Some text describing what precision the student should round their answer to
 	 * @member {observable|string} precisionHint
 	 * @memberof Numbas.display.NumberEntryPartDisplay
 	 */
 	this.precisionHint = ko.computed(function() {
-		return R('numberentry.give your answer to precision',this.part.settings.precision,this.part.settings.precisionType);
-	}
+        if(this.part.settings.precisionType=='none') {
+            return '';
+        }
+        var precision = this.part.settings.precision;
+        var precisionType = R('numberentry.precision type.'+this.part.settings.precisionType);
+        if(precision != 1) {
+            precisionType += 's';
+        }
+		return R('numberentry.give your answer to precision',{precision: precision,precisionType: precisionType});
+	},this);
+
+	/** Show the precision restriction hint?
+	 * @member {observable|string} showPrecisionHint
+	 * @memberof Numbas.display.NumberEntryPartDisplay
+	 */
+    this.showPrecisionHint = ko.computed(function() {
+        return this.part.settings.showPrecisionHint && this.precisionHint();
+    },this);
 }
 display.NumberEntryPartDisplay.prototype =
 {

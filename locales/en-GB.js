@@ -156,7 +156,9 @@ R.registerLocale('en-GB',{
 	'matrixmath.abs.too big': "Sorry, can't compute the determinant of a matrix bigger than 3x3 yet.",
 	'matrixmath.mul.different sizes': "Can't multiply matrices of different sizes.",
 
-	'numberentry.give your answer to precision': "Give your answer to %s %s",
+    'numberentry.precision type.dp': "decimal place",
+    'numberentry.precision type.sigfig': "significant figure",
+	'numberentry.give your answer to precision': "Round your answer to %(precision) %(precisionType).",
 
 	'vectormath.cross.not 3d': "Can only take the cross product of 3-dimensional vectors.",
 	'vectormath.dot.matrix too big': "Can't calculate dot product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
