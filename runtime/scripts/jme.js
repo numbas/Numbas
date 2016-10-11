@@ -189,7 +189,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			else if(expr.length)
 			{
 				//invalid character or not able to match a token
-				throw(new Numbas.Error('jme.tokenise.invalid',oexpr));
+				throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
 			}
 			else
 				break;
@@ -220,7 +220,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(tok.vars!==undefined)
 			{
 				if(output.length<tok.vars)
-					throw(new Numbas.Error('jme.shunt.not enough arguments',tok.name || tok.type));
+					throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
 
 				var thing = {tok: tok,
 							 args: output.slice(output.length-tok.vars)};
@@ -422,7 +422,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					if(allowUnbound)
 						return {tok: new TName(name)};
 					else
-						throw new Numbas.Error('jme.substituteTree.undefined variable',name);
+						throw new Numbas.Error('jme.substituteTree.undefined variable',{name:name});
 				}
 				else
 				{
@@ -522,12 +522,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 						//check if the user typed something like xtan(y), when they meant x*tan(y)
 						var possibleOp = op.slice(1);
 						if(possibleOp in scope.functions)
-							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',op,op[0],possibleOp));
+							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',{name:op,first:op[0],possibleOp:possibleOp}));
 						else
-							throw(new Numbas.Error('jme.typecheck.function not defined',op,op));
+							throw(new Numbas.Error('jme.typecheck.function not defined',{op:op,suggestion:op}));
 					}
 					else
-						throw(new Numbas.Error('jme.typecheck.op not defined',op));
+						throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
 				}
 
 				for(var j=0;j<scope.functions[op].length; j++)
@@ -544,10 +544,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				else {
 					for(var i=0;i<=tree.args.length;i++) {
 						if(tree.args[i] && tree.args[i].unboundName) {
-							throw(new Numbas.Error('jme.typecheck.no right type unbound name',tree.args[i].name));
+							throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:tree.args[i].name}));
 						}
 					}
-					throw(new Numbas.Error('jme.typecheck.no right type definition',op));
+					throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op}));
 				}
 			}
 		default:
@@ -745,7 +745,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				while(i<s.length && s.charAt(i)!=']')
 					i++;
 				if(i==s.length)
-					throw(new Numbas.Error('jme.texsubvars.no right bracket',cmd));
+					throw(new Numbas.Error('jme.texsubvars.no right bracket',{op:cmd}));
 				else
 				{
 					args = s.slice(si,i);
@@ -758,7 +758,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 			if(s.charAt(i)!='{')
 			{
-				throw(new Numbas.Error('jme.texsubvars.missing parameter',cmd,s));
+				throw(new Numbas.Error('jme.texsubvars.missing parameter',{op:cmd,parameter:s}));
 			}
 
 			var brackets=1;
@@ -772,7 +772,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					brackets--;
 			}
 			if(i == s.length-1 && brackets>0)
-				throw(new Numbas.Error('jme.texsubvars.no right brace',cmd));
+				throw(new Numbas.Error('jme.texsubvars.no right brace',{op:cmd}));
 
 			var expr = s.slice(si,i);
 			s = s.slice(i+1);
@@ -1005,7 +1005,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 			{
 				if(!(name in scopeSets))
 				{
-					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',name));
+					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',{name:name}));
 				}
 
 				var sub = collectRuleset(scopeSets[name],scopeSets);

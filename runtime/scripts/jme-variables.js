@@ -78,7 +78,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 			try {
 				var val = jfn.apply(this,args);
 				if(val===undefined) {
-					throw(new Numbas.Error('jme.user javascript.returned undefined',fn.name));
+					throw(new Numbas.Error('jme.user javascript.returned undefined',{name:fn.name}));
 				}
 				val = jme.wrapValue(val,fn.outtype);
 				if(!val.type)
@@ -87,7 +87,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 			}
 			catch(e)
 			{
-				throw(new Numbas.Error('jme.user javascript.error',fn.name,e.message));
+				throw(new Numbas.Error('jme.user javascript.error',{name:fn.name,message:e.message}));
 			}
 		}
 	},
@@ -130,7 +130,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 				break;
 			}
 		} catch(e) {
-			throw(new Numbas.Error('jme.variables.error making function',fn.name,e.message));
+			throw(new Numbas.Error('jme.variables.error making function',{name:fn.name,message:e.message}));
 		}
 		return fn
 	},
@@ -177,13 +177,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
 		if(path.contains(name))
 		{
-			throw(new Numbas.Error('jme.variables.circular reference',name,path));
+			throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
 		}
 
 		var v = todo[name];
 
 		if(v===undefined)
-			throw(new Numbas.Error('jme.variables.variable not defined',name));
+			throw(new Numbas.Error('jme.variables.variable not defined',{name:name}));
 
 		//work out dependencies
 		for(var i=0;i<v.vars.length;i++)
@@ -200,19 +200,19 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 					if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
 						throw(e);
 					} else {
-						throw(new Numbas.Error('jme.variables.error computing dependency',x));
+						throw(new Numbas.Error('jme.variables.error computing dependency',{name:x}));
 					}
 				}
 			}
 		}
 
 		if(!v.tree) {
-			throw(new Numbas.Error('jme.variables.empty definition',name));
+			throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
 		}
 		try {
 			scope.variables[name] = jme.evaluate(v.tree,scope);
 		} catch(e) {
-			throw(new Numbas.Error('jme.variables.error evaluating variable',name,e.message));
+			throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
 		}
 		return scope.variables[name];
 	},

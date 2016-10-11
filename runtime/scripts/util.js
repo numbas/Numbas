@@ -138,7 +138,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		if(a.type in util.equalityTests) {
 			return util.equalityTests[a.type](a,b);
 		} else {
-			throw(new Numbas.Error('util.equality not defined for type %s',a.type));
+			throw(new Numbas.Error('util.equality not defined for type',{type:a.type}));
 		}
 	},
 

@@ -166,7 +166,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	{
 		var acc = timing.accs[name];
 		if(!acc)
-			throw(new Numbas.Error('timing.no accumulator',name));
+			throw(new Numbas.Error('timing.no accumulator',{name:name}));
 
 		acc.go -= 1;
 		if(acc.go==0)

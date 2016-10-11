@@ -58,7 +58,7 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 {
 	var type = tryGetAttribute(null,xml,'.','type',[]);
 	if(type==null) {
-		throw(new Numbas.Error('part.missing type attribute',util.nicePartName(path)));
+		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
 	}
 	if(partConstructors[type])
 	{
@@ -73,7 +73,7 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 		return part;
 	}
 	else {
-		throw(new Numbas.Error('part.unknown type',util.nicePartName(path),type));
+		throw(new Numbas.Error('part.unknown type',{part:util.nicePartName(path),type:type}));
 	}
 }
 
@@ -157,7 +157,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 			part: this
 		};
 		with(withEnv) {
-			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',util.nicePartName(this.path),name,e.message))}})');
+			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
 		}
 		this.scripts[name] = {script: script, order: order};
 	}
@@ -408,11 +408,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				else
 				{
 					var change = this.score - oScore;
-					this.markingComment(
-						util.pluralise(change,
-							R('part.marking.steps change single',math.niceNumber(change)),
-							R('part.marking.steps change plural',math.niceNumber(change))
-					));
+					this.markingComment(R('part.marking.steps change',{count:change}));
 				}
 			}
 		}
@@ -465,11 +461,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			var stepsMax = this.marks - this.settings.stepsPenalty;
 			this.markingComment(
 				this.settings.stepsPenalty>0 
-					? util.pluralise(stepsMax,
-						R('part.marking.revealed steps with penalty single',math.niceNumber(stepsMax)),
-						R('part.marking.revealed steps with penalty plural',math.niceNumber(stepsMax))
-						)
-					: R('part.marking.revealed steps no penalty'));
+					? R('part.marking.revealed steps with penalty',{count:stepsMax})	
+                    : R('part.marking.revealed steps no penalty'));
 		}
 
 		if(this.stagedAnswer) {
@@ -522,7 +515,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					this.credit = result.credit;
 					this.answered = result.answered;
 				} catch(e) {
-                    throw(new Numbas.Error('part.marking.uncaught error',util.nicePartName(this.path),e.message));
+                    throw(new Numbas.Error('part.marking.uncaught error',{part:util.nicePartName(this.path),message:e.message}));
 				}
 			} else {
 				this.giveWarning(R('part.marking.not submitted'));
@@ -546,10 +539,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		{
 			if(!(this.parentPart && this.parentPart.type=='gapfill'))
 				this.markingComment(
-					util.pluralise(this.score,
-						R('part.marking.total score single',math.niceNumber(this.score)),
-						R('part.marking.total score plural',math.niceNumber(this.score))
-					)
+					R('part.marking.total score',{count:this.score})
 				);
 		}
 
@@ -630,7 +620,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				new_variables[vr.variable] = p2.studentAnswerAsJME();
 				replaced.push(vr.variable);
 			} else if(vr.must_go_first) {
-				throw(new Numbas.Error(R("part.marking.variable replacement part not answered",util.nicePartName(vr.part))));
+				throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:util.nicePartName(vr.part)}));
 			}
 		}
 		for(var i=0;i<replace.length;i++) {

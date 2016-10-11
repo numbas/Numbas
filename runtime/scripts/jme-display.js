@@ -1008,7 +1008,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	if(tok.type in typeToTeX) {
 		return typeToTeX[tok.type](thing,tok,texArgs,settings);
 	} else {
-		throw(new Numbas.Error(R('jme.display.unknown token type',tok.type)));
+		throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
 	}
 }
 
@@ -1367,7 +1367,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 	if(tok.type in typeToJME) {
 		return typeToJME[tok.type](tree,tok,bits,settings);
 	} else {
-		throw(new Numbas.Error(R('jme.display.unknown token type',tok.type)));
+		throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
 	}
 }
 

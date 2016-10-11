@@ -130,7 +130,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		if(minvalue && minvalue.type=='number') {
 			minvalue = minvalue.value;
 		} else {
-			throw(new Numbas.Error('part.setting not present','minimum value'));
+			throw(new Numbas.Error('part.setting not present',{property:R('minimum value')}));
 		}
 
 		var maxvalue = jme.subvars(settings.maxvalueString,scope);
@@ -138,7 +138,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		if(maxvalue && maxvalue.type=='number') {
 			maxvalue = maxvalue.value;
 		} else {
-			throw(new Numbas.Error('part.setting not present','maximum value'));
+			throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
 		}
 
 		switch(settings.precisionType) {

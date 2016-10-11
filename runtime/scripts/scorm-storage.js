@@ -29,7 +29,7 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 	{
 		var errorCode = pipwerks.SCORM.debug.getCode();
 		if(errorCode) {
-			throw(new Numbas.Error(R('scorm.error initialising',pipwerks.SCORM.debug.getInfo(errorCode))));
+			throw(new Numbas.Error(R('scorm.error initialising',{message: pipwerks.SCORM.debug.getInfo(errorCode)})));
 		}
 
 		//if the pretend LMS extension is loaded, we can start that up
@@ -407,7 +407,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 				throw(new Numbas.Error('scorm.no exam suspend data'));
 			}
 		} catch(e) {
-			throw(new Numbas.Error('scorm.error loading suspend data',e.message));
+			throw(new Numbas.Error('scorm.error loading suspend data',{message: e.message}));
 		}
 		return this.suspendData;
 	},
@@ -474,7 +474,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 					variables: variables
 			};
 		} catch(e) {
-			throw(new Numbas.Error('scorm.error loading question',question.number,e.message));
+			throw(new Numbas.Error('scorm.error loading question',{'number':question.number,message:e.message}));
 		}
 	},
 
@@ -517,7 +517,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 			return pobj;
 		} catch(e) {
-			throw(new Numbas.Error('scorm.error loading part',part.path,e.message));
+			throw(new Numbas.Error('scorm.error loading part',{part:part.path,message:e.message}));
 		}
 	},
 

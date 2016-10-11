@@ -73,7 +73,7 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
     if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
         var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
         var answerSize = settings.numRows+'×'+settings.numColumns;
-        throw(new Numbas.Error('part.matrix.size mismatch',correctSize,answerSize));
+        throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
     }
 
 	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
@@ -255,7 +255,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 			if(numIncorrect==0) {
 				this.setCredit(1,R('part.marking.correct'));
 			} else if(this.settings.markPerCell && numIncorrect<numCells) {
-				this.setCredit( (numCells-numIncorrect)/numCells, R('part.matrix.some incorrect',numIncorrect) );
+				this.setCredit( (numCells-numIncorrect)/numCells, R('part.matrix.some incorrect',{count:numIncorrect}) );
 			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}

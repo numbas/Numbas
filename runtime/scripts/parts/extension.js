@@ -44,7 +44,7 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
 	doesMarking: true,
 
     mark: function() {
-        this.markingComment(R('part.extension.not implemented','mark'));
+        this.markingComment(R('part.extension.not implemented',{name:'mark'}));
     },
 
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.

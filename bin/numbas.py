@@ -29,6 +29,8 @@ from zipfile import ZipFile, ZipInfo
 import xml.etree.ElementTree as etree
 from itertools import count
 import subprocess
+import json
+
 
 namespaces = {
     '': 'http://www.imsglobal.org/xsd/imscp_v1p1',
@@ -206,10 +208,23 @@ def makeExam(options):
     files = collectFiles(options)
     files[os.path.join('.','settings.js')] = io.StringIO(options.xmls)
 
-    localePath = os.path.join(options.path,'locales',options.locale+'.js')
-    if not os.path.exists(localePath):
-        raise Exception("Can't find locale "+options.locale)
-    files[os.path.join('.','locale.js')] = io.StringIO(open(localePath,encoding='utf-8').read())
+    localePath = os.path.join(options.path,'locales')
+    locales = {}
+    for fname in os.listdir(localePath):
+        name,ext = os.path.splitext(fname)
+        if ext.lower()=='.json':
+            with open(os.path.join(localePath,fname),encoding='utf-8') as f:
+                locales[name] = {'translation': json.loads(f.read())}
+
+    locale_js = """
+    Numbas.queueScript('localisation-resources',['i18next'],function() {{
+    Numbas.locale = {{
+        preferred_locale: {},
+        resources: {}
+    }}
+    }});
+    """.format(json.dumps(options.locale),json.dumps(locales))
+    files[os.path.join('.','locale.js')] = io.StringIO(locale_js)
 
     if options.scorm:
         IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'

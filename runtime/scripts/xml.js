@@ -53,7 +53,7 @@ var xml = Numbas.xml = {
 		//check for errors
 		if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
 		{
-			throw(new Numbas.Error('xml.could not load',Sarissa.getParseErrorText(doc)));
+			throw(new Numbas.Error('xml.could not load',{message:Sarissa.getParseErrorText(doc)}));
 		}
 
 		//allow XPath to be used to select nodes
@@ -169,13 +169,13 @@ var xml = Numbas.xml = {
 				var vars = [];
 
 				if(value.trim()=='') {
-					throw(new Numbas.Error('jme.variables.empty definition',name));
+					throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
 				}
 
 				try {
 					var tree = Numbas.jme.compile(value,scope,true);
 				} catch(e) {
-					throw(new Numbas.Error('xml.error in variable definition',name));
+					throw(new Numbas.Error('xml.error in variable definition',{name:name}));
 				}
 				vars = vars.merge(Numbas.jme.findvars(tree));
 				todo[name]={
@@ -272,14 +272,14 @@ var xml = Numbas.xml = {
 								value = Numbas.util.unPercent(value);
 							}
 							else
-								throw(new Numbas.Error('xml.property not number',name,value,elem));
+								throw(new Numbas.Error('xml.property not number',{name:name,value:value,element:elem}));
 						}
 						else if(typeof(obj[name]) == 'boolean')
 						{
 							if(Numbas.util.isBool(value))							
 								value = Numbas.util.parseBool(value);
 							else
-								throw(new Numbas.Error('xml.property not boolean',name,value,elem));
+								throw(new Numbas.Error('xml.property not boolean',{name:name,value:value,element:elem}));
 						}
 						//otherwise must be a string, so leave it alone
 					}
@@ -304,7 +304,7 @@ var xml = Numbas.xml = {
 		return value;
 	},
 
-	/** Replace every `<localise>` tag with its contents, run through R.js, i.e. get localised strings.
+	/** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
 	 * @param {Element} template
 	 */
 	localise: function(template) {

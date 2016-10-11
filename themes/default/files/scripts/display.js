@@ -975,7 +975,7 @@ display.QuestionDisplay = function(q)
 	 * @member {observable|string} displayName
 	 * @memberof Numbas.display.QuestionDisplay
 	 */
-	this.displayName = ko.observable(R('question.header',q.number+1));
+	this.displayName = ko.observable(R('question.header',{'number':q.number+1}));
 
 	/** Has the student looked at this question? ({@link Numbas.Question#visited})
 	 * @member {observable|boolean} visited
@@ -1413,7 +1413,7 @@ display.PartDisplay = function(p)
 		else if(this.stepsShown())
 			return R('question.show steps already penalised');
 		else
-			return R('question.show steps penalty',Numbas.math.niceNumber(this.part.settings.stepsPenalty),util.pluralise(this.part.settings.stepsPenalty,R('mark'),R('marks')));
+			return R('question.show steps penalty',{count:this.part.settings.stepsPenalty});
 	},this);
 
 	/** Have the correct answers been revealed?
@@ -1556,12 +1556,12 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 				var message = action.message || '';
 				if(util.isNonemptyHTML(message))
 				{
-					var marks = R('feedback.marks',Numbas.math.niceNumber(Math.abs(change)),util.pluralise(change,R('mark'),R('marks')));
+					var marks = Math.abs(change);
 
 					if(change>0)
-						message+='\n\n'+R('feedback.you were awarded',marks);
+						message+='\n\n'+R('feedback.you were awarded',{count:marks});
 					else if(change<0)
-						message+='\n\n'+R('feedback.taken away',marks,util.pluralise(change,R('was'),R('were')));
+						message+='\n\n'+R('feedback.taken away',{count:marks});
 				}
 				if(util.isNonemptyHTML(message))
 					messages.push(message);
@@ -1703,10 +1703,10 @@ display.JMEPartDisplay = function()
 						suggestion.push(suggestedNames[i]);
 					}
 					suggestion = suggestion.join('*');
-					p.giveWarning(R('part.jme.unexpected variable name suggestion',unexpectedVariableName,suggestion));
+					p.giveWarning(R('part.jme.unexpected variable name suggestion',{name:unexpectedVariableName,suggestion:suggestion}));
 				}
 				else
-					p.giveWarning(R('part.jme.unexpected variable name', unexpectedVariableName));
+					p.giveWarning(R('part.jme.unexpected variable name', {name:unexpectedVariableName}));
 			}
 		}
 
@@ -1867,11 +1867,8 @@ display.NumberEntryPartDisplay = function()
             return '';
         }
         var precision = this.part.settings.precision;
-        var precisionType = R('numberentry.precision type.'+this.part.settings.precisionType);
-        if(precision != 1) {
-            precisionType += 's';
-        }
-		return R('numberentry.give your answer to precision',{precision: precision,precisionType: precisionType});
+        var precisionType = R('part.numberentry.precision type.'+this.part.settings.precisionType,{count:precision});
+		return R('part.numberentry.give your answer to precision',{count: precision,precisionType: precisionType});
 	},this);
 
 	/** Show the precision restriction hint?
@@ -2322,10 +2319,10 @@ function showScoreFeedback(obj,settings)
 			var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 
 			var scoreobj = {
-				marks: niceNumber(marks),
-				score: niceNumber(score),
-				marksString: niceNumber(marks)+' '+util.pluralise(marks,R('mark'),R('marks')),
-				scoreString: niceNumber(score)+' '+util.pluralise(score,R('mark'),R('marks'))
+				marks: marks,
+				score: score,
+				marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
+				scoreString: niceNumber(score)+' '+R('mark',{count:score})
 			};
 			if(revealed && !answered()) {
 				return R('question.score feedback.unanswered');

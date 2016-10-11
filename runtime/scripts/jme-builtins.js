@@ -666,14 +666,14 @@ newBuiltin('listval',[TList,TNum],'?', null, {
 		var index = util.wrapListIndex(args[1].value,list.vars);
 		if(list.type!='list') {
 			if(list.type=='name')
-				throw(new Numbas.Error('jme.variables.variable not defined',list.name));
+				throw(new Numbas.Error('jme.variables.variable not defined',{name:list.name}));
 			else
 				throw(new Numbas.Error('jme.func.listval.not a list'));
 		}
 		if(index in list.value)
 			return list.value[index];
 		else
-			throw(new Numbas.Error('jme.func.listval.invalid index',index,list.value.length));
+			throw(new Numbas.Error('jme.func.listval.invalid index',{index:index,size:list.value.length}));
 	},
 
 	doc: {
@@ -830,7 +830,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
 
 		var value = jme.evaluate(args[2],scope);
 		if(!(value.type in jme.mapFunctions)) {
-			throw(new Numbas.Error('jme.typecheck.map not on enumerable',value.type));
+			throw(new Numbas.Error('jme.typecheck.map not on enumerable',{type:value.type}));
 		}
 		scope = new Scope(scope);
 
@@ -1166,7 +1166,7 @@ newBuiltin('matrix',[TList],TMatrix,null, {
 			}
 			break;
 		default:
-			throw(new Numbas.Error('jme.func.matrix.invalid row type',list.value[0].type));
+			throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
 		}
 		value.rows = rows;
 		value.columns = columns;

@@ -256,7 +256,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		}
 		catch(e)
 		{
-			this.setCredit(0,R('part.jme.answer invalid',e.message));
+			this.setCredit(0,R('part.jme.answer invalid',{message:e.message}));
 			return;
 		}
 
@@ -329,8 +329,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		{
 			if(this.settings.mustHaveShowStrings)
 			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)}).join(', ');
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',{'string':x})}).join(', ');
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',{strings:strings}) : R('part.jme.must-have several',{strings:strings})
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
@@ -340,8 +340,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		{
 			if(this.settings.notAllowedShowStrings)
 			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)}).join(', ');
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',{'string':x})}).join(', ');
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',{strings:strings}) : R('part.jme.not-allowed several',{strings:strings})
 				this.addCredit(0,message);
 			}
 			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
@@ -374,7 +374,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		}
 		catch(e)
 		{
-			this.giveWarning(R('part.jme.answer invalid',e.message));
+			this.giveWarning(R('part.jme.answer invalid',{message:e.message}));
 			return false;
 		}
 
@@ -386,10 +386,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 					suggestion.push(suggestedNames[i]);
 				}
 				suggestion = suggestion.join('*');
-				this.giveWarning(R('part.jme.unexpected variable name suggestion',validation.unexpectedVariableName,suggestion));
+				this.giveWarning(R('part.jme.unexpected variable name suggestion',{name:validation.unexpectedVariableName,suggestion:suggestion}));
 			}
 			else
-				this.giveWarning(R('part.jme.unexpected variable name', validation.unexpectedVariableName));
+				this.giveWarning(R('part.jme.unexpected variable name', {name:validation.unexpectedVariableName}));
 		}
 
 		if( validation.failMinLength)
@@ -407,8 +407,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.giveWarning(this.settings.mustHaveMessage);
 			if(this.settings.mustHaveShowStrings)
 			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',x)}).join(', ');
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',strings) : R('part.jme.must-have several',strings)
+				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',{'string':x})}).join(', ');
+				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',{strings:strings}) : R('part.jme.must-have several',{strings:strings})
 				this.giveWarning(message);
 			}
 		}
@@ -418,8 +418,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.giveWarning(this.settings.notAllowedMessage);
 			if(this.settings.notAllowedShowStrings)
 			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',x)}).join(', ');
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',strings) : R('part.jme.not-allowed several',strings)
+				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',{'string':x})}).join(', ');
+				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',{strings:strings}) : R('part.jme.not-allowed several',{strings:strings})
 				this.giveWarning(message);
 			}
 		}

@@ -63,7 +63,7 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 
 	job = function(fn,that) {
 		function handleError(e) {
-			e.message = R('question.error',q.number+1,e.message);
+			e.message = R('question.error',{'number':q.number+1,message:e.message});
 			throw(e);
 		}
 		Numbas.schedule.add({task: fn, error: handleError},that);
@@ -337,7 +337,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 				eval(js);
 			} catch(e) {
 				var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
-				throw(new Numbas.Error(errorName,this.number+1,e.message));
+				throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
 			}
 		}
 	},
@@ -436,7 +436,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	leavingDirtyQuestion: function() {
 		if(this.answered && this.isDirty()) {
-			Numbas.display.showAlert(R(this.parts.length>1 ? 'question.unsubmitted changes.several parts' : 'question.unsubmitted changes.one part'));
+			Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
 			return true;
 		}
 	},
@@ -447,7 +447,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	{
 		var part = this.getPart(partRef);
 		if(!part)
-			throw(new Numbas.Error('question.no such part',partRef));
+			throw(new Numbas.Error('question.no such part',{path:partRef}));
 		part.storeAnswer(answerList);
 	},
 
