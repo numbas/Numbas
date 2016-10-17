@@ -423,6 +423,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 				this.mark += this.questionList[i].marks;
 			}
 		},this);
+    
+        if(loading) {
+            job(function() {
+                this.updateScore();
+            },this);
+        }
 	},
 
 	/** 
