@@ -911,6 +911,7 @@
 					equals(exprToLaTeX('not a'),'\\neg a','logical NOT');
                     equals(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
                     equals(exprToLaTeX('(5 + 9i)*(2 + 7)'),'\\left ( 5 + 9 i \\right ) \\left ( 2 + 7 \\right )','put brackets around complex numbers when multiplying and neither Re nor Im are zero');
+                    equals(exprToLaTeX('(-7+9i)*(x+1)'), '\\left ( -7 + 9 i \\right ) \\left ( x + 1 \\right )','don\'t unnecessarily take unary minus out when it\'s on a complex number');
 				});
 			});
 		</script>

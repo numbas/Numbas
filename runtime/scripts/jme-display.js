@@ -1807,8 +1807,8 @@ var simplificationRules = jme.display.simplificationRules = {
 		['-?;x+?;y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
 		['(-?;x)/?;y',[],'-(x/y)'],			//take negation to left of fraction
 		['?;x/(-?;y)',[],'-(x/y)'],			
-		['(-?;x)*?;y',[],'-(x*y)'],			//take negation to left of multiplication
-		['?;x*(-?;y)',[],'-(x*y)'],		
+		['(-?;x)*?;y',['not (x isa "complex")'],'-(x*y)'],			//take negation to left of multiplication
+		['?;x*(-?;y)',['not (y isa "complex")'],'-(x*y)'],		
 		['?;x+(?;y+?;z)',[],'(x+y)+z'],		//make sure sums calculated left-to-right
 		['?;x-(?;y+?;z)',[],'(x-y)-z'],
 		['?;x+(?;y-?;z)',[],'(x+y)-z'],
