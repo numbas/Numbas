@@ -178,7 +178,7 @@ function texifyWouldBracketOpArg(thing,i) {
 	//complex numbers might need brackets round them when multiplied with something else or unary minusing
 	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') ) {
 		var v = thing.args[i].tok.value;
-		return (v.re==0 || v.im==0);
+		return !(v.re==0 || v.im==0);
 	}
 	return false;
 }
@@ -1798,8 +1798,8 @@ var simplificationRules = jme.display.simplificationRules = {
         ['?;x',['x isa "number"','x<0'],'-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
 		['+(?;x)',[],'x'],					//get rid of unary plus
 		['?;x+(-?;y)',[],'x-y'],			//plus minus = minus
-		['?;x+?;y',['y<0'],'x-eval(-y)'],
-		['?;x-?;y',['y<0'],'x+eval(-y)'],
+		['?;x+?;y',['y isa "number"','y<0'],'x-eval(-y)'],
+		['?;x-?;y',['y isa "number"','y<0'],'x+eval(-y)'],
 		['?;x-(-?;y)',[],'x+y'],			//minus minus = plus
 		['-(-?;x)',[],'x'],				//unary minus minus = plus
 		['-?;x',['x isa "complex"','re(x)<0'],'eval(-x)'],

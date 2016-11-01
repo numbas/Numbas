@@ -825,7 +825,7 @@
 					equals(simplifyExpression('(1-i)-(-2+2i)',''),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
 					equals(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
 					equals(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
-					equals(simplifyExpression('x+(-10+2)'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
+					equals(simplifyExpression('x+(-10+2)','basic,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
 					equals(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
 					equals(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
 					equals(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
@@ -909,7 +909,8 @@
 					equals(exprToLaTeX('long_function_name(x)'),'\\operatorname{long\\_function\\_name} \\left ( x \\right )','long function names are wrapped in \\operatorname');
 					equals(exprToLaTeX('fact(3)*fact(2)'),'3! \\times 2!','times sign between factorials');
 					equals(exprToLaTeX('not a'),'\\neg a','logical NOT');
-					equals(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
+                    equals(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
+                    equals(exprToLaTeX('(5 + 9i)*(2 + 7)'),'\\left ( 5 + 9 i \\right ) \\left ( 2 + 7 \\right )','put brackets around complex numbers when multiplying and neither Re nor Im are zero');
 				});
 			});
 		</script>
