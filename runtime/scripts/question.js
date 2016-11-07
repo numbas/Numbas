@@ -201,9 +201,11 @@ var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
 		}
 
 		q.display.makeHTML();
-
+	});
+	job(function() {
 		q.runCallbacks('HTMLAttached');
-
+	});
+	job(function() {
 		if(loading)
 		{
 			var qobj = Numbas.store.loadQuestion(q);
