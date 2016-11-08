@@ -378,9 +378,10 @@ newBuiltin('factorise',[TNum],TList,function(n) {
 	}
 );
 
-newBuiltin('random', [TRange], TNum, math.random, {doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
+newBuiltin('random', [TRange], TNum, math.random, {random:true, doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
 
 newBuiltin('random',[TList],'?',null, {
+	random:true, 
 	evaluate: function(args,scope) 
 	{
 		return math.choose(args[0].value);
@@ -394,6 +395,7 @@ newBuiltin('random',[TList],'?',null, {
 });
 
 newBuiltin( 'random',[],'?', null, {
+	random:true, 
 	typecheck: function() { return true; },
 	evaluate: function(args,scope) { return math.choose(args);},
 	doc: {
@@ -460,22 +462,28 @@ newBuiltin('deal',[TNum],TList,
 			return new TNum(i);
 		});
 	},
-	{doc: {
-		usage: ['deal(n)','deal(5)'],
-		description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
-		tags: ['permutation','order','shuffle']
-	}}
+	{
+		random:true, 
+		doc: {
+			usage: ['deal(n)','deal(5)'],
+			description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
+			tags: ['permutation','order','shuffle']
+		}
+	}
 );
 
 newBuiltin('shuffle',[TList],TList,
 	function(list) {
 		return math.shuffle(list);
 	},
-	{doc: {
-		usage: ['shuffle(list)','shuffle([1,2,3])'],
-		description: 'Randomly reorder a list.',
-		tags: ['permutation','order','shuffle','deal']	
-	}}
+	{
+		random:true, 
+		doc: {
+			usage: ['shuffle(list)','shuffle([1,2,3])'],
+			description: 'Randomly reorder a list.',
+			tags: ['permutation','order','shuffle','deal']	
+		}
+	}
 );
 
 newBuiltin('shuffle',[TRange],TList,
@@ -483,11 +491,14 @@ newBuiltin('shuffle',[TRange],TList,
 		var list = range.slice(3).map(function(n){return new TNum(n)})
 		return math.shuffle(list);
 	},
-	{doc: {
-		usage: ['shuffle(list)','shuffle([1,2,3])'],
-		description: 'Randomly reorder a list.',
-		tags: ['permutation','order','shuffle','deal']	
-	}}
+	{
+		random:true, 
+		doc: {
+			usage: ['shuffle(list)','shuffle([1,2,3])'],
+			description: 'Randomly reorder a list.',
+			tags: ['permutation','order','shuffle','deal']	
+		}
+	}
 );
 
 //if needs to be a bit different because it can return any type

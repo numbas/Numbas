@@ -140,7 +140,7 @@ var xml = Numbas.xml = {
 
 	/** @typedef variable_data_dict
 	 * @type {object}
-	 * @property {Numbas.jme.tree} tree
+	 * @property {Numbas.jme.tree} tree - definition of variable
 	 * @property {string[]} vars - names of variables this variable depends on
 	 */
 
