@@ -1401,6 +1401,12 @@ display.PartDisplay = function(p)
 	 */
 	this.stepsOpen = ko.observable(p.stepsOpen);
 
+	/** Have the correct answers been revealed?
+	 * @member {observable|boolean} revealed
+	 * @memberof Numbas.display.PartDisplay
+	 */
+	this.revealed = ko.observable(false);
+
 	/** Text to describe the state of the steps penalty
 	 * @member {observable|string} stepsPenaltyMessage
 	 * @memberof Numbas.display.PartDisplay
@@ -1408,19 +1414,13 @@ display.PartDisplay = function(p)
 	this.stepsPenaltyMessage = ko.computed(function() {
 		if(this.stepsOpen())
 			return R('question.hide steps no penalty');
-		else if(this.part.settings.stepsPenalty==0)
+		else if(this.part.settings.stepsPenalty==0 || this.revealed())
 			return R('question.show steps no penalty');
 		else if(this.stepsShown())
 			return R('question.show steps already penalised');
 		else
 			return R('question.show steps penalty',{count:this.part.settings.stepsPenalty});
 	},this);
-
-	/** Have the correct answers been revealed?
-	 * @member {observable|boolean} revealed
-	 * @memberof Numbas.display.PartDisplay
-	 */
-	this.revealed = ko.observable(false);
 
 	/** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true
 	 * @member {observable|boolean} showCorrectAnswer

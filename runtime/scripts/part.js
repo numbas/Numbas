@@ -734,15 +734,20 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	validate: function() { return true; },
 
-	/** Show the steps
+	/** Show the steps, as a result of the student asking to show them.
+	 * If the answers have not been revealed, we should apply the steps penalty.
+	 *
 	 * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
 	 */
 	showSteps: function(dontStore)
 	{
+		this.openSteps();
+		if(this.revealed) {
+			return;
+		}
+
 		this.stepsShown = true;
-		this.stepsOpen = true;
 		this.calculateScore();
-		this.display.showSteps();
 		if(!this.revealed) {
 			if(this.answered)
 				this.submit();
@@ -753,6 +758,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		{
 			Numbas.store.stepsShown(this);
 		}
+	},
+
+	/** Open the steps, either because the student asked or the answers to the question are being revealed. This doesn't affect the steps penalty.
+	 */
+	openSteps: function() {
+		this.stepsOpen = true;
+		this.display.showSteps();
 	},
 
 	/** Close the steps box. This doesn't affect the steps penalty.
@@ -775,7 +787,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		//this.setCredit(0);
 		if(this.steps.length>0) {
-			this.showSteps(dontStore);
+			this.openSteps();
 			for(var i=0; i<this.steps.length; i++ )
 			{
 				this.steps[i].revealAnswer(dontStore);
