@@ -54,7 +54,7 @@ Copyright 2011-14 Newcastle University
 		<link rel="stylesheet" type="text/css" href="styles.css" />
 		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
 	</head>
-	
+
 	<body>
 		<div id="die">
 			<h1 data-localise="die.numbas failed">Numbas failed</h1>
@@ -103,7 +103,7 @@ Copyright 2011-14 Newcastle University
 						<!-- total exam score display -->
 						<li class="examScore fake-nav-link" data-bind="visible: exam.settings.showActualMark">
 							<a class="clearfix">
-								<span class="pull-left" data-localise="control.total"></span> 
+								<span class="pull-left" data-localise="control.total"></span>
 								<span class="pull-right" id="examScore" data-bind="html: examScoreDisplay"></span>
 							</a>
 						</li>
@@ -121,7 +121,6 @@ Copyright 2011-14 Newcastle University
 
 						<div class="menuButtons">
 							<li><button class="btn btn-primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-							<li><button class="btn btn-primary navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
 							<li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
 						</div>
 					</ul>
@@ -130,19 +129,20 @@ Copyright 2011-14 Newcastle University
 				<div class="hamburger navbar navbar-default navbar-fixed-top hidden-lg hidden-md">
 					<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
 						<span class="icon-bar"></span>
-						<span class="icon-bar"></span> 	
+						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
 
 					<ul class="nav">
 						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}" data-localise="control.previous"></button></li>
-						<li>	
+						<li>
 							<div class="titleBits" data-bind="with: currentQuestion">
 								<span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
 								<span id="questionNameDisplay" data-bind="text: displayName"></span>
 							</div>
 						</li>
 						<li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}" data-localise="control.next"></button></li>
+						<li><button class="btn btn-primary navbar-btn center-block" data-bind="visible: lastQuestion" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
 					</ul>
 				</div>
 			</div>
@@ -204,7 +204,7 @@ Copyright 2011-14 Newcastle University
 						</tr>
 						<tr>
 							<th data-localise="exam.marks available"></th>
-							<td class="rtd" data-bind="niceNumber: marks"></td>	
+							<td class="rtd" data-bind="niceNumber: marks"></td>
 						</tr>
 						<tr data-bind="visible: exam.settings.percentPass>0">
 							<th data-localise="exam.pass percentage"></th>
@@ -222,16 +222,16 @@ Copyright 2011-14 Newcastle University
 						<table class="summary col-sm-6 col-sm-offset-3">
 							<tr>
 								<th data-localise="result.exam start"></th>
-								<td class="rtd" data-bind="text: startTime"></td>	
-							</tr>	
+								<td class="rtd" data-bind="text: startTime"></td>
+							</tr>
 							<tr>
 								<th data-localise="result.exam stop"></th>
-								<td class="rtd" data-bind="text: endTime"></td>	
+								<td class="rtd" data-bind="text: endTime"></td>
 							</tr>
 							<tr>
 								<th data-localise="result.time spent"></th>
 								<td class="rtd" data-bind="text: timeSpent"></td>
-							</tr> 
+							</tr>
 							<tr>
 								<th data-localise="result.questions attempted"></th>
 								<td class="rtd" data-bind="html: questionsAttemptedDisplay"></td>
@@ -244,8 +244,8 @@ Copyright 2011-14 Newcastle University
 							</tr>
 							<tr class="resultrow" data-bind="visible: exam.settings.percentPass>0">
 								<th data-localise="result.result"></th>
-								<td class="rtd" data-bind="html: result"></td>	
-							</tr>							
+								<td class="rtd" data-bind="html: result"></td>
+							</tr>
 						</table>
 
 						<div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage"></div>
@@ -254,11 +254,11 @@ Copyright 2011-14 Newcastle University
 					<h3 data-localise="result.detailed question breakdown"></h3>
 					<p data-localise="result.click a question to review"></p>
 					<div class="row">
-					<table id="question-breakdown" class="col-sm-4 col-sm-offset-4">		
+					<table id="question-breakdown" class="col-sm-4 col-sm-offset-4">
 						<thead>
 							<th class="qtd" data-localise="result.question number"></th>
 							<th class="qtd" colspan="3" data-localise="result.question score"></th>
-						</thead>		
+						</thead>
 						<tbody data-bind="foreach: questions">
 							<tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
 								<td class="qtd" data-bind="text: question.number+1"></td>
@@ -269,7 +269,7 @@ Copyright 2011-14 Newcastle University
 						</tbody>
 					</table>
 				</div>
-							
+
 					<div class="info-buttons">
 						<div><button class="btn btn-primary" data-bind="click: function(){ window.print(); }" data-localise="result.print"></button></div>
 						<div><button class="btn btn-primary" id="exitBtn" data-bind="click: Numbas.controls.exitExam" data-localise="result.exit"></button></div>

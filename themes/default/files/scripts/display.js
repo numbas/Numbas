@@ -36,7 +36,7 @@ MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
 		});
 
 		TEX.Definitions.Add({macros: {
-			'var': 'JMEvar', 
+			'var': 'JMEvar',
 			'simplify': 'JMEsimplify'
 		}});
 
@@ -142,7 +142,7 @@ ko.bindingHandlers.slideVisible = {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		$(element).toggle(v);
 	},
-		
+
 	update: function(element,valueAccessor) {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		if(v)
@@ -157,7 +157,7 @@ ko.bindingHandlers.fadeVisible = {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		$(element).toggle(v);
 	},
-		
+
 	update: function(element,valueAccessor) {
 		var v = ko.utils.unwrapObservable(valueAccessor());
 		if(v)
@@ -324,12 +324,12 @@ ko.components.register('matrix-input',{
 			}
 			return false;
 		}
-		
+
 		this.update = function() {
 			// update value when number of rows or columns changes
 			var numRows = parseInt(this.numRows());
 			var numColumns = parseInt(this.numColumns());
-			
+
 			var value = this.value();
 			value.splice(numRows,value.length-numRows);
 			for(var i=0;i<numRows;i++) {
@@ -341,7 +341,7 @@ ko.components.register('matrix-input',{
 					row = value[i]();
 				}
 				row.splice(numColumns,row.length-numColumns);
-				
+
 				for(var j=0;j<numColumns;j++) {
 					var cell;
 					if(row.length<=j) {
@@ -357,7 +357,7 @@ ko.components.register('matrix-input',{
 		}
 
 		ko.computed(this.update,this);
-		
+
 		// update model with value
 		ko.computed(function() {
 			var v = params.value();
@@ -374,7 +374,7 @@ ko.components.register('matrix-input',{
 				}
 			}
 		},this);
-		
+
 		var firstGo = true;
 		//update value with model
 		ko.computed(function() {
@@ -388,7 +388,7 @@ ko.components.register('matrix-input',{
 			params.value(v);
 		},this)
 	},
-	template: 
+	template:
 	 '<div class="matrix-input">'
 	+'	<!-- ko if: allowResize --><div class="matrix-size">'
 	+'		<label class="num-rows">Rows: <input type="number" min="1" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
@@ -451,7 +451,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
 			if($('input:focus').length || $('#jqibox').is(':visible'))
 				return;
-			
+
 			switch(e.keyCode)
 			{
 			case 37:
@@ -580,9 +580,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
  * @memberof Numbas.display
  * @constructor
  * @param {Numbas.Exam} e - associated exam
- * 
+ *
  */
-display.ExamDisplay = function(e) 
+display.ExamDisplay = function(e)
 {
 	this.exam=e;
 
@@ -591,7 +591,7 @@ display.ExamDisplay = function(e)
 	 * @memberof Numbas.display.ExamDisplay
 	 */
 	this.mode = ko.observable(e.mode);
-	
+
 	/** Is {@link Numbas.store} currently saving?
 	 * @member {observable|boolean} saving
 	 * @memberof Numbas.display.ExamDisplay
@@ -623,7 +623,7 @@ display.ExamDisplay = function(e)
 	},this);
 
 	/** The number of the current question
-	 * @member {observable|number} currentQuestionNumber 
+	 * @member {observable|number} currentQuestionNumber
 	 * @memberof Numbas.display.ExamDisplay
 	 */
 	this.currentQuestionNumber = ko.computed(function() {
@@ -647,7 +647,7 @@ display.ExamDisplay = function(e)
 	this.canReverse = ko.computed(function() {
 		return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
 	},this);
-	
+
 	/** Can the student go forward to the next question? (False if the current question is the last one)
 	 * @member {observable|boolean} canAdvance
 	 * @memberof Numbas.display.ExamDisplay
@@ -760,8 +760,8 @@ display.ExamDisplay = function(e)
 	 * @memberof Numbas.display.ExamDisplay
 	 */
 	this.questionsAttempted = ko.computed(function() {
-		return this.questions().reduce(function(s,q) { 
-			return s + (q.answered() ? 1 : 0); 
+		return this.questions().reduce(function(s,q) {
+			return s + (q.answered() ? 1 : 0);
 		},0);
 	},this);
 
@@ -867,14 +867,14 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
             this.feedbackMessage(exam.feedbackMessage);
 			this.startTime(exam.start);
 			this.endTime(exam.stop);
-			
+
 			break;
 
 		case "suspend":
 			this.showScore();
 
 			break;
-		
+
 		case "exit":
 			break;
 		}
@@ -916,7 +916,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.exam.currentQuestion.display.html.remove();
 		this.oldQuestion = this.exam.currentQuestion.display;
 	},
-	
+
 	/** Called after the current question has been regenerated */
 	endRegen: function() {
 		var currentQuestion = this.exam.currentQuestion;
@@ -1157,10 +1157,10 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 
 		//show correct answers if appropriate
 		this.revealAnswer();
-		
+
 		//display score if appropriate
 		this.showScore(true);
-		
+
 		//scroll back to top of page
 		scroll(0,0);
 
@@ -1214,7 +1214,7 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		scrollTo($('.warning-icon:visible:first'));
 	},
 
-	/** Initialise this question's display 
+	/** Initialise this question's display
 	 * @see Numbas.display.ExamDisplay.init
 	 */
 	init: function() {
@@ -1346,7 +1346,7 @@ display.PartDisplay = function(p)
 	 * @memberof Numbas.display.PartDisplay
 	 */
 	this.feedbackMessages = ko.observableArray([]);
-	
+
 	/** Should the button to toggle feedback messages be shown?
 	 * @member {observable|boolean} showFeedbackToggler
 	 * @memberof Numbas.display.PartDisplay
@@ -1566,7 +1566,7 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 				if(util.isNonemptyHTML(message))
 					messages.push(message);
 			}
-			
+
 			this.feedbackMessages(messages);
 		}
 	},
@@ -1592,12 +1592,12 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 	/** Fill the student's last submitted answer into inputs
 	 * @abstract
 	 */
-	restoreAnswer: function() 
+	restoreAnswer: function()
 	{
 	},
 
 	/** Show the correct answers to this part */
-	revealAnswer: function() 
+	revealAnswer: function()
 	{
 		this.revealed(true);
 		this.removeWarnings();
@@ -1769,7 +1769,7 @@ display.PatternMatchPartDisplay = function()
 		p.storeAnswer([this.studentAnswer()]);
 	},this);
 }
-display.PatternMatchPartDisplay.prototype = 
+display.PatternMatchPartDisplay.prototype =
 {
 	restoreAnswer: function()
 	{
@@ -1805,7 +1805,7 @@ display.NumberEntryPartDisplay = function()
 	},this);
 
 	/** Cleaned-up version of student answer (remove commas and trim whitespace)
-	 * 
+	 *
 	 * Also check for validity and give warnings
 	 * @member {observable|string} cleanStudentAnswer
 	 * @memberof Numbas.display.NumberEntryPartDisplay
@@ -2316,6 +2316,8 @@ function showScoreFeedback(obj,settings)
 			}
 		}),
 		message: ko.computed(function() {
+			if(part.settings.showFeedbackIcon==false):
+				return 'invisible'
 			var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 
 			var scoreobj = {
@@ -2418,11 +2420,11 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 			nextScroll = null;
 			div.animate({scrollTop: itemOffset},{
 				duration: options.speed,
-				complete: function() { 
+				complete: function() {
 					going = false;
 					if(nextScroll != null)
 						scrollTo(nextScroll);
-				} 
+				}
 			});
 		}
 	}
@@ -2455,4 +2457,3 @@ var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
 
 
 });
-

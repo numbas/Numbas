@@ -100,17 +100,17 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 
 	//remember parent part object, so scores can percolate up for steps/gaps
 	this.parentPart = parentPart;
-	
+
 	//remember a path for this part, for stuff like marking and warnings
 	this.path = path;
 	this.question.partDictionary[path] = this;
 
 	//initialise settings object
 	this.settings = util.copyobj(Part.prototype.settings);
-	
+
 	tryGetAttribute(this,this.xml,'.',['type','marks']);
 
-	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer'],[]);
+	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer', 'showFeedbackIcon'],[]);
 
 	//initialise gap and step arrays
 	this.gaps = [];
@@ -180,8 +180,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	/** XML defining this part
 	 * @type {Element}
 	 */
-	xml: '',				
-	
+	xml: '',
+
 	/** The question this part belongs to
 	 * @type {Numbas.Question}
 	 */
@@ -221,7 +221,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @type {number}
 	 */
 	score: 0,
-	
+
 	/** Messages explaining how marks were awarded
 	 * @type {feedbackmessage[]}
 	 */
@@ -290,12 +290,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
 	 * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
 	 */
-	settings: 
+	settings:
 	{
 		stepsPenalty: 0,
 		enableMinimumMarks: false,
 		minimumMarks: 0,
 		showCorrectAnswer: true,
+		showFeedbackIcon: true,
 		hasVariableReplacements: false
 	},
 
@@ -348,7 +349,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	display: undefined,
 
-	/** Give the student a warning about this part. 	
+	/** Give the student a warning about this part.
 	 * @param {string} warning
 	 * @see {Numbas.display.PartDisplay.warning}
 	 */
@@ -424,7 +425,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			this.parentPart.calculateScore();
 	},
 
-	/** Update the stored answer from the student (called when the student changes their answer, but before submitting) 
+	/** Update the stored answer from the student (called when the student changes their answer, but before submitting)
 	 */
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
@@ -460,8 +461,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		{
 			var stepsMax = this.marks - this.settings.stepsPenalty;
 			this.markingComment(
-				this.settings.stepsPenalty>0 
-					? R('part.marking.revealed steps with penalty',{count:stepsMax})	
+				this.settings.stepsPenalty>0
+					? R('part.marking.revealed steps with penalty',{count:stepsMax})
                     : R('part.marking.revealed steps no penalty'));
 		}
 
