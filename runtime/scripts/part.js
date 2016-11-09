@@ -32,6 +32,7 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
 /** Part type constructors
  * These functions aren't called directly - they're the original part constructor objects before they're extended with the generic part methods, kept for reference so their methods can be reused by other parts
  * @see Numbas.partConstructors
+ * @namespace Numbas.parts
  * @memberof Numbas
  */
 Numbas.parts = {};
@@ -76,9 +77,6 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
 		throw(new Numbas.Error('part.unknown type',{part:util.nicePartName(path),type:type}));
 	}
 }
-
-/** Question part types
- * @namespace Numbas.parts */
 
 /** Base question part object
  * @constructor

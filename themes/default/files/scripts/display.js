@@ -798,30 +798,39 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 {
 	/** Reference to the associated exam object
 	 * @type {Numbas.Exam}
+	 * @memberof Numbas.display.ExamDisplay
 	 */
 	exam: undefined,
 
-	/** Update the timer */
+	/** Update the timer 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	showTiming: function()
 	{
 		this.displayTime(Numbas.timing.secsToDisplayTime(this.exam.timeRemaining));
 		this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
 	},
 
-	/** Initialise the question list display */
+	/** Initialise the question list display 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	initQuestionList: function() {
 		for(var i=0; i<this.exam.questionList.length; i++) {
 			this.questions.push(this.exam.questionList[i].display);
 		}
 	},
 
-	/** Hide the timer */
+	/** Hide the timer 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	hideTiming: function()
 	{
 		this.displayTime('');
 	},
 
-	/** Show/update the student's total score */
+	/** Show/update the student's total score 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	showScore: function()
 	{
 		var exam = this.exam;
@@ -830,7 +839,9 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.percentScore(exam.percentScore);
 	},
 
-	/** Update the question list display - typically, scroll so the current question is visible */
+	/** Update the question list display - typically, scroll so the current question is visible 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	updateQuestionMenu: function()
 	{
 		var exam = this.exam;
@@ -841,6 +852,7 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 
 	/** Show an info page (one of the front page, pause , results, or exit)
 	 * @param {string} page - name of the page to show
+	 * @memberof Numbas.display.ExamDisplay
 	 */
 	showInfoPage: function(page)
 	{
@@ -881,7 +893,9 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.hideNavMenu();
 	},
 
-	/** Show the current question */
+	/** Show the current question 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	showQuestion: function()
 	{
 		var exam = this.exam;
@@ -903,21 +917,27 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		this.hideNavMenu();
 	},
 
-	/** Hide the sliding side menu*/
+	/** Hide the sliding side menu
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	hideNavMenu: function() {
 		if($('#navMenu').data('bs.offcanvas')) {
 			$('#navMenu').offcanvas('hide');
 		}
 	},
 
-	/** Called just before the current question is regenerated */
+	/** Called just before the current question is regenerated 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	startRegen: function() {
 		$('#questionDisplay').hide();
 		this.exam.currentQuestion.display.html.remove();
 		this.oldQuestion = this.exam.currentQuestion.display;
 	},
 	
-	/** Called after the current question has been regenerated */
+	/** Called after the current question has been regenerated 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	endRegen: function() {
 		var currentQuestion = this.exam.currentQuestion;
 		this.questions.splice(currentQuestion.number,1,currentQuestion.display);
@@ -925,11 +945,17 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 		$('#questionDisplay').fadeIn(200);
 	},
 
+	/** Apply knockout bindings to the given question
+	 * @param {Numbas.Question}
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	applyQuestionBindings: function(question) {
 		ko.applyBindings({exam: this, question: question.display},question.display.html[0]);
 	},
 
-	/** Called when the exam ends */
+	/** Called when the exam ends 
+	 * @memberof Numbas.display.ExamDisplay
+	 */
 	end: function() {
 		this.mode(this.exam.mode);
 		this.questions().map(function(q) {
@@ -1082,15 +1108,19 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 {
 	/** The associated question object
 	 * @type {Numbas.Question}
+	 * @memberof Numbas.display.QuestionDisplay
 	 */
 	question: undefined,			//reference back to the main question object
 
 	/** HTML representing the question
 	 * @type {Element}
+	 * @memberof Numbas.display.QuestionDisplay
 	 */
 	html: '',						//HTML for displaying question
 
-	/** Make the HTML to display the question */
+	/** Make the HTML to display the question 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	makeHTML: function() {
 		var q = this.question;
 		var qd = this;
@@ -1123,7 +1153,9 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		});
 	},
 
-	/** Show the question */
+	/** Show the question 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	show: function()
 	{
 		var q = this.question;
@@ -1168,18 +1200,24 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		Numbas.display.typeset(this.html,this.postTypesetF);
 	},
 
-	/** Called when the student leaves the question */
+	/** Called when the student leaves the question 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	leave: function() {
 		$(this.css).remove();
 	},
 
-	/** Show this question's advice */
+	/** Show this question's advice 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	showAdvice: function( fromButton )
 	{
 		this.adviceDisplayed(this.question.adviceDisplayed);
 	},
 
-	/** Reveal the answers to this question */
+	/** Reveal the answers to this question 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	revealAnswer: function()
 	{
 		this.revealed(this.question.revealed);
@@ -1188,7 +1226,9 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		scroll(0,0);
 	},
 
-	/** Display question score and answer state */
+	/** Display question score and answer state 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	showScore: function(noUpdate)
 	{
 		var q = this.question;
@@ -1209,13 +1249,16 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.anyAnswered(anyAnswered);
 	},
 
-	/** Scroll to the first part submission error */
+	/** Scroll to the first part submission error 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	scrollToError: function() {
 		scrollTo($('.warning-icon:visible:first'));
 	},
 
 	/** Initialise this question's display 
 	 * @see Numbas.display.ExamDisplay.init
+	 * @memberof Numbas.display.QuestionDisplay
 	 */
 	init: function() {
 		var q = this.question;
@@ -1226,7 +1269,9 @@ display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.pr
 		this.numParts(q.parts.length);
 	},
 
-	/** Called when the exam ends */
+	/** Called when the exam ends 
+	 * @memberof Numbas.display.QuestionDisplay
+	 */
 	end: function() {
 		var q = this.question;
 		for(var i=0;i<q.parts.length;i++)
@@ -1486,6 +1531,7 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 {
 	/** Show a warning message about this part
 	 * @param {string} warning
+	 * @memberof Numbas.display.PartDisplay
 	 */
 	warning: function(warning)
 	{
@@ -1494,12 +1540,15 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 	/** Set the list of warnings
 	 * @param {string[]} warnings
+	 * @memberof Numbas.display.PartDisplay
 	 */
 	setWarnings: function(warnings) {
 		this.warnings(warnings.map(function(warning){return {message: warning+''}}));
 	},
 
-	/** Remove all previously displayed warnings */
+	/** Remove all previously displayed warnings 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	removeWarnings: function()
 	{
 		this.part.removeWarnings();
@@ -1507,6 +1556,7 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 	/** Called when the part is displayed (basically when question is changed)
 	 * @see Numbas.display.QuestionDisplay.show
+	 * @memberof Numbas.display.PartDisplay
 	 */
 	show: function()
 	{
@@ -1517,7 +1567,9 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 		this.showScore(this.part.answered,true);
 	},
 
-	/** Show/update the student's score and answer status on this part */
+	/** Show/update the student's score and answer status on this part 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	showScore: function(valid,noUpdate)
 	{
 		var p = this.part;
@@ -1571,7 +1623,9 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 		}
 	},
 
-	/** Called when 'show steps' button is pressed, or coming back to a part after steps shown */
+	/** Called when 'show steps' button is pressed, or coming back to a part after steps shown 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	showSteps: function()
 	{
 		this.stepsShown(this.part.stepsShown);
@@ -1583,7 +1637,9 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 		}
 	},
 
-	/** Hide the steps */
+	/** Hide the steps 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	hideSteps: function()
 	{
 		this.stepsOpen(this.part.stepsOpen);
@@ -1591,12 +1647,15 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 	/** Fill the student's last submitted answer into inputs
 	 * @abstract
+	 * @memberof Numbas.display.PartDisplay
 	 */
 	restoreAnswer: function() 
 	{
 	},
 
-	/** Show the correct answers to this part */
+	/** Show the correct answers to this part 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	revealAnswer: function() 
 	{
 		this.revealed(true);
@@ -1606,6 +1665,7 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 
 	/** Initialise this part's display
 	 * @see Numbas.display.QuestionDisplay.init
+	 * @memberof Numbas.display.PartDisplay
 	 */
 	init: function() {
 		this.part.setDirty(false);
@@ -1614,7 +1674,9 @@ display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype 
 		}
 	},
 
-	/** Called when the exam ends */
+	/** Called when the exam ends 
+	 * @memberof Numbas.display.PartDisplay
+	 */
 	end: function() {
 		this.restoreAnswer();
 		for(var i=0;i<this.part.steps.length;i++) {
