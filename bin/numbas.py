@@ -271,9 +271,12 @@ def makeExam(options):
     for dst,src in javascripts:
         del files[dst]
 
+    javascripts.sort(key=lambda x:x[0])
+
     javascripts = [src for dst,src in javascripts]
     numbas_loader_path = os.path.join(options.path,'runtime','scripts','numbas.js')
     javascripts.remove(numbas_loader_path)
+
     javascripts.insert(0,numbas_loader_path)
     javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
     files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
