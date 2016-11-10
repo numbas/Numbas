@@ -41,6 +41,9 @@ Copyright 2011-14 Newcastle University
 			Numbas.queueScript('go',['start-exam'],function() {
 				Numbas.init();
 			});
+            $(function() {
+                Numbas.checkAllScriptsLoaded();
+            });
 		</script>
 
 		<!-- CSS -->
