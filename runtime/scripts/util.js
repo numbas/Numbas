@@ -767,6 +767,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		if(r===undefined) {
 			r = n;
 		}
+		if(r>n) {
+			throw(new Numbas.Error('util.permutations.r bigger than n'));
+		}
 		var indices = [];
 		var cycles = [];
 		for(var i=0;i<n;i++) {
