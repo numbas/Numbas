@@ -106,3 +106,25 @@ def show_precision_hint(part):
 
     if part['type']=='numberentry':
         part['showPrecisionHint'] = False
+
+@migration(version_from='show_precision_hint')
+def exam_question_groups(data):
+    allQuestions = data.get('allQuestions',True)
+    pickQuestions = data.get('pickQuestions',0)
+    shuffleQuestions = data.get('shuffleQuestions',False)
+    if shuffleQuestions:
+        if pickQuestions>0:
+            pickingStrategy = 'random-subset'
+        else:
+            pickingStrategy = 'all-shuffled'
+    else:
+        pickingStrategy = 'all-ordered'
+
+    data['showQuestionGroupNames'] = False
+
+    data['question_groups'] = [{
+        'name': '',
+        'pickingStrategy': pickingStrategy,
+        'pickQuestions': pickQuestions,
+        'questions': data.get('questions',[]),
+    }]

@@ -705,6 +705,12 @@ display.ExamDisplay = function(e)
 	 */
 	this.displayTime = ko.observable('');
 
+    /** Show the names of question groups in the menu?
+     * @member {observable|string} showQuestionGroupNames
+     * @memberof Numbas.display.ExamDisplay
+     */
+    this.showQuestionGroupNames = ko.observable(e.settings.showQuestionGroupNames);
+
 	/** Time the exam started, formatted for display
 	 * @mamber {observable|string} startTime
 	 * @memberof Numbas.display.ExamDisplay
@@ -815,6 +821,13 @@ display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype 
 	 * @memberof Numbas.display.ExamDisplay
 	 */
 	initQuestionList: function() {
+        this.question_groups = this.exam.question_groups.map(function(g) {
+            return {
+                name: g.settings.name,
+                group: g,
+                questions: g.questionList.map(function(q){return q.display})
+            }
+        });
 		for(var i=0; i<this.exam.questionList.length; i++) {
 			this.questions.push(this.exam.questionList[i].display);
 		}

@@ -273,6 +273,14 @@ input.jme {
 	font-weight: bold;
 }
 
+#questionList .question-group-header h3 {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+    padding: 10px 15px; /* copied from the nav > li > a style in bootstrap */
+}
+
 .questionSelector .feedback-icon {
 	float: right;
 	padding: 0;
@@ -372,6 +380,12 @@ input.jme {
 	background-color: #dcdcdc;
 	cursor: pointer;
 }
+
+#question-breakdown .question-group-header th {
+    text-align: center;
+    padding-top: 1em;
+}
+
 
 /* question bits */
 

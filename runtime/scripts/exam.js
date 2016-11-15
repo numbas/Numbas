@@ -19,6 +19,7 @@ Copyright 2011-14 Newcastle University
 
 Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme'],function() {
 	var job = Numbas.schedule.add;
+    var util = Numbas.util;
 
 /** Keeps track of all info we need to know while exam is running.
  *
@@ -93,8 +94,6 @@ function Exam()
     }
     this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
 
-	settings.numQuestions = xml.selectNodes('questions/question').length;
-
 	var scopes = [
 		Numbas.jme.builtinScope
 	];
@@ -150,6 +149,15 @@ function Exam()
 		this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.rulesets);
 	}
 
+    // question groups
+    tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames']);
+    var groupNodes = this.xml.selectNodes('question_groups/question_group');
+    this.question_groups = [];
+    for(var i=0;i<groupNodes.length;i++) {
+        this.question_groups.push(new QuestionGroup(this,groupNodes[i]));
+    }
+
+
 	//initialise display
 	this.display = new Numbas.display.ExamDisplay(this);
 
@@ -176,6 +184,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 * @property {boolean} showAnswerState - tell student if answer is correct/wrong/partial?
 	 * @property {boolean} allowRevealAnswer - allow 'reveal answer' button?
 	 * @property {number} adviceGlobalThreshold - if student scores lower than this percentage on a question, the advice is displayed
+     * @property {boolean} showQuestionGroupNames - show the names of question groups?
 	 */
 	settings: {
 		
@@ -198,6 +207,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		showAnswerState: false,		
 		allowRevealAnswer: false,	
 		adviceGlobalThreshold: 0, 	
+        showQuestionGroupNames: false
 	},
 
 	/** Base node of exam XML
@@ -261,6 +271,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 * @type Numbas.Question
 	 */
 	currentQuestion: undefined,
+
+    /** Groups of questions in the exam
+     * @type QuestionGroup[]
+     */
+    question_groups: [],
 	
 	/**
 	 * Which questions are used?
@@ -326,6 +341,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		var variablesTodo = Numbas.xml.loadVariables(exam.xml,exam.scope);
 		var result = Numbas.jme.variables.makeVariables(variablesTodo,exam.scope);
 		exam.scope.variables = result.variables;
+
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
 		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
@@ -339,8 +355,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		var suspendData = Numbas.store.load(this);	//get saved info from storage
 
 		job(function() {
-			this.questionSubset = suspendData.questionSubset;
-			this.settings.numQuestions = this.questionSubset.length;
+            var e = this;
+            var numQuestions = 0;
+            suspendData.questionSubsets.forEach(function(subset,i) {
+                e.question_groups[i].questionSubset = subset;
+                numQuestions += subset.length;
+            });
+			this.settings.numQuestions = numQuestions;
+
 			this.start = new Date(suspendData.start);
 			if(this.settings.allowPause) {
 				this.timeRemaining = this.settings.duration - (suspendData.duration-suspendData.timeRemaining);
@@ -361,31 +383,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		},this);
 	},
 
-
-	/** Decide which questions to use and in what order */
+	/** Decide which questions to use and in what order
+     * @see Numbas.QuestionGroup#chooseQuestionSubset
+     */
 	chooseQuestionSubset: function()
 	{
-		//get all questions out of XML
-		var tmpQuestionList = new Array();
+        var numQuestions = 0;
+        this.question_groups.forEach(function(group) {
+            group.chooseQuestionSubset();
+            numQuestions += group.questionSubset.length;
+        });
+        this.settings.numQuestions = numQuestions;
 
-		//shuffle questions?
-		this.questionSubset = [];
-		if(this.settings.shuffleQuestions)
-		{
-			this.questionSubset = Numbas.math.deal(this.settings.numQuestions);
-		}
-		else	//otherwise just pick required number of questions from beginning of list
-		{
-			this.questionSubset = Numbas.math.range(this.settings.numQuestions);
-		}
-		if(!this.settings.allQuestions) {
-			this.questionSubset = this.questionSubset.slice(0,this.settings.pickQuestions);
-			this.settings.numQuestions = this.settings.pickQuestions;
-		}
-
-		if(this.questionSubset.length==0)
-		{
-			Numbas.display.showAlert("This exam contains no questions! Check the .exam file for errors.");
+		if(numQuestions==0) {
+            throw(new Numbas.Error('exam.changeQuestion.no questions'));
 		}
 	},
 
@@ -394,23 +405,29 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 *
 	 * If loading, need to restore randomised variables instead of generating anew
 	 *
-	 * @param {boolean} [loading=true]
+	 * @param {boolean} lo
 	 */
 	makeQuestionList: function(loading)
 	{
+        var exam = this;
 		this.questionList = [];
+        var questionAcc = 0;
+        
+        this.question_groups.forEach(function(group) {
+            group.questionList = [];
+            var questionNodes = group.xml.selectNodes("questions/question");
+            group.questionSubset.forEach(function(n) {
+                job(function(n) {
+    				var question = new Numbas.Question( exam, group, questionNodes[n], questionAcc++, loading, exam.scope );
+                    exam.questionList.push(question);
+                    group.questionList.push(question);
+                },group,n);
+            });
+        });
 		
-		var questions = this.xml.selectNodes("questions/question");
-		for(var i = 0; i<this.questionSubset.length; i++) 
-		{
-			job(function(i)
-			{
-				var question = new Numbas.Question( this, questions[this.questionSubset[i]], i, loading, this.scope );
-				this.questionList.push(question);
-			},this,i);
-		}
-
 		job(function() {
+            this.settings.numQuestions = this.questionList.length;
+
 			//register questions with exam display
 			this.display.initQuestionList();
 
@@ -813,5 +830,51 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
 	 */
 	message: ''
 };
+
+/** Represents a group of questions
+ *
+ * @constructor
+ * @property {Numbas.Exam} exam - the exam this group belongs to
+ * @property {Element} xml
+ * @property {number[]} questionSubset - the indices of the picked questions, in the order they should appear to the student
+ * @property {Question[]} questionList
+ * @memberof Numbas
+ */
+function QuestionGroup(exam, groupNode) {
+    this.exam = exam;
+    this.xml = groupNode;
+
+    this.settings = util.copyobj(this.settings);
+    Numbas.xml.tryGetAttribute(this.settings,this.xml,'.',['name','pickingStrategy','pickQuestions']);
+}
+QuestionGroup.prototype = {
+    /** Settings for this group
+     * @property {string} name
+     * @property {string} pickingStrategy - how to pick the list of questions: 'all-ordered', 'all-shuffled' or 'random-subset'
+     * @property {number} pickQuestions - if `pickingStrategy` is 'random-subset', how many questions to pick
+     */
+    settings: {
+        name: '',
+        pickingStrategy: 'all-ordered',
+        pickQuestions: 1
+    },
+
+	/** Decide which questions to use and in what order */
+    chooseQuestionSubset: function() {
+        var questionNodes = this.xml.selectNodes('questions/question');
+        var numQuestions = questionNodes.length;
+        switch(this.settings.pickingStrategy) {
+            case 'all-ordered':
+                this.questionSubset = Numbas.math.range(numQuestions);
+                break;
+            case 'all-shuffled':
+                this.questionSubset = Numbas.math.deal(numQuestions);
+                break;
+            case 'random-subset':
+                this.questionSubset = Numbas.math.deal(numQuestions).slice(0,this.settings.pickQuestions);
+                break;
+        }
+    }
+}
 
 });

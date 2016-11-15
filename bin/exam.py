@@ -120,9 +120,6 @@ class Exam:
     name = ''                        #title of exam
     duration = 0                    #allowed time for exam, in seconds
     percentPass = 0                    #percentage classified as a pass
-    shuffleQuestions = False        #randomise question order?
-    allQuestions = True                #use all questions?
-    pickQuestions = 0                #if not using all questions, how many questions to use
     showactualmark = True            #show student's score to student?
     showtotalmark = True            #show total marks available to student?
     showanswerstate = True            #show right/wrong on questions?
@@ -131,6 +128,7 @@ class Exam:
     adviceGlobalThreshold = 0        #reveal advice if student scores less than this percentage
     intro = ''                        #text shown on the front page
     feedbackMessages = []
+    showQuestionGroupNames = False          # show the names of question groups?
 
 
     def __init__(self,name='Untitled Exam'):
@@ -156,7 +154,7 @@ class Exam:
         self.functions = []
         self.variables = []
         
-        self.questions = []
+        self.question_groups = []
 
         self.resources = []
         self.extensions = []
@@ -170,7 +168,7 @@ class Exam:
     @staticmethod
     def fromDATA(data):
         exam = Exam()
-        tryLoad(data,['name','duration','percentPass','shuffleQuestions','allQuestions','pickQuestions','resources','extensions'],exam)
+        tryLoad(data,['name','duration','percentPass','resources','extensions','showQuestionGroupNames'],exam)
 
         if haskey(data,'navigation'):
             nav = data['navigation']
@@ -215,9 +213,10 @@ class Exam:
             variables = data['variables']
             for variable in variables.keys():
                 exam.variables.append(Variable(variables[variable]))
-        if haskey(data,'questions'):
-            for question in data['questions']:
-                exam.questions.append(Question.fromDATA(question))
+        if haskey(data,'question_groups'):
+            print(data['question_groups'])
+            for question in data['question_groups']:
+                exam.question_groups.append(QuestionGroup.fromDATA(question))
 
         return exam
 
@@ -236,7 +235,7 @@ class Exam:
                             ],
                             ['functions'],
                             ['variables'],
-                            ['questions']
+                            ['question_groups'],
                         ])
         root.attrib = {
                 'name': strcons(self.name),
@@ -296,15 +295,13 @@ class Exam:
         for function in self.functions:
             functions.append(function.toxml())
 
-        questions = root.find('questions')
-        questions.attrib = {
-                'shuffle': strcons_fix(self.shuffleQuestions),
-                'all': strcons_fix(self.allQuestions),
-                'pick': strcons_fix(self.pickQuestions),
+        question_groups = root.find('question_groups')
+        question_groups.attrib = {
+            'showQuestionGroupNames': strcons(self.showQuestionGroupNames),
         }
 
-        for q in self.questions:
-            questions.append(q.toxml())
+        for qg in self.question_groups:
+            question_groups.append(qg.toxml())
 
         return root
 
@@ -375,6 +372,39 @@ class FeedbackMessage:
         feedbackmessage.append(makeContentNode(self.message))
 
         return feedbackmessage
+
+class QuestionGroup:
+    name = ''
+    pickingStrategy = 'all-ordered' # 'all-ordered', ''all-shuffled', 'random-subset'
+    pickQuestions = 0
+
+    def __init__(self):
+        self.questions = []
+
+    @staticmethod
+    def fromDATA(data):
+        qg = QuestionGroup()
+        print(data)
+        tryLoad(data,['name','pickingStrategy','pickQuestions'],qg)
+
+        if 'questions' in data:
+            for q in data['questions']:
+                qg.questions.append(Question.fromDATA(q))
+
+        return qg
+
+    def toxml(self):
+        qg = makeTree(['question_group',['questions']])
+        qg.attrib = {
+            'name': strcons(self.name),
+            'pickingStrategy': strcons(self.pickingStrategy),
+            'pickQuestions': strcons(self.pickQuestions),
+        }
+        questions = qg.find('questions')
+        for q in self.questions:
+            questions.append(q.toxml())
+
+        return qg
 
 class Question:
     name = 'Untitled Question'

@@ -22,7 +22,7 @@ Numbas.queueScript('storage',['base'],function() {
 /** @typedef exam_suspend_data
  * @memberof Numbas.storage
  * @property {number} timeRemaining - seconds until exam timer runs out
- * @property {number[]} questionSubset - order of questions
+ * @property {number[][]} questionSubsets - order of questions in each question group
  * @property {number} start - time the exam started
  * @property {number} score - student's current score
  * @property {number} currentQuestion - number of the question the student was looking at before suspending

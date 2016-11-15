@@ -33,16 +33,18 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
  * @constructor
  * @memberof Numbas
  * @param {Numbas.Exam} exam - parent exam
+ * @param {Numbas.QuestionGroup} group - group this question belongs to
  * @param {Element} xml
  * @param {number} number - index of this question in the exam (starting at 0)
  * @param {boolean} loading - is this question being resumed from an existing session?
  * @param {Numbas.jme.Scope} gscope - global JME scope
  */
-var Question = Numbas.Question = function( exam, xml, number, loading, gscope)
+var Question = Numbas.Question = function( exam, group, xml, number, loading, gscope)
 {
 	var question = this;
 	var q = question;
 	q.exam = exam;
+    q.group = group;
 	q.adviceThreshold = q.exam.adviceGlobalThreshold;
 	q.xml = xml;
 	q.originalXML = q.xml;

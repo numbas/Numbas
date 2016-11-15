@@ -303,7 +303,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		{
 			timeRemaining: exam.timeRemaining || 0,
 			duration: exam.settings.duration || 0,
-			questionSubset: exam.questionSubset,
+			questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
 			start: exam.start
 		};
 
@@ -435,7 +435,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 		return {timeRemaining: eobj.timeRemaining || 0,
 				duration: eobj.duration || 0 ,
-				questionSubset: eobj.questionSubset,
+				questionSubsets: eobj.questionSubsets,
 				start: eobj.start,
 				score: score,
 				currentQuestion: currentQuestion
