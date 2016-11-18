@@ -677,11 +677,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	regenQuestion: function()
 	{
 		var e = this;
-		var n = e.currentQuestion.number;
+        var oq = e.currentQuestion;
+		var n = oq.number;
+        var group = oq.group
+        var n_in_group = group.questionList.indexOf(oq);
 		job(e.display.startRegen,e.display);
 		job(function() {
-			var on = e.questionSubset[n];
-			e.questionList[n] = new Numbas.Question(e, e.xml.selectNodes('questions/question')[on], n, false, e.scope);
+            var q = new Numbas.Question(e, oq.group, oq.originalXML, oq.number, false, e.scope);
+			e.questionList[n] = group.questionList[n_in_group] = q;
 		})
 		job(function() {
 			e.changeQuestion(n);
