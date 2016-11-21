@@ -1346,8 +1346,18 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
 	 */
 	combinations: function(n,k) {
-		if(n.complex || k.complex)
+		if(n.complex || k.complex) {
 			throw(new Numbas.Error('math.combinations.complex'));
+        }
+        if(n<0) {
+            throw(new Numbas.Error('math.combinations.n less than zero'));
+        }
+        if(k<0) {
+            throw(new Numbas.Error('math.combinations.k less than zero'));
+        }
+        if(n<k) {
+            throw(new Numbas.Error('math.combinations.n less than k'));
+        }
 
 		k=Math.max(k,n-k);
 		return math.productRange(k+1,n)/math.productRange(1,n-k);
@@ -1358,11 +1368,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @param {number} k
 	 * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
 	 */
-	permutations: function(n,k) {
-		if(n.complex || k.complex)
-			throw(new Numbas.Error('math.permutations.complex'));
+    permutations: function(n,k) {
+        if(n.complex || k.complex) {
+            throw(new Numbas.Error('math.permutations.complex'));
+        }
+        if(n<0) {
+            throw(new Numbas.Error('math.permutations.n less than zero'));
+        }
+        if(k<0) {
+            throw(new Numbas.Error('math.permutations.k less than zero'));
+        }
+        if(n<k) {
+            throw(new Numbas.Error('math.permutations.n less than k'));
+        }
 
-		return math.productRange(k+1,n);
+		return math.productRange(n-k+1,n);
 	},
 
 	/** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.

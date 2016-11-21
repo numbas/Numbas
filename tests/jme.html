@@ -481,18 +481,20 @@
 					closeEquals(evaluate('min(-32,4)').value,-32,'min(-32,4)');
 					raisesNumbasError(function(){ evaluate('min(i,1+i)') },'math.order complex numbers',"can't order complex numbers: min(i,1+i)");
 
-					closeEquals(evaluate('perm(5,4)').value,5,'perm(5,4)');
-					closeEquals(evaluate('perm(6,1)').value,720,'perm(6,1)');
-					closeEquals(evaluate('perm(2,3)').value,1,'perm(2,3)');
-					closeEquals(evaluate('perm(-2,1)').value,1,'perm(-2,1)');
+					closeEquals(evaluate('perm(5,4)').value,120,'perm(5,4)');
+					closeEquals(evaluate('perm(6,1)').value,6,'perm(6,1)');
+                    raisesNumbasError(function() {evaluate('perm(2,3)')},'math.permutations.n less than k','n less than k: perm(2,3)');
+                    raisesNumbasError(function() {evaluate('perm(-2,3)')},'math.permutations.n less than zero','n less than zero: perm(-2,3)');
+                    raisesNumbasError(function() {evaluate('perm(2,-3)')},'math.permutations.k less than zero','k less than zero: perm(2,-3)');
 					raisesNumbasError(function() {evaluate('perm(i,1)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(i,1)");
 					raisesNumbasError(function() {evaluate('perm(1,i)')},'math.permutations.complex',"error: can't compute permutations of complex numbers: perm(1,i)");
 
 					closeEquals(evaluate('comb(5,4)').value,5,'comb(5,4)');
 					closeEquals(evaluate('comb(6,1)').value,6,'comb(6,1)');
 					closeEquals(evaluate('comb(7,3)').value,35,'comb(6,1)');
-					closeEquals(evaluate('comb(2,3)').value,1,'comb(2,3)');
-					closeEquals(evaluate('comb(-2,1)').value,1,'comb(-2,1)');
+                    raisesNumbasError(function() {evaluate('comb(2,3)')},'math.combinations.n less than k','n less than k: comb(2,3)');
+                    raisesNumbasError(function() {evaluate('comb(-2,3)')},'math.combinations.n less than zero','n less than zero: comb(-2,3)');
+                    raisesNumbasError(function() {evaluate('comb(2,-3)')},'math.combinations.k less than zero','k less than zero: comb(2,-3)');
 					raisesNumbasError(function() {evaluate('comb(i,1)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(i,1)");
 					raisesNumbasError(function() {evaluate('comb(1,i)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(1,i)");
 
