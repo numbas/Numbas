@@ -214,7 +214,6 @@ class Exam:
             for variable in variables.keys():
                 exam.variables.append(Variable(variables[variable]))
         if haskey(data,'question_groups'):
-            print(data['question_groups'])
             for question in data['question_groups']:
                 exam.question_groups.append(QuestionGroup.fromDATA(question))
 
@@ -384,7 +383,6 @@ class QuestionGroup:
     @staticmethod
     def fromDATA(data):
         qg = QuestionGroup()
-        print(data)
         tryLoad(data,['name','pickingStrategy','pickQuestions'],qg)
 
         if 'questions' in data:
