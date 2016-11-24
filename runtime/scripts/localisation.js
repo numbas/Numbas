@@ -1,6 +1,7 @@
 Numbas.queueScript('localisation',['i18next','localisation-resources'],function() {
     i18next.init({
         lng: Numbas.locale.preferred_locale,
+        lowerCaseLng: true,
         keySeparator: false,
         interpolation: {
             format: function(value,format) {

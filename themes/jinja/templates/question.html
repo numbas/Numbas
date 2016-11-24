@@ -1,0 +1,7 @@
+<div id="questionContainer" class="container-fluid" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
+    <div class="contentArea ">
+        <div id="questionDisplay" data-bind="stopbinding: true">
+        </div>
+        {% include 'question-nav.html' %}
+    </div>
+</div>

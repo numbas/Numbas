@@ -1,0 +1,5 @@
+<h1 class="text-center" data-bind="html: exam.settings.name"></h1>
+<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage"></div>
+<div class="info-buttons col-sm-6 col-sm-offset-3">
+    <button class="btn btn-success" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
+</div>

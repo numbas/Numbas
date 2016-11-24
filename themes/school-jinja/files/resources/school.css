@@ -1,0 +1,54 @@
+html {
+    font-size: 21px;
+}
+body, .btn {
+    font-size: 1rem;
+    font-family: 'ABeeZee',Helvetica,Arial,sans-serif;
+}
+.btn.btn-lg {
+    font-size: 1.2rem;
+}
+.feedback-icon {
+    font-size: 2em;
+}
+.warning-icon, .questionSelector .dirty-message .warning-icon {
+    font-size: 1.5rem;
+}
+#questionDisplay .question {
+    padding-top: 1em;
+}
+.statement {
+    margin-top: 0;
+}
+
+.menuButtons .btn {
+    font-size: 1.3em;
+}
+
+.part .student-answer {
+    display: block;
+    margin: 1em 0;
+}
+
+.part.type-gapfill .student-answer {
+    margin: 0;
+}
+
+input[type=text], input[type=number] {
+    font-family: Delius,Helvetica,Arial,sans-serif;
+}
+
+#results .total th {
+    padding-top: 0.5em;
+    font-size: 1.1em;
+}
+
+@media print {
+    html {
+        font-size: 18px;
+    }
+
+    #infoDisplay {
+        page-break-after: always;
+    }
+}

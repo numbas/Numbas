@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#Copyright 2011-13 Newcastle University
+#Copyright 2011-16 Newcastle University
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import shutil
 from optparse import OptionParser
 import examparser
 from exam import Exam,ExamError
-from xml2js import xml2js
+import xml2js
 from zipfile import ZipFile, ZipInfo
 import xml.etree.ElementTree as etree
 from itertools import count
 import subprocess
 import json
+import jinja2
 
 
 namespaces = {
@@ -94,143 +95,202 @@ except NameError:
     basestring = str
 
 def realFile(file):
+    """
+        Filter out temporary files created by vim
+    """
     return not (file[-1]=='~' or file[-4:]=='.swp')
 
-def collectFiles(options,dirs=[('runtime','.')]):
-
-    resources=[x if isinstance(x,list) else [x,x] for x in options.resources]
-
-    for name,path in resources:
-        if os.path.isdir(path):
-            dirs.append((os.path.join(os.getcwd(),path),os.path.join('resources',name)))
 
 
-    extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
-    extfiles = [
-            (os.path.join(os.getcwd(),x),os.path.join('extensions',os.path.split(x)[1]))
-                for x in extensions if os.path.isdir(x)
-            ]
-    dirs += extfiles
+class NumbasCompiler(object):
+    def __init__(self,options):
+        self.options = options
+        self.get_themepaths()
 
-    for themepath in options.themepaths:
-        dirs.append((os.path.join(themepath,'files'),'.'))
+    def get_themepaths(self):
+        self.themepaths = [self.options.theme]
+        for theme,i in zip(self.themepaths,count()):
+            theme = self.themepaths[i] = self.get_theme_path(theme)
+            inherit_file = os.path.join(theme,'inherit.txt')
+            if os.path.exists(inherit_file):
+                self.themepaths += open(inherit_file).read().splitlines()
 
-    files = {}
-    for (src,dst) in dirs:
-        src = os.path.join(options.path,src)
-        for x in os.walk(src, followlinks=options.followlinks):
-            xsrc = x[0]
-            xdst = x[0].replace(src,dst,1)
-            for y in filter(realFile,x[2]):
-                files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
+        self.themepaths.reverse()
 
-    for name,path in resources:
-        if not os.path.isdir(path):
-            files[os.path.join('resources',name)] = os.path.join(options.path,path)
-    
-    return files
+    def get_theme_path(self,theme):
+        if os.path.exists(theme):
+            return theme
+        else:
+            ntheme = os.path.join(self.options.path,'themes',theme)
+            if os.path.exists(ntheme):
+                return ntheme
+            else:
+                raise Exception("Couldn't find theme %s" % theme)
 
-def compileToDir(exam,files,options):
-    if options.action == 'clean':
+    def compile(self):
+        self.parse_exam()
+
+        files = self.files = self.collect_files()
+
+        self.render_templates()
+
+        self.make_xml()
+        files[os.path.join('.','settings.js')] = io.StringIO(self.xmls)
+
+        self.make_locale_file()
+
+        if self.options.scorm:
+            self.add_scorm()
+
+        self.collect_stylesheets()
+        self.collect_scripts()
+
+        if self.options.minify:
+            self.minify()
+            
+        if self.options.zip:
+            self.compileToZip()
+        else:
+            self.compileToDir()
+
+    def parse_exam(self):
+        """
+            Parse an exam definition from the given source
+        """
         try:
-            shutil.rmtree(options.output)
-        except OSError:
-            pass
-    try:
-        os.mkdir(options.output)
-    except OSError:
-        pass
-    
-    def makepath(path):    #make sure directory hierarchy of path exists by recursively creating directories
-        dir = os.path.dirname(path)
-        if not os.path.exists(dir):
-            makepath(dir)
-            try:
-                os.mkdir(dir)
-            except OSError:
-                pass
+            self.exam = Exam.fromstring(self.options.source)
+            self.examXML = self.exam.tostring()
+            self.resources = self.exam.resources
+            self.extensions = self.exam.extensions
+        except ExamError as err:
+            raise Exception('Error constructing exam:\n%s' % err)
+        except examparser.ParseError as err:
+            raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
+        except:
+            raise Exception('Failed to compile exam.')
 
-    for (dst,src) in files.items():
-        dst = os.path.join(options.output,dst)
-        makepath(dst)
-        if isinstance(src,basestring):
-            if options.action=='clean' or not os.path.exists(dst) or os.path.getmtime(src)>os.path.getmtime(dst):
-                shutil.copyfile(src,dst)
-        else:
-            shutil.copyfileobj(src,open(dst,'w',encoding='utf-8'))
-    
-    print("Exam created in %s" % os.path.relpath(options.output))
+    def collect_files(self,dirs=[('runtime','.')]):
+        """
+            Collect files from the given directories to be included in the compiled package
+        """
+        resources = [x if isinstance(x,list) else [x,x] for x in self.resources]
 
-def compileToZip(exam,files,options):
-    
-    def cleanpath(path):
-        if path=='': 
-            return ''
-        dirname, basename = os.path.split(path)
-        dirname=cleanpath(dirname)
-        if basename!='.':
-            dirname = os.path.join(dirname,basename)
-        return dirname
+        for name,path in resources:
+            if os.path.isdir(path):
+                dirs.append((os.path.join(self.options.path,path),os.path.join('resources',name)))
 
-    f = ZipFile(options.output,'w')
+        extensions = [os.path.join(self.options.path,'extensions',x) for x in self.extensions]
+        extfiles = [
+            (os.path.join(self.options.path,x),os.path.join('extensions',os.path.split(x)[1]))
+            for x in extensions if os.path.isdir(x)
+        ]
+        dirs += extfiles
 
-    for (dst,src) in files.items():
-        dst = ZipInfo(cleanpath(dst))
-        dst.external_attr = 0o644<<16
-        dst.date_time = datetime.datetime.today().timetuple()
-        if isinstance(src,basestring):
-            f.writestr(dst,open(src,'rb').read())
-        else:
-            f.writestr(dst,src.read())
+        for themepath in self.themepaths:
+            dirs.append((os.path.join(themepath,'files'),'.'))
 
+        files = {}
+        for (src,dst) in dirs:
+            src = os.path.join(self.options.path,src)
+            for x in os.walk(src, followlinks=self.options.followlinks):
+                xsrc = x[0]
+                xdst = x[0].replace(src,dst,1)
+                for y in filter(realFile,x[2]):
+                    files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
 
+        for name,path in resources:
+            if not os.path.isdir(path):
+                files[os.path.join('resources',name)] = os.path.join(self.options.path,path)
+        
+        return files
 
-    print("Exam created in %s" % os.path.relpath(options.output))
+    def make_xml(self):
+        """
+            Write the javascript representation of the XML files (theme XSLT and exam XML)
+        """
+        xslts = {}
+        for themedir in self.themepaths:
+            xsltdir = os.path.join(themedir,'xslt')
 
-    f.close()
+            if os.path.exists(xsltdir):
+                files = filter(lambda x: x[-5:]=='.xslt', os.listdir(xsltdir))
+                for file in files:
+                    name, ext = os.path.splitext(file)
+                    xslts[name] = xml2js.encode(open(os.path.join(xsltdir,file),encoding='utf-8').read())
 
-def makeExam(options):
-    try:
-        exam = Exam.fromstring(options.source)
-        examXML = exam.tostring()
-        options.resources = exam.resources
-        options.extensions = exam.extensions
-    except ExamError as err:
-        raise Exception('Error constructing exam:\n%s' % err)
-    except examparser.ParseError as err:
-        raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
-    except:
-        raise Exception('Failed to compile exam.')
+        if self.question_xslt is not None:
+            xslts['question'] = xml2js.encode(self.question_xslt)
 
-    options.examXML = examXML
-    options.xmls = xml2js(options)
+        xslts_js = ',\n\t\t'.join('{}: "{}"'.format(name,body) for name,body in xslts.items())
 
-    files = collectFiles(options)
-    files[os.path.join('.','settings.js')] = io.StringIO(options.xmls)
+        extensionfiles = []
+        for extension in self.extensions:
+            name = os.path.split(extension)[1]
+            if os.path.exists(os.path.join(extension,name+'.js')):
+                extensionfiles.append('extensions/'+name+'/'+name+'.js')
 
-    localePath = os.path.join(options.path,'locales')
-    locales = {}
-    for fname in os.listdir(localePath):
-        name,ext = os.path.splitext(fname)
-        if ext.lower()=='.json':
-            with open(os.path.join(localePath,fname),encoding='utf-8') as f:
-                locales[name] = {'translation': json.loads(f.read())}
+        self.xmls = xml2js.rawxml_js_template.format(**{
+            'extensionfiles': str(extensionfiles),
+            'templates': xslts_js,
+            'examXML': xml2js.encode(self.examXML),
+        })
 
-    locale_js = """
-    Numbas.queueScript('localisation-resources',['i18next'],function() {{
-    Numbas.locale = {{
-        preferred_locale: {},
-        resources: {}
-    }}
-    }});
-    """.format(json.dumps(options.locale),json.dumps(locales))
-    files[os.path.join('.','locale.js')] = io.StringIO(locale_js)
+    def render_templates(self):
+        """
+            Render index.html using the theme templates
+        """
+        template_paths = [os.path.join(path,'templates') for path in self.themepaths]
+        template_paths.reverse()
 
-    if options.scorm:
+        self.template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_paths))
+        index_html = self.render_template('index.html')
+        if index_html:
+            self.files[os.path.join('.','index.html')] = io.StringIO(index_html)
+        self.question_xslt = self.render_template('question.xslt')
+
+    def render_template(self,name):
+        try:
+            template = self.template_environment.get_template(name)
+            output = template.render({'exam': self.exam,'self.options': self.options})
+            return output
+        except jinja2.exceptions.TemplateNotFound:
+            return None
+
+    def make_locale_file(self):
+        """
+            Make locale.js using the selected locale file
+        """
+        localePath = os.path.join(self.options.path,'locales')
+        locales = {}
+        for fname in os.listdir(localePath):
+            name,ext = os.path.splitext(fname)
+            if ext.lower()=='.json':
+                with open(os.path.join(localePath,fname),encoding='utf-8') as f:
+                    locales[name.lower()] = {'translation': json.loads(f.read())}
+
+        locale_js_template = """
+        Numbas.queueScript('localisation-resources',['i18next'],function() {{
+        Numbas.locale = {{
+            preferred_locale: {},
+            resources: {}
+        }}
+        }});
+        """
+        locale_js = locale_js_template.format(json.dumps(self.options.locale),json.dumps(locales))
+
+        self.files[os.path.join('.','locale.js')] = io.StringIO(locale_js)
+
+    def add_scorm(self):
+        """
+            Add the necessary files for the SCORM protocol to the package
+        """
+
+        self.files.update(self.collect_files([('scormfiles','.')]))
+
         IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
-        manifest = etree.fromstring(open(os.path.join(options.path,'scormfiles','imsmanifest.xml')).read())
-        manifest.attrib['identifier'] = 'Numbas: %s' % exam.name
-        manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix,IMSprefix,IMSprefix)).text = exam.name
+        manifest = etree.fromstring(open(os.path.join(self.options.path,'scormfiles','imsmanifest.xml')).read())
+        manifest.attrib['identifier'] = 'Numbas: %s' % self.exam.name
+        manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix,IMSprefix,IMSprefix)).text = self.exam.name
         def to_relative_url(path):
             path = os.path.normpath(path)
             bits = []
@@ -241,7 +301,7 @@ def makeExam(options):
             bits.insert(0,tail)
             return '/'.join(bits)
 
-        resource_files = [to_relative_url(x) for x in files.keys()]
+        resource_files = [to_relative_url(x) for x in self.files.keys()]
 
         resource_element = manifest.find('%sresources/%sresource' % (IMSprefix,IMSprefix))
         for filename in resource_files:
@@ -249,70 +309,122 @@ def makeExam(options):
             file_element.attrib = {'href': filename}
             resource_element.append(file_element)
 
-        files.update(collectFiles(options,[('scormfiles','.')]))
-
         manifest_string = etree.tostring(manifest)
         try:
             manifest_string = manifest_string.decode('utf-8')
         except AttributeError:
             pass
 
-        files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest_string)
+        self.files[os.path.join('.','imsmanifest.xml')] = io.StringIO(manifest_string)
 
-    stylesheets = [(dst,src) for dst,src in files.items() if os.path.splitext(dst)[1]=='.css']
-    for dst,src in stylesheets:
-        del files[dst]
-    stylesheets = [src for dst,src in stylesheets]
-    stylesheets = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in stylesheets)
-    files[os.path.join('.','styles.css')] = io.StringIO(stylesheets)
-    
+    def collect_stylesheets(self):
+        """
+            Collect together all CSS files and compile them into a single file, styles.css
+        """
+        stylesheets = [(dst,src) for dst,src in self.files.items() if os.path.splitext(dst)[1]=='.css']
+        stylesheets.sort(key=lambda x:x[0])
+        for dst,src in stylesheets:
+            del self.files[dst]
+        stylesheets = [src for dst,src in stylesheets]
+        stylesheets = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in stylesheets)
+        self.files[os.path.join('.','styles.css')] = io.StringIO(stylesheets)
 
-    javascripts = [(dst,src) for dst,src in files.items() if os.path.splitext(dst)[1]=='.js']
-    for dst,src in javascripts:
-        del files[dst]
+    def collect_scripts(self):
+        """
+            Collect together all Javascript files and compile them into a single file, scripts.js
+        """
+        javascripts = [(dst,src) for dst,src in self.files.items() if os.path.splitext(dst)[1]=='.js']
+        for dst,src in javascripts:
+            del self.files[dst]
 
-    javascripts.sort(key=lambda x:x[0])
+        javascripts.sort(key=lambda x:x[0])
 
-    javascripts = [src for dst,src in javascripts]
-    numbas_loader_path = os.path.join(options.path,'runtime','scripts','numbas.js')
-    javascripts.remove(numbas_loader_path)
+        javascripts = [src for dst,src in javascripts]
+        numbas_loader_path = os.path.join(self.options.path,'runtime','scripts','numbas.js')
+        javascripts.remove(numbas_loader_path)
 
-    javascripts.insert(0,numbas_loader_path)
-    javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
-    files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
+        javascripts.insert(0,numbas_loader_path)
+        javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
+        self.files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
 
-    if options.minify:
-        for dst,src in files.items():
+
+    def minify(self):
+        """
+            Minify all javascript files in the package
+        """
+        for dst,src in self.files.items():
             if isinstance(src,basestring) and os.path.splitext(dst)[1] == '.js':
-                p = subprocess.Popen([options.minify,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p = subprocess.Popen([self.options.minify,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 out,err = p.communicate()
                 code = p.poll()
                 if code != 0:
-                    raise Exception('Failed to minify %s with minifier %s' % (src,options.minify))
+                    raise Exception('Failed to minify %s with minifier %s' % (src,self.options.minify))
                 else:
-                    files[dst] = io.StringIO(out.decode('utf-8'))
-        
-    if options.zip:
-        compileToZip(exam,files,options)
-    else:
-        compileToDir(exam,files,options)
+                    self.files[dst] = io.StringIO(out.decode('utf-8'))
 
-def get_theme_path(theme,options):
-    if os.path.exists(theme):
-        return theme
-    else:
-        ntheme = os.path.join(options.path,'themes',theme)
-        if os.path.exists(ntheme):
-            return ntheme
-        else:
-            raise Exception("Couldn't find theme %s" % theme)
+    def compileToZip(self):
+        """ 
+            Compile the exam as a .zip file
+        """
+        def cleanpath(path):
+            if path=='': 
+                return ''
+            dirname, basename = os.path.split(path)
+            dirname=cleanpath(dirname)
+            if basename!='.':
+                dirname = os.path.join(dirname,basename)
+            return dirname
+
+        f = ZipFile(self.options.output,'w')
+
+        for (dst,src) in self.files.items():
+            dst = ZipInfo(cleanpath(dst))
+            dst.external_attr = 0o644<<16
+            dst.date_time = datetime.datetime.today().timetuple()
+            if isinstance(src,basestring):
+                f.writestr(dst,open(src,'rb').read())
+            else:
+                f.writestr(dst,src.read())
+
+        print("Exam created in %s" % os.path.relpath(self.options.output))
+
+        f.close()
+
+    def compileToDir(self):
+        """
+            Compile the exam as a directory on the filesystem
+        """
+        if self.options.action == 'clean':
+            try:
+                shutil.rmtree(self.options.output)
+            except OSError:
+                pass
+        try:
+            os.mkdir(self.options.output)
+        except OSError:
+            pass
+        
+        def makepath(path):    #make sure directory hierarchy of path exists by recursively creating directories
+            dir = os.path.dirname(path)
+            if not os.path.exists(dir):
+                makepath(dir)
+                try:
+                    os.mkdir(dir)
+                except OSError:
+                    pass
+
+        for (dst,src) in self.files.items():
+            dst = os.path.join(self.options.output,dst)
+            makepath(dst)
+            if isinstance(src,basestring):
+                if self.options.action=='clean' or not os.path.exists(dst) or os.path.getmtime(src)>os.path.getmtime(dst):
+                    shutil.copyfile(src,dst)
+            else:
+                shutil.copyfileobj(src,open(dst,'w',encoding='utf-8'))
+        
+        print("Exam created in %s" % os.path.relpath(self.options.output))
 
 def run():
-    if 'assesspath' in os.environ:
-        path = os.environ['assesspath']
-    else:
-        path = os.getcwd()
-
     parser = OptionParser(usage="usage: %prog [options] source")
     parser.add_option('-t','--theme',
                         dest='theme',
@@ -354,8 +466,8 @@ def run():
         )
     parser.add_option('-p','--path',
                         dest='path',
-                        default=path,
-                        help='The path to the Numbas files (or you can set the ASSESSPATH environment variable)'
+                        default=os.getcwd(),
+                        help='The path to the Numbas files'
         )
     parser.add_option('-o','--output',
                         dest='output',
@@ -379,7 +491,6 @@ def run():
 
     if options.pipein:
         options.source = sys.stdin.detach().read().decode('utf-8')
-        options.sourcedir = os.getcwd()
         if not options.output:
             options.output = os.path.join(path,'output','exam')
     else:
@@ -396,7 +507,6 @@ def run():
                 print("Couldn't find source file %s" % osource)
                 exit(1)
         options.source=open(source_path,encoding='utf-8').read()
-        options.sourcedir = os.path.dirname(source_path)
 
         if not options.output:
             output = os.path.basename(os.path.splitext(source_path)[0])
@@ -405,17 +515,9 @@ def run():
             options.output=os.path.join(path,'output',output)
     
 
-    options.themepaths = [options.theme]
-    for theme,i in zip(options.themepaths,count()):
-        theme = options.themepaths[i] = get_theme_path(theme,options)
-        inherit_file = os.path.join(theme,'inherit.txt')
-        if os.path.exists(inherit_file):
-            options.themepaths += open(inherit_file).read().splitlines()
-
-    options.themepaths.reverse()
-
     try:
-        makeExam(options)
+        compiler = NumbasCompiler(options)
+        compiler.compile()
     except Exception as err:
         sys.stderr.write(str(err)+'\n')
         _,_,exc_traceback = sys.exc_info()

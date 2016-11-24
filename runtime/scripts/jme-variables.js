@@ -292,10 +292,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {Numbas.jme.Scope} scope
 	 */
 	DOMcontentsubvars: function(element, scope) {
-		if($.nodeName(element,'iframe'))
+		if($.nodeName(element,'iframe')) {
 			return element;
-		if(element.hasAttribute('nosubvars'))
+        } else if(element.hasAttribute('nosubvars')) {
 			return element;
+        } else if($.nodeName(element,'object')) {
+            function go() {
+                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
+            }
+            if(element.contentDocument) {
+                go();
+            } else {
+                element.addEventListener('load',go,false);
+            }
+            return;
+        }
 
 		if(element.hasAttribute('data-jme-visible')) {
 			var condition = element.getAttribute('data-jme-visible');
