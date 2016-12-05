@@ -397,6 +397,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         end: function() {
+            this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
             this.mode(this.exam.mode);
             this.questions().map(function(q) {
                 q.end();
