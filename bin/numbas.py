@@ -106,10 +106,12 @@ def collectFiles(options,dirs=[('runtime','.')]):
 
 
     extensions = [os.path.join(options.path,'extensions',x) for x in options.extensions]
-    extfiles = [
-            (os.path.join(os.getcwd(),x),os.path.join('extensions',os.path.split(x)[1]))
-                for x in extensions if os.path.isdir(x)
-            ]
+    extfiles = []
+    for x in extensions:
+        if os.path.isdir(x):
+            extfiles.append((os.path.join(os.getcwd(),x),os.path.join('extensions',os.path.split(x)[1])))
+        else:
+            raise Exception("Extension {} not found".format(x))
     dirs += extfiles
 
     for themepath in options.themepaths:
