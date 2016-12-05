@@ -1,5 +1,5 @@
 /*
-Copyright 2011-13 Newcastle University
+Copyright 2011-16 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ ul, ol {
 iframe {
 	border: none;
 	max-width: 100%;
+}
+
+img, object[type*="image"] {
+    max-width: 100%;
+    height: auto;
 }
 
 /*main template */
@@ -104,6 +109,14 @@ iframe {
 
 .question-nav {
 	display: none;
+}
+.navbar-btn {
+    white-space: normal;
+}
+
+.question-bottom-nav .navbar-btn {
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 @media screen {
@@ -374,6 +387,7 @@ input.jme {
 
 #results table tbody td {
 	border-bottom: 2px solid #ddd;
+    vertical-align: middle;
 }
 
 #question-breakdown .question:hover td {

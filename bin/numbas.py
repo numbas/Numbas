@@ -218,7 +218,7 @@ class NumbasCompiler(object):
                     name, ext = os.path.splitext(file)
                     xslts[name] = xml2js.encode(open(os.path.join(xsltdir,file),encoding='utf-8').read())
 
-        if self.question_xslt is not None:
+        if 'question' not in xslts and self.question_xslt is not None:
             xslts['question'] = xml2js.encode(self.question_xslt)
 
         xslts_js = ',\n\t\t'.join('{}: "{}"'.format(name,body) for name,body in xslts.items())
@@ -243,9 +243,11 @@ class NumbasCompiler(object):
         template_paths.reverse()
 
         self.template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_paths))
-        index_html = self.render_template('index.html')
-        if index_html:
-            self.files[os.path.join('.','index.html')] = io.StringIO(index_html)
+        index_dest = os.path.join('.','index.html')
+        if index_dest not in self.files:
+            index_html = self.render_template('index.html')
+            if index_html:
+                self.files[index_dest] = io.StringIO(index_html)
         self.question_xslt = self.render_template('question.xslt')
 
     def render_template(self,name):
