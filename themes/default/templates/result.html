@@ -1,74 +1,6 @@
-<h1 data-localise="result.exam summary"></h1>
+<h1 data-bind="html: exam.settings.name"></h1>
 
-<div class="row">
-    <table class="summary col-sm-6 col-sm-offset-3">
-        <tr>
-            <th data-localise="exam.exam name"></th>
-            <td class="rtd" data-bind="html: exam.settings.name"></td>
-        </tr>
-        <tr>
-            <th data-localise="exam.random seed"></th>
-            <td class="rtd" data-bind="html: exam.seed"></td>
-        </tr>
-        <tr data-bind="visible: exam.student_name">
-            <th data-localise="exam.student name"></th>
-            <td class="rtd"><span data-bind="text: exam.student_name"></span> <span data-bind="visible: exam.student_id">(<span data-bind="text: exam.student_id"></span>)</span></td>
-        </tr>
-        <tr>
-            <th data-localise="exam.number of questions"></th>
-            <td class="rtd" data-bind="text: exam.settings.numQuestions"></td>
-        </tr>
-        <tr>
-            <th data-localise="exam.marks available"></th>
-            <td class="rtd" data-bind="niceNumber: marks"></td>	
-        </tr>
-        <tr data-bind="visible: exam.settings.percentPass>0">
-            <th data-localise="exam.pass percentage"></th>
-            <td class="rtd" data-bind="text: percentPass"></td>
-        </tr>
-        <tr data-bind="visible: exam.settings.duration>0">
-            <th data-localise="exam.time allowed"></th>
-            <td class="rtd" data-bind="text: exam.displayDuration"></td>
-        </tr>
-    </table>
-</div>
-
-<h3 data-localise="result.performance summary"></h3>
-<div class="row">
-    <table class="summary col-sm-6 col-sm-offset-3">
-        <tr>
-            <th data-localise="result.exam start"></th>
-            <td class="rtd" data-bind="text: startTime"></td>	
-        </tr>	
-        <tr>
-            <th data-localise="result.exam stop"></th>
-            <td class="rtd" data-bind="text: endTime"></td>	
-        </tr>
-        <tr>
-            <th data-localise="result.time spent"></th>
-            <td class="rtd" data-bind="text: timeSpent"></td>
-        </tr> 
-        <tr>
-            <th data-localise="result.questions attempted"></th>
-            <td class="rtd" data-bind="html: questionsAttemptedDisplay"></td>
-        </tr>
-        <tr>
-            <th data-localise="result.score"></th>
-            <td class="rtd">
-                <span data-bind="text: examScoreDisplay"></span> (<span data-bind="text: percentScore"></span>%)
-            </td>
-        </tr>
-        <tr class="resultrow" data-bind="visible: exam.settings.percentPass>0">
-            <th data-localise="result.result"></th>
-            <td class="rtd" data-bind="html: result"></td>	
-        </tr>							
-    </table>
-
-    <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage"></div>
-</div>
-
-<h3 data-localise="result.detailed question breakdown"></h3>
-<p data-localise="result.click a question to review"></p>
+<p class="col-sm-6 col-sm-offset-3" data-localise="result.click a question to review"></p>
 <div class="row">
     <table id="question-breakdown" class="col-sm-4 col-sm-offset-4">		
         <thead>
@@ -90,7 +22,43 @@
             </tr>
             <!-- /ko -->
             <!-- /ko -->
+            <tr>
+                <th class="qtd" data-localise="Total"></th>
+                <th class="qtd" data-bind="niceNumber: score"></th>
+                <th class="qtd">/</th>
+                <th class="qtd">
+                    <span data-bind="niceNumber: marks"></span>
+                    (<span data-bind="text: percentScore"></span>%)
+                </th>
+            </tr>
         </tbody>
+    </table>
+    <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage"></div>
+</div>
+
+<h3 data-localise="result.performance summary"></h3>
+<div class="row">
+    <table class="summary col-sm-6 col-sm-offset-3">
+        <tr>
+            <th data-localise="exam.exam name"></th>
+            <td class="rtd" data-bind="html: exam.settings.name"></td>
+        </tr>
+        <tr>
+            <th data-localise="exam.random seed"></th>
+            <td class="rtd" data-bind="html: exam.seed"></td>
+        </tr>
+        <tr>
+            <th data-localise="result.exam start"></th>
+            <td class="rtd" data-bind="text: startTime"></td>	
+        </tr>	
+        <tr>
+            <th data-localise="result.exam stop"></th>
+            <td class="rtd" data-bind="text: endTime"></td>	
+        </tr>
+        <tr>
+            <th data-localise="result.time spent"></th>
+            <td class="rtd" data-bind="text: timeSpent"></td>
+        </tr> 
     </table>
 </div>
 
