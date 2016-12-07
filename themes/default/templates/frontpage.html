@@ -1,0 +1,23 @@
+<h1 data-bind="html: exam.settings.name"></h1>
+<table class="col-sm-6 col-sm-offset-3">
+    <tr>
+        <th data-localise="exam.number of questions"></th>
+        <td class="rtd" data-bind="html: exam.settings.numQuestions"></td>
+    </tr>
+    <tr data-bind="visible: exam.settings.showTotalMark">
+        <th data-localise="exam.marks available"></th>
+        <td class="rtd" data-bind="niceNumber: marks"></td>
+    </tr>
+    <tr data-bind="visible: exam.settings.percentPass>0">
+        <th data-localise="exam.pass percentage"></th>
+        <td class="rtd" data-bind="text: percentPass"></td>
+    </tr>
+    <tr data-bind="visible: exam.settings.duration>0">
+        <th data-localise="exam.time allowed"></th>
+        <td class="rtd" data-bind="html: exam.displayDuration"></td>
+    </tr>
+</table>
+<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage"></div>
+<div class="info-buttons col-sm-6 col-sm-offset-3">
+    <button class="btn btn-primary" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
+</div>

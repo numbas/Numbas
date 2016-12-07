@@ -113,6 +113,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	//initialise gap and step arrays
 	this.gaps = [];
 	this.steps = [];
+    this.isStep = false;
 
 	//load steps
 	var stepNodes = this.xml.selectNodes('steps/part');

@@ -1,0 +1,14 @@
+<div id="infoDisplay" class="container" data-bind="visible: infoPage">
+    <div id="frontpage" class="row" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
+        {% include 'frontpage.html' %}
+    </div>
+    <div id="suspend" data-bind="visible: infoPage()=='suspend', if: infoPage()=='suspend'">
+        {% include 'suspend.html' %}
+    </div>
+    <div id="results" class="container-fluid" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
+        {% include 'result.html' %}
+    </div>
+    <div id="exit" data-bind="visible: infoPage()=='exit', if: infoPage()=='exit'">
+        {% include 'exit.html' %}
+    </div>
+</div>

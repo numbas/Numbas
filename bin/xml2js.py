@@ -1,4 +1,4 @@
-#Copyright 2011-13 Newcastle University
+#Copyright 2011-16 Newcastle University
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,9 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import os
 import re
-import sys
 
 def encode(xml):
     xml = xml.strip()
@@ -24,42 +22,13 @@ def encode(xml):
     xml = re.sub('"','\\"',xml)
     return xml
 
-def xml2js(options):
-    all = ''
-    for themedir in options.themepaths:
-        xsltdir = os.path.join(themedir,'xslt')
+rawxml_js_template = """Numbas.queueScript('settings',{extensionfiles},function() {{
+    Numbas.rawxml = {{
+        templates: {{
+            {templates}
+        }},
 
-        if os.path.exists(xsltdir):
-            files = filter(lambda x: x[-5:]=='.xslt', os.listdir(xsltdir))
-            for x in files:
-                if len(all):
-                    all+=',\n\t\t'
-                s = x[:-5]+': \"'+encode(open(os.path.join(xsltdir,x),encoding='utf-8').read())+'\"'
-                all+=s
-
-    extensionfiles = []
-    for extension in options.extensions:
-        name = os.path.split(extension)[1]
-        if os.path.exists(os.path.join(extension,name+'.js')):
-            extensionfiles.append('extensions/'+name+'/'+name+'.js')
-
-    out = """Numbas.queueScript('settings',%s,function() {
-Numbas.rawxml = {
-    templates: {
-        %s
-    },
-
-    examXML: \"%s\"
-};
-
-});
-""" % (str(extensionfiles),all, encode(options.examXML))
-    return out
-
-if __name__ == '__main__':
-    if(len(sys.argv)>1):
-        examXMLfile = sys.argv[1]
-    else:
-        examXMLfile = os.path.join('..','exams','examXML.xml')
-    examXML = open(examXMLfile,encoding='utf-8').read()
-    out = xml2js(examXML,os.path.join('..','themes','default'))
+        examXML: \"{examXML}\"
+    }};
+}});
+"""
