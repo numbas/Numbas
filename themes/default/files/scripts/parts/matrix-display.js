@@ -1,6 +1,7 @@
 Numbas.queueScript('display/parts/matrix',['display-base','part-display','util','jme','jme-display'],function() {
     var display = Numbas.display;
     var extend = Numbas.util.extend;
+    var util = Numbas.util;
 
     /** Display code for a {@link Numbas.parts.MatrixEntryPart}
      * @augments Numbas.display.PartDisplay
