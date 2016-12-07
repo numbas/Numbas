@@ -255,7 +255,7 @@ class NumbasCompiler(object):
     def render_template(self,name):
         try:
             template = self.template_environment.get_template(name)
-            output = template.render({'exam': self.exam,'self.options': self.options})
+            output = template.render({'exam': self.exam,'options': self.options})
             return output
         except jinja2.exceptions.TemplateNotFound:
             return None
