@@ -14,6 +14,8 @@ This repository contains the Numbas compiler, which runs as standalone Python 3,
 
 A publicly-available editor, requiring no set-up, is available at [numbas.mathcentre.ac.uk](http://numbas.mathcentre.ac.uk). Or, you can follow [our instructions for Windows, Mac, or Ubuntu to install your own instance](http://numbas.github.io/editor).
 
+If you decide to run your own installation, install the compiler's dependencies with `pip install -r requirements.txt`.
+
 ### Development
 
 Numbas is open source, and we welcome contributions of any sort. Bug reports or feature suggestions can be added to [the GitHub issue tracker](https://github.com/numbas/Numbas/issues), or emailed to numbas@ncl.ac.uk. 
