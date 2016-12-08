@@ -40,7 +40,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
 
 					var tex = jme.display.texify({tok: v},settings);
 				}catch(e) {
-					throw(new Numbas.Error('mathjax.math processing error',e.message,expr));
+					throw(new Numbas.Error('mathjax.math processing error',{message:e.message,expression:expr}));
 				}
 				var mml = TEX.Parse(tex,this.stack.env).mml();
 
