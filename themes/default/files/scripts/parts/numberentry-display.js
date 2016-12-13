@@ -30,7 +30,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         },this);
 
         /** Cleaned-up version of student answer (remove commas and trim whitespace)
-         * 
+         *
          * Also check for validity and give warnings
          * @member {observable|string} cleanStudentAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
@@ -93,7 +93,11 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             }
             var precision = this.part.settings.precision;
             var precisionType = R('part.numberentry.precision type.'+this.part.settings.precisionType,{count:precision});
-            return R('part.numberentry.give your answer to precision',{count: precision,precisionType: precisionType});
+            if (precision === 0) {
+              return R('part.numberentry.give your answer to precision_0',{count: precision,precisionType: precisionType});
+            } else {
+              return R('part.numberentry.give your answer to precision',{count: precision,precisionType: precisionType});
+            }
         },this);
 
         /** Show the precision restriction hint?

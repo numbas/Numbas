@@ -233,6 +233,7 @@
     "part.numberentry.precision type.sigfig": "significant figure",
     "part.numberentry.precision type.sigfig_plural": "significant figures",
     "part.numberentry.give your answer to precision": "Round your answer to {{count}} {{precisionType}}.",
+    "part.numberentry.give your answer to precision_0": "Round your answer to the nearest integer.",
     "question.unsubmitted changes": "Je hebt je antwoord veranderd maar nog niet verzonden. Controleer je antwoord en klik op <strong>Verzend</strong>.",
     "question.unsubmitted changes_plural": "Je hebt antwoorden gewijzigd maar niet verzonden. Controleer alle antwoorden en klik op <strong>Verzend alles</strong>.",
     "util.equality not defined for type": "Equality not defined for type {{type}}",
