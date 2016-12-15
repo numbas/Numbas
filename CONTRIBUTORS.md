@@ -14,6 +14,6 @@
 * Carolijn Tacken (Dutch translation)
 * José Klenner (Spanish translation)
 * [James Ndegwa Maringa](https://github.com/wandeg) ([issue #454](https://github.com/numbas/Numbas/issues/454))
-* [anbarasiu](https://github.com/anbarasiu) ([issue #464](https://github.com/numbas/Numbas/issues/464))
+* [Anbarasi U](https://github.com/anbarasiu) ([issue #464](https://github.com/numbas/Numbas/issues/464))
 
 *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
