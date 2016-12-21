@@ -38,6 +38,12 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','inputstep','allowfractions'],['correctAnswerFraction','inputStep','allowFractions']);
 
+    var answerNode = this.xml.selectSingleNode('answer');
+    var notationStyles = answerNode.getAttribute('notationstyles');
+    if(notationStyles) {
+        settings.notationStyles = notationStyles.split(',');
+    }
+
 	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
@@ -88,6 +94,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
 	 * @property {boolean} integerAnswer - must the answer be an integer?
 	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
+     * @property {string[]} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
 	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
 	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
@@ -104,6 +111,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		correctAnswerFraction: false,
 		integerAnswer: false,
 		allowFractions: false,
+        notationStyles: ['en','si-en'],
 		integerPC: 0,
 		displayAnswer: 0,
 		precisionType: 'none',
@@ -157,15 +165,13 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		settings.maxvalue = maxvalue + fudge;
 	},
 
-	/** Tidy up the student's answer - remove space, and get rid of comma separators
-	 * @param {string} answer}
+	/** Tidy up the student's answer - at the moment, just remove space.
+     * You could override this to do more substantial filtering of the student's answer.
+	 * @param {string} answer
 	 * @returns {string}
 	 */
 	cleanAnswer: function(answer) {
-		// do a bit of string tidy up
-		// uk number format only for now - get rid of any UK 1000 separators	
-		answer = (answer+'').replace(/,/g, '');
-		answer = $.trim(answer);
+		answer = answer.toString().trim();
 		return answer;
 	},
 
@@ -183,8 +189,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		return new Numbas.jme.types.TNum(this.studentAnswerAsFloat());
 	},
 
+    /** Get the student's answer as a floating point number
+     * @returns {number}
+     */
 	studentAnswerAsFloat: function() {
-		return util.parseNumber(this.studentAnswer,this.settings.allowFractions);
+		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
 	},
 
 	/** Mark the student's answer */
@@ -197,7 +206,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			return false;
 		}
 		
-		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions) ) {
+		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles) ) {
 			var answerFloat = this.studentAnswerAsFloat();
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue ) {
 				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0) {

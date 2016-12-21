@@ -539,7 +539,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
 	 * @param {number} n
-	 * @param {object} options - `precisionType` is either "dp" or "sigfig"
+	 * @param {object} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+     * @see Numbas.util.numberNotationStyles
 	 * @returns {string}
 	 */
 	niceNumber: function(n,options)
@@ -621,6 +622,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 					out = math.precround(n,10)+'';
 				}
 			}
+            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                var match_neg = /^(-)?(.*)/.exec(out);
+                var minus = match_neg[1] || '';
+                var bits = match_neg[2].split('.');
+                var integer = bits[0];
+                var decimal = bits[1];
+                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            }
 			switch(piD)
 			{
 			case 0:

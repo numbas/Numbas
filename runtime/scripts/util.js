@@ -290,16 +290,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return util.re_fraction.test(s);
     },
 
-	/** Is `n` a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
+	/** Is `n`a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
+     *
+     * If `styles` is given, try to put the number in standard form if it matches any of the given styles.
 	 * @param {number} n
 	 * @param {boolean} allowFractions
+     * @param {string|string[]} styles - styles of notation to allow.
+     * @see Numbas.util.cleanNumber
 	 * @returns {boolean}
 	 */
-	isNumber: function(n,allowFractions) {
+	isNumber: function(n,allowFractions,styles) {
+        n = util.cleanNumber(n,styles);
 		if(!isNaN(n)) {
 			return true;
 		}
-		n = n.toString().trim();
 		if(/-?infinity/i.test(n)) {
 			return true;
 		} else if(allowFractions && util.re_fraction.test(n)) {
@@ -359,12 +363,76 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Regular expression recognising a fraction */
 	re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
 
-	/** Parse a number - either parseFloat, or parse a fraction
+    /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
+     * @param {string} thousands - the string used to separate powers of 1000
+     * @param {string} decimal_mark - the decimal mark character
+     * @returns {function}
+     */
+    standardNumberFormatter: function(thousands, decimal_mark) {
+        return function(integer,decimal) {
+            var s = util.separateThousands(integer,thousands);
+            if(decimal) {
+                s += decimal_mark+decimal;
+            }
+            return s;
+        }
+    },
+
+
+
+    /** Clean a string potentially representing a number.
+     * Remove space, and then try to identify a notation style.
+     * 
+     * If `styles` is given, `s` will be tested against the given styles. If it matches, the string will be rewritten using the matched integer and decimal parts, with punctuation removed and the decimal point changed to a dot.
+     *
+     * @param {string} s - the string potentially representing a number.
+     * @param {string|string[]} styles - styles of notation to allow, e.g. `['en','si-en']` 
+     *
+     * @see Numbas.util.numberNotationStyles
+     */
+    cleanNumber: function(s,styles) {
+		s = s.toString().trim();
+        var match_neg = /^(-)?(.*)/.exec(s);
+        var minus = match_neg[1] || '';
+        s = match_neg[2];
+
+        if(styles!==undefined) {
+            if(typeof styles=='string') {
+                styles = [styles];
+            }
+            for(var i=0,l=styles.length;i<l;i++) {
+                var style = util.numberNotationStyles[styles[i]];
+                if(!style) {
+                    continue;
+                }
+                var re = style.re;
+                var m;
+                if(re && (m=re.exec(s))) {
+                    var integer = m[1].replace(/\D/g,'');
+                    if(m[2]) {
+                        var decimal = m[2].replace(/\D/g,'');
+                        s = integer+'.'+decimal
+                    } else {
+                        s = integer;
+                    }
+                    break;
+                }
+            }
+        }
+
+        return minus+s;
+    },
+
+	/** Parse a number - either parseFloat, or parse a fraction.
 	 * @param {string} s
+     * @param {boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed? 
+     * @param {string|string[]} styles - styles of notation to allow.
+     * @see Numbas.util.cleanNumber
 	 * @returns {number}
 	 */
-	parseNumber: function(s,allowFractions) {
-		s = s.toString().trim();
+	parseNumber: function(s,allowFractions,styles) {
+        s = util.cleanNumber(s,styles);
+
 		var m;
 		if(util.isFloat(s)) {
 			return parseFloat(s);
@@ -843,6 +911,78 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	}
 	
 };
+
+/** Different styles of writing a decimal
+ * 
+ * Objects of the form `{re,format}`, where `re` is a regex recognising numbers in this style, and `format(integer,decimal)` renders the number in this style.
+ *
+ * Each regex matches the integer part in group 1, and the decimal part in group 2 - it should be safe to remove all non-digit characters in these and preserve meaning.
+ * @see https://en.wikipedia.org/wiki/Decimal_mark#Examples_of_use
+ */
+util.numberNotationStyles = {
+    'plain': {
+        re: /^([0-9]+)(\x2E[0-9]+)?$/,
+        format: function(integer,decimal) {
+            if(decimal) {
+                return integer+'.'+decimal;
+            } else {
+                return integer;
+            }
+        }
+    },
+    // English style - commas separate thousands, dot for decimal point
+    'en': {
+        re: /^(\d{1,3}(?:,\d{3})*)(\x2E\d+)?$/,   
+        format: util.standardNumberFormatter(',','.')
+    },
+    
+    // English SI style - spaces separate thousands, dot for decimal point
+    'si-en': {
+        re: /^(\d{1,3}(?: +\d{3})*)(\x2E\d+)?$/,
+        format: util.standardNumberFormatter(' ','.')
+    },
+
+    // French SI style - spaces separate thousands, comma for decimal point
+    'si-fr': {
+        re: /^(\d{1,3}(?: +\d{3})*)(,\d+)?$/,
+        format: util.standardNumberFormatter(' ',',')
+    },
+
+    // Continental European style - dots separate thousands, comma for decimal point
+    'eu': {
+        re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?$/,
+        format: util.standardNumberFormatter('.',',')
+    },
+
+    // Swiss style - apostrophes separate thousands, dot for decimal point
+    'ch': {
+        re: /^(\d{1,3}(?:'\d{3})*)(\x2E\d+)?$/,
+        format: util.standardNumberFormatter('\'','.')
+    },
+
+    // Indian style - commas separate groups, dot for decimal point. The rightmost group is three digits, other groups are two digits.
+    'in': {
+        re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?$/,
+        format: function(integer,decimal) {
+            integer = integer+'';
+            if(integer.length>3) {
+                var over = (integer.length-3)%2
+                var out = integer.slice(0,over);
+                var i = over;
+                while(i<integer.length-3) {
+                    out += (out ? ',' : '')+integer.slice(i,i+2);
+                    i += 2;
+                }
+                integer = out+','+integer.slice(i);
+            }
+            if(decimal) {
+                return integer+'.'+decimal;
+            } else {
+                return integer;
+            }
+        }
+    }
+}
 
 var endDelimiters = {
     '$': /[^\\]\$/,

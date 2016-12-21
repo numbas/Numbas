@@ -863,6 +863,7 @@ class NumberEntryPart(Part):
     integerAnswer = False
     integerPartialCredit = 0
     allowFractions = False
+    notationStyles = ['en','si-en']
     checkingType = 'range'
     answer = 0
     checkingAccuracy = 0
@@ -884,7 +885,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
+        tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -892,7 +893,6 @@ class NumberEntryPart(Part):
                 tryLoad(data,['minvalue','maxvalue'],part)
         else:
             tryLoad(data,['answer','checkingAccuracy'],part)
-
 
         return part
 
@@ -909,6 +909,7 @@ class NumberEntryPart(Part):
                 'checkingType': strcons(self.checkingType),
                 'inputstep': strcons_fix(self.inputStep),
                 'allowfractions': strcons_fix(self.allowFractions),
+                'notationstyles': strcons_fix(','.join(self.notationStyles)),
                 'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
                 }
         if self.checkingType == 'range':
