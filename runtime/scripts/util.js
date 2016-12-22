@@ -366,13 +366,22 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
      * @param {string} thousands - the string used to separate powers of 1000
      * @param {string} decimal_mark - the decimal mark character
+     * @param {boolean} separate_decimal=false - should the `thousands` separator be used to separate negative powers of 1000 (that is, groups of 3 digits after the decimal point)?
      * @returns {function}
      */
-    standardNumberFormatter: function(thousands, decimal_mark) {
+    standardNumberFormatter: function(thousands, decimal_mark, separate_decimal) {
         return function(integer,decimal) {
             var s = util.separateThousands(integer,thousands);
             if(decimal) {
-                s += decimal_mark+decimal;
+                var o = '';
+                if(separate_decimal) {
+                    for(var i=0;i<decimal.length;i+=3) {
+                        o += (o ? thousands : '')+decimal.slice(i,i+3);
+                    }
+                } else {
+                    o = decimal;
+                }
+                s += decimal_mark+o;
             }
             return s;
         }
@@ -918,6 +927,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
  *
  * Each regex matches the integer part in group 1, and the decimal part in group 2 - it should be safe to remove all non-digit characters in these and preserve meaning.
  * @see https://en.wikipedia.org/wiki/Decimal_mark#Examples_of_use
+ * @memberof Numbas.util
  */
 util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
@@ -939,24 +949,24 @@ util.numberNotationStyles = {
     
     // English SI style - spaces separate thousands, dot for decimal point
     'si-en': {
-        re: /^(\d{1,3}(?: +\d{3})*)(\x2E\d+)?$/,
-        format: util.standardNumberFormatter(' ','.')
+        re: /^(\d{1,3}(?: +\d{3})*)(\x2E(?:\d{3} )*\d{1,3})?$/,
+        format: util.standardNumberFormatter(' ','.',true)
     },
 
     // French SI style - spaces separate thousands, comma for decimal point
     'si-fr': {
-        re: /^(\d{1,3}(?: +\d{3})*)(,\d+)?$/,
-        format: util.standardNumberFormatter(' ',',')
+        re: /^(\d{1,3}(?: +\d{3})*)(,(?:\d{3} )*\d{1,3})?$/,
+        format: util.standardNumberFormatter(' ',',',true)
     },
 
     // Continental European style - dots separate thousands, comma for decimal point
-    'fr': {
+    'eu': {
         re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?$/,
         format: util.standardNumberFormatter('.',',')
     },
     
     // Plain French style - no thousands separator, comma for decimal point
-    'plain-fr': {
+    'plain-eu': {
         re: /^([0-9]+)(,[0-9]+)?$/,
         format: function(integer,decimal) {
             if(decimal) {
