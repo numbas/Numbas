@@ -36,7 +36,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
 
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','inputstep','allowfractions'],['correctAnswerFraction','inputStep','allowFractions']);
+	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
 
     var answerNode = this.xml.selectSingleNode('answer');
     var notationStyles = answerNode.getAttribute('notationstyles');
@@ -68,7 +68,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
         var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
 		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
 	} else {
-		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision});
+		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision, style: settings.correctAnswerStyle});
 	}
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);

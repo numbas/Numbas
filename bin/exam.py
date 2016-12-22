@@ -863,13 +863,14 @@ class NumberEntryPart(Part):
     integerAnswer = False
     integerPartialCredit = 0
     allowFractions = False
-    notationStyles = ['en','si-en']
+    notationStyles = ['en','si-en','plain-en']
     checkingType = 'range'
     answer = 0
     checkingAccuracy = 0
     minvalue = 0
     maxvalue = 0
     correctAnswerFraction = False
+    correctAnswerStyle = 'plain-en'
     inputStep = 1
 
     precisionType = 'none'
@@ -885,7 +886,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','integerAnswer','integerPartialCredit','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','integerAnswer','integerPartialCredit','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -906,12 +907,13 @@ class NumberEntryPart(Part):
 
         answer = part.find('answer')
         answer.attrib = {
-                'checkingType': strcons(self.checkingType),
-                'inputstep': strcons_fix(self.inputStep),
-                'allowfractions': strcons_fix(self.allowFractions),
-                'notationstyles': strcons_fix(','.join(self.notationStyles)),
-                'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
-                }
+            'checkingType': strcons(self.checkingType),
+            'inputstep': strcons_fix(self.inputStep),
+            'allowfractions': strcons_fix(self.allowFractions),
+            'notationstyles': strcons_fix(','.join(self.notationStyles)),
+            'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
+            'correctanswerstyle': strcons_fix(self.correctAnswerStyle),
+        }
         if self.checkingType == 'range':
             answer.attrib['minvalue'] = strcons_fix(self.minvalue)
             answer.attrib['maxvalue'] = strcons_fix(self.maxvalue)

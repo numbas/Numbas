@@ -920,7 +920,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
  * @see https://en.wikipedia.org/wiki/Decimal_mark#Examples_of_use
  */
 util.numberNotationStyles = {
-    'plain': {
+    // Plain English style - no thousands separator, dot for decimal point
+    'plain-en': {
         re: /^([0-9]+)(\x2E[0-9]+)?$/,
         format: function(integer,decimal) {
             if(decimal) {
@@ -949,9 +950,21 @@ util.numberNotationStyles = {
     },
 
     // Continental European style - dots separate thousands, comma for decimal point
-    'eu': {
+    'fr': {
         re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?$/,
         format: util.standardNumberFormatter('.',',')
+    },
+    
+    // Plain French style - no thousands separator, comma for decimal point
+    'plain-fr': {
+        re: /^([0-9]+)(,[0-9]+)?$/,
+        format: function(integer,decimal) {
+            if(decimal) {
+                return integer+','+decimal;
+            } else {
+                return integer;
+            }
+        }
     },
 
     // Swiss style - apostrophes separate thousands, dot for decimal point
