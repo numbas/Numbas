@@ -232,11 +232,19 @@
     "part.numberentry.precision type.dp_plural": "decimal places",
     "part.numberentry.precision type.sigfig": "significant figure",
     "part.numberentry.precision type.sigfig_plural": "significant figures",
-    "part.numberentry.give your answer to precision": "Round your answer to {{count}} {{precisionType}}.",
-    "part.numberentry.give your answer to precision_0": "Round your answer to the nearest integer.",
+    "part.numberentry.give your answer to precision": "Round your answer to {{count,niceNumber}} {{precisionType}}.",
     "question.unsubmitted changes": "Du har gjort endring i svaret, men ikke sendt det inn. Vennligst sjekk svaret og klikk <strong>Send inn svar</strong>.",
     "question.unsubmitted changes_plural": "Du har gjort endringer i dine svar, men ikke sendt de inn. Vennligst se over svarene og klikk <strong>Send inn alle delsvar</strong>.",
     "util.equality not defined for type": "Equality not defined for type {{type}}",
     "mark_plural": "poeng",
-    "was_plural": "var"
+    "was_plural": "var",
+    "die.script not loaded": "Numbas couldn't start because the file <code>{{file}}</code> was not loaded. Check that it's included in <code>scripts.js</code>.",
+    "math.combinations.n less than zero": "Can't compute combinations: n is less than zero",
+    "math.combinations.k less than zero": "Can't compute combinations: k is less than zero",
+    "math.combinations.n less than k": "Can't compute combinations: n is less than k",
+    "math.permutations.n less than zero": "Can't compute permutations: n is less than zero",
+    "math.permutations.k less than zero": "Can't compute permutations: k is less than zero",
+    "math.permutations.n less than k": "Can't compute permutations: n is less than k",
+    "part.numberentry.give your answer to precision_0": "Round your answer to the nearest integer."
 }
+
