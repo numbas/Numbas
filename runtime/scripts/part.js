@@ -103,6 +103,8 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	this.path = path;
 	this.question.partDictionary[path] = this;
 
+    this.index = parseInt(this.path.match(/\d+$/));
+
 	//initialise settings object
 	this.settings = util.copyobj(Part.prototype.settings);
 	
@@ -119,7 +121,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	var stepNodes = this.xml.selectNodes('steps/part');
 	for(var i=0; i<stepNodes.length; i++)
 	{
-		var step = Numbas.createPart( stepNodes[i], this.path+'s'+i,this.question, this, loading);
+		var step = Numbas.createPart( stepNodes[i], this.path+'s'+i, this.question, this, loading);
         step.isStep = true;
 		this.steps[i] = step;
 		this.stepsMarks += step.marks;

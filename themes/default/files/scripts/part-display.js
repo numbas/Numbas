@@ -246,6 +246,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     return true;
             }
         }
+
+        var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';
+        var index = p.isStep || p.isGap ? p.index : util.letterOrdinal(p.index);
+        p.xml.setAttribute('jme-context-description',R(label)+' '+index);
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {

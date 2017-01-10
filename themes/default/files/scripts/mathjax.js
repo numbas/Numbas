@@ -4,7 +4,18 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
 	Numbas.display.MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
 
     MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
-        throw(new Numbas.Error(message[2].message));
+        var elem = message[1];
+        var contexts = [];
+        while(elem.parentElement) {
+            var context = Numbas.display.getLocalisedAttribute(elem,'data-jme-context-description');
+            if(context) {
+                contexts.splice(0,0,context);
+            }
+            elem = elem.parentElement;
+        }
+        var context_description = contexts.join(' ');
+        console.log(contexts);
+        throw(new Numbas.Error(context_description ? 'mathjax.error with context' : 'mathjax.error',{context: context_description, message:message[2].message}));
     });
 
 	MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {

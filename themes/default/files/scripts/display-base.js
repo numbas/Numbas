@@ -11,7 +11,23 @@ Numbas.queueScript('display-base',['controls','math','xml','util','timing','jme'
             $('[data-localise]').each(function() {
                 var localString = R($(this).data('localise'));
                 $(this).html(localString);
-            })
+            });
+        },
+
+        /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
+         * If that exists, localise its value and set the desired attribute, then return it.
+         * @param {element} elem
+         * @param {string} name
+         * @returns {string}
+         */
+        getLocalisedAttribute: function(elem, name) {
+            var attr_localise;
+            var attr = elem.getAttribute(name);
+            if(!attr && (attr_localise = elem.getAttribute('localise-'+name))) {
+                attr = R(attr_localise);
+                elem.setAttribute(name,attr);
+            }
+            return attr;
         },
 
         /** Update the progress bar when loading

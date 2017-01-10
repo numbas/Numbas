@@ -162,6 +162,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var qd = this;
             var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
             html.addClass('jme-scope').data('jme-scope',q.scope);
+            html.attr('data-jme-context-description',R('question.header',{number:q.number+1}));
             html.find('table').wrap('<div class="table-responsive">');	// wrap tables so they have a scrollbar when they overflow
             $('#questionDisplay').append(html);
 

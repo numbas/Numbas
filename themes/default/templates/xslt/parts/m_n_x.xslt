@@ -3,7 +3,7 @@
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
 	<form>
 		<table class="choices-grid">
-			<thead>
+			<thead localise-data-jme-context-description="part.mcq.answers">
 				<td/>
 				<xsl:for-each select="answers/answer">
 					<th><xsl:apply-templates select="content"/></th>

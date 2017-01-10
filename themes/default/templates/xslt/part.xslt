@@ -49,7 +49,9 @@
 	</xsl:if>
 	<xsl:element name="{$tag}">
 		<xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/></xsl:attribute>
-		<xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />')</xsl:attribute>
+        <xsl:attribute name="data-part-path"><xsl:value-of select="$path" /></xsl:attribute>
+        <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
 
 		<xsl:if test="not(ancestor::gaps)">
 			<xsl:apply-templates select="prompt" />
@@ -78,7 +80,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<ol class="feedbackMessages well col-lg-6 col-md-6 col-xs-12 pull-right" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages">
+					<ol class="feedbackMessages well col-lg-6 col-md-6 col-xs-12 pull-right" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages" localise-data-jme-context-description="part.feedback">
 						<li class="feedbackMessage" data-bind="latex: $data"></li>
 					</ol>
 				</div>

@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="choices" mode="one">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
-	<form>
+	<form localise-data-jme-context-description="part.mcq.choices">
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<ul class="multiplechoice clearfix">
