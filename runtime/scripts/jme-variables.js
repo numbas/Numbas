@@ -317,6 +317,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 			}
 		}
 
+        var new_attrs = {};
+        for(var i=0;i<element.attributes.length;i++) {
+            var m;
+            var attr = element.attributes[i];
+            if(m = attr.name.match(/^eval-(.*)/)) {
+                console.log(attr.name);
+                var name = m[1];
+                var value = jme.subvars(attr.value,scope,true);
+                new_attrs[name] = value;
+            }
+        }
+        for(var name in new_attrs) {
+            element.setAttribute(name,new_attrs[name]);
+        }
+
 		var re_end;
 		$(element).contents().each(function() {
 			if(this.nodeType==(this.TEXT_NODE || 3)) {
