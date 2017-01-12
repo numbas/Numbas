@@ -258,9 +258,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 				return dependants[name];
 			}
 			var d = [];
-			todo[name].vars.map(function(name2) {
-				d = d.concat(name2,findDependants(name2));
-			});
+            if(name in todo) {
+    			todo[name].vars.map(function(name2) {
+	    			d = d.concat(name2,findDependants(name2));
+		    	});
+            }
 			var o = [];
 			d.map(function(name2) {
 				if(!o.contains(name2)) {
