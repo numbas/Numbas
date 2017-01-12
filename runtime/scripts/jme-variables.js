@@ -247,22 +247,37 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
 	/** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
 	 * @param {object} todo - dictionary of variables mapped to their definitions
-	 * @param {string[]} variables - list of variable names whose dependants we should find
+	 * @param {string[]} ancestors - list of variable names whose dependants we should find
 	 * @returns {object} - a copy of the todo list, only including the dependants of the given variables
 	 */
 	variableDependants: function(todo,ancestors) {
-		var out = {}
+        // a dictionary mapping variable names to lists of names of variables they depend on
 		var dependants = {};
-		function findDependants(name) {
+
+		function findDependants(name,path) {
+            path = path || [];
+
+            // stop at circular references
+            if(path.contains(name)) {
+                return [];
+            }
+            
+            // if we've already done this, variable, return it
 			if(name in dependants) {
 				return dependants[name];
 			}
+
+            // for each variable used in this variable, find its dependants
 			var d = [];
             if(name in todo) {
+                var newpath = path.slice();
+                newpath.push(name);
     			todo[name].vars.map(function(name2) {
-	    			d = d.concat(name2,findDependants(name2));
+	    			d = d.concat(name2,findDependants(name2,newpath));
 		    	});
             }
+
+            // make a new list with duplicates removed
 			var o = [];
 			d.map(function(name2) {
 				if(!o.contains(name2)) {
