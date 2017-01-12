@@ -37,6 +37,8 @@ var TString = types.TString;
 var TBool = types.TBool;
 var THTML = types.THTML;
 var TList = types.TList;
+var TKeyPair = types.TKeyPair;
+var TDict = types.TDict;
 var TMatrix = types.TMatrix;
 var TName = types.TName;
 var TRange = types.TRange;
@@ -105,6 +107,19 @@ newBuiltin('+',[TList,'?'],TList, null, {
 	}
 });
 
+newBuiltin('+',[TDict,TDict],TDict, null,{
+    evaluate: function(args,scope) {
+        var nvalue = {};
+        for(var x in args[0].value) {
+            nvalue[x] = args[0].value[x];
+        }
+        for(var x in args[1].value) {
+            nvalue[x] = args[1].value[x];
+        }
+        return new TDict(nvalue);
+    }
+});
+
 var fconc = function(a,b) { return a+b; }
 newBuiltin('+', [TString,'?'], TString, fconc, {doc: {usage: '\'Hello \' + name', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
 newBuiltin('+', ['?',TString], TString, fconc, {doc: {usage: 'name + \' is OK.\'', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
@@ -168,6 +183,76 @@ newBuiltin('list',[TRange],TList,function(range) {
 	return numbers;
 });
 
+newBuiltin('dict',['*keypair'],TDict,null,{
+    evaluate: function(args,scope) {
+        var value = {};
+        args.forEach(function(kp) {
+            value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+        });
+        return new TDict(value);
+    }
+});
+newBuiltin('keys',[TDict],TList,function(d) {
+    var o = [];
+    for(var key in d) {
+        o.push(new TString(key));
+    }
+    return o;
+});
+newBuiltin('values',[TDict],TList,function(d) {
+    var o = [];
+    for(var key in d) {
+        o.push(d[key]);
+    }
+    return o;
+});
+newBuiltin('items',[TDict],TList,null, {
+    evaluate: function(args,scope) {
+        var o = [];
+        for(var x in args[0].value) {
+            o.push(new TList([new TString(x), args[0].value[x]]))
+        }
+        return new TList(o);
+    }
+});
+newBuiltin('listval',[TDict,TString],'?', null, {
+    evaluate: function(args,scope) {
+        var d = args[0].value;
+        var key = args[1].value;
+        if(!d.hasOwnProperty(key)) {
+            throw(new Numbas.Error('jme.func.listval.key not in dict',{key:key}));
+        }
+        return d[key];
+    }
+});
+newBuiltin('get',[TDict,TString,'?'],'?',null,{
+    evaluate: function(args,scope) {
+        var d = args[0].value;
+        var key = args[1].value;
+        if(!d.hasOwnProperty(key)) {
+            return args[2]
+        }
+        return d[key];
+    }
+});
+newBuiltin('in', [TString,TDict], TBool, function(s,d) {
+    return d.hasOwnProperty(s);
+});
+
+newBuiltin('json_decode', [TString], '?', null, {
+    evaluate: function(args,scope) {
+        var data = JSON.parse(args[0].value);
+        return jme.wrapValue(data);
+    }
+});
+newBuiltin('json_encode', ['?'], TString, null, {
+    evaluate: function(args,scope) {
+        var s = new TString(JSON.stringify(jme.unwrapValue(args[0])));
+        s.safe = true;
+        return s;
+    }
+});
+
 newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
 newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
 
@@ -182,12 +267,29 @@ newBuiltin('latex',[TString],TString,null,{
 	}
 });
 
+newBuiltin('safe',[TString],TString,null, {
+    evaluate: function(args,scope) {
+        var t = args[0].tok;
+        t.safe = true;
+        return t;
+    },
+    typecheck: function(variables) {
+        return variables.length==1 && variables[0].type=='string';
+    }
+});
+jme.findvarsOps.safe = function(tree,boundvars,scope) {
+	return [];
+}
+
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the first letter of a string', tags: ['upper-case','case','upper']}});
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
 newBuiltin('join',[TList,TString],TString,function(list,delimiter) { 
 	return list.map(jme.tokenToDisplayString).join(delimiter);
+});
+newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
+    return str.split(delimiter).map(function(s){return new TString(s)});
 });
 newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
@@ -332,6 +434,13 @@ newBuiltin('abs', [TString], TNum, function(s){return s.length}, {doc: {usage: '
 newBuiltin('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
 newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : r.length-3; }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
 newBuiltin('abs', [TVector], TNum, vectormath.abs, {doc: {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']}});
+newBuiltin('abs', [TDict], TNum, function(d) {
+    var n = 0;
+    for(var x in d) {
+        n += 1;
+    }
+    return n;
+});
 newBuiltin('arg', [TNum], TNum, math.arg, {doc: {usage: 'arg(1+i)', description: 'Argument of a complex number.', tags: ['angle','direction']}} );
 newBuiltin('re', [TNum], TNum, math.re, {doc: {usage: 're(1 + 2i)', description: 'Real part of a complex number.'}} );
 newBuiltin('im', [TNum], TNum, math.im, {doc: {usage: 'im(1 + 2i)', description: 'Imaginary part of a complex number.'}} );
@@ -936,17 +1045,25 @@ newBuiltin('let',['?'],TList, null, {
 		var lambda = args[args.length-1];
 
 		var variables = {};
-		for(var i=0;i<args.length-1;i+=2) {
-			var name = args[i].tok.name;
-			var value = scope.evaluate(args[i+1]);
-			variables[name] = value;
-		}
+        if(args[0].tok.type=='dict') {
+            var d = scope.evaluate(args[0]);
+            variables = d.value;
+        } else {
+            for(var i=0;i<args.length-1;i+=2) {
+                var name = args[i].tok.name;
+                var value = scope.evaluate(args[i+1]);
+                variables[name] = value;
+            }
+        }
 		var nscope = new Scope([scope,{variables:variables}]);
 
 		return nscope.evaluate(lambda);
 	},
 
 	typecheck: function(variables) {
+        if(variables.length==2 && variables[0].tok.type=='dict') {
+            return true;
+        }
 		if(variables.length<3 || (variables.length%2)!=1) {
 			return false;
 		}

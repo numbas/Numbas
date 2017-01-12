@@ -210,6 +210,8 @@
 					raisesNumbasError(function(){ compile('(x') },'jme.shunt.no right bracket','no right bracket: (x');
 					raisesNumbasError(function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
 					raisesNumbasError(function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
+                    raisesNumbasError(function(){ compile('["a":1,2]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: ["a":1,2]');
+                    raisesNumbasError(function(){ compile('[2,"a":1]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: [2,"a":1]');
 				})
 			
 				
@@ -732,7 +734,20 @@
 				test('List operations',function() {
 					deepCloseEqual(evaluate('["a","b","c"] except "a"').value.map(getValue),['b','c'],'["a","b","c"] except "a"');
 					deepCloseEqual(evaluate('["a","b","c"] except ["a","c","f"]').value.map(getValue),['b'],'["a","b","c"] except ["a","c","f"]');
-				});
+                });
+
+                test('Dictionaries',function() {
+                    deepCloseEqual(evaluate('["a": 1]["a"]').value,1,'["a": 1]["a"] = 1');
+                    raisesNumbasError(function() { evaluate('["a": 1]["b"]') }, 'jme.func.listval.key not in dict', '["a": 1]["b"]');
+                    deepCloseEqual(evaluate('keys( ["a": 1, "b": 2] )').value.map(getValue), ['a','b'],'keys( ["a":1,"b": 2] )');
+                    deepCloseEqual(evaluate('values( ["a": 1, "b": 2] )').value.map(getValue), [1,2],'values( ["a":1,"b": 2] )');
+                    deepCloseEqual(jme.unwrapValue(evaluate('items( ["a": 1, "b": 2] )')), [['a',1],['b',2]],'items( ["a":1,"b": 2] )');
+                    equals(evaluate('"a" in ["a": 1]').value,true,'"a" in ["a": 1]');
+                    equals(evaluate('"b" in ["a": 1]').value,false,'"b" in ["a": 1]');
+                    equals(evaluate('"__proto__" in dict()').value,false,'"__proto__" in dict()');
+                    deepCloseEqual(jme.unwrapValue(evaluate('["a":1,"b":2]+["a":4,"c":3]')),{a:4,b:2,c:3},'["a":1,"b":2]+["a":4,"c":3]');
+                    deepCloseEqual(jme.unwrapValue(evaluate('map(let(bits,x,["a":bits]),x,[1,2,3])')),[{a:1},{a:2},{a:3}],'map(let(bits,x,["a":bits]),x,[1,2,3])');
+                });
 
 				test('Branching',function() {
 					closeEquals(evaluate('if(true,1,0)').value,1,'if(true,1,0)');
@@ -762,7 +777,10 @@
 					m.rows = 1;
 					m.columns = 1;
 					equals(jme.wrapValue(m).type,'list','wrapValue on list without type hint gives list');
-					equals(jme.wrapValue(m,'matrix').type,'matrix','wrapValue on list with matrix type hint');
+                    equals(jme.wrapValue(m,'matrix').type,'matrix','wrapValue on list with matrix type hint');
+                    equals(jme.wrapValue(null).type,'string','wrapValue on null gives empty string');
+                    equals(jme.wrapValue({a:1}).type,'dict','wrapValue on object gives dict');
+                    equals(jme.wrapValue(new Numbas.jme.types.TList(1)).type,'list','wrapValue on a token returns it unchanged');
 				});
 				
 				module('Scopes');

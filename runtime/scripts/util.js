@@ -663,7 +663,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 */
 	escapeHTML: function(str)
 	{
-		return str.replace(/&/g,'&amp;');
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+        ;
 	},
 
 	/** Create a comparison function which sorts objects by a particular property

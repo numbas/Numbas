@@ -51,8 +51,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
 		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
-		re_string: /^(['"])((?:[^\1\\]|\\.)*?)\1/,
-		re_comment: /^\/\/.*(?:\n|$)/
+		re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
+		re_comment: /^\/\/.*(?:\n|$)/,
+        re_keypair: /^:/
 	},
 
 	/** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
@@ -186,6 +187,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 				token = new TString(estr);
 			}
+            else if(result = expr.match(jme.re.re_keypair)) {
+                if(tokens.length==0 || tokens[tokens.length-1].type!='string') {
+                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
+                }
+                token = new TKeyPair(tokens.pop().value);
+            }
 			else if(expr.length)
 			{
 				//invalid character or not able to match a token
@@ -222,9 +229,23 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				if(output.length<tok.vars)
 					throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
 
-				var thing = {tok: tok,
-							 args: output.slice(output.length-tok.vars)};
-				output = output.slice(0,output.length-tok.vars);
+				var thing = {
+                    tok: tok,
+                    args: output.splice(output.length-tok.vars,tok.vars)
+                };
+                if(tok.type=='list') {
+                    var mode = null;
+                    for(var i=0;i<thing.args.length;i++) {
+                        var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
+                        if(i>0 && argmode!=mode) {
+                            throw(new Numbas.Error('jme.shunt.list mixed argument types',{mode: mode, argmode: argmode}));
+                        }
+                        mode = argmode;
+                    }
+                    if(mode=='dictionary') {
+                        thing.tok = new TDict();
+                    }
+                }
 				output.push(thing);
 			}
 			else
@@ -296,7 +317,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				break;
 
 			case '[':
-				if(i==0 || tokens[i-1].type=='(' || tokens[i-1].type=='[' || tokens[i-1].type==',' || tokens[i-1].type=='op')	//define list
+				if(i==0 || tokens[i-1].type=='(' || tokens[i-1].type=='[' || tokens[i-1].type==',' || tokens[i-1].type=='op' || tokens[i-1].type=='keypair')	//define list
 				{
 					listmode.push('new');
 				}
@@ -373,6 +394,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 					}
 				}
 				break;
+            case 'keypair':
+                stack.push(tok);
 			}
 		}
 
@@ -488,13 +511,26 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				tok = new TList(value);
 			}
 			return tok;
+        case 'dict':
+            if(tok.value===undefined) {
+                var value = {};
+                for(var i=0;i<tree.args.length;i++) {
+                    var kp = tree.args[i];
+                    value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+                }
+                tok = new TDict(value);
+            }
+            return tok;
 		case 'string':
 			var value = tok.value;
-			if(value.contains('{'))
+			if(!tok.safe && value.contains('{')) {
 				value = jme.contentsubvars(value,scope)
-			var t = new TString(value);
-			t.latex = tok.latex;
-			return t;
+                var t = new TString(value);
+                t.latex = tok.latex
+                return t;
+            } else {
+                return tok;
+            }
 		case 'name':
 			if(tok.name.toLowerCase() in scope.variables)
 				return scope.variables[tok.name.toLowerCase()];
@@ -853,10 +889,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	 * @returns {object}
 	 */
 	unwrapValue: function(v) {
-		if(v.type=='list')
-			return v.value.map(jme.unwrapValue);
-		else
-			return v.value;
+        switch(v.type) {
+            case 'list':
+                return v.value.map(jme.unwrapValue);
+            case 'dict':
+                var o = {};
+                Object.keys(v.value).forEach(function(key) {
+                    o[key] = jme.unwrapValue(v.value[key]);
+                });
+                return o;
+		    default:
+    			return v.value;
+        }
 	},
 	
 	/** Wrap up a plain JavaScript value (number, string, bool or array) as a {@link Numbas.jme.token}.
@@ -869,28 +913,43 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		case 'number':
 			return new jme.types.TNum(v);
 		case 'string':
-			return new jme.types.TString(v);
+            var s = new jme.types.TString(v);
+            s.safe = true;
+            return s;
 		case 'boolean':
 			return new jme.types.TBool(v);
 		default:
-			if($.isArray(v)) {
-				// it would be nice to abstract this, but some types need the arguments to be wrapped, while others don't
-				switch(typeHint) {
-				case 'matrix':
-					return new jme.types.TMatrix(v);
-				case 'vector':
-					return new jme.types.TVector(v);
-				case 'range':
-					return new jme.types.TRange(v);
-				case 'set':
-					v = v.map(jme.wrapValue);
-					return new jme.types.TSet(v);
-				default:
-					v = v.map(jme.wrapValue);
-					return new jme.types.TList(v);
-				}
-			}
-			return v;
+            switch(typeHint) {
+                case 'html':
+                    return v;
+                default:
+                    if($.isArray(v)) {
+                        // it would be nice to abstract this, but some types need the arguments to be wrapped, while others don't
+                        switch(typeHint) {
+                        case 'matrix':
+                            return new jme.types.TMatrix(v);
+                        case 'vector':
+                            return new jme.types.TVector(v);
+                        case 'range':
+                            return new jme.types.TRange(v);
+                        case 'set':
+                            v = v.map(jme.wrapValue);
+                            return new jme.types.TSet(v);
+                        default:
+                            v = v.map(jme.wrapValue);
+                            return new jme.types.TList(v);
+                        }
+                    } else if(v===null || v===undefined) { // CONTROVERSIAL! Cast null to the empty string, because we don't have a null type.
+                        return new jme.types.TString('');
+                    } else if(v!==null && typeof v=='object' && v.type===undefined) {
+                        var o = {};
+                        Object.keys(v).forEach(function(key) {
+                            o[key] = jme.wrapValue(v[key]);
+                        });
+                        return new jme.types.TDict(o);
+                    }
+                    return v;
+            }
 		}
 	},
 
@@ -1197,6 +1256,8 @@ TNum.doc = {
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {string} value
+ * @property {boolean} latex - is this string LaTeX code? If so, it's displayed as-is in math mode
+ * @property {boolean} safe - if true, don't run {@link Numbas.jme.subvars} on this token when it's evaluated
  * @property type "string"
  * @constructor
  * @param {string} s
@@ -1283,6 +1344,37 @@ TList.doc = {
 	usage: ['[0,1,2,3]','[a,b,c]','[true,false,false]'],
 	description: "A list of elements of any data type."
 };
+
+
+/** Key-value pair assignment
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {string} key
+ * @constructor
+ * @param {string} key
+ */
+var TKeyPair = types.TKeyPair = types.keypair = function(key) {
+    this.key = key;
+}
+TKeyPair.prototype = {
+    type: 'keypair',
+    vars: 1
+}
+
+/** Dictionary: map strings to values
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {object} value - undefined until the token is evaluated
+ * @property type "dict"
+ * @constructor
+ * @param {object} value
+ */
+var TDict = types.TDict = types.dict = function(value) {
+    this.value = value;
+}
+TDict.prototype = {
+    type: 'dict'
+}
 
 /** Set type
  * @memberof Numbas.jme.types
@@ -1546,7 +1638,8 @@ var precedence = jme.precedence = {
 	'and': 11,
 	'or': 12,
 	'xor': 13,
-	'implies': 14
+	'implies': 14,
+    ':': 100
 };
 
 /** Synonyms of operator names - keys in this dictionary are translated to their corresponding values
@@ -1577,7 +1670,7 @@ var funcSynonyms = jme.funcSynonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments 
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe'];
 
 var rightAssociative = {
 	'^': true,
@@ -1899,6 +1992,9 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
 				return [];
 			break;
 		case 'string':
+            if(tree.tok.safe) {
+                return [];
+            }
 			var bits = util.contentsplitbrackets(tree.tok.value);
 			var out = [];
 			for(var i=0;i<bits.length;i+=4)

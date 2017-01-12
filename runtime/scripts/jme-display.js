@@ -408,6 +408,7 @@ var texOps = jme.display.texOps = {
 	'or': infixTex('\\vee'),
 	'xor': infixTex('\\, \\textrm{XOR} \\,'),
 	'implies': infixTex('\\to'),
+    'in': infixTex('\\in'),
 	'|': infixTex('|'),
 	'abs': (function(thing,texArgs,settings) { 
 		var arg;
@@ -933,6 +934,22 @@ var typeToTeX = jme.display.typeToTeX = {
 		}
 		return '\\left[ '+texArgs.join(', ')+' \\right]';
 	},
+    keypair: function(thing,tok,texArgs,settings) {
+        var key = '\\textrm{'+tok.key+'}';
+        return key+' \\colon '+texArgs[0];
+    },
+    dict: function(thing,tok,texArgs,settings) {
+		if(!texArgs)
+		{
+            texArgs = [];
+			if(tok.value) {
+                for(var key in tok.value) {
+                    texArgs.push(texify({tok: new jme.types.TKeyPair(key), args:[{tok:tok.value[key]}]},settings));
+                }
+			}
+		}
+        return '\\left[ '+texArgs.join(', ')+' \\right]';
+    },
 	vector: function(thing,tok,texArgs,settings) {
 		return ('\\left ( ' 
 				+ texVector(tok.value,settings)
@@ -1244,6 +1261,26 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		}
 		return '[ '+bits.join(', ')+' ]';
 	},
+    keypair: function(tree,tok,bits,settings) {
+        var key = typeToJME['string'](null,{value:tok.key},[],settings);
+        return key+': '+bits[0];
+    },
+    dict: function(tree,tok,bits,settings) {
+		if(!bits)
+		{
+            bits = [];
+			if(tok.value) {
+                for(var key in tok.value) {
+                    bits.push(treeToJME({tok: new jme.types.TKeyPair(key), args:[{tok:tok.value[key]}]},settings));
+                }
+			}
+		}
+        if(bits.length) {
+            return '[ '+bits.join(', ')+' ]';
+        } else {
+            return 'dict()';
+        }
+    },
 	vector: function(tree,tok,bits,settings) {
 		return 'vector('+tok.value.map(function(n){ return settings.jmeNumber(n,settings)}).join(',')+')';
 	},
@@ -1252,6 +1289,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			tok.value.map(function(row){return '['+row.map(function(n){ return settings.jmeNumber(n,settings)}).join(',')+']'}).join(',')+')';
 	},
 	'function': function(tree,tok,bits,settings) {
+        if(tok.name in jmeFunctions) {
+            return jmeFunctions[tok.name](tree,tok,bits,settings);
+        }
+
 		if(!bits) {
 			return tok.name+'()';
 		} else {
@@ -1319,6 +1360,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		case 'isa':
 		case 'except':
 		case '+':
+        case 'in':
 			op=' '+op+' ';
 			break;
 		case 'not':
@@ -1337,6 +1379,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 	expression: function(tree,tok,bits,settings) {
 		return treeToJME(tok.tree);
 	}
+}
+
+/** Define how to render function in JME, for special cases when the normal rendering `f(...)` isn't right.
+ * @enum {function}
+ * @memberof Numbas.jme.display
+ */
+var jmeFunctions = jme.display.jmeFunctions = {
+    'dict': typeToJME.dict
 }
 
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
