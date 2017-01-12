@@ -1438,7 +1438,7 @@ newBuiltin('table',[TList,TList],THTML,
 			}
 		}
 
-		return table;
+		return new THTML(table);
 	},
 	{
 		unwrapValues: true,
@@ -1468,7 +1468,7 @@ newBuiltin('table',[TList],THTML,
 			}
 		}
 
-		return table;
+		return new THTML(table);
 	},
 	{
 		unwrapValues: true,
