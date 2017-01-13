@@ -133,6 +133,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             throw(new Numbas.Error('part.numberentry.zero sig fig'));
         }
 
+        // author trying to set the required precision for a number entry part to a negative number of decimal places or sig figs
+        if(settings.precisionType=='dp' && settings.precision<0) {
+            throw(new Numbas.Error('part.numberentry negative with decimal places'));
+        }
+
 		var minvalue = jme.subvars(settings.minvalueString,scope);
 		minvalue = scope.evaluate(minvalue);
 		if(minvalue && minvalue.type=='number') {
