@@ -110,12 +110,12 @@ newBuiltin('+',[TList,'?'],TList, null, {
 newBuiltin('+',[TDict,TDict],TDict, null,{
     evaluate: function(args,scope) {
         var nvalue = {};
-        for(var x in args[0].value) {
+        Object.keys(args[0].value).forEach(function(x) {
             nvalue[x] = args[0].value[x];
-        }
-        for(var x in args[1].value) {
+        })
+        Object.keys(args[1].value).forEach(function(x) {
             nvalue[x] = args[1].value[x];
-        }
+        })
         return new TDict(nvalue);
     }
 });
@@ -194,24 +194,33 @@ newBuiltin('dict',['*keypair'],TDict,null,{
 });
 newBuiltin('keys',[TDict],TList,function(d) {
     var o = [];
-    for(var key in d) {
+    Object.keys(d).forEach(function(key) {
         o.push(new TString(key));
-    }
+    })
     return o;
 });
 newBuiltin('values',[TDict],TList,function(d) {
     var o = [];
-    for(var key in d) {
-        o.push(d[key]);
-    }
+    Object.values(d).forEach(function(v) {
+        o.push(v);
+    })
     return o;
 });
+newBuiltin('values',[TDict,TList],TList,function(d,keys) {
+    return keys.map(function(key) {
+        if(!d.hasOwnProperty(key.value)) {
+            throw(new Numbas.Error('jme.func.listval.key not in dict',{key:key}));
+        } else {
+            return d[key.value];
+        }
+    });
+})
 newBuiltin('items',[TDict],TList,null, {
     evaluate: function(args,scope) {
         var o = [];
-        for(var x in args[0].value) {
-            o.push(new TList([new TString(x), args[0].value[x]]))
-        }
+        Object.entries(args[0].value).forEach(function(x) {
+            o.push(new TList([new TString(x[0]), x[1]]))
+        });
         return new TList(o);
     }
 });
