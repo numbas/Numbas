@@ -133,6 +133,10 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             throw(new Numbas.Error('part.numberentry.zero sig fig'));
         }
 
+        if(settings.precisionType=='dp' && settings.precision<0) {
+            throw(new Numbas.Error('part.numberentry.negative decimal places'));
+        }
+
 		var minvalue = jme.subvars(settings.minvalueString,scope);
 		minvalue = scope.evaluate(minvalue);
 		if(minvalue && minvalue.type=='number') {

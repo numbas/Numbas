@@ -176,6 +176,7 @@
     "part.numberentry.answer not integer": "Your answer is invalid. You must enter a whole number, not a decimal.",
     "part.numberentry.answer not integer or decimal": "Your answer is invalid. You must enter an integer or a decimal.",
     "part.numberentry.zero sig fig": "This part is set up to round the student's answer to zero significant figures, which has no meaning.",
+    "part.numberentry.negative decimal places": "This part is set up to round the student's answer to a negative number of decimal places, which has no meaning.",
     "part.numberentry.precision type.dp": "decimal place",
     "part.numberentry.precision type.dp_plural": "decimal places",
     "part.numberentry.precision type.sigfig": "significant figure",
