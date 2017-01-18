@@ -835,6 +835,7 @@ class PatternMatchPart(Part):
     partialCredit = 0
     answer = ''
     displayAnswer = ''
+    matchMode = 'regex'
 
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
@@ -842,7 +843,7 @@ class PatternMatchPart(Part):
     @staticmethod
     def fromDATA(data):
         part = PatternMatchPart()
-        tryLoad(data,['caseSensitive','partialCredit','answer','displayAnswer'],part)
+        tryLoad(data,['caseSensitive','partialCredit','answer','displayAnswer','matchMode'],part)
 
         return part
 
@@ -855,6 +856,7 @@ class PatternMatchPart(Part):
         part.find('correctanswer').text = strcons(self.answer)
 
         part.find('case').attrib = {'sensitive': strcons_fix(self.caseSensitive), 'partialcredit': strcons_fix(self.partialCredit)+'%'}
+        part.find('matchmode') = ## ????
 
         return part
 

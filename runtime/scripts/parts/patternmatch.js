@@ -37,6 +37,8 @@ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, quest
 
 	settings.correctAnswerString = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
 
+	//No idea what to do here.
+
 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
 	if(!displayAnswerNode)
 		this.error('part.patternmatch.display answer missing');
@@ -76,7 +78,8 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		displayAnswerString: '',
 		displayAnswer: '',
 		caseSensitive: false,
-		partialCredit: 0
+		partialCredit: 0,
+		matchMode: 'regex'
 	},
 
 	/** Compute the correct answer, based on the given scope
@@ -114,24 +117,53 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		}
 		this.answered = this.studentAnswer.length>0;
 
-		var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );			
-		var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
-		
-		if( this.settings.caseSensitive ) {
-			if( caseSensitiveAnswer.test(this.studentAnswer) ) {
-				this.setCredit(1,R('part.marking.correct'));
-			} else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-				this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
+		var caseInsensitiveRegexAnswer = new RegExp( this.settings.correctAnswer, 'i' );			
+		var caseSensitiveRegexAnswer = new RegExp( this.settings.correctAnswer );
+
+		var caseSensitiveStringAnswer = $.trim(this.settings.correctAnswerString);
+		var caseInsensitiveStringAnswer = $.trim(this.settings.correctAnswerString.toLowerCase());
+
+		var caseInsensitiveStudentAnswer = this.studentAnswer.toLowerCase();
+		//True if matchMode set to 'regex' and false if set to 'string'
+		var matchMode = this.settings.matchMode == 'regex';
+			
+		if (matchMode) {
+			if( this.settings.caseSensitive ) {
+				if( caseSensitiveRegexAnswer.test(this.studentAnswer) ) {
+					this.setCredit(1,R('part.marking.correct'));
+				} else if(caseInsensitiveRegexAnswer.test(this.studentAnswer)) {
+					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
+				} else {
+					this.setCredit(0,R('part.marking.incorrect'));
+				}
 			} else {
-				this.setCredit(0,R('part.marking.incorrect'));
-			}
-		} else {
-			if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-				this.setCredit(1,R('part.marking.correct'));
-			} else {
-				this.setCredit(0,R('part.marking.incorrect'));
+				if(caseInsensitiveRegexAnswer.test(this.studentAnswer)) {
+					this.setCredit(1,R('part.marking.correct'));
+				} else {
+					this.setCredit(0,R('part.marking.incorrect'));
+				}
 			}
 		}
+
+		else {
+			if( this.settings.caseSensitive ) {
+				if( caseSensitiveStringAnswer == this.studentAnswer ) {
+					this.setCredit(1,R('part.marking.correct'));
+				} else if(caseInsensitiveStringAnswer == caseInsensitiveStudentAnswer) {
+					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
+				} else {
+					this.setCredit(0,R('part.marking.incorrect'));
+				}
+			} else {
+				if(caseInsensitiveStringAnswer == caseInsensitiveStudentAnswer) {
+					this.setCredit(1,R('part.marking.correct'));
+				} else {
+					this.setCredit(0,R('part.marking.incorrect'));
+				}
+			}
+		}
+
+
 	},
 
 	/** Is the student's answer valid? False if the part hasn't been submitted.
