@@ -12,55 +12,55 @@ Copyright 2011-15 Newcastle University
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+   */
 
-/** @file The {@link Numbas.parts.PatternMatchPart} object */
+   /** @file The {@link Numbas.parts.PatternMatchPart} object */
 
-Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+   Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
 
-var util = Numbas.util;
-var jme = Numbas.jme;
-var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
+   	var util = Numbas.util;
+   	var jme = Numbas.jme;
+   	var math = Numbas.math;
+   	var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-var Part = Numbas.parts.Part;
+   	var Part = Numbas.parts.Part;
 
 /** Text-entry part - student's answer must match the given regular expression
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading)
-{
-	var settings = this.settings;
-	util.copyinto(PatternMatchPart.prototype.settings,settings);
+ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading)
+ {
+ 	var settings = this.settings;
+ 	util.copyinto(PatternMatchPart.prototype.settings,settings);
 
-	settings.correctAnswerString = Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer'));
+ 	settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer')));
 
-	//No idea what to do here.
+ 	tryGetAttribute(settings,this.xml,'correctanswer',['mode'],['matchMode']);
 
-	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
-	if(!displayAnswerNode)
-		this.error('part.patternmatch.display answer missing');
-	settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+ 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
+ 	if(!displayAnswerNode)
+ 		this.error('part.patternmatch.display answer missing');
+ 	settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
 
-	this.getCorrectAnswer(this.question.scope);
+ 	this.getCorrectAnswer(this.question.scope);
 
-	tryGetAttribute(settings,this.xml,'case',['sensitive','partialCredit'],'caseSensitive');
+ 	tryGetAttribute(settings,this.xml,'case',['sensitive','partialCredit'],'caseSensitive');
 
-	this.display = new Numbas.display.PatternMatchPartDisplay(this);
+ 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
 
-	if(loading)
-	{
-		var pobj = Numbas.store.loadPatternMatchPart(this);
-		this.stagedAnswer = [pobj.studentAnswer];
-	}
-}
-PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
+ 	if(loading)
+ 	{
+ 		var pobj = Numbas.store.loadPatternMatchPart(this);
+ 		this.stagedAnswer = [pobj.studentAnswer];
+ 	}
+ }
+ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	/** The student's last submitted answer 
 	 * @type {string}
 	 */
-	studentAnswer: '',
+	 studentAnswer: '',
 
 	/** Properties set when the part is generated.
 	 * Extends {@link Numbas.parts.Part#settings}
@@ -71,28 +71,32 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 * @property {boolean} caseSensitive - does case matter?
 	 * @property {number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
 	 */
-	settings: 
-	{
-		correctAnswerString: '.*',
-		correctAnswer: /.*/,
-		displayAnswerString: '',
-		displayAnswer: '',
-		caseSensitive: false,
-		partialCredit: 0,
-		matchMode: 'regex'
-	},
+	 settings: 
+	 {
+	 	correctAnswerString: '.*',
+	 	correctAnswer: /.*/,
+	 	displayAnswerString: '',
+	 	displayAnswer: '',
+	 	caseSensitive: false,
+	 	partialCredit: 0,
+	 	matchMode: 'regex'
+	 },
 
 	/** Compute the correct answer, based on the given scope
-	 */
+	*/
 	getCorrectAnswer: function(scope) {
 		var settings = this.settings;
 
 		settings.correctAnswer = '^'+jme.subvars(settings.correctAnswerString, scope, true)+'$';
 		settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+		
+		if (this.settings.matchMode=='regex') {
+			settings.correctAnswer = '^'+settings.correctAnswer+'$';
+		}
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
-	 */
+	*/
 	setStudentAnswer: function() {
 		this.studentAnswer = this.answerList[0];
 	},
@@ -101,12 +105,12 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 * @abstract
 	 * @returns {Numbas.jme.token}
 	 */
-	studentAnswerAsJME: function() {
-		return new Numbas.jme.types.TString(this.studentAnswer);
-	},
+	 studentAnswerAsJME: function() {
+	 	return new Numbas.jme.types.TString(this.studentAnswer);
+	 },
 
 	/** Mark the student's answer
-	 */
+	*/
 	mark: function ()
 	{
 		var validation = this.validation;
@@ -117,50 +121,49 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 		}
 		this.answered = this.studentAnswer.length>0;
 
-		var caseInsensitiveRegexAnswer = new RegExp( this.settings.correctAnswer, 'i' );			
-		var caseSensitiveRegexAnswer = new RegExp( this.settings.correctAnswer );
+		switch (this.settings.matchMode){
+			case 'regex':
 
-		var caseSensitiveStringAnswer = $.trim(this.settings.correctAnswerString);
-		var caseInsensitiveStringAnswer = $.trim(this.settings.correctAnswerString.toLowerCase());
+			var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );
+			var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
 
-		var caseInsensitiveStudentAnswer = this.studentAnswer.toLowerCase();
-		//True if matchMode set to 'regex' and false if set to 'string'
-		var matchMode = this.settings.matchMode == 'regex';
-			
-		if (matchMode) {
 			if( this.settings.caseSensitive ) {
-				if( caseSensitiveRegexAnswer.test(this.studentAnswer) ) {
+				if( caseSensitiveAnswer.test(this.studentAnswer) ) {
 					this.setCredit(1,R('part.marking.correct'));
-				} else if(caseInsensitiveRegexAnswer.test(this.studentAnswer)) {
+				} else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
 					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
 				} else {
 					this.setCredit(0,R('part.marking.incorrect'));
 				}
 			} else {
-				if(caseInsensitiveRegexAnswer.test(this.studentAnswer)) {
+				if(caseInsensitiveAnswer.test(this.studentAnswer)) {
 					this.setCredit(1,R('part.marking.correct'));
 				} else {
 					this.setCredit(0,R('part.marking.incorrect'));
 				}
 			}
-		}
 
-		else {
+			break;
+
+			case 'exact':
+
 			if( this.settings.caseSensitive ) {
-				if( caseSensitiveStringAnswer == this.studentAnswer ) {
+				if( this.studentAnswer == this.settings.correctAnswer ) {
 					this.setCredit(1,R('part.marking.correct'));
-				} else if(caseInsensitiveStringAnswer == caseInsensitiveStudentAnswer) {
+				} else if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
 					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
 				} else {
 					this.setCredit(0,R('part.marking.incorrect'));
 				}
 			} else {
-				if(caseInsensitiveStringAnswer == caseInsensitiveStudentAnswer) {
+				if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
 					this.setCredit(1,R('part.marking.correct'));
 				} else {
 					this.setCredit(0,R('part.marking.incorrect'));
 				}
 			}
+
+			break;
 		}
 
 
@@ -169,15 +172,15 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	/** Is the student's answer valid? False if the part hasn't been submitted.
 	 * @returns {boolean}
 	 */
-	validate: function()
-	{
-		if(!this.answered) {
-			this.giveWarning(R('part.marking.not submitted'));
-		}
+	 validate: function()
+	 {
+	 	if(!this.answered) {
+	 		this.giveWarning(R('part.marking.not submitted'));
+	 	}
 
-		return this.answered;
-	}
-};
+	 	return this.answered;
+	 }
+	};
 
-Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
+	Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
 });
