@@ -40,7 +40,7 @@
 
             <!-- stopwatch and timing controls -->
             <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-                <a class="clearfix">
+                <a class="clearfix">prev
                     <span class="pull-left" data-localise="timing.time remaining"></span>
                     <span class="pull-right" data-bind="text: displayTime"></span>
                 </a>
@@ -48,7 +48,6 @@
 
             <div class="menuButtons">
                 <li><button class="btn btn-primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-                <li><button class="btn btn-primary navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
                 <li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
             </div>
         </ul>
@@ -65,10 +64,11 @@
         <ul class="nav">
             <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
             <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
+            <li><button type="button" class="btn btn-primary navbar-btn btn-warning" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
             <li>	
                 <div class="titleBits" data-bind="with: currentQuestion">
                     <span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
-                    <span id="questionNameDisplay" data-bind="text: displayName"></span>
+                    <span id="questionNamDeisplay" data-bind="text: displayName"></span>
                 </div>
             </li>
         </ul>
