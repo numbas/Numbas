@@ -854,9 +854,9 @@ class PatternMatchPart(Part):
         part.find('displayanswer').append(makeContentNode(self.displayAnswer))
 
         part.find('correctanswer').text = strcons(self.answer)
+        part.find('correctanswer').attrib = {'mode':strcons(self.matchMode)}
 
         part.find('case').attrib = {'sensitive': strcons_fix(self.caseSensitive), 'partialcredit': strcons_fix(self.partialCredit)+'%'}
-        part.find('correctanswer').attrib = {'mode':strcons(self.matchMode)}
 
         return part
 

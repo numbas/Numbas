@@ -87,12 +87,15 @@ Copyright 2011-15 Newcastle University
 	getCorrectAnswer: function(scope) {
 		var settings = this.settings;
 
-		settings.correctAnswer = '^'+jme.subvars(settings.correctAnswerString, scope, true)+'$';
+		settings.correctAnswer = jme.subvars(settings.correctAnswerString, scope, true);
+
+        switch(this.settings.matchMode) {
+            case 'regex':
+                settings.correctAnswer = '^'+settings.correctAnswer+'$';
+                break;
+        }
+
 		settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
-		
-		if (this.settings.matchMode=='regex') {
-			settings.correctAnswer = '^'+settings.correctAnswer+'$';
-		}
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
@@ -124,46 +127,46 @@ Copyright 2011-15 Newcastle University
 		switch (this.settings.matchMode){
 			case 'regex':
 
-			var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );
-			var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
+                var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );
+                var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
 
-			if( this.settings.caseSensitive ) {
-				if( caseSensitiveAnswer.test(this.studentAnswer) ) {
-					this.setCredit(1,R('part.marking.correct'));
-				} else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
-				} else {
-					this.setCredit(0,R('part.marking.incorrect'));
-				}
-			} else {
-				if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-					this.setCredit(1,R('part.marking.correct'));
-				} else {
-					this.setCredit(0,R('part.marking.incorrect'));
-				}
-			}
+                if( this.settings.caseSensitive ) {
+                    if( caseSensitiveAnswer.test(this.studentAnswer) ) {
+                        this.setCredit(1,R('part.marking.correct'));
+                    } else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
+                        this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
+                    } else {
+                        this.setCredit(0,R('part.marking.incorrect'));
+                    }
+                } else {
+                    if(caseInsensitiveAnswer.test(this.studentAnswer)) {
+                        this.setCredit(1,R('part.marking.correct'));
+                    } else {
+                        this.setCredit(0,R('part.marking.incorrect'));
+                    }
+                }
 
-			break;
+                break;
 
 			case 'exact':
 
-			if( this.settings.caseSensitive ) {
-				if( this.studentAnswer == this.settings.correctAnswer ) {
-					this.setCredit(1,R('part.marking.correct'));
-				} else if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
-					this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
-				} else {
-					this.setCredit(0,R('part.marking.incorrect'));
-				}
-			} else {
-				if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
-					this.setCredit(1,R('part.marking.correct'));
-				} else {
-					this.setCredit(0,R('part.marking.incorrect'));
-				}
-			}
+                if( this.settings.caseSensitive ) {
+                    if( this.studentAnswer == this.settings.correctAnswer ) {
+                        this.setCredit(1,R('part.marking.correct'));
+                    } else if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
+                        this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
+                    } else {
+                        this.setCredit(0,R('part.marking.incorrect'));
+                    }
+                } else {
+                    if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
+                        this.setCredit(1,R('part.marking.correct'));
+                    } else {
+                        this.setCredit(0,R('part.marking.incorrect'));
+                    }
+                }
 
-			break;
+                break;
 		}
 
 
