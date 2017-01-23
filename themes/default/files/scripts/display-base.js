@@ -273,6 +273,11 @@ Numbas.queueScript('display-base',['controls','math','xml','util','timing','jme'
                 }
             }),
             message: ko.computed(function() {
+
+                if (settings.showFeedbackIcon) {
+                    return 'invisible';
+                }
+
                 var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 
                 var scoreobj = {
