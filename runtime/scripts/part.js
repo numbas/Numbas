@@ -110,7 +110,7 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	
 	tryGetAttribute(this,this.xml,'.',['type','marks']);
 
-	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer'],[]);
+	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
 
 	//initialise gap and step arrays
 	this.gaps = [];
@@ -297,6 +297,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		enableMinimumMarks: false,
 		minimumMarks: 0,
 		showCorrectAnswer: true,
+		showFeedbackIcon: true,
 		hasVariableReplacements: false
 	},
 

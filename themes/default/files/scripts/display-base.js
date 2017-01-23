@@ -295,6 +295,11 @@ Numbas.queueScript('display-base',['controls','math','xml','util','timing','jme'
                     return '';
             }),
             iconClass: ko.computed(function() {
+                
+                if (!settings.showFeedbackIcon) {
+                    return 'invisible';
+                }
+
                 switch(state()) {
                 case 'wrong':
                     return 'icon-remove';
