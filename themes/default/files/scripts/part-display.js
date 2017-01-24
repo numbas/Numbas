@@ -199,7 +199,9 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|object} scoreFeedback
          * @memberof Numbas.display.PartDisplay
          */
-        this.scoreFeedback = display.showScoreFeedback(this,p.question.exam.settings);
+        var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
+        feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
+        this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
 
         /** Control functions
          * @member {object} controls

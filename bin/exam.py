@@ -601,6 +601,7 @@ class Part:
     enableMinimumMarks = True
     minimumMarks = 0
     showCorrectAnswer = True
+    showFeedbackIcon = True
     variableReplacementStrategy = 'originalfirst'
 
     def __init__(self,marks,prompt=''):
@@ -632,7 +633,7 @@ class Part:
             )
         part = partConstructors[kind].fromDATA(data)
 
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','variableReplacementStrategy'],part);
+        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy'],part);
 
         if haskey(data,'marks'):
             part.marks = data['marks']
@@ -670,7 +671,8 @@ class Part:
             'stepspenalty': strcons_fix(self.stepsPenalty), 
             'enableminimummarks': strcons_fix(self.enableMinimumMarks), 
             'minimummarks': strcons_fix(self.minimumMarks), 
-            'showcorrectanswer': strcons_fix(self.showCorrectAnswer)
+            'showcorrectanswer': strcons_fix(self.showCorrectAnswer),
+            'showfeedbackicon': strcons_fix(self.showFeedbackIcon)
         }
 
         part.find('prompt').append(makeContentNode(self.prompt))
