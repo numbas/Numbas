@@ -206,7 +206,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         +'		<table class="matrix">'
         +'			<tbody data-bind="foreach: value">'
         +'				<tr data-bind="foreach: $data">'
-        +'					<td class="cell"><input data-bind="value: cell, valueUpdate: \'afterkeydown\', autosize: true, disable: $parents[1].disable, event: {keydown: $parents[1].keydown, keyup: $parents[1].moveArrow}"></td>'
+        +'					<td class="cell"><input data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: {keydown: $parents[1].keydown, keyup: $parents[1].moveArrow}"></td>'
         +'				</tr>'
         +'			</tbody>'
         +'		</table>'
