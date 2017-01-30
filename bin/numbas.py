@@ -139,6 +139,8 @@ class NumbasCompiler(object):
 
         self.make_locale_file()
 
+        self.add_source()
+
         if self.options.scorm:
             self.add_scorm()
 
@@ -351,6 +353,11 @@ class NumbasCompiler(object):
         javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
         self.files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
 
+    def add_source(self):
+        """
+        	Add the original .exam file, so that it can be recreated later on
+        """
+        self.files[os.path.join('.','source.exam')] = io.StringIO(self.options.source)
 
     def minify(self):
         """
