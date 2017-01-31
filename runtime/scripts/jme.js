@@ -440,7 +440,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			if(tree.tok.type=='name')
 			{
 				var name = tree.tok.name.toLowerCase();
-				if(scope.variables[name]===undefined)
+                var v = scope.getVariable(name);
+				if(v===undefined)
 				{
 					if(allowUnbound)
 						return {tok: new TName(name)};
@@ -449,7 +450,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				}
 				else
 				{
-					var v = scope.variables[name];
 					if(v.tok) {
 						return v;
 					} else {
@@ -532,18 +532,19 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return tok;
             }
 		case 'name':
-			if(tok.name.toLowerCase() in scope.variables)
-				return scope.variables[tok.name.toLowerCase()];
-			else
+            var v = scope.getVariable(tok.name.toLowerCase());
+			if(v) {
+				return v;
+            } else {
 				tok = new TName(tok.name);
 				tok.unboundName = true;
 				return tok;
-			break;
+            }
 		case 'op':
 		case 'function':
 			var op = tok.name.toLowerCase();
 			if(lazyOps.indexOf(op)>=0) {
-				return scope.functions[op][0].evaluate(tree.args,scope);
+				return scope.getFunction(op)[0].evaluate(tree.args,scope);
 			}
 			else {
 
@@ -552,23 +553,26 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				}
 
 				var matchedFunction;
-				if(scope.functions[op]===undefined)
+                var fns = scope.getFunction(op);
+				if(fns.length==0)
 				{
 					if(tok.type=='function') {
 						//check if the user typed something like xtan(y), when they meant x*tan(y)
 						var possibleOp = op.slice(1);
-						if(possibleOp in scope.functions)
+						if(op.length>1 && scope.getFunction(possibleOp).length) {
 							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',{name:op,first:op[0],possibleOp:possibleOp}));
-						else
+						} else {
 							throw(new Numbas.Error('jme.typecheck.function not defined',{op:op,suggestion:op}));
+                        }
 					}
-					else
+					else {
 						throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
+                    }
 				}
 
-				for(var j=0;j<scope.functions[op].length; j++)
+				for(var j=0;j<fns.length; j++)
 				{
-					var fn = scope.functions[op][j];
+					var fn = fns[j];
 					if(fn.typecheck(tree.args))
 					{
 						matchedFunction = fn;
@@ -699,8 +703,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			var vars1 = findvars(tree1);
 			var vars2 = findvars(tree2);
 
-			for(var v in scope.variables)
-			{
+			for(var v in scope.allVariables()) {
 				delete vars1[v];
 				delete vars2[v];
 			}
@@ -716,7 +719,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
 				for(var i = 0; i<rs.length; i++) {
 					var nscope = new jme.Scope([scope,{variables:rs[i]}]);
-					util.copyinto(scope.variables,rs[i]);
 					var r1 = evaluate(tree1,nscope);
 					var r2 = evaluate(tree2,nscope);
 					if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
@@ -997,8 +999,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 				// a function application is random if its definition is marked as random,
 				// or if any of its arguments are random
 				var op = expr.tok.name.toLowerCase();
-				if(scope.functions[op]) {
-					var fns = scope.functions[op];
+                var fns = scope.getFunction(op);
+				if(fns) {
 					for(var i=0;i<fns.length;i++) {
 						var fn = fns[i]
 						if(fn.random===undefined && fn.language=='jme') {
@@ -1154,52 +1156,136 @@ var fnSort = util.sortBy('id');
 var Scope = jme.Scope = function(scopes) {
 	this.variables = {};
 	this.functions = {};
+    this._resolved_functions = {};
 	this.rulesets = {};
+    this.deleted = {
+        variables: {},
+        functions: {},
+        rulesets: {}
+    }
 
-	if(scopes===undefined)
-		return;
+	if(scopes===undefined) {
+        this.extras = {};
+        return;
+    } 
+    if(!$.isArray(scopes)) {
+        scopes = [scopes,undefined];
+    }
+    this.question = scopes[0].question || this.question;
+    if(scopes[0].__proto__!==Scope.prototype) {
+        this.extras = scopes[0];
+        return;
+    } else {
+        this.parent = scopes[0];
+        this.extras = scopes[1] || {};
+    }
 
-	if(!$.isArray(scopes))
-		scopes = [scopes];
-
-	for(var i=0;i<scopes.length;i++) {
-		var scope = scopes[i];
-        this.question = scope.question || this.question;
-		if(scope) {
-			if('variables' in scope) {
-				for(var x in scope.variables) {
-					this.variables[x] = scope.variables[x];
-				}
-			}
-			if('functions' in scope) {
-				for(var x in scope.functions) {
-					if(!(x in this.functions))
-						this.functions[x] = scope.functions[x].slice();
-					else 
-						this.functions[x] = this.functions[x].merge(scope.functions[x],fnSort);
-				}
-			}
-			if('rulesets' in scope) {
-				for(var x in scope.rulesets) {
-					if(!(x in this.rulesets))
-						this.rulesets[x] = scope.rulesets[x];
-					else
-						this.rulesets[x] = mergeRulesets(this.rulesets[x],scope.rulesets[x]);
-				}
-			}
-		}
-	}
+    return;
 }
 Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 	/** Add a JME function to the scope.
 	 * @param {jme.funcObj} fn - function to add
 	 */
 	addFunction: function(fn) {
-		if(!(fn.name in this.functions))
+		if(!(fn.name in this.functions)) {
 			this.functions[fn.name] = [fn];
-		else
+        } else {
 			this.functions[fn.name].push(fn);
+            delete this._resolved_functions[fn.name];
+        }
 	},
+
+    deleteVariable: function(name) {
+        this.deleted.variables[name] = true;
+    },
+
+    /** Get the object with given name from the given collection 
+     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {string} name - the name of the object to retrieve
+     * @returns {object}
+     */
+    resolve: function(collection,name) {
+        var scope = this;
+        while(scope) {
+            if(scope.deleted[collection][name]) {
+                return;
+            }
+            if(scope.extras[collection] && scope.extras[collection][name]!==undefined) {
+                return scope.extras[collection][name];
+            }
+            if(scope[collection][name]!==undefined) {
+                return scope[collection][name];
+            }
+            scope = scope.parent;
+        }
+    },
+
+    collect: function(collection,name) {
+        var scope = this;
+        var deleted = {};
+        var out = {};
+        var name
+        while(scope) {
+            for(var name in scope.deleted[collection]) {
+                deleted[name] = scope.deleted[collection][name];
+            }
+            if(scope.extras[collection]) {
+                for(name in scope.extras[collection]) {
+                    if(!deleted[name]) {
+                        out[name] = out[name] || scope.extras[collection][name];
+                    }
+                }
+            }
+            for(name in scope[collection]) {
+                if(!deleted[name]) {
+                    out[name] = out[name] || scope[collection][name];
+                }
+            }
+            scope = scope.parent;
+        }
+        return out;
+    },
+
+    allVariables: function() {
+        return this.collect('variables');
+    },
+
+    allRulesets: function() {
+        if(!this._allRulesets) {
+            this._allRulesets = this.collect('rulesets');
+        }
+        return this._allRulesets;
+    },
+
+    getVariable: function(name) {
+        return this.resolve('variables',name);
+    },
+
+    /** Get all definitions of the given function name
+     * @param {string} name
+     * @returns {Numbas.jme.funcObj[]}
+     */
+    getFunction: function(name) {
+        if(!this._resolved_functions[name]) {
+            var scope = this;
+            var o = [];
+            while(scope) {
+                if(scope.extras.functions && scope.extras.functions[name]!==undefined) {
+                    o = o.concat(scope.extras.functions[name]);
+                }
+                if(scope.functions[name]!==undefined) {
+                    o = o.concat(scope.functions[name]);
+                }
+                scope = scope.parent;
+            }
+            this._resolved_functions[name] = o;
+        }
+        return this._resolved_functions[name];
+    },
+
+    getRuleset: function(name) {
+        return this.resolve('rulesets',name);
+    },
 
 	/** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
 	 * @param {JME} expr

@@ -49,7 +49,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 	{
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = jme.collectRuleset(ruleset,scope.rulesets);
+		ruleset = jme.collectRuleset(ruleset,scope.allRulesets());
 
 		expr+='';	//make sure expr is a string
 
@@ -93,7 +93,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 
 		if(!ruleset)
 			ruleset = simplificationRules.basic;
-		ruleset = jme.collectRuleset(ruleset,scope.rulesets);		//collect the ruleset - replace set names with the appropriate Rule objects
+		ruleset = jme.collectRuleset(ruleset,scope.allRulesets());		//collect the ruleset - replace set names with the appropriate Rule objects
 
 		try 
 		{
@@ -212,7 +212,7 @@ function infixTex(code)
 {
 	return function(thing,texArgs)
 	{
-		var arity = jme.builtinScope.functions[thing.tok.name][0].intype.length;
+		var arity = jme.builtinScope.getFunction(thing.tok.name)[0].intype.length;
 		if( arity == 1 )	//if operation is unary, prepend argument with code
 		{
 			return code+texArgs[0];

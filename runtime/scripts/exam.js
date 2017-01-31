@@ -146,7 +146,7 @@ function Exam()
 
 	for(var name in sets)
 	{
-		this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.rulesets);
+		this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
 	}
 
     // question groups

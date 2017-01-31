@@ -694,7 +694,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
 	evaluate: function(args,scope)
 	{
 		var kind = jme.evaluate(args[1],scope).value;
-		if(args[0].tok.type=='name' && scope.variables[args[0].tok.name.toLowerCase()]==undefined )
+		if(args[0].tok.type=='name' && scope.getVariable(args[0].tok.name.toLowerCase())==undefined )
 			return new TBool(kind=='name');
 
 		var match = false;
@@ -907,15 +907,14 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 
 function mapOverList(lambda,names,list,scope) {
 	var olist = list.map(function(v) {
-		var d = {}
 		if(typeof(names)=='string') {
-			d[names] = v;
+			scope.variables[names] = v;
 		} else {
 			names.forEach(function(name,i) {
-				d[name] = v.value[i];
+				scope.variables[name] = v.value[i];
 			});
 		}
-		return scope.evaluate(lambda,d);
+		return scope.evaluate(lambda);
 	});
 	return new TList(olist);
 }
@@ -934,9 +933,8 @@ jme.mapFunctions = {
 	},
 	'matrix': function(lambda,name,matrix,scope) {
 		return new TMatrix(matrixmath.map(matrix,function(n) {
-			var d = {}
-			d[name] = new TNum(n);
-			var o = scope.evaluate(lambda,d);
+			scope.variables[name] = new TNum(n);
+			var o = scope.evaluate(lambda);
 			if(o.type!='number') {
 				throw(new Numbas.Error("jme.map.matrix map returned non number"))
 			}
@@ -945,9 +943,8 @@ jme.mapFunctions = {
 	},
 	'vector': function(lambda,name,vector,scope) {
 		return new TVector(vectormath.map(vector,function(n) {
-			var d = {}
-			d[name] = new TNum(n);
-			var o = scope.evaluate(lambda,d);
+			scope.variables[name] = new TNum(n);
+			var o = scope.evaluate(lambda);
 			if(o.type!='number') {
 				throw(new Numbas.Error("jme.map.vector map returned non number"))
 			}

@@ -637,7 +637,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			if(name in new_variables) {
 				delete todo[name];
 			} else {
-				delete scope.variables[name];
+				scope.deleteVariable(name);
 			}
 		}
 
