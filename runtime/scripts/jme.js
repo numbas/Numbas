@@ -1143,15 +1143,21 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 var fnSort = util.sortBy('id');
 
 /**
- * JME evaluation environment.
+ * A JME evaluation environment.
+ * Stores variable, function, and ruleset definitions.
+ *
+ * A scope may have a parent; elements of the scope are resolved by searching up through the hierarchy of parents until a match is found.
+ *
  * @memberof Numbas.jme
  * @constructor
- * @property {object} variables - dictionary of {@link Numbas.jme.token} objects
- * @property {object} functions - dictionary of arrays of {@link Numbas.jme.funcObj} objects. There can be more than one function for each name because of signature overloading.
- * @property {objects} rulesets - dictionary of {@link Numbas.jme.Ruleset} objects
+ * @property {object} variables - dictionary of {@link Numbas.jme.token} objects defined **at this level in the scope**. To resolve a variable in the scope, use `getVariable`.
+ * @property {object} functions - dictionary of arrays of {@link Numbas.jme.funcObj} objects. There can be more than one function for each name because of signature overloading. To resolve a function name in the scope, use `getFunction`.
+ * @property {object} rulesets - dictionary of {@link Numbas.jme.Ruleset} objects. To resolve a ruleset in the scope, use `getRuleset`.
+ * @property {object} deleted - an object `{variables: {}, functions: {}, rulesets: {}}`: names of deleted variables/functions/rulesets
+ * @property {object} extras - additional variables/functions/rulesets added into this scope, not from a parent scope
  * @property {Numbas.Question} question - the question this scope belongs to
  *
- * @param {Numbas.jme.Scope[]} scopes - List of scopes to combine into this one. Scopes appearing later in the list override ones appearing earlier, in case variable/ruleset names conflict.
+ * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in `this.extras`
  */
 var Scope = jme.Scope = function(scopes) {
 	this.variables = {};
@@ -1183,6 +1189,7 @@ var Scope = jme.Scope = function(scopes) {
     return;
 }
 Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
+
 	/** Add a JME function to the scope.
 	 * @param {jme.funcObj} fn - function to add
 	 */
@@ -1195,6 +1202,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
 	},
 
+    /** Mark the given variable name as deleted from the scope.
+     * @param {string} name
+     */
     deleteVariable: function(name) {
         this.deleted.variables[name] = true;
     },
@@ -1220,11 +1230,53 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
 
+    /** Find the value of the variable with the given name, if it's defined
+     * @param {string} name
+     * @returns {Numbas.jme.token}
+     */
+    getVariable: function(name) {
+        return this.resolve('variables',name);
+    },
+
+    /** Get all definitions of the given function name.
+     * @param {string} name
+     * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
+     */
+    getFunction: function(name) {
+        if(!this._resolved_functions[name]) {
+            var scope = this;
+            var o = [];
+            while(scope) {
+                if(scope.extras.functions && scope.extras.functions[name]!==undefined) {
+                    o = o.merge(scope.extras.functions[name],fnSort);
+                }
+                if(scope.functions[name]!==undefined) {
+                    o = o.merge(scope.functions[name],fnSort);
+                }
+                scope = scope.parent;
+            }
+            this._resolved_functions[name] = o;
+        }
+        return this._resolved_functions[name];
+    },
+
+    /** Get the ruleset with the gien name
+     * @param {string} name
+     * @returns {Numbas.jme.Ruleset}
+     */
+    getRuleset: function(name) {
+        return this.resolve('rulesets',name);
+    },
+
+    /** Collect together all items from the given collection 
+     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @returns {object} a dictionary of names to values
+     */
     collect: function(collection,name) {
         var scope = this;
         var deleted = {};
         var out = {};
-        var name
+        var name;
         while(scope) {
             for(var name in scope.deleted[collection]) {
                 deleted[name] = scope.deleted[collection][name];
@@ -1246,10 +1298,16 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return out;
     },
 
+    /** Gather all variables defined in this scope
+     * @returns {object} a dictionary of variables
+     */
     allVariables: function() {
         return this.collect('variables');
     },
 
+    /** Gather all rulesets defined in this scope
+     * @returns {object} a dictionary of rulesets
+     */
     allRulesets: function() {
         if(!this._allRulesets) {
             this._allRulesets = this.collect('rulesets');
@@ -1257,40 +1315,45 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this._allRulesets;
     },
 
-    getVariable: function(name) {
-        return this.resolve('variables',name);
-    },
-
-    /** Get all definitions of the given function name
-     * @param {string} name
-     * @returns {Numbas.jme.funcObj[]}
+    /** Gather all functions defined in this scope
+     * @returns {object} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
      */
-    getFunction: function(name) {
-        if(!this._resolved_functions[name]) {
-            var scope = this;
-            var o = [];
-            while(scope) {
-                if(scope.extras.functions && scope.extras.functions[name]!==undefined) {
-                    o = o.concat(scope.extras.functions[name]);
-                }
-                if(scope.functions[name]!==undefined) {
-                    o = o.concat(scope.functions[name]);
-                }
-                scope = scope.parent;
+    allFunctions: function() {
+        var scope = this;
+        var out = {}
+        var name;
+        function add(name,fns) {
+            if(!out[name]) {
+                out[name] = [];
             }
-            this._resolved_functions[name] = o;
+            out[name] = out[name].merge(fns,fnSort);
         }
-        return this._resolved_functions[name];
+        while(scope) {
+            if(scope.extras.functions) {
+                for(var name in scope.extras.functions) {
+                    add(name,scope.extras.functions[name])
+                }
+                for(var name in scope.functions) {
+                    add(name,scope.functions[name])
+                }
+            }
+        }
+        return out;
     },
 
-    getRuleset: function(name) {
-        return this.resolve('rulesets',name);
+    /** Gather all members of this scope into this scope object.
+     * A backwards-compatibility hack for questions that use `question.scope.variables.x`
+     * Shouldn't be applied to any scope other than the question scope.
+     */
+    flatten: function() {
+        this.variables = this.allVariables();
+        this.rulesets = this.allRulesets();
     },
 
 	/** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
 	 * @param {JME} expr
 	 * @param {object} [variables] - dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
-	 * @returns {token}
+	 * @returns {Numbas.jme.token}
 	 */
 	evaluate: function(expr,variables) {
 		var scope = this;
