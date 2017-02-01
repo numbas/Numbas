@@ -166,22 +166,21 @@ newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c',
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 	var start = r[0];
 	var end = r[1];
-	var step = r[2];
+	var step_size = r[2];
 	if(x>end || x<start) {
 		return false;
 	}
-	if(step===0) {
+	if(step_size===0) {
 		return true;
 	} else {
-		var max_steps = Math.floor(end-start)/step;
-		var steps = Math.floor((x-start)/step);
-		return step*steps+start==x && steps <= max_steps;
+		var max_steps = Math.floor(end-start)/step_size;
+		var steps = Math.floor((x-start)/step_size);
+		return step_size*steps + start == x && steps <= max_steps;
 	}
 });
 
 newBuiltin('list',[TRange],TList,function(range) {
-	var numbers = range.slice(3).map(function(n){ return new TNum(n); });
-	return numbers;
+    return math.rangeToList(range).map(function(n){return new TNum(n)});
 });
 
 newBuiltin('dict',['*keypair'],TDict,null,{
@@ -322,16 +321,15 @@ newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(s
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange,TRange], TList,
 	function(range,except) {
-		if(range[2]==0)
+		if(range[2]==0) {
 			throw(new Numbas.Error("jme.func.except.continuous range"));
-		range = range.slice(3);
-		if(except[2]==0)
-		{
+        }
+
+		range = math.rangeToList(range);
+		if(except[2]==0) {
 			return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new TNum(i)});
-		}
-		else
-		{
-			except = except.slice(3);
+		} else {
+			except = math.rangeToList(except);
 			return math.except(range,except).map(function(i){return new TNum(i)});
 		}
 	},
@@ -345,9 +343,10 @@ newBuiltin('except', [TRange,TRange], TList,
 
 newBuiltin('except', [TRange,TList], TList,
 	function(range,except) {
-		if(range[2]==0)
+		if(range[2]==0) {
 			throw(new Numbas.Error("jme.func.except.continuous range"));
-		range = range.slice(3);
+        }
+		range = math.rangeToList(range)
 		except = except.map(function(i){ return i.value; });
 		return math.except(range,except).map(function(i){return new TNum(i)});
 	},
@@ -361,9 +360,10 @@ newBuiltin('except', [TRange,TList], TList,
 
 newBuiltin('except', [TRange,TNum], TList,
 	function(range,except) {
-		if(range[2]==0)
+		if(range[2]==0) {
 			throw(new Numbas.Error("jme.func.except.continuous range"));
-		range = range.slice(3);
+        }
+		range = math.rangeToList(range);
 		return math.except(range,[except]).map(function(i){return new TNum(i)});
 	},
 
@@ -378,7 +378,7 @@ newBuiltin('except', [TRange,TNum], TList,
 newBuiltin('except', [TList,TRange], TList,
 	function(range,except) {
 		range = range.map(function(i){ return i.value; });
-		except = except.slice(3);
+		except = math.rangeToList(except);
 		return math.except(range,except).map(function(i){return new TNum(i)});
 	},
 
@@ -456,7 +456,7 @@ newBuiltin('implies', [TBool,TBool], TBool, function(a,b){return !a || b;}, {doc
 newBuiltin('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
 newBuiltin('abs', [TString], TNum, function(s){return s.length}, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
 newBuiltin('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
-newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : r.length-3; }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
+newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
 newBuiltin('abs', [TVector], TNum, vectormath.abs, {doc: {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']}});
 newBuiltin('abs', [TDict], TNum, function(d) {
     var n = 0;
@@ -632,7 +632,7 @@ newBuiltin('shuffle',[TList],TList,
 
 newBuiltin('shuffle',[TRange],TList,
 	function(range) {
-		var list = range.slice(3).map(function(n){return new TNum(n)})
+		var list = math.rangeToList(range).map(function(n){return new TNum(n)})
 		return math.shuffle(list);
 	},
 	{
@@ -951,7 +951,7 @@ jme.mapFunctions = {
 	'list': mapOverList,
 	'set': mapOverList,
 	'range': function(lambda,name,range,scope) {
-		var list = range.slice(3).map(function(n){return new TNum(n)});
+		var list = math.rangeToList(range).map(function(n){return new TNum(n)});
 		return mapOverList(lambda,name,list,scope);
 	},
 	'matrix': function(lambda,name,matrix,scope) {
@@ -1034,7 +1034,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
 			list = list.value;
 			break;
 		case 'range':
-			list = list.value.slice(3);
+			list = math.rangeToList(list.value);
 			for(var i=0;i<list.length;i++) {
 				list[i] = new TNum(list[i]);
 			}
@@ -1177,7 +1177,7 @@ newBuiltin('set',[TList],TSet,function(l) {
 	return util.distinct(l);
 });
 newBuiltin('set',[TRange],TSet,function(r) {
-	return r.slice(3).map(function(n){return new TNum(n)});
+	return math.rangeToList(r).map(function(n){return new TNum(n)});
 });
 
 newBuiltin('set', ['?'], TSet, null, {

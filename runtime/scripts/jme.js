@@ -1489,6 +1489,9 @@ TMatrix.doc = {
  * @augments Numbas.jme.token
  * @property {Array.<Number>} value - `[start,end,step]` and then, if the range is discrete, all the values included in the range.
  * @property {Number} size - the number of values in the range (if it's discrete, `undefined` otherwise)
+ * @property {Number} start - the lower bound of the range
+ * @property {Number} end - the upper bound of the range
+ * @property {Number} start - the difference between elements in the range
  * @property type "range"
  * @constructor
  * @param {Array.<Number>} range - `[start,end,step]`
@@ -1498,18 +1501,10 @@ var TRange = types.TRange = types.range = function(range)
 	this.value = range;
 	if(this.value!==undefined)
 	{
-		var start = this.value[0], end = this.value[1], step = this.value[2];
-
-		//if range is discrete, store all values in range so they don't need to be computed each time
-		if(step != 0)
-		{
-			var n = (end-start)/step;
-			this.size = n+1;
-			for(var i=0;i<=n;i++)
-			{
-				this.value[i+3] = start+i*step;
-			}
-		}
+        this.start = this.value[0];
+        this.end = this.value[1];
+        this.step = this.value[2];
+        this.size = Math.floor((this.end-this.start)/this.step);
 	}
 }
 TRange.prototype.type = 'range';

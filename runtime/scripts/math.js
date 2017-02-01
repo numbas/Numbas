@@ -1308,24 +1308,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 */
 	random: function(range)
 	{
-		if(range.length>3)	//if values in range are given after [min,max,step]
-		{
-			return math.choose(range.slice(3));
-		}
-		else
-		{
-			if(range[2]==0)
-			{
-				return math.randomrange(range[0],range[1]);
-			}
-			else
-			{
-				var diff = range[1]-range[0];
-				var steps = diff/range[2];
-				var n = Math.floor(math.randomrange(0,steps+1));
-				return range[0]+n*range[2];
-			}
-		}
+        if(range[2]==0) {
+            return math.randomrange(range[0],range[1]);
+        } else {
+            var num_steps = math.rangeSize(range);
+            var n = Math.floor(math.randomrange(0,num_steps));
+            return range[0]+n*range[2];
+        }
 	},
 
 	/** Remove all the values in the list `exclude` from the list `range`
@@ -1524,6 +1513,38 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 			step = step.re;
 		return [range[0],range[1],step];
 	},
+
+    /** Convert a range to a list - enumerate all the elements of the range
+     * @param {range} range
+     * @returns {number[]}
+     */
+    rangeToList: function(range) {
+        var start = range[0];
+        var end = range[1];
+        var step_size = range[2];
+        var out = [];
+        var n = 0;
+        var t = start;
+        while(start<end ? t<=end : t>=end)
+        {
+            out.push(t)
+            n += 1;
+            t = start + n*step_size;
+        }
+
+        return out;
+    },
+
+    /** Calculate the number of elements in a range
+     * @param {range} range
+     * @returns {number}
+     */
+    rangeSize: function(range) {
+        var diff = range[1]-range[0];
+        var num_steps = Math.floor(diff/range[2])+1;
+        num_steps += (range[0]+num_steps*range[2] == range[1] ? 1 : 0);
+        return num_steps;
+    },
 
 	/** Get a rational approximation to a real number by the continued fractions method.
 	 *
