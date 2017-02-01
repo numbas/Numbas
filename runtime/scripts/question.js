@@ -172,6 +172,7 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 		}
 	
 		q.scope = new jme.Scope([q.scope]);
+        q.scope.flatten();
 
 		q.unwrappedVariables = {};
         var all_variables = q.scope.allVariables()
