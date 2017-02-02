@@ -110,7 +110,7 @@ def show_precision_hint(part):
 @migration(version_from='show_precision_hint')
 def exam_question_groups(data):
     allQuestions = data.get('allQuestions',True)
-    pickQuestions = data.get('pickQuestions',0)
+    pickQuestions = int(data.get('pickQuestions',0))
     shuffleQuestions = data.get('shuffleQuestions',False)
     if shuffleQuestions:
         if pickQuestions>0:
