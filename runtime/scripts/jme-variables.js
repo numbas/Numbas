@@ -264,7 +264,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(todo[name]===undefined) {
             throw(new Numbas.Error('ruleset.set not defined',{name:name}));
         }
-        todo[name].forEach(function(name2) {
+        todo[name].forEach(function(name) {
+			var m = /^\s*(!)?(.*)\s*$/.exec(name);
+			var name2 = m[2].trim().toLowerCase();
             jme.variables.computeRuleset(name2,todo,scope,newpath);
         });
         var ruleset = Numbas.jme.collectRuleset(todo[name],scope.rulesets);
