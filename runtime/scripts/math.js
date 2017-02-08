@@ -537,6 +537,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		return( a>=1 ? degree : 0 );
 	},
 
+    /** Add the given number of zero digits to a string representation of a number.
+     * @param {string} n - a string representation of a number
+     * @param {number} digits - the number of digits to add
+     * @returns {string}
+     */
+    addDigits: function(n,digits) {
+        n = n+'';
+        var m = n.match(/^(-?\d+(?:\.\d+)?)(e[\-+]?\d+)$/);
+        if(m) {
+            return math.addDigits(m[1],digits)+m[2];
+        } else {
+            if(n.indexOf('.')==-1) {
+                n += '.';
+            }
+            for(var i=0;i<digits;i++) {
+                n += '0';
+            }
+            return n;
+        }
+    },
+
+
 	/** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
 	 * @param {number} n
 	 * @param {object} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
@@ -589,27 +611,22 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 				n /= Math.pow(Math.PI,piD);
 
 			var out;
+
 			switch(options.precisionType) {
 			case 'sigfig':
 				var precision = options.precision;
 				out = math.siground(n,precision)+'';
 				var sigFigs = math.countSigFigs(out,true);
-				if(sigFigs<precision) {
-					if(out.indexOf('.')==-1)
-						out += '.';
-					for(var i=0;i<precision-sigFigs;i++)
-						out+='0';
-				}
+                if(sigFigs<precision) {
+                    out = math.addDigits(out,precision-sigFigs);
+                }
 				break;
 			case 'dp':
 				var precision = options.precision;
 				out = math.precround(n,precision)+'';
 				var dp = math.countDP(out);
 				if(dp<precision) {
-					if(out.indexOf('.')==-1)
-						out += '.';
-					for(var i=0;i<precision-dp;i++)
-						out+='0';
+                    out = math.addDigits(out,precision-dp);
 				}
 				break;
 			default:
@@ -807,11 +824,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 */
 	countDP: function(n) {
-		var m = n.match(/\.(\d*)$/);
+		var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([\-+])?(\d+))?$/);
 		if(!m)
 			return 0;
-		else
-			return m[1].length;
+		else {
+			var dp = m[1] ? m[1].length : 0;
+            if(m[2] && m[2]=='-') {
+                dp += parseInt(m[3]);
+            }
+            return dp;
+        }
 	},
 	
 	/** Calculate the significant figures precision of a number.
@@ -820,6 +842,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @returns {number}
 	 */
 	countSigFigs: function(n,max) {
+        n += '';
 		var m;
 		if(max) {
 			m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
