@@ -164,7 +164,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {object} todo - dictionary of variables still to evaluate
 	 * @param {Numbas.jme.Scope} scope
 	 * @param {string[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
-	 * @return {Numbas.jme.token}
+	 * @returns {Numbas.jme.token}
 	 */
 	computeVariable: function(name,todo,scope,path)
 	{
@@ -244,6 +244,46 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		}
 		return {variables: scope.variables, conditionSatisfied: conditionSatisfied};
 	},
+
+	/** Collect together a ruleset, evaluating all its dependencies first.
+	 * @param {string} name - the name of the ruleset to evaluate
+	 * @param {object} todo - dictionary of rulesets still to evaluate
+	 * @param {Numbas.jme.Scope} scope
+	 * @param {string[]} path - Breadcrumbs - rulesets names currently being evaluated, so we can detect circular dependencies
+	 * @returns {Numbas.jme.Ruleset}
+	 */
+    computeRuleset: function(name,todo,scope,path) {
+        if(scope.rulesets[name]) {
+            return;
+        }
+        if(path.contains(name)) {
+            throw(new Numbas.Error('ruleset.circular reference',{name:name}));
+        }
+        var newpath = path.slice();
+        newpath.push(name);
+        if(todo[name]===undefined) {
+            throw(new Numbas.Error('ruleset.set not defined',{name:name}));
+        }
+        todo[name].forEach(function(name2) {
+            jme.variables.computeRuleset(name2,todo,scope,newpath);
+        });
+        var ruleset = Numbas.jme.collectRuleset(todo[name],scope.rulesets);
+        scope.rulesets[name] = ruleset;
+        return ruleset;
+    },
+
+    /** Gather together a set of ruleset definitions
+     * @param {object} todo - a dictionary mapping ruleset names to definitions
+     * @param {Numbas.jme.Scope} scope - the scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
+     * @returns {object} a dictionary of rulesets
+     */
+    makeRulesets: function(todo,scope) {
+        var out = {};
+		for(var name in todo) {
+            out[name] = jme.variables.computeRuleset(name,todo,scope,[]);
+		}
+        return out;
+    },
 
 	/** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
 	 * @param {object} todo - dictionary of variables mapped to their definitions

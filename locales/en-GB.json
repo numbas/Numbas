@@ -236,6 +236,8 @@
     "question.score feedback.partial": "Your answer is partially correct",
     "question.score feedback.wrong": "Your answer is incorrect",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
+    "ruleset.circular reference": "Circular reference in definition of ruleset <code>{{name}}</code>",
+    "ruleset.set not defined": "Ruleset {{name}} has not been defined",
     "timing.no accumulator": "no timing accumulator {{name}}",
     "timing.time remaining": "Time remaining:",
     "xml.could not load": "Couldn't load an XML document: {{message}}",

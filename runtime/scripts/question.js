@@ -130,10 +130,7 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 			sets[name] = set;
 		}
 
-		for(var name in sets)
-		{
-			q.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],q.scope.rulesets);
-		}
+        Numbas.jme.variables.makeRulesets(sets,q.scope);
 	});
 
 	job(function() {
