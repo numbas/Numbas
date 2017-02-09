@@ -523,7 +523,7 @@ def run():
             output = os.path.basename(os.path.splitext(source_path)[0])
             if options.zip:
                 output += '.zip'
-            options.output=os.path.join(path,'output',output)
+            options.output=os.path.join(options.path,'output',output)
     
 
     try:
