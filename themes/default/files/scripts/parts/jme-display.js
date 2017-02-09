@@ -34,7 +34,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|TeX} correctAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.displaySimplification,p.question.scope);
+        this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.answerSimplification,p.question.scope);
 
         ko.computed(function() {
             p.storeAnswer([this.studentAnswer()]);
@@ -52,7 +52,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.removeWarnings();
 
             try {
-                var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,p.settings.displaySimplification,p.question.scope);
+                var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,p.settings.answerSimplification,p.question.scope);
                 if(tex===undefined)
                     throw(new Numbas.Error('display.part.jme.error making maths'));
 
