@@ -245,10 +245,11 @@ function nullaryTex(code)
  */
 function funcTex(code)
 {
-	return function(thing,texArgs)
-	{
+	var f = function(thing,texArgs){
 		return code+' \\left ( '+texArgs.join(', ')+' \\right )';
 	}
+    f.code = code;
+    return f;
 }
 
 /** Define how to texify each operation and function
@@ -295,11 +296,16 @@ var texOps = jme.display.texOps = {
 	}),
 
 	/** exponentiation */
-	'^': (function(thing,texArgs) {
+	'^': (function(thing,texArgs,settings) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-		if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp'))
-			tex0 = '\\left ( ' +tex0+' \\right )';	
+        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp')) {
+            tex0 = '\\left ( ' +tex0+' \\right )';    
+        }
+        var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
+        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name)) {
+            return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
+        }
 		return (tex0+'^{ '+texArgs[1]+' }');
 	}),
 
