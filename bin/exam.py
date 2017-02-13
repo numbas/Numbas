@@ -603,6 +603,7 @@ class Part:
     showCorrectAnswer = True
     showFeedbackIcon = True
     variableReplacementStrategy = 'originalfirst'
+    customMarkingAlgorithm = ''
 
     def __init__(self,marks,prompt=''):
         self.marks = marks
@@ -633,7 +634,7 @@ class Part:
             )
         part = partConstructors[kind].fromDATA(data)
 
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy'],part);
+        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm'],part);
 
         if haskey(data,'marks'):
             part.marks = data['marks']
@@ -662,7 +663,8 @@ class Part:
                             ['scripts'],
                             ['adaptivemarking',
                                 ['variablereplacements'],
-                            ]
+                            ],
+                            ['markingalgorithm'],
                         ])
 
         part.attrib = {
@@ -690,6 +692,9 @@ class Part:
             }
             script_element.text = strcons(script_dict.get('script',''))
             scripts.append(script_element)
+
+        marking_algorithm = part.find('markingalgorithm')
+        marking_algorithm.text = strcons(self.customMarkingAlgorithm)
 
         variable_replacements = part.find('adaptivemarking/variablereplacements')
         variable_replacements.attrib = {
