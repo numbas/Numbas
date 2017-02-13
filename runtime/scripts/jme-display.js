@@ -624,7 +624,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
 		else
 			out = '\\frac{'+f[0]+'}{'+f[1]+'}';
 		if(n<0)
-			out=' - '+out;
+			out='-'+out;
 
 		switch(piD)
 		{
