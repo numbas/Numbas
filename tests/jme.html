@@ -227,7 +227,13 @@
 					equals(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
 				});
 
-				var evaluate = function(t,scope) { return jme.evaluate(t,scope || Numbas.jme.builtinScope) };
+                var evaluate = function(t,scope) { 
+                    scope = scope || Numbas.jme.builtinScope;
+                    if(scope.__proto__!=Numbas.jme.Scope.prototype) {
+                        scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,scope]);
+                    }
+                    return jme.evaluate(t,scope)
+                };
 
 				test('jme.typecheck',function() {
 					raisesNumbasError(function(){ evaluate('x()') },'jme.typecheck.function not defined','function not defined: x()');
@@ -267,7 +273,7 @@
 				test('Literals',function() {
 					closeEquals(evaluate('1').value,1,'1');
 					closeEquals(evaluate('true').value,true,'true');
-					deepCloseEqual(evaluate('1..3').value,[1,3,1,1,2,3],'1..3');
+					deepCloseEqual(evaluate('1..3').value,[1,3,1],'1..3');
 					deepCloseEqual(evaluate('[1,2]').value.map(getValue),[1,2],'[1,2]');
 					deepCloseEqual(evaluate('[1,"hi",true]').value.map(getValue),[1,"hi",true],'[1,"hi",true]');
 					closeEquals(evaluate('"hi"').value,'hi','"hi"');
@@ -705,11 +711,15 @@
 				});
 
 				test('Range operations',function() {
-					deepCloseEqual(evaluate('1..5').value,[1,5,1,1,2,3,4,5],'1..5');
-					deepCloseEqual(evaluate('1..7#2').value,[1,7,2,1,3,5,7],'1..#7#2');
-					deepCloseEqual(evaluate('-2..3#2').value,[-2,3,2,-2,0,2],'-2..3#2');
-					deepCloseEqual(evaluate('100..102#1/3').value,[100,102,1/3,100,100+1/3,100+2/3,101,101+1/3,101+2/3,102],'100..102#1/3');
-					deepCloseEqual(evaluate('6..1#-1').value,[6,1,-1,6,5,4,3,2,1],'6..1#-1');
+					deepCloseEqual(evaluate('1..5').value,[1,5,1],'1..5');
+					deepCloseEqual(jme.unwrapValue(evaluate('list(1..5)')),[1,2,3,4,5],'list(1..5)');
+					deepCloseEqual(evaluate('1..7#2').value,[1,7,2],'1..#7#2');
+					deepCloseEqual(jme.unwrapValue(evaluate('list(1..7#2)')),[1,3,5,7],'list(1..#7#2)');
+					deepCloseEqual(evaluate('-2..3#2').value,[-2,3,2],'-2..3#2');
+					deepCloseEqual(jme.unwrapValue(evaluate('list(-2..3#2)')),[-2,0,2],'list(-2..3#2)');
+					deepCloseEqual(jme.unwrapValue(evaluate('list(100..102#1/3)')),[100,100+1/3,100+2/3,101,101+1/3,101+2/3,102],'list(100..102#1/3)');
+					deepCloseEqual(jme.unwrapValue(evaluate('list(6..1#-1)')),[6,5,4,3,2,1],'list(6..1#-1)');
+
 					deepCloseEqual(evaluate('1..2#0').value,[1,2,0],'1..2#0');
 
 					deepCloseEqual(evaluate('-3..7 except 0..3').value.map(getValue),[-3,-2,-1,4,5,6,7],'-3..7 except 0..3');
@@ -734,6 +744,7 @@
 				test('List operations',function() {
 					deepCloseEqual(evaluate('["a","b","c"] except "a"').value.map(getValue),['b','c'],'["a","b","c"] except "a"');
 					deepCloseEqual(evaluate('["a","b","c"] except ["a","c","f"]').value.map(getValue),['b'],'["a","b","c"] except ["a","c","f"]');
+                    deepCloseEqual(evaluate('["a","b","c","d","e"][0..2]').value.map(getValue),['a','b'],'["a","b","c","d","e"][0..2]');
                 });
 
                 test('Dictionaries',function() {
@@ -794,28 +805,28 @@
 							y: new types.TString('hi')
 						}
 					});
-					ok(scope.variables.x,'add variables in scope constructor')
+					ok(scope.getVariable('x'),'add variables in scope constructor')
 					var scope2 = new jme.Scope([scope,{variables: {x: new types.TNum(2)}}]);
-					closeEquals(scope2.variables.x.value,2,'override variable in old scope with new value');
-					closeEquals(scope2.variables.y.value,'hi','but other variables retained if not defined in later scope');
+					closeEquals(scope2.getVariable('x').value,2,'override variable in old scope with new value');
+					closeEquals(scope2.getVariable('y').value,'hi','but other variables retained if not defined in later scope');
 				});
 
 				test('Functions',function() {
-					ok(jme.builtinScope.functions['+'],'builtin scope has functions in it.');
+					ok(jme.builtinScope.getFunction('+'),'builtin scope has functions in it.');
 					deepCloseEqual(new jme.Scope().functions,{},'scope from constructor has no functions');
 					var scope = new jme.Scope([jme.builtinScope,{
 						functions: {
 							'+':[(new jme.funcObj('+',[types.TBool,types.TBool],types.TBool,null,{nobuiltin:true}))]
 						}
 					}]);
-					closeEquals(scope.functions['+'].length,jme.builtinScope.functions['+'].length+1,'add overloaded function to old scope');
-					closeEquals(new Numbas.jme.Scope([scope,jme.builtinScope]).functions['+'].length,scope.functions['+'].length,"don't duplicate functions when extending scope");
+					closeEquals(scope.getFunction('+').length,jme.builtinScope.getFunction('+').length+1,'add overloaded function to old scope');
+					closeEquals(new Numbas.jme.Scope([scope,jme.builtinScope]).getFunction('+').length,scope.getFunction('+').length,"don't duplicate functions when extending scope");
 				});
 
 				test('Rulesets',function() {
 					deepCloseEqual(new jme.Scope().rulesets,{},'scope from constructor has no rulesets');
 					var scope = new jme.Scope({rulesets: jme.display.simplificationRules});
-					ok(scope.rulesets.basic,'extend scope with some rulesets');
+					ok(scope.getRuleset('basic'),'extend scope with some rulesets');
 				});
 
 

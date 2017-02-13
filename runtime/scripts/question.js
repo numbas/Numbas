@@ -132,7 +132,7 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 
 		for(var name in sets)
 		{
-			q.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],q.scope.rulesets);
+			q.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],q.scope.allRulesets());
 		}
 	});
 
@@ -171,11 +171,13 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 			}
 		}
 	
-		q.scope = new jme.Scope([gscope,q.scope]);
+		q.scope = new jme.Scope([q.scope]);
+        q.scope.flatten();
 
 		q.unwrappedVariables = {};
-		for(var name in q.scope.variables) {
-			q.unwrappedVariables[name] = Numbas.jme.unwrapValue(q.scope.variables[name]);
+        var all_variables = q.scope.allVariables()
+		for(var name in all_variables) {
+			q.unwrappedVariables[name] = Numbas.jme.unwrapValue(all_variables[name]);
 		}
 
 		q.runCallbacks('variablesGenerated');

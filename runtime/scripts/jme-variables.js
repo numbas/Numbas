@@ -168,7 +168,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 */
 	computeVariable: function(name,todo,scope,path)
 	{
-		if(scope.variables[name]!==undefined)
+		if(scope.getVariable(name)!==undefined)
 			return scope.variables[name];
 
 		if(path===undefined)

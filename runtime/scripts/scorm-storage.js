@@ -336,9 +336,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 		};
 
 		qobj.variables = {};
-		for(var name in question.scope.variables)
+        var all_variables = question.scope.allVariables();
+		for(var name in all_variables)
 		{
-			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: question.scope.variables[name]},{niceNumber:false});
+			qobj.variables[name] = Numbas.jme.display.treeToJME({tok: all_variables[name]},{niceNumber:false});
 		}
 
 		qobj.parts = [];
