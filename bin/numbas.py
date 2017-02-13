@@ -101,6 +101,12 @@ def realFile(file):
     return not (file[-1]=='~' or file[-4:]=='.swp')
 
 
+class CompileError(Exception):
+    def __init__(self, message, stdout='', stderr='', code=0):
+        super(CompileError, self).__init__()
+        self.message = message
+    def __str__(self):
+        return 'Compilation error: {}'.format(self.message)
 
 class NumbasCompiler(object):
     def __init__(self,options):
@@ -125,7 +131,7 @@ class NumbasCompiler(object):
             if os.path.exists(ntheme):
                 return ntheme
             else:
-                raise Exception("Couldn't find theme %s" % theme)
+                raise CompileError("Couldn't find theme %s" % theme)
 
     def compile(self):
         self.parse_exam()
@@ -165,11 +171,11 @@ class NumbasCompiler(object):
             self.resources = self.exam.resources
             self.extensions = self.exam.extensions
         except ExamError as err:
-            raise Exception('Error constructing exam:\n%s' % err)
+            raise CompileError('Error constructing exam:\n%s' % err)
         except examparser.ParseError as err:
-            raise Exception("Failed to compile exam due to parsing error.\n%s" % err)
+            raise CompileError("Failed to compile exam due to parsing error.\n%s" % err)
         except:
-            raise Exception('Failed to compile exam.')
+            raise CompileError('Failed to compile exam.')
 
     def collect_files(self,dirs=[('runtime','.')]):
         """
@@ -187,7 +193,7 @@ class NumbasCompiler(object):
             if os.path.isdir(x):
                 extfiles.append((os.path.join(os.getcwd(),x),os.path.join('extensions',os.path.split(x)[1])))
             else:
-                raise Exception("Extension {} not found".format(x))
+                raise CompileError("Extension {} not found".format(x))
         dirs += extfiles
 
         for themepath in self.themepaths:
@@ -252,6 +258,9 @@ class NumbasCompiler(object):
             index_html = self.render_template('index.html')
             if index_html:
                 self.files[index_dest] = io.StringIO(index_html)
+            else:
+                if self.options.expect_index_html:
+                    raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
         self.question_xslt = self.render_template('question.xslt')
 
     def render_template(self,name):
@@ -261,6 +270,8 @@ class NumbasCompiler(object):
             return output
         except jinja2.exceptions.TemplateNotFound:
             return None
+        except jinja2.exceptions.TemplateSyntaxError as e:
+            raise CompileError('Error in theme template: jinja syntax error on line {} of {}: {}\n\n'.format(e.lineno,e.name,e.message))
 
     def make_locale_file(self):
         """
@@ -369,7 +380,7 @@ class NumbasCompiler(object):
                 out,err = p.communicate()
                 code = p.poll()
                 if code != 0:
-                    raise Exception('Failed to minify %s with minifier %s' % (src,self.options.minify))
+                    raise CompileError('Failed to minify %s with minifier %s' % (src,self.options.minify))
                 else:
                     self.files[dst] = io.StringIO(out.decode('utf-8'))
 
@@ -497,6 +508,16 @@ def run():
                         dest='minify',
                         default='',
                         help='Path to Javascript minifier. If not given, no minification is performed.')
+    parser.add_option('--show_traceback',
+                        dest='show_traceback',
+                        action='store_true',
+                        default=False,
+                        help='Show the Python traceback in case of an error')
+    parser.add_option('--no_index_html',
+                        dest='expect_index_html',
+                        action='store_false',
+                        default=True,
+                        help='Don\'t expect an index.html file to be produced')
 
     (options,args) = parser.parse_args()
 
@@ -523,7 +544,7 @@ def run():
             output = os.path.basename(os.path.splitext(source_path)[0])
             if options.zip:
                 output += '.zip'
-            options.output=os.path.join(path,'output',output)
+            options.output=os.path.join(options.path,'output',output)
     
 
     try:
@@ -532,7 +553,9 @@ def run():
     except Exception as err:
         sys.stderr.write(str(err)+'\n')
         _,_,exc_traceback = sys.exc_info()
-        traceback.print_exc()
+        if options.show_traceback:
+            sys.stderr.write('\n')
+            traceback.print_exc()
         exit(1)
 
 if __name__ == '__main__':

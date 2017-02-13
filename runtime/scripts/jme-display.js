@@ -256,10 +256,11 @@ function nullaryTex(code)
  */
 function funcTex(code)
 {
-	return function(thing,texArgs)
-	{
+	var f = function(thing,texArgs){
 		return code+' \\left ( '+texArgs.join(', ')+' \\right )';
 	}
+    f.code = code;
+    return f;
 }
 
 /** Define how to texify each operation and function
@@ -306,11 +307,16 @@ var texOps = jme.display.texOps = {
 	}),
 
 	/** exponentiation */
-	'^': (function(thing,texArgs) {
+	'^': (function(thing,texArgs,settings) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-		if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp'))
-			tex0 = '\\left ( ' +tex0+' \\right )';	
+        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp')) {
+            tex0 = '\\left ( ' +tex0+' \\right )';    
+        }
+        var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
+        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name)) {
+            return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
+        }
 		return (tex0+'^{ '+texArgs[1]+' }');
 	}),
 
@@ -635,7 +641,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
 		else
 			out = '\\frac{'+f[0]+'}{'+f[1]+'}';
 		if(n<0)
-			out=' - '+out;
+			out='-'+out;
 
 		switch(piD)
 		{
@@ -1318,20 +1324,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var arg_type = args[i].tok.type;
 			var arg_value = args[i].tok.value;
 			var pd;
+            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
 
 			if(arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true)
 			{
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
 			}
-			else if(arg_type=='number' && arg_value.complex && (op=='*' || op=='-u' || op=='/'))	// put brackets round a complex number
+			else if(arg_type=='number' && arg_value.complex && bracketNumberOp)	// put brackets round a complex number
 			{
 				if(arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0))
 				{
 					bits[i] = '('+bits[i]+')';
 					args[i].bracketed = true;
 				}
-			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && (op=='*' || op=='-u' || op=='/')) {
+			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp) {
 				bits[i] = '('+bits[i]+')';
 				args[i].bracketed = true;
 			}
@@ -1980,6 +1987,10 @@ var simplificationRules = jme.display.simplificationRules = {
 		['sinh(0)',[],'0'],
 		['tanh(0)',[],'0']
 	],
+
+    trigPowers: [
+        ['sin^(?;n)(?;x)',[],'sin(x)^n']
+    ],
 
 	otherNumbers: [
 		['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']

@@ -164,7 +164,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {object} todo - dictionary of variables still to evaluate
 	 * @param {Numbas.jme.Scope} scope
 	 * @param {string[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
-	 * @return {Numbas.jme.token}
+	 * @returns {Numbas.jme.token}
 	 */
 	computeVariable: function(name,todo,scope,path,computeFn)
 	{
@@ -247,6 +247,51 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
 	},
 
+	/** Collect together a ruleset, evaluating all its dependencies first.
+	 * @param {string} name - the name of the ruleset to evaluate
+	 * @param {object} todo - dictionary of rulesets still to evaluate
+	 * @param {Numbas.jme.Scope} scope
+	 * @param {string[]} path - Breadcrumbs - rulesets names currently being evaluated, so we can detect circular dependencies
+	 * @returns {Numbas.jme.Ruleset}
+	 */
+    computeRuleset: function(name,todo,scope,path) {
+        if(scope.rulesets[name.toLowerCase()] || (name.toLowerCase() in jme.displayFlags)) {
+            return;
+        }
+        if(path.contains(name)) {
+            throw(new Numbas.Error('ruleset.circular reference',{name:name}));
+        }
+        var newpath = path.slice();
+        newpath.push(name);
+        if(todo[name]===undefined) {
+            throw(new Numbas.Error('ruleset.set not defined',{name:name}));
+        }
+        todo[name].forEach(function(name) {
+            if(typeof(name)!=='string') {
+                return;
+            }
+			var m = /^\s*(!)?(.*)\s*$/.exec(name);
+			var name2 = m[2].trim();
+            jme.variables.computeRuleset(name2,todo,scope,newpath);
+        });
+        var ruleset = Numbas.jme.collectRuleset(todo[name],scope.rulesets);
+        scope.rulesets[name] = scope.rulesets[name.toLowerCase()] = ruleset;
+        return ruleset;
+    },
+
+    /** Gather together a set of ruleset definitions
+     * @param {object} todo - a dictionary mapping ruleset names to definitions
+     * @param {Numbas.jme.Scope} scope - the scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
+     * @returns {object} a dictionary of rulesets
+     */
+    makeRulesets: function(todo,scope) {
+        var out = {};
+		for(var name in todo) {
+            out[name] = jme.variables.computeRuleset(name,todo,scope,[]);
+		}
+        return out;
+    },
+
 	/** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
 	 * @param {object} todo - dictionary of variables mapped to their definitions
 	 * @param {string[]} ancestors - list of variable names whose dependants we should find
@@ -311,71 +356,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {Numbas.jme.Scope} scope
 	 */
 	DOMcontentsubvars: function(element, scope) {
-		if($.nodeName(element,'iframe')) {
-			return element;
-        } else if(element.hasAttribute('nosubvars')) {
-			return element;
-        } else if($.nodeName(element,'object')) {
-            function go() {
-                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
-            }
-            if(element.contentDocument) {
-                go();
-            } else {
-                element.addEventListener('load',go,false);
-            }
-            return;
-        }
-
-		if(element.hasAttribute('data-jme-visible')) {
-			var condition = element.getAttribute('data-jme-visible');
-			var result = scope.evaluate(condition);
-			if(!(result.type=='boolean' && result.value==true)) {
-				$(element).remove();
-				return;
-			}
-		}
-
-        var new_attrs = {};
-        for(var i=0;i<element.attributes.length;i++) {
-            var m;
-            var attr = element.attributes[i];
-            if(m = attr.name.match(/^eval-(.*)/)) {
-                var name = m[1];
-                var value = jme.subvars(attr.value,scope,true);
-                new_attrs[name] = value;
-            }
-        }
-        for(var name in new_attrs) {
-            element.setAttribute(name,new_attrs[name]);
-        }
-
-		var re_end;
-		$(element).contents().each(function() {
-			if(this.nodeType==(this.TEXT_NODE || 3)) {
-				var selector = $(this);
-				var str = this.nodeValue;
-				var bits = util.contentsplitbrackets(str,re_end);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-				re_end = bits.re_end;
-				var i=0;
-				var l = bits.length;
-				for(var i=0; i<l; i+=4) {
-					var textsubs = jme.variables.DOMsubvars(bits[i],scope,this.ownerDocument);
-					for(var j=0;j<textsubs.length;j++) {
-						selector.before(textsubs[j]);
-					}
-					var startDelimiter = bits[i+1] || '';
-					var tex = bits[i+2] || '';
-					var endDelimiter = bits[i+3] || '';
-					var n = this.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-					selector.before(n);
-				}
-				selector.remove();
-			} else {
-				jme.variables.DOMcontentsubvars(this,scope);
-			}
-		});
-		return element;
+        var subber = new DOMcontentsubber(scope);
+        return subber.subvars(element);
 	},
 
 	/** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
@@ -472,7 +454,97 @@ function importNode(doc,node,allChildren) {
 	}
 };
 
+function DOMcontentsubber(scope) {
+    this.scope = scope;
+    this.re_end = undefined;
+}
+DOMcontentsubber.prototype = {
+    subvars: function(element) {
+        switch(element.nodeType) {
+            case 1: //element
+                this.sub_element(element);
+                break;
+            case 3: //text
+                this.sub_text(element);
+                break;
+            default:
+                return;
+        }
+        
+    },
 
+    sub_element: function(element) {
+        var subber = this;
+        var scope = this.scope;
+        if($.nodeName(element,'iframe')) {
+            return element;
+        } else if(element.hasAttribute('nosubvars')) {
+            return element;
+        } else if($.nodeName(element,'object')) {
+            function go() {
+                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
+            }
 
+            if(element.contentDocument) {
+                go();
+            } else {
+                element.addEventListener('load',go,false);
+            }
+            return;
+        }
+
+        if(element.hasAttribute('data-jme-visible')) {
+            var condition = element.getAttribute('data-jme-visible');
+            var result = scope.evaluate(condition);
+            if(!(result.type=='boolean' && result.value==true)) {
+                $(element).remove();
+                return;
+            }
+        }
+
+        var new_attrs = {};
+        for(var i=0;i<element.attributes.length;i++) {
+            var m;
+            var attr = element.attributes[i];
+            if(m = attr.name.match(/^eval-(.*)/)) {
+                var name = m[1];
+                var value = jme.subvars(attr.value,scope,true);
+                new_attrs[name] = value;
+            }
+        }
+        for(var name in new_attrs) {
+            element.setAttribute(name,new_attrs[name]);
+        }
+
+        var subber = this;
+        var o_re_end = this.re_end;
+        $(element).contents().each(function() {
+            subber.subvars(this);
+        });
+        this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
+        return;
+    },
+
+    sub_text: function(node) {
+        var selector = $(node);
+        var str = node.nodeValue;
+        var bits = util.contentsplitbrackets(str,this.re_end);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+        this.re_end = bits.re_end;
+        var i=0;
+        var l = bits.length;
+        for(var i=0; i<l; i+=4) {
+            var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
+            for(var j=0;j<textsubs.length;j++) {
+                selector.before(textsubs[j]);
+            }
+            var startDelimiter = bits[i+1] || '';
+            var tex = bits[i+2] || '';
+            var endDelimiter = bits[i+3] || '';
+            var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
+            selector.before(n);
+        }
+        selector.remove();
+    }
+}
 
 });
