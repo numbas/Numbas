@@ -1308,20 +1308,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var arg_type = args[i].tok.type;
 			var arg_value = args[i].tok.value;
 			var pd;
+            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
 
 			if(arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true)
 			{
 				bits[i]='('+bits[i]+')';
 				args[i].bracketed=true;
 			}
-			else if(arg_type=='number' && arg_value.complex && (op=='*' || op=='-u' || op=='/'))	// put brackets round a complex number
+			else if(arg_type=='number' && arg_value.complex && bracketNumberOp)	// put brackets round a complex number
 			{
 				if(arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0))
 				{
 					bits[i] = '('+bits[i]+')';
 					args[i].bracketed = true;
 				}
-			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && (op=='*' || op=='-u' || op=='/')) {
+			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp) {
 				bits[i] = '('+bits[i]+')';
 				args[i].bracketed = true;
 			}
@@ -1962,6 +1963,10 @@ var simplificationRules = jme.display.simplificationRules = {
 		['sinh(0)',[],'0'],
 		['tanh(0)',[],'0']
 	],
+
+    trigPowers: [
+        ['sin^(?;n)(?;x)',[],'sin(x)^n']
+    ],
 
 	otherNumbers: [
 		['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
