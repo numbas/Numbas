@@ -293,7 +293,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Is `n`a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
      *
      * If `styles` is given, try to put the number in standard form if it matches any of the given styles.
-	 * @param {number} n
+	 * @param {number|string} n
 	 * @param {boolean} allowFractions
      * @param {string|string[]} styles - styles of notation to allow.
      * @see Numbas.util.cleanNumber

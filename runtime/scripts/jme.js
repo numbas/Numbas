@@ -484,115 +484,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	 */
 	evaluate: function(tree,scope)
 	{
-		//if a string is given instead of an expression tree, compile it to a tree
-		if( typeof(tree)=='string' )
-			tree = jme.compile(tree,scope);
-		if(!tree)
-			return null;
-
-
-		tree = jme.substituteTree(tree,scope,true);
-
-		var tok = tree.tok;
-		switch(tok.type)
-		{
-		case 'number':
-		case 'boolean':
-		case 'range':
-			return tok;
-		case 'list':
-			if(tok.value===undefined)
-			{
-				var value = [];
-				for(var i=0;i<tree.args.length;i++)
-				{
-					value[i] = jme.evaluate(tree.args[i],scope);
-				}
-				tok = new TList(value);
-			}
-			return tok;
-        case 'dict':
-            if(tok.value===undefined) {
-                var value = {};
-                for(var i=0;i<tree.args.length;i++) {
-                    var kp = tree.args[i];
-                    value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
-                }
-                tok = new TDict(value);
-            }
-            return tok;
-		case 'string':
-			var value = tok.value;
-			if(!tok.safe && value.contains('{')) {
-				value = jme.contentsubvars(value,scope)
-                var t = new TString(value);
-                t.latex = tok.latex
-                return t;
-            } else {
-                return tok;
-            }
-		case 'name':
-            var v = scope.getVariable(tok.name.toLowerCase());
-			if(v) {
-				return v;
-            } else {
-				tok = new TName(tok.name);
-				tok.unboundName = true;
-				return tok;
-            }
-		case 'op':
-		case 'function':
-			var op = tok.name.toLowerCase();
-			if(lazyOps.indexOf(op)>=0) {
-				return scope.getFunction(op)[0].evaluate(tree.args,scope);
-			}
-			else {
-
-				for(var i=0;i<tree.args.length;i++) {
-					tree.args[i] = jme.evaluate(tree.args[i],scope);
-				}
-
-				var matchedFunction;
-                var fns = scope.getFunction(op);
-				if(fns.length==0)
-				{
-					if(tok.type=='function') {
-						//check if the user typed something like xtan(y), when they meant x*tan(y)
-						var possibleOp = op.slice(1);
-						if(op.length>1 && scope.getFunction(possibleOp).length) {
-							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',{name:op,first:op[0],possibleOp:possibleOp}));
-						} else {
-							throw(new Numbas.Error('jme.typecheck.function not defined',{op:op,suggestion:op}));
-                        }
-					}
-					else {
-						throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
-                    }
-				}
-
-				for(var j=0;j<fns.length; j++)
-				{
-					var fn = fns[j];
-					if(fn.typecheck(tree.args))
-					{
-						matchedFunction = fn;
-						break;
-					}
-				}
-				if(matchedFunction)
-					return matchedFunction.evaluate(tree.args,scope);
-				else {
-					for(var i=0;i<=tree.args.length;i++) {
-						if(tree.args[i] && tree.args[i].unboundName) {
-							throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:tree.args[i].name}));
-						}
-					}
-					throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op}));
-				}
-			}
-		default:
-			return tok;
-		}
+        return scope.evaluate(tree);
 	},
 
 	/** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt})
@@ -900,6 +792,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     o[key] = jme.unwrapValue(v.value[key]);
                 });
                 return o;
+            case 'name':
+                return v.name;
 		    default:
     			return v.value;
         }
@@ -1154,10 +1048,9 @@ var fnSort = util.sortBy('id');
  * @property {object} functions - dictionary of arrays of {@link Numbas.jme.funcObj} objects. There can be more than one function for each name because of signature overloading. To resolve a function name in the scope, use `getFunction`.
  * @property {object} rulesets - dictionary of {@link Numbas.jme.Ruleset} objects. To resolve a ruleset in the scope, use `getRuleset`.
  * @property {object} deleted - an object `{variables: {}, functions: {}, rulesets: {}}`: names of deleted variables/functions/rulesets
- * @property {object} extras - additional variables/functions/rulesets added into this scope, not from a parent scope
  * @property {Numbas.Question} question - the question this scope belongs to
  *
- * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in `this.extras`
+ * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in this scope
  */
 var Scope = jme.Scope = function(scopes) {
 	this.variables = {};
@@ -1169,21 +1062,24 @@ var Scope = jme.Scope = function(scopes) {
         functions: {},
         rulesets: {}
     }
-
 	if(scopes===undefined) {
-        this.extras = {};
         return;
     } 
     if(!$.isArray(scopes)) {
         scopes = [scopes,undefined];
     }
     this.question = scopes[0].question || this.question;
-    if(scopes[0].__proto__!==Scope.prototype) {
-        this.extras = scopes[0];
-        return;
+    var extras;
+    if(!scopes[0].evaluate) {
+        extras = scopes[0];
     } else {
         this.parent = scopes[0];
-        this.extras = scopes[1] || {};
+        extras = scopes[1] || {};
+    }
+    if(extras) {
+        this.variables = extras.variables || this.variables;
+        this.rulesets = extras.rulesets || this.rulesets;
+        this.functions = extras.functions || this.functions;
     }
 
     return;
@@ -1220,9 +1116,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             if(scope.deleted[collection][name]) {
                 return;
             }
-            if(scope.extras[collection] && scope.extras[collection][name]!==undefined) {
-                return scope.extras[collection][name];
-            }
             if(scope[collection][name]!==undefined) {
                 return scope[collection][name];
             }
@@ -1238,6 +1131,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this.resolve('variables',name);
     },
 
+    /** Set the given variable name
+     * @param {string} name
+     * @param {Numbas.jme.token} value
+     */
+    setVariable: function(name, value) {
+        this.variables[name.toLowerCase()] = value;
+    },
+
     /** Get all definitions of the given function name.
      * @param {string} name
      * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
@@ -1247,9 +1148,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var scope = this;
             var o = [];
             while(scope) {
-                if(scope.extras.functions && scope.extras.functions[name]!==undefined) {
-                    o = o.merge(scope.extras.functions[name],fnSort);
-                }
                 if(scope.functions[name]!==undefined) {
                     o = o.merge(scope.functions[name],fnSort);
                 }
@@ -1280,13 +1178,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         while(scope) {
             for(var name in scope.deleted[collection]) {
                 deleted[name] = scope.deleted[collection][name];
-            }
-            if(scope.extras[collection]) {
-                for(name in scope.extras[collection]) {
-                    if(!deleted[name]) {
-                        out[name] = out[name] || scope.extras[collection][name];
-                    }
-                }
             }
             for(name in scope[collection]) {
                 if(!deleted[name]) {
@@ -1329,13 +1220,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             out[name] = out[name].merge(fns,fnSort);
         }
         while(scope) {
-            if(scope.extras.functions) {
-                for(var name in scope.extras.functions) {
-                    add(name,scope.extras.functions[name])
-                }
-                for(var name in scope.functions) {
-                    add(name,scope.functions[name])
-                }
+            for(var name in scope.functions) {
+                add(name,scope.functions[name])
             }
         }
         return out;
@@ -1363,7 +1249,120 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 				scope.variables[name] = jme.wrapValue(variables[name]);
 			}
 		}
-		return jme.evaluate(expr,scope);
+
+		//if a string is given instead of an expression tree, compile it to a tree
+        var tree;
+		if( typeof(expr)=='string' ) {
+			tree = jme.compile(expr,scope);
+        } else {
+            tree = expr;
+        }
+		if(!tree) {
+			return null;
+        }
+
+		tree = jme.substituteTree(tree,scope,true);
+
+		var tok = tree.tok;
+		switch(tok.type)
+		{
+		case 'number':
+		case 'boolean':
+		case 'range':
+			return tok;
+		case 'list':
+			if(tok.value===undefined)
+			{
+				var value = [];
+				for(var i=0;i<tree.args.length;i++)
+				{
+					value[i] = jme.evaluate(tree.args[i],scope);
+				}
+				tok = new TList(value);
+			}
+			return tok;
+        case 'dict':
+            if(tok.value===undefined) {
+                var value = {};
+                for(var i=0;i<tree.args.length;i++) {
+                    var kp = tree.args[i];
+                    value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+                }
+                tok = new TDict(value);
+            }
+            return tok;
+		case 'string':
+			var value = tok.value;
+			if(!tok.safe && value.contains('{')) {
+				value = jme.contentsubvars(value,scope)
+                var t = new TString(value);
+                t.latex = tok.latex
+                return t;
+            } else {
+                return tok;
+            }
+		case 'name':
+            var v = scope.getVariable(tok.name.toLowerCase());
+			if(v) {
+				return v;
+            } else {
+				tok = new TName(tok.name);
+				tok.unboundName = true;
+				return tok;
+            }
+		case 'op':
+		case 'function':
+			var op = tok.name.toLowerCase();
+			if(lazyOps.indexOf(op)>=0) {
+				return scope.getFunction(op)[0].evaluate(tree.args,scope);
+			}
+			else {
+
+				for(var i=0;i<tree.args.length;i++) {
+					tree.args[i] = jme.evaluate(tree.args[i],scope);
+				}
+
+				var matchedFunction;
+                var fns = scope.getFunction(op);
+				if(fns.length==0)
+				{
+					if(tok.type=='function') {
+						//check if the user typed something like xtan(y), when they meant x*tan(y)
+						var possibleOp = op.slice(1);
+						if(op.length>1 && scope.getFunction(possibleOp).length) {
+							throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication',{name:op,first:op[0],possibleOp:possibleOp}));
+						} else {
+							throw(new Numbas.Error('jme.typecheck.function not defined',{op:op,suggestion:op}));
+                        }
+					}
+					else {
+						throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
+                    }
+				}
+
+				for(var j=0;j<fns.length; j++)
+				{
+					var fn = fns[j];
+					if(fn.typecheck(tree.args))
+					{
+						matchedFunction = fn;
+						break;
+					}
+				}
+				if(matchedFunction)
+					return matchedFunction.evaluate(tree.args,scope);
+				else {
+					for(var i=0;i<=tree.args.length;i++) {
+						if(tree.args[i] && tree.args[i].unboundName) {
+							throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:tree.args[i].name}));
+						}
+					}
+					throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op}));
+				}
+			}
+		default:
+			return tok;
+		}
 	}
 };
 
@@ -2040,7 +2039,7 @@ function varnamesAgree(array1, array2) {
  * @enum {function}
  * @memberof Numbas.jme 
  */
-var checkingFunctions = 
+var checkingFunctions = jme.checkingFunctions = 
 {
 	/** Absolute difference between variables - fail if bigger than tolerance */
 	absdiff: function(r1,r2,tolerance) 
@@ -2197,7 +2196,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
  * @param {number} checkingAccuracy
  * @returns {boolean}
  */
-function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
+var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAccuracy)
 {	// first checks both expressions are of same type, then uses given checking type to compare results
 
 	var v1 = r1.value, v2 = r2.value;
@@ -2258,5 +2257,85 @@ function resultsEqual(r1,r2,checkingFunction,checkingAccuracy)
 		return util.eq(r1,r2);
 	}
 };
+
+jme.varsUsed = function(tree) {
+    switch(tree.tok.type) {
+        case 'name':
+            return [tree.tok.name];
+        case 'op':
+        case 'function':
+            var o = [];
+            for(var i=0;i<tree.args.length;i++) {
+                o = o.concat(jme.varsUsed(tree.args[i]));
+            }
+            return o;
+        default:
+            return [];
+    }
+};
+
+/*
+ * compare vars used lexically, then longest goes first if one is a prefix of the other
+ * then by data type
+ * then by function name
+ * otherwise return 0
+ *   
+ * @returns -1 if a is less, 0 if equal, 1 if a is more
+ */
+jme.compareTrees = function(a,b) {
+    var va = jme.varsUsed(a);
+    var vb = jme.varsUsed(b);
+    for(var i=0;i<va.length;i++) {
+        if(i>=vb.length) {
+            return -1;
+        }
+        if(va[i]!=vb[i]) {
+            return va[i]<vb[i] ? -1 : 1;
+        }
+    }
+    if(vb.length>va.length) {
+        return 1;
+    }
+    if(a.tok.type!=b.tok.type) {
+        var order = ['op','function'];
+        var oa = order.indexOf(a.tok.type);
+        var ob = order.indexOf(b.tok.type);
+        if(oa!=ob) {
+            return oa>ob ? -1 : 1;
+        } else {
+            return a.tok.type<b.tok.type ? -1 : 1;
+        }
+    }
+    switch(a.tok.type) {
+        case 'op':
+        case 'function':
+            function is_pow(t) {
+                return t.tok.name=='^' || (t.tok.name=='*' && t.args[1].tok.name=='^') || (t.tok.name=='/' && t.args[1].tok.name=='^');
+            }
+            var pa = is_pow(a);
+            var pb = is_pow(b);
+            if(pa && !pb) {
+                return -1;
+            } else if(!pa && pb) {
+                return 1;
+            }
+            if(a.tok.name!=b.tok.name) {
+                return a.tok.name<b.tok.name ? -1 : 1;
+            }
+            if(a.args.length!=b.args.length) {
+                return a.args.length<b.args.length ? -1 : 1;
+            }
+            for(var i=0;i<a.args.length;i++) {
+                var c = jme.compareTrees(a.args[i],b.args[i]);
+                if(c!=0) {
+                    return c;
+                }
+            }
+            break;
+        case 'number':
+            return a.tok.value<b.tok.value ? -1 : a.tok.value>b.tok.value ? 1 : 0;
+    }
+    return 0;
+}
 
 });

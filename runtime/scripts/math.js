@@ -816,7 +816,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	
 	/** Calculate the significant figures precision of a number.
 	 * @param {number|string} n
-	 * @param {number} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
+	 * @param {boolean} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
 	 * @returns {number}
 	 */
 	countSigFigs: function(n,max) {

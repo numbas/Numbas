@@ -166,7 +166,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {string[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
 	 * @return {Numbas.jme.token}
 	 */
-	computeVariable: function(name,todo,scope,path)
+	computeVariable: function(name,todo,scope,path,computeFn)
 	{
 		if(scope.getVariable(name)!==undefined)
 			return scope.variables[name];
@@ -174,6 +174,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		if(path===undefined)
 			path=[];
 
+        computeFn = computeFn || jme.variables.computeVariable;
 
 		if(path.contains(name))
 		{
@@ -194,13 +195,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 				var newpath = path.slice(0);
 				newpath.splice(0,0,name);
 				try {
-					jme.variables.computeVariable(x,todo,scope,newpath);
+					computeFn(x,todo,scope,newpath,computeFn);
 				}
 				catch(e) {
 					if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
 						throw(e);
 					} else {
-						throw(new Numbas.Error('jme.variables.error computing dependency',{name:x}));
+						throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message}));
 					}
 				}
 			}
@@ -223,15 +224,16 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
 	 * @returns {object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
 	 */
-	makeVariables: function(todo,scope,condition)
+	makeVariables: function(todo,scope,condition,computeFn)
 	{
-		scope = new jme.Scope(scope);
+		nscope = new jme.Scope(scope);
+        computeFn = computeFn || jme.variables.computeVariable;
 
 		var conditionSatisfied = true;
 		if(condition) {
 			var condition_vars = jme.findvars(condition);
 			condition_vars.map(function(v) {
-				jme.variables.computeVariable(v,todo,scope);
+				computeFn(v,todo,scope,undefined,computeFn);
 			});
 			conditionSatisfied = jme.evaluate(condition,scope).value;
 		}
@@ -239,10 +241,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 		if(conditionSatisfied) {
 			for(var x in todo)
 			{
-				jme.variables.computeVariable(x,todo,scope);
+				computeFn(x,todo,scope,undefined,computeFn);
 			}
 		}
-		return {variables: scope.variables, conditionSatisfied: conditionSatisfied};
+		return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
 	},
 
 	/** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables

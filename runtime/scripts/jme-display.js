@@ -126,6 +126,9 @@ jme.display = /** @lends Numbas.jme.display */ {
 
 		var rules = ruleset.rules;
 
+        var depth = 0;
+        var seen = [];
+
 		// apply rules until nothing can be done
 		while( applied )
 		{
@@ -151,6 +154,14 @@ jme.display = /** @lends Numbas.jme.display */ {
 					{
 						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]));
 						applied = true;
+                        depth += 1;
+                        if(depth > 100) {
+                            var str = Numbas.jme.display.treeToJME(exprTree);
+                            if(seen.contains(str)) {
+                                throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
+                            }
+                            seen.push(str);
+                        }
 						break;
 					}
 				}
@@ -1303,8 +1314,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		var op = tok.name;
 		var args = tree.args, l = args.length;
 
-		for(var i=0;i<l;i++)
-		{
+		for(var i=0;i<l;i++) {
 			var arg_type = args[i].tok.type;
 			var arg_value = args[i].tok.value;
 			var pd;
@@ -1328,8 +1338,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		}
 		
 		//omit multiplication symbol when not necessary
-		if(op=='*')
-		{
+		if(op=='*') {
 			//number or brackets followed by name or brackets doesn't need a times symbol
 			//except <anything>*(-<something>) does
 			if( ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )	
@@ -1338,8 +1347,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			}
 		}
 
-		switch(op)
-		{
+		switch(op) {
 		case '+u':
 			op='+';
 			break;
@@ -1365,12 +1373,17 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			break;
 		case 'not':
 			op = 'not ';
+            break;
+        case 'fact':
+            op = '!';
+            break;
 		}
 
-		if(l==1)
-			{return op+bits[0];}
-		else
-			{return bits[0]+op+bits[1];}
+		if(l==1) {
+            return tok.postfix ? bits[0]+op : op+bits[0];
+        } else {
+			return bits[0]+op+bits[1];
+        }
 	},
 	set: function(tree,tok,bits,settings) {
 		return 'set('+tok.value.map(function(thing){return treeToJME({tok:thing},settings);}).join(',')+')';
@@ -1386,7 +1399,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
  * @memberof Numbas.jme.display
  */
 var jmeFunctions = jme.display.jmeFunctions = {
-    'dict': typeToJME.dict
+    'dict': typeToJME.dict,
+    'fact': function(tree,tok,bits,settings) {
+        if(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name') {
+            return bits[0]+'!';
+        } else {
+            return '( '+bits[0]+' )!';
+        }
+    }
 }
 
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
@@ -1596,8 +1616,7 @@ Numbas.jme.display.getCommutingTerms = getCommutingTerms;
  * @param {boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
  * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-function matchTree(ruleTree,exprTree,doCommute)
-{
+jme.display.matchTree = matchTree = function(ruleTree,exprTree,doCommute) {
 	if(doCommute===undefined) {
 		doCommute = false;
 	}
@@ -1820,7 +1839,6 @@ function matchTree(ruleTree,exprTree,doCommute)
 		return {};
 	}
 }
-jme.display.matchTree = matchTree;
 
 /** Match expresison against a pattern. Wrapper for {@link Numbas.jme.display.matchTree}
  *
@@ -1965,8 +1983,99 @@ var simplificationRules = jme.display.simplificationRules = {
 
 	otherNumbers: [
 		['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
-	]
+	],
+
+    cancelTerms: [
+        // x+y or rest+x+y
+        ['(?;rest+?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)*x'],
+        ['(?;rest+?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
+        ['(?;rest+?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
+        ['(?;rest+?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+2*x'],
+        ['?;n*?;x+?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)*x'],
+        ['?;n*?;x+?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
+        ['-?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
+        ['-?;x+?;y',['canonical_compare(x,y)=0'],'0*x'],
+        ['?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
+        ['?;x+?;y',['canonical_compare(x,y)=0'],'2*x'],
+
+        // x-y or rest+x-y
+        ['(?;rest+?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)*x'],
+        ['(?;rest+?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-1)*x'],
+        ['(?;rest+?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
+        ['(?;rest+?;x) - ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
+        ['?;n*?;x-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)*x'],
+        ['?;n*?;x-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
+        ['-?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-1-n)*x'],
+        ['-?;x-?;y',['canonical_compare(x,y)=0'],'-2*x'],
+        ['?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(1-n)*x'],
+        ['?;x-?;y',['canonical_compare(x,y)=0'],'0*x'],
+
+        // rest-x-y or rest-x+y
+        ['(?;rest-?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)*x'],
+        ['(?;rest-?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
+        ['(?;rest-?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
+        ['(?;rest-?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)*x'],
+        ['(?;rest-?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+1)*x'],
+        ['(?;rest-?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(1+n)*x'],
+        ['(?;rest-?;x) - ?;y',['canonical_compare(x,y)=0'],'rest-2*x'],
+        ['(?;rest-?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
+
+
+
+        ['(?;rest+?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)/x'],
+        ['(?;n)/(?;x)+(?;m)/(?;y)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)/x'],
+        ['(?;rest+?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)/x'],
+        ['?;n/?;x-?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)/x'],
+        ['(?;rest-?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)/x'],
+        ['(?;rest-?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)/x']
+    ],
+
+    cancelFactors: [
+        // x*y or rest*x*y
+        ['(?;rest*(?;x)^(?;n)) * (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^(n+m)'],
+        ['(?;rest*(?;x)*(?;n)) * ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
+        ['(?;rest*?;x) * (?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
+        ['(?;rest*?;x) * ?;y',['canonical_compare(x,y)=0'],'rest*x^2'],
+        ['(?;x)^(?;n)*(?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'x^eval(n+m)'],
+        ['(?;x)^(?;n)*?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
+        ['?;x*(?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
+        ['?;x*?;y',['canonical_compare(x,y)=0'],'x^2'],
+
+        // x/y or rest*x/y
+        ['(?;rest*(?;x)^(?;n)) / ((?;y)^(?;m))',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n-m)'],
+        ['(?;rest*(?;x)^(?;n)) / ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n-1)'],
+        ['(?;rest*?;x) / ((?;y)^(?;n))',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(1-n)'],
+        ['(?;rest*?;x) / ?;y',['canonical_compare(x,y)=0'],'rest*x^0'],
+        ['(?;x)^(?;n) / (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'x^eval(n-m)'],
+        ['(?;x)^(?;n) / ?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n-1)'],
+        ['?;x / ((?;y)^(?;n))',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(1-n)'],
+        ['?;x / ?;y',['canonical_compare(x,y)=0'],'x^0'],
+
+        // rest/x/y or rest/x*y
+        ['(?;rest/((?;x)^(?;n))) * (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(m-n)'],
+        ['(?;rest/((?;x)^(?;n))) * ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(1-n)'],
+        ['(?;rest/?;x) * (?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(1-n)'],
+        ['(?;rest/((?;x)^(?;n))) / ((?;y)^(?;m))',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(n+m))'],
+        ['(?;rest/((?;x)^(?;n))) / ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(n+1))'],
+        ['(?;rest/?;x) / ((?;y)^(?;n))',['n isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(1+n))'],
+        ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^2)'],
+        ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^0)']
+    ]
 };
+
+
+// these rules conflict with noLeadingMinus
+var canonicalOrderRules = [
+    ['?;x+?;y',['canonical_compare(x,y)=1'],'y+x'],
+    ['?;x-?;y',['canonical_compare(x,y)=1'],'(-y)+x'],
+    ['-?;x+?;y',['canonical_compare(x,y)=1'],'y-x'],
+    ['-?;x-?;y',['canonical_compare(x,y)=1'],'(-y)-x'],
+    ['(?;x+?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)+y'],
+
+    ['?;x*?;y',['canonical_compare(x,y)=-1'],'y*x'],
+    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y']
+]
+
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.display.Rule} objects
  * @param {Array} rules
  * @returns {Numbas.jme.Ruleset}
@@ -1978,18 +2087,22 @@ var compileRules = jme.display.compileRules = function(rules)
 		var pattern = rules[i][0];
 		var conditions = rules[i][1];
 		var result = rules[i][2];
-		rules[i] = new Rule(pattern,conditions,result);
+        rules[i] = new Rule(pattern,conditions,result);
 	}
 	return new jme.Ruleset(rules,{});
 }
 
 var all=[];
 var nsimplificationRules = Numbas.jme.display.simplificationRules = {};
+var notAll = ['canonicalOrder'];
 for(var x in simplificationRules)
 {
 	nsimplificationRules[x] = nsimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
-	all = all.concat(nsimplificationRules[x].rules);
+    if(!notAll.contains(x)) {
+    	all = all.concat(nsimplificationRules[x].rules);
+    }
 }
+nsimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=new jme.Ruleset(all,{});
 
