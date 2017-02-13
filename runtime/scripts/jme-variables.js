@@ -354,71 +354,75 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @param {Numbas.jme.Scope} scope
 	 */
 	DOMcontentsubvars: function(element, scope) {
-		if($.nodeName(element,'iframe')) {
-			return element;
-        } else if(element.hasAttribute('nosubvars')) {
-			return element;
-        } else if($.nodeName(element,'object')) {
-            function go() {
-                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
-            }
-            if(element.contentDocument) {
-                go();
-            } else {
-                element.addEventListener('load',go,false);
-            }
-            return;
-        }
+        switch(element.nodeType) {
+            case 1: //element
+                if($.nodeName(element,'iframe')) {
+                    return element;
+                } else if(element.hasAttribute('nosubvars')) {
+                    return element;
+                } else if($.nodeName(element,'object')) {
+                    function go() {
+                        jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
+                    }
+                    if(element.contentDocument) {
+                        go();
+                    } else {
+                        element.addEventListener('load',go,false);
+                    }
+                    return;
+                }
 
-		if(element.hasAttribute('data-jme-visible')) {
-			var condition = element.getAttribute('data-jme-visible');
-			var result = scope.evaluate(condition);
-			if(!(result.type=='boolean' && result.value==true)) {
-				$(element).remove();
-				return;
-			}
-		}
+                if(element.hasAttribute('data-jme-visible')) {
+                    var condition = element.getAttribute('data-jme-visible');
+                    var result = scope.evaluate(condition);
+                    if(!(result.type=='boolean' && result.value==true)) {
+                        $(element).remove();
+                        return;
+                    }
+                }
 
-        var new_attrs = {};
-        for(var i=0;i<element.attributes.length;i++) {
-            var m;
-            var attr = element.attributes[i];
-            if(m = attr.name.match(/^eval-(.*)/)) {
-                var name = m[1];
-                var value = jme.subvars(attr.value,scope,true);
-                new_attrs[name] = value;
-            }
-        }
-        for(var name in new_attrs) {
-            element.setAttribute(name,new_attrs[name]);
-        }
+                var new_attrs = {};
+                for(var i=0;i<element.attributes.length;i++) {
+                    var m;
+                    var attr = element.attributes[i];
+                    if(m = attr.name.match(/^eval-(.*)/)) {
+                        var name = m[1];
+                        var value = jme.subvars(attr.value,scope,true);
+                        new_attrs[name] = value;
+                    }
+                }
+                for(var name in new_attrs) {
+                    element.setAttribute(name,new_attrs[name]);
+                }
 
-		var re_end;
-		$(element).contents().each(function() {
-			if(this.nodeType==(this.TEXT_NODE || 3)) {
-				var selector = $(this);
-				var str = this.nodeValue;
-				var bits = util.contentsplitbrackets(str,re_end);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-				re_end = bits.re_end;
-				var i=0;
-				var l = bits.length;
-				for(var i=0; i<l; i+=4) {
-					var textsubs = jme.variables.DOMsubvars(bits[i],scope,this.ownerDocument);
-					for(var j=0;j<textsubs.length;j++) {
-						selector.before(textsubs[j]);
-					}
-					var startDelimiter = bits[i+1] || '';
-					var tex = bits[i+2] || '';
-					var endDelimiter = bits[i+3] || '';
-					var n = this.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-					selector.before(n);
-				}
-				selector.remove();
-			} else {
-				jme.variables.DOMcontentsubvars(this,scope);
-			}
-		});
-		return element;
+                var re_end;
+                $(element).contents().each(function() {
+                    jme.variables.DOMcontentsubvars(this,scope);
+                });
+                return;
+            case 3: //text
+                var selector = $(element);
+                var str = element.nodeValue;
+                var bits = util.contentsplitbrackets(str,re_end);	//split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+                re_end = bits.re_end;
+                var i=0;
+                var l = bits.length;
+                for(var i=0; i<l; i+=4) {
+                    var textsubs = jme.variables.DOMsubvars(bits[i],scope,element.ownerDocument);
+                    for(var j=0;j<textsubs.length;j++) {
+                        selector.before(textsubs[j]);
+                    }
+                    var startDelimiter = bits[i+1] || '';
+                    var tex = bits[i+2] || '';
+                    var endDelimiter = bits[i+3] || '';
+                    var n = element.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
+                    selector.before(n);
+                }
+                selector.remove();
+                break;
+            default:
+                return;
+        }
 	},
 
 	/** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
