@@ -1027,9 +1027,13 @@ jme.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;
 jme.re.re_strip_whitespace = new RegExp('^'+jme.re.re_whitespace+'+|'+jme.re.re_whitespace+'+$','g');
 
 
+/** Flags used to control the behaviour of JME display functions.
+ * Values are `undefined` so they can be overridden
+ * @memberof Numbas.jme
+ */
 var displayFlags = jme.displayFlags = {
-	fractionnumbers: true,
-	rowvector: true
+	fractionnumbers: undefined,
+	rowvector: undefined
 };
 
 var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
