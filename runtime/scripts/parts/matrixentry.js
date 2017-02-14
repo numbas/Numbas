@@ -159,6 +159,14 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		this.studentAnswer = this.stagedAnswer[2];
 	},
 
+	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	rawStudentAnswerAsJME: function() {
+        return jme.wrapValue(this.studentAnswer);
+	},
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
@@ -194,7 +202,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	},
 
 	/** Mark the student's answer */
-	mark: function()
+	mark_builtin: function()
 	{
 		var validation = this.validation;
 

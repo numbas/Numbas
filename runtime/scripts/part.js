@@ -21,6 +21,7 @@ Numbas.queueScript('part',['base','schedule','display','jme','jme-variables','xm
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
+var marking = Numbas.marking;
 
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
@@ -141,6 +142,12 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		vr.variable = vr.variable.toLowerCase();
 		this.settings.errorCarriedForwardReplacements.push(vr);
 	}
+
+    var markingAlgorithmNode = this.xml.selectSingleNode('markingalgorithm');
+    var markingAlgorithmString = Numbas.xml.getTextContent(markingAlgorithmNode).trim();
+    if(markingAlgorithmString) {
+        this.settings.customMarkingAlgorithm = new marking.MarkingScript(markingAlgorithmString);
+    }
 
 	this.markingFeedback = [];
 	this.warnings = [];
@@ -290,6 +297,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
 	 * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
+     * @property {object} customMarkingAlgorithm
 	 */
 	settings: 
 	{
@@ -298,7 +306,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		minimumMarks: 0,
 		showCorrectAnswer: true,
 		showFeedbackIcon: true,
-		hasVariableReplacements: false
+		hasVariableReplacements: false,
+        customMarkingAlgorithm: null
 	},
 
 	/** Throw an error, with the part's identifier prepended to the message
@@ -591,7 +600,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     		this.getCorrectAnswer(scope);
 
     		this.mark();
-	    	this.answered = this.validate();
+            if(!this.settings.customMarkingAlgorithm) {
+    	    	this.answered = this.validate();
+            }
         } catch(e) {
             this.giveWarning(e.message);
         }
@@ -660,6 +671,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	setStudentAnswer: function() {},
 
+	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	rawStudentAnswerAsJME: function() {
+	},
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
@@ -667,13 +685,49 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	studentAnswerAsJME: function() {
 	},
 
-	/** Function which marks the student's answer: set the credit for the student's answer to a number between 0 and 1. Runs before {@link Numbas.parts.Part#validate} - set properties on `this.validation` to record reasons answer is valid/invalid.
+    /** Function which marks the student's answer: set the credit for the student's answer to a number between 0 and 1. 
+     * If `this.settings.customMarkingAlgorithm` is set, use that; otherwise, use `this.mark_builtin`.
+     * Runs before {@link Numbas.parts.Part#validate} - set properties on `this.validation` to record reasons answer is valid/invalid.
+     * @see Numbas.parts.Part.settings.customMarkingAlgorithm
+     * @see Numbas.parts.Part#mark_builtin
+     */
+    mark: function() {
+        if(this.settings.customMarkingAlgorithm) {
+            return this.mark_custom();
+        } else {
+            return this.mark_builtin();
+        }
+    },
+
+	/** "Built-in" marking function: used if customMarkingAlgorithm is not set.
 	 * @abstract
+     * @see Numbas.parts.Part#mark
      * @see Numbas.parts.Part#setCredit
      * @see Numbas.parts.Part#markingComment
      * @see Numbas.parts.Part#validate
 	 */
-	mark: function() {},
+	mark_builtin: function() {},
+
+    /** Run the custom marking algorithm
+     * @see Numbas.parts.Part#mark
+     * @see Numbas.part.Part.settings.customMarkingAlgorithm
+     */
+    mark_custom: function() {
+		if(this.answerList==undefined) {
+			this.setCredit(0,R('part.marking.nothing entered'));
+			return false;
+		}
+		
+        var result = this.settings.customMarkingAlgorithm.evaluate(this.question.scope, this.rawStudentAnswerAsJME(),this.settings);
+        if(!result.states.mark) {
+            throw(new Numbas.Error('part.marking.custom markign script has no mark note'));
+        } else if(result.state_errors.mark) {
+            throw(result.state_errors.mark);
+        }
+
+        var states = result.states.mark;
+        marking.finalise_state(this,states);
+    },
 
 	/** Set the `credit` to an absolute value
 	 * @param {number} credit
@@ -699,6 +753,20 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.credit += credit;
 		this.markingFeedback.push({
 			op: 'addCredit',
+			credit: credit,
+			message: message
+		});
+	},
+
+	/** Subtract an absolute value from `credit`
+	 * @param {number} credit - amount to subtract
+	 * @param {string} message - message to show in feedback to explain this action
+	 */
+	subCredit: function(credit,message)
+	{
+		this.credit -= credit;
+		this.markingFeedback.push({
+			op: 'subCredit',
 			credit: credit,
 			message: message
 		});
@@ -731,6 +799,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Is the student's answer acceptable?
+     * Only runs if `this.customMarkingAlgorithm` is not set.
 	 * @abstract
 	 * @returns {boolean}
 	 */

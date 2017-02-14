@@ -185,6 +185,14 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		this.studentAnswer = this.cleanAnswer(this.answerList[0]);
 	},
 
+	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	rawStudentAnswerAsJME: function() {
+		return new Numbas.jme.types.TString(this.studentAnswer);
+	},
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
@@ -201,7 +209,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	},
 
 	/** Mark the student's answer */
-	mark: function()
+	mark_builtin: function()
 	{
 		var validation = this.validation;
 

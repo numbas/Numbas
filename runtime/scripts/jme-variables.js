@@ -255,7 +255,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 * @returns {Numbas.jme.Ruleset}
 	 */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.rulesets[name.toLowerCase()] || (name.toLowerCase() in jme.displayFlags)) {
+        if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -275,7 +275,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             jme.variables.computeRuleset(name2,todo,scope,newpath);
         });
         var ruleset = Numbas.jme.collectRuleset(todo[name],scope.rulesets);
-        scope.rulesets[name] = scope.rulesets[name.toLowerCase()] = ruleset;
+        scope.setRuleset(name,ruleset);
         return ruleset;
     },
 

@@ -30,10 +30,24 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
 
     var state_functions = [];
 
+    state_functions.push(state_fn('correct',[],TBool,function(message) {
+        return {
+            return: true,
+            state: [{type:"set_credit", credit:1, message:R('part.marking.correct')}]
+        };
+    }));
+
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
             state: [{type:"set_credit", credit:1, message:message}]
+        };
+    }));
+
+    state_functions.push(state_fn('incorrect',[],TBool,function(message) {
+        return {
+            return: false,
+            state: [{type:"set_credit", credit:0, message:R('part.marking.incorrect')}]
         };
     }));
 
@@ -127,6 +141,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         this.state = [];
         this.states = {};
         this.state_valid = {};
+        this.state_errors = {};
 
         var scope = this;
         state_functions.forEach(function(fn) {
@@ -197,15 +212,15 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                 scope, 
                 {
                     variables: {
-                        studentanswer: jme.builtinScope.evaluate(studentAnswer),
-                        settings: jme.wrapValue(JSON.parse(settings))
+                        studentanswer: studentAnswer,
+                        settings: jme.wrapValue(settings)
                     }
                 }
             ]);
 
             var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
 
-            return {states: scope.states, values: result.variables, scope: result.scope};
+            return {states: scope.states, values: result.variables, scope: result.scope, state_valid: scope.state_valid, state_errors: scope.state_errors};
         }
     }
 
@@ -225,6 +240,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     }
                 }
             } catch(e) {
+                scope.state_errors[name] = e;
                 var invalid_dep = null;
                 for(var x of todo[name].vars) {
                     if(x in todo) {
@@ -245,32 +261,23 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return scope.variables[name];
     }
 
-    marking.finalise_state = function(states) {
-        var credit = 0;
-        var messages = [];
-        var warnings = [];
+    marking.finalise_state = function(part, states) {
         var valid = true;
         var end = false;
         for(var i=0;i<states.length;i++) {
             var state = states[i];
-            var old_credit = credit;
-            var message = null;
             switch(state.type) {
                 case 'set_credit':
-                    credit = state.credit;
-                    message = state.message;
+                    part.setCredit(state.credit, state.message);
                     break;
                 case 'multiply_credit':
-                    credit *= state.factor;
-                    message = state.message;
+                    part.multCredit(state.factor, state.message);
                     break;
                 case 'add_credit':
-                    credit += state.credit;
-                    message = state.message;
+                    part.addCredit(state.credit, state.message);
                     break;
                 case 'sub_credit':
-                    credit += state.credit;
-                    message = state.message;
+                    part.subCredit(state.credit, state.message);
                     break;
                 case 'end':
                     end = true;
@@ -279,30 +286,16 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     }
                     break;
                 case 'warning':
-                    warnings.push(state.message);
+                    part.giveWarning(state.message);
                     break;
                 case 'feedback':
-                    message = state.message;
+                    part.markingComment(state.message);
                     break;
             }
             if(end) {
                 break;
             }
-            var credit_message = null;
-            if(credit != old_credit) {
-                var diff = credit-old_credit;
-                credit_message = diff > 0 ? 'You were awarded '+diff+' marks' : (-diff)+' marks were taken away';
-            }
-            if(credit_message || message) {
-                message = (message || '')+(credit_message ? '<br><strong>'+credit_message+'</strong>' :'');
-                messages.push(message);
-            }
         }
-        return {
-            messages: messages,
-            credit: credit,
-            warnings: warnings,
-            valid: valid
-        }
+        part.answered = valid;
     }
 });

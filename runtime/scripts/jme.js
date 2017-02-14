@@ -1170,6 +1170,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this.resolve('rulesets',name);
     },
 
+    /** Set the given ruleset name
+     * @param {string} name
+     * @param {Numbas.jme.Ruleset[]} rules
+     */
+    setRuleset: function(name, rules) {
+        this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
+    },
+
     /** Collect together all items from the given collection 
      * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
      * @returns {object} a dictionary of names to values

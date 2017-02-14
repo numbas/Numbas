@@ -314,6 +314,18 @@ newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
 newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 
+newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
+    var re = new RegExp(pattern);
+    var m = re.exec(str);
+    return m || [];
+},{unwrapValues: true});
+
+newBuiltin('match_regex',[TString,TString,TString],TList,function(pattern,str,flags) {
+    var re = new RegExp(pattern,flags);
+    var m = re.exec(str);
+    return m || [];
+},{unwrapValues: true});
+
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange,TRange], TList,

@@ -62,6 +62,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 			this.gaps[i].revealAnswer(dontStore);
 	},
 
+	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+	rawStudentAnswerAsJME: function() {
+		return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
+	},
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
