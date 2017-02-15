@@ -17,7 +17,7 @@ tick_indexes (Indexes of choice/answer pairs):
 score_ticks (The score for each choice/answer pair):
   map(
     if(studentAnswer[x][y],
-      let(distractor,settings["distractors"][x][y], credit,settings["matrix"][x][y],
+      let(distractor,settings["distractors"][x][y], credit, if(marks=0,0,settings["matrix"][x][y]/marks),
         switch(
           credit<>0,
             if(distractor="",

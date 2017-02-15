@@ -51,9 +51,9 @@ validNumber (Is the student's answer a valid number?):
 
 numberInRange (Is the student's number in the allowed range?):
     if(studentNumber>=settings["minvalue"] and studentNumber<=settings["maxvalue"],
-        correct("Your answer is correct")
+        correct()
     ,
-        incorrect("Your answer is incorrect");
+        incorrect();
         end()
     )
 

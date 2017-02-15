@@ -298,7 +298,11 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 	var distractors = [];
 	for( i=0; i<this.numAnswers; i++ ) {
-		distractors.push([]);
+        var row = [];
+        for(var j=0;j<this.numChoices;j++) {
+            row.push('');
+        }
+		distractors.push(row);
 	}
 	var distractorNodes = this.xml.selectNodes('marking/distractors/distractor');
 	for( i=0; i<distractorNodes.length; i++ )
