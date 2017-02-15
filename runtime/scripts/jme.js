@@ -1081,7 +1081,11 @@ var Scope = jme.Scope = function(scopes) {
         extras = scopes[1] || {};
     }
     if(extras) {
-        this.variables = extras.variables || this.variables;
+        if(extras.variables) {
+            for(var x in extras.variables) {
+                this.setVariable(x,extras.variables[x]);
+            }
+        }
         this.rulesets = extras.rulesets || this.rulesets;
         this.functions = extras.functions || this.functions;
     }
