@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.NumberEntryPart} object */
 
-Numbas.queueScript('parts/numberentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/numberentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -83,6 +83,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
 	/** The student's last submitted answer */
 	studentAnswer: '',
+
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.numberentry,
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
@@ -193,67 +198,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		return new Numbas.jme.types.TString(this.studentAnswer);
 	},
 
-	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
-	 * @abstract
-	 * @returns {Numbas.jme.token}
-	 */
-	studentAnswerAsJME: function() {
-		return new Numbas.jme.types.TNum(this.studentAnswerAsFloat());
-	},
-
     /** Get the student's answer as a floating point number
      * @returns {number}
      */
 	studentAnswerAsFloat: function() {
 		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
-	},
-
-	/** Mark the student's answer */
-	mark_builtin: function()
-	{
-		var validation = this.validation;
-
-		if(this.answerList==undefined) {
-			this.setCredit(0,R('part.marking.nothing entered'));
-			return false;
-		}
-		
-		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles) ) {
-			var answerFloat = this.studentAnswerAsFloat();
-			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue ) {
-				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0) {
-					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except decimal'));
-                } else if(this.settings.integerAnswer && !this.settings.allowFractions && util.isFraction(this.studentAnswer)) {
-					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except fraction'));
-				} else {
-					this.setCredit(1,R('part.marking.correct'));
-				}
-			} else {
-				this.setCredit(0,R('part.marking.incorrect'));
-			}
-			this.answered = true;
-
-			var failedPrecision = !math.toGivenPrecision(this.studentAnswer,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision);
-			
-			if(failedPrecision) {
-				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
-			}
-		}else{
-			this.answered = false;
-			this.setCredit(0,R('part.numberentry.answer invalid'));
-		}
-	},
-
-	/** Is the student's answer valid? False if the part hasn't been submitted.
-	 * @returns {boolean}
-	 */
-	validate: function()
-	{
-		if(!this.answered) {
-			this.giveWarning(R('part.marking.not submitted'));
-		}
-		
-		return this.answered;
 	}
 };
 

@@ -1,0 +1,113 @@
+studentExpr (The student's answer, parsed): 
+    try(
+        simplify(parse(studentAnswer),[])
+    , message,
+        warn(translate("part.jme.answer invalid",["message":message]));
+        fail(translate("part.jme.answer invalid",["message":message]))
+    )
+
+cleanedStudentString (The student's answer as a string, cleaned up): string(studentExpr)
+
+scope_vars (Variables already defined in the scope): 
+    definedvariables()
+
+studentVariables (Variables used in the student's answer): 
+    set(findvars(studentExpr))-set(scope_vars)
+
+unexpectedVariables (Unexpected variables used in the student's answer):
+    let(uvars, filter(not (x in settings["expectedVariableNames"]),x,list(studentVariables)),
+        assert(len(settings["expectedVariableNames"])=0 or len(uvars)=0,
+            warn(translate("part.jme.unexpected variable name",["name":uvars[0]]))
+        );
+        uvars
+    )
+
+failMinLength (Is the student's answer too short?):
+    assert(settings["minLength"]=0 or len(cleanedStudentString)>=settings["minLength"],
+        multiply_credit(settings["minLengthPC"],settings["minLengthMessage"]);
+        true
+    )
+
+failMaxLength:
+    assert(settings["maxLength"]=0 or len(cleanedStudentString)<=settings["maxLength"],
+        multiply_credit(settings["maxLengthPC"],settings["maxLengthMessage"]);
+        true
+    )
+
+forbiddenStrings:
+    filter(x in cleanedStudentString, x, settings["notAllowed"])
+
+forbiddenStringsPenalty:
+    assert(len(forbiddenStrings)=0,
+        translate(
+          if(len(settings["notAllowed"])=1, 'part.jme.not-allowed one', 'part.jme.not-allowed several'),
+          ["strings":map(translate('part.jme.not-allowed bits',["string":str]),str,forbiddenStrings)]
+        );
+        multiply_credit(settings["notAllowedPC"],settings["notAllowedMessage"])
+    )
+
+requiredStrings:
+    filter(not (x in cleanedStudentString), x, settings["mustHave"])
+
+requiredStringsPenalty:
+    assert(len(requiredStrings)=0,
+        translate(
+          if(len(settings["mustHave"])=1, 'part.jme.must-have one', 'part.jme.must-have several'),
+          ["strings":map(translate('part.jme.must-have bits',["string":str]),str,forbiddenStrings)]
+        );
+        multiply_credit(settings["mustHavePC"],settings["mustHaveMessage"])
+    )
+
+correctExpr (The correct answer, parsed): 
+    parse(settings["correctAnswer"])
+
+correctVars (Variables used in the correct answer): 
+    set(findvars(correctExpr))-set(scope_vars)
+
+vRange (The range to pick variable values from): settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
+
+vset (The sets of variable values to test against):
+    repeat(
+        dict(map([x,random(vRange)],x,correctVars or studentVariables)),
+        settings["vsetRangePoints"]
+    )
+
+agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
+    map(
+        resultsEqual(eval(studentexpr,vars),eval(correctexpr,vars),settings["checkingType"],settings["checkingAccuracy"]),
+        vars,
+        vset
+    )
+
+numFails (The number of times the student's answer and the expected answer disagree): 
+    len(filter(not x,x,agree))
+
+numericallyCorrect (Is the student's answer numerically correct?):
+    if(numFails<settings["failureRate"],
+        correct(translate("part.jme.marking.correct"))
+    ,
+        incorrect()
+    )
+
+sameVars (Does the student use the same variables as the correct answer?):
+    if(studentVariables=correctVars,
+        true
+    ,
+        incorrect();
+        end();
+        false
+    )
+
+mark:
+    apply(studentExpr);
+    apply(unexpectedVariables);
+    apply(sameVars);
+    apply(numericallyCorrect);
+    apply(failMinLength);
+    apply(failMaxLength);
+    apply(forbiddenStringsPenalty);
+    apply(requiredStringsPenalty)
+
+interpreted_answer (The student's answer, to be reused by other parts):
+    studentExpr
+

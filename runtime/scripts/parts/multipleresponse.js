@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.MultipleResponsePart} object */
 
-Numbas.queueScript('parts/multipleresponse',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/multipleresponse',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -401,10 +401,6 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 		}
 	}
 
-	//if this part has a minimum number of answers more than zero, then
-	//we start in an error state
-	this.wrongNumber = settings.minAnswers > 0;
-
 	this.display = new Numbas.display.MultipleResponsePartDisplay(this);
 }
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
@@ -414,10 +410,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	 */
 	ticks: [],
 	
-	/** Has the student given the wrong number of responses?
-	 * @type {boolean}
-	 */
-	wrongNumber: false,
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.multipleresponse,
 
 	/** Number of choices - used by `m_n_x` parts
 	 * @type {number}
@@ -633,90 +629,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 						return Numbas.jme.wrapValue(this.ticks);
 				}
 		}
-	},
-
-	/** Mark the student's choices */
-	mark_builtin: function()
-	{
-		var validation = this.validation;
-
-		if(this.stagedAnswer==undefined) {
-			this.setCredit(0,R('part.marking.did not answer'));
-			return false;
-		}
-		this.setCredit(0);
-
-		validation.numTicks = 0;
-		var partScore = 0;
-		for( i=0; i<this.numAnswers; i++ ) {
-			for(var j=0; j<this.numChoices; j++ ) {
-				if(this.ticks[i][j]) {
-					validation.numTicks += 1;
-				}
-			}
-		}
-
-		validation.wrongNumber = (validation.numTicks<this.settings.minAnswers || (validation.numTicks>this.settings.maxAnswers && this.settings.maxAnswers>0));
-		if(validation.wrongNumber) {
-			this.setCredit(0,R('part.mcq.wrong number of choices'));
-			return;
-		}
-
-		for( i=0; i<this.numAnswers; i++ ) {
-			for(var j=0; j<this.numChoices; j++ ) {
-				if(this.ticks[i][j]) {
-					partScore += this.settings.matrix[i][j];
-
-					var row = this.settings.distractors[i];
-					if(row)
-						var message = row[j];
-					var award = this.settings.matrix[i][j];
-					if(award!=0) {
-						if(!util.isNonemptyHTML(message) && award>0) {
-							message = R('part.mcq.correct choice');
-						}
-						this.addCredit(award/this.marks,message);
-					} else {
-						this.markingComment(message);
-					}
-				}
-			}
-		}
-
-		if(this.marks>0) {
-			if(this.credit<=0) {
-				this.markingComment(R('part.marking.incorrect'));
-			}
-			this.setCredit(Math.min(partScore,this.marks)/this.marks);	//this part might have a maximum number of marks which is less then the sum of the marking matrix
-		} else {
-			this.setCredit(1,R('part.marking.correct'));
-		}
-	},
-
-	/** Are the student's answers valid? Show a warning if they've picked the wrong number */
-	validate: function()
-	{
-		var validation = this.validation;
-
-		if(validation.wrongNumber)
-		{
-			switch(this.settings.warningType)
-			{
-			case 'prevent':
-				this.giveWarning(R('part.mcq.wrong number of choices'));
-				return false;
-				break;
-			case 'warn':
-				this.giveWarning(R('part.mcq.wrong number of choices'));
-				break;
-			}
-		}
-
-		if(validation.numTicks>0)
-			return true;
-		else
-			this.giveWarning(R('part.mcq.no choices selected'));
-			return false;
 	},
 
 	/** Reveal the correct answers, and any distractor messages for the student's choices 

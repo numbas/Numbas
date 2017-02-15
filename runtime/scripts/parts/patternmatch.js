@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
    /** @file The {@link Numbas.parts.PatternMatchPart} object */
 
-   Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+   Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
    	var util = Numbas.util;
    	var jme = Numbas.jme;
@@ -61,6 +61,11 @@ Copyright 2011-15 Newcastle University
 	 * @type {string}
 	 */
 	 studentAnswer: '',
+
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.patternmatch,
 
 	/** Properties set when the part is generated.
 	 * Extends {@link Numbas.parts.Part#settings}
@@ -112,85 +117,6 @@ Copyright 2011-15 Newcastle University
 	 	return new Numbas.jme.types.TString(this.studentAnswer);
 	 },
 
-	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
-	 * @abstract
-	 * @returns {Numbas.jme.token}
-	 */
-	 studentAnswerAsJME: function() {
-	 	return new Numbas.jme.types.TString(this.studentAnswer);
-	 },
-
-	/** Mark the student's answer
-	*/
-	mark_builtin: function ()
-	{
-		var validation = this.validation;
-
-		if(this.answerList==undefined) {
-			this.setCredit(0,R('part.marking.nothing entered'));
-			return false;
-		}
-		this.answered = this.studentAnswer.length>0;
-
-		switch (this.settings.matchMode){
-			case 'regex':
-
-                var caseInsensitiveAnswer = new RegExp( this.settings.correctAnswer, 'i' );
-                var caseSensitiveAnswer = new RegExp( this.settings.correctAnswer );
-
-                if( this.settings.caseSensitive ) {
-                    if( caseSensitiveAnswer.test(this.studentAnswer) ) {
-                        this.setCredit(1,R('part.marking.correct'));
-                    } else if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-                        this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
-                    } else {
-                        this.setCredit(0,R('part.marking.incorrect'));
-                    }
-                } else {
-                    if(caseInsensitiveAnswer.test(this.studentAnswer)) {
-                        this.setCredit(1,R('part.marking.correct'));
-                    } else {
-                        this.setCredit(0,R('part.marking.incorrect'));
-                    }
-                }
-
-                break;
-
-			case 'exact':
-
-                if( this.settings.caseSensitive ) {
-                    if( this.studentAnswer == this.settings.correctAnswer ) {
-                        this.setCredit(1,R('part.marking.correct'));
-                    } else if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
-                        this.setCredit(this.settings.partialCredit,R('part.patternmatch.correct except case'));
-                    } else {
-                        this.setCredit(0,R('part.marking.incorrect'));
-                    }
-                } else {
-                    if(this.studentAnswer.toLowerCase() == this.settings.correctAnswer.toLowerCase()) {
-                        this.setCredit(1,R('part.marking.correct'));
-                    } else {
-                        this.setCredit(0,R('part.marking.incorrect'));
-                    }
-                }
-
-                break;
-		}
-
-
-	},
-
-	/** Is the student's answer valid? False if the part hasn't been submitted.
-	 * @returns {boolean}
-	 */
-	 validate: function()
-	 {
-	 	if(!this.answered) {
-	 		this.giveWarning(R('part.marking.not submitted'));
-	 	}
-
-	 	return this.answered;
-	 }
 	};
 
 	Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);

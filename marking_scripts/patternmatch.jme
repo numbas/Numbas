@@ -1,0 +1,49 @@
+regex_match (Match the student's answer with the correct answer, interpreted as a regular expression):
+  match_regex(settings["correctAnswer"],studentAnswer)
+
+regex_match_case_insensitive (Match the student's answer with the correct answer, interpreted as a case-insensitive regular expression):
+  match_regex(settings["correctAnswer"],studentAnswer,"i")
+
+exact_match (Is the student's answer exactly the correct answer?):
+  studentAnswer=settings["correctAnswer"]
+
+exact_match_case_insensitive (Is the student's answer exactly the correct answer?):
+  lower(studentAnswer)=lower(settings["correctAnswer"])
+
+matches (Does the student's answer match the correct answer?):
+  switch(
+    settings["matchMode"]="regex", len(regex_match)>0,
+    settings["matchMode"]="exact", exact_match,
+    false
+  )
+      
+matches_case_insensitive (Does the student's answer match the correct answer, ignoring case?):
+  switch(
+    settings["matchMode"]="regex", len(regex_match_case_insensitive)>0,
+    settings["matchMode"]="exact", exact_match_case_insensitive,
+    false
+  )
+     
+
+mark:
+  assert(len(studentAnswer)>0,fail("part.marking.nothing entered"));
+  if(settings["caseSensitive"],
+    if(matches,
+      correct(),
+      if(matches_case_insensitive,
+        set_credit(settings["partialCredit"],translate("part.patternmatch.correct except case")),
+        incorrect()
+      )
+    ,
+      incorrect()
+    )
+  ,
+    if(matches_case_insensitive,
+      correct()
+    ,
+      incorrect()
+    )
+  )
+
+interpreted_answer (The student's answer, to be reused by other parts):
+  studentAnswer

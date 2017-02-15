@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.JMEPart} object */
 
-Numbas.queueScript('parts/jme',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/jme',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -138,6 +138,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	studentAnswer: '',
 
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.jme,
+
 	/** Properties set when the part is generated.
 	 *
 	 * Extends {@link Numbas.parts.Part#settings}
@@ -236,203 +241,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	 */
 	rawStudentAnswerAsJME: function() {
 		return new Numbas.jme.types.TString(this.studentAnswer);
-	},
-
-	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
-	 * @abstract
-	 * @returns {Numbas.jme.token}
-	 */
-	studentAnswerAsJME: function() {
-		return new Numbas.jme.types.TExpression(Numbas.jme.compile(this.studentAnswer));
-	},
-
-	/** Mark the student's answer
-	 */
-	mark_builtin: function()
-	{
-		var validation = this.validation;
-
-		if(this.answerList==undefined)
-		{
-			this.setCredit(0,R('part.marking.nothing entered'));
-			return false;
-		}
-
-		try
-		{
-			var simplifiedAnswer = Numbas.jme.display.simplifyExpression(this.studentAnswer,'',this.question.scope);
-		}
-		catch(e)
-		{
-			this.setCredit(0,R('part.jme.answer invalid',{message:e.message}));
-			return;
-		}
-
-		if(this.settings.checkVariableNames) {
-			var tree = jme.compile(this.studentAnswer,this.question.scope);
-			var usedvars = jme.findvars(tree);
-			validation.failExpectedVariableNames = false;
-			for(var i=0;i<usedvars.length;i++) {
-				if(!this.settings.expectedVariableNames.contains(usedvars[i].toLowerCase())) {
-					validation.failExpectedVariableNames = true;
-					validation.unexpectedVariableName = usedvars[i];
-					break;
-				}
-			}
-		}
-
-		validation.failMinLength = (this.settings.minLength>0 && simplifiedAnswer.length<this.settings.minLength);
-		validation.failMaxLength = (this.settings.maxLength>0 && simplifiedAnswer.length>this.settings.maxLength);
-		validation.failNotAllowed = false;
-		validation.failMustHave = false;
-
-		//did student actually write anything?
-		this.answered = this.studentAnswer.length > 0;
-		
-		//do comparison of student's answer with correct answer
-		if(!jme.compare(this.studentAnswer, this.settings.correctAnswer, this.settings, this.markingScope))
-		{
-			this.setCredit(0,R('part.marking.incorrect'));
-			return;
-		}
-
-		var noSpaceAnswer = this.studentAnswer.replace(/\s/g,'').toLowerCase();
-		//see if student answer contains any forbidden strings
-		for( i=0; i<this.settings.notAllowed.length; i++ ) {
-            var notAllowedString = this.settings.notAllowed[i].toLowerCase();
-			if(noSpaceAnswer.contains(notAllowedString)) { 
-                validation.failNotAllowed = true; 
-                break;
-            }
-		}
-
-		if(!validation.failNotAllowed) {
-            var checkMustHaveAnswer = noSpaceAnswer;
-			//see if student answer contains all the required strings
-			for( i=0; i<this.settings.mustHave.length; i++ ) {
-                var mustHaveString = this.settings.mustHave[i].toLowerCase();
-				if(!checkMustHaveAnswer.contains(mustHaveString)) { 
-                    validation.failMustHave = true; 
-                    break;
-                } else {
-                    checkMustHaveAnswer = checkMustHaveAnswer.replace(mustHaveString,'');
-                }
-			}
-		}
-
-		//calculate how many marks will be given for a correct answer
-		//(can be modified if answer wrong length or fails string restrictions)
-		this.setCredit(1,R('part.jme.marking.correct'));
-
-		if(validation.failMinLength)
-		{
-			this.multCredit(this.settings.minLengthPC,this.settings.minLengthMessage);
-		}
-		if(validation.failMaxLength)
-		{
-			this.multCredit(this.settings.maxLengthPC,this.settings.maxLengthMessage);
-		}
-
-		if(validation.failMustHave)
-		{
-			if(this.settings.mustHaveShowStrings)
-			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',{'string':x})}).join(', ');
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',{strings:strings}) : R('part.jme.must-have several',{strings:strings})
-				this.addCredit(0,message);
-			}
-			this.multCredit(this.settings.mustHavePC,this.settings.mustHaveMessage);
-		}
-
-		if(validation.failNotAllowed)
-		{
-			if(this.settings.notAllowedShowStrings)
-			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',{'string':x})}).join(', ');
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',{strings:strings}) : R('part.jme.not-allowed several',{strings:strings})
-				this.addCredit(0,message);
-			}
-			this.multCredit(this.settings.notAllowedPC,this.settings.notAllowedMessage);
-		}
-
-	},
-
-	/** Is the student's answer valid? False if student hasn't submitted an answer
-	 * @returns {boolean}
-	 */
-	validate: function()
-	{
-		var validation = this.validation;
-
-		if(this.studentAnswer.length===0)
-		{
-			this.giveWarning(R('part.marking.not submitted'));
-			return false;
-		}
-
-		try{
-			var scope = new jme.Scope(this.question.scope);
-
-			var tree = jme.compile(this.studentAnswer,scope);
-			var varnames = jme.findvars(tree);
-			for(i=0;i<varnames.length;i++) {
-				scope.variables[varnames[i]]=new jme.types.TNum(0);
-			}
-			jme.evaluate(tree,scope);
-		}
-		catch(e)
-		{
-			this.giveWarning(R('part.jme.answer invalid',{message:e.message}));
-			return false;
-		}
-
-		if( validation.failExpectedVariableNames ) {
-			var suggestedNames = validation.unexpectedVariableName.split(jme.re.re_short_name);
-			if(suggestedNames.length>3) {
-				var suggestion = [];
-				for(var i=1;i<suggestedNames.length;i+=2) {
-					suggestion.push(suggestedNames[i]);
-				}
-				suggestion = suggestion.join('*');
-				this.giveWarning(R('part.jme.unexpected variable name suggestion',{name:validation.unexpectedVariableName,suggestion:suggestion}));
-			}
-			else
-				this.giveWarning(R('part.jme.unexpected variable name', {name:validation.unexpectedVariableName}));
-		}
-
-		if( validation.failMinLength)
-		{
-			this.giveWarning(this.settings.minLengthMessage);
-		}
-
-		if( validation.failMaxLength )
-		{
-			this.giveWarning(this.settings.maxLengthMessage);
-		}
-
-		if( validation.failMustHave )
-		{
-			this.giveWarning(this.settings.mustHaveMessage);
-			if(this.settings.mustHaveShowStrings)
-			{
-				var strings = this.settings.mustHave.map(function(x){return R('part.jme.must-have bits',{'string':x})}).join(', ');
-				var message = this.settings.mustHave.length==1 ? R('part.jme.must-have one',{strings:strings}) : R('part.jme.must-have several',{strings:strings})
-				this.giveWarning(message);
-			}
-		}
-
-		if( validation.failNotAllowed )
-		{
-			this.giveWarning(this.settings.notAllowedMessage);
-			if(this.settings.notAllowedShowStrings)
-			{
-				var strings = this.settings.notAllowed.map(function(x){return R('part.jme.not-allowed bits',{'string':x})}).join(', ');
-				var message = this.settings.notAllowed.length==1 ? R('part.jme.not-allowed one',{strings:strings}) : R('part.jme.not-allowed several',{strings:strings})
-				this.giveWarning(message);
-			}
-		}
-
-		return true;
 	}
 };
 

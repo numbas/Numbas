@@ -1,0 +1,85 @@
+rows (The number of rows in the student's answer): len(studentanswer)
+
+cols (The number of columns in the student's answer): if(rows>0,len(studentanswer[0]),0)
+
+correct_rows (The number of rows in the correct answer): len(settings['correctAnswer'])
+
+correct_cols (The number of columns in the correct answer): len(settings['correctAnswer'][0])
+
+num_cells (The number of cells in the student's answer): rows*cols
+
+cell_indexes (The index of each cell in the student's answer): 
+    product(list(0..rows-1), list(0..cols-1))
+
+studentNumbers:
+    map(map(parseNumber(c, "en"), c, row), row, studentAnswer)
+
+studentMatrix (The student's answer, with each cell parsed to numbers): 
+    matrix(studentNumbers)
+
+invalid_cells (The positions of the cells in the student's answer which can't be interpreted as numbers):
+    filter(isnan(studentNumbers[p[0]][p[1]]), p, cell_indexes)
+
+any_invalid (Are any of the cells invalid?):
+    assert(len(invalid_cells)=0,
+        warn(translate("part.matrix.invalid cell"));
+        fail(translate("part.matrix.invalid cell"));
+        true
+    )
+
+wrong_precision_cells (The indexes of the cells which are given to the wrong precision):
+    filter(not toGivenPrecision(studentAnswer[p[0]][p[1]], settings["precisionType"], settings['precision'], settings["strictPrecision"]), p, cell_indexes)
+
+wrong_precision (Has every cell been given to the correct precision?):
+    assert(len(wrong_precision_cells)=0,
+        multiply_credit(settings['precisionPC'], settings["precisionMessage"])
+    )
+
+
+wrong_size (Does the student's answer have the wrong dimensions?):
+    assert(rows=correct_rows and cols=correct_cols,
+        incorrect();
+        end()
+    )
+
+rounded_matrix (The student's answer, with each cell rounded to the required precision): 
+    map(
+        switch(
+            settings["precisionType"]="dp",
+            precround(c, settings['precision']),
+            settings["precisionType"]="sigfig",
+            siground(c, settings['precision']),
+            c
+        ),
+        c,
+        studentMatrix
+    )
+
+correct_cells (The indexes of the cells which are correct):
+    filter(
+        if(p[0]<correct_rows and p[1]<correct_cols,
+            withinTolerance(rounded_matrix[p[0]][p[1]], settings["correctAnswer"][p[0]][p[1]], settings['tolerance']),
+            false
+        ),
+        p, 
+        cell_indexes
+    )
+
+mark:
+    apply(any_invalid);
+    apply(wrong_size);
+    if(len(correct_cells)=len(cell_indexes),
+        correct()
+    ,
+        if(settings['markPerCell'],
+            set_credit(len(correct_cells)/num_cells,translate('part.matrix.some incorrect',["count":num_cells-len(correct_cells)]))
+        ,
+            incorrect();
+            end()
+        )
+    );
+    apply(wrong_precision)
+
+interpreted_answer (The student's answer, to be reused by other parts):
+  studentMatrix
+

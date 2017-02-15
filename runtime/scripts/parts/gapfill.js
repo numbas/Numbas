@@ -96,8 +96,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	 */
 	mark: function()
 	{
-		var validation = this.validation;
-
 		this.credit=0;
 		if(this.marks>0)
 		{
@@ -116,21 +114,17 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 			}
 			this.credit/=this.marks;
 		}
-	},
 
-	/** Are the student's answers to all of the gaps valid?
-	 * @returns {boolean}
-	 */
-	validate: function()
-	{
 		//go through all gaps, and if any one fails to validate then
 		//whole part fails to validate
 		var success = true;
-		for(var i=0; i<this.gaps.length; i++)
+		for(var i=0; i<this.gaps.length; i++) {
 			success = success && this.gaps[i].answered;
+        }
 
-		return success;
+        this.answered = success;
 	}
+
 };
 GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
 GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);

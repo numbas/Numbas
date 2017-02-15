@@ -143,15 +143,20 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		this.settings.errorCarriedForwardReplacements.push(vr);
 	}
 
-    var markingAlgorithmNode = this.xml.selectSingleNode('markingalgorithm');
-    var markingAlgorithmString = Numbas.xml.getTextContent(markingAlgorithmNode).trim();
-    if(markingAlgorithmString) {
-        this.settings.customMarkingAlgorithm = new marking.MarkingScript(markingAlgorithmString);
+    var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
+    var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
+    if(markingScriptString) {
+        var algo = this.markingScript = new marking.MarkingScript(markingScriptString);
+        var requiredNotes = ['mark','interpreted_answer'];
+        requiredNotes.forEach(function(name) {
+            if(!(name in algo.notes)) {
+                throw(new Numbas.Error("part.marking.missing required note",{note:name}));
+            }
+        });
     }
 
 	this.markingFeedback = [];
 	this.warnings = [];
-	this.validation = {};
 
 	this.scripts = {};
 	var scriptNodes = this.xml.selectNodes('scripts/script');
@@ -297,7 +302,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
 	 * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
-     * @property {object} customMarkingAlgorithm
+     * @property {object} markingScript
 	 */
 	settings: 
 	{
@@ -306,9 +311,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		minimumMarks: 0,
 		showCorrectAnswer: true,
 		showFeedbackIcon: true,
-		hasVariableReplacements: false,
-        customMarkingAlgorithm: null
+		hasVariableReplacements: false
 	},
+
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: null,
 
 	/** Throw an error, with the part's identifier prepended to the message
 	 * @param {string} message
@@ -589,20 +598,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	/** Calculate the correct answer in the given scope, and mark the student's answer
 	 * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
 	 * @param {object} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
-	 * @returns {object} - dictionary with `warnings` {string[]}, `markingFeedback` {feedbackmessage[]}, `validation` {object}, `credit` {number} and `answered` {boolean}
+	 * @returns {object} - dictionary with `warnings` {string[]}, `markingFeedback` {feedbackmessage[]}, `credit` {number} and `answered` {boolean}
 	 */
 	markAgainstScope: function(scope,feedback) {
 		this.setWarnings(feedback.warnings.slice());
 		this.markingFeedback = feedback.markingFeedback.slice();
-		this.validation = {};
 
         try {
     		this.getCorrectAnswer(scope);
-
     		this.mark();
-            if(!this.settings.customMarkingAlgorithm) {
-    	    	this.answered = this.validate();
-            }
         } catch(e) {
             this.giveWarning(e.message);
         }
@@ -610,7 +614,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		return {
 			warnings: this.warnings.slice(),
 			markingFeedback: this.markingFeedback.slice(),
-			validation: util.copyobj(this.validation),
 			credit: this.credit,
 			answered: this.answered
 		}
@@ -659,7 +662,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		return scope;
 	},
 
-	/** Compute the correct answer, based on the given scope
+	/** Compute the correct answer, based on the given scope.
 	 * Anything to do with marking that depends on the scope should be in this method, and calling it with a new scope should update all the settings used by the marking algorithm.
 	 * @param {Numbas.jme.Scope} scope
 	 * @abstract
@@ -671,7 +674,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	setStudentAnswer: function() {},
 
-	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	/** Get the student's answer as it was entered as a JME data type, to be used in the marking script.
 	 * @abstract
 	 * @returns {Numbas.jme.token}
 	 */
@@ -683,50 +686,37 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @returns {Numbas.jme.token}
 	 */
 	studentAnswerAsJME: function() {
+        return this.interpretedStudentAnswer;
 	},
 
-    /** Function which marks the student's answer: set the credit for the student's answer to a number between 0 and 1. 
-     * If `this.settings.customMarkingAlgorithm` is set, use that; otherwise, use `this.mark_builtin`.
-     * Runs before {@link Numbas.parts.Part#validate} - set properties on `this.validation` to record reasons answer is valid/invalid.
-     * @see Numbas.parts.Part.settings.customMarkingAlgorithm
-     * @see Numbas.parts.Part#mark_builtin
+    /** Function which marks the student's answer: run `this.settings.markingScript`, which sets the credit for the student's answer to a number between 0 and 1 and produces a list of feedback messages and warnings.
+     * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
+     * @see Numbas.parts.Part.settings.markingScript
+     * @see Numbas.parts.Part.answered
      */
     mark: function() {
-        if(this.settings.customMarkingAlgorithm) {
-            return this.mark_custom();
-        } else {
-            return this.mark_builtin();
-        }
-    },
-
-	/** "Built-in" marking function: used if customMarkingAlgorithm is not set.
-	 * @abstract
-     * @see Numbas.parts.Part#mark
-     * @see Numbas.parts.Part#setCredit
-     * @see Numbas.parts.Part#markingComment
-     * @see Numbas.parts.Part#validate
-	 */
-	mark_builtin: function() {},
-
-    /** Run the custom marking algorithm
-     * @see Numbas.parts.Part#mark
-     * @see Numbas.part.Part.settings.customMarkingAlgorithm
-     */
-    mark_custom: function() {
 		if(this.answerList==undefined) {
 			this.setCredit(0,R('part.marking.nothing entered'));
-			return false;
+			return;
 		}
 		
-        var result = this.settings.customMarkingAlgorithm.evaluate(this.question.scope, {studentAnswer: this.rawStudentAnswerAsJME(), settings: jme.wrapValue(this.settings), marks: new jme.types.TNum(this.marks)});
-        if(!result.states.mark) {
-            throw(new Numbas.Error('part.marking.custom markign script has no mark note'));
-        } else if(result.state_errors.mark) {
+        var result = this.markingScript.evaluate(
+            this.question.scope, 
+            {
+                studentAnswer: this.rawStudentAnswerAsJME(), 
+                settings: jme.wrapValue(this.settings), 
+                marks: new jme.types.TNum(this.marks),
+                partType: new jme.types.TString(this.type)
+            }
+        );
+        if(result.state_errors.mark) {
             throw(result.state_errors.mark);
         }
 
         var states = result.states.mark;
         marking.finalise_state(this,states);
+
+        this.interpretedStudentAnswer = result.values['interpreted_answer'];
     },
 
 	/** Set the `credit` to an absolute value
@@ -797,13 +787,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			message: message
 		});
 	},
-
-	/** Is the student's answer acceptable?
-     * Only runs if `this.customMarkingAlgorithm` is not set.
-	 * @abstract
-	 * @returns {boolean}
-	 */
-	validate: function() { return true; },
 
 	/** Show the steps, as a result of the student asking to show them.
 	 * If the answers have not been revealed, we should apply the steps penalty.

@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.MatrixEntryPart} object */
 
-Numbas.queueScript('parts/matrixentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/matrixentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -93,6 +93,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** The student's last submitted answer */
 	studentAnswer: '',
 
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.matrixentry,
+
 	/** Properties set when part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {matrix} correctAnswer - the correct answer to the part
@@ -159,20 +164,12 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		this.studentAnswer = this.stagedAnswer[2];
 	},
 
-	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	/** Get the student's answer as it was entered as a JME data type, to be used in the marking script
 	 * @abstract
 	 * @returns {Numbas.jme.token}
 	 */
 	rawStudentAnswerAsJME: function() {
         return jme.wrapValue(this.studentAnswer);
-	},
-
-	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
-	 * @abstract
-	 * @returns {Numbas.jme.token}
-	 */
-	studentAnswerAsJME: function() {
-		return new Numbas.jme.types.TMatrix(this.studentAnswerAsMatrix());
 	},
 
 	studentAnswerAsMatrix: function() {
@@ -199,100 +196,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		studentMatrix.columns = columns;
 		
 		return studentMatrix;
-	},
-
-	/** Mark the student's answer */
-	mark_builtin: function()
-	{
-		var validation = this.validation;
-
-		if(this.answerList===undefined)
-		{
-			this.setCredit(0,R('part.marking.nothing entered'));
-			return false;
-		}
-
-		var correctMatrix = this.settings.correctAnswer;
-
-		if(this.studentAnswer) {
-			var studentMatrix = this.studentAnswerAsMatrix();
-
-			if(studentMatrix===null) {
-				this.setCredit(0,R('part.matrix.invalid cell'));
-				validation.invalidCell = true;
-				return;
-			} else {
-				validation.invalidCell = false;
-			}
-
-			var precisionOK = true;
-			var rows = studentMatrix.rows;
-			var columns = studentMatrix.columns;
-
-			for(var i=0;i<rows;i++) {
-				for(var j=0;j<columns;j++) {
-					var cell = this.studentAnswer[i][j];
-					precisionOK &= math.toGivenPrecision(cell,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision); 
-				}
-			}
-
-			validation.wrongSize = rows!=correctMatrix.rows || columns!=correctMatrix.columns;
-			if(validation.wrongSize) {
-				this.answered = true;
-				this.setCredit(0,R('part.marking.incorrect'));
-				return;
-			}
-
-			var rounders = {'dp': Numbas.matrixmath.precround, 'sigfig': Numbas.matrixmath.siground, 'none': function(x){return x}};
-			var round = rounders[this.settings.precisionType];
-			studentMatrix = round(studentMatrix,this.settings.precision);
-
-			var numIncorrect = 0;
-			for(var i=0;i<rows;i++) {
-				for(var j=0;j<columns;j++) {
-					var studentCell = studentMatrix[i][j];
-					var correctCell = correctMatrix[i][j];
-					if(!math.withinTolerance(studentCell,correctCell,this.settings.tolerance)) {
-						numIncorrect += 1;
-					}
-				}
-			}
-
-			var numCells = rows*columns;
-
-			if(numIncorrect==0) {
-				this.setCredit(1,R('part.marking.correct'));
-			} else if(this.settings.markPerCell && numIncorrect<numCells) {
-				this.setCredit( (numCells-numIncorrect)/numCells, R('part.matrix.some incorrect',{count:numIncorrect}) );
-			} else {
-				this.setCredit(0,R('part.marking.incorrect'));
-			}
-
-			if(!precisionOK) {
-				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
-			}
-
-			this.answered = true;
-		} else {
-			this.answered = false;
-			this.setCredit(0,R('part.matrix.answer invalid'));
-		}
-	},
-
-	/** Is the student's answer valid? False if the part hasn't been submitted.
-	 * @returns {boolean}
-	 */
-	validate: function()
-	{
-		var validation = this.validation;
-
-		if(validation.invalidCell) {
-			this.giveWarning(R('part.matrix.invalid cell'));
-		} else if(!this.answered) {
-			this.giveWarning(R('part.matrix.empty cell'));
-		}
-		
-		return this.answered;
 	}
 }
 

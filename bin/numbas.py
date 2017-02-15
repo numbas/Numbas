@@ -143,6 +143,8 @@ class NumbasCompiler(object):
         self.make_xml()
         files[os.path.join('.','settings.js')] = io.StringIO(self.xmls)
 
+        files[os.path.join('.','marking_scripts.js')] = io.StringIO(self.collect_marking_scripts())
+
         self.make_locale_file()
 
         self.add_source()
@@ -213,6 +215,26 @@ class NumbasCompiler(object):
                 files[os.path.join('resources',name)] = os.path.join(self.options.path,path)
         
         return files
+
+    def collect_marking_scripts(self):
+        scripts_dir = os.path.join(self.options.path,'marking_scripts')
+        scripts = {}
+        for filename in os.listdir(scripts_dir):
+            name, ext = os.path.splitext(filename)
+            print(name)
+            print(ext)
+            if ext=='.jme':
+                with open(os.path.join(scripts_dir,filename)) as f:
+                    scripts[name] = f.read()
+        template = """Numbas.queueScript('marking_scripts',['marking'],function() {{
+            Numbas.marking_scripts = {scripts};
+            for(var x in Numbas.marking_scripts) {{
+                Numbas.marking_scripts[x] = new Numbas.marking.MarkingScript(Numbas.marking_scripts[x]);
+            }}
+        }});
+        """
+
+        return template.format(scripts = json.dumps(scripts))
 
     def make_xml(self):
         """

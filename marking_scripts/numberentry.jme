@@ -1,0 +1,81 @@
+studentNumber (The student's answer, parsed as a number):
+    if(settings["allowFractions"],
+        parseNumber_or_fraction(studentAnswer,"en")
+    ,
+        parseNumber(studentAnswer,"en")
+    )
+
+isFraction (Is the student's answer a fraction?):
+    "/" in studentAnswer
+
+numerator (The numerator of the student's answer, or 0 if not a fraction):
+    if(isFraction,
+        parsenumber(split(studentAnswer,"/")[0],"en")
+    ,
+        0
+    )
+
+isInteger (Is the student's answer an integer?):
+    countDP(studentAnswer)=0
+
+integerAnswerPenalty (Penalty for not entering an integer):
+    if(settings["integerAnswer"], 
+        switch(
+        not isInteger,
+            multiply_credit(settings["integerPC"],translate("part.numberentry.correct except decimal")); true,
+        settings["allowFractions"] and isFraction,
+            multiply_credit(settings["integerPC"],translate("part.numberentry.correct except fraction")); true,
+            false
+        )
+    ,
+        false
+    )
+
+denominator (The numerator of the student's answer, or 0 if not a fraction):
+    if(isFraction,
+        parsenumber(split(studentAnswer,"/")[1],"en")
+    ,
+        0
+    )
+
+cancelled (Is the student's answer a cancelled fraction?):
+    gcd(numerator,denominator)=1
+
+validNumber (Is the student's answer a valid number?):
+    if(isNaN(studentNumber),
+        warn(translate("part.numberentry.answer invalid"));
+        fail(translate("part.numberentry.answer invalid"))
+    ,
+        true
+    )
+
+numberInRange (Is the student's number in the allowed range?):
+    if(studentNumber>=settings["minvalue"] and studentNumber<=settings["maxvalue"],
+        correct("Your answer is correct")
+    ,
+        incorrect("Your answer is incorrect");
+        end()
+    )
+
+correctPrecision (Has the student's answer been given to the desired precision?):     
+    if(togivenprecision(studentanswer,settings['precisionType'],settings['precision'],settings["strictPrecision"]),
+        true
+    ,
+        multiply_credit(0.5,settings["precisionMessage"]);
+        false
+    )
+
+mark (Mark the student's answer):
+    apply(validNumber);
+    apply(numberInRange);
+    assert(numberInRange,end());
+    apply(integerAnswerPenalty);
+    if(isFraction,
+        apply(cancelled)
+    ,
+        apply(correctPrecision)
+    )
+ 
+interpreted_answer (The student's answer, to be reused by other parts):
+    studentNumber
+
