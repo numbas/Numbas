@@ -718,7 +718,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			return false;
 		}
 		
-        var result = this.settings.customMarkingAlgorithm.evaluate(this.question.scope, this.rawStudentAnswerAsJME(),this.settings);
+        var result = this.settings.customMarkingAlgorithm.evaluate(this.question.scope, {studentAnswer: this.rawStudentAnswerAsJME(), settings: jme.wrapValue(this.settings), marks: new jme.types.TNum(this.marks)});
         if(!result.states.mark) {
             throw(new Numbas.Error('part.marking.custom markign script has no mark note'));
         } else if(result.state_errors.mark) {

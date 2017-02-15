@@ -207,15 +207,9 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         this.notes = todo;
     }
     MarkingScript.prototype = {
-        evaluate: function(scope, studentAnswer, settings) {
+        evaluate: function(scope, variables) {
             scope = new StatefulScope([
-                scope, 
-                {
-                    variables: {
-                        studentanswer: studentAnswer,
-                        settings: jme.wrapValue(settings)
-                    }
-                }
+                scope, {variables: variables}
             ]);
 
             var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
