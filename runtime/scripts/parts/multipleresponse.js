@@ -589,6 +589,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		this.ticks = util.copyarray(this.stagedAnswer,true);
 	},
 
+	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+	 * @abstract
+	 * @returns {Numbas.jme.token}
+	 */
+    rawStudentAnswerAsJME: function() {
+        return Numbas.jme.wrapValue(this.ticks);
+    },
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
@@ -628,7 +636,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	},
 
 	/** Mark the student's choices */
-	mark: function()
+	mark_builtin: function()
 	{
 		var validation = this.validation;
 
