@@ -700,23 +700,97 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			return;
 		}
 		
+        var result = this.mark_answer(this.rawStudentAnswerAsJME());
+
+        this.apply_feedback(marking.finalise_state(result.states.mark));
+
+        this.interpretedStudentAnswer = result.values['interpreted_answer'];
+    },
+
+    /** Apply a finalised list of feedback states to this part.
+     * @param {object[]} feedback
+     * @see Numbas.marking.finalise_state
+     */
+    apply_feedback: function(feedback) {
+        var valid = true;
+        var part = this;
+        var end = false;
+        var states = feedback.states.slice();
+        var i=0;
+        var lifts = [];
+        var scale = 1;
+        while(i<states.length) {
+            var state = states[i];
+            switch(state.op) {
+                case 'set_credit':
+                    part.setCredit(scale*state.credit, state.message);
+                    break;
+                case 'multiply_credit':
+                    part.multCredit(scale*state.factor, state.message);
+                    break;
+                case 'add_credit':
+                    part.addCredit(scale*state.credit, state.message);
+                    break;
+                case 'sub_credit':
+                    part.subCredit(scale*state.credit, state.message);
+                    break;
+                case 'warning':
+                    part.giveWarning(state.message);
+                    break;
+                case 'feedback':
+                    part.markingComment(state.message);
+                    break;
+                case 'end':
+                    end = true;
+                    if(state.invalid) {
+                        valid = false;
+                    }
+                    break;
+                case 'start_lift':
+                    lifts.push({credit: this.credit,scale:scale});
+                    this.credit = 0;
+                    scale = state.scale;
+                    break;
+                case 'end_lift':
+                    var last_lift = lifts.pop();
+                    var lift_credit = this.credit;
+                    this.credit = last_lift.credit;
+                    this.addCredit(lift_credit*last_lift.scale);
+                    scale = last_lift.scale;
+                    break;
+            }
+            i += 1;
+            if(end) {
+                break;
+            }
+        }
+
+        part.answered = valid;
+    },
+
+    /** Run the marking script against the given answer.
+     * This does NOT apply the feedback and credit to the part object, it just returns it.
+     * @param {Numbas.jme.token} studentAnswer
+     * @see Numbas.parts.Part#mark
+     * @returns {object} a dictionary `{states, values, scope, state_valid, state_errors}`
+     */
+    mark_answer: function(studentAnswer) {
         var result = this.markingScript.evaluate(
             this.question.scope, 
             {
-                studentAnswer: this.rawStudentAnswerAsJME(), 
+                studentAnswer: studentAnswer, 
                 settings: jme.wrapValue(this.settings), 
                 marks: new jme.types.TNum(this.marks),
-                partType: new jme.types.TString(this.type)
+                partType: new jme.types.TString(this.type),
+                gaps: jme.wrapValue(this.gaps.map(function(g){return g.path})),
+                steps: jme.wrapValue(this.steps.map(function(s){return s.path}))
             }
         );
         if(result.state_errors.mark) {
             throw(result.state_errors.mark);
         }
 
-        var states = result.states.mark;
-        marking.finalise_state(this,states);
-
-        this.interpretedStudentAnswer = result.values['interpreted_answer'];
+        return result;
     },
 
 	/** Set the `credit` to an absolute value

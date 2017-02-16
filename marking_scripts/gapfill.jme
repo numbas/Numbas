@@ -1,0 +1,21 @@
+gap_feedback:
+  map(
+    let(result,submit_part(gap),
+      feedback(translate('part.gapfill.feedback header',["index":index]));
+      concat_feedback(result["feedback"], result["marks"]/marks);
+      result
+    ),
+    [gap,index],
+    zip(gaps,list(1..len(gaps)))
+  )
+
+any_invalid:
+  len(filter(not gap["answered"],gap,gap_feedback))>0
+
+mark:
+  apply(gap_feedback);
+  assert(not any_invalid,fail(""))
+
+interpreted_answer:
+  studentAnswer
+

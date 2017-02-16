@@ -151,6 +151,8 @@
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking {{part}}: {{message}}",
     "part.marking.no result": "This part could not be marked.",
+    "marking.script.error parsing notes": "Error parsing marking script: {{message}}",
+    "marking.note.compilation error": "Error compiling note <code>{{name}}</code>: {{message}}",
     "part.correct answer": "Expected answer:",
     "part.missing type attribute": "{{part}}: Missing part type attribute",
     "part.unknown type": "{{part}}: Unrecognised part type {{type}}",

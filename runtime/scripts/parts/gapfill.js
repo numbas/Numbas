@@ -53,6 +53,11 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	 */
 	stagedAnswer: 'something',
 
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.gapfill,
+
 	/** Reveal the answers to all of the child gaps 
 	 * Extends {@link Numbas.parts.Part.revealAnswer}
 	 */
@@ -70,6 +75,16 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 		return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
 	},
 
+    setStudentAnswer: function() {
+        this.studentAnswer = this.gaps.map(function(g) {
+            if(g.stagedAnswer) {
+                g.answerList = util.copyarray(g.stagedAnswer);
+            }
+            g.setStudentAnswer();
+            return g.studentAnswer;
+        });
+    },
+
 	/** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
 	 * @abstract
 	 * @returns {Numbas.jme.token}
@@ -78,23 +93,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 		return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
 	},
 
-	/** Submit all of the child gaps.
-	 *
-	 * Sets `this.submitting = true` while submitting, so that child parts don't try to recalculate the score during marking.
-	 */
-	submit: function()
-	{
-		this.submitting = true;
-		for(var i=0;i<this.gaps.length;i++)
-		{
-			this.gaps[i].submit();
-		}
-		this.submitting = false;
-	},
-
 	/** Mark this part - add up the scores from each of the child gaps.
 	 */
-	mark: function()
+	mark_old: function()
 	{
 		this.credit=0;
 		if(this.marks>0)
@@ -102,6 +103,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 			for(var i=0; i<this.gaps.length; i++)
 			{
 				var gap = this.gaps[i];
+    			gap.submit();
 				this.credit += gap.credit*gap.marks;
 				if(this.gaps.length>1)
 					this.markingComment(R('part.gapfill.feedback header',{index:i+1}));
@@ -126,7 +128,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	}
 
 };
-GapFillPart.prototype.submit = util.extend(GapFillPart.prototype.submit, Part.prototype.submit);
 GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);
 
 Numbas.partConstructors['gapfill'] = util.extend(Part,GapFillPart);

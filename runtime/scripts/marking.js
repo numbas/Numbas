@@ -9,6 +9,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var TName = jme.types.TName;
     var TNum = jme.types.TNum;
     var TBool = jme.types.TBool;
+    var TDict = jme.types.TDict;
 
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
@@ -33,63 +34,63 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{type:"set_credit", credit:1, message:R('part.marking.correct')}]
+            state: [{op:"set_credit", credit:1, message:R('part.marking.correct')}]
         };
     }));
 
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{type:"set_credit", credit:1, message:message}]
+            state: [{op:"set_credit", credit:1, message:message}]
         };
     }));
 
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{type:"set_credit", credit:0, message:R('part.marking.incorrect')}]
+            state: [{op:"set_credit", credit:0, message:R('part.marking.incorrect')}]
         };
     }));
 
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{type:"set_credit", credit:0, message:message}]
+            state: [{op:"set_credit", credit:0, message:message}]
         };
     }));
 
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{type:"set_credit", credit:n, message: message}]
+            state: [{op:"set_credit", credit:n, message: message}]
         }
     }));
 
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{type:"multiply_credit", factor: n, message: message}]
+            state: [{op:"multiply_credit", factor: n, message: message}]
         }
     }));
 
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{type:"add_credit", credit:n, message: message}]
+            state: [{op:"add_credit", credit:n, message: message}]
         }
     }));
 
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{type:"sub_credit", credit:n, message: message}]
+            state: [{op:"sub_credit", credit:n, message: message}]
         }
     }));
 
     state_functions.push(state_fn('end',[],TBool,function() {
         return {
             return: true,
-            state: [{type:"end"}]
+            state: [{op:"end"}]
         }
     }));
 
@@ -97,8 +98,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return {
             return: message,
             state: [
-                {type:"set_credit", credit:0, message:message},
-                {type:"end", invalid:true}
+                {op:"set_credit", credit:0, message:message},
+                {op:"end", invalid:true}
             ]
         };
     }));
@@ -106,14 +107,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('warn',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{type:"warning", message: message}]
+            state: [{op:"warning", message: message}]
         }
     }));
 
     state_functions.push(state_fn('feedback',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{type:"feedback", message: message}]
+            state: [{op:"feedback", message: message}]
         }
     }));
 
@@ -134,6 +135,43 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
         return tree;
     }
+
+    state_functions.push(new jme.funcObj('submit_part',[TString],TDict,null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            part.submit();
+            return jme.wrapValue({
+                credit: part.credit,
+                marks: part.marks,
+                feedback: part.markingFeedback,
+                answered: part.answered
+            });
+        }
+    }));
+
+    state_functions.push(new jme.funcObj('mark_part',[TString,'?'],TDict,null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            var part_result = part.mark_answer(args[1]);
+            var result = marking.finalise_state(part_result.states.mark);
+            return jme.wrapValue({
+                credit: result.credit,
+                marks: part.marks,
+                feedback: result.states,
+                states: part_result.states,
+                state_valid: part_result.state_valid,
+                values: part_result.values,
+                valid: result.valid
+            });
+        }
+    }));
+
+    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(feedback, scale) {
+        return {
+            return: feedback,
+            state: {op: "concat", messages: feedback, scale: scale}
+        }
+    }));
 
 
     var StatefulScope = function() {
@@ -214,7 +252,13 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
 
             var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
 
-            return {states: scope.states, values: result.variables, scope: result.scope, state_valid: scope.state_valid, state_errors: scope.state_errors};
+            return {
+                states: scope.states, 
+                values: result.variables, 
+                scope: result.scope, 
+                state_valid: scope.state_valid, 
+                state_errors: scope.state_errors
+            };
         }
     }
 
@@ -228,7 +272,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                 scope.setVariable(name, res);
                 scope.state_valid[name] = true;
                 for(var i=0;i<scope.state.length;i++) {
-                    if(scope.state[i].type=='end' && scope.state[i].invalid) {
+                    if(scope.state[i].op=='end' && scope.state[i].invalid) {
                         scope.state_valid[name] = false;
                         break;
                     }
@@ -255,23 +299,35 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return scope.variables[name];
     }
 
-    marking.finalise_state = function(part, states) {
+    /** Run through a sequence of state operations, accumulating credit.
+     * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
+     * @see Numbas.parts.Part#apply_feedback
+     * @returns {object} a dictionary `{valid: boolean, credit: number, states: object[]}`
+     */
+    marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
+        var credit = 0;
+        var out_states = [];
+
         for(var i=0;i<states.length;i++) {
             var state = states[i];
-            switch(state.type) {
+            switch(state.op) {
                 case 'set_credit':
-                    part.setCredit(state.credit, state.message);
+                    out_states.push(state);
+                    credit = state.credit;
                     break;
                 case 'multiply_credit':
-                    part.multCredit(state.factor, state.message);
+                    out_states.push(state);
+                    credit *= state.factor;
                     break;
                 case 'add_credit':
-                    part.addCredit(state.credit, state.message);
+                    out_states.push(state);
+                    credit += state.credit;
                     break;
                 case 'sub_credit':
-                    part.subCredit(state.credit, state.message);
+                    out_states.push(state);
+                    credit -= state.credit;
                     break;
                 case 'end':
                     end = true;
@@ -279,17 +335,26 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         valid = false;
                     }
                     break;
-                case 'warning':
-                    part.giveWarning(state.message);
+                case 'concat':
+                    states = states.slice(0,i+1).concat(
+                        [{op:"start_lift",scale:state.scale}],
+                        state.messages,
+                        [{op:"end_lift"}],
+                        states.slice(i+1)
+                    );
                     break;
-                case 'feedback':
-                    part.markingComment(state.message);
-                    break;
+                default:
+                    out_states.push(state);
             }
             if(end) {
                 break;
             }
         }
-        part.answered = valid;
+
+        return {
+            valid: valid,
+            credit: credit,
+            states: out_states
+        }
     }
 });

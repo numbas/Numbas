@@ -309,7 +309,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             }
 
             if(valid===undefined)
-                valid = this.part.validate();
+                valid = this.part.answered;
             this.answered(valid);
 
             if(this.part.markingFeedback.length && !this.part.question.revealed)
