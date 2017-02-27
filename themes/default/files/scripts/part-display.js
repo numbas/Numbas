@@ -127,7 +127,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          */
         this.showFeedbackToggler = ko.computed(function() {
             var e = p.question.exam;
-            return this.isNotOnlyPart() && (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
+            return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
         },this);
 
         /** Show the "submit part" button?
