@@ -435,6 +435,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
 				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
+        if(this.revealed) {
+            this.score = 0;
+        }
 
 		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();

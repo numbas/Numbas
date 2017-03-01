@@ -72,7 +72,7 @@ function Exam()
 		
 	//feedback
 	var feedbackPath = 'settings/feedback';
-	tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer']);
+	tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName']);
 
 	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);
 
@@ -207,7 +207,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		showAnswerState: false,		
 		allowRevealAnswer: false,	
 		adviceGlobalThreshold: 0, 	
-        showQuestionGroupNames: false
+        showQuestionGroupNames: false,
+        showStudentName: true
 	},
 
 	/** Base node of exam XML

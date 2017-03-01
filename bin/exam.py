@@ -116,7 +116,7 @@ def haskey(data,key):
     return False
 
 #exam object
-class Exam:
+class Exam(object):
     name = ''                        #title of exam
     duration = 0                    #allowed time for exam, in seconds
     percentPass = 0                    #percentage classified as a pass
@@ -129,6 +129,7 @@ class Exam:
     intro = ''                        #text shown on the front page
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
+    showstudentname = True
 
 
     def __init__(self,name='Untitled Exam'):
@@ -168,7 +169,7 @@ class Exam:
     @staticmethod
     def fromDATA(data):
         exam = Exam()
-        tryLoad(data,['name','duration','percentPass','resources','extensions','showQuestionGroupNames'],exam)
+        tryLoad(data,['name','duration','percentPass','resources','extensions','showQuestionGroupNames','showstudentname'],exam)
 
         if haskey(data,'navigation'):
             nav = data['navigation']
@@ -268,7 +269,8 @@ class Exam:
                 'showactualmark': strcons_fix(self.showactualmark),
                 'showtotalmark': strcons_fix(self.showtotalmark),
                 'showanswerstate': strcons_fix(self.showanswerstate),
-                'allowrevealanswer': strcons_fix(self.allowrevealanswer)
+                'allowrevealanswer': strcons_fix(self.allowrevealanswer),
+                'showstudentname': strcons_fix(self.showstudentname),
         }
         feedback.find('advice').attrib = {'type': strcons(self.adviceType), 'threshold': strcons_fix(self.adviceGlobalThreshold)}
         feedback.find('intro').append(makeContentNode(self.intro))
