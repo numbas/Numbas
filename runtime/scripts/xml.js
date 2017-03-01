@@ -154,35 +154,29 @@ var xml = Numbas.xml = {
 		if(!variableNodes)
 			return {};
 
-		//list of variable names to ignore because they don't make sense
-		var ignoreVariables = ['pi','e','date','year','month','monthname','day','dayofweek','dayofweekname','hour24','hour','minute','second','msecond','firstcdrom'];
-
 		//evaluate variables - work out dependency structure, then evaluate from definitions in correct order
 		var todo = {};
 		for( var i=0; i<variableNodes.length; i++ )
 		{
 			var name = variableNodes[i].getAttribute('name').toLowerCase();
-			if(!ignoreVariables.contains(name))
-			{
-				var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+            var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
 
-				var vars = [];
+            var vars = [];
 
-				if(value.trim()=='') {
-					throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
-				}
+            if(value.trim()=='') {
+                throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+            }
 
-				try {
-					var tree = Numbas.jme.compile(value,scope,true);
-				} catch(e) {
-					throw(new Numbas.Error('xml.error in variable definition',{name:name}));
-				}
-				vars = vars.merge(Numbas.jme.findvars(tree));
-				todo[name]={
-					tree: tree,
-					vars: vars
-				};
-			}
+            try {
+                var tree = Numbas.jme.compile(value,scope,true);
+            } catch(e) {
+                throw(new Numbas.Error('xml.error in variable definition',{name:name}));
+            }
+            vars = vars.merge(Numbas.jme.findvars(tree));
+            todo[name]={
+                tree: tree,
+                vars: vars
+            };
 		}
 		return todo;
 	},
