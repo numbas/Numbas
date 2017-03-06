@@ -282,6 +282,44 @@ input.jme {
     margin-left: 0.2em;
 }
 
+.student-answer.answered input {
+    border: 1px solid;
+    border-color: hsl(204,72%,50%);
+    background: hsl(204,72%,95%);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.student-answer.answered[feedback-state='correct'] input {
+    border-color: hsl(120, 50%, 50%);
+    background: hsl(120, 50%, 95%);
+}
+.student-answer.answered[feedback-state='wrong'] input {
+    border-color: hsl(0, 50%, 50%);
+    background: hsl(0, 50%, 95%);
+}
+.student-answer.answered[feedback-state='partial'] input {
+    background: white;
+}
+
+.student-answer.answered .multiplechoice .checked label {
+    border-bottom: 1px solid hsl(204,72%,50%);
+}
+.student-answer.answered:not([feedback-state='none']) .multiplechoice .checked.correct label {
+    border-bottom-color: hsl(120,50%,50%);
+}
+.student-answer.answered:not([feedback-state='none']) .multiplechoice .checked:not(.correct) label {
+    border-bottom-color: hsl(0,50%,50%);
+}
+
+#everything .student-answer.answered .choices-grid td.checked {
+    background: hsl(204,72%,95%);
+}
+#everything .student-answer.answered:not([feedback-state='none']) .choices-grid td.checked.correct {
+    background: hsl(120,50%,95%);
+}
+#everything .student-answer.answered:not([feedback-state='none']) .choices-grid td.checked:not(.correct) {
+    background: hsl(0,50%,95%);
+}
+
 .exam-name {
 	font-weight: bold;
 }

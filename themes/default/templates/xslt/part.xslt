@@ -59,7 +59,9 @@
 		<xsl:if test="count(steps/part)>0">
 			<xsl:apply-templates select="steps"/>
 		</xsl:if>
-		<span class="student-answer" data-bind="css: {{dirty: isDirty}}">
+        <span class="student-answer">
+            <xsl:attribute name="data-bind">css: {dirty: isDirty, answered: scoreFeedback.answered}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
+
 			<xsl:apply-templates select="." mode="typespecific"/>
 			<span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown, event: {{focus: showWarnings, blur: hideWarnings}}" tabindex="0"></span>
 			<span class="warnings alert alert-danger" data-bind="foreach: warnings, visible: warningsShown">
