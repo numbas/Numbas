@@ -330,8 +330,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	applyScripts: function() {
-		this.originalScripts = {
-		}
+        var part = this;
+		this.originalScripts = {};
+
 		for(var name in this.scripts) {
 			var script_dict = this.scripts[name];
 			var order = script_dict.order;
@@ -342,21 +343,34 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 					break;
 				default:
 					var originalScript = this[name];
+
+                    function instead(script) {
+                        return function() {
+                            return script.apply(part,arguments);
+                        }
+                    }
+                    function before(script,originalScript) {
+                        return function() {
+                            originalScript.apply(this,arguments);
+                            return script.apply(part,arguments);
+                        }
+                    }
+                    function after(script,originalScript) {
+                        return function() {
+                            script.apply(part,arguments);
+                            return originalScript.apply(this,arguments);
+                        }
+                    }
+
 					switch(order) {
 						case 'instead':
-							this[name] = script;
+							this[name] = instead(script);
 							break;
 						case 'before':
-							this[name] = function() {
-								script.apply(this,arguments);
-								originalScript.apply(this,arguments);
-							}
+							this[name] = before(script,originalScript);
 							break;
 						case 'after':
-							this[name] = function() {
-								originalScript.apply(this,arguments);
-								script.apply(this,arguments);
-							}
+							this[name] = after(script,originalScript);
 							break;
 					}
 			}
@@ -439,6 +453,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
 				this.score = Math.max(this.score,this.settings.minimumMarks);
 		}
+        if(this.revealed) {
+            this.score = 0;
+        }
 
 		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();

@@ -47,6 +47,10 @@
             <th data-localise="exam.random seed"></th>
             <td class="rtd" data-bind="html: exam.seed"></td>
         </tr>
+        <tr data-bind="visible: exam.settings.showStudentName && exam.student_name">
+            <th data-localise="exam.student name"></th>
+            <td class="rtd"><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
+        </tr>
         <tr>
             <th data-localise="result.exam start"></th>
             <td class="rtd" data-bind="text: startTime"></td>	

@@ -748,6 +748,7 @@
                 });
 
                 test('Dictionaries',function() {
+                    ok(compile('["a": -1]','prefix operation as value of dictionary item'));
                     deepCloseEqual(evaluate('["a": 1]["a"]').value,1,'["a": 1]["a"] = 1');
                     raisesNumbasError(function() { evaluate('["a": 1]["b"]') }, 'jme.func.listval.key not in dict', '["a": 1]["b"]');
                     deepCloseEqual(evaluate('keys( ["a": 1, "b": 2] )').value.map(getValue), ['a','b'],'keys( ["a":1,"b": 2] )');

@@ -112,7 +112,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(token in opSynonyms) {
                     token = opSynonyms[token];
                 }
-				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) )
+				if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' )
 				{
 					if(token in prefixForm) {
 						token = prefixForm[token];

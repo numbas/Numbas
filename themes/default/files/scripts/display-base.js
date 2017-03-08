@@ -272,6 +272,8 @@ Numbas.queueScript('display-base',['controls','math','xml','util','timing','jme'
                     newScore(false);
                 }
             }),
+            state: state,
+            answered: answered,
             message: ko.computed(function() {
                 var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 

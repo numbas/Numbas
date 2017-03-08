@@ -57,7 +57,8 @@
 			<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
 				<xsl:text>start-column</xsl:text>
 			</xsl:if>
-		</xsl:attribute>
+        </xsl:attribute>
+        <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
 		<label>
 			<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
@@ -93,6 +94,7 @@
 				<xsl:text>start-column</xsl:text>
 			</xsl:if>
 		</xsl:attribute>
+        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
 		<label>
 			<input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
 			<xsl:apply-templates select="content"/>

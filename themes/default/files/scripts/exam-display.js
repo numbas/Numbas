@@ -252,7 +252,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return {
                     name: g.settings.name,
                     group: g,
-                    questions: g.questionList.map(function(q){return q.display})
+                    questions: ko.observable(g.questionList.map(function(q){return q.display}))
                 }
             });
             for(var i=0; i<this.exam.questionList.length; i++) {
@@ -381,6 +381,11 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         endRegen: function() {
             var currentQuestion = this.exam.currentQuestion;
             this.questions.splice(currentQuestion.number,1,currentQuestion.display);
+            var group = this.question_groups.filter(function(g){return g.group = currentQuestion.group})[0];
+            var n_in_group = currentQuestion.group.questionList.indexOf(currentQuestion);
+            var group_questions = group.questions();
+            group_questions.splice(n_in_group,1,currentQuestion.display);
+            group.questions(group_questions);
             this.applyQuestionBindings(currentQuestion);
             $('#questionDisplay').fadeIn(200);
         },
