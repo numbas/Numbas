@@ -333,14 +333,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     }
                     function before(script,originalScript) {
                         return function() {
-                            originalScript.apply(this,arguments);
-                            return script.apply(part,arguments);
+                            script.apply(part,arguments);
+                            return originalScript.apply(this,arguments);
                         }
                     }
                     function after(script,originalScript) {
                         return function() {
-                            script.apply(part,arguments);
-                            return originalScript.apply(this,arguments);
+                            originalScript.apply(this,arguments);
+                            return script.apply(part,arguments);
                         }
                     }
 
