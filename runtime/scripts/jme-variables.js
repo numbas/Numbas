@@ -483,7 +483,7 @@ DOMcontentsubber.prototype = {
                 jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
             }
 
-            if(element.contentDocument) {
+            if(element.contentDocument && element.contentDocument.rootElement) {
                 go();
             } else {
                 element.addEventListener('load',go,false);
