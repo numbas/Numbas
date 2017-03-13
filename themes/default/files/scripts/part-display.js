@@ -138,22 +138,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             return this.isNotOnlyPart() && !(this.revealed() || !this.isDirty());
         },this);
 
-        /** Show the marks feedback?
-         * @member {observable|boolean} showMarks
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.showMarks = ko.computed(function() {
-            return this.isNotOnlyPart() && this.scoreFeedback.message();
-        }, this);
-
-        /** Should the box containing part marks and the submit and feedback buttons be shown?
-         * @member {observable|boolean} showFeedbackBox
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.showFeedbackBox = ko.computed(function() {
-            return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
-        },this);
-
         /** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
          * @member {observable|boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
@@ -202,6 +186,22 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
         this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
+
+        /** Show the marks feedback?
+         * @member {observable|boolean} showMarks
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showMarks = ko.computed(function() {
+            return this.scoreFeedback.message() && (this.isNotOnlyPart() || this.scoreFeedback.iconClass());
+        }, this);
+
+        /** Should the box containing part marks and the submit and feedback buttons be shown?
+         * @member {observable|boolean} showFeedbackBox
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showFeedbackBox = ko.computed(function() {
+            return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
+        },this);
 
         /** Control functions
          * @member {object} controls
