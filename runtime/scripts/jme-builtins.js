@@ -44,6 +44,7 @@ var TName = types.TName;
 var TRange = types.TRange;
 var TSet = types.TSet;
 var TVector = types.TVector;
+var TExpression = types.TExpression;
 
 
 /** The built-in JME evaluation scope
@@ -1488,6 +1489,12 @@ newBuiltin('table',[TList],THTML,
 			description: 'Create a table to display a list of rows of data.'
 		}
 	}
+);
+
+newBuiltin('expression',[TString],TExpression,
+    function(str) {
+        return jme.compile(str);
+    }
 );
 
 ///end of builtins
