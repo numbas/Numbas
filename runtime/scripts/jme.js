@@ -2349,7 +2349,17 @@ jme.compareTrees = function(a,b) {
             }
             break;
         case 'number':
-            return a.tok.value<b.tok.value ? -1 : a.tok.value>b.tok.value ? 1 : 0;
+            var na = a.tok.value;
+            var nb = b.tok.value;
+            if(na.complex || nb.complex) {
+                na = na.complex ? na : {re:na,im:0};
+                nb = nb.complex ? nb : {re:nb,im:0};
+                var gt = na.re > nb.re || (na.re==nb.re && na.im>nb.im);
+                var eq = na.re==nb.re && na.im==nb.im;
+                return gt ? 1 : eq ? 0 : -1;
+            } else {
+                return a.tok.value<b.tok.value ? -1 : a.tok.value>b.tok.value ? 1 : 0;
+            }
     }
     return 0;
 }
