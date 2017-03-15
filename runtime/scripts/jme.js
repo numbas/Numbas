@@ -1238,18 +1238,38 @@ var types = jme.types = {}
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {number} value
+ * @property {string|number|object} originalValue - the value used to construct the token - either a string, a number, or a complex number object
  * @property type "number"
  * @constructor
  * @param {number} num
  */
 var TNum = types.TNum = types.number = function(num)
 {
-	if(num===undefined) 
+	if(num===undefined)
 		return;
+
+    this.originalValue = num;
+
+    switch(typeof(num)) {
+        case 'object':
+            if(num.complex) {
+                this.value = num;
+            } else {
+                throw(new Numbas.Error("jme.tokenise.number.object not complex"));
+            }
+            break;
+        case "number":
+            this.value = num;
+            break;
+        case "string":
+            this.value = parseFloat(num);
+            break;
+    }
 
 	this.value = num.complex ? num : parseFloat(num);
 }
 TNum.prototype.type = 'number';
+
 TNum.doc = {
 	name: 'number',
 	usage: ['0','1','0.234','i','e','pi'],
