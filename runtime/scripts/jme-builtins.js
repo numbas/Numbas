@@ -176,10 +176,12 @@ newBuiltin('list',[TRange],TList,function(range) {
 newBuiltin('dict',[TList],TDict,null, {
     evaluate: function(args,scope) {
         var value = {};
-        var items = scope.evaluate(args[0]).value;
-        items.forEach(function(item) {
-            value[item.value[0].value] = item.value[1];
-        });
+        if(args.length>0) {
+            var items = scope.evaluate(args[0]).value;
+            items.forEach(function(item) {
+                value[item.value[0].value] = item.value[1];
+            });
+        }
         return new TDict(value);
     }
 });
