@@ -866,8 +866,6 @@ class PatternMatchPart(Part):
 
 class NumberEntryPart(Part):
     kind = 'numberentry'
-    integerAnswer = False
-    integerPartialCredit = 0
     allowFractions = False
     notationStyles = ['en','si-en','plain-en']
     checkingType = 'range'
@@ -892,7 +890,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','integerAnswer','integerPartialCredit','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -906,7 +904,6 @@ class NumberEntryPart(Part):
     def toxml(self):
         part = Part.toxml(self)
         part.append(makeTree(['answer',
-                                ['allowonlyintegeranswers'],
                                 ['precision','message'],
                             ]
                             ))
@@ -926,7 +923,6 @@ class NumberEntryPart(Part):
         else:
             answer.attrib['answer'] = strcons_fix(self.answer)
             answer.attrib['accuracy'] = strcons_fix(self.checkingAccuracy)
-        answer.find('allowonlyintegeranswers').attrib = {'value': strcons_fix(self.integerAnswer), 'partialcredit': strcons_fix(self.integerPartialCredit)+'%'}
         answer.find('precision').attrib = {
             'type': strcons(self.precisionType), 
             'precision': strcons_fix(self.precision), 

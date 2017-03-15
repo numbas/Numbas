@@ -44,7 +44,6 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
         settings.notationStyles = notationStyles.split(',');
     }
 
-	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
@@ -92,10 +91,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} maxvalueString - definition of maximum value, before variables are substituted in
 	 * @property {number} maxvalue - maximum value marked correct
 	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
-	 * @property {boolean} integerAnswer - must the answer be an integer?
 	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
      * @property {string[]} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
-	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
 	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
 	 * @property {number} precisionString - definition of precision setting, before variables are substituted in
@@ -109,10 +106,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		minvalue: 0,
 		maxvalue: 0,
 		correctAnswerFraction: false,
-		integerAnswer: false,
 		allowFractions: false,
         notationStyles: ['en','si-en'],
-		integerPC: 0,
 		displayAnswer: 0,
 		precisionType: 'none',
 		precision: 0,
@@ -213,13 +208,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles) ) {
 			var answerFloat = this.studentAnswerAsFloat();
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue ) {
-				if(this.settings.integerAnswer && math.countDP(this.studentAnswer)>0) {
-					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except decimal'));
-                } else if(this.settings.integerAnswer && !this.settings.allowFractions && util.isFraction(this.studentAnswer)) {
-					this.setCredit(this.settings.integerPC,R('part.numberentry.correct except fraction'));
-				} else {
-					this.setCredit(1,R('part.marking.correct'));
-				}
+                this.setCredit(1,R('part.marking.correct'));
 			} else {
 				this.setCredit(0,R('part.marking.incorrect'));
 			}
