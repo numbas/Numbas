@@ -335,7 +335,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	error: function(message) {
 		message = R.apply(this,arguments);
 		var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
-		throw(new Numbas.Error(niceName+': '+message));
+		throw(new Numbas.Error('part.error',{path: niceName, message: message}));
 	},
 
 	applyScripts: function() {
