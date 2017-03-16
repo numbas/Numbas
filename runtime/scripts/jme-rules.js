@@ -1,4 +1,4 @@
-Numbas.queueScript('jme-rules',['base','math','jme','util'],function() {
+Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
 
 var math = Numbas.math;
 var jme = Numbas.jme;
@@ -429,6 +429,124 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommut
 	return matchTree(pattern,expr,doCommute);
 }
 
+/** Flags used to control the behaviour of JME display functions.
+ * Values are `undefined` so they can be overridden
+ * @memberof Numbas.jme.rules
+ */
+var displayFlags = jme.rules.displayFlags = {
+	fractionnumbers: undefined,
+	rowvector: undefined
+};
+/** Set of simplification rules
+ * @constructor
+ * @memberof Numbas.jme.rules
+ * @param {rule[]} rules
+ * @param {object} flags
+ */
+var Ruleset = jme.rules.Ruleset = function(rules,flags) {
+	this.rules = rules;
+	this.flags = $.extend({},displayFlags,flags);
+}
+Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
+	/** Test whether flag is set 
+	 * @memberof Numbas.jme.rules.Ruleset.prototype
+	 */
+	flagSet: function(flag) {
+		flag = flag.toLowerCase();
+		if(this.flags.hasOwnProperty(flag))
+			return this.flags[flag];
+		else
+			return false;
+	}
+}
+
+var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
+
+function mergeRulesets(r1,r2) {
+	var rules = r1.rules.merge(r2.rules,ruleSort);
+	var flags = $.extend({},r1.flags,r2.flags);
+	return new Ruleset(rules, flags);
+}
+
+/** Collect a ruleset together from a list of ruleset names, or rulesets.
+ * @param {string|Array<string>} set - can be a comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {object} scopeSets - a dictionary of rulesets
+ * @returns {Numbas.jme.rules.Ruleset}
+ */
+var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
+{
+	scopeSets = util.copyobj(scopeSets);
+
+	if(!set)
+		return [];
+
+	if(!scopeSets)
+		throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
+
+	var rules = [];
+	var flags = {};
+
+	if(typeof(set)=='string') {
+		set = set.split(',');
+	}
+	else {
+		flags = $.extend(flags,set.flags);
+		if(set.rules)
+			set = set.rules;
+	}
+
+	for(var i=0; i<set.length; i++ )
+	{
+		if(typeof(set[i])=='string')
+		{
+			var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
+			var neg = m[1]=='!' ? true : false;
+			var name = m[2].trim().toLowerCase();
+			if(name in displayFlags)
+			{
+				flags[name]= !neg;
+			}
+			else if(name.length>0)
+			{
+				if(!(name in scopeSets))
+				{
+					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',{name:name}));
+				}
+
+				var sub = collectRuleset(scopeSets[name],scopeSets);
+
+				flags = $.extend(flags,sub.flags);
+
+				scopeSets[name] = sub;
+				if(neg)
+				{
+					for(var j=0; j<sub.rules.length; j++)
+					{
+						if((m=rules.indexOf(sub.rules[j]))>=0)
+						{
+							rules.splice(m,1);
+						}
+					}
+				}
+				else
+				{
+					for(var j=0; j<sub.rules.length; j++)
+					{
+						if(!(rules.contains(sub.rules[j])))
+						{
+							rules.push(sub.rules[j]);
+						}
+					}
+				}
+			}
+		}
+		else
+			rules.push(set[i]);
+	}
+	return new Ruleset(rules,flags);
+}
+
+
 /** Built-in simplification rules
  * @enum {Numbas.jme.rules.Rule[]}
  * @memberof Numbas.jme.rules
@@ -674,24 +792,22 @@ var compileRules = jme.rules.compileRules = function(rules)
 		var result = rules[i][2];
         rules[i] = new Rule(pattern,conditions,result);
 	}
-	return new jme.Ruleset(rules,{});
+	return new Ruleset(rules,{});
 }
 
 var all=[];
-var nsimplificationRules = Numbas.jme.rules.simplificationRules = {};
+var compiledSimplificationRules = {};
 var notAll = ['canonicalOrder','expandBrackets'];
 for(var x in simplificationRules)
 {
-	nsimplificationRules[x] = nsimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+	compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
     if(!notAll.contains(x)) {
-    	all = all.concat(nsimplificationRules[x].rules);
+    	all = all.concat(compiledSimplificationRules[x].rules);
     }
 }
-nsimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
-nsimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
-simplificationRules = nsimplificationRules;
-simplificationRules['all']=new jme.Ruleset(all,{});
-
-Numbas.jme.builtinScope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{rulesets: simplificationRules}]);
+compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
+compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
+compiledSimplificationRules['all'] = new Ruleset(all,{});
+jme.rules.simplificationRules = compiledSimplificationRules;
 
 });

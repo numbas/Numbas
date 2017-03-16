@@ -19,7 +19,18 @@ Copyright 2011-14 Newcastle University
  * Provides {@link Numbas.jme}
  */
 
-Numbas.queueScript('jme',['jme-base','jme-builtins'],function(){});
+Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules'],function(){
+    
+    var jme = Numbas.jme;
+
+    /** For backwards compatibility, copy references to some members of jme.rules to jme.
+     * These items used to belong to Numbas.jme, but were spun out to Numbas.jme.rules.
+     */
+    ['displayFlags','Ruleset','collectRuleset'].forEach(function(name) {
+        jme[name] = jme.rules[name];
+    });
+
+});
 
 Numbas.queueScript('jme-base',['base','math','util'],function() {
 
@@ -921,122 +932,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
 jme.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
 jme.re.re_strip_whitespace = new RegExp('^'+jme.re.re_whitespace+'+|'+jme.re.re_whitespace+'+$','g');
-
-
-/** Flags used to control the behaviour of JME display functions.
- * Values are `undefined` so they can be overridden
- * @memberof Numbas.jme
- */
-var displayFlags = jme.displayFlags = {
-	fractionnumbers: undefined,
-	rowvector: undefined
-};
-
-var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
-
-/** Set of simplification rules
- * @constructor
- * @memberof Numbas.jme
- * @param {rule[]} rules
- * @param {object} flags
- */
-var Ruleset = jme.Ruleset = function(rules,flags) {
-	this.rules = rules;
-	this.flags = $.extend({},displayFlags,flags);
-}
-Ruleset.prototype = /** @lends Numbas.jme.Ruleset.prototype */ {
-	/** Test whether flag is set 
-	 * @memberof Numbas.jme.Ruleset.prototype
-	 */
-	flagSet: function(flag) {
-		flag = flag.toLowerCase();
-		if(this.flags.hasOwnProperty(flag))
-			return this.flags[flag];
-		else
-			return false;
-	}
-}
-
-function mergeRulesets(r1,r2) {
-	var rules = r1.rules.merge(r2.rules,ruleSort);
-	var flags = $.extend({},r1.flags,r2.flags);
-	return new Ruleset(rules, flags);
-}
-
-//collect a ruleset together from a list of ruleset names, or rulesets.
-// set can be a comma-separated string of ruleset names, or an array of names/Ruleset objects.
-var collectRuleset = jme.collectRuleset = function(set,scopeSets)
-{
-	scopeSets = util.copyobj(scopeSets);
-
-	if(!set)
-		return [];
-
-	if(!scopeSets)
-		throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
-
-	var rules = [];
-	var flags = {};
-
-	if(typeof(set)=='string') {
-		set = set.split(',');
-	}
-	else {
-		flags = $.extend(flags,set.flags);
-		if(set.rules)
-			set = set.rules;
-	}
-
-	for(var i=0; i<set.length; i++ )
-	{
-		if(typeof(set[i])=='string')
-		{
-			var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
-			var neg = m[1]=='!' ? true : false;
-			var name = m[2].trim().toLowerCase();
-			if(name in displayFlags)
-			{
-				flags[name]= !neg;
-			}
-			else if(name.length>0)
-			{
-				if(!(name in scopeSets))
-				{
-					throw(new Numbas.Error('jme.display.collectRuleset.set not defined',{name:name}));
-				}
-
-				var sub = collectRuleset(scopeSets[name],scopeSets);
-
-				flags = $.extend(flags,sub.flags);
-
-				scopeSets[name] = sub;
-				if(neg)
-				{
-					for(var j=0; j<sub.rules.length; j++)
-					{
-						if((m=rules.indexOf(sub.rules[j]))>=0)
-						{
-							rules.splice(m,1);
-						}
-					}
-				}
-				else
-				{
-					for(var j=0; j<sub.rules.length; j++)
-					{
-						if(!(rules.contains(sub.rules[j])))
-						{
-							rules.push(sub.rules[j]);
-						}
-					}
-				}
-			}
-		}
-		else
-			rules.push(set[i]);
-	}
-	return new Ruleset(rules,flags);
-}
 
 var fnSort = util.sortBy('id');
 

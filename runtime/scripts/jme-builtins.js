@@ -19,7 +19,7 @@ Copyright 2011-15 Newcastle University
  * Provides {@link Numbas.jme}
  */
 
-Numbas.queueScript('jme-builtins',['jme-base'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules'],function(){
 
 var util = Numbas.util;
 var math = Numbas.math;
@@ -52,7 +52,7 @@ var TOp = Numbas.jme.types.TOp;
  * @type {Numbas.jme.Scope}
  * @memberof Numbas.jme
  */
-var builtinScope = jme.builtinScope = new Scope();
+var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 
 var funcs = {};
 
