@@ -606,6 +606,7 @@ class Part:
     showFeedbackIcon = True
     variableReplacementStrategy = 'originalfirst'
     customMarkingAlgorithm = ''
+    extendBaseMarkingAlgorithm = True
 
     def __init__(self,marks,prompt=''):
         self.marks = marks
@@ -636,7 +637,7 @@ class Part:
             )
         part = partConstructors[kind].fromDATA(data)
 
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm'],part);
+        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],part);
 
         if haskey(data,'marks'):
             part.marks = data['marks']
@@ -697,6 +698,9 @@ class Part:
 
         marking_algorithm = part.find('markingalgorithm')
         marking_algorithm.text = strcons(self.customMarkingAlgorithm)
+        marking_algorithm.attrib = {
+            'extend': strcons_fix(self.extendBaseMarkingAlgorithm),
+        }
 
         variable_replacements = part.find('adaptivemarking/variablereplacements')
         variable_replacements.attrib = {

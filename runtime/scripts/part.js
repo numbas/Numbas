@@ -91,6 +91,8 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
  */
 var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loading )
 {
+    var p = this;
+
 	//remember XML
 	this.xml = xml;
 
@@ -143,14 +145,21 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 		this.settings.errorCarriedForwardReplacements.push(vr);
 	}
 
+    // create the marking script for the part
     var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
     var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
     if(markingScriptString) {
-        var algo = this.markingScript = new marking.MarkingScript(markingScriptString);
+        // extend the base marking algorithm if asked to do so
+        var extend_base = markingScriptNode.getAttribute('extend') || true;
+        var oldMarkingScript = this.markingScript;
+
+        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
+
+        // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
             if(!(name in algo.notes)) {
-                throw(new Numbas.Error("part.marking.missing required note",{note:name}));
+                p.error("part.marking.missing required note",{note:name});
             }
         });
     }
