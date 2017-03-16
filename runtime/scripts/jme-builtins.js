@@ -1547,6 +1547,12 @@ newBuiltin('args',[TExpression],TList,null, {
     }
 });
 
+newBuiltin('type',[TExpression],TString,null, {
+    evaluate: function(args,scope) {
+        return args[0].tree.tok.type;
+    }
+});
+
 newBuiltin('name',[TString],TName,function(name){ return name });
 newBuiltin('string',[TName],TString,function(name){ return name });
 newBuiltin('op',[TString],TOp,function(name){ return name });
