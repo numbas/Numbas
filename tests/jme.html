@@ -971,7 +971,7 @@
 					equals(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
                     equals(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
 
-                    equals(simplifyExpression('x+(1-2)x',['all']),'0','Collect numbers resulting in a negative');
+                    equals(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     equals(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
 
 

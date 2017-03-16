@@ -2071,6 +2071,10 @@ var simplificationRules = jme.display.simplificationRules = {
         ['(?;rest/?;x) / ((?;y)^(?;n))',['n isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(1+n))'],
         ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^2)'],
         ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^0)']
+    ],
+
+    collectLikeFractions: [
+        ['?;a/?;b+?;c/?;d',['canonical_compare(b,d)=0'],'(a+c)/b']
     ]
 };
 
@@ -2085,6 +2089,11 @@ var canonicalOrderRules = [
 
     ['?;x*?;y',['canonical_compare(x,y)=-1'],'y*x'],
     ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y']
+]
+
+var expandBracketsRules = [
+    ['(?;x+?;y)*?;z',[],'x*z+y*z'],
+    ['?;x*(?;y+?;z)',[],'x*y+x*z']
 ]
 
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.display.Rule} objects
@@ -2105,7 +2114,7 @@ var compileRules = jme.display.compileRules = function(rules)
 
 var all=[];
 var nsimplificationRules = Numbas.jme.display.simplificationRules = {};
-var notAll = ['canonicalOrder'];
+var notAll = ['canonicalOrder','expandBrackets'];
 for(var x in simplificationRules)
 {
 	nsimplificationRules[x] = nsimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
@@ -2114,6 +2123,7 @@ for(var x in simplificationRules)
     }
 }
 nsimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
+nsimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
 simplificationRules = nsimplificationRules;
 simplificationRules['all']=new jme.Ruleset(all,{});
 
