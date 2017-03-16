@@ -125,11 +125,22 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     }));
 
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
-        var name = args[0].tok.name.toLowerCase();
-        return {
-            return: args[0].tok,
-            state: scope.states[name] || []
-        };
+        if(args[0].tok.type=='name') {
+            var name = args[0].tok.name.toLowerCase();
+            return {
+                return: args[0].tok,
+                state: scope.states[name] || []
+            };
+        } else {
+            var feedback = scope.evaluate(args[0]);
+            if(feedback.type!='list') {
+                throw(new Numbas.Error('marking.apply.not a list'));
+            }
+            return {
+                return: feedback,
+                state: jme.unwrapValue(feedback)
+            }
+        }
     }));
     jme.lazyOps.push('apply');
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
@@ -146,6 +157,44 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                 feedback: part.markingFeedback,
                 answered: part.answered
             });
+        }
+    }));
+
+    state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
+        evaluate: function(args, scope) {
+            var script_name = args[0].value;
+            var script = Numbas.marking_scripts[script_name];
+            if(!script) {
+                throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
+            }
+            var nscope = new StatefulScope([scope]);
+            for(var x in scope.states) {
+                nscope.deleteVariable(x);
+            }
+
+            var result = script.evaluate(
+                nscope,
+                {
+                    studentAnswer: args[1],
+                    settings: args[2],
+                    marks: args[3]
+                }
+            );
+
+            if(result.state_errors.mark) {
+                throw(result.state_errors.mark);
+            }
+
+            var notes = {};
+            Object.keys(result.states).forEach(function(name) {
+                notes[name] = {
+                    feedback: result.states[name],
+                    value: result.values[name],
+                    valid: result.state_valid[name]
+                }
+            });
+
+            return jme.wrapValue(notes);
         }
     }));
 
@@ -229,16 +278,27 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         this.vars = jme.findvars(this.tree);
     }
 
-    var MarkingScript = marking.MarkingScript = function(source) {
+    var MarkingScript = marking.MarkingScript = function(source, base) {
         try {
             var notes = source.split(/\n(\s*\n)+/);
+            var ntodo = {};
             var todo = {};
             notes.forEach(function(note) {
                 if(note.trim().length) {
                     var res = new MarkingNote(note);
-                    todo[res.name.toLowerCase()] = res;
+                    var name = res.name.toLowerCase();
+                    ntodo[name] = todo[name] = res;
                 }
             });
+            if(base) {
+                Object.keys(base.notes).forEach(function(name) {
+                    if(name in ntodo) {
+                        todo['base_'+name] = base.notes[name];
+                    } else {
+                        todo[name] = base.notes[name];
+                    }
+                });
+            }
         } catch(e) {
             throw(new Numbas.Error("marking.script.error parsing notes",{message:e.message}));
         }
@@ -309,6 +369,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         var end = false;
         var credit = 0;
         var out_states = [];
+        var num_lifts = 0;
 
         for(var i=0;i<states.length;i++) {
             var state = states[i];
@@ -330,9 +391,15 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     credit -= state.credit;
                     break;
                 case 'end':
-                    end = true;
-                    if(state.invalid) {
-                        valid = false;
+                    if(num_lifts) {
+                        while(i+1<states.length && states[i+1].op!='end_lift') {
+                            i += 1;
+                        }
+                    } else {
+                        end = true;
+                        if(state.invalid) {
+                            valid = false;
+                        }
                     }
                     break;
                 case 'concat':
@@ -342,6 +409,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         [{op:"end_lift"}],
                         states.slice(i+1)
                     );
+                    break;
+                case 'start_lift':
+                    num_lifts += 1;
+                    out_states.push(state);
+                    break;
+                case 'end_lift':
+                    num_lifts -= 1;
+                    out_states.push(state);
                     break;
                 default:
                     out_states.push(state);
