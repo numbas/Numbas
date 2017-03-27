@@ -221,8 +221,6 @@ class NumbasCompiler(object):
         scripts = {}
         for filename in os.listdir(scripts_dir):
             name, ext = os.path.splitext(filename)
-            print(name)
-            print(ext)
             if ext=='.jme':
                 with open(os.path.join(scripts_dir,filename)) as f:
                     scripts[name] = f.read()

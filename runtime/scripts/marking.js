@@ -348,7 +348,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         }
                     }
                 }
-                if(invalid_dep) {
+                if(invalid_dep || Numbas.marking.ignore_note_errors) {
                     scope.state_valid[name] = false;
                 } else {
                     throw(new Error("Error evaluating note <code>"+name+"</code> - "+e.message));
