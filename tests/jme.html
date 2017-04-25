@@ -974,6 +974,7 @@
                     equals(simplifyExpression('x+(1-2)x',['all']),'x - x','Collect numbers resulting in a negative');
                     equals(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
 
+                    equals(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');

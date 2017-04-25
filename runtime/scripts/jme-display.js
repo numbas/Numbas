@@ -1316,21 +1316,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var pd;
             var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
 
-			if(arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true)
-			{
-				bits[i]='('+bits[i]+')';
-				args[i].bracketed=true;
-			}
-			else if(arg_type=='number' && arg_value.complex && bracketNumberOp)	// put brackets round a complex number
-			{
-				if(arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0))
-				{
-					bits[i] = '('+bits[i]+')';
-					args[i].bracketed = true;
-				}
-			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp) {
+            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true // if this kind of op as an argument to the parent op always gets brackets
+            bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
+            bracketArg = bracketArg || (arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp);  // put brackets around multiples of pi
+            bracketArg = bracketArg || (arg_type=='number' && bracketNumberOp && bits[i].indexOf('/')>=0); // put brackets around fractions when necessary
+
+			if(bracketArg) {
 				bits[i] = '('+bits[i]+')';
-				args[i].bracketed = true;
+				args[i].bracketed=true;
 			}
 		}
 		
