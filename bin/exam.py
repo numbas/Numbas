@@ -877,6 +877,9 @@ class NumberEntryPart(Part):
     correctAnswerStyle = 'plain-en'
     inputStep = 1
 
+    mustBeReduced = False
+    mustBeReducedPC = 0
+
     precisionType = 'none'
     precision = 0
     precisionPartialCredit = 0
@@ -890,7 +893,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -916,6 +919,8 @@ class NumberEntryPart(Part):
             'notationstyles': strcons_fix(','.join(self.notationStyles)),
             'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
             'correctanswerstyle': strcons_fix(self.correctAnswerStyle),
+            'mustbereduced': strcons_fix(self.mustBeReduced),
+            'mustbereducedpc': strcons_fix(self.mustBeReducedPC)+'%'
         }
         if self.checkingType == 'range':
             answer.attrib['minvalue'] = strcons_fix(self.minvalue)

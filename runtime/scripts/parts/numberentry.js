@@ -37,6 +37,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
+	tryGetAttribute(settings,this.xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
 
     var answerNode = this.xml.selectSingleNode('answer');
     var notationStyles = answerNode.getAttribute('notationstyles');
@@ -99,6 +100,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {number} precision - how many decimal places or significant figures to require
 	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {boolean} mustBeReduced - should the student enter a fraction in lowest terms
+	 * @property {number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
 	 */
 	settings:
 	{
@@ -112,6 +115,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		precisionType: 'none',
 		precision: 0,
 		precisionPC: 0,
+		mustBeReduced: false,
+		mustBeReducedPC: 0,
 		precisionMessage: R('You have not given your answer to the correct precision.'),
         showPrecisionHint: true
 	},
@@ -215,9 +220,16 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			this.answered = true;
 
 			var failedPrecision = !math.toGivenPrecision(this.studentAnswer,this.settings.precisionType,this.settings.precision,this.settings.strictPrecision);
-			
 			if(failedPrecision) {
 				this.multCredit(this.settings.precisionPC,this.settings.precisionMessage);
+			}
+
+			if(this.settings.allowFractions && util.isFraction(this.studentAnswer) && this.settings.mustBeReduced){
+				var answerAsFraction = util.parseFraction(this.studentAnswer);
+				var failedReduced = !(math.gcd(answerAsFraction.numerator,answerAsFraction.denominator) == 1);
+				if(failedReduced){
+					this.multCredit(this.settings.mustBeReducedPC,R('part.numberentry.answer not reduced'));
+				}
 			}
 		}else{
 			this.answered = false;
