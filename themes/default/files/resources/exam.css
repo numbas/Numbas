@@ -56,6 +56,10 @@ img, object[type*="image"] {
     height: auto;
 }
 
+.table-responsive {
+    overflow-y: hidden;
+}
+
 /*main template */
 
 #loading .progress-bar {
