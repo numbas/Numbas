@@ -570,6 +570,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	storeAnswer: function(answerList)
 	{
 		this.setDirty(true);
+        this.display.removeWarnings();
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
 		var answerIndex = answerList[0];
@@ -581,7 +582,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		case 'dropdownlist':
 			for(var i=0; i<this.numAnswers; i++)
 			{
-				this.stagedAnswer[i][choiceIndex]= i==answerIndex;
+				this.stagedAnswer[i][choiceIndex]= i===answerIndex;
 			}
 			break;
 		default:

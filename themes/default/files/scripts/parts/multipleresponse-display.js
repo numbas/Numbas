@@ -57,8 +57,12 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
 
             var oldAnswer = null;
             ko.computed(function() {
+                if(this.studentAnswer()==='') {
+                    oldAnswer = null;
+                    p.storeAnswer([null,0]);
+                }
                 var i = parseInt(this.studentAnswer());
-                if(i!=oldAnswer && !isNaN(i)) {
+                if(i!==oldAnswer && !isNaN(i)) {
                     p.storeAnswer([i,0]);
                     oldAnswer = i;
                 }
