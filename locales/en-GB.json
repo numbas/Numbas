@@ -173,6 +173,8 @@
     "part.numberentry.correct except decimal": "Your answer is within the allowed range, but decimal numbers are not allowed.",
     "part.numberentry.correct except fraction": "Your answer is within the allowed range, but fractions are not allowed.",
     "part.numberentry.answer invalid": "You did not enter a valid number.",
+    "part.numberentry.answer not reduced": "Your answer is not reduced to lowest terms.",
+    "part.numberentry.give your answer as a reduced fraction": "Reduce your answer to lowest terms.",
     "part.numberentry.answer not integer": "Your answer is invalid. You must enter a whole number, not a decimal.",
     "part.numberentry.answer not integer or decimal": "Your answer is invalid. You must enter an integer or a decimal.",
     "part.numberentry.zero sig fig": "This part is set up to round the student's answer to zero significant figures, which has no meaning.",

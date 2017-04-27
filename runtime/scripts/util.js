@@ -449,12 +449,30 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return Infinity;
 		} else if(s.toLowerCase()=='-infinity') {
 			return -Infinity;
-		} else if(allowFractions && (m = util.re_fraction.exec(s))) {
-			var n = parseInt(m[2])/parseInt(m[3]);
-			return m[1] ? -n : n;
+		} else if(allowFractions && (m = util.parseFraction(s))) {
+			return m.numerator/m.denominator;
 		} else {
 			return NaN;
 		}
+	},
+
+	/** Parse a string representing an integer or fraction
+	 * @param {string} s
+	 * @see {Numbas.util.re_fraction}
+	 * @returns {object} object of the form {numerator, denominator}
+	 */
+	parseFraction: function(s) {
+		if(util.isInt(s)){
+			return {numerator:parseInt(s), denominator:1};
+		}
+		var m = util.re_fraction.exec(s);
+		if(!m) {
+			return;
+		}
+		var n = parseInt(m[2]);
+		n = m[1] ? -n : n;
+		var d = parseInt(m[3]);
+		return {numerator:n, denominator:d};
 	},
 
 	/** Pad string `s` on the left with a character `p` until it is `n` characters long.
