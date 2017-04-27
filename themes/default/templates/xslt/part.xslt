@@ -25,10 +25,17 @@
 <xsl:template match="part">
 	<xsl:variable name="path">
 		<xsl:apply-templates select="." mode="path"/>
-	</xsl:variable>
+    </xsl:variable>
+    <xsl:variable name="inline">
+        <xsl:choose>
+            <xsl:when test="ancestor::gaps and @type='1_n_2' and @displaytype='dropdownlist'"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:when test="ancestor::gaps and not (choices)"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 	<xsl:variable name="tag">
 		<xsl:choose>
-			<xsl:when test="ancestor::gaps and not (choices)">span</xsl:when>
+			<xsl:when test="$inline">span</xsl:when>
 			<xsl:otherwise>div</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -38,8 +45,11 @@
 			<xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
-	<xsl:variable name="block">
-		<xsl:if test="@type='1_n_2' or @type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:if>
+    <xsl:variable name="block">
+        <xsl:choose>
+    		<xsl:when test="@type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:when>
+            <xsl:when test="@type='1_n_2' and @displaytype='radiogroup'"><xsl:text> block</xsl:text></xsl:when>
+        </xsl:choose>
 	</xsl:variable>
 
 	<xsl:if test="parent::parts">

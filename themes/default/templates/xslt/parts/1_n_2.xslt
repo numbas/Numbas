@@ -5,9 +5,9 @@
 </xsl:template>
 
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
-	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
+    <span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<xsl:apply-templates select="choices" mode="correctanswer"/>
-	</div>
+    </span>
 </xsl:template>
 {% endraw %}

@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="choices" mode="one">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
-	<form localise-data-jme-context-description="part.mcq.choices">
+	<span localise-data-jme-context-description="part.mcq.choices">
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<ul class="multiplechoice clearfix">
@@ -20,12 +20,12 @@
 			</select>
 		</xsl:when>
 	</xsl:choose>
-	</form>
+    </span>
 </xsl:template>
 
 <xsl:template match="choices" mode="correctanswer">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
-	<form>
+	<span>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<ul class="multiplechoice clearfix">
@@ -44,7 +44,7 @@
 			</select>
 		</xsl:when>
 	</xsl:choose>
-	</form>
+	</span>
 </xsl:template>
 
 <xsl:template match="choice" mode="radiogroup">
