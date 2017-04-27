@@ -532,14 +532,20 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 				matrix.push(row);
 				for(var j=0;j<this.numChoices;j++) {
 					var value = settings.markingMatrixArray[i][j];
-
 					if(util.isFloat(value)) {
 						value = parseFloat(value);
 					} else {
-						value = jme.evaluate(value,scope).value;
-						if(!util.isFloat(value)) {
-							this.error('part.mcq.matrix not a number',this.path,i,j);
-						}
+            if(value == ''){
+              this.error('part.mcq.matrix cell empty',{part:this.path,row:i,column:j});
+            }
+            try {
+              value = jme.evaluate(value,scope).value;
+            }catch(e){
+              this.error('part.mcq.matrix jme error',{part:this.path,row:i,column:j,error:e.message});
+            }
+            if(!util.isFloat(value)) {
+              this.error('part.mcq.matrix not a number',{part:this.path,row:i,column:j});
+            }
 						value = parseFloat(value);
 					}
 
