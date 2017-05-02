@@ -1,18 +1,21 @@
 body.worksheet {
 	font-size: 1em;
 }
+body.worksheet img {
+	max-width: 100%;
+}
 body.worksheet .questionList {
 	max-height: none;
+	overflow-y: hidden !important;
 }
 body.worksheet h1,h2,h3,h4,h5,h6 {
         margin-top: 0;
-        margin-bottom: 0;
+        margin-bottom: 0.5em;
 }
 body.worksheet .number {
-        float: left;
-        font-size: 1.1em;
+        font-size: 1.3em;
         margin-right: 0.5em;
-        margin-left: -1.2em;
+				margin-bottom: 1em;
 }
 body.worksheet #infoDisplay {
 	display: none;
@@ -34,7 +37,7 @@ body.worksheet .steps {
 body.worksheet .statement, body.worksheet .advice {
 	margin: 1em 0;
 	padding-top: 0.2em;
-	padding-left: 1em;
+	padding-left: 0;
 	padding-bottom: 0.1em;
 	background: none;
 }
@@ -60,6 +63,7 @@ body.worksheet .timeBox{
 body.worksheet #examBanner {
 	margin-left: 0;
 	line-height: 1em;
+	text-align: right;
 }
 
 body.worksheet #generatorControls {
@@ -184,4 +188,8 @@ body.worksheet .btn {
 		border: 1px solid black;
 		background: white;
 	}
+
+  body.worksheet .question {
+    overflow: hidden !important;
+  }
 }
