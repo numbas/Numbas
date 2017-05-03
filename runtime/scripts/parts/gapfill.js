@@ -111,7 +111,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	},
 
 	/** Are the student's answers to all of the gaps valid?
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	validate: function()
 	{

@@ -23,7 +23,7 @@ Numbas.queueScript('timing',['base'],function() {
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	
 	/** Get the current date as a string in the user's locale
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	displayDate: function()
 	{
@@ -31,8 +31,8 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	},
 
 	/** Convert a number of seconds to a string in `HH:MM:SS` format
-	 * @param {number} time
-	 * @returns {string}
+	 * @param {Number} time
+	 * @returns {String}
 	 */
 	secsToDisplayTime: function( time )
 	{		
@@ -79,7 +79,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	timers: [],
 
 	/** Timing messages - how long did each timer take?
-	 * @type {string[]}
+	 * @type {Array.<String>}
 	 */
 	messages: [],
 	start: function()
@@ -88,7 +88,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	},
 
 	/** End the top timer on the queue
-	 * @param {string} label - a description of the timer
+	 * @param {String} label - a description of the timer
 	 */
 	end: function(label)
 	{
@@ -119,7 +119,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 
 	/** Stress test a function by running it a lot of times and seeing how long it takes
 	 * @param {function} f
-	 * @param {number} times
+	 * @param {Number} times
 	 */
 	stress: function(f,times)
 	{
@@ -132,7 +132,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	},
 
 	/** Timing accumulators
-	 * @see Numbas.timing.startacc}
+	 * @see Numbas.timing.startacc
 	 */
 	accs: {},
 
@@ -141,7 +141,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	 * Call this with the function's name when you start the function, and {@link Numbas.timing.endacc} with the same name just before returning a value.
 	 *
 	 * It copes with recursion automatically, so you don't need to worry about double counting
-	 * @param {string} name
+	 * @param {String} name
 	 */
 	startacc: function(name)
 	{
@@ -159,7 +159,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 	},
 
 	/** Stop accumulating runtime for a function
-	 * @param {string} name
+	 * @param {String} name
 	 * @see Numbas.timing.startacc
 	 */
 	endacc: function(name)

@@ -14,7 +14,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
-/** @file Provides a storage API {@link Numbas.storage.SCORMstorage} which interfaces with SCORM */
+/** @file Provides a storage API {@link Numbas.storage.SCORMStorage} which interfaces with SCORM */
 
 Numbas.queueScript('scorm-storage',['base','SCORM_API_wrapper','storage'],function() {
 
@@ -70,7 +70,7 @@ var SCORMStorage = Numbas.storage.SCORMStorage = function()
 	}
 };
 
-SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
+SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 	/** Mode the session started in:
 	 *
 	 * * `ab-initio` - starting a new attempt
@@ -88,7 +88,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	partIndices:{},			//associate part ids with interaction indices
 
 	/** The last `cmi.suspend_data` object 
-	 * @type {json} 
+	 * @type {Numbas.storage.exam_suspend_data} 
 	 */
 	suspendData: undefined,	//save the suspend data so we don't have to keep fetching it off the server
 	
@@ -112,9 +112,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	},
 
 	/** Set a SCORM data model element.
-	 * @param {string} key - element name. This is prepended with `cmi.`
-	 * @param {string} value - element value
-	 * @returns {boolean} - did the call succeed?
+	 * @param {String} key - element name. This is prepended with `cmi.`
+	 * @param {String} value - element value
+	 * @returns {Boolean} - did the call succeed?
 	 */
 	set: function(key,value)
 	{
@@ -125,8 +125,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	},
 
 	/** Get a SCORM data model element
-	 * @param {string} key - element name. This is prepended with `cmi.`
-	 * @returns {string} - the value of the element
+	 * @param {String} key - element name. This is prepended with `cmi.`
+	 * @returns {String} - the value of the element
 	 */
 	get: function(key)
 	{
@@ -138,7 +138,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Make an id string corresponding to a question, of the form `qN`, where `N` is the question's number
 	 * @param {Numbas.Question} question
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getQuestionId: function(question)
 	{
@@ -147,7 +147,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Make an id string corresponding to a part, of the form `qNpXgYsZ`
 	 * @param {Numbas.parts.Part} part
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getPartId: function(part)
 	{
@@ -320,8 +320,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Create suspend data object for a question
 	 * @param {Numbas.Question} question
-	 * @returns {object}
-	 * @see Numbas.storage.SCORMstorage.setSuspendData
+	 * @returns {Numbas.storage.question_suspend_data}
+	 * @see Numbas.storage.SCORMStorage#setSuspendData
 	 */
 	questionSuspendData: function(question)
 	{
@@ -352,8 +352,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Create suspend data object for a part
 	 * @param {Numbas.parts.Part} part
-	 * @returns {object}
-	 * @see Numbas.storage.SCORMstorage.setSuspendData
+	 * @returns {Numbas.storage.part_suspend_data}
+	 * @see Numbas.storage.SCORMStorage#setSuspendData
 	 */
 	partSuspendData: function(part)
 	{
@@ -392,7 +392,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	},
 
 	/** Get the suspend data from the SCORM data model
-	 * @returns {object}
+	 * @returns {Numbas.storage.exam_suspend_data}
 	 */
 	getSuspendData: function()
 	{
@@ -414,7 +414,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Get suspended exam info
 	 * @param {Numbas.Exam} exam
-	 * @returns {exam_suspend_data}
+	 * @returns {Numbas.storage.exam_suspend_data}
 	 */
 	load: function(exam) 
 	{
@@ -433,18 +433,19 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 		var score = parseInt(this.get('score.raw'),10);
 
-		return {timeRemaining: eobj.timeRemaining || 0,
-				duration: eobj.duration || 0 ,
-				questionSubsets: eobj.questionSubsets,
-				start: eobj.start,
-				score: score,
-				currentQuestion: currentQuestion
+		return {
+            timeRemaining: eobj.timeRemaining || 0,
+            duration: eobj.duration || 0 ,
+            questionSubsets: eobj.questionSubsets,
+            start: eobj.start,
+            score: score,
+            currentQuestion: currentQuestion
 		};
 	},
 
 	/** Get suspended info for a question
 	 * @param {Numbas.Question} question
-	 * @returns {question_suspend_data}
+	 * @returns {Numbas.storage.question_suspend_data}
 	 */
 	loadQuestion: function(question) 
 	{
@@ -480,7 +481,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Get suspended info for a part
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadPart: function(part)
 	{
@@ -523,7 +524,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.JMEPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadJMEPart: function(part)
 	{
@@ -534,7 +535,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.PatternMatchPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadPatternMatchPart: function(part)
 	{
@@ -545,7 +546,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.NumberEntryPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadNumberEntryPart: function(part)
 	{
@@ -556,7 +557,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.NumberEntryPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadMatrixEntryPart: function(part)
 	{
@@ -571,7 +572,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.MultipleResponsePart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadMultipleResponsePart: function(part)
 	{
@@ -612,7 +613,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 
 	/** Load a {@link Numbas.parts.ExtensionPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadExtensionPart: function(part)
 	{
@@ -655,7 +656,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	},
 
 	/** Get the student's ID
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getStudentID: function() {
 		var id = this.get('learner_id');
@@ -663,7 +664,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	},
 
 	/** Get entry state: `ab-initio`, or `resume`
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getEntry: function() 
 	{
@@ -675,7 +676,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMstorage.prototype */ {
 	 * * `browse` - see exam info, not questions
 	 * * `normal` - sit exam
 	 * * `review` - look at completed exam
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getMode: function() 
 	{

@@ -96,16 +96,16 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Properties set when part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
 	 * @property {matrix} correctAnswer - the correct answer to the part
-	 * @property {jme} numRows - default number of rows in the student's answer
-	 * @property {jme} numColumns - default number of columns in the student's answer
-	 * @property {boolean} allowResize - allow the student to change the dimensions of their answer?
-	 * @property {jme} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
-	 * @property {boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
-	 * @property {boolean} allowFractions - can the student enter a fraction as their answer for a cell?
-	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-	 * @property {number} precision - how many decimal places or significant figures to require
-	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {JME} numRows - default number of rows in the student's answer
+	 * @property {JME} numColumns - default number of columns in the student's answer
+	 * @property {Boolean} allowResize - allow the student to change the dimensions of their answer?
+	 * @property {JME} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
+	 * @property {Boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
+	 * @property {Boolean} allowFractions - can the student enter a fraction as their answer for a cell?
+	 * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {Number} precision - how many decimal places or significant figures to require
+	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
 	 */
 	settings: {
 		correctAnswer: null,
@@ -272,7 +272,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	},
 
 	/** Is the student's answer valid? False if the part hasn't been submitted.
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	validate: function()
 	{

@@ -38,7 +38,7 @@ var InformationPart = Numbas.parts.InformationPart = function(xml, path, questio
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
 	/** This part is always valid
-	 * @returns {boolean} true
+	 * @returns {Boolean} true
 	 */
 	validate: function() {
 		this.answered = true;

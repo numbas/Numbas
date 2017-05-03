@@ -410,40 +410,40 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
 	/** Student's last submitted answer/choice selections
-	 * @type {Array.Array.<boolean>}
+	 * @type {Array.<Array.<Boolean>>}
 	 */
 	ticks: [],
 	
 	/** Has the student given the wrong number of responses?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	wrongNumber: false,
 
 	/** Number of choices - used by `m_n_x` parts
-	 * @type {number}
+	 * @type {Number}
 	 */
 	numChoices: 0,
 
 	/** Number of answers
-	 * @type {number}
+	 * @type {Number}
 	 */
 	numAnswers: 0,
 
 	/** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	flipped: false,
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
-	 * @property {number} minAnswers - minimum number of responses the student must select
-	 * @property {number} maxAnswers - maxmimum number of responses the student must select
-	 * @property {string} choiceOrder - order in which to display choices - either `random` or `fixed`
-	 * @property {string} answerOrder - order in which to display answers - either `random` or `fixed`
-	 * @property {Array.Array.<number>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
-	 * @property {string} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
-	 * @property {string} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
+	 * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
+	 * @property {Number} minAnswers - minimum number of responses the student must select
+	 * @property {Number} maxAnswers - maxmimum number of responses the student must select
+	 * @property {String} choiceOrder - order in which to display choices - either `random` or `fixed`
+	 * @property {String} answerOrder - order in which to display answers - either `random` or `fixed`
+	 * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
+	 * @property {String} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
+	 * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
 	 */
 	settings:
 	{

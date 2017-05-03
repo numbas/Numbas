@@ -35,8 +35,8 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
  * @param {Numbas.Exam} exam - parent exam
  * @param {Numbas.QuestionGroup} group - group this question belongs to
  * @param {Element} xml
- * @param {number} number - index of this question in the exam (starting at 0)
- * @param {boolean} loading - is this question being resumed from an existing session?
+ * @param {Number} number - index of this question in the exam (starting at 0)
+ * @param {Boolean} loading - is this question being resumed from an existing session?
  * @param {Numbas.jme.Scope} gscope - global JME scope
  */
 var Question = Numbas.Question = function( exam, group, xml, number, loading, gscope)
@@ -239,51 +239,56 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	xml: null,
 	/** Position of this question in the exam
-	 * @type {number}
+	 * @type {Number}
 	 */
 	number: -1,
 	/** Name - shouldn't be shown to students
-	 * @type {string}
+	 * @type {String}
 	 */
 	name: '',
+
+    /** The JME scope for this question. Contains variables, functions and rulesets defined in this question
+     * @type {Numbas.jme.Scope}
+     */
+    scope: null,
 	
 	/** Maximum marks available for this question
-	 * @type {number}
+	 * @type {Number}
 	 */
 	marks: 0,
 
 	/** Student's score on this question
-	 * @type {number}
+	 * @type {Number}
 	 */
 	score: 0,
 
 	/** Percentage score below which the advice is revealed
-	 * @type {number}
+	 * @type {Number}
 	 */
 	adviceThreshold: 0,
 
 	/** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	visited: false,
 
 	/** Has this question been answered satisfactorily?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	answered: false,
 
 	/** Number of times this question has been submitted.
-	 * @type {number}
+	 * @type {Number}
 	 */
 	submitted: 0,
 
 	/** Has the advice been displayed?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	adviceDisplayed: false,
 
-	/** Have correct answers been revealed?
-	 * @type {boolean}
+	/** Have the correct answers been revealed?
+	 * @type {Boolean}
 	 */
 	revealed: false,
 
@@ -293,7 +298,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	parts: [],
 
 	/** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
-	 * @type {object}
+	 * @type {Object.<Numbas.parts.Part>}
 	 */
 	partDictionary: {},
 
@@ -302,8 +307,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	display: undefined,
 
-	/** Callbacks to run when the question's HTML is attached to the page
-	 * @type {object.Array.<function>}
+	/** Callbacks to run when various events happen
+     * @property {Array.<function>} HTMLAttached - Run when the question's HTML has been attached to the page.
+     * @property {Array.<function>} variablesGenerated - Run when the question's variables have been generated.
+	 * @type {Object.<Array.<function>>}
 	 */
 	callbacks: {
 		HTMLAttached: [],
@@ -312,7 +319,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 	/** Run the callbacks for a given event
 	 *
-	 * @param {string} name - name of the event
+	 * @param {String} name - name of the event
 	 */
 	runCallbacks: function(name) {
 		var callbacks = this.callbacks[name];
@@ -365,7 +372,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	},
 
 	/** Show the question's advice
-	 * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+	 * @param {Boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
 	 */
 	getAdvice: function(dontStore)
 	{
@@ -376,7 +383,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	},
 
 	/** Reveal the correct answers to the student
-	 * @param {booelan} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+	 * @param {Boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
 	 */
 	revealAnswer: function(dontStore)
 	{
@@ -404,7 +411,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	},
 
 	/** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	validate: function()
 	{
@@ -417,7 +424,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	},
 
 	/** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	isDirty: function()
 	{
@@ -432,8 +439,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	},
 
 	/** Show a warning and return true if the question is dirty.
-	 * @see Numbas.Question.isDirty
-	 * @returns {boolean}
+	 * @see Numbas.Question#isDirty
+	 * @returns {Boolean}
 	 */
 	leavingDirtyQuestion: function() {
 		if(this.answered && this.isDirty()) {

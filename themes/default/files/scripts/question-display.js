@@ -12,7 +12,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         var exam = q.exam;
 
         /** Has the advice been shown?
-         * @member {observable|boolean} adviceDisplayed
+         * @member {observable|Boolean} adviceDisplayed
          * @memberof Numbas.display.QuestionDisplay
          */
         this.adviceDisplayed = ko.observable(false);
@@ -28,25 +28,25 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         }
 
         /** Text for the "submit all answers" button
-         * @member {observable|string} submitMessage
+         * @member {observable|String} submitMessage
          * @memberof Numbas.display.QuestionDisplay
          */
         this.submitMessage = ko.observable('');
 
         /** The name to display for this question - in default locale, it's "Question {N}"
-         * @member {observable|string} displayName
+         * @member {observable|String} displayName
          * @memberof Numbas.display.QuestionDisplay
          */
         this.displayName = ko.observable(R('question.header',{'number':q.number+1}));
 
         /** Has the student looked at this question? ({@link Numbas.Question#visited})
-         * @member {observable|boolean} visited
+         * @member {observable|Boolean} visited
          * @memberof Numbas.display.QuestionDisplay
          */
         this.visited = ko.observable(q.visited);
 
         /** Is this question visible in the list?
-         * @member {observable|boolean} visible
+         * @member {observable|Boolean} visible
          * @memberof Numbas.display.QuestionDisplay
          */
         this.visible = ko.computed(function() {
@@ -60,25 +60,25 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         },this);
 
         /** Number of parts in this question
-         * @member {observable|number} numParts
+         * @member {observable|Number} numParts
          * @memberof Numbas.display.QuestionDisplay
          */
         this.numParts = ko.observable(q.parts.length);
 
         /** Student's current score ({@link Numbas.Question#score})
-         * @member {observable|number} score
+         * @member {observable|Number} score
          * @memberof Numbas.display.QuestionDisplay
          */
         this.score = ko.observable(q.score);
 
         /** Total marks available for this question ({@link Numbas.Question#marks})
-         * @member {observable|number} marks
+         * @member {observable|Number} marks
          * @memberof Numbas.display.QuestionDisplay
          */
         this.marks = ko.observable(q.marks);
 
         /** Proportion of available marks awarded to the student
-         * @member {observable|number} credit
+         * @member {observable|Number} credit
          * @memberof Numbas.display.QuestionDisplay
          */
         this.credit = ko.computed(function() {
@@ -86,7 +86,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         },this);
 
         /** Does this question do any marking?
-         * @member {observable|boolean} doesMarking
+         * @member {observable|Boolean} doesMarking
          * @memberof Numbas.display.QuestionDisplay
          */
         this.doesMarking = ko.computed(function() {
@@ -94,31 +94,31 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         },this);
 
         /** Has this question been answered? ({@link Numbas.Question#answered})
-         * @member {observable|boolean} answered
+         * @member {observable|Boolean} answered
          * @memberof Numbas.display.QuestionDisplay
          */
         this.answered = ko.observable(q.answered);
 
         /** Have the correct answers been revealed? ({@link Numbas.Question#revealed})
-         * @member {observable|boolean} revealed
+         * @member {observable|Boolean} revealed
          * @memberof Numbas.display.QuestionDisplay
          */
         this.revealed = ko.observable(q.revealed);
 
         /** Have any of this question's parts been answered?
-         * @member {observable|boolean} anyAnswered
+         * @member {observable|Boolean} anyAnswered
          * @memberof Numbas.display.QuestionDisplay
          */
         this.anyAnswered = ko.observable(false);
 
         /** Has the student changed any of their answers since submitting?
-         * @member {observable|boolean} isDirty
+         * @member {observable|Boolean} isDirty
          * @memberof Numbas.display.QuestionDisplay
          */
         this.isDirty = ko.observable(false);
 
         /** Is the student able to reveal the correct answers?
-         * @member {observable|boolean} canReveal
+         * @member {observable|Boolean} canReveal
          * @memberof Numbas.display.QuestionDisplay
          */
         this.canReveal = ko.computed(function() {
@@ -126,7 +126,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         },this);
 
         /** Score feedback string
-         * @member {{update: function, message: observable|string}} scoreFeedback
+         * @member {{update: function, message: observable|String}} scoreFeedback
          * @memberof Numbas.display.QuestionDisplay
          */
         this.scoreFeedback = display.showScoreFeedback(this,q.exam.settings);
@@ -294,7 +294,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         },
 
         /** Initialise this question's display 
-         * @see Numbas.display.ExamDisplay.init
          * @memberof Numbas.display.QuestionDisplay
          */
         init: function() {

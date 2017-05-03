@@ -26,50 +26,50 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.question = p.question;
 
         /** The student's current score ({@link Numbas.parts.Part#score})
-         * @member {observable|number} score
+         * @member {observable|Number} score
          * @memberof Numbas.display.PartDisplay
          */
         this.score = ko.observable(p.score);
 
         /** The total marks available for this part ({@link Numbas.parts.Part#marks})
-         * @member {observable|number} marks
+         * @member {observable|Number} marks
          * @memberof Numbas.display.PartDisplay
          */
         this.marks = ko.observable(p.marks);
 
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
-         * @member {observable|number} credit
+         * @member {observable|Number} credit
          * @memberof Numbas.display.PartDisplay
          */
         this.credit = ko.observable(p.credit);
 
         /** Does this part do any marking?
-         * @member {observable|boolean} doesMarking
-         * @see {Numbas.Part.doesMarking}
+         * @member {observable|Boolean} doesMarking
+         * @see Numbas.parts.Part#doesMarking
          * @memberof Numbas.display.PartDisplay
          */
         this.doesMarking = ko.observable(p.doesMarking);
 
         /** Has the student answered this part?
-         * @member {observable|boolean} answered
+         * @member {observable|Boolean} answered
          * @memberof Numbas.display.PartDisplay
          */
         this.answered = ko.observable(p.answered);
 
         /** Has the student changed their answer since the last submission?
-         * @member {observable|boolean} isDirty
+         * @member {observable|Boolean} isDirty
          * @memberof Numbas.display.PartDisplay
          */
         this.isDirty = ko.observable(false);
 
         /** Warnings based on the student's answer
-         * @member {observable|Array.<{message:string}>} warnings
+         * @member {observable|Array.<Object.<String>>} warnings
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = ko.observableArray([]);
 
         /** Are the warnings visible?
-         * @member {observable|boolean} warningsShown
+         * @member {observable|Boolean} warningsShown
          * @memberof Numbas.display.PartDisplay
          */
         this.warningsShown = ko.observable(false);
@@ -93,13 +93,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         }
 
         /** Are the marking feedback messages visible?
-         * @member {observable|boolean} feedbackShown
+         * @member {observable|Boolean} feedbackShown
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackShown = ko.observable(false);
 
         /** Text for the button to toggle the display of the feedback messages
-         * @member {observable|string} toggleFeedbackText
+         * @member {observable|String} toggleFeedbackText
          * @memberof Numbas.display.PartDisplay
          */
         this.toggleFeedbackText = ko.computed(function() {
@@ -107,14 +107,14 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Feedback messages
-         * @member {observable|string[]} feedbackMessages
+         * @member {observable|String[]} feedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackMessages = ko.observableArray([]);
         
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
-         * @member {observable|boolean} isNotOnlyPart
+         * @member {observable|Boolean} isNotOnlyPart
          * @memberof Numbas.display.PartDisplay
          */
         this.isNotOnlyPart = ko.computed(function() {
@@ -122,7 +122,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Should the button to toggle feedback messages be shown?
-         * @member {observable|boolean} showFeedbackToggler
+         * @member {observable|Boolean} showFeedbackToggler
          * @memberof Numbas.display.PartDisplay
          */
         this.showFeedbackToggler = ko.computed(function() {
@@ -131,7 +131,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Show the "submit part" button?
-         * @member {observable|boolean} showSubmitPart
+         * @member {observable|Boolean} showSubmitPart
          * @memberof Numbas.display.PartDisplay
          */
         this.showSubmitPart = ko.computed(function() {
@@ -139,25 +139,25 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
-         * @member {observable|boolean} stepsShown
+         * @member {observable|Boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsShown = ko.observable(p.stepsShown);
 
         /** Are the steps currently open? ({@link Numbas.parts.Part#stepsOpen})
-         * @member {observable|boolean} stepsOpen
+         * @member {observable|Boolean} stepsOpen
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsOpen = ko.observable(p.stepsOpen);
 
         /** Have the correct answers been revealed?
-         * @member {observable|boolean} revealed
+         * @member {observable|Boolean} revealed
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = ko.observable(false);
 
         /** Text to describe the state of the steps penalty
-         * @member {observable|string} stepsPenaltyMessage
+         * @member {observable|String} stepsPenaltyMessage
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsPenaltyMessage = ko.computed(function() {
@@ -172,7 +172,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true
-         * @member {observable|boolean} showCorrectAnswer
+         * @member {observable|Boolean} showCorrectAnswer
          * @memberof Numbas.display.PartDisplay
          */
         this.showCorrectAnswer = ko.computed(function() {
@@ -180,7 +180,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         });
 
         /** Display of this parts's current score / answered status
-         * @member {observable|object} scoreFeedback
+         * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
          * @memberof Numbas.display.PartDisplay
          */
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
@@ -188,7 +188,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
 
         /** Show the marks feedback?
-         * @member {observable|boolean} showMarks
+         * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay
          */
         this.showMarks = ko.computed(function() {
@@ -196,7 +196,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         }, this);
 
         /** Should the box containing part marks and the submit and feedback buttons be shown?
-         * @member {observable|boolean} showFeedbackBox
+         * @member {observable|Boolean} showFeedbackBox
          * @memberof Numbas.display.PartDisplay
          */
         this.showFeedbackBox = ko.computed(function() {
@@ -204,7 +204,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         /** Control functions
-         * @member {object} controls
+         * @member {Object} controls
          * @memberof Numbas.display.PartDisplay
          * @property {function} toggleFeedback - Toggle the display of the marking feedback messages
          * @property {function} submit - Submit the student's answers for marking
@@ -236,7 +236,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         }
 
         /** Event bindings
-         * @member {object} inputEvents
+         * @member {Object} inputEvents
          * @memberof Numbas.display.PartDisplay
          */
         this.inputEvents = {
@@ -256,7 +256,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
         /** Show a warning message about this part
-         * @param {string} warning
+         * @param {String} warning
          * @memberof Numbas.display.PartDisplay
          */
         warning: function(warning)
@@ -265,7 +265,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },
 
         /** Set the list of warnings
-         * @param {string[]} warnings
+         * @param {Array.<String>} warnings
          * @memberof Numbas.display.PartDisplay
          */
         setWarnings: function(warnings) {

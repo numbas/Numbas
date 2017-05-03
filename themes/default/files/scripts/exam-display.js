@@ -14,19 +14,19 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.exam=e;
 
         /** The exam's mode ({@link Numbas.Exam#mode})
-         * @member {observable|string} mode
+         * @member {observable|String} mode
          * @memberof Numbas.display.ExamDisplay
          */
         this.mode = ko.observable(e.mode);
         
         /** Is {@link Numbas.store} currently saving?
-         * @member {observable|boolean} saving
+         * @member {observable|Boolean} saving
          * @memberof Numbas.display.ExamDisplay
          */
         this.saving = ko.observable(false);
 
         /** The name of the currently displayed info page
-         * @member {observable|string} infoPage
+         * @member {observable|String} infoPage
          * @memberof Numbas.display.ExamDisplay
          */
         this.infoPage = ko.observable(null);
@@ -38,7 +38,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.currentQuestion = ko.observable(null);
 
         /** What kind of view are we in at the moment? 'infopage' or 'question'
-         * @member {observable|string} viewType
+         * @member {observable|String} viewType
          * @memberof Numbas.display.ExamDisplay
          */
         this.viewType = ko.computed(function() {
@@ -50,7 +50,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
 
         /** The number of the current question
-         * @member {observable|number} currentQuestionNumber 
+         * @member {observable|Number} currentQuestionNumber 
          * @memberof Numbas.display.ExamDisplay
          */
         this.currentQuestionNumber = ko.computed(function() {
@@ -68,7 +68,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.questions = ko.observableArray([]);
 
         /** Can the student go back to the previous question? (False if the current question is the first one
-         * @member {observable|boolean} canReverse
+         * @member {observable|Boolean} canReverse
          * @memberof Numbas.display.ExamDisplay
          */
         this.canReverse = ko.computed(function() {
@@ -76,7 +76,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
         
         /** Can the student go forward to the next question? (False if the current question is the last one)
-         * @member {observable|boolean} canAdvance
+         * @member {observable|Boolean} canAdvance
          * @memberof Numbas.display.ExamDisplay
          */
         this.canAdvance = ko.computed(function() {
@@ -84,25 +84,25 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
 
         /** The student's total score ({@link Numbas.Exam#score})
-         * @member {observable|number} score
+         * @member {observable|Number} score
          * @memberof Numbas.display.ExamDisplay
          */
         this.score = ko.observable(e.score);
 
         /** The total marks available for the exam ({@link Numbas.Exam#mark})
-         * @member {observable|number} marks
+         * @member {observable|Number} marks
          * @memberof Numbas.display.ExamDisplay
          */
         this.marks = ko.observable(e.mark);
 
         /** The percentage score the student needs to achieve to pass ({@link Numbas.Exam#percentPass}), formatted as a string.
-         * @member {observable|string} percentPass
+         * @member {observable|String} percentPass
          * @memberof Numbas.display.ExamDisplay
          */
         this.percentPass = ko.observable(e.settings.percentPass*100+'%');
 
         /** String displaying the student's current score, and the total marks available, if allowed
-         * @member {observable|string} examScoreDisplay
+         * @member {observable|String} examScoreDisplay
          * @memberof Numbas.display.ExamDisplay
          */
         this.examScoreDisplay = ko.computed(function() {
@@ -121,25 +121,25 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
 
         /** The student's total score as a percentage of the total marks available
-         * @member {observable|number} percentScore
+         * @member {observable|Number} percentScore
          * @memberof Numbas.display.ExamDisplay
          */
         this.percentScore = ko.observable(0);
 
         /** The time left in the exam
-         * @member {observable|string} displayTime
+         * @member {observable|String} displayTime
          * @memberof Numbas.display.ExamDisplay
          */
         this.displayTime = ko.observable('');
 
         /** Show the names of question groups in the menu?
-         * @member {observable|string} showQuestionGroupNames
+         * @member {observable|String} showQuestionGroupNames
          * @memberof Numbas.display.ExamDisplay
          */
         this.showQuestionGroupNames = ko.observable(e.settings.showQuestionGroupNames);
 
         /** Time the exam started, formatted for display
-         * @mamber {observable|string} startTime
+         * @mamber {observable|String} startTime
          * @memberof Numbas.display.ExamDisplay
          */
         var _startTime = ko.observable();
@@ -158,7 +158,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         });
 
         /** Time the exam ended, formatted for display
-         * @mamber {observable|string} endTime
+         * @mamber {observable|String} endTime
          * @memberof Numbas.display.ExamDisplay
          */
         var _endTime = ko.observable();
@@ -177,19 +177,19 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         });
 
         /** The total time the student has spent in the exam
-         * @member {observable|string} timeSpent
+         * @member {observable|String} timeSpent
          * @memberof Numbas.display.ExamDisplay
          */
         this.timeSpent = ko.observable('');
 
         /** Is the student allowed to pause the exam?
-         * @member {boolean} allowPause
+         * @member {Boolean} allowPause
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowPause = e.settings.allowPause;
 
         /** Total number of questions the student attempted
-         * @member {observable|number} questionsAttempted
+         * @member {observable|Number} questionsAttempted
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttempted = ko.computed(function() {
@@ -199,7 +199,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
 
         /** Total number of questions the student attempted, formatted as a fraction of the total number of questions
-         * @member {observable|string} questionsAttemptedDisplay
+         * @member {observable|String} questionsAttemptedDisplay
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttemptedDisplay = ko.computed(function() {
@@ -207,19 +207,19 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
 
         /** The result of the exam - passed or failed?
-         * @member {observable|string} result
+         * @member {observable|String} result
          * @memberof Numbas.display.ExamDisplay
          */
         this.result = ko.observable('');
 
         /** Did the student pass the exam?
-         * @member {observable|boolean} passed
+         * @member {observable|Boolean} passed
          * @memberof Numbas.display.ExamDisplay
          */
         this.passed = ko.observable(false);
 
         /** Message shown to the student based on their total score
-         * @member {observable|string} feedbackMessage
+         * @member {observable|String} feedbackMessage
          * @memberof Numbas.display.ExamDisplay
          */
         this.feedbackMessage = ko.observable(null);
@@ -291,7 +291,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },
 
         /** Show an info page (one of the front page, pause , results, or exit)
-         * @param {string} page - name of the page to show
+         * @param {String} page - name of the page to show
          * @memberof Numbas.display.ExamDisplay
          */
         showInfoPage: function(page)
@@ -349,11 +349,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 window.onbeforeunload = null;
 
             exam.currentQuestion.display.show();
-            if(!this.madeCarousel)
-            {
-                display.carouselGo = makeCarousel($('.questionList'),{step: 2, nextBtn: '.questionMenu .next', prevBtn: '.questionMenu .prev'});
-                this.madeCarousel = true;
-            }
             this.hideNavMenu();
         },
 
@@ -408,93 +403,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 q.end();
             });
         }
-    };
-
-    /** Make a carousel out of a div containing a list
-     * @param {Element} elem - div containing list to turn into a carousel
-     * @param {object} options -`prevBtn`, `nextBtn` - selectors of buttons to move up and down, `speed`, `step`
-     */
-    var makeCarousel = Numbas.display.makeCarousel = function(elem,options) {
-        options = $.extend({
-            prevBtn: null,
-            nextBtn: null,
-            speed: 200,
-            step: 1
-        }, options || {});
-
-        var div = $(elem);
-        var current = div.find('li:first');
-        var going = false;
-        var nextScroll = null;
-
-        function scrollTo(i)
-        {
-            nextScroll = i;
-            if(going)
-                return;
-            try {
-                var listOffset = div.find('ul,ol').position().top;
-                var listHeight = div.find('ul,ol').height();
-            } catch(e) {
-                return;
-            }
-
-            var lis = div.find('li');
-            var divHeight = div.height();
-            var maxI = 0;
-            for(var j=0;j<lis.length;j++)
-            {
-                var y = lis.eq(j).position().top - listOffset;
-                if(listHeight - y < divHeight)
-                {
-                    maxI = j;
-                    break;
-                }
-            }
-            i = Math.max(Math.min(i,maxI),0);
-
-            var ocurrent = current;
-            current = div.find('li').eq(i);
-            var itemOffset = current.position().top - listOffset;
-            if(itemOffset != div.scrollTop() && ocurrent != current)
-            {
-                going = true;
-                nextScroll = null;
-                div.animate({scrollTop: itemOffset},{
-                    duration: options.speed,
-                    complete: function() { 
-                        going = false;
-                        if(nextScroll != null)
-                            scrollTo(nextScroll);
-                    } 
-                });
-            }
-        }
-
-        function scrollUp() {
-            var i = div.find('li').index(current) || 0;
-            if(nextScroll!==null)
-                i = Math.min(i,nextScroll);
-            i = Math.max(i-options.step, 0);
-            scrollTo(i);
-        }
-        function scrollDown() {
-            var lis = div.find('li');
-            var i = lis.index(current) || 0;
-            if(nextScroll!==null)
-                i = Math.max(i,nextScroll);
-            i = Math.min(i+options.step,lis.length-1);
-            scrollTo(i);
-        }
-
-        $(options.prevBtn).click(scrollUp);
-        $(options.nextBtn).click(scrollDown);
-        div.mousewheel(function(e,d) {
-            d > 0 ? scrollUp() : scrollDown();
-            return false;
-        });
-
-        return scrollTo;
     };
 
 });

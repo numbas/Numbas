@@ -26,7 +26,7 @@ var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
  * @typedef partpath
- * @type {string}
+ * @type {String}
  */
 
 /** Part type constructors
@@ -50,9 +50,9 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {boolean} loading
+ * @param {Boolean} loading
  * @returns {Numbas.parts.Part}
- * @throws {NumbasError} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  * @memberof Numbas
  */
 var createPart = Numbas.createPart = function(xml, path, question, parentPart, loading)
@@ -85,8 +85,8 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
  * @param {partpath} path
  * @param {Numbas.Question} Question
  * @param {Numbas.parts.Part} parentPart
- * @param {boolean} loading
- * @see {Numbas.createPart}
+ * @param {Boolean} loading
+ * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loading )
 {
@@ -199,57 +199,57 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	path: '',
 
 	/** This part's type, e.g. "jme", "numberentry", ...
-	 * @type {string}
+	 * @type {String}
 	 */
 	type: '',
 
 	/** Maximum marks available for this part
-	 * @type {number}
+	 * @type {Number}
 	 */
 	marks: 0,
 
 	/** Marks available for the steps, if any
-	 * @type {number}
+	 * @type {Number}
 	 */
 	stepsMarks: 0,
 
 	/** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
-	 * @type {number}
+	 * @type {Number}
 	 */
 	credit: 0,
 
 	/** Student's score on this part
-	 * @type {number}
+	 * @type {Number}
 	 */
 	score: 0,
 	
 	/** Messages explaining how marks were awarded
-	 * @type {feedbackmessage[]}
+	 * @type {Array.<Numbas.parts.feedbackmessage>}
 	 */
 	markingFeedback: [],
 
 	/** Warnings shown next to the student's answer
-	 * @type {string[]}
+	 * @type {Array.<String>}
 	 */
 	warnings: [],
 
 	/** Has the student changed their answer since last submitting?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	isDirty: false,
 
 	/** Student's answers as visible on the screen (not necessarily yet submitted)
-	 * @type {string[]}
+	 * @type {Array.<String>}
 	 */
 	stagedAnswer: undefined,
 
 	/** Student's last submitted answer - a copy of {@link Numbas.parts.Part.stagedAnswer} taken when they submitted.
-	 * @type {string[]}
+	 * @type {Array.<String>}
 	 */
 	answerList: undefined,
 
 	/** Has this part been answered?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	answered: false,
 
@@ -264,32 +264,32 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	steps: [],
 
 	/** Have the steps been show for this part?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	stepsShown: false,
 
 	/** Is the steps display open? (Students can toggle it, but that doesn't affect whether they get the penalty)
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	stepsOpen: false,
 
 	/** True if this part should be resubmitted because another part it depended on has changed
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	shouldResubmit: false,
 
 	/** Does this mark do any marking? False for information only parts
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	doesMarking: true,
 
 	/** Properties set when the part is generated
-	 * @type {object}
-	 * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown
-	 * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
-	 * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part
-	 * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
-	 * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
+	 * @type {Object}
+	 * @property {Number} stepsPenalty - Number of marks to deduct when the steps are shown
+	 * @property {Boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
+	 * @property {Number} minimumMarks - Lower limit on the score the student can be awarded for this part
+	 * @property {Boolean} showCorrectAnswer - Show the correct answer on reveal?
+	 * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
 	 */
 	settings: 
 	{
@@ -302,7 +302,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Throw an error, with the part's identifier prepended to the message
-	 * @param {string} message
+	 * @param {String} message
 	 * @returns {Numbas.Error}
 	 */
 	error: function(message) {
@@ -365,8 +365,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	display: undefined,
 
 	/** Give the student a warning about this part. 	
-	 * @param {string} warning
-	 * @see {Numbas.display.PartDisplay.warning}
+	 * @param {String} warning
+	 * @see Numbas.display.PartDisplay.warning
 	 */
 	giveWarning: function(warning)
 	{
@@ -375,8 +375,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Set the list of warnings
-	 * @param {string[]} warnings
-	 * @see {Numbas.display.PartDisplay.warning}
+	 * @param {Array.<String>} warnings
+	 * @see Numbas.display.PartDisplay.warning
 	 */
 	setWarnings: function(warnings) {
 		this.warnings = warnings;
@@ -384,7 +384,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Remove all warnings
-	 * @see {Numbas.display.PartDisplay.warning}
+	 * @see Numbas.display.PartDisplay.warning
 	 */
 	removeWarnings: function() {
 		this.setWarnings([]);
@@ -452,7 +452,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
-	 * @param {boolean} dirty
+	 * @param {Boolean} dirty
 	 */
 	setDirty: function(dirty) {
 		this.isDirty = dirty;
@@ -576,8 +576,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Has the student entered an answer to this part?
-	 * @see {Numbas.Part.stagedAnswer}
-	 * @returns {boolean}
+	 * @see Numbas.parts.Part#stagedAnswer
+	 * @returns {Boolean}
 	 */
 	hasStagedAnswer: function() {
 		return !(this.stagedAnswer==undefined || this.stagedAnswer=='');
@@ -594,10 +594,24 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 	},
 
+    /** @typedef {Object} Numbas.parts.feedbackmessage 
+     * @property {String} op - the kind of feedback
+     * @see Numbas.parts.Part#setCredit Numbas.parts.Part#addCredit Numbas.parts.Part#multCredit Numbas.parts.Part#markingComment
+     */
+
+    /** @typedef {Object} Numbas.parts.marking_results
+     * A dictionary representing the results of marking a student's answer.
+     * @property {Array.<String>} warnings - Warning messages.
+     * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages.
+     * @property {Object} validation - dictionary of data to be used by {@link Numbas.parts.Part#validate} to determine if the student's answer could be marked.
+     * @property {Number} credit - Proportion of the available marks to award to the student.
+     * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
+     */
+
 	/** Calculate the correct answer in the given scope, and mark the student's answer
 	 * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
-	 * @param {object} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
-	 * @returns {object} - dictionary with `warnings` {string[]}, `markingFeedback` {feedbackmessage[]}, `validation` {object}, `credit` {number} and `answered` {boolean}
+	 * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+	 * @returns {Numbas.parts.marking_results}
 	 */
 	markAgainstScope: function(scope,feedback) {
 		this.setWarnings(feedback.warnings.slice());
@@ -693,8 +707,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	mark: function() {},
 
 	/** Set the `credit` to an absolute value
-	 * @param {number} credit
-	 * @param {string} message - message to show in feedback to explain this action
+	 * @param {Number} credit
+	 * @param {String} message - message to show in feedback to explain this action
 	 */
 	setCredit: function(credit,message)
 	{
@@ -708,8 +722,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Add an absolute value to `credit`
-	 * @param {number} credit - amount to add
-	 * @param {string} message - message to show in feedback to explain this action
+	 * @param {Number} credit - amount to add
+	 * @param {String} message - message to show in feedback to explain this action
 	 */
 	addCredit: function(credit,message)
 	{
@@ -722,8 +736,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Multiply `credit` by the given amount - use to apply penalties
-	 * @param {number} factor
-	 * @param {string} message - message to show in feedback to explain this action
+	 * @param {Number} factor
+	 * @param {String} message - message to show in feedback to explain this action
 	 */
 	multCredit: function(factor,message)
 	{
@@ -737,7 +751,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Add a comment to the marking feedback
-	 * @param {string} message
+	 * @param {String} message
 	 */
 	markingComment: function(message)
 	{
@@ -749,14 +763,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 	/** Is the student's answer acceptable?
 	 * @abstract
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	validate: function() { return true; },
 
 	/** Show the steps, as a result of the student asking to show them.
 	 * If the answers have not been revealed, we should apply the steps penalty.
 	 *
-	 * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+	 * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
 	 */
 	showSteps: function(dontStore)
 	{
@@ -796,7 +810,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Reveal the correct answer to this part
-	 * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+	 * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
 	 */
 	revealAnswer: function(dontStore)
 	{

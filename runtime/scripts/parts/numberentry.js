@@ -86,22 +86,22 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
-	 * @property {number} minvalueString - definition of minimum value, before variables are substituted in
-	 * @property {number} minvalue - minimum value marked correct
-	 * @property {number} maxvalueString - definition of maximum value, before variables are substituted in
-	 * @property {number} maxvalue - maximum value marked correct
-	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
-	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
-     * @property {string[]} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
-	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
-	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-	 * @property {number} precisionString - definition of precision setting, before variables are substituted in
-	 * @property {number} precision - how many decimal places or significant figures to require
-	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
-	 * @property {boolean} mustBeReduced - should the student enter a fraction in lowest terms
-	 * @property {number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+	 * @property {Number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
+	 * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
+	 * @property {Number} minvalue - minimum value marked correct
+	 * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
+	 * @property {Number} maxvalue - maximum value marked correct
+	 * @property {Number} correctAnswerFraction - display the correct answer as a fraction?
+	 * @property {Boolean} allowFractions - can the student enter a fraction as their answer?
+     * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
+	 * @property {Number} displayAnswer - representative correct answer to display when revealing answers
+	 * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {Number} precisionString - definition of precision setting, before variables are substituted in
+	 * @property {Number} precision - how many decimal places or significant figures to require
+	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
+	 * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
 	 */
 	settings:
 	{
@@ -171,8 +171,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 	/** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.
-	 * @param {string} answer
-	 * @returns {string}
+	 * @param {String} answer
+	 * @returns {String}
 	 */
 	cleanAnswer: function(answer) {
 		answer = answer.toString().trim();
@@ -194,7 +194,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	},
 
     /** Get the student's answer as a floating point number
-     * @returns {number}
+     * @returns {Number}
      */
 	studentAnswerAsFloat: function() {
 		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
@@ -238,7 +238,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	},
 
 	/** Is the student's answer valid? False if the part hasn't been submitted.
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	validate: function()
 	{

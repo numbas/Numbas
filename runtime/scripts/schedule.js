@@ -30,27 +30,32 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	calls: [],
 
 	/** Bits of queue that have been picked up while a task performs sub-tasks 
-	 * @type {Array.Array.<function>} */
+	 * @type {Array.<Array.<function>>} */
 	lifts: [],
 
 	/** Number of tasks completed 
-	 * @type {number}
+	 * @type {Number}
 	 */
 	completed: 0,
 
 	/** Total number of tasks ever scheduled
-	 * @type {number}
+	 * @type {Number}
 	 */
 	total: 0,
 
 	/** Should the scheduler stop running tasks?
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	halt:false,
 
+    /** @typedef {Object} Numbas.schedule.task_object
+     * @property {function} task - The function to execute.
+     * @property {function} error - A callback, used if an error is raised.
+     */
+
 	/** Add a task to the queue
-	 * @param {function|object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
-	 * @param {object} that - what `this` should be when the function is called
+	 * @param {function|Numbas.schedule.task_object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
+	 * @param {Object} that - what `this` should be when the function is called
 	 */
 	add: function(fn,that)
 	{
