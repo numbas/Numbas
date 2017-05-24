@@ -492,6 +492,13 @@ newBuiltin('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', d
 newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
 newBuiltin('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
 
+newBuiltin('rational_approximation',[TNum],TList,function(n) {
+    return math.rationalApproximation(n);
+},{unwrapValues:true});
+newBuiltin('rational_approximation',[TNum,TNum],TList,function(n,accuracy) {
+    return math.rationalApproximation(n,accuracy);
+},{unwrapValues:true});
+
 newBuiltin('factorise',[TNum],TList,function(n) {
 		return math.factorise(n).map(function(n){return new TNum(n)});
 	}
