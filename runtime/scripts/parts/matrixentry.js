@@ -167,6 +167,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		return new Numbas.jme.types.TMatrix(this.studentAnswerAsMatrix());
 	},
 
+    /** Get the student's answer as a matrix
+     * @returns {matrix}
+     */
 	studentAnswerAsMatrix: function() {
 		var rows = this.studentAnswerRows;
 		var columns = this.studentAnswerColumns;
