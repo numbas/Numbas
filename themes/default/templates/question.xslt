@@ -20,8 +20,10 @@ Copyright 2011-16 Newcastle University
 
     <xsl:template match="question">
         <div class="question clearfix" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
+            <form>
             <h3 data-bind="text: displayName" class="print-only"></h3>
             <xsl:apply-templates />
+            </form>
         </div>
     </xsl:template>
 
