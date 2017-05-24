@@ -2065,7 +2065,7 @@ var matrixmath = Numbas.matrixmath = {
 		{
 			var rowA = a[i] || [];
 			var rowB = b[i] || [];
-			for(var j=0;j<rows;j++)
+			for(var j=0;j<columns;j++)
 			{
 				if(!eq(rowA[j]||0,rowB[j]||0))
 					return false;
