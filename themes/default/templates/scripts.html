@@ -1,6 +1,9 @@
 <!-- mathjax stuff -->
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
+        TeX: {
+            extensions: ['begingroup.js']
+        },
         tex2jax: {
             inlineMath: [['$','$'], ['\\(','\\)']],
             displayMath: [['\\[','\\]'], ['$$','$$']],
