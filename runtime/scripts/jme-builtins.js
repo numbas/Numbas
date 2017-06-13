@@ -268,8 +268,9 @@ newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',
 
 newBuiltin('latex',[TString],TString,null,{
 	evaluate: function(args,scope) {
-		args[0].latex = true;
-		return args[0];
+        var s = new TString(args[0].value);
+        s.latex = true;
+        return s;
 	},
 	doc: {
 		usage: ['latex("something")'],
