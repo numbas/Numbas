@@ -543,13 +543,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			}
 		}
 
-		if(this.stepsShown)
-		{
-			for(var i=0;i<this.steps.length;i++)
-			{
-				this.steps[i].submit();
-			}
-		}
+        if(this.stepsShown) {
+            for(var i=0;i<this.steps.length;i++) {
+                if(this.steps[i].isDirty) {
+                    this.steps[i].submit();
+                }
+            }
+        }
 
 		this.calculateScore();
 		this.question.updateScore();
@@ -780,15 +780,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 
 		this.stepsShown = true;
-		this.calculateScore();
 		if(!this.revealed) {
-			if(this.answered)
+			if(this.answered) {
 				this.submit();
-			else
+            } else {
+                this.calculateScore();
 				this.question.updateScore();
-		}
-		if(!dontStore)
-		{
+            }
+		} else {
+            this.calculateScore();
+        }
+		if(!dontStore) {
 			Numbas.store.stepsShown(this);
 		}
 	},
