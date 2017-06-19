@@ -376,7 +376,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         endRegen: function() {
             var currentQuestion = this.exam.currentQuestion;
             this.questions.splice(currentQuestion.number,1,currentQuestion.display);
-            var group = this.question_groups.filter(function(g){return g.group = currentQuestion.group})[0];
+            var group = this.question_groups.filter(function(g){return g.group == currentQuestion.group})[0];
             var n_in_group = currentQuestion.group.questionList.indexOf(currentQuestion);
             var group_questions = group.questions();
             group_questions.splice(n_in_group,1,currentQuestion.display);
