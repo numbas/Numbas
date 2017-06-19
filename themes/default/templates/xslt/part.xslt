@@ -25,10 +25,17 @@
 <xsl:template match="part">
 	<xsl:variable name="path">
 		<xsl:apply-templates select="." mode="path"/>
-	</xsl:variable>
+    </xsl:variable>
+    <xsl:variable name="inline">
+        <xsl:choose>
+            <xsl:when test="ancestor::gaps and @type='1_n_2' and choices/@displaytype='dropdownlist'"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:when test="ancestor::gaps and not (choices)"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 	<xsl:variable name="tag">
 		<xsl:choose>
-			<xsl:when test="ancestor::gaps and not (choices)">span</xsl:when>
+			<xsl:when test="$inline='true'">span</xsl:when>
 			<xsl:otherwise>div</xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
@@ -38,8 +45,11 @@
 			<xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
 		</xsl:choose>
 	</xsl:variable>
-	<xsl:variable name="block">
-		<xsl:if test="@type='1_n_2' or @type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:if>
+    <xsl:variable name="block">
+        <xsl:choose>
+    		<xsl:when test="@type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:when>
+            <xsl:when test="@type='1_n_2' and @displaytype='radiogroup'"><xsl:text> block</xsl:text></xsl:when>
+        </xsl:choose>
 	</xsl:variable>
 
 	<xsl:if test="parent::parts">
@@ -74,8 +84,8 @@
 				<div class="row">
 					<div class="partFeedback .col-2 well pull-right" data-bind="visible: showFeedbackBox">
 						<button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: showSubmitPart"><localise>question.submit part</localise></button>
-						<div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks">
-							<span class="score" data-bind="html: scoreFeedback.message"></span>
+						<div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
+							<span class="score" data-bind="html: scoreFeedback.message, visible: isNotOnlyPart"></span>
 							<span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 						</div>
 						<button class="btn btn-primary" id="feedbackToggle" data-bind="slideVisible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>

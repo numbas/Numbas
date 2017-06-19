@@ -410,7 +410,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
 	/** Student's last submitted answer/choice selections
-	 * @type {Array.Array.<boolean>}
+	 * @type {Array.<Array.<Boolean>>}
 	 */
 	ticks: [],
 	
@@ -420,30 +420,30 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     markingScript: Numbas.marking_scripts.multipleresponse,
 
 	/** Number of choices - used by `m_n_x` parts
-	 * @type {number}
+	 * @type {Number}
 	 */
 	numChoices: 0,
 
 	/** Number of answers
-	 * @type {number}
+	 * @type {Number}
 	 */
 	numAnswers: 0,
 
 	/** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)
-	 * @type {boolean}
+	 * @type {Boolean}
 	 */
 	flipped: false,
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
-	 * @property {number} minAnswers - minimum number of responses the student must select
-	 * @property {number} maxAnswers - maxmimum number of responses the student must select
-	 * @property {string} choiceOrder - order in which to display choices - either `random` or `fixed`
-	 * @property {string} answerOrder - order in which to display answers - either `random` or `fixed`
-	 * @property {Array.Array.<number>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
-	 * @property {string} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
-	 * @property {string} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
+	 * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
+	 * @property {Number} minAnswers - minimum number of responses the student must select
+	 * @property {Number} maxAnswers - maxmimum number of responses the student must select
+	 * @property {String} choiceOrder - order in which to display choices - either `random` or `fixed`
+	 * @property {String} answerOrder - order in which to display answers - either `random` or `fixed`
+	 * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
+	 * @property {String} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
+	 * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
 	 */
 	settings:
 	{
@@ -532,14 +532,20 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 				matrix.push(row);
 				for(var j=0;j<this.numChoices;j++) {
 					var value = settings.markingMatrixArray[i][j];
-
 					if(util.isFloat(value)) {
 						value = parseFloat(value);
 					} else {
-						value = jme.evaluate(value,scope).value;
-						if(!util.isFloat(value)) {
-							this.error('part.mcq.matrix not a number',this.path,i,j);
-						}
+            if(value == ''){
+              this.error('part.mcq.matrix cell empty',{part:this.path,row:i,column:j});
+            }
+            try {
+              value = jme.evaluate(value,scope).value;
+            }catch(e){
+              this.error('part.mcq.matrix jme error',{part:this.path,row:i,column:j,error:e.message});
+            }
+            if(!util.isFloat(value)) {
+              this.error('part.mcq.matrix not a number',{part:this.path,row:i,column:j});
+            }
 						value = parseFloat(value);
 					}
 
@@ -564,6 +570,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 	storeAnswer: function(answerList)
 	{
 		this.setDirty(true);
+        this.display.removeWarnings();
 		//get choice and answer 
 		//in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
 		var answerIndex = answerList[0];
@@ -575,7 +582,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 		case 'dropdownlist':
 			for(var i=0; i<this.numAnswers; i++)
 			{
-				this.stagedAnswer[i][choiceIndex]= i==answerIndex;
+				this.stagedAnswer[i][choiceIndex]= i===answerIndex;
 			}
 			break;
 		default:

@@ -42,7 +42,7 @@ var xml = Numbas.xml = {
 	},
 
 	/** Load in a single XML document
-	 * @param {string} xmlstring
+	 * @param {String} xmlstring
 	 * @returns {XMLDocument}
 	 */
 	loadXML: function(xmlstring)
@@ -85,13 +85,14 @@ var xml = Numbas.xml = {
 		return doc;
 	},
 
-	/** @typedef func_data
-	 * @type {object}
-	 * @property {string} name
-	 * @property {string} definition - definition, either in {@link JME} or JavaScript
-	 * @property {string} language - either `jme` or `javascript`
-	 * @property {string} outtype - name of the {@link Numbas.jme.token} type this function returns
-	 * @property {object[]} parameters - dicts of `name` and `type` for the function's parameters.
+    /** The definition of a custom JME function.
+     * @typedef func_data
+	 * @type {Object}
+	 * @property {String} name
+	 * @property {String} definition - definition of the function, either in {@link JME} or JavaScript
+	 * @property {String} language - either `"jme"` or `"javascript"`
+	 * @property {String} outtype - name of the {@link Numbas.jme.token} type this function returns
+	 * @property {Array.<Object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
 	 */
 
 	/** Load user-defined functions from an XML node
@@ -138,10 +139,9 @@ var xml = Numbas.xml = {
 		return tmpFunctions;
 	},
 
-	/** @typedef variable_data_dict
-	 * @type {object}
+	/** @typedef {Object} variable_data_dict
 	 * @property {Numbas.jme.tree} tree - definition of variable
-	 * @property {string[]} vars - names of variables this variable depends on
+	 * @property {String[]} vars - names of variables this variable depends on
 	 */
 
 	/** Load variable definitions from an XML node
@@ -186,7 +186,7 @@ var xml = Numbas.xml = {
 	 *
 	 * This pulls the message out and serializes it so it can be inserted easily with jQuery
 	 * @param {Element} node
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	serializeMessage: function(node)
 	{
@@ -195,7 +195,7 @@ var xml = Numbas.xml = {
 
 	/** Get all the text belonging to an element
 	 * @param {Element} elem
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getTextContent: function(elem)
 	{
@@ -204,7 +204,7 @@ var xml = Numbas.xml = {
 
 	/** Set the text content of an element
 	 * @param {Element} elem
-	 * @param {string} text
+	 * @param {String} text
 	 */
 	setTextContent: function(elem,text)
 	{
@@ -214,14 +214,18 @@ var xml = Numbas.xml = {
 			elem.text = text;
 	},
 
+    /** @typedef {Object} Numbas.xml.tryGetAttribute_options
+     * @property {Boolean} string - Always return the attribute as a string.
+     */
+
 	/** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
-	 * @param {object} obj - object to fill up
+	 * @param {Object} obj - object to fill up
 	 * @param {Element} xmlroot - root XML element
-	 * @param {Element|string} elem - either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`
-	 * @param {string[]} names - names of attributes to load
-	 * @param {string[]} [altnames] - names of object properties to associate with attribute names. If undefined, the attribute name is used.
-	 * @param {object} options - `string` means always return the attribute as a string
-	 * @returns {object} - last attribute loaded
+	 * @param {Element|String} elem - either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`
+	 * @param {String[]} names - names of attributes to load
+	 * @param {String[]} [altnames] - names of object properties to associate with attribute names. If undefined, the attribute name is used.
+	 * @param {Numbas.xml.tryGetAttribute_options} options
+	 * @returns {Object} - The last attribute loaded.
 	 */
 	tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
 	{
@@ -311,7 +315,7 @@ var xml = Numbas.xml = {
 
 	/** Is the given node empty? True if it has no children.
 	 * @param {Element} node
-	 * @returns {bool}
+	 * @returns {Boolean}
 	 */
 	isEmpty: function(node) {
 		return node.childNodes.length==0;

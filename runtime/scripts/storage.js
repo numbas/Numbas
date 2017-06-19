@@ -21,36 +21,38 @@ Numbas.queueScript('storage',['base'],function() {
 
 /** @typedef exam_suspend_data
  * @memberof Numbas.storage
- * @property {number} timeRemaining - seconds until exam timer runs out
- * @property {number[][]} questionSubsets - order of questions in each question group
- * @property {number} start - time the exam started
- * @property {number} score - student's current score
- * @property {number} currentQuestion - number of the question the student was looking at before suspending
+ * @property {Number} timeRemaining - Seconds until the end of the exam ({@link Numbas.Exam#timeRemaining})
+ * @property {Number} duration - Length of the exam, in seconds ({@link Numbas.Exam#settings})
+ * @property {Array.<Array.<Number>>} questionSubsets - The sets of questions in each question group ({@link Numbas.Exam#question_groups})
+ * @property {Date} start - The time the exam was started ({@link Numbas.Exam#start})
+ * @property {Number} score - The student's current score ({@link Numbas.exam#score})
+ * @property {Number} currentQuestion - The index of the current question ({@link Numbas.Exam#currentQuestionNumber})
  */
 
 /** @typedef question_suspend_data
  * @memberof Numbas.storage
- * @property {number} score - student's current score on this question ({@link Numbas.Question#score})
- * @property {boolean} visited - has the student looked at this question? ({@link Numbas.Question#visited})
- * @property {boolean} answered - has the student answered this question? ({@link Numbas.Question#answered})
- * @property {boolean} submitted - how many times has the student submitted this question? ({@link Numbas.Question#submitted})
- * @property {boolean} adviceDisplayed - has the advice been shown to the student? ({@link Numbas.Question#adviceDisplayed})
- * @property {boolean} revealed - have the correct answers been revealed to the student? ({@link Numbas.Question#revealed})
- * @property {object} variables - dictionary mapping variable names to values, in {@link JME} format.
+ * @property {String} name - The name of the question ({@link Numbas.Question#name})
+ * @property {Number} score - The student's score for this question ({@link Numbas.Question#score})
+ * @property {Boolean} visited - Has the student visited this question yet? ({@link Numbas.Question#visited})
+ * @property {Boolean} answered - Has the student answered this part? ({@link Numbas.Question#answered})
+ * @property {Boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
+ * @property {Boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
+ * @property {Object.<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
+ * @see Numbas.storage.SCORMStorage#loadQuestion
  */
 
 /** @typedef part_suspend_data
  * @memberof Numbas.storage
- * @property {string} answer - student's answer to the part, as encoded for saving
- * @property {boolean} answered - has the student answered this part? ({@link Numbas.parts.Part#answered})
- * @property {boolean} stepsShown - have the steps been shown? ({@link Numbas.parts.Part#stepsShown})
- * @property {boolean} stepsOpen - are the steps currently visible? ({@link Numbas.parts.Part#stepsOpen})
- * @property {part_suspend_data[]} gaps - data for gaps, if this is a gapfill part
- * @property {part_suspend_data[]} steps - data for steps, if this part has steps
- * @property {string} studentAnswer - student's answer, for {@link Numbas.parts.JMEPart}, {@link Numbas.parts.NumberEntryPart} or {@link Numbas.parts.PatternMatchPart} parts
- * @property {number[]} shuffleChoices - order of choices, if this is a {@link Numbas.parts.MultipleResponsePart}
- * @property {number[]} shuffleAnswers - order of answers, if this is a {@link Numbas.parts.MultipleResponsePart}
- * @property {Array.Array.<number>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
+ * @property {String} answer - student's answer to the part, as encoded for saving
+ * @property {Boolean} answered - has the student answered this part? ({@link Numbas.parts.Part#answered})
+ * @property {Boolean} stepsShown - have the steps been shown? ({@link Numbas.parts.Part#stepsShown})
+ * @property {Boolean} stepsOpen - are the steps currently visible? ({@link Numbas.parts.Part#stepsOpen})
+ * @property {Array.<Numbas.storage.part_suspend_data>} gaps - data for gaps, if this is a gapfill part
+ * @property {Array.<Numbas.storage.part_suspend_data>} steps - data for steps, if this part has steps
+ * @property {String} studentAnswer - student's answer, for {@link Numbas.parts.JMEPart}, {@link Numbas.parts.NumberEntryPart} or {@link Numbas.parts.PatternMatchPart} parts
+ * @property {Array.<Number>} shuffleChoices - order of choices, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {Array.<Number>} shuffleAnswers - order of answers, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {Array.<Array.<Number>>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
  */
 
 
@@ -75,7 +77,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
 	/** Get suspended exam info
 	 * @param {Numbas.Exam} exam
-	 * @returns {exam_suspend_data}
+	 * @returns {Numbas.storage.exam_suspend_data}
 	 */
 	load: function() {},
 
@@ -85,49 +87,49 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
 	/** Get suspended info for a question
 	 * @param {Numbas.Question} question
-	 * @returns {question_suspend_data}
+	 * @returns {Numbas.storage.question_suspend_data}
 	 */
 	loadQuestion: function(questionNumber) {},
 
 	/** Get suspended info for a part
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadPart: function(part) {},
 
 	/** Load a {@link Numbas.parts.JMEPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadJMEPart: function(part) {},
 
 	/** Load a {@link Numbas.parts.PatternMatchPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadPatternMatchPart: function(part) {},
 
 	/** Load a {@link Numbas.parts.NumberEntryPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadNumberEntryPart: function(part) {},
 
 	/** Load a {@link Numbas.parts.MatrixEntryPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadMatrixEntryPart: function(part) {},
 
 	/** Load a {@link Numbas.parts.MultipleResponsePart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadMultipleResponsePart: function(part) {},
 
 	/** Load a {@link Numbas.parts.ExtensionPart}
 	 * @param {Numbas.parts.Part} part
-	 * @returns {part_suspend_data}
+	 * @returns {Numbas.storage.part_suspend_data}
 	 */
 	loadExtensionPart: function(part) {},
 
@@ -144,14 +146,14 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 	end: function() {},
 
 	/** Get the student's ID
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getStudentID: function() {
 		return '';
 	},
 
 	/** Get entry state: `ab-initio`, or `resume`
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getEntry: function() { 
 		return 'ab-initio';
@@ -162,7 +164,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 	 * * `browse` - see exam info, not questions
 	 * * `normal` - sit exam
 	 * * `review` - look at completed exam
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	getMode: function() {},
 

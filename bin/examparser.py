@@ -260,7 +260,7 @@ def printdata(data,ntabs=0):
 
 #utility functions
 
-"""Force fixed precision output of floats, instead of scientific notation"""
+"""Cast data to string. Forces fixed precision output of floats, instead of scientific notation"""
 def strcons_fix(data):
     if (data is True) or (data is False):
         out=data

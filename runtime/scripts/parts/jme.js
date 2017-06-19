@@ -134,7 +134,7 @@ var JMEPart = Numbas.parts.JMEPart = function(xml, path, question, parentPart, l
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */ 
 {
 	/** Student's last submitted answer
-	 * @type {string}
+	 * @type {String}
 	 */
 	studentAnswer: '',
 
@@ -146,30 +146,30 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	/** Properties set when the part is generated.
 	 *
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {jme} correctAnswerString - the definition of the correct answer, without variables substituted into it.
-	 * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-	 * @property {string} answerSimplificationString - string from the XML defining which answer simplification rules to use
-	 * @property {string[]} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
-	 * @property {string} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
-	 * @property {number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
-	 * @property {number} failureRate - comparison failures allowed before we decide answers are different
-	 * @property {number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
-	 * @property {number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
-	 * @property {number} vsetRangePoints - number of points to compare answers on
-	 * @property {number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-	 * @property {number} maxLengthPC - partial credit if the student's answer is too long
-	 * @property {string} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
-	 * @property {number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-	 * @property {number} minLengthPC - partial credit if the student's answer is too short
-	 * @property {string} minLengthMessage - message to add to the marking feedback if the student's answer is too short
-	 * @property {string[]} mustHave - strings which must be present in the student's answer
-	 * @property {number} mustHavePC - partial credit to award if any must-have string is missing
-	 * @property {string} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
-	 * @property {boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
-	 * @property {string[]} notAllowed - strings which must not be present in the student's answer
-	 * @property {number} notAllowedPC - partial credit to award if any not-allowed string is present
-	 * @property {string} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
-	 * @property {boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+	 * @property {JME} correctAnswerString - the definition of the correct answer, without variables substituted into it.
+	 * @property {String} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
+	 * @property {String} answerSimplificationString - string from the XML defining which answer simplification rules to use
+	 * @property {Array.<String>} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
+	 * @property {String} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
+	 * @property {Number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
+	 * @property {Number} failureRate - comparison failures allowed before we decide answers are different
+	 * @property {Number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
+	 * @property {Number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
+	 * @property {Number} vsetRangePoints - number of points to compare answers on
+	 * @property {Number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+	 * @property {Number} maxLengthPC - partial credit if the student's answer is too long
+	 * @property {String} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
+	 * @property {Number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+	 * @property {Number} minLengthPC - partial credit if the student's answer is too short
+	 * @property {String} minLengthMessage - message to add to the marking feedback if the student's answer is too short
+	 * @property {Array.<String>} mustHave - strings which must be present in the student's answer
+	 * @property {Number} mustHavePC - partial credit to award if any must-have string is missing
+	 * @property {String} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
+	 * @property {Boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
+	 * @property {Array.<String>} notAllowed - strings which must not be present in the student's answer
+	 * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
+	 * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
+	 * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
 	 */
 	settings: 
 	{

@@ -538,6 +538,10 @@ def run():
                         action='store_false',
                         default=True,
                         help='Don\'t expect an index.html file to be produced')
+    parser.add_option('--mathjax-url',
+                        dest='mathjax_url',
+                        default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0',
+                        help='URL of MathJax')
 
     (options,args) = parser.parse_args()
 

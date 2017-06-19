@@ -89,14 +89,19 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          */
         this.precisionHint = ko.computed(function() {
             if(this.part.settings.precisionType=='none') {
-                return '';
-            }
-            var precision = this.part.settings.precision;
-            var precisionType = R('part.numberentry.precision type.'+this.part.settings.precisionType,{count:precision});
-            if (precision === 0) {
-              return R('part.numberentry.give your answer to precision_0',{count: precision,precisionType: precisionType});
+                if(this.part.settings.mustBeReduced) {
+                    return R('part.numberentry.give your answer as a reduced fraction');
+                } else {
+                    return '';
+                }
             } else {
-              return R('part.numberentry.give your answer to precision',{count: precision,precisionType: precisionType});
+                var precision = this.part.settings.precision;
+                var precisionType = R('part.numberentry.precision type.'+this.part.settings.precisionType,{count:precision});
+                if (precision === 0) {
+                  return R('part.numberentry.give your answer to precision_0',{count: precision,precisionType: precisionType});
+                } else {
+                  return R('part.numberentry.give your answer to precision',{count: precision,precisionType: precisionType});
+                }
             }
         },this);
 

@@ -101,7 +101,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
 	},
 
 	/** Make a function which tries to jump to question N
-	 * @param {number} n - number of the question to jump to
+	 * @param {Number} n - number of the question to jump to
 	 * @returns {function}
 	 * @see Numbas.controls.jumpQuestion
 	 */
@@ -111,8 +111,8 @@ Numbas.controls = /** @lends Numbas.controls */ {
 		}
 	},
 
-	/* Try to move directly to a particular question
-	 * @param {number} jumpTo - number of the question to jump to
+	/** Try to move directly to a particular question
+	 * @param {Number} jumpTo - number of the question to jump to
 	 * @see Numbas.Exam#tryChangeQuestion
 	 */
 	jumpQuestion: function( jumpTo )

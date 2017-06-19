@@ -24,17 +24,18 @@ Numbas.queueScript('math',['base'],function() {
 /** Mathematical functions, providing stuff that the built-in `Math` object doesn't
  * @namespace Numbas.math */
 
-/** @typedef complex
- * @property {number} re
- * @property {number} im
+/** A complex number.
+ * @typedef complex
+ * @property {Number} re
+ * @property {Number} im
  */
 
 /** @typedef range
- * @desc A range of numbers, separated by a constant intervaland between fixed lower and upper bounds.
- * @type {number[]}
- * @property {number} 0 Minimum value
- * @property {number} 1 Maximum value
- * @property {number} 2 Step size
+ * @desc A range of numbers, separated by a constant interval and between fixed lower and upper bounds.
+ * @type {Array.<Number>}
+ * @property {Number} 0 Minimum value
+ * @property {Number} 1 Maximum value
+ * @property {Number} 2 Step size
  * @see Numbas.math.defineRange
  */
 
@@ -45,9 +46,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	
 	/** Construct a complex number from real and imaginary parts.
 	 *
-	 * Elsewhere in this documentation, `{number}` will refer to either a JavaScript float or a {@link complex} object, interchangeably.
-	 * @param {number} re
-	 * @param {number} im
+	 * Elsewhere in this documentation, `{Number}` will refer to either a JavaScript float or a {@link complex} object, interchangeably.
+	 * @param {Number} re
+	 * @param {Number} im
 	 * @returns {complex}
 	 */
 	complex: function(re,im)
@@ -60,7 +61,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 	
 	/** String version of a complex number
-	 * @returns {string}
+	 * @returns {String}
 	 * @method
 	 * @memberof! complex
 	 */
@@ -70,8 +71,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Negate a number.
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	negate: function(n)
 	{
@@ -82,8 +83,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Complex conjugate
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	conjugate: function(n)
 	{
@@ -94,9 +95,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Add two numbers
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	add: function(a,b)
 	{
@@ -117,9 +118,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Subtract one number from another
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	sub: function(a,b)
 	{
@@ -140,9 +141,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Multiply two numbers
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	mul: function(a,b)
 	{
@@ -163,9 +164,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Divide one number by another
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	div: function(a,b)
 	{
@@ -192,9 +193,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Exponentiate a number
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	pow: function(a,b)
 	{
@@ -237,8 +238,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Calculate the Nth row of Pascal's triangle
-	 * @param {number} n
-	 * @returns {number[]}
+	 * @param {Number} n
+	 * @returns {Array.<Number>}
 	 */
 	binomialCoefficients: function(n) {
 		var b = [1];
@@ -251,9 +252,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** a mod b. Always returns a positive number
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	mod: function(a,b) {
 		if(b==Infinity) {
@@ -264,9 +265,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Calculate the `b`-th root of `a`
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	root: function(a,b)
 	{
@@ -274,8 +275,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Square root
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	sqrt: function(n)
 	{
@@ -291,8 +292,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Natural logarithm (base `e`)
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	log: function(n)
 	{
@@ -309,8 +310,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Calculate `e^n`
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	exp: function(n)
 	{
@@ -323,8 +324,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 	
 	/** Magnitude of a number - absolute value of a real; modulus of a complex number.
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	abs: function(n)
 	{
@@ -342,8 +343,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Argument of a (complex) number
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	arg: function(n)
 	{
@@ -354,8 +355,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Real part of a number
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	re: function(n)
 	{
@@ -366,8 +367,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Imaginary part of a number
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	im: function(n)
 	{
@@ -379,9 +380,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Is `a` less than `b`?
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	lt: function(a,b)
 	{
@@ -392,9 +393,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Is `a` greater than `b`?
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	gt: function(a,b)
 	{
@@ -405,9 +406,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Is `a` less than or equal to `b`?
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	leq: function(a,b)
 	{
@@ -418,9 +419,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	
 	/** Is `a` greater than or equal to `b`?
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	geq: function(a,b)
 	{
@@ -430,9 +431,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Is `a` equal to `b`?
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	eq: function(a,b)
 	{
@@ -454,9 +455,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Greatest of two numbers - wraps `Math.max`
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	max: function(a,b)
 	{
@@ -468,7 +469,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	/** Greatest of a list of numbers
 	 * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
 	 * @param {Array} numbers
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	listmax: function(numbers) {
 		if(numbers.length==0) {
@@ -483,9 +484,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Least of two numbers - wraps `Math.min`
 	 * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	min: function(a,b)
 	{
@@ -497,7 +498,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	/** Least of a list of numbers
 	 * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
 	 * @param {Array} numbers
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	listmin: function(numbers) {
 		if(numbers.length==0) {
@@ -511,9 +512,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Are `a` and `b` unequal?
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 * @see Numbas.math.eq
 	 */
 	neq: function(a,b)
@@ -522,8 +523,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** If `n` can be written in the form `a*pi^n`, return the biggest possible `n`, otherwise return `0`.
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	piDegree: function(n)
 	{
@@ -538,9 +539,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
     /** Add the given number of zero digits to a string representation of a number.
-     * @param {string} n - a string representation of a number
-     * @param {number} digits - the number of digits to add
-     * @returns {string}
+     * @param {String} n - a string representation of a number
+     * @param {Number} digits - the number of digits to add
+     * @returns {String}
      */
     addDigits: function(n,digits) {
         n = n+'';
@@ -558,12 +559,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
     },
 
+    /** Settings for {@link Numbas.math.niceNumber}
+     * @typedef niceNumber_settings
+     * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
+     * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
+     */
 
 	/** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
-	 * @param {number} n
-	 * @param {object} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+	 * @param {Number} n
+	 * @param {niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
      * @see Numbas.util.numberNotationStyles
-	 * @returns {string}
+	 * @returns {String}
 	 */
 	niceNumber: function(n,options)
 	{
@@ -670,16 +676,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Get a random number in range `[0..n-1]`
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	randomint: function(n) {
 		return Math.floor(n*(Math.random()%1)); 
 	},
 
 	/** Get a  random shuffling of the numbers `[0..n-1]`
-	 * @param {number} n
-	 * @returns {number[]}
+	 * @param {Number} n
+	 * @returns {Array.<Number>}
 	 */
 	deal: function(N) 
 	{ 
@@ -704,8 +710,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Calculate the inverse of a shuffling
-	 * @param {number[]} l
-	 * @returns {number[]} l
+	 * @param {Array.<Number>} l
+	 * @returns {Array.<Number>} l
 	 * @see Numbas.math.deal
 	 */
 	inverse: function(l)
@@ -719,8 +725,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/* Just the numbers from 1 to `n` (inclusive) in an array!
-	 * @param {number} n
-	 * @returns {number[]}
+	 * @param {Number} n
+	 * @returns {Array.<Number>}
 	 */
 	range: function(n)
 	{
@@ -733,9 +739,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Round `a` to `b` decimal places. Real and imaginary parts of complex numbers are rounded independently.
-	 * @param {number} n
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} n
+	 * @param {Number} b
+	 * @returns {Number}
 	 * @throws {Numbas.Error} "math.precround.complex" if b is complex
 	 */
 	precround: function(a,b) {
@@ -787,9 +793,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Round `a` to `b` significant figures. Real and imaginary parts of complex numbers are rounded independently.
-	 * @param {number} n
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} n
+	 * @param {Number} b
+	 * @returns {Number}
 	 * @throws {Numbas.Error} "math.precround.complex" if b is complex
 	 */
 	siground: function(a,b) {
@@ -820,8 +826,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Count the number of decimal places used in the string representation of a number.
-	 * @param {number|string} n
-	 * @returns {number}
+	 * @param {Number|String} n
+	 * @returns {Number}
 	 */
 	countDP: function(n) {
 		var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([\-+])?(\d+))?$/);
@@ -837,9 +843,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 	
 	/** Calculate the significant figures precision of a number.
-	 * @param {number|string} n
-	 * @param {boolean} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
-	 * @returns {number}
+	 * @param {Number|String} n
+	 * @param {Boolean} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
+	 * @returns {Number}
 	 */
 	countSigFigs: function(n,max) {
         n += '';
@@ -856,11 +862,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Is n given to the desired precision?
-	 * @param {number|string} n
-	 * @param {string} precisionType - either 'dp' or 'sigfig'
-	 * @param {number} precision - number of desired digits of precision
-	 * @param {boolean} strictPrecision - must trailing zeroes be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
-	 * @returns {boolean}
+	 * @param {Number|String} n
+	 * @param {String} precisionType - either 'dp' or 'sigfig'
+	 * @param {Number} precision - number of desired digits of precision
+	 * @param {Boolean} strictPrecision - must trailing zeroes be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
+	 * @returns {Boolean}
 	 */
 	toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
 		if(precisionType=='none') {
@@ -891,10 +897,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Is a within +/- tolerance of b?
-	 * @param {number} a
-	 * @param {number} b
-	 * @param {number} tolerance
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @param {Number} tolerance
+	 * @returns {Boolean}
 	 */
 	withinTolerance: function(a,b,tolerance) {
 		if(tolerance==0) {
@@ -907,8 +913,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Factorial, or Gamma(n+1) if n is not a positive integer.
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	factorial: function(n)
 	{
@@ -934,8 +940,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	/** Lanczos approximation to the gamma function 
 	 *
 	 * http://en.wikipedia.org/wiki/Lanczos_approximation#Simple_implementation
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	gamma: function(n)
 	{
@@ -962,8 +968,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Base-10 logarithm
-	 * @param {number} n
-	 * @returns {number}
+	 * @param {Number} n
+	 * @returns {Number}
 	 */
 	log10: function(n)
 	{
@@ -971,9 +977,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Arbitrary base logarithm
-	 * @param {number} n
-     * @param {number} b
-	 * @returns {number} log(n)/log(b)
+	 * @param {Number} n
+     * @param {Number} b
+	 * @returns {Number} log(n)/log(b)
 	 */
 	log_base: function(n,b)
 	{
@@ -981,8 +987,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Convert from degrees to radians
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.degrees
 	 */
 	radians: function(x) {
@@ -990,8 +996,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Convert from radians to degrees
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.radians
 	 */
 	degrees: function(x) {
@@ -999,8 +1005,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Cosine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	cos: function(x) {
 		if(x.complex)
@@ -1012,8 +1018,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 	
 	/** Sine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	sin: function(x) {
 		if(x.complex)
@@ -1025,8 +1031,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Tangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	tan: function(x) {
 		if(x.complex)
@@ -1036,32 +1042,32 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Cosecant 
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	cosec: function(x) {
 		return div(1,math.sin(x));
 	},
 
 	/** Secant
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	sec: function(x) {
 		return div(1,math.cos(x));
 	},
 		
 	/** Cotangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	cot: function(x) {
 		return div(1,math.tan(x));
 	},
 
 	/** Inverse sine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arcsin: function(x) {
 		if(x.complex || math.abs(x)>1)
@@ -1075,8 +1081,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Inverse cosine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arccos: function(x) {
 		if(x.complex || math.abs(x)>1)
@@ -1093,8 +1099,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Inverse tangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arctan: function(x) {
 		if(x.complex)
@@ -1108,8 +1114,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Hyperbolic sine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	sinh: function(x) {
 		if(x.complex)
@@ -1119,8 +1125,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Hyperbolic cosine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	cosh: function(x) {
 		if(x.complex)
@@ -1130,40 +1136,40 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Hyperbolic tangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	tanh: function(x) {
 		return div(math.sinh(x),math.cosh(x));
 	},
 
 	/** Hyperbolic cosecant
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	cosech: function(x) {
 		return div(1,math.sinh(x));
 	},
 
 	/** Hyperbolic secant
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	sech: function(x) {
 		return div(1,math.cosh(x));
 	},
 
 	/** Hyperbolic tangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	coth: function(x) {
 		return div(1,math.tanh(x));
 	},
 
 	/** Inverse hyperbolic sine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arcsinh: function(x) {
 		if(x.complex)
@@ -1173,8 +1179,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Inverse hyperbolic cosine
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arccosh: function (x) {
 		if(x.complex)
@@ -1184,8 +1190,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Inverse hyperbolic tangent
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	arctanh: function (x) {
 		if(x.complex)
@@ -1195,8 +1201,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.round
 	 * @see Numbas.math.floor
 	 */
@@ -1208,8 +1214,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Round down to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.ceil
 	 * @see Numbas.math.round
 	 */
@@ -1221,8 +1227,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Round to the nearest integer; fractional part >= 0.5 rounds up. For complex numbers, real and imaginary parts are rounded independently.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.ceil
 	 * @see Numbas.math.floor
 	 */
@@ -1234,8 +1240,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.fract
 	 */
 	trunc: function(x) {
@@ -1250,8 +1256,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 * @see Numbas.math.trunc
 	 */
 	fract: function(x) {
@@ -1262,8 +1268,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Sign of a number - +1, 0, or -1. For complex numbers, gives the sign of the real and imaginary parts separately.
-	 * @param {number} x
-	 * @returns {number}
+	 * @param {Number} x
+	 * @returns {Number}
 	 */
 	sign: function(x) {
 		if(x.complex)
@@ -1279,9 +1285,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Get a random real number between `min` and `max` (inclusive)
-	 * @param {number} min
-	 * @param {number] max
-	 * @returns {number}
+	 * @param {Number} min
+	 * @param {Number] max
+	 * @returns {Number}
 	 * @see Numbas.math.random
 	 * @see Numbas.math.choose
 	 */
@@ -1297,7 +1303,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * If all the values in the range are appended to the list, eg `[min,max,step,v1,v2,v3,...]`, just pick randomly from the values.
 	 * 
 	 * @param {range} range - `[min,max,step]`
-	 * @returns {number}
+	 * @returns {Number}
 	 * @see Numbas.math.randomrange
 	 */
 	random: function(range)
@@ -1312,9 +1318,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Remove all the values in the list `exclude` from the list `range`
-	 * @param {number[]} range
-	 * @param {number[]} exclude
-	 * @returns {number[]}
+	 * @param {Array.<Number>} range
+	 * @param {Array.<Number>} exclude
+	 * @returns {Array.<Number>}
 	 */
 	except: function(range,exclude) {
 		range = range.filter(function(r) {
@@ -1329,7 +1335,6 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Choose one item from an array, at random
 	 * @param {Array} selection
-	 * @returns {object}
 	 * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
 	 * @see Numbas.math.randomrange
 	 */
@@ -1347,9 +1352,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * from http://dreaminginjavascript.wordpress.com/2008/11/08/combinations-and-permutations-in-javascript/ 
 	 * 
 	 * (public domain)
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 */
 	productRange: function(a,b) {
 		if(a>b)
@@ -1362,8 +1367,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 	 
 	/** `nCk` - number of ways of picking `k` unordered elements from `n`.
-	 * @param {number} n
-	 * @param {number} k
+	 * @param {Number} n
+	 * @param {Number} k
 	 * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
 	 */
 	combinations: function(n,k) {
@@ -1385,8 +1390,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** `nPk` - number of ways of picking `k` ordered elements from `n`.
-	 * @param {number} n
-	 * @param {number} k
+	 * @param {Number} n
+	 * @param {Number} k
 	 * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
 	 */
     permutations: function(n,k) {
@@ -1407,9 +1412,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {boolean}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Boolean}
 	 */
 	divides: function(a,b) {
 		if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b))
@@ -1419,9 +1424,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Greatest common factor (GCF), or greatest common divisor (GCD), of `a` and `b`.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
 	 */
 	gcd: function(a,b) {
@@ -1447,9 +1452,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	},
 
 	/** Lowest common multiple (LCM) of `a` and `b`.
-	 * @param {number} a
-	 * @param {number} b
-	 * @returns {number}
+	 * @param {Number} a
+	 * @param {Number} b
+	 * @returns {Number}
 	 * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
 	 */
 	lcm: function(a,b) {
@@ -1483,8 +1488,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Write the range of integers `[a..b]` as an array of the form `[min,max,step]`, for use with {@link Numbas.math.random}. If either number is complex, only the real part is used.
 	 *
-	 * @param {number} a
-	 * @param {number} b
+	 * @param {Number} a
+	 * @param {Number} b
 	 * @returns {range}
 	 * @see Numbas.math.random
 	 */
@@ -1499,7 +1504,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Change the step size of a range created with {@link Numbas.math.defineRange}
 	 * @param {range} range
-	 * @param {number} step
+	 * @param {Number} step
 	 * @returns {range}
 	 */
 	rangeSteps: function(range,step)
@@ -1551,9 +1556,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 *
 	 * If `accuracy` is given, the returned answer will be within `Math.exp(-accuracy)` of the original number
 	 * 
-	 * @param {number} n
-	 * @param {number} [accuracy]
-	 * @returns {number[]} - [numerator,denominator]
+	 * @param {Number} n
+	 * @param {Number} [accuracy]
+	 * @returns {Array.<Number>} - [numerator,denominator]
 	 */
 	rationalApproximation: function(n,accuracy)
 	{
@@ -1595,8 +1600,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Factorise n. When n=2^(a1)*3^(a2)*5^(a3)*..., this returns the powers [a1,a2,a3,...]
 	 * 
-	 * @param {number} n
-	 * @returns {number[]} - exponents of the prime factors of n
+	 * @param {Number} n
+	 * @returns {Array.<Number>} - exponents of the prime factors of n
 	 */
 	factorise: function(n) {
 		if(n<=0) {
@@ -1620,8 +1625,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
 	/** Sum the elements in the given list
 	 *
-	 * @param {list} list
-	 * @returns {number}
+	 * @param {Array.<Number>} list
+	 * @returns {Number}
 	 */
 	sum: function(list) {
 		var total = 0;
@@ -1643,9 +1648,9 @@ math.gcf = math.gcd;
 
 var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
 
-/** A list of the vector's components. 
+/** A list of a vector's components. 
  * @typedef vector
- *  @type {number[]}
+ *  @type {Array.<Number>}
  */
 
 /** Vector operations.
@@ -1694,7 +1699,7 @@ var vectormath = Numbas.vectormath = {
 	},
 
 	/** Multiply by a scalar
-	 * @param {number} k
+	 * @param {Number} k
 	 * @param {vector} v
 	 * @returns {vector}
 	 */
@@ -1704,7 +1709,7 @@ var vectormath = Numbas.vectormath = {
 
 	/** Divide by a scalar
 	 * @param {vector} v
-	 * @param {number} k
+	 * @param {Number} k
 	 * @returns {vector}
 	 */
 	div: function(v,k) {
@@ -1714,8 +1719,8 @@ var vectormath = Numbas.vectormath = {
 	/** Vector dot product - each argument can be a vector, or a matrix with one row or one column, which is converted to a vector.
 	 * @param {vector|matrix} a
 	 * @param {vector|matrix} b
-	 * @returns {number}
-	 * @throws {NumbasError} "vectormaths.dot.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+	 * @returns {Number}
+	 * @throws {Numbas.Error} "vectormaths.dot.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
 	 */
 	dot: function(a,b) {
 
@@ -1754,8 +1759,8 @@ var vectormath = Numbas.vectormath = {
 	 * @param {vector|matrix} b
 	 * @returns {vector}
 	 *
-	 * @throws {NumbasError} "vectormaths.cross.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
-	 * @throws {NumbasError} "vectormath.cross.not 3d" if either of the vectors is not 3D.
+	 * @throws {Numbas.Error} "vectormaths.cross.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+	 * @throws {Numbas.Error} "vectormath.cross.not 3d" if either of the vectors is not 3D.
 	 */
 	cross: function(a,b) {
 		//check if A is a matrix object. If it's the right shape, we can use it anyway
@@ -1791,7 +1796,7 @@ var vectormath = Numbas.vectormath = {
 
 	/** Length of a vector, squared
 	 * @param {vector} a
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	abs_squared: function(a) {
 		return a.reduce(function(s,x){ return s + mul(x,x); },0);
@@ -1799,7 +1804,7 @@ var vectormath = Numbas.vectormath = {
 
 	/** Length of a vector
 	 * @param {vector} a
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	abs: function(a) {
 		return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
@@ -1808,7 +1813,7 @@ var vectormath = Numbas.vectormath = {
     /** Angle between vectors a and b, in radians, or 0 if either vector has length 0.
      * @param {vector} a
      * @param {vector} b
-     * @returns {number}
+     * @returns {Number}
      */
     angle: function(a,b) {
         var dot = vectormath.dot(a,b);
@@ -1824,7 +1829,7 @@ var vectormath = Numbas.vectormath = {
 	/** Are two vectors equal? True if each pair of corresponding components is equal.
 	 * @param {vector} a
 	 * @param {vector} b
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	eq: function(a,b) {
 		if(b.length>a.length)
@@ -1839,8 +1844,8 @@ var vectormath = Numbas.vectormath = {
 	/** Are two vectors unequal?
 	 * @param {vector} a
 	 * @param {vector} b
-	 * @returns {boolean}
-	 * @see {Numbas.vectormath.eq}
+	 * @returns {Boolean}
+	 * @see Numbas.vectormath.eq
 	 */
 	neq: function(a,b) {
 		return !vectormath.eq(a,b);
@@ -1882,7 +1887,7 @@ var vectormath = Numbas.vectormath = {
 
 	/** Round each element to given number of decimal places
 	 * @param {vector}
-	 * @param {number} - number of decimal places
+	 * @param {Number} - number of decimal places
 	 * @returns {vector}
 	 */
 	precround: function(v,dp) {
@@ -1891,7 +1896,7 @@ var vectormath = Numbas.vectormath = {
 
 	/** Round each element to given number of significant figures
 	 * @param {vector}
-	 * @param {number} - number of decimal places
+	 * @param {Number} - number of decimal places
 	 * @returns {vector}
 	 */
 	siground: function(v,sf) {
@@ -1921,11 +1926,11 @@ var vectormath = Numbas.vectormath = {
 	}
 }
 
-/** An array of rows (each of which is an array of numbers) 
+/** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
  * @typedef matrix
- * @type {Array.Array.<number>}
- * @property {number} rows
- * @property {number} columns
+ * @type {Array.<Array.<Number>>}
+ * @property {Number} rows - The number of rows in the matrix
+ * @property {Number} columns - The number of columns in the matrix
  */
 
 /** Matrix operations.
@@ -1995,8 +2000,8 @@ var matrixmath = Numbas.matrixmath = {
 	
 	/** Matrix determinant. Only works up to 3x3 matrices.
 	 * @param {matrix} m
-	 * @returns {number}
-	 * @throws {NumbasError} "matrixmath.abs.too big" if the matrix has more than 3 rows.
+	 * @returns {Number}
+	 * @throws {Numbas.Error} "matrixmath.abs.too big" if the matrix has more than 3 rows.
 	 */
 	abs: function(m) {
 		if(m.rows!=m.columns)
@@ -2022,7 +2027,7 @@ var matrixmath = Numbas.matrixmath = {
 	},
 
 	/** Multiply a matrix by a scalar
-	 * @param {number} k
+	 * @param {Number} k
 	 * @param {matrix} m
 	 * @returns {matrix}
 	 */
@@ -2035,7 +2040,7 @@ var matrixmath = Numbas.matrixmath = {
 
 	/** Divide a matrix by a scalar
 	 * @param {matrix} m
-	 * @param {number} k
+	 * @param {Number} k
 	 * @returns {matrix}
 	 */
 	scalardiv: function(m,k) {
@@ -2049,7 +2054,7 @@ var matrixmath = Numbas.matrixmath = {
 	 * @param {matrix} a
 	 * @param {matrix} b
 	 * @returns {matrix}
-	 * @throws {NumbasError} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
+	 * @throws {Numbas.Error} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
 	 */
 	mul: function(a,b) {
 		if(a.columns!=b.rows)
@@ -2078,7 +2083,7 @@ var matrixmath = Numbas.matrixmath = {
 	/** Are two matrices equal? True if each pair of corresponding elements is equal.
 	 * @param {matrix} a
 	 * @param {matrix} b
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	eq: function(a,b) {
 		var rows = Math.max(a.rows,b.rows);
@@ -2087,7 +2092,7 @@ var matrixmath = Numbas.matrixmath = {
 		{
 			var rowA = a[i] || [];
 			var rowB = b[i] || [];
-			for(var j=0;j<rows;j++)
+			for(var j=0;j<columns;j++)
 			{
 				if(!eq(rowA[j]||0,rowB[j]||0))
 					return false;
@@ -2099,15 +2104,15 @@ var matrixmath = Numbas.matrixmath = {
 	/** Are two matrices unequal?
 	 * @param {matrix} a
 	 * @param {matrix} b
-	 * @returns {boolean}
-	 * @see {Numbas.matrixmath.eq}
+	 * @returns {Boolean}
+	 * @see Numbas.matrixmath.eq
 	 */
 	neq: function(a,b) {
 		return !matrixmath.eq(a,b);
 	},
 
 	/** Make an `NxN` identity matrix.
-	 * @param {number} n
+	 * @param {Number} n
 	 * @returns {matrix}
 	 */
 	id: function(n) {
@@ -2160,7 +2165,7 @@ var matrixmath = Numbas.matrixmath = {
 
 	/** Round each element to given number of decimal places
 	 * @param {matrix}
-	 * @param {number} - number of decimal places
+	 * @param {Number} - number of decimal places
 	 * @returns {matrix}
 	 */
 	precround: function(m,dp) {
@@ -2169,7 +2174,7 @@ var matrixmath = Numbas.matrixmath = {
 
 	/** Round each element to given number of significant figures
 	 * @param {matrix}
-	 * @param {number} - number of decimal places
+	 * @param {Number} - number of decimal places
 	 * @returns {matrix}
 	 */
 	siground: function(m,sf) {
@@ -2177,6 +2182,10 @@ var matrixmath = Numbas.matrixmath = {
 	}
 }
 
+/** A set of objects: no item occurs more than once.
+ * @typedef set
+ * @type Array
+ */
 
 /** Set operations.
  *
@@ -2185,8 +2194,8 @@ var matrixmath = Numbas.matrixmath = {
 var setmath = Numbas.setmath = {
 	/** Does the set contain the given element?
 	 * @param {set} set
-	 * @param {object} element
-	 * @returns {bool}
+	 * @param element
+	 * @returns {Boolean}
 	 */
 	contains: function(set,element) {
 		for(var i=0,l=set.length;i<l;i++) {
@@ -2225,7 +2234,7 @@ var setmath = Numbas.setmath = {
 	/** Are two sets equal? Yes if a,b and (a intersect b) all have the same length
 	 * @param {set} a
 	 * @param {set} b
-	 * @returns {bool}
+	 * @returns {Boolean}
 	 */
 	eq: function(a,b) {	
 		return a.length==b.length && setmath.intersection(a,b).length==a.length;
@@ -2242,7 +2251,7 @@ var setmath = Numbas.setmath = {
 
 	/** Size of a set
 	 * @param {set} set
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	size: function(set) {
 		return set.length;

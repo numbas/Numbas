@@ -3,6 +3,7 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
         lng: Numbas.locale.preferred_locale,
         lowerCaseLng: true,
         keySeparator: false,
+        nsSeparator: false,
         interpolation: {
             format: function(value,format) {
                 if(format=='niceNumber') {

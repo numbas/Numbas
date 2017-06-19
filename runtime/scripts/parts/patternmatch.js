@@ -58,7 +58,7 @@ Copyright 2011-15 Newcastle University
  }
  PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	/** The student's last submitted answer 
-	 * @type {string}
+	 * @type {String}
 	 */
 	 studentAnswer: '',
 
@@ -69,12 +69,12 @@ Copyright 2011-15 Newcastle University
 
 	/** Properties set when the part is generated.
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {string} correctAnswerString - the definition of the correct answer, without variables substituted in.
+	 * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.
 	 * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
-	 * @property {string} displayAnswerString - the definition of the display answer, without variables substituted in.
-	 * @property {string} displayAnswer - a representative correct answer to display when answers are revealed
-	 * @property {boolean} caseSensitive - does case matter?
-	 * @property {number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
+	 * @property {String} displayAnswerString - the definition of the display answer, without variables substituted in.
+	 * @property {String} displayAnswer - a representative correct answer to display when answers are revealed
+	 * @property {Boolean} caseSensitive - does case matter?
+	 * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
 	 */
 	 settings: 
 	 {

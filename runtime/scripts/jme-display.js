@@ -27,12 +27,12 @@ var util = Numbas.util;
 
 /** A JME expression
  * @typedef JME
- * @type {string}
+ * @type {String}
  */
 
 /** A LaTeX string
  * @typedef TeX
- * @type {string}
+ * @type {String}
  */
 
 /** @namespace Numbas.jme.display */
@@ -41,7 +41,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 	/** Convert a JME expression to LaTeX.
 	 *
 	 * @param {JME} expr
-	 * @param {string[]|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
 	 * @param {Numbas.jme.Scope} scope
 	 * @returns {TeX}
 	 */
@@ -63,7 +63,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 	/** Simplify a JME expression string according to the given ruleset and return it as a JME string
 	 * 
 	 * @param {JME} expr
-	 * @param {string[]|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
 	 * @param {Numbas.jme.Scope} scope
 	 * @returns {JME}
 	 *
@@ -79,7 +79,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 	/** Simplify a JME expression string according to given ruleset and return it as a syntax tree
 	 *
 	 * @param {JME} expr 
-	 * @param {string[]|Numbas.jme.Ruleset} ruleset
+	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
 	 * @param {Numbas.jme.Scope} scope
 	 * @returns {Numbas.jme.tree}
 	 *
@@ -110,7 +110,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 	/** Simplify a syntax tree according to the given ruleset
 	 * 
 	 * @param {Numbas.jme.tree} exprTree
-	 * @param {string[]|Numbas.jme.Ruleset} ruleset
+	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
 	 * @param {Numbas.jme.Scope} scope
 	 * @returns {Numbas.jme.tree}
 	 *
@@ -199,8 +199,8 @@ function texifyWouldBracketOpArg(thing,i) {
  * @private
  *
  * @param {Numbas.jme.tree} thing
- * @param {string[]} texArgs - the arguments of `thing`, as TeX
- * @param {number} i - the index of the argument to bracket
+ * @param {Array.<String>} texArgs - the arguments of `thing`, as TeX
+ * @param {Number} i - the index of the argument to bracket
  * @returns {TeX}
  */
 function texifyOpArg(thing,texArgs,i)
@@ -583,7 +583,7 @@ var texOps = jme.display.texOps = {
  * @memberof Numbas.jme.display
  * @private
  * 
- * @param {number} n
+ * @param {Number} n
  * @returns {TeX}
  */
 var texRationalNumber = jme.display.texRationalNumber = function(n)
@@ -665,7 +665,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {number} n
+ * @param {Number} n
  * @returns {TeX}
  */
 function texRealNumber(n)
@@ -749,20 +749,17 @@ function texRealNumber(n)
  * @memberof Numbas.jme.display
  * @private
  * 
- * @param {number[]|Numbas.jme.tree} v
- * @param {object} settings
+ * @param {Array.<Number>|Numbas.jme.tree} v
+ * @param {texify_settings} settings
  * @returns {TeX}
  */
 function texVector(v,settings)
 {
 	var out;
 	var elements;
-	if(v.args)
-	{
+	if(v.args) {
 		elements = v.args.map(function(x){return texify(x,settings)});
-	}
-	else
-	{
+	} else {
 		var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 		elements = v.map(function(x){return texNumber(x)});
 	}
@@ -777,9 +774,9 @@ function texVector(v,settings)
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Array.Array.<number>|Numbas.jme.tree} m
- * @param {object} settings
- * @param {boolean} parens - enclose the matrix in parentheses?
+ * @param {Array.<Array.<Number>>|Numbas.jme.tree} m
+ * @param {texify_settings} settings
+ * @param {Boolean} parens - enclose the matrix in parentheses?
  * @returns {TeX}
  */
 function texMatrix(m,settings,parens)
@@ -857,8 +854,8 @@ texNameAnnotations.m = texNameAnnotations.matrix;
 /** Convert a variable name to TeX
  * @memberof Numbas.jme.display
  *
- * @param {string} name
- * @param {string[]} [annotations]
+ * @param {String} name
+ * @param {Array.<String>} [annotations]
  * @param {function} [longNameMacro=texttt] - function which returns TeX for a long name
  * @returns {TeX}
  */
@@ -1007,6 +1004,15 @@ var typeToTeX = jme.display.typeToTeX = {
 		return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
 	}
 }
+
+/** A dictionary of settings for {@link Numbas.jme.display.texify}.
+ * @typedef texify_settings
+ * @property {Boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {Boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
+ * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
+ */
+
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
  *
  * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
@@ -1015,7 +1021,7 @@ var typeToTeX = jme.display.typeToTeX = {
  * @method
  *
  * @param {Numbas.jme.tree} thing
- * @param {object} settings
+ * @param {texify_settings} settings
  *
  * @returns {TeX}
  */
@@ -1051,8 +1057,8 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {number} n
- * @param {object} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Number} n
+ * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
@@ -1136,8 +1142,8 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {number} n
- * @param {object} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Number} n
+ * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 function jmeRealNumber(n,settings)
@@ -1326,21 +1332,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var pd;
             var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
 
-			if(arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true)
-			{
-				bits[i]='('+bits[i]+')';
-				args[i].bracketed=true;
-			}
-			else if(arg_type=='number' && arg_value.complex && bracketNumberOp)	// put brackets round a complex number
-			{
-				if(arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0))
-				{
-					bits[i] = '('+bits[i]+')';
-					args[i].bracketed = true;
-				}
-			} else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp) {
+            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true // if this kind of op as an argument to the parent op always gets brackets
+            bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
+            bracketArg = bracketArg || (arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp);  // put brackets around multiples of pi
+            bracketArg = bracketArg || (arg_type=='number' && bracketNumberOp && bits[i].indexOf('/')>=0); // put brackets around fractions when necessary
+
+			if(bracketArg) {
 				bits[i] = '('+bits[i]+')';
-				args[i].bracketed = true;
+				args[i].bracketed=true;
 			}
 		}
 		
@@ -1416,12 +1415,19 @@ var jmeFunctions = jme.display.jmeFunctions = {
     }
 }
 
+/** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
+ * @typedef jme_display_settings
+ * @property {Boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
+ */
+
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
  * @memberof Numbas.jme.display
  * @method
  * 
  * @param {Numbas.jme.tree} tree
- * @param {object} settings
+ * @param {jme_display_settings} settings
  * @returns {JME}
  */
 var treeToJME = jme.display.treeToJME = function(tree,settings)

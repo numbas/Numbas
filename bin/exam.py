@@ -875,8 +875,6 @@ class PatternMatchPart(Part):
 
 class NumberEntryPart(Part):
     kind = 'numberentry'
-    integerAnswer = False
-    integerPartialCredit = 0
     allowFractions = False
     notationStyles = ['en','si-en','plain-en']
     checkingType = 'range'
@@ -887,6 +885,9 @@ class NumberEntryPart(Part):
     correctAnswerFraction = False
     correctAnswerStyle = 'plain-en'
     inputStep = 1
+
+    mustBeReduced = False
+    mustBeReducedPC = 0
 
     precisionType = 'none'
     precision = 0
@@ -901,7 +902,7 @@ class NumberEntryPart(Part):
     @staticmethod
     def fromDATA(data):
         part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','integerAnswer','integerPartialCredit','allowFractions','notationStyles','checkingType','inputStep','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
         if part.checkingType == 'range':
             if haskey(data,'answer'):
                 part.maxvalue = part.minvalue = data['answer']
@@ -915,7 +916,6 @@ class NumberEntryPart(Part):
     def toxml(self):
         part = Part.toxml(self)
         part.append(makeTree(['answer',
-                                ['allowonlyintegeranswers'],
                                 ['precision','message'],
                             ]
                             ))
@@ -928,6 +928,8 @@ class NumberEntryPart(Part):
             'notationstyles': strcons_fix(','.join(self.notationStyles)),
             'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
             'correctanswerstyle': strcons_fix(self.correctAnswerStyle),
+            'mustbereduced': strcons_fix(self.mustBeReduced),
+            'mustbereducedpc': strcons_fix(self.mustBeReducedPC)+'%'
         }
         if self.checkingType == 'range':
             answer.attrib['minvalue'] = strcons_fix(self.minvalue)
@@ -935,7 +937,6 @@ class NumberEntryPart(Part):
         else:
             answer.attrib['answer'] = strcons_fix(self.answer)
             answer.attrib['accuracy'] = strcons_fix(self.checkingAccuracy)
-        answer.find('allowonlyintegeranswers').attrib = {'value': strcons_fix(self.integerAnswer), 'partialcredit': strcons_fix(self.integerPartialCredit)+'%'}
         answer.find('precision').attrib = {
             'type': strcons(self.precisionType), 
             'precision': strcons_fix(self.precision), 

@@ -48,6 +48,9 @@
 <xsl:template match="choice" mode="m_n_x">
 	<xsl:param name="displaytype"/>
 
+	<xsl:variable name="path">
+        <xsl:apply-templates select="../.." mode="path"/>
+    </xsl:variable>
 	<xsl:variable name="answers" select="../../answers"/>
 	<xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
 	<tr>
@@ -58,11 +61,11 @@
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
                         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
-						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" />
+                        <input type="checkbox" class="choice" name="${path}-choice-{$choicenum}" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" />
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
                         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>]()==<xsl:value-of select="$answernum"/>, correct: ticks[<xsl:value-of select="$choicenum"/>]()==<xsl:value-of select="$answernum"/> &amp;&amp; correctTicks[<xsl:value-of select="$choicenum"/>]==<xsl:value-of select="$answernum"/>}</xsl:attribute>
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" value="{$answernum}"/>
+                        <input type="radio" class="choice" name="${path}-choice-{$choicenum}" data-bind="checked: ticks[{$choicenum}], disable: revealed, visible: layout[{$answernum}][{$choicenum}]" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>
@@ -73,6 +76,9 @@
 <xsl:template match="choice" mode="m_n_x-correctanswer">
 	<xsl:param name="displaytype"/>
 
+	<xsl:variable name="path">
+        <xsl:apply-templates select="../.." mode="path"/>
+    </xsl:variable>
 	<xsl:variable name="answers" select="../../answers"/>
 	<xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
 	<tr>
@@ -82,10 +88,10 @@
 			<td class="option">
 				<xsl:choose>
 					<xsl:when test="$displaytype='checkbox'">
-						<input type="checkbox" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}], visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true"/>
+                        <input type="checkbox" class="choice" name="{$path}-choice-{$choicenum}" data-bind="checked: correctTicks[{$answernum}][{$choicenum}], visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true"/>
 					</xsl:when>
 					<xsl:when test="$displaytype='radiogroup'">
-						<input type="radio" class="choice" name="choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+'', visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true" value="{$answernum}"/>
+                        <input type="radio" class="choice" name="{$path}-choice-{$choicenum}" data-bind="checked: correctTicks[{$choicenum}]+'', visible: layout[{$answernum}][{$choicenum}], disable: true" disabled="true" value="{$answernum}"/>
 					</xsl:when>
 				</xsl:choose>
 			</td>

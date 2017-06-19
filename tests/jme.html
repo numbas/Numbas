@@ -98,24 +98,33 @@
 					deepCloseEqual(tokenise('False'),[new types.TBool(false)],'False');
 					equal(tokenise('false')[0].value,false,'value is false');
 				});
-				test('Numbers', function() {
-					deepCloseEqual(tokenise('0'),[new types.TNum(0)],'0');
-					deepCloseEqual(tokenise('0.0'),[new types.TNum(0)],'0.0');
+                test('Numbers', function() {
+                    function checkNumber(str,expected) {
+                        var n = tokenise(str);
+                        ok(n.length==1);
+                        n = n[0];
+                        expected = new types.TNum(expected);
+                        equal(n.type,expected.type);
+                        deepCloseEqual(n.value,expected.value);
+                    }
+                    checkNumber('0',0);
+                    checkNumber('0.0',0);
 
 					raisesNumbasError(function(){ tokenise('.1')},'jme.tokenise.invalid','Invalid: .1');
 
-					deepCloseEqual(tokenise('1'),[new types.TNum(1)],'1');
-					deepCloseEqual(tokenise('1.0023'),[new types.TNum(1.0023)],'1.0023');
+                    checkNumber('1',1);
+                    checkNumber('1.0023',1.0023);
 
-					deepCloseEqual(tokenise('e'),[new types.TNum(Math.E)],'e');
 
-					deepCloseEqual(tokenise('pi'),[new types.TNum(Math.PI)],'pi');
-					deepCloseEqual(tokenise('PI'),[new types.TNum(Math.PI)],'PI');
+                    checkNumber('e',Math.E);
 
-					deepCloseEqual(tokenise('i'),[new types.TNum(math.complex(0,1))],'i');
+                    checkNumber('pi',Math.PI);
+                    checkNumber('PI',Math.PI);
 
-					deepCloseEqual(tokenise('infinity'),[new types.TNum(Infinity)],'infinity');
-					deepCloseEqual(tokenise('infty'),[new types.TNum(Infinity)],'infinity');
+                    checkNumber('i',math.complex(0,1));
+
+                    checkNumber('infinity',Infinity);
+                    checkNumber('infty',Infinity);
 				});
 
 				test('Names',function() {
@@ -131,9 +140,11 @@
 					deepCloseEqual(tokenise("in_code"),[new types.TName("in_code")],"in_code");
 				});
 
-				test('Whitespace',function() {
-					deepCloseEqual(tokenise('\u00A01'),[new types.TNum(1)],'\\u00A01');
-					deepCloseEqual(tokenise('1        '),[new types.TNum(1)],'1       (whitespace at end of expression)');
+                test('Whitespace',function() {
+                    var one = new types.TNum(1);
+                    one.originalValue = '1';
+					deepCloseEqual(tokenise('\u00A01'),[one],'\\u00A01');
+					deepCloseEqual(tokenise('1        '),[one],'1       (whitespace at end of expression)');
 					deepCloseEqual(tokenise('a &nbsp; + b'),[new types.TName('a'),new types.TOp('+'),new types.TName('b')],'a &nbsp; + b (html-escaped space)');
 				});
 
@@ -975,6 +986,7 @@
                     equals(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     equals(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
 
+                    equals(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					equals(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');

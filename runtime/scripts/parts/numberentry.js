@@ -37,6 +37,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 
 	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
 	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
+	tryGetAttribute(settings,this.xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
 
     var answerNode = this.xml.selectSingleNode('answer');
     var notationStyles = answerNode.getAttribute('notationstyles');
@@ -44,7 +45,6 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
         settings.notationStyles = notationStyles.split(',');
     }
 
-	tryGetAttribute(settings,this.xml,'answer/allowonlyintegeranswers',['value','partialcredit'],['integerAnswer','integerPC']);
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
@@ -91,22 +91,22 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
-	 * @property {number} minvalueString - definition of minimum value, before variables are substituted in
-	 * @property {number} minvalue - minimum value marked correct
-	 * @property {number} maxvalueString - definition of maximum value, before variables are substituted in
-	 * @property {number} maxvalue - maximum value marked correct
-	 * @property {number} correctAnswerFraction - display the correct answer as a fraction?
-	 * @property {boolean} integerAnswer - must the answer be an integer?
-	 * @property {boolean} allowFractions - can the student enter a fraction as their answer?
-     * @property {string[]} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
-	 * @property {number} integerPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not an integer, when `integerAnswer` is true.
-	 * @property {number} displayAnswer - representative correct answer to display when revealing answers
-	 * @property {string} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-	 * @property {number} precisionString - definition of precision setting, before variables are substituted in
-	 * @property {number} precision - how many decimal places or significant figures to require
-	 * @property {number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-	 * @property {string} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {Number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
+	 * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
+	 * @property {Number} minvalue - minimum value marked correct
+	 * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
+	 * @property {Number} maxvalue - maximum value marked correct
+	 * @property {Number} correctAnswerFraction - display the correct answer as a fraction?
+	 * @property {Boolean} allowFractions - can the student enter a fraction as their answer?
+     * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
+	 * @property {Number} displayAnswer - representative correct answer to display when revealing answers
+	 * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {Number} precisionString - definition of precision setting, before variables are substituted in
+	 * @property {Number} precision - how many decimal places or significant figures to require
+	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
+	 * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
 	 */
 	settings:
 	{
@@ -114,14 +114,14 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		minvalue: 0,
 		maxvalue: 0,
 		correctAnswerFraction: false,
-		integerAnswer: false,
 		allowFractions: false,
         notationStyles: ['en','si-en'],
-		integerPC: 0,
 		displayAnswer: 0,
 		precisionType: 'none',
 		precision: 0,
 		precisionPC: 0,
+		mustBeReduced: false,
+		mustBeReducedPC: 0,
 		precisionMessage: R('You have not given your answer to the correct precision.'),
         showPrecisionHint: true
 	},
@@ -176,8 +176,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 	/** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.
-	 * @param {string} answer
-	 * @returns {string}
+	 * @param {String} answer
+	 * @returns {String}
 	 */
 	cleanAnswer: function(answer) {
 		answer = answer.toString().trim();
@@ -199,7 +199,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	},
 
     /** Get the student's answer as a floating point number
-     * @returns {number}
+     * @returns {Number}
      */
 	studentAnswerAsFloat: function() {
 		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);

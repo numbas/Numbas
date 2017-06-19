@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="choices" mode="one">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
-	<form localise-data-jme-context-description="part.mcq.choices">
+	<span localise-data-jme-context-description="part.mcq.choices">
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<ul class="multiplechoice clearfix">
@@ -20,12 +20,12 @@
 			</select>
 		</xsl:when>
 	</xsl:choose>
-	</form>
+    </span>
 </xsl:template>
 
 <xsl:template match="choices" mode="correctanswer">
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
-	<form>
+	<span>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
 			<ul class="multiplechoice clearfix">
@@ -44,10 +44,13 @@
 			</select>
 		</xsl:when>
 	</xsl:choose>
-	</form>
+	</span>
 </xsl:template>
 
 <xsl:template match="choice" mode="radiogroup">
+	<xsl:variable name="path">
+        <xsl:apply-templates select="../.." mode="path"/>
+    </xsl:variable>
 	<xsl:variable name="cols" select="../@displaycolumns"/>
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
@@ -60,12 +63,15 @@
         </xsl:attribute>
         <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
 		<label>
-			<input type="radio" class="choice" name="choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
+            <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
 	</li>
 </xsl:template>
 <xsl:template match="choice" mode="radiogroup-correctanswer">
+	<xsl:variable name="path">
+        <xsl:apply-templates select="../.." mode="path"/>
+    </xsl:variable>
 	<xsl:variable name="cols" select="../@displaycolumns"/>
 	
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
@@ -77,7 +83,7 @@
 			</xsl:if>
 		</xsl:attribute>
 		<label>
-			<input type="radio" class="choice" name="choice" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
+            <input type="radio" class="choice" name="{$path}-choice-correctanswer" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
 			<xsl:apply-templates select="content"/>
 		</label>
 	</li>

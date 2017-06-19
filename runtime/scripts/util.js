@@ -63,7 +63,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
 	 * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
 	 * @param {Array} arr
-	 * @param {boolean} deep - if true, do a deep copy of each element
+	 * @param {Boolean} deep - if true, do a deep copy of each element
 	 * @see Numbas.util.copyobj
 	 * @returns {Array}
 	 */
@@ -81,9 +81,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Clone an object.
-	 * @param {object} obj
-	 * @param {boolean} deep - if true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
-	 * @returns {object}
+	 * @param {Object} obj
+	 * @param {Boolean} deep - if true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
+	 * @returns {Object}
 	 */
 	copyobj: function(obj,deep)
 	{
@@ -115,8 +115,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
 	/** Shallow copy an object into an already existing object
 	 * (add all src's properties to dest)
-	 * @param {object} src
-	 * @param {object} dest
+	 * @param {Object} src
+	 * @param {Object} dest
 	 */
 	copyinto: function(src,dest)
 	{
@@ -130,7 +130,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Generic equality test on {@link Numbas.jme.token}s
 	 * @param {Numbas.jme.token} a
 	 * @param {Numbas.jme.token} b
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	eq: function(a,b) {
 		if(a.type != b.type)
@@ -176,7 +176,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Generic inequality test on {@link Numbas.jme.token}s
 	 * @param {Numbas.jme.token} a
 	 * @param {Numbas.jme.token} b
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 * @see Numbas.util.eq
 	 */
 	neq: function(a,b) {
@@ -186,7 +186,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Are two arrays equal? True if their elements are all equal
 	 * @param {Array} a
 	 * @param {Array} b
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	arraysEqual: function(a,b) {
 		if(a.length!=b.length) {
@@ -225,8 +225,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Return a copy of the input list with duplicates removed
-	 * @param {array} list
-	 * @returns {list}
+	 * @param {Array} list
+	 * @returns {Array}
 	 * @see Numbas.util.eq
 	 */
 	distinct: function(list) {
@@ -250,9 +250,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Is value in the list?
-	 * @param {array} list
+	 * @param {Array} list
 	 * @param {Numbas.jme.token} value
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	contains: function(list,value) {
 		for(var i=0;i<list.length;i++) {
@@ -264,8 +264,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Test if parameter is an integer
-	 * @param {object} i
-	 * @returns {boolean}
+	 * @param {Object} i
+	 * @returns {Boolean}
 	 */
 	isInt: function(i)
 	{
@@ -273,8 +273,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Test if parameter is a float
-	 * @param {object} f
-	 * @returns {boolean}
+	 * @param {Object} f
+	 * @returns {Boolean}
 	 */
 	isFloat: function(f)
 	{
@@ -282,8 +282,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
     /** Test if parameter is a fraction
-     * @param {string} s
-     * @returns {boolean}
+     * @param {String} s
+     * @returns {Boolean}
      */
     isFraction: function(s) {
 		s = s.toString().trim();
@@ -293,11 +293,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Is `n`a number? i.e. `!isNaN(n)`, or is `n` "infinity", or if `allowFractions` is true, is `n` a fraction?
      *
      * If `styles` is given, try to put the number in standard form if it matches any of the given styles.
-	 * @param {number|string} n
-	 * @param {boolean} allowFractions
-     * @param {string|string[]} styles - styles of notation to allow.
+	 * @param {Number|String} n
+	 * @param {Boolean} allowFractions
+     * @param {String|Array.<String>} styles - styles of notation to allow.
      * @see Numbas.util.cleanNumber
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	isNumber: function(n,allowFractions,styles) {
         n = util.cleanNumber(n,styles);
@@ -314,9 +314,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Wrap a list index so -1 maps to length-1
-	 * @param {number} n
-	 * @param {number} size
-	 * @returns {number}
+	 * @param {Number} n
+	 * @param {Number} size
+	 * @returns {Number}
 	 */
 	wrapListIndex: function(n,size) {
 		if(n<0) {
@@ -326,8 +326,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Test if parameter is a boolean - that is: a boolean literal, or any of the strings 'false','true','yes','no', case-insensitive.
-	 * @param {object} b
-	 * @returns {boolean}
+	 * @param {Object} b
+	 * @returns {Boolean}
 	 */
 	isBool: function(b)
 	{
@@ -339,8 +339,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Parse a string as HTML, and return true only if it contains non-whitespace text
-	 * @param {string} html
-	 * @returns {boolean}
+	 * @param {String} html
+	 * @returns {Boolean}
 	 */
 	isNonemptyHTML: function(html) {
 		var d = document.createElement('div');
@@ -349,8 +349,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
-	 * @param {object} b
-	 * @returns {boolean}
+	 * @param {Object} b
+	 * @returns {Boolean}
 	 */
 	parseBool: function(b)
 	{
@@ -364,9 +364,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
 
     /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
-     * @param {string} thousands - the string used to separate powers of 1000
-     * @param {string} decimal_mark - the decimal mark character
-     * @param {boolean} separate_decimal=false - should the `thousands` separator be used to separate negative powers of 1000 (that is, groups of 3 digits after the decimal point)?
+     * @param {String} thousands - the string used to separate powers of 1000
+     * @param {String} decimal_mark - the decimal mark character
+     * @param {Boolean} separate_decimal=false - should the `thousands` separator be used to separate negative powers of 1000 (that is, groups of 3 digits after the decimal point)?
      * @returns {function}
      */
     standardNumberFormatter: function(thousands, decimal_mark, separate_decimal) {
@@ -394,8 +394,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * 
      * If `styles` is given, `s` will be tested against the given styles. If it matches, the string will be rewritten using the matched integer and decimal parts, with punctuation removed and the decimal point changed to a dot.
      *
-     * @param {string} s - the string potentially representing a number.
-     * @param {string|string[]} styles - styles of notation to allow, e.g. `['en','si-en']` 
+     * @param {String} s - the string potentially representing a number.
+     * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']` 
      *
      * @see Numbas.util.numberNotationStyles
      */
@@ -433,11 +433,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     },
 
 	/** Parse a number - either parseFloat, or parse a fraction.
-	 * @param {string} s
-     * @param {boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed? 
-     * @param {string|string[]} styles - styles of notation to allow.
+	 * @param {String} s
+     * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed? 
+     * @param {String|String[]} styles - styles of notation to allow.
      * @see Numbas.util.cleanNumber
-	 * @returns {number}
+	 * @returns {Number}
 	 */
 	parseNumber: function(s,allowFractions,styles) {
         s = util.cleanNumber(s,styles);
@@ -449,19 +449,43 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return Infinity;
 		} else if(s.toLowerCase()=='-infinity') {
 			return -Infinity;
-		} else if(allowFractions && (m = util.re_fraction.exec(s))) {
-			var n = parseInt(m[2])/parseInt(m[3]);
-			return m[1] ? -n : n;
+		} else if(allowFractions && (m = util.parseFraction(s))) {
+			return m.numerator/m.denominator;
 		} else {
 			return NaN;
 		}
 	},
 
+    /** A fraction
+     * @typedef {Object} fraction
+     * @property {Number} numerator
+     * @property {Number} denominator
+     */
+
+	/** Parse a string representing an integer or fraction
+	 * @param {String} s
+	 * @see Numbas.util.re_fraction
+	 * @returns {fraction}
+	 */
+	parseFraction: function(s) {
+		if(util.isInt(s)){
+			return {numerator:parseInt(s), denominator:1};
+		}
+		var m = util.re_fraction.exec(s);
+		if(!m) {
+			return;
+		}
+		var n = parseInt(m[2]);
+		n = m[1] ? -n : n;
+		var d = parseInt(m[3]);
+		return {numerator:n, denominator:d};
+	},
+
 	/** Pad string `s` on the left with a character `p` until it is `n` characters long.
-	 * @param {string} s
-	 * @param {number} n
-	 * @param {string} p
-	 * @returns {string}
+	 * @param {String} s
+	 * @param {Number} n
+	 * @param {String} p
+	 * @returns {String}
 	 */
 	lpad: function(s,n,p)
 	{
@@ -473,9 +497,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
 	/** Replace occurences of `%s` with the extra arguments of the function
 	 * @example formatString('hello %s %s','Mr.','Perfect') => 'hello Mr. Perfect'
-	 * @param {string} str
-	 * @param {...string} value - string to substitute
-	 * @returns {string}
+	 * @param {String} str
+	 * @param {...String} value - string to substitute
+	 * @returns {String}
 	 */
 	formatString: function(str)
 	{
@@ -488,8 +512,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
     /** String representation of a time, in the format HH:MM:SS
-     * @param {Data} t
-     * @returns {string}
+     * @param {Date} t
+     * @returns {String}
      */
     formatTime: function(t) {
 		var h = t.getHours();
@@ -501,9 +525,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
 	/** Format an amount of currency
 	 * @example currency(5.3,'£','p') => £5.30
-	 * @param {number} n
-	 * @param {string} prefix - symbol to use in front of currency if abs(n) >= 1
-	 * @param {string} suffix - symbol to use in front of currency if abs(n) <= 1
+	 * @param {Number} n
+	 * @param {String} prefix - symbol to use in front of currency if abs(n) >= 1
+	 * @param {String} suffix - symbol to use in front of currency if abs(n) <= 1
 	 */
 	currency: function(n,prefix,suffix) {
 		if(n<0)
@@ -525,9 +549,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
     /* Write a number with every three digits separated by the given separator character
      * @example separateThousands(1234567.1234,',') => '1,234,567.1234'
-     * @param {number} n
-     * @param {string} separator
-     * @returns {string}
+     * @param {Number} n
+     * @param {String} separator
+     * @returns {String}
      */
     separateThousands: function(n,separator) {
         if(n<0) {
@@ -553,8 +577,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Get rid of the % on the end of percentages and parse as float, then divide by 100
 	 * @example unPercent('50%') => 0.5
 	 * @example unPercent('50') => 0.5
-	 * @param {string} s
-	 * @returns {number}
+	 * @param {String} s
+	 * @returns {Number}
 	 */
 	unPercent: function(s)
 	{
@@ -565,10 +589,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** Pluralise a word
 	 * 
 	 * If `n` is not unity, return `plural`, else return `singular`
-	 * @param {number} n
-	 * @param {string} singular - string to return if `n` is +1 or -1
-	 * @param {string} plural - string to returns if `n` is not +1 or -1
-	 * @returns {string}
+	 * @param {Number} n
+	 * @param {String} singular - string to return if `n` is +1 or -1
+	 * @param {String} plural - string to returns if `n` is not +1 or -1
+	 * @returns {String}
 	 */
 	pluralise: function(n,singular,plural)
 	{
@@ -580,8 +604,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Make the first letter in the string a capital
-	 * @param {string} str
-	 * @returns {string}
+	 * @param {String} str
+	 * @returns {String}
 	 */
 	capitalise: function(str) {
 		return str.replace(/^[a-z]/,function(c){return c.toUpperCase()});
@@ -591,10 +615,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 *
 	 * Strips out nested brackets
 	 * @example splitbrackets('a{{b}}c','{','}') => ['a','b','c']
-	 * @param {string} t - string to split
-	 * @param {string} lb - left bracket string
-	 * @param {string} rb - right bracket string
-	 * @returns {string[]} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
+	 * @param {String} t - string to split
+	 * @param {String} lb - left bracket string
+	 * @param {String} rb - right bracket string
+	 * @returns {Array.<String>} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
 	 */
 	splitbrackets: function(str,lb,rb)
 	{
@@ -658,8 +682,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Because XML doesn't like having ampersands hanging about, replace them with escape codes
-	 * @param {string} str - XML string
-	 * @returns {string}
+	 * @param {String} str - XML string
+	 * @returns {String}
 	 */
 	escapeHTML: function(str)
 	{
@@ -673,7 +697,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Create a comparison function which sorts objects by a particular property
-	 * @param {string[]|string} prop - name of the property (or list of names of properties) to sort by
+	 * @param {Array.<String>|String} prop - name of the property (or list of names of properties) to sort by
 	 * @returns {function}
 	 */
 	sortBy: function(props) {
@@ -711,8 +735,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Cartesian product of one or more lists
-	 * @param {array} lists - list of arrays
-	 * @returns {array}
+	 * @param {Array} lists - list of arrays
+	 * @returns {Array}
 	 */
 	product: function(lists) {
         if(!Array.isArray(lists)) {
@@ -753,8 +777,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
-	 * @param {array} lists - list of arrays
-	 * @returns {array}
+	 * @param {Array} lists - list of arrays
+	 * @returns {Array}
 	 */
 	zip: function(lists) {
 		var out = [];
@@ -775,8 +799,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** All combinations of r items from given array, without replacement
-	 * @param {array} list
-	 * @param {number} r
+	 * @param {Array} list
+	 * @param {Number} r
 	 */
 	combinations: function(list,r) {
 		var indexes = [];
@@ -809,8 +833,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
 	
 	/** All combinations of r items from given array, with replacement
-	 * @param {array} list
-	 * @param {number} r
+	 * @param {Array} list
+	 * @param {Number} r
 	 */
 	combinations_with_replacement: function(list,r) {
 		var indexes = [];
@@ -842,8 +866,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	/** All permutations of all choices of r elements from list
 	 *
 	 * Inspired by the algorithm in Python's itertools library
-	 * @param {array} list - elements to choose and permute
-	 * @param {number} r - number of elements to choose
+	 * @param {Array} list - elements to choose and permute
+	 * @param {Number} r - number of elements to choose
 	 */
 	permutations: function(list,r) {
 		var n = list.length;
@@ -887,8 +911,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
 	/** Get the letter format of an ordinal
 	 * e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...
-	 * @param {number} n
-	 * @returns {string}
+	 * @param {Number} n
+	 * @returns {String}
 	 */
 	letterOrdinal: function(n) {
 		var alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -909,8 +933,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	/** Get a human-sensible name of a part, given its path
-	 * @param {string} path
-	 * @returns {string}
+	 * @param {String} path
+	 * @returns {String}
 	 */
 	nicePartName: function(path) {
 		var re_path = /^p(\d+)(?:g(\d+)|s(\d+))?$/;
@@ -932,10 +956,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
  * Objects of the form `{re,format}`, where `re` is a regex recognising numbers in this style, and `format(integer,decimal)` renders the number in this style.
  *
  * Each regex matches the integer part in group 1, and the decimal part in group 2 - it should be safe to remove all non-digit characters in these and preserve meaning.
- * @see https://en.wikipedia.org/wiki/Decimal_mark#Examples_of_use
+ * @see {@link https://en.wikipedia.org/wiki/Decimal_mark#Examples_of_use|Examples of decimal mark use on Wikipedia}
  * @memberof Numbas.util
  */
-util.numberNotationStyles = {
+var numberNotationStyles = util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
     'plain-en': {
         re: /^([0-9]+)(\x2E[0-9]+)?$/,
@@ -1024,9 +1048,9 @@ var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
 /** Split a string up by TeX delimiters (`$`, `\[`, `\]`)
  *
  * `bits.re_end` stores the delimiter if the returned array has unfinished maths at the end
- * @param {string} txt - string to split up
+ * @param {String} txt - string to split up
  * @param {RegExp} re_end - If tex is split across several strings (e.g. text nodes with <br> in the middle), this can be used to give the end delimiter for unfinished maths 
- * @returns {string[]} bits - stuff outside TeX, left delimiter, TeX, right delimiter, stuff outside TeX, ...
+ * @returns {Array.<String>} bits - stuff outside TeX, left delimiter, TeX, right delimiter, stuff outside TeX, ...
  * @example contentsplitbrackets('hello $x+y$ and \[this\] etc') => ['hello ','$','x+y','$',' and ','\[','this','\]']
  * @memberof Numbas.util
  * @method
