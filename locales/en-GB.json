@@ -136,7 +136,7 @@
     "part.feedback": "feedback",
     "part.script.error": "Error in part {{path}} custom script {{script}}: {{message}}",
     "part.marking.steps no matter": "Because you received full marks for the part, your answers to the steps aren't counted.",
-    "part.marking.steps change": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark) for your answers to the steps",
+    "part.marking.steps change": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark) for your answers to the steps.",
     "part.marking.revealed steps with penalty": "You revealed the steps. The maximum you can score for this part is <strong>{{count,niceNumber}}</strong> $t(mark). Your scores will be scaled down accordingly.",
     "part.marking.revealed steps no penalty": "You revealed the steps.",
     "part.marking.used variable replacements": "This part was marked using your answers to previous parts.",
