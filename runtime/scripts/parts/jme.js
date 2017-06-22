@@ -16,12 +16,11 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.JMEPart} object */
 
-Numbas.queueScript('parts/jme',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
+Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 var nicePartName = util.nicePartName;
 
 var Part = Numbas.parts.Part;
@@ -49,6 +48,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
     loadFromXML: function(xml) {
         var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
         //parse correct answer from XML
         answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
@@ -137,7 +137,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
     finaliseLoad: function() {
         this.stagedAnswer = [''];
-        this.getCorrectAnswer(this.question.scope);
+        this.getCorrectAnswer(this.getScope());
         this.display = new Numbas.display.JMEPartDisplay(this);
     },
 
@@ -232,7 +232,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 			this.error('part.jme.answer missing');
 		}
 
-		this.markingScope = new jme.Scope(this.question.scope);
+		this.markingScope = new jme.Scope(this.getScope());
 		this.markingScope.variables = {};
 
 	},

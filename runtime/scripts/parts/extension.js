@@ -16,7 +16,7 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.} object */
 
-Numbas.queueScript('parts/extension',['base','display','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/extension',['base','util','part'],function() {
 
 var util = Numbas.util;
 

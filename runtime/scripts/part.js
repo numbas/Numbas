@@ -16,14 +16,12 @@ Copyright 2011-14 Newcastle University
 
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
 
-Numbas.queueScript('part',['base','schedule','display','jme','jme-variables','xml','util','scorm-storage'],function() {
+Numbas.queueScript('part',['base','jme','jme-variables','util'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
-
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
  * @typedef partpath
@@ -82,6 +80,8 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart)
  * @memberof Numbas
  */
 var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart) {
+    var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
 	var type = tryGetAttribute(null,xml,'.','type',[]);
 	if(type==null) {
 		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
@@ -113,7 +113,9 @@ var Part = Numbas.parts.Part = function( path, question, parentPart)
 	
 	//remember a path for this part, for stuff like marking and warnings
 	this.path = path;
-	this.question.partDictionary[path] = this;
+    if(this.question) {
+    	this.question.partDictionary[path] = this;
+    }
 
     this.index = parseInt(this.path.match(/\d+$/));
 
@@ -153,6 +155,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     loadFromXML: function(xml) {
         this.xml = xml;
+
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
         tryGetAttribute(this,this.xml,'.',['type','marks']);
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
@@ -217,7 +221,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.stepsOpen = pobj.stepsOpen;
 
 		if(this.answered) {
-			question.onHTMLAttached(function() {part.submit()});
+			this.question && this.question.onHTMLAttached(function() {part.submit()});
 		}
 
         this.steps.forEach(function(s){ s.resume() });
@@ -273,7 +277,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     setScript: function(name,order,script) {
         var withEnv = {
-            variables: this.question.unwrappedVariables,
+            variables: this.question ? this.question.unwrappedVariables : {},
             question: this.question,
             part: this
         };
@@ -390,6 +394,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {Number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {Boolean} showCorrectAnswer - Show the correct answer on reveal?
 	 * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
+     * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
      * @property {Object} markingScript
 	 */
 	settings: 
@@ -399,7 +404,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		minimumMarks: 0,
 		showCorrectAnswer: true,
 		showFeedbackIcon: true,
-		hasVariableReplacements: false
+		hasVariableReplacements: false,
+        variableReplacementStrategy: 'originalfirst'
 	},
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -567,10 +573,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			if(dirty && this.parentPart) {
 				this.parentPart.setDirty(true);
 			}
-			this.question.display && this.question.display.isDirty(this.question.isDirty());
+			this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
 		}
 	},
 
+    /** Get a JME scope for this part.
+     * If `this.question` is set, use the question's scope. Otherwise, use {@link Numbas.jme.builtinScope}.
+     * @returns {Numbas.jme.Scope}
+     */
+    getScope: function() {
+        return this.question ? this.question.scope : Numbas.jme.builtinScope;
+    },
 
 	/** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
 	 */
@@ -610,7 +623,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 				try{
 					if(this.settings.variableReplacementStrategy=='originalfirst') {
-						var result_original = this.markAgainstScope(this.question.scope,existing_feedback);
+						var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
 						result = result_original;
 						var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
 					}
@@ -658,7 +671,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
 
 		this.calculateScore();
-		this.question.updateScore();
+		this.question && this.question.updateScore();
 
 		if(this.answered)
 		{
@@ -673,7 +686,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		this.submitting = false;
 
-		if(this.answered) {
+		if(this.answered && this.question) {
 			for(var path in this.errorCarriedForwardBackReferences) {
 				var p2 = this.question.getPart(path);
 				p2.pleaseResubmit();
@@ -745,6 +758,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		// dictionary of variables to replace
 		var replace = this.settings.errorCarriedForwardReplacements;
 		var replaced = [];
+
+        if(!this.question) {
+            return this.getScope();
+        }
 
 		// fill scope with new values of those variables
 		var new_variables = {}
@@ -913,7 +930,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     mark_answer: function(studentAnswer) {
         var result = this.markingScript.evaluate(
-            this.question.scope, 
+            this.getScope(), 
             this.marking_parameters(studentAnswer)
         );
         if(result.state_errors.mark) {
@@ -1010,7 +1027,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				this.submit();
             } else {
                 this.calculateScore();
-				this.question.updateScore();
+				this.question && this.question.updateScore();
             }
 		} else {
             this.calculateScore();

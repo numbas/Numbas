@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-variables.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-rules.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-builtins.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/marking.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/part.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/numberentry.js" charset="utf-8"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/i18next/i18next.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="locales.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="marking_scripts.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
+
+
+        <style>
+            td, th {
+                text-align: right;
+                padding: 0.5em;
+            }
+            td.description {
+                font-family: monospace;
+            }
+        </style>
+	</head>
+    <body>
+        <p>This page tests standalone question parts.</p>
+        <script>
+			Numbas.queueScript('base',[],function() {});
+			Numbas.queueScript('go',['jme','localisation','parts/numberentry'],function() {
+				let jme = Numbas.jme;
+                let math = Numbas.math;
+
+                console.log('ok');
+
+                var p = window.p = Numbas.createPart('numberentry','p0');
+                var s = p.settings;
+                s.minvalueString = '1';
+                s.maxvalueString = '1';
+                p.finaliseLoad();
+            });
+        </script>
+	</body>
+</html>
+

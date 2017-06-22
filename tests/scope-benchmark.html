@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-variables.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-rules.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-builtins.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
+
+		<!-- R.js - localisation -->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/i18next/i18next.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="locales.js"></script>
+
+		<!--JQuery scripts-->
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
+
+
+        <style>
+            td, th {
+                text-align: right;
+                padding: 0.5em;
+            }
+            td.description {
+                font-family: monospace;
+            }
+        </style>
+	</head>
+    <body>
+        <p>This page runs some benchmarks to do with nested JME scopes.</p>
+        <table id="tests">
+            <thead>
+                <tr>
+                    <th>Test</th>
+                    <th>Time taken (s)</th>
+                    <th>Runs per second</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <script>
+			Numbas.queueScript('base',[],function() {});
+			Numbas.queueScript('go',['jme','localisation'],function() {
+				let jme = Numbas.jme;
+                let math = Numbas.math;
+
+                var jobs = [];
+
+                function time(description,runs,fn) {
+                    let row = document.createElement('tr');
+                    let td_description = document.createElement('td');
+                    td_description.textContent = description;
+                    td_description.classList.add('description');
+                    row.appendChild(td_description);
+                    let td_time = document.createElement('td');
+                    row.appendChild(td_time);
+                    let td_runs_per_s = document.createElement('td');
+                    row.appendChild(td_runs_per_s);
+                    $('#tests tbody').append(row);
+
+                    jobs.push({
+                        description:description,
+                        runs: runs,
+                        fn:fn, 
+                        td_time: td_time, 
+                        td_runs_per_s: 
+                        td_runs_per_s
+                    });
+                }
+                function do_job(job) {
+                    setTimeout(function() {
+                        let start = new Date();
+                        job.fn();
+                        let end = new Date();
+                        let diff = (end-start)/1000;
+                        console.info(`${job.description} took ${diff}s`)
+                        job.td_time.textContent = diff;
+                        let runs_per_s = Math.round(job.runs/diff);
+                        job.td_runs_per_s.textContent = Numbas.math.niceNumber(runs_per_s,{style:'en'});
+                    },1);
+                }
+
+                setInterval(function() {
+                    if(jobs.length) {
+                        let job = jobs.splice(0,1)[0];
+                        do_job(job);
+                    }
+                },10);
+
+                function eval_expr(expr,runs) {
+                    time(expr,runs,function() {
+                        Numbas.jme.builtinScope.evaluate(expr);
+                    });
+                }
+
+                var runs = 1000000;
+                eval_expr('repeat(0..'+runs+','+runs+')',runs);
+                eval_expr('repeat(random(true,false),'+runs+')',runs);
+                eval_expr('map(random(true,false),x,0..'+runs+')',runs);
+                eval_expr('repeat(map(random(true,false),x,0..'+(runs/10000)+'),10000)',runs);
+                eval_expr('filter(random(true,false),x,0..'+runs+')',runs);
+                eval_expr('repeat(filter(random(true,false),x,0..'+(runs/10000)+'),10000)',runs);
+                eval_expr('repeat(random(0..'+runs+'),'+runs+')',runs);
+            });
+        </script>
+	</body>
+</html>
+

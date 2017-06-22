@@ -16,12 +16,11 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.MatrixEntryPart} object */
 
-Numbas.queueScript('parts/matrixentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
+Numbas.queueScript('parts/matrixentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 var Part = Numbas.parts.Part;
 
@@ -41,6 +40,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
     loadFromXML: function(xml) {
         var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
         tryGetAttribute(settings,xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
         tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
@@ -67,14 +67,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
     finaliseLoad: function() {
         var settings = this.settings;
-        var numRows = jme.subvars(settings.numRows, this.question.scope);
-        settings.numRows = this.question.scope.evaluate(numRows).value;
+        var scope = this.getScope();
+        var numRows = jme.subvars(settings.numRows, scope);
+        settings.numRows = scope.evaluate(numRows).value;
 
-        var numColumns = jme.subvars(settings.numColumns, this.question.scope);
-        settings.numColumns = this.question.scope.evaluate(numColumns).value;
+        var numColumns = jme.subvars(settings.numColumns, scope);
+        settings.numColumns = scope.evaluate(numColumns).value;
 
-        var tolerance = jme.subvars(settings.tolerance, this.question.scope);
-        settings.tolerance = this.question.scope.evaluate(tolerance).value;
+        var tolerance = jme.subvars(settings.tolerance, scope);
+        settings.tolerance = scope.evaluate(tolerance).value;
         settings.tolerance = Math.max(settings.tolerance,0.00000000001);
 
         if(settings.precisionType!='none') {
@@ -90,7 +91,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             this.studentAnswer.push(row);
         }
         
-        this.getCorrectAnswer(this.question.scope);
+        this.getCorrectAnswer(scope);
 
         if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
             var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;

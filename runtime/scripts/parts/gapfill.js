@@ -16,12 +16,11 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.GapFillPart} object */
 
-Numbas.queueScript('parts/gapfill',['base','display','jme','jme-variables','xml','util','scorm-storage','part'],function() {
+Numbas.queueScript('parts/gapfill',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 var Part = Numbas.parts.Part;
 

@@ -16,12 +16,11 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.NumberEntryPart} object */
 
-Numbas.queueScript('parts/numberentry',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
+Numbas.queueScript('parts/numberentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 var Part = Numbas.parts.Part;
 
@@ -39,6 +38,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
     loadFromXML: function(xml) {
         var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
         tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
@@ -66,7 +67,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         }
 
         try {
-            this.getCorrectAnswer(this.question.scope);
+            this.getCorrectAnswer(this.getScope());
         } catch(e) {
             this.error(e.message);
         }
@@ -82,7 +83,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         this.stagedAnswer = [''];
 
-        this.display = new Numbas.display.NumberEntryPartDisplay(this);
+        if(Numbas.display) {
+            this.display = new Numbas.display.NumberEntryPartDisplay(this);
+        }
     },
 
     resume: function() {
@@ -130,6 +133,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         notationStyles: ['en','si-en'],
 		displayAnswer: 0,
 		precisionType: 'none',
+        precisionString: '0',
+        strictPrecision: false,
 		precision: 0,
 		precisionPC: 0,
 		mustBeReduced: false,

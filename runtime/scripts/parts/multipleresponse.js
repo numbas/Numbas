@@ -16,12 +16,11 @@ Copyright 2011-15 Newcastle University
 
 /** @file The {@link Numbas.parts.MultipleResponsePart} object */
 
-Numbas.queueScript('parts/multipleresponse',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
+Numbas.queueScript('parts/multipleresponse',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 var Part = Numbas.parts.Part;
 
@@ -65,6 +64,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 {
     loadFromXML: function(xml) {
         var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+        var scope = this.getScope();
 
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -180,13 +181,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(def = answersNode.getAttribute('def')) {
             settings.answersDef = def;
             var nodeName = this.flipped ? 'choice' : 'answer';
-            loadDef(settings.answersDef,this.question.scope,answersNode,nodeName);
+            loadDef(settings.answersDef,scope,answersNode,nodeName);
             answerNodes = answersNode.selectNodes(nodeName);
             this.numAnswers = answerNodes.length;
         }
         if(choicesNode && (def = choicesNode.getAttribute('def'))) {
             settings.choicesDef = def;
-            loadDef(settings.choicesDef,this.question.scope,choicesNode,'choice');
+            loadDef(settings.choicesDef,scope,choicesNode,'choice');
             choiceNodes = choicesNode.selectNodes('choice');
             this.numChoices = choiceNodes.length;
         }
@@ -247,7 +248,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             var cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             cell.message = $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
-            cell.message = jme.contentsubvars(cell.message,this.question.scope);
+            cell.message = jme.contentsubvars(cell.message,scope);
 
             if(this.type == '1_n_2' || this.type == 'm_n_2') {    
                 // possible answers are recorded as choices in the multiple choice types.
@@ -288,6 +289,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
     finaliseLoad: function() {
         var settings = this.settings;
+        var scope = this.getScope();
 
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -312,16 +314,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.marks = util.parseNumber(this.marks) || 0;
         settings.minimumMarks = util.parseNumber(settings.minimumMarks) || 0;
 
-        var minAnswers = jme.subvars(settings.minAnswers, this.question.scope);
-        minAnswers = jme.evaluate(settings.minAnswers,this.question.scope);
+        var minAnswers = jme.subvars(settings.minAnswers, scope);
+        minAnswers = jme.evaluate(settings.minAnswers, scope);
         if(minAnswers && minAnswers.type=='number') {
             settings.minAnswers = minAnswers.value;
         } else {
             this.error('part.setting not present','minimum answers');
         }
 
-        var maxAnswers = jme.subvars(settings.maxAnswers, this.question.scope);
-        maxAnswers = jme.evaluate(settings.maxAnswers,this.question.scope);
+        var maxAnswers = jme.subvars(settings.maxAnswers, scope);
+        maxAnswers = jme.evaluate(settings.maxAnswers, scope);
         if(maxAnswers && maxAnswers.type=='number') {
             settings.maxAnswers = maxAnswers.value;
         } else {
@@ -344,7 +346,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 // note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
                 // I have only myself to thank for this - CP
-                var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,this.question.scope));
+                var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,scope));
             }
             var layoutFunction = layoutTypes[settings.layoutType];
             for(var i=0;i<this.numAnswers;i++) {
@@ -370,7 +372,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxAnswers = this.numAnswers * this.numChoices;
         }
 
-        this.getCorrectAnswer(this.question.scope);
+        this.getCorrectAnswer(scope);
 
         var matrix = this.settings.matrix;
         
