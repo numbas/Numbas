@@ -1,6 +1,6 @@
-gap_feedback:
+gap_feedback (Feedback on each of the gaps):
   map(
-    let(result,submit_part(gap),
+    let(result,submit_part(gap["path"]),
       feedback(translate('part.gapfill.feedback header',["index":index]));
       concat_feedback(result["feedback"], result["marks"]/marks);
       result
@@ -9,7 +9,7 @@ gap_feedback:
     zip(gaps,list(1..len(gaps)))
   )
 
-any_invalid:
+any_invalid (Are the answers to any of the gaps invalid?):
   len(filter(not gap["answered"],gap,gap_feedback))>0
 
 mark:

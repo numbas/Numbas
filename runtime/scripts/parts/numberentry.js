@@ -34,53 +34,65 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 {
 	var settings = this.settings;
 	util.copyinto(NumberEntryPart.prototype.settings,settings);
-
-	tryGetAttribute(settings,this.xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
-	tryGetAttribute(settings,this.xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
-
-    var answerNode = this.xml.selectSingleNode('answer');
-    var notationStyles = answerNode.getAttribute('notationstyles');
-    if(notationStyles) {
-        settings.notationStyles = notationStyles.split(',');
-    }
-
-	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
-	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
-
-	if(settings.precisionType!='none') {
-		settings.allowFractions = false;
-	}
-
-    try {
-    	this.getCorrectAnswer(this.question.scope);
-    } catch(e) {
-        this.error(e.message);
-    }
-
-	var messageNode = this.xml.selectSingleNode('answer/precision/message');
-	if(messageNode)
-		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-
-	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
-	if(settings.correctAnswerFraction) {
-        var diff = Math.abs(settings.maxvalue-settings.minvalue)/2;
-        var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
-		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
-	} else {
-		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision, style: settings.correctAnswerStyle});
-	}
-
-	this.display = new Numbas.display.NumberEntryPartDisplay(this);
-	
-	if(loading)
-	{
-		var pobj = Numbas.store.loadNumberEntryPart(this);
-		this.stagedAnswer = [pobj.studentAnswer+''];
-	}
 }
 NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
+    loadFromXML: function(xml) {
+        var settings = this.settings;
+        tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
+
+        var answerNode = xml.selectSingleNode('answer');
+        var notationStyles = answerNode.getAttribute('notationstyles');
+        if(notationStyles) {
+            settings.notationStyles = notationStyles.split(',');
+        }
+        
+        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
+        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
+
+        var messageNode = xml.selectSingleNode('answer/precision/message');
+        if(messageNode) {
+            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+        }
+
+    },
+
+    finaliseLoad: function() {
+        var settings = this.settings;
+        if(settings.precisionType!='none') {
+            settings.allowFractions = false;
+        }
+
+        try {
+            this.getCorrectAnswer(this.question.scope);
+        } catch(e) {
+            this.error(e.message);
+        }
+
+        var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
+        if(settings.correctAnswerFraction) {
+            var diff = Math.abs(settings.maxvalue-settings.minvalue)/2;
+            var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
+            settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
+        } else {
+            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision, style: settings.correctAnswerStyle});
+        }
+
+        this.stagedAnswer = [''];
+
+        this.display = new Numbas.display.NumberEntryPartDisplay(this);
+    },
+
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+		var pobj = this.store.loadNumberEntryPart(this);
+		this.stagedAnswer = [pobj.studentAnswer+''];
+    },
+
 	/** The student's last submitted answer */
 	studentAnswer: '',
 
@@ -205,6 +217,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
 	}
 };
+['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+    NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
+});
 
 Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
 });

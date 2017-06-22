@@ -204,13 +204,13 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             var part_result = part.mark_answer(args[1]);
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
-                credit: result.credit,
                 marks: part.marks,
+                credit: result.credit,
                 feedback: result.states,
+                valid: result.valid,
                 states: part_result.states,
                 state_valid: part_result.state_valid,
-                values: part_result.values,
-                valid: result.valid
+                values: part_result.values
             });
         }
     }));

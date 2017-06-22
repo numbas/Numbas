@@ -32,11 +32,17 @@ var Part = Numbas.parts.Part;
  */
 var InformationPart = Numbas.parts.InformationPart = function(xml, path, question, parentPart, loading)
 {
-	this.display = new Numbas.display.InformationPartDisplay(this);
-	this.answered = true;
-	this.isDirty = false;
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
+    finaliseLoad: function() {
+        this.answered = true;
+        this.isDirty = false;
+
+        if(Numbas.display) {
+            this.display = new Numbas.display.InformationPartDisplay(this);
+        }
+    },
+
 	/** This part is always valid
 	 * @returns {Boolean} true
 	 */
@@ -57,6 +63,9 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
 
 	doesMarking: false
 };
+['finaliseLoad'].forEach(function(method) {
+    InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
+});
 
 Numbas.partConstructors['information'] = util.extend(Part,InformationPart);
 });

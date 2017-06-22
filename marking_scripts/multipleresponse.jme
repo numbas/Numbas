@@ -1,6 +1,6 @@
 numAnswers: len(settings["matrix"])
 
-numChoices: if(numAnswers=0,0,len(settings["matrix"][0]))
+numChoices: if(numAnswers=1,1,len(settings["matrix"][0]))
 
 numTicks (How many options did the student tick?):
   sum(map(sum(row),row,studentAnswer))

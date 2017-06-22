@@ -30,25 +30,47 @@ var Part = Numbas.parts.Part;
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var GapFillPart = Numbas.parts.GapFillPart = function(xml, path, question, parentPart, loading)
+var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
 {
-	var gapXML = this.xml.selectNodes('gaps/part');
-
-	this.marks = 0;
-
-	for( var i=0 ; i<gapXML.length; i++ )
-	{
-		var gap = Numbas.createPart(gapXML[i], path+'g'+i, this.question, this, loading);
-		gap.isGap = true;
-		this.marks += gap.marks;
-		this.gaps[i]=gap;
-		this.answered = this.answered || gap.answered;
-	}
-
-	this.display = new Numbas.display.GapFillPartDisplay(this);
 }	
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 {
+
+    loadFromXML: function(xml) {
+        var gapXML = xml.selectNodes('gaps/part');
+
+        this.marks = 0;
+
+        for( var i=0 ; i<gapXML.length; i++ ) {
+            var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this);
+            this.addGap(gap,i);
+        }
+    },
+
+    finaliseLoad: function() {
+        if(Numbas.display) {
+            this.display = new Numbas.display.GapFillPartDisplay(this);
+        }
+    },
+
+    /** Add a gap to this part
+     * @param {Numbas.parts.Part} gap
+     * @param {Number} index - the position of the gap
+     */
+    addGap: function(gap, index) {
+        gap.isGap = true;
+        this.marks += gap.marks;
+        this.gaps.splice(index,0,gap);
+    },
+
+    resume: function() {
+        var p = this;
+        this.gaps.forEach(function(g){ 
+            g.resume(); 
+            p.answered = p.answered || gap.answered;
+        });
+    },
+
 	/** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
 	 */
 	stagedAnswer: 'something',
@@ -128,7 +150,12 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	}
 
 };
-GapFillPart.prototype.revealAnswer = util.extend(GapFillPart.prototype.revealAnswer, Part.prototype.revealAnswer);
+['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+    GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
+});
+['revealAnswer'].forEach(function(method) {
+    GapFillPart.prototype[method] = util.extend(GapFillPart.prototype[method], Part.prototype[method]);
+});
 
 Numbas.partConstructors['gapfill'] = util.extend(Part,GapFillPart);
 });

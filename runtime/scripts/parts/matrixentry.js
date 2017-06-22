@@ -34,62 +34,73 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
 	var settings = this.settings;
 	util.copyinto(MatrixEntryPart.prototype.settings,settings);
 
-	tryGetAttribute(settings,this.xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
-	tryGetAttribute(settings,this.xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
 
-	var numRows = jme.subvars(settings.numRows, this.question.scope);
-	settings.numRows = this.question.scope.evaluate(numRows).value;
+}
+MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
+{
 
-	var numColumns = jme.subvars(settings.numColumns, this.question.scope);
-	settings.numColumns = this.question.scope.evaluate(numColumns).value;
+    loadFromXML: function(xml) {
+        var settings = this.settings;
+        tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
+        tryGetAttribute(settings,xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
+        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
 
-	var tolerance = jme.subvars(settings.tolerance, this.question.scope);
-	settings.tolerance = this.question.scope.evaluate(tolerance).value;
-	settings.tolerance = Math.max(settings.tolerance,0.00000000001);
+        var messageNode = xml.selectSingleNode('answer/precision/message');
+        if(messageNode) {
+            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+        }
 
-	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
-	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
+    },
 
-	if(settings.precisionType!='none') {
-		settings.allowFractions = false;
-	}
-
-	this.studentAnswer = [];
-	for(var i=0;i<this.settings.numRows;i++) {
-		var row = [];
-		for(var j=0;j<this.settings.numColumns;j++) {
-			row.push('');
-		}
-		this.studentAnswer.push(row);
-	}
-	
-	var messageNode = this.xml.selectSingleNode('answer/precision/message');
-	if(messageNode) {
-		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-	}
-
-	this.getCorrectAnswer(this.question.scope);
-
-    if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
-        var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
-        var answerSize = settings.numRows+'×'+settings.numColumns;
-        throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
-    }
-
-	this.display = new Numbas.display.MatrixEntryPartDisplay(this);
-
-	if(loading)
-	{
-		var pobj = Numbas.store.loadMatrixEntryPart(this);
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+		var pobj = this.store.loadMatrixEntryPart(this);
 		if(pobj.studentAnswer) {
 			var rows = pobj.studentAnswer.length;
 			var columns = rows>0 ? pobj.studentAnswer[0].length : 0;
 			this.stagedAnswer = [rows, columns, pobj.studentAnswer];
 		}
-	}
-}
-MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
-{
+    },
+
+    finaliseLoad: function() {
+        var settings = this.settings;
+        var numRows = jme.subvars(settings.numRows, this.question.scope);
+        settings.numRows = this.question.scope.evaluate(numRows).value;
+
+        var numColumns = jme.subvars(settings.numColumns, this.question.scope);
+        settings.numColumns = this.question.scope.evaluate(numColumns).value;
+
+        var tolerance = jme.subvars(settings.tolerance, this.question.scope);
+        settings.tolerance = this.question.scope.evaluate(tolerance).value;
+        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
+
+        if(settings.precisionType!='none') {
+            settings.allowFractions = false;
+        }
+
+        this.studentAnswer = [];
+        for(var i=0;i<this.settings.numRows;i++) {
+            var row = [];
+            for(var j=0;j<this.settings.numColumns;j++) {
+                row.push('');
+            }
+            this.studentAnswer.push(row);
+        }
+        
+        this.getCorrectAnswer(this.question.scope);
+
+        if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
+            var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
+            var answerSize = settings.numRows+'×'+settings.numColumns;
+            throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
+        }
+
+        this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+    },
+
 	/** The student's last submitted answer */
 	studentAnswer: '',
 
@@ -200,7 +211,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		
 		return studentMatrix;
 	}
-}
+};
+['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+    MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
+});
 
 Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
 

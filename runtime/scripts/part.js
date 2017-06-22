@@ -46,37 +46,50 @@ Numbas.parts = {};
 var partConstructors = Numbas.partConstructors = {};
 
 
-/** Create a new question part. Automatically picks the right constructor based on the type defined in the XML.
- * @param {Element} xml
+/** Create a new question part.
+ * @see Numbas.partConstructors
+ * @param {String} type
  * @param {partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {Boolean} loading
  * @returns {Numbas.parts.Part}
- * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(xml, path, question, parentPart, loading)
+var createPart = Numbas.createPart = function(type, path, question, parentPart)
 {
-	var type = tryGetAttribute(null,xml,'.','type',[]);
-	if(type==null) {
-		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
-	}
 	if(partConstructors[type])
 	{
 		var cons = partConstructors[type];
-		var part = new cons(xml, path, question, parentPart, loading);
+		var part = new cons(path, question, parentPart);
 		if(part.customConstructor) {
 			part.customConstructor.apply(part);
-		}
-		if(loading && part.answered) {
-			question.onHTMLAttached(function() {part.submit()});
 		}
 		return part;
 	}
 	else {
 		throw(new Numbas.Error('part.unknown type',{part:util.nicePartName(path),type:type}));
 	}
+}
+
+/** Create a question part based on an XML definition.
+ * @param {Element} xml
+ * @param {partpath} path
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @returns {Numbas.parts.Part}
+ * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ * @memberof Numbas
+ */
+var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart) {
+	var type = tryGetAttribute(null,xml,'.','type',[]);
+	if(type==null) {
+		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
+	}
+    var part = createPart(type,path, question, parentPart);
+    part.loadFromXML(xml);
+    part.finaliseLoad();
+    return part;
 }
 
 /** Base question part object
@@ -86,15 +99,11 @@ var createPart = Numbas.createPart = function(xml, path, question, parentPart, l
  * @param {partpath} path
  * @param {Numbas.Question} Question
  * @param {Numbas.parts.Part} parentPart
- * @param {Boolean} loading
  * @see Numbas.createPart
  */
-var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loading )
+var Part = Numbas.parts.Part = function( path, question, parentPart)
 {
     var p = this;
-
-	//remember XML
-	this.xml = xml;
 
 	//remember parent question object
 	this.question = question;
@@ -111,46 +120,138 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
 	//initialise settings object
 	this.settings = util.copyobj(Part.prototype.settings);
 	
-	tryGetAttribute(this,this.xml,'.',['type','marks']);
-
-	tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
-
 	//initialise gap and step arrays
 	this.gaps = [];
 	this.steps = [];
     this.isStep = false;
 
-	//load steps
-	var stepNodes = this.xml.selectNodes('steps/part');
-	for(var i=0; i<stepNodes.length; i++)
-	{
-		var step = Numbas.createPart( stepNodes[i], this.path+'s'+i, this.question, this, loading);
-        step.isStep = true;
-		this.steps[i] = step;
-		this.stepsMarks += step.marks;
-	}
-
-	var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
-	tryGetAttribute(this.settings,this.xml,variableReplacementsNode,['strategy'],['variableReplacementStrategy'])
-
-	var replacementNodes = variableReplacementsNode.selectNodes('replace');
 	this.settings.errorCarriedForwardReplacements = [];
 	this.errorCarriedForwardBackReferences = {};
-	this.settings.hasVariableReplacements = replacementNodes.length>0;
-	for(var i=0;i<replacementNodes.length;i++) {
-		var n = replacementNodes[i];
-		var vr = {}
-		tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
-		vr.variable = vr.variable.toLowerCase();
-		this.settings.errorCarriedForwardReplacements.push(vr);
-	}
 
-    // create the marking script for the part
-    var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-    var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
-    if(markingScriptString) {
-        // extend the base marking algorithm if asked to do so
-        var extend_base = markingScriptNode.getAttribute('extend') || true;
+	this.markingFeedback = [];
+	this.warnings = [];
+
+	this.scripts = {};
+
+	this.applyScripts();
+}
+
+Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
+
+    /** Storage engine
+     * @type {Numbas.storage.BlankStorage}
+     */
+    store: undefined,
+
+	/** XML defining this part
+	 * @type {Element}
+	 */
+	xml: '',				
+
+    /** Load the part's settings from an XML <part> node
+     * @param {Element} xml
+     */
+    loadFromXML: function(xml) {
+        this.xml = xml;
+
+        tryGetAttribute(this,this.xml,'.',['type','marks']);
+        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
+
+        //load steps
+        var stepNodes = this.xml.selectNodes('steps/part');
+        for(var i=0; i<stepNodes.length; i++)
+        {
+            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this);
+            this.addStep(step,i);
+        }
+
+        // set variable replacements
+        var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
+        tryGetAttribute(this.settings,this.xml,variableReplacementsNode,['strategy'],['variableReplacementStrategy'])
+        var replacementNodes = variableReplacementsNode.selectNodes('replace');
+        this.settings.hasVariableReplacements = replacementNodes.length>0;
+        for(var i=0;i<replacementNodes.length;i++) {
+            var n = replacementNodes[i];
+            var vr = {}
+            tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
+            this.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
+        }
+
+        // create the JME marking script for the part
+        var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
+        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
+        if(markingScriptString) {
+            // extend the base marking algorithm if asked to do so
+            var extend_base = markingScriptNode.getAttribute('extend') || true;
+            this.setMarkingScript(markingScriptString,extend_base);
+        }
+
+        // custom JavaScript scripts
+        var scriptNodes = this.xml.selectNodes('scripts/script');
+        for(var i=0;i<scriptNodes.length; i++) {
+            var name = scriptNodes[i].getAttribute('name');
+            var order = scriptNodes[i].getAttribute('order');
+            var script = Numbas.xml.getTextContent(scriptNodes[i]);
+        }
+
+    },
+
+    /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded
+     */
+    finaliseLoad: function() {
+        if(Numbas.display) {
+            this.display = new Numbas.display.PartDisplay(this);
+        }
+    },
+
+    /** Load saved data about this part from storage
+     */
+    resume: function() {
+        var part = this;
+        if(!this.store) {
+            return;
+        }
+		var pobj = this.store.loadPart(this);
+		this.answered = pobj.answered;
+		this.stepsShown = pobj.stepsShown;
+		this.stepsOpen = pobj.stepsOpen;
+
+		if(this.answered) {
+			question.onHTMLAttached(function() {part.submit()});
+		}
+
+        this.steps.forEach(function(s){ s.resume() });
+    },
+
+    /** Add a step to this part
+     * @param {Numbas.parts.Part} step
+     * @param {Number} index - position of the step
+     */
+    addStep: function(step, index) {
+        step.isStep = true;
+        this.steps.splice(index,0,step);
+        this.stepsMarks += step.marks;
+    },
+
+    /** Add a variable replacement for this part's adaptive marking
+     * @param {String} variable - the name of the variable to replace
+     * @param {String} part - the path of the part to use
+     * @param {Boolean} must_go_first - Must the referred part be answered before this part can be marked?
+     */
+    addVariableReplacement: function(variable, part, must_go_first) {
+        var vr = {
+            variable: variable.toLowerCase(),
+            part: part,
+            must_go_first: must_go_first
+        };
+        this.settings.errorCarriedForwardReplacements.push(vr);
+    },
+
+    /** Set this part's JME marking script
+     * @param {String} markingScriptString
+     * @param {Boolean} extend_base - Does this script extend the built-in script?
+     */
+    setMarkingScript: function(markingScriptString, extend_base) {
         var oldMarkingScript = this.markingScript;
 
         var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
@@ -162,47 +263,25 @@ var Part = Numbas.parts.Part = function( xml, path, question, parentPart, loadin
                 p.error("part.marking.missing required note",{note:name});
             }
         });
-    }
+    },
 
-	this.markingFeedback = [];
-	this.warnings = [];
-
-	this.scripts = {};
-	var scriptNodes = this.xml.selectNodes('scripts/script');
-	for(var i=0;i<scriptNodes.length; i++) {
-		var name = scriptNodes[i].getAttribute('name');
-		var order = scriptNodes[i].getAttribute('order');
-		var script = Numbas.xml.getTextContent(scriptNodes[i]);
-		var withEnv = {
-			variables: this.question.unwrappedVariables,
-			question: this.question,
-			part: this
-		};
-		with(withEnv) {
-			script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
-		}
-		this.scripts[name] = {script: script, order: order};
-	}
-
-	this.applyScripts();
-
-	//initialise display code
-	this.display = new Numbas.display.PartDisplay(this);
-
-	if(loading)
-	{
-		var pobj = Numbas.store.loadPart(this);
-		this.answered = pobj.answered;
-		this.stepsShown = pobj.stepsShown;
-		this.stepsOpen = pobj.stepsOpen;
-	}
-}
-
-Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
-	/** XML defining this part
-	 * @type {Element}
-	 */
-	xml: '',				
+    /** Set a custom JavaScript script
+     * @param {String} name - the name of the method to override
+     * @param {String} order - When should the script run? `'instead'`, `'before'` or `'after'`
+     * @param {String} script - the source code of the script
+     * @see {Numbas.parts.Part#applyScripts}
+     */
+    setScript: function(name,order,script) {
+        var withEnv = {
+            variables: this.question.unwrappedVariables,
+            question: this.question,
+            part: this
+        };
+        with(withEnv) {
+            script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
+        }
+        this.scripts[name] = {script: script, order: order};
+    },
 	
 	/** The question this part belongs to
 	 * @type {Numbas.Question}
@@ -386,7 +465,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 	},
 
-	/** Associated display object
+	/** Associated display object. It is not safe to assume this is always present - in the editor, parts have no display.
 	 * @type {Numbas.display.PartDisplay}
 	 */
 	display: undefined,
@@ -398,7 +477,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	giveWarning: function(warning)
 	{
 		this.warnings.push(warning);
-		this.display.warning(warning);
+		this.display && this.display.warning(warning);
 	},
 
 	/** Set the list of warnings
@@ -407,7 +486,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	setWarnings: function(warnings) {
 		this.warnings = warnings;
-		this.display.setWarnings(warnings);
+		this.display && this.display.setWarnings(warnings);
 	},
 
 	/** Remove all warnings
@@ -475,7 +554,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	storeAnswer: function(answerList) {
 		this.stagedAnswer = answerList;
 		this.setDirty(true);
-		this.display.removeWarnings();
+		this.display && this.display.removeWarnings();
 	},
 
 	/** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
@@ -484,11 +563,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	setDirty: function(dirty) {
 		this.isDirty = dirty;
 		if(this.display) {
-			this.display.isDirty(dirty);
+			this.display && this.display.isDirty(dirty);
 			if(dirty && this.parentPart) {
 				this.parentPart.setDirty(true);
 			}
-			this.question.display.isDirty(this.question.isDirty());
+			this.question.display && this.question.display.isDirty(this.question.isDirty());
 		}
 	},
 
@@ -497,7 +576,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	submit: function() {
 		this.shouldResubmit = false;
-		this.display.removeWarnings();
+		this.display && this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
 		this.submitting = true;
@@ -589,8 +668,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 				);
 		}
 
-		Numbas.store.partAnswered(this);
-		this.display.showScore(this.answered);
+		this.store && this.store.partAnswered(this);
+		this.display && this.display.showScore(this.answered);
 
 		this.submitting = false;
 
@@ -814,6 +893,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         part.answered = valid;
     },
 
+    marking_parameters: function(studentAnswer) {
+        return {
+            path: this.path,
+            studentAnswer: studentAnswer, 
+            settings: jme.wrapValue(this.settings), 
+            marks: new jme.types.TNum(this.marks),
+            partType: new jme.types.TString(this.type),
+            gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME())})),
+            steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME())}))
+        };
+    },
+
     /** Run the marking script against the given answer.
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      * @param {Numbas.jme.token} studentAnswer
@@ -823,14 +914,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     mark_answer: function(studentAnswer) {
         var result = this.markingScript.evaluate(
             this.question.scope, 
-            {
-                studentAnswer: studentAnswer, 
-                settings: jme.wrapValue(this.settings), 
-                marks: new jme.types.TNum(this.marks),
-                partType: new jme.types.TString(this.type),
-                gaps: jme.wrapValue(this.gaps.map(function(g){return g.path})),
-                steps: jme.wrapValue(this.steps.map(function(s){return s.path}))
-            }
+            this.marking_parameters(studentAnswer)
         );
         if(result.state_errors.mark) {
             throw(result.state_errors.mark);
@@ -932,7 +1016,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.calculateScore();
         }
 		if(!dontStore) {
-			Numbas.store.stepsShown(this);
+			this.store && this.store.stepsShown(this);
 		}
 	},
 
@@ -940,7 +1024,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	openSteps: function() {
 		this.stepsOpen = true;
-		this.display.showSteps();
+		this.display && this.display.showSteps();
 	},
 
 	/** Close the steps box. This doesn't affect the steps penalty.
@@ -948,8 +1032,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	hideSteps: function()
 	{
 		this.stepsOpen = false;
-		this.display.hideSteps();
-		Numbas.store.stepsHidden(this);
+		this.display && this.display.hideSteps();
+		this.store && this.store.stepsHidden(this);
 	},
 
 	/** Reveal the correct answer to this part
@@ -957,7 +1041,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	revealAnswer: function(dontStore)
 	{
-		this.display.revealAnswer();
+		this.display && this.display.revealAnswer();
 		this.revealed = true;
         this.setDirty(false);
 

@@ -181,4 +181,41 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
         }
     }
 
+    ko.bindingHandlers.reorder_table = {
+        // reorder the rows and columns of a table, including the header
+        // value is an object {rows, columns, leaders}
+        // rows and columns are permutations
+        // leaders is the number of columns at the start of each row to ignore (so column headers aren't moved)
+        init: function(element, valueAccessor) {
+            var value = ko.unwrap(valueAccessor());
+            var row_order = value.rows;
+            var column_order = value.columns;
+            var leaders = value.leaders || 0;
+            Array.prototype.forEach.call(element.querySelectorAll('tr'),function(r) {
+                var columns = Array.prototype.slice.call(r.querySelectorAll('td,th'),leaders);
+                for(var i=0;i<column_order.length;i++) {
+                    r.appendChild(columns[column_order[i]]);
+                }
+            });
+            Array.prototype.forEach.call(element.querySelectorAll('tbody'),function(body) {
+                var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
+                for(var i=0;i<row_order.length;i++) {
+                    body.appendChild(rows[row_order[i]]);
+                }
+            })
+        }
+    }
+
+    ko.bindingHandlers.reorder_list = {
+        init: function(element, valueAccessor) {
+            var value = ko.unwrap(valueAccessor());
+            var order = value.order;
+            var leaders = value.leaders || 0;
+            var items = Array.prototype.slice.call(element.children, leaders);
+            for(var i=0;i<order.length;i++) {
+                element.appendChild(items[order[i]]);
+            }
+        }
+    }
+
 });

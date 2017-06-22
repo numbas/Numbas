@@ -4,17 +4,17 @@
 	<span localise-data-jme-context-description="part.mcq.choices">
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<ul class="multiplechoice clearfix">
+            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
 				<xsl:apply-templates select="choice" mode="radiogroup"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<ul class="multiplechoice clearfix">
+            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
 				<xsl:apply-templates select="choice" mode="checkbox"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed">
+            <select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}">
 				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist"/>
 			</select>
@@ -28,17 +28,17 @@
 	<span>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<ul class="multiplechoice clearfix">
+			<ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
 				<xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<ul class="multiplechoice clearfix">
+			<ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
 				<xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
 			</ul>
 		</xsl:when>
 		<xsl:when test="@displaytype='dropdownlist'">
-			<select class="multiplechoice" data-bind="value: correctAnswer" disabled="true">
+			<select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}" disabled="true">
 				<option value=""></option>
 				<xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
 			</select>

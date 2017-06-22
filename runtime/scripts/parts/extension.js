@@ -23,16 +23,20 @@ var util = Numbas.util;
 var Part = Numbas.parts.Part;
 
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
- * The idea 
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, loading)
+var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart)
 {
-	this.display = new Numbas.display.ExtensionPartDisplay(this);
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
+    finaliseLoad: function() {
+        if(Numbas.display) {
+        	this.display = new Numbas.display.ExtensionPartDisplay(this);
+        }
+    },
+
 	validate: function() {
         return false;
 	},
@@ -58,12 +62,18 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
      * @ param {object} data
      */
     loadSuspendData: function(data) {
-        var pobj = Numbas.store.loadExtensionPart(this);
+        if(!this.store) {
+            return;
+        }
+        var pobj = this.store.loadExtensionPart(this);
         if(pobj) {
             return pobj.extension_data;
         }
     }
 };
+['finaliseLoad'].forEach(function(method) {
+    ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
+});
 
 Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
 });

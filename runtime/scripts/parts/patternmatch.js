@@ -1,66 +1,69 @@
 /*
 Copyright 2011-15 Newcastle University
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-   */
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
-   /** @file The {@link Numbas.parts.PatternMatchPart} object */
+/** @file The {@link Numbas.parts.PatternMatchPart} object */
 
-   Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
+Numbas.queueScript('parts/patternmatch',['base','display','jme','jme-variables','xml','util','scorm-storage','part','marking_scripts'],function() {
 
-   	var util = Numbas.util;
-   	var jme = Numbas.jme;
-   	var math = Numbas.math;
-   	var tryGetAttribute = Numbas.xml.tryGetAttribute;
+var util = Numbas.util;
+var jme = Numbas.jme;
+var math = Numbas.math;
+var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
-   	var Part = Numbas.parts.Part;
+var Part = Numbas.parts.Part;
 
 /** Text-entry part - student's answer must match the given regular expression
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
- var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading)
- {
+var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading) {
  	var settings = this.settings;
  	util.copyinto(PatternMatchPart.prototype.settings,settings);
+}
+PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 
- 	settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(this.xml.selectSingleNode('correctanswer')));
+    loadFromXML: function(xml) {
+        var settings = this.settings;
+        settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
+        tryGetAttribute(settings,xml,'correctanswer',['mode'],['matchMode']);
+        var displayAnswerNode = xml.selectSingleNode('displayanswer');
+        if(!displayAnswerNode)
+            this.error('part.patternmatch.display answer missing');
+        settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+        tryGetAttribute(settings,xml,'case',['sensitive','partialCredit'],'caseSensitive');
+    },
 
- 	tryGetAttribute(settings,this.xml,'correctanswer',['mode'],['matchMode']);
+    finaliseLoad: function() {
+        this.getCorrectAnswer(this.question.scope);
+        this.display = new Numbas.display.PatternMatchPartDisplay(this);
+    },
 
- 	var displayAnswerNode = this.xml.selectSingleNode('displayanswer');
- 	if(!displayAnswerNode)
- 		this.error('part.patternmatch.display answer missing');
- 	settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
-
- 	this.getCorrectAnswer(this.question.scope);
-
- 	tryGetAttribute(settings,this.xml,'case',['sensitive','partialCredit'],'caseSensitive');
-
- 	this.display = new Numbas.display.PatternMatchPartDisplay(this);
-
- 	if(loading)
- 	{
- 		var pobj = Numbas.store.loadPatternMatchPart(this);
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+ 		var pobj = this.store.loadPatternMatchPart(this);
  		this.stagedAnswer = [pobj.studentAnswer];
- 	}
- }
- PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
+    },
+
 	/** The student's last submitted answer 
 	 * @type {String}
 	 */
-	 studentAnswer: '',
+	studentAnswer: '',
 
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
@@ -76,8 +79,7 @@ Copyright 2011-15 Newcastle University
 	 * @property {Boolean} caseSensitive - does case matter?
 	 * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
 	 */
-	 settings: 
-	 {
+	settings: {
 	 	correctAnswerString: '.*',
 	 	correctAnswer: /.*/,
 	 	displayAnswerString: '',
@@ -85,10 +87,10 @@ Copyright 2011-15 Newcastle University
 	 	caseSensitive: false,
 	 	partialCredit: 0,
 	 	matchMode: 'regex'
-	 },
+    },
 
 	/** Compute the correct answer, based on the given scope
-	*/
+	 */
 	getCorrectAnswer: function(scope) {
 		var settings = this.settings;
 
@@ -104,20 +106,23 @@ Copyright 2011-15 Newcastle University
 	},
 
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
-	*/
+	 */
 	setStudentAnswer: function() {
 		this.studentAnswer = this.answerList[0];
 	},
 
 	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
 	 * @abstract
-	 * @returns {Numbas.jme.token}
-	 */
-	 rawStudentAnswerAsJME: function() {
-	 	return new Numbas.jme.types.TString(this.studentAnswer);
-	 },
+   	 * @returns {Numbas.jme.token}
+  	 */
+	rawStudentAnswerAsJME: function() {
+	    return new Numbas.jme.types.TString(this.studentAnswer);
+	},
 
-	};
+};
+['finaliseLoad','resume','loadFromXML'].forEach(function(method) {
+    PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
+});
 
-	Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
+Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
 });

@@ -2,7 +2,7 @@
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
 	<form>
-		<table class="choices-grid">
+        <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
 			<thead localise-data-jme-context-description="part.mcq.answers">
 				<td/>
 				<xsl:for-each select="answers/answer">
@@ -26,7 +26,7 @@
 	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
 		<form>
-		<table class="choices-grid">
+		<table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
 			<thead>
 				<td/>
 				<xsl:for-each select="answers/answer">

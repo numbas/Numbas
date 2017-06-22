@@ -196,7 +196,10 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 		var parts = q.xml.selectNodes('parts/part');
 		for(var j = 0; j<parts.length; j++)
 		{
-			var part = Numbas.createPart(parts[j], 'p'+j,q,null, loading);
+			var part = Numbas.createPartFromXML(parts[j], 'p'+j,q,null);
+            if(loading) {
+                part.resume();
+            }
 			q.parts[j] = part;
 			q.marks += part.marks;
 		}
