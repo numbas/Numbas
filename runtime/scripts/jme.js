@@ -1089,8 +1089,11 @@ function mergeRulesets(r1,r2) {
 	return new Ruleset(rules, flags);
 }
 
-//collect a ruleset together from a list of ruleset names, or rulesets.
-// set can be a comma-separated string of ruleset names, or an array of names/Ruleset objects.
+/** Collect a ruleset together from a list of ruleset names, or rulesets.
+ * @param {String|Array.<String|Numbas.jme.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {Object.<Numbas.jme.Ruleset>} - Dictionary of rulesets defined in the current scope.
+ * @returns Numbas.jme.Ruleset
+ */
 var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 {
 	scopeSets = util.copyobj(scopeSets);
