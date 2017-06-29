@@ -484,6 +484,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	 */
 	evaluate: function(tree,scope)
 	{
+        if(!scope) {
+            throw(new Numbas.Error('jme.evaluate.no scope given'));
+        }
+
 		//if a string is given instead of an expression tree, compile it to a tree
 		if( typeof(tree)=='string' )
 			tree = jme.compile(tree,scope);
