@@ -1106,6 +1106,7 @@ var collectRuleset = jme.collectRuleset = function(set,scopeSets)
 
 	if(typeof(set)=='string') {
 		set = set.split(',');
+        set.splice(0,0,'basic');
 	}
 	else {
 		flags = $.extend(flags,set.flags);
