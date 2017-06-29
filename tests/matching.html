@@ -4,14 +4,17 @@
 	<title>Pattern-matching algebraic expressions</title>
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-rules.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-builtins.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
 
 		<!-- R.js - localisation -->
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/R/R.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="../locales/en-GB.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/i18next/i18next.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="locales.js"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
@@ -158,10 +161,8 @@
 		</div>
 
 		<script type="text/javascript">
-			Numbas.queueScript('seedrandom',[],function() {});
-			Numbas.queueScript('knockout',[],function() {});
-			Numbas.queueScript('sarissa',[],function() {});
-			Numbas.queueScript('go',['jme'],function() {
+			Numbas.queueScript('base',[],function() {});
+			Numbas.queueScript('go',['jme','localisation'],function() {
 				function ViewModel() {
 					var vm = this;
 					this.pattern = ko.observable('');

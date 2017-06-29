@@ -495,6 +495,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	 */
 	evaluate: function(tree,scope)
 	{
+        if(!scope) {
+            throw(new Numbas.Error('jme.evaluate.no scope given'));
+        }
         return scope.evaluate(tree);
 	},
 
