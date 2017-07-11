@@ -1538,8 +1538,7 @@ Rule.prototype = /** @lends Numbas.jme.display.Rule.prototype */ {
 
 var endTermNames = {
 	'??':true,
-	'm_nothing':true,
-	'm_number': true
+	'm_nothing':true
 }
 function isEndTerm(term) {
 	while(term.tok.type=='function' && /^m_(?:all|pm|not|commute)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
@@ -1817,17 +1816,39 @@ function matchTree(ruleTree,exprTree,doCommute)
 			if(ruleTok.type!=exprTok.type || ruleTok.name!=exprTok.name) {
 				return false;
 			}
+            var i = 0;
+            var j = 0;
 			for(var i=0;i<ruleTree.args.length;i++)
 			{
-				var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
-				if(m==false) {
-					return false;
-				} else {
-					for(var x in m) {
-						d[x]=m[x];
-					}
-				}
+                if(jme.isFunction(ruleTree.args[i].tok,'m_all')) {
+                    while(j<exprTree.args.length) {
+                        var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
+                        if(!m) {
+                            break;
+                        }
+                        for(var x in m) {
+                            d[x]=m[x];
+                        }
+                        j += 1;
+                    }
+                } else if(jme.isName(ruleTree.args[i].tok,'m_nothing')) {
+                    continue;
+                } else {
+                    var m = matchTree(ruleTree.args[i],exprTree.args[j],doCommute);
+                    if(m===false) {
+                        return false;
+                    } else {
+                        for(var x in m) {
+                            d[x]=m[x];
+                        }
+                        j += 1;
+                    }
+                }
 			}
+            // if not all terms in the rule have been matched, the rule doesn't match
+            if(j<i) {
+                return false;
+            }
 			return d
 		}
 	case 'name':
