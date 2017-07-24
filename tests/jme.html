@@ -591,8 +591,16 @@
 					equals(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');
 					equals(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
 					equals(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
-					equals(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
-				});
+                    equals(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
+                });
+
+                test('Currency',function() {
+                    equals(evaluate('currency(2.01,"£","p")').value,'£2.01','currency(2.01,"£","p")');
+                    equals(evaluate('currency(2.00001,"£","p")').value,'£2','currency(2.00001,"£","p")');
+                    equals(evaluate('currency(2.999,"£","p")').value,'£3','currency(2.999,"£","p")');
+                    equals(evaluate('currency(0.999,"£","p")').value,'£1','currency(0.999,"£","p")');
+                    equals(evaluate('currency(0.99,"£","p")').value,'99p','currency(0.99,"£","p")');
+                });
 
 				test('Random numbers',function() {
 					var acc = true;

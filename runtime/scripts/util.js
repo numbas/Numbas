@@ -527,7 +527,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * @example currency(5.3,'£','p') => £5.30
 	 * @param {Number} n
 	 * @param {String} prefix - symbol to use in front of currency if abs(n) >= 1
-	 * @param {String} suffix - symbol to use in front of currency if abs(n) <= 1
+	 * @param {String} suffix - symbol to use after currency if abs(n) <= 1
 	 */
 	currency: function(n,prefix,suffix) {
 		if(n<0)
@@ -536,14 +536,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return prefix+'0';
 		}
 
-		var s = Numbas.math.niceNumber(Math.floor(100*n));
-		if(Math.abs(n)>=1) {
-			if(n%1<0.005)
-				return prefix+Numbas.math.niceNumber(n);
-			s = s.replace(/(..)$/,'.$1');
-			return prefix+s
+        // convert n to a whole number of pence, as a string
+		var s = Numbas.math.niceNumber(100*n,{precisionType:'dp',precision:0});
+		if(n >= 0.995) {
+			if(n%1 < 0.005) {
+				return prefix+Numbas.math.niceNumber(Math.floor(n));
+            } else if(n%1 >= 0.995) {
+                return prefix+Numbas.math.niceNumber(Math.ceil(n));
+            }
+			s = s.replace(/(..)$/,'.$1');   // put a dot before the last two digits, representing the pence
+			return prefix + s
 		} else {
-			return s+suffix;
+			return s + suffix;
 		}
 	},
 
