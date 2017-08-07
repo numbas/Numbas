@@ -138,7 +138,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     finaliseLoad: function() {
         this.stagedAnswer = [''];
         this.getCorrectAnswer(this.getScope());
-        this.display = new Numbas.display.JMEPartDisplay(this);
+        if(Numbas.display) {
+            this.display = new Numbas.display.JMEPartDisplay(this);
+        }
     },
 
 	/** Student's last submitted answer
@@ -258,4 +260,3 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 Numbas.partConstructors['jme'] = util.extend(Part,JMEPart);
 
 });
-

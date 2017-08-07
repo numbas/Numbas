@@ -99,7 +99,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
         }
 
-        this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+        if(Numbas.display) {
+            this.display = new Numbas.display.MatrixEntryPartDisplay(this);
+        }
     },
 
 	/** The student's last submitted answer */
@@ -123,6 +125,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	 * @property {Number} precision - how many decimal places or significant figures to require
 	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
 	 */
 	settings: {
 		correctAnswer: null,
@@ -134,9 +137,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		markPerCell: false,
 		allowFractions: false,
 		precisionType: 'none',	//'none', 'dp' or 'sigfig'
+        precisionString: '0',
 		precision: 0,
-		precisionPC: 0,	//fraction of credit to take away if precision wrong
-		precisionMessage: R('You have not given your answer to the correct precision.')	//message to give to student if precision wrong
+		precisionPC: 0,
+		precisionMessage: R('You have not given your answer to the correct precision.'),
+        strictPrecision: true
 	},
 
 	/** Compute the correct answer, based on the given scope

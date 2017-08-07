@@ -64,7 +64,8 @@ correctExpr (The correct answer, parsed):
 correctVars (Variables used in the correct answer): 
     set(findvars(correctExpr))-set(scope_vars)
 
-vRange (The range to pick variable values from): settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
+vRange (The range to pick variable values from): 
+    settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
 
 vset (The sets of variable values to test against):
     repeat(

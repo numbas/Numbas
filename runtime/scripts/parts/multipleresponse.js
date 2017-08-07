@@ -101,7 +101,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.error('part.mcq.choices missing');
         }
 
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswers','maxAnswers','choiceOrder']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswersString','maxAnswersString','choiceOrder']);
 
         var choiceNodes = choicesNode.selectNodes('choice');
 
@@ -314,33 +314,25 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.marks = util.parseNumber(this.marks) || 0;
         settings.minimumMarks = util.parseNumber(settings.minimumMarks) || 0;
 
-        var minAnswers = jme.subvars(settings.minAnswers, scope);
-        minAnswers = jme.evaluate(settings.minAnswers, scope);
+        var minAnswers = jme.subvars(settings.minAnswersString, scope);
+        minAnswers = jme.evaluate(minAnswers, scope);
         if(minAnswers && minAnswers.type=='number') {
             settings.minAnswers = minAnswers.value;
         } else {
-            this.error('part.setting not present','minimum answers');
+            this.error('part.setting not present',{property: 'minimum answers'});
         }
 
-        var maxAnswers = jme.subvars(settings.maxAnswers, scope);
-        maxAnswers = jme.evaluate(settings.maxAnswers, scope);
+        var maxAnswers = jme.subvars(settings.maxAnswersString, scope);
+        maxAnswers = jme.evaluate(maxAnswers, scope);
         if(maxAnswers && maxAnswers.type=='number') {
             settings.maxAnswers = maxAnswers.value;
         } else {
-            this.error('part.setting not present','maximum answers');
+            this.error('part.setting not present',{property: 'maximum answers'});
         }
 
         // fill layout matrix
         var layout = this.layout = [];
         if(this.type=='m_n_x') {
-            var layoutTypes = {
-                all: function(row,column) { return true; },
-                lowertriangle: function(row,column) { return row>=column; },
-                strictlowertriangle: function(row,column) { return row>column; },
-                uppertriangle: function(row,column) { return row<=column; },
-                strictuppertriangle: function(row,column) { return row<column; },
-                expression: function(row,column) { return layoutMatrix[row][column]; }
-            };
             if(settings.layoutType=='expression') {
                 // expression can either give a 2d array (list of lists) or a matrix
                 // note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
@@ -348,7 +340,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 // I have only myself to thank for this - CP
                 var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,scope));
             }
-            var layoutFunction = layoutTypes[settings.layoutType];
+            var layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             for(var i=0;i<this.numAnswers;i++) {
                 var row = [];
                 for(var j=0;j<this.numChoices;j++) {
@@ -427,7 +419,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
 
-        this.display = new Numbas.display.MultipleResponsePartDisplay(this);
+        if(Numbas.display) {
+            this.display = new Numbas.display.MultipleResponsePartDisplay(this);
+        }
     },
 
     /** Student's last submitted answer/choice selections
@@ -458,24 +452,32 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
-     * @property {Number} minAnswers - minimum number of responses the student must select
-     * @property {Number} maxAnswers - maxmimum number of responses the student must select
+     * @property {String} minAnswersString - minimum number of responses the student must select, without variables substituted in.
+     * @property {String} maxAnswersString - maxmimum number of responses the student must select, without variables substituted in.
+     * @property {Number} minAnswers - minimum number of responses the student must select. Generated from `minAnswersString`.
+     * @property {Number} maxAnswers - maxmimum number of responses the student must select. Generated from `maxAnswersString`.
      * @property {String} choiceOrder - order in which to display choices - either `random` or `fixed`
      * @property {String} answerOrder - order in which to display answers - either `random` or `fixed`
      * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
      * @property {String} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
      * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
+     * @property {String} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}
+     * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
      */
     settings:
     {
         maxMarksEnabled: false,        //is there a maximum number of marks the student can get?
-        minAnswers: '0',                //minimum number of responses student must select
-        maxAnswers: '0',                //maximum ditto
+        minAnswersString: '0',                //minimum number of responses student must select
+        maxAnswersString: '0',                //maximum ditto
+        minAnswers: 0,                //minimum number of responses student must select
+        maxAnswers: 0,                //maximum ditto
         choiceOrder: '',            //order in which to display choices
         answerOrder: '',            //order in which to display answers
         matrix: [],                    //marks matrix
         displayType: '',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-        warningType: ''                //what to do if wrong number of responses
+        warningType: '',                //what to do if wrong number of responses
+        layoutType: 'all',
+        layoutExpression: ''
     },
 
     /** Compute the correct answer, based on the given scope
@@ -677,6 +679,19 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 ['revealAnswer'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
+
+
+/** Layouts for multiple response types
+ * @type {Object.<function>
+ */
+Numbas.parts.MultipleResponsePart.layoutTypes = {
+    all: function(row,column) { return true; },
+    lowertriangle: function(row,column) { return row>=column; },
+    strictlowertriangle: function(row,column) { return row>column; },
+    uppertriangle: function(row,column) { return row<=column; },
+    strictuppertriangle: function(row,column) { return row<column; },
+    expression: function(row,column) { return layoutMatrix[row][column]; }
+};
 
 Numbas.partConstructors['1_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_2'] = util.extend(Part,MultipleResponsePart);

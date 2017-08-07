@@ -60,6 +60,7 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart)
 	{
 		var cons = partConstructors[type];
 		var part = new cons(path, question, parentPart);
+        part.type = type;
 		if(part.customConstructor) {
 			part.customConstructor.apply(part);
 		}
@@ -582,7 +583,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.jme.Scope}
      */
     getScope: function() {
-        return this.question ? this.question.scope : Numbas.jme.builtinScope;
+        if(!this.scope) {
+            if(this.question) {
+                this.scope = this.question.scope;
+            } else {
+                this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
+            }
+        }
+        return this.scope;
     },
 
 	/** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
@@ -949,7 +957,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		var oCredit = this.credit;
 		this.credit = credit;
 		this.markingFeedback.push({
-			op: 'addCredit',
+			op: 'add_credit',
 			credit: this.credit - oCredit,
 			message: message
 		});
@@ -963,7 +971,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	{
 		this.credit += credit;
 		this.markingFeedback.push({
-			op: 'addCredit',
+			op: 'add_credit',
 			credit: credit,
 			message: message
 		});
@@ -992,7 +1000,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		var oCredit = this.credit
 		this.credit *= factor;
 		this.markingFeedback.push({
-			op: 'addCredit',
+			op: 'add_credit',
 			credit: this.credit - oCredit,
 			message: message
 		});

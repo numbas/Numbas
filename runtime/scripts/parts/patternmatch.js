@@ -49,7 +49,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());
-        this.display = new Numbas.display.PatternMatchPartDisplay(this);
+        if(Numbas.display) {
+            this.display = new Numbas.display.PatternMatchPartDisplay(this);
+        }
     },
 
     resume: function() {

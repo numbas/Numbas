@@ -117,6 +117,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 * @property {Number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
 	 * @property {Number} precisionString - definition of precision setting, before variables are substituted in
+     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
 	 * @property {Number} precision - how many decimal places or significant figures to require
 	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision

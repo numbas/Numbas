@@ -16,6 +16,11 @@
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/part.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/numberentry.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/jme.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/matrixentry.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/multipleresponse.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/patternmatch.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/gapfill.js" charset="utf-8"></script>
 
 		<!-- R.js - localisation -->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/i18next/i18next.js"></script>
@@ -38,19 +43,92 @@
 	</head>
     <body>
         <p>This page tests standalone question parts.</p>
+        <hr>
         <script>
 			Numbas.queueScript('base',[],function() {});
-			Numbas.queueScript('go',['jme','localisation','parts/numberentry'],function() {
+			Numbas.queueScript('go',['jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill'],function() {
 				let jme = Numbas.jme;
                 let math = Numbas.math;
 
-                console.log('ok');
+                function element(name,attr,content) {
+                    var e = document.createElement(name);
+                    for(var key in attr) {
+                        e.setAttribute(key,attr[key]);
+                    }
+                    if(content!==undefined) {
+                        e.innerHTML = content;
+                    }
+                    return e;
+                }
 
-                var p = window.p = Numbas.createPart('numberentry','p0');
-                var s = p.settings;
-                s.minvalueString = '1';
-                s.maxvalueString = '1';
-                p.finaliseLoad();
+                function debug(message) {
+                    document.body.appendChild(element('p',{},message));
+                    console.log(message);
+                }
+
+                function make_part(type, settings, marks) {
+                    var p = window.p = Numbas.createPart(type,'p0');
+                    Object.assign(p.settings, settings);
+                    marks = marks === undefined ? 1 : marks;
+                    p.marks = marks;
+                    return p;
+                }
+
+                function mark_part(p, answer) {
+                    debug(`${p.type} part with answer ${JSON.stringify(answer)}`);
+                    p.finaliseLoad();
+                    var answer = answer;
+                    p.stagedAnswer = typeof(answer)=='string' ? [answer] : answer;
+                    p.submit();
+                    debug("<h3>Feedback</h3>");
+                    p.markingFeedback.forEach(m => debug(m.message));
+                    document.body.appendChild(element('hr'));
+                }
+
+                mark_part(make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}), '1');
+                mark_part(make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}), '0');
+
+                mark_part(make_part('jme', {correctAnswerString: 'x+2', failureRate: 1}), 'x+2');
+                mark_part(make_part('jme', {correctAnswerString: 'x+2', failureRate: 1}), 'x+3');
+
+                mark_part(make_part('patternmatch', {correctAnswerString: 'hi', displayAnswerString: 'hi'}), 'hi');
+                mark_part(make_part('patternmatch', {correctAnswerString: 'hi', displayAnswerString: 'hi'}), 'ahi');
+
+                mark_part(make_part('matrix', {correctAnswerString: 'id(2)'}), [2,2,[['1','0'],['0','1']]]);
+                mark_part(make_part('matrix', {correctAnswerString: 'id(2)'}), [2,2,[['1','1'],['0','0']]]);
+
+                var p = make_part('1_n_2', {markingMatrixArray: [[1],[0]], distractors: [[''],['']], minAnswersString: '1', maxAnswersString: '1'});
+                p.numAnswers = 2;
+                p.numChoices = 1;
+                mark_part(p, [[true],[false]]);
+                mark_part(p, [[false],[true]]);
+
+                var p = make_part('m_n_2', {markingMatrixArray: [[1],[1],[0]], distractors: [[''],[''],['']], minAnswersString: '1', maxAnswersString: '2'});
+                p.numAnswers = 3;
+                p.numChoices = 1;
+                mark_part(p, [[true],[true],[false]]);
+                mark_part(p, [[false],[false],[true]]);
+
+                var p = make_part('m_n_x', {markingMatrixArray: [[1,0],[0,1]], distractors: [['',''],['','']], minAnswersString: '1', maxAnswersString: '2'});
+                p.numAnswers = 2;
+                p.numChoices = 2;
+                mark_part(p, [[true,false],[false,true]]);
+                mark_part(p, [[false,true],[false,true]]);
+
+                var gaps = {
+                    'p0g0': make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}),
+                    'p0g1': make_part('jme', {correctAnswerString: 'x+2', failureRate: 1})
+                };
+                gaps['p0g0'].stagedAnswer = ['1'];
+                gaps['p0g1'].stagedAnswer = ['x+2'];
+                var p = make_part('gapfill',{},1);
+                var scope = p.getScope();
+                Object.values(gaps).forEach(function(g,i){ g.path='p0g'+i; p.addGap(g,i) });
+                scope.question = {getPart: function(path){ console.log(path); return gaps[path]; }};
+                debug("Gapfill part");
+                p.submit();
+                p.markingFeedback.forEach(m=>debug(m.message));
+                window.p = p;
             });
         </script>
 	</body>
