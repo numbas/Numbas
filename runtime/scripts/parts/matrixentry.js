@@ -37,7 +37,6 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, questio
 }
 MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 {
-
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
@@ -51,6 +50,14 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
 
+    },
+
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+
+        tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
+        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precision', 'precisionPC', 'precisionMessage', 'strictPrecision']);
     },
 
     resume: function() {

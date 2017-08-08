@@ -33,6 +33,11 @@ var InformationPart = Numbas.parts.InformationPart = function(xml, path, questio
 {
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
+    loadFromXML: function() {
+    },
+
+    loadFromJSON: function() {
+    },
     finaliseLoad: function() {
         this.answered = true;
         this.isDirty = false;

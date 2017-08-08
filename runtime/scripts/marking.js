@@ -359,10 +359,17 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return scope.variables[name];
     }
 
+    /** @typedef Numbas.marking.finalised_state
+     * @type {Object}
+     * @property {Boolean} valid - Can the answer be marked?
+     * @property {Number} credit - Proportion of the credit to award
+     * @property {Array.<Object>} states - Feedback actions
+     */
+
     /** Run through a sequence of state operations, accumulating credit.
      * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
      * @see Numbas.parts.Part#apply_feedback
-     * @returns {object} a dictionary `{valid: boolean, credit: number, states: object[]}`
+     * @returns {Numbas.marking.finalised_state} a dictionary `{valid: boolean, credit: number, states: object[]}`
      */
     marking.finalise_state = function(states) {
         var valid = true;

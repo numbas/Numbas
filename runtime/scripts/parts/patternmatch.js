@@ -47,6 +47,14 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         tryGetAttribute(settings,xml,'case',['sensitive','partialCredit'],'caseSensitive');
     },
 
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+
+        tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
+        tryLoad(data, ['caseSensitive', 'partialCredit'], settings);
+    },
+
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());
         if(Numbas.display) {

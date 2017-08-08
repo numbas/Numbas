@@ -46,6 +46,16 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         }
     },
 
+    loadFromJSON: function(data) {
+        var p = this;
+        if('gaps' in data) {
+            data.gaps.forEach(function(gd,i) {
+                var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p);
+                p.addGap(gap, i)
+            });
+        }
+    },
+
     finaliseLoad: function() {
         if(Numbas.display) {
             this.display = new Numbas.display.GapFillPartDisplay(this);

@@ -31,6 +31,10 @@ var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parent
 {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
+    loadFromXML: function() {},
+
+    loadFromJSON: function() {},
+
     finaliseLoad: function() {
         if(Numbas.display) {
         	this.display = new Numbas.display.ExtensionPartDisplay(this);

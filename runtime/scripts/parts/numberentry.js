@@ -41,7 +41,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','inputstep','allowfractions'],['correctAnswerFraction','correctAnswerStyle','inputStep','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
 
         var answerNode = xml.selectSingleNode('answer');
@@ -58,6 +58,17 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
 
+    },
+
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+
+        tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
+        tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
+        tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
+        tryLoad(data, ['notationStyles'], settings);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
     },
 
     finaliseLoad: function() {
@@ -106,7 +117,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 	/** Properties set when the part is generated
 	 * Extends {@link Numbas.parts.Part#settings}
-	 * @property {Number} inputStep - step size for the number input if it's being displayed as an `<input type=number>` control.
 	 * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
 	 * @property {Number} minvalue - minimum value marked correct
 	 * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
@@ -126,7 +136,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 	 */
 	settings:
 	{
-		inputStep: 1,
+        minvalueString: '0',
+        maxvalueString: '0',
 		minvalue: 0,
 		maxvalue: 0,
 		correctAnswerFraction: false,

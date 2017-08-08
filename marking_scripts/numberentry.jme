@@ -1,8 +1,8 @@
 studentNumber (The student's answer, parsed as a number):
     if(settings["allowFractions"],
-        parseNumber_or_fraction(studentAnswer,"en")
+        parseNumber_or_fraction(studentAnswer,settings["notationStyles"])
     ,
-        parseNumber(studentAnswer,"en")
+        parseNumber(studentAnswer,settings["notationStyles"])
     )
 
 isFraction (Is the student's answer a fraction?):
@@ -10,7 +10,7 @@ isFraction (Is the student's answer a fraction?):
 
 numerator (The numerator of the student's answer, or 0 if not a fraction):
     if(isFraction,
-        parsenumber(split(studentAnswer,"/")[0],"en")
+        parseNumber(split(studentAnswer,"/")[0],settings["notationStyles"])
     ,
         0
     )
@@ -20,7 +20,7 @@ isInteger (Is the student's answer an integer?):
 
 denominator (The numerator of the student's answer, or 0 if not a fraction):
     if(isFraction,
-        parsenumber(split(studentAnswer,"/")[1],"en")
+        parseNumber(split(studentAnswer,"/")[1],settings["notationStyles"])
     ,
         0
     )
@@ -48,7 +48,7 @@ correctPrecision (Has the student's answer been given to the desired precision?)
     if(togivenprecision(studentanswer,settings['precisionType'],settings['precision'],settings["strictPrecision"]),
         true
     ,
-        multiply_credit(0.5,settings["precisionMessage"]);
+        multiply_credit(settings["precisionPC"],settings["precisionMessage"]);
         false
     )
 

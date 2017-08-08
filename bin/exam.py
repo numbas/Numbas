@@ -1085,7 +1085,7 @@ class MultipleChoicePart(Part):
             'minimumexpected': strcons_fix(self.minAnswers),
             'maximumexpected': strcons_fix(self.maxAnswers),
             'displaycolumns': strcons_fix(self.displayColumns),
-            'order': strcons('random' if self.shuffleChoices else 'fixed'),
+            'shuffle': strcons_fix(self.shuffleChoices),
             'displaytype': strcons(self.displayType)
         }
 
@@ -1096,7 +1096,7 @@ class MultipleChoicePart(Part):
                 choices.append(makeTree(['choice',makeContentNode(choice)]))
 
         answers = part.find('answers')
-        answers.attrib = {'order': 'random' if self.shuffleAnswers else 'fixed'}
+        answers.attrib = {'order': strcons_fix(self.shuffleAnswers)}
         if isinstance(self.answers,str):
             answers.attrib['def'] = strcons(self.answers)
         else:

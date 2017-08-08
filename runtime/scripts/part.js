@@ -93,6 +93,25 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
     return part;
 }
 
+/** Create a question part based on an XML definition.
+ * @param {Object} data
+ * @param {partpath} path
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @returns {Numbas.parts.Part}
+ * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
+ * @memberof Numbas
+ */
+var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart) {
+    if(!data.type) {
+		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
+	}
+    var part = createPart(data.type,path, question, parentPart);
+    part.loadFromJSON(data);
+    part.finaliseLoad();
+    return part;
+}
+
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
@@ -837,6 +856,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
      * @see Numbas.parts.Part.settings.markingScript
      * @see Numbas.parts.Part.answered
+     * @returns {Numbas.marking.finalised_state}
      */
     mark: function() {
 		if(this.answerList==undefined) {
@@ -846,9 +866,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		
         var result = this.mark_answer(this.rawStudentAnswerAsJME());
 
-        this.apply_feedback(marking.finalise_state(result.states.mark));
+        var finalised_result = marking.finalise_state(result.states.mark)
+        this.apply_feedback(finalised_result);
 
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
+
+        return finalised_result;
     },
 
     /** Apply a finalised list of feedback states to this part.
@@ -920,7 +943,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     marking_parameters: function(studentAnswer) {
         return {
-            path: this.path,
+            path: jme.wrapValue(this.path),
             studentAnswer: studentAnswer, 
             settings: jme.wrapValue(this.settings), 
             marks: new jme.types.TNum(this.marks),

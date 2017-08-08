@@ -41,24 +41,6 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
     var settings = this.settings;
     util.copyinto(MultipleResponsePart.prototype.settings,settings);
 
-    /*
-    // apply shuffling to XML nodes, so the HTML to display is generated in the right order
-    for(i=0;i<this.numAnswers;i++) {
-        answersNode.removeChild(answerNodes[i]);
-    }
-    for(i=0;i<this.numAnswers;i++) {
-        answersNode.appendChild(answerNodes[this.shuffleAnswers[i]]);
-    }
-    if(this.type == 'm_n_x') {
-        for(var i=0;i<this.numChoices;i++) {
-            choicesNode.removeChild(choiceNodes[i]);
-        }
-        for(i=0;i<this.numChoices;i++) {
-            choicesNode.appendChild(choiceNodes[this.shuffleChoices[i]]);
-        }
-    }
-    */
-
 }
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
@@ -73,13 +55,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             // so swap "answers" and "choices"
             // this all stems from an extremely bad design decision made very early on
             this.flipped = true;
-            this.numChoices = 1;
-            settings.answerOrder = settings.choiceOrder;
-            settings.choiceOrder = '';
         } else {
             this.flipped = false;
         }
-
 
         //work out marks available
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
@@ -101,7 +79,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.error('part.mcq.choices missing');
         }
 
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','order','displayType'],['minAnswersString','maxAnswersString','choiceOrder']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffleChoices','displayType'],['minAnswersString','maxAnswersString','shuffleChoices']);
 
         var choiceNodes = choicesNode.selectNodes('choice');
 
@@ -112,14 +90,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             // so swap "answers" and "choices"
             // this all stems from an extremely bad design decision made very early on
             this.numAnswers = choiceNodes.length;
-            answersNode = choicesNode;
             answerNodes = choiceNodes;
             choicesNode = null;
         } else {
             this.numChoices = choiceNodes.length;
             answersNode = xml.selectSingleNode('answers');
             if(answersNode) {
-                tryGetAttribute(settings,null,answersNode,'order','answerOrder');
+                tryGetAttribute(settings,null,answersNode,'shuffleAnswers','shuffleAnswers');
                 answerNodes = answersNode.selectNodes('answer');
                 this.numAnswers = answerNodes.length;
             }
@@ -262,6 +239,85 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         settings.distractors = distractors;
     },
 
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        var scope = this.getScope();
+
+        //get number of answers and answer order setting
+        if(this.type == '1_n_2' || this.type == 'm_n_2') {
+            // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
+            // so swap "answers" and "choices"
+            // this all stems from an extremely bad design decision made very early on
+            this.flipped = true;
+        } else {
+            this.flipped = false;
+        }
+
+        tryLoad(data, ['maxMarks'], this, ['marks']);
+        tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
+        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType']);
+        tryLoad(data, ['warningType'], settings);
+        tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
+
+        if('choices' in data) {
+            if(typeof(data.choices)=='string') {
+                choices = jme.evaluate(data.choices, scope);
+                if(settings.choices.type!='list') {
+                    this.error('part.mcq.options def not a list','choice');
+                }
+                settings.choices = jme.unwrapValue(choices);
+            } else {
+                settings.choices = data.choices;
+            }
+            this.numChoices = settings.choices.length;
+        }
+
+        if('answers' in data) {
+            if(typeof(data.answers)=='string') {
+                answers = jme.evaluate(data.answers, scope);
+                if(settings.answers.type!='list') {
+                    this.error('part.mcq.options def not a list','answer');
+                }
+                settings.answers = jme.unwrapValue(answers);
+            } else {
+                settings.answers = data.answers;
+            }
+            this.numAnswers = settings.answers.length;
+        }
+
+        if(this.flipped) {
+            this.numAnswers = 1;
+        }
+
+        if(typeof(data.matrix)=='string') {
+            settings.markingMatrixString = data.matrix;
+        } else {
+            settings.markingMatrixArray = data.matrix;
+        }
+
+        tryLoad(data, ['distractors'], settings);
+        if(!settings.distractors) {
+            console.log(this.type, this.numChoices, this.numAnswers);
+            settings.distractors = [];
+            for(var i=0;i<this.numChoices; i++) {
+                var row = [];
+                for(var j=0;j<this.numAnswers; j++) {
+                    row.push('');
+                }
+                settings.distractors.push(row);
+            }
+        }
+
+        if(this.flipped) {
+            this.numAnswers = this.numChoices;
+            this.numChoices = 1;
+            this.answers = this.choices;
+            this.choices = null;
+        }
+
+    },
+
     resume: function() {
         if(!this.store) {
             return;
@@ -293,19 +349,19 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
-            settings.answerOrder = settings.choiceOrder;
-            settings.choiceOrder = '';
+            settings.shuffleAnswers = settings.shuffleChoices;
+            settings.shuffleChoices = false;
         }
 
         this.shuffleChoices = [];
-        if(settings.choiceOrder=='random') {
+        if(settings.shuffleChoices) {
             this.shuffleChoices = math.deal(this.numChoices);
         } else {
             this.shuffleChoices = math.range(this.numChoices);
         }
 
         this.shuffleAnswers = [];
-        if(settings.answerOrder=='random') {
+        if(settings.shuffleAnswers) {
             this.shuffleAnswers = math.deal(this.numAnswers);
         } else {
             this.shuffleAnswers = math.range(this.numAnswers);
@@ -456,8 +512,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {String} maxAnswersString - maxmimum number of responses the student must select, without variables substituted in.
      * @property {Number} minAnswers - minimum number of responses the student must select. Generated from `minAnswersString`.
      * @property {Number} maxAnswers - maxmimum number of responses the student must select. Generated from `maxAnswersString`.
-     * @property {String} choiceOrder - order in which to display choices - either `random` or `fixed`
-     * @property {String} answerOrder - order in which to display answers - either `random` or `fixed`
+     * @property {String} shuffleChoices - should the order of choices be randomised?
+     * @property {String} shuffleAnswers - should the order of answers be randomised?
      * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
      * @property {String} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
      * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
@@ -471,8 +527,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         maxAnswersString: '0',                //maximum ditto
         minAnswers: 0,                //minimum number of responses student must select
         maxAnswers: 0,                //maximum ditto
-        choiceOrder: '',            //order in which to display choices
-        answerOrder: '',            //order in which to display answers
+        shuffleChoices: false,
+        shuffleAnswers: false,
         matrix: [],                    //marks matrix
         displayType: '',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
         warningType: '',                //what to do if wrong number of responses

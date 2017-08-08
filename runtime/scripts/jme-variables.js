@@ -227,7 +227,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 	 */
 	makeVariables: function(todo,scope,condition,computeFn)
 	{
-		nscope = new jme.Scope(scope);
+		var nscope = new jme.Scope(scope);
         computeFn = computeFn || jme.variables.computeVariable;
 
 		var conditionSatisfied = true;

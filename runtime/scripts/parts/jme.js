@@ -127,6 +127,20 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
     },
 
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+
+        tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
+        tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
+        tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
+        tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
+        tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+
+        tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+    },
+
     resume: function() {
         if(!this.store) {
             return;
@@ -192,7 +206,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		checkingType: 'RelDiff',
 
 		checkingAccuracy: 0,
-		failureRate: 0,
+		failureRate: 1,
 
 		vsetRangeStart: 0,
 		vsetRangeEnd: 1,
