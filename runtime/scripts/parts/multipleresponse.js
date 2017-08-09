@@ -90,7 +90,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             // so swap "answers" and "choices"
             // this all stems from an extremely bad design decision made very early on
             this.numAnswers = choiceNodes.length;
-            answerNodes = choiceNodes;
+            answersNode = choicesNode;
             choicesNode = null;
         } else {
             this.numChoices = choiceNodes.length;
