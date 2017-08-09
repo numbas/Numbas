@@ -40,6 +40,8 @@ function Exam()
 
 	var settings = this.settings;
 
+    this.signals = new Numbas.schedule.SignalBox();
+
 	//load settings from XML
 	tryGetAttribute(settings,xml,'.',['name','percentPass']);
 	tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
@@ -112,7 +114,6 @@ function Exam()
 	var rulesetNodes = xml.selectNodes('settings/rulesets/set');
 
 	var sets = {};
-	sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
 	for( i=0; i<rulesetNodes.length; i++)
 	{
 		var name = rulesetNodes[i].getAttribute('name');
@@ -428,22 +429,25 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             });
         });
 		
-		job(function() {
-            this.settings.numQuestions = this.questionList.length;
+        job(function() {
+            Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','HTMLAttached']) })).then(function() {
+                exam.settings.numQuestions = exam.questionList.length;
 
-			//register questions with exam display
-			this.display.initQuestionList();
+                //register questions with exam display
+                exam.display.initQuestionList();
 
-			//calculate max marks available in exam
-			this.mark = 0;
+                //calculate max marks available in exam
+                exam.mark = 0;
 
-			//go through the questions and recalculate the part scores, then the question scores, then the exam score
-			for( i=0; i<this.settings.numQuestions; i++ )
-			{
-				this.mark += this.questionList[i].marks;
-			}
-		},this);
-    
+                //go through the questions and recalculate the part scores, then the question scores, then the exam score
+                for( i=0; i<exam.settings.numQuestions; i++ )
+                {
+                    exam.mark += exam.questionList[i].marks;
+                }
+                exam.signals.trigger('question list initialised');
+            });
+        });
+
         if(loading) {
             job(function() {
                 this.updateScore();

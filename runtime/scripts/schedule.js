@@ -136,7 +136,47 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 		var schedule = Numbas.schedule;
 
 		schedule.calls = schedule.calls.concat(schedule.lifts.pop());
-	}
+	},
 };
+
+var SignalBox = Numbas.schedule.SignalBox = function() {
+    this.callbacks = {};
+}
+SignalBox.prototype = {
+    getCallback: function(name) {
+        if(this.callbacks[name]) {
+            return this.callbacks[name];
+        }
+        var deferred = this.callbacks[name] = {};
+        deferred.promise = new Promise(function(resolve,reject) {
+            deferred.resolve = resolve;
+            deferred.reject = reject;
+        });
+        return deferred;
+    },
+
+    on: function(events, fn) {
+        var sb = this;
+        if(typeof(events)=='string') {
+            events = [events];
+        }
+        var promises = [];
+        events.forEach(function(name) {
+            var callback = sb.getCallback(name);
+            promises.push(callback.promise);
+        });
+        var promise = Promise.all(promises);
+        if(fn) {
+            promise.then(fn);
+        }
+        return promise;
+    },
+
+    trigger: function(name) {
+        var callback = this.getCallback(name);
+        callback.resolved = true;
+        callback.resolve();
+    }
+}
 
 });

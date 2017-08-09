@@ -18,15 +18,22 @@ Copyright 2011-14 Newcastle University
 
 Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension'],function() {});
 
-Numbas.queueScript('question',['base','schedule','display','jme','jme-variables','xml','util','scorm-storage','part','standard_parts'],function() {
+Numbas.queueScript('question',['base','schedule','jme','jme-variables','xml','util','scorm-storage','part','standard_parts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 
-var job = Numbas.schedule.add;
-
 var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+var job = function(fn,that) {
+    function handleError(e) {
+        e.message = R('question.error',{'number':q.number+1,message:e.message});
+        throw(e);
+    }
+    Numbas.schedule.add({task: fn, error: handleError},that);
+}
+
 
 /** Keeps track of all info to do with an instance of a single question
  *
@@ -43,11 +50,10 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 {
 	var question = this;
 	var q = question;
+    q.signals = new Numbas.schedule.SignalBox();
 	q.exam = exam;
     q.group = group;
 	q.adviceThreshold = q.exam.adviceGlobalThreshold;
-	q.xml = xml;
-	q.originalXML = q.xml;
 	q.number = number;
 	q.scope = new jme.Scope(gscope);
     q.scope.question = q;
@@ -60,60 +66,61 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 		variablesGenerated: []
 	};
 
-	//get question's name
-	tryGetAttribute(q,q.xml,'.','name');
+    q.variablesTest = {
+        condition: '',
+        maxRuns: 10
+    };
 
-	job = function(fn,that) {
-		function handleError(e) {
-			e.message = R('question.error',{'number':q.number+1,message:e.message});
-			throw(e);
-		}
-		Numbas.schedule.add({task: fn, error: handleError},that);
-	}
+	q.parts = [];
+    q.partDictionary = {};
 
-	if(loading)
-	{
-		// check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
-		var qobj = Numbas.store.loadQuestion(q);
+    q.loadFromXML(xml);
+    q.finaliseLoad();
+    if(loading) {
+        q.resume();
+    } else {
+        q.signals.trigger('generateVariables');
+    }
+}
+Question.prototype = /** @lends Numbas.Question.prototype */ 
+{
+    /** Load the question's settings from an XML <question> node
+     * @param {Element} xml
+     */
+    loadFromXML: function(xml) {
+        var q = this;
+        q.xml = xml;
+        q.originalXML = q.xml;
 
-		if(qobj.name && qobj.name!=q.name) {
-			throw(new Numbas.Error('question.loaded name mismatch'));
-		}
-	}
+        //get question's name
+        tryGetAttribute(q,q.xml,'.','name');
 
-	job(function() {
 		var preambleNodes = q.xml.selectNodes('preambles/preamble');
 		for(var i = 0; i<preambleNodes.length; i++) {
 			var lang = preambleNodes[i].getAttribute('language');
 			q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
 		}
+        q.signals.trigger('preambleLoaded');
 
-		q.runPreamble();
-	});
+		q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
+        q.signals.trigger('functionsLoaded');
 
-	job(function() {
-		var functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
-		q.scope.functions = Numbas.jme.variables.makeFunctions(functionsTodo,q.scope,{question:q});
 		//make rulesets
 		var rulesetNodes = q.xml.selectNodes('rulesets/set');
 
-		var sets = {};
-		sets['default'] = ['unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'];
-		for(var i=0; i<rulesetNodes.length; i++)
-		{
+		q.rulesets = {};
+		for(var i=0; i<rulesetNodes.length; i++) {
 			var name = rulesetNodes[i].getAttribute('name');
 			var set = [];
 
 			//get new rule definitions
 			defNodes = rulesetNodes[i].selectNodes('ruledef');
-			for( var j=0; j<defNodes.length; j++ )
-			{
+			for( var j=0; j<defNodes.length; j++ ) {
 				var pattern = defNodes[j].getAttribute('pattern');
 				var result = defNodes[j].getAttribute('result');
 				var conditions = [];
 				var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-				for(var k=0; k<conditionNodes.length; k++)
-				{
+				for(var k=0; k<conditionNodes.length; k++) {
 					conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
 				}
 				var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
@@ -122,123 +129,171 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 
 			//get included sets
 			var includeNodes = rulesetNodes[i].selectNodes('include');
-			for(var j=0; j<includeNodes.length; j++ )
-			{
+			for(var j=0; j<includeNodes.length; j++) {
 				set.push(includeNodes[j].getAttribute('name'));
 			}
 
-			sets[name] = set;
+			q.rulesets[name] = set;
 		}
+        q.signals.trigger('rulesetsLoaded');
 
-        Numbas.jme.variables.makeRulesets(sets,q.scope);
-	});
+		q.variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
+        tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
+        q.signals.trigger('variableDefinitionsLoaded');
 
-	job(function() {
-		var variablesTodo = q.variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
-		if(loading)
-		{
-			var qobj = Numbas.store.loadQuestion(q);
-			for(var x in qobj.variables)
-			{
-				q.scope.variables[x] = qobj.variables[x];
-			}
-		}
-		else
-		{
-			q.variablesTest = {
-				condition: '',
-				maxRuns: 10
-			};
-			tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
-			var conditionSatisfied = false;
-			var condition = jme.compile(q.variablesTest.condition);
-			var runs = 0;
-			var scope;
-			while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
-				runs += 1;
-				scope = new jme.Scope([q.scope]);
-				var result = jme.variables.makeVariables(variablesTodo,q.scope,condition);
-				scope.variables = result.variables;
-				conditionSatisfied = result.conditionSatisfied;
-			}
-			if(!conditionSatisfied) {
-				throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
-			} else {
-				q.scope = scope;
-			}
-		}
-	
-		q.scope = new jme.Scope([q.scope]);
-        q.scope.flatten();
+        q.signals.on('variablesGenerated',function() {
+            var doc = Sarissa.getDomDocument();
+            doc.appendChild(q.originalXML.cloneNode(true));	//get a fresh copy of the original XML, to sub variables into
+            q.xml = doc.selectSingleNode('question');
+            q.xml.setAttribute('number',q.number);
+        });
 
-		q.unwrappedVariables = {};
-        var all_variables = q.scope.allVariables()
-		for(var name in all_variables) {
-			q.unwrappedVariables[name] = Numbas.jme.unwrapValue(all_variables[name]);
-		}
-
-		q.runCallbacks('variablesGenerated');
-	});
-
-	job(this.subvars,this);
-
-	job(function()
-	{
-		//initialise display - get question HTML, make menu item, etc.
-		q.display = new Numbas.display.QuestionDisplay(q);
-	});
-
-	job(function() 
-	{
-		//load parts
-		q.parts=new Array();
-		q.partDictionary = {};
-		var parts = q.xml.selectNodes('parts/part');
-		for(var j = 0; j<parts.length; j++)
-		{
-			var part = Numbas.createPartFromXML(parts[j], 'p'+j,q,null);
-            if(loading) {
-                part.resume();
+        q.signals.on('variablesGenerated', function() {
+            //load parts
+            var partNodes = q.xml.selectNodes('parts/part');
+            for(var j = 0; j<partNodes.length; j++) {
+                var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null);
+                q.parts[j] = part;
+                q.marks += part.marks;
             }
-			q.parts[j] = part;
-			q.marks += part.marks;
+            q.signals.trigger('partsGenerated');
+        })
+
+    },
+
+    /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
+     */
+    finaliseLoad: function() {
+        var q = this;
+
+        q.signals.on('preambleLoaded', function() {
+            q.runPreamble();
+        });
+
+        q.signals.on('functionsLoaded', function() {
+            q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
+            q.signals.trigger('functionsMade');
+        });
+
+        q.signals.on('rulesetsLoaded',function() {
+            Numbas.jme.variables.makeRulesets(q.rulesets,q.scope);
+            q.signals.trigger('rulesetsMade');
+        });
+
+        q.signals.on(['generateVariables','functionsMade','rulesetsMade'], function() {
+            var conditionSatisfied = false;
+            var condition = jme.compile(q.variablesTest.condition);
+            var runs = 0;
+            var scope;
+            while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
+                runs += 1;
+                scope = new jme.Scope([q.scope]);
+                var result = jme.variables.makeVariables(q.variablesTodo,q.scope,condition);
+                scope.variables = result.variables;
+                conditionSatisfied = result.conditionSatisfied;
+            }
+            if(!conditionSatisfied) {
+                throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
+            } else {
+                q.scope = scope;
+            }
+            q.signals.trigger('variablesSet');
+        });
+
+        q.signals.on('variablesSet',function() {
+            q.scope = new jme.Scope([q.scope]);
+            q.scope.flatten();
+
+            q.unwrappedVariables = {};
+            var all_variables = q.scope.allVariables()
+            for(var name in all_variables) {
+                q.unwrappedVariables[name] = Numbas.jme.unwrapValue(all_variables[name]);
+            }
+
+            q.signals.trigger('variablesGenerated');
+        });
+
+        q.signals.on('variablesGenerated',function() {
+            q.name = jme.contentsubvars(q.name,q.scope);
+        });
+
+        if(Numbas.display) {
+            q.display = new Numbas.display.QuestionDisplay(q);
+        }
+
+        q.signals.on(['variablesGenerated','partsGenerated'], function() {
+            if(Numbas.display) {
+                //initialise display - get question HTML, make menu item, etc.
+                q.display.makeHTML();
+                q.signals.trigger('HTMLAttached');
+            }
+        });
+
+        q.signals.on(['variablesGenerated','partsGenerated'], function() {
+            q.signals.trigger('ready');
+        });
+
+        q.signals.on('ready',function() {
+            q.updateScore();
+        });
+
+        q.signals.on(['variablesGenerated','partsGenerated','HTMLAttached'], function() {
+            if(q.display) {
+                q.display.showScore();
+            }
+        });
+    },
+
+    /** Load saved data about this question from storage
+     */
+    resume: function() {
+        var q = this;
+		// check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
+		var qobj = Numbas.store.loadQuestion(q);
+
+		if(qobj.name && qobj.name!=q.name) {
+			throw(new Numbas.Error('question.loaded name mismatch'));
 		}
 
-		q.display.makeHTML();
-	});
-	job(function() {
-		q.runCallbacks('HTMLAttached');
-	});
-	job(function() {
-		if(loading)
-		{
-			var qobj = Numbas.store.loadQuestion(q);
+        var qobj = Numbas.store.loadQuestion(q);
+        for(var x in qobj.variables) {
+            q.scope.variables[x] = qobj.variables[x];
+        }
+        q.signals.trigger('variablesSet');
 
-			q.adviceDisplayed = qobj.adviceDisplayed;
-			q.answered = qobj.answered;
-			q.revealed = qobj.revealed;
-			q.submitted = qobj.submitted;
-			q.visited = qobj.visited;
-			q.score = qobj.score;
+        q.signals.on('partsGenerated', function() {
+            q.parts.forEach(function(part) {
+                if(loading) {
+                    part.resume();
+                }
+            });
+            q.signals.trigger('partsResumed');
+        });
 
-			if(q.revealed)
-				q.revealAnswer(true);
-			else if(q.adviceDisplayed)
-				q.getAdvice(true);
+        q.signals.on('ready',function() {
+            q.adviceDisplayed = qobj.adviceDisplayed;
+            q.answered = qobj.answered;
+            q.revealed = qobj.revealed;
+            q.submitted = qobj.submitted;
+            q.visited = qobj.visited;
+            q.score = qobj.score;
 
-			for(var j=0;j<q.parts.length;j++) {
-				q.parts[j].display.restoreAnswer();
-			}
-		}
+            if(q.revealed) {
+                q.revealAnswer(true);
+            } else if(q.adviceDisplayed) {
+                q.getAdvice(true);
+            }
 
-		q.updateScore();
-		
-		q.display.showScore();
-	});
+            q.parts.forEach(function(p) {
+                if(p.display) {
+                    p.display.restoreAnswer();
+                }
+            });
 
-}
-Question.prototype = /** @lends Numbas.Question.prototype */ 
-{
+            q.updateScore();
+        });
+    },
+
 	/** XML definition of this question 
 	 * @type {Element}
 	 */
@@ -318,26 +373,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @type {Object.<Array.<function>>}
 	 */
 	callbacks: {
-		HTMLAttached: [],
-		variablesGenerated: []
 	},
 
-	/** Run the callbacks for a given event
-	 *
-	 * @param {String} name - name of the event
-	 */
-	runCallbacks: function(name) {
-		var callbacks = this.callbacks[name];
-		for(var i=0;i<callbacks.length;i++) {
-			callbacks[i](this);
-		}
-	},
 
 	/** Leave this question - called when moving to another question, or showing an info page. 
 	 * @see Numbas.display.QuestionDisplay.leave
 	 */
 	leave: function() {
-		this.display.leave();
+        if(this.display) {
+    		this.display.leave();
+        }
 	},
 
 	/** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
@@ -353,18 +398,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 				throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
 			}
 		}
-	},
-
-	/** Substitute the question's variables into its XML - clones the XML so the original is untouched.
-	 */
-	subvars: function()
-	{
-		var q = this;
-		var doc = Sarissa.getDomDocument();
-		doc.appendChild(q.originalXML.cloneNode(true));	//get a fresh copy of the original XML, to sub variables into
-		q.xml = doc.selectSingleNode('question');
-		q.xml.setAttribute('number',q.number);
-		q.name = jme.contentsubvars(q.name,q.scope);
+        this.signals.trigger('preambleRun');
 	},
 
 	/** Get the part object corresponding to a path
@@ -382,9 +416,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	getAdvice: function(dontStore)
 	{
 		this.adviceDisplayed = true;
-		this.display.showAdvice(true);
-		if(!dontStore)
+        if(this.display) {
+    		this.display.showAdvice(true);
+        }
+		if(!dontStore) {
 			Numbas.store.adviceDisplayed(this);
+        }
 	},
 
 	/** Reveal the correct answers to the student
@@ -402,11 +439,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			this.parts[i].revealAnswer(dontStore);
         }
 
-		//display revealed answers
-		this.display.end();
-		this.display.revealAnswer();
-
-		this.display.showScore();
+        if(this.display) {
+    		//display revealed answers
+	    	this.display.end();
+		    this.display.revealAnswer();
+    
+	    	this.display.showScore();
+        }
 
 		if(!dontStore) {
 			Numbas.store.answerRevealed(this);
@@ -449,7 +488,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	leavingDirtyQuestion: function() {
 		if(this.answered && this.isDirty()) {
-			Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            if(Numbas.display) {
+    			Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            }
 			return true;
 		}
 	},
@@ -500,10 +541,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			this.submitted += 1;
 
 		//display message about success or failure
-		if(! this.answered )
-		{
-			Numbas.display.showAlert(R('question.can not submit'));
-			this.display.scrollToError();
+		if(! this.answered ) {
+            if(this.display) {
+    			Numbas.display.showAlert(R('question.can not submit'));
+	    		this.display.scrollToError();
+            }
 		}
 
 							
@@ -525,8 +567,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		//update total exam score
 		this.exam.updateScore();
 
-		//display score - ticks and crosses etc.
-		this.display.showScore();
+        if(this.display) {
+    		//display score - ticks and crosses etc.
+	    	this.display.showScore();
+        }
 
 		//notify storage
 		Numbas.store.saveQuestion(this);
@@ -537,7 +581,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @param {function} fn
 	 */
 	onHTMLAttached: function(fn) {
-		this.callbacks.HTMLAttached.push(fn);
+        this.signals.on('HTMLAttached',fn);
 	},
 
 	/** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
@@ -545,7 +589,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @param {function} fn
 	 */
 	onVariablesGenerated: function(fn) {
-		this.callbacks.variablesGenerated.push(fn);
+        this.signals.on('variablesGenerated',fn);
 	}
 };
 
