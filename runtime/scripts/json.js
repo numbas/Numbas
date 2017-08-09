@@ -24,18 +24,25 @@ var json = Numbas.json = {
         for(var i=0;i<attrs.length;i++) {
             var attr = attrs[i];
             var target_attr = altnames[i] || attr;
-            var value = undefined;
-            if(attr in source) {
-                value = source[attr];
-            } else if(attr.toLowerCase() in source) {
-                value = source[attr.toLowerCase()];
-            }
+            var value = json.tryGet(source, attr);
             if(value!==undefined) {
                 if(target_attr in target && typeof target[target_attr] == 'string') {
                     value += '';
                 }
                 target[target_attr] = value;
             }
+        }
+    },
+
+    /** Try to load an attribute with the given name from `source`. The given name and its lower-case equivalent are tried.
+     * @param {Object} source
+     * @param {String} attr
+     */
+    tryGet: function(source, attr) {
+        if(attr in source) {
+            return source[attr];
+        } else if(attr.toLowerCase() in source) {
+            return source[attr.toLowerCase()]
         }
     }
 }

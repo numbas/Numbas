@@ -216,8 +216,49 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var name = scriptNodes[i].getAttribute('name');
             var order = scriptNodes[i].getAttribute('order');
             var script = Numbas.xml.getTextContent(scriptNodes[i]);
+            this.setScript(name, order, script);
         }
 
+    },
+
+    /** Load the part's settings from a JSON object
+     * @param {Object} data
+     */
+    loadFromJSON: function(data) {
+        var p = this;
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
+
+        tryLoad(data,['marks'],this);
+        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy'],this.settings);
+
+        var variableReplacements = tryGet(data, 'variableReplacements');
+        if(variableReplacements) {
+            variableReplacements.map(function(vr) {
+                p.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
+            });
+        }
+
+        if('steps' in data) {
+            data.steps.map(function(sd,i) {
+                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this);
+                p.addStep(sd,i);
+            });
+        }
+
+        var marking = {};
+        tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
+        if(marking.customMarkingAlgorithm) {
+            this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
+        }
+
+        if('scripts' in data) {
+            for(var name in data.scripts) {
+                var script = data.scripts[name];
+                this.setScript(name, script.order, script.script);
+            }
+        }
     },
 
     /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded

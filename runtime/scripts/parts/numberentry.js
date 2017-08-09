@@ -234,7 +234,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
 	}
 };
-['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
     NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
 });
 

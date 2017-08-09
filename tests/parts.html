@@ -56,16 +56,7 @@
 				let jme = Numbas.jme;
                 let math = Numbas.math;
 
-                function make_part_from_json(type, settings, marks) {
-                    var p = Numbas.createPart(type,'p0');
-                    p.loadFromJSON(settings);
-                    p.finaliseLoad();
-                    if(!p.marks) {
-                        marks = marks === undefined ? 1 : marks;
-                        p.marks = marks;
-                    }
-                    return p;
-                }
+                var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(data, 'p0', null, null); };
 
                 function mark_part(p, answer) {
                     var answer = answer;
@@ -81,9 +72,15 @@
                     return p.mark();
                 }
 
+                QUnit.module('Part')
+                QUnit.test('Set marks', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', marks: 3, minValue: '1', maxValue: '2'});
+                    assert.equal(p.marks,3,'3 marks');
+                });
+
                 QUnit.module('Number entry');
                 QUnit.test('Answer is 1', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '1', maxValue: '1'});
+                    var p = createPartFromJSON({type:'numberentry', marks: 1, minValue: '1', maxValue: '1'});
                     var res;
                     res = mark_part(p, '1');
                     assert.equal(res.credit,1,'"1" marked correct');
@@ -96,30 +93,30 @@
                     assert.notOk(res.valid,'"!" is invalid');
                 });
                 QUnit.test('Partial credit for wrong precision', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', precisionPartialCredit: 0.2});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', precisionPartialCredit: 0.2});
                     var res = mark_part(p,'0.1000');
                     assert.equal(res.credit,0.2,'"0.1000" gets partial credit');
                 });
                 QUnit.test('Answer is 1/3, fractions not allowed', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '1/3', maxValue: '1/3'});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3'});
                     var res = mark_part(p,'1/3');
                     assert.equal(res.credit,0,'"1/3": No credit awarded');
                     assert.notOk(res.valid,'"1/3": Not valid');
                 });
                 QUnit.test('Answer is 1/3, fractions not allowed', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '1/3', maxValue: '1/3', allowFractions: true});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', allowFractions: true});
                     var res = mark_part(p,'1/3');
                     assert.equal(res.credit,1,'"1/3" correct');
                 });
                 QUnit.test('Answer is 1/3, to 2 dp', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '1/3', maxValue: '1/3', precision: '2', precisionType: 'dp'});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precision: '2', precisionType: 'dp'});
                     var res = mark_part(p,'0.33');
                     assert.equal(res.credit,1,'"0.33" correct');
                     var res = mark_part(p,'0.330');
                     assert.equal(res.credit,0,'"0.330" incorrect');
                 });
                 QUnit.test('Answer is 0.1, to 2 dp', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp'});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp'});
                     var res = mark_part(p,'0.1');
                     assert.equal(res.credit,1,'"0.1" correct');
                     var res = mark_part(p,'0.10');
@@ -128,7 +125,7 @@
                     assert.equal(res.credit,0,'"0.100" incorrect');
                 });
                 QUnit.test('Answer is 0.1, to 2 dp, strict', function(assert) {
-                    var p = make_part_from_json('numberentry', {minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', strictPrecision: true});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', strictPrecision: true});
                     var res = mark_part(p,'0.1');
                     assert.equal(res.credit,0,'"0.1" incorrect');
                     console.log(p.settings.strictPrecision);
@@ -136,7 +133,7 @@
 
                 QUnit.module('JME')
                 QUnit.test('Answer is "x+2"', function(assert) {
-                    var p = make_part_from_json('jme', {answer: 'x+2'});
+                    var p = createPartFromJSON({type:'jme', answer: 'x+2'});
                     var res = mark_part(p,'x+2');
                     assert.equal(res.credit,1,'"x+2" correct');
                     var res = mark_part(p,'2+x');
@@ -151,7 +148,7 @@
 
                 QUnit.module('Pattern match');
                 QUnit.test('Answer is "hi+"', function(assert) {
-                    var p = make_part_from_json('patternmatch', {answer: 'hi+', displayAnswer: 'hi'});
+                    var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});
                     var res = mark_part(p,'hi');
                     assert.equal(res.credit,1,'"hi" correct');
                     var res = mark_part(p,'hiiiiii');
@@ -163,9 +160,76 @@
                     assert.ok(res.valid,'"???" valid');
                 });
 
+                QUnit.module('Matrix entry');
+                QUnit.test('Answer is id(2)', function(assert) {
+                    var p = createPartFromJSON({type:'matrix', correctAnswer: 'id(2)'});
+                    var res = mark_part(p,[2,2,[['1','0'],['0','1']]]);
+                    assert.equal(res.credit,1,'[[1,0],[0,1]] is correct');
+                    var res = mark_part(p,[2,2,[['1','1'],['0','1']]]);
+                    assert.equal(res.credit,0,'[[1,1],[0,1]] is incorrect');
+                    var res = mark_part(p,[3,3,[['1','0','0'],['0','1','0'],['0','0','0']]]);
+                    assert.equal(res.credit,0,'[[1,0,0],[0,1,0],[0,0,0]] is incorrect');
+                    assert.ok(res.states.filter(function(s){return s.note=='wrong_size' && s.credit==0}).length>0, '[[1,0,0],[0,1,0],[0,0,0]] fails because wrong size');
+                    console.log(res);
+                });
+
+                QUnit.module('Choose one from a list');
+                QUnit.test('Three choices, first answer is correct', function(assert) {
+                    var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
+                    var res = mark_part(p, [[true], [false], [false]]);
+                    assert.equal(res.credit,1,'Picking first choice is correct');
+                    var res = mark_part(p, [[false], [true], [false]]);
+                    assert.equal(res.credit,0,'Picking second choice is incorrect');
+                })
+                QUnit.test('Three choices, third answer is correct', function(assert) {
+                    var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[0],[0],[1]]});
+                    var res = mark_part(p, [[false], [false], [true]]);
+                    assert.equal(res.credit,1,'Picking third choice is correct');
+                    var res = mark_part(p, [[true], [false], [false]]);
+                    assert.equal(res.credit,0,'Picking first choice is incorrect');
+                })
+                QUnit.test('Three choices, first answer is correct, marking matrix is a JME expression', function(assert) {
+                    var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: '[1,0,0]'});
+                    var res = mark_part(p, [[true], [false], [false]]);
+                    assert.equal(res.credit,1,'Picking first choice is correct');
+                    var res = mark_part(p, [[false], [true], [false]]);
+                    assert.equal(res.credit,0,'Picking second choice is incorrect');
+                })
+
+                QUnit.module('Choose several from a list');
+                QUnit.test('Two choices, both right', function(assert) {
+                    var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[1]]});
+                    var res = mark_part(p, [[true], [true]]);
+                    assert.equal(res.credit,1,'Picking both is correct');
+                    var res = mark_part(p, [[true], [false]]);
+                    assert.equal(res.credit,0.5,'Picking just one gives half credit');
+                });
+                QUnit.test('Two choices, minAnswers = 2', function(assert) {
+                    var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[1]], minAnswers: 2});
+                    var res = mark_part(p, [[false], [true]]);
+                    assert.equal(res.credit,0,'Picking one is incorrect');
+                    window.p = p;
+                });
+
+                QUnit.module('Match choices with answers');
+                QUnit.test('Marking matrix is id(2)', function(assert) {
+                    var p = createPartFromJSON({type:'m_n_x', choices: ['a','b'], answers: ['A','B'], matrix: [[1,0],[0,1]]});
+                    var res = mark_part(p, [[true,false],[false,true]]);
+                    assert.equal(res.credit,1,'Picking correct options gives 1 credit');
+                    var res = mark_part(p, [[true,true],[true,true]]);
+                    assert.equal(res.credit,1,'Picking all options gives 1 credit');
+                });
+                QUnit.test('Marking matrix is id(2) with -5 for wrong choice', function(assert) {
+                    var p = createPartFromJSON({type:'m_n_x', choices: ['a','b'], answers: ['A','B'], matrix: [[1,-5],[-5,1]]});
+                    var res = mark_part(p, [[true,false],[false,true]]);
+                    assert.equal(res.credit,1,'Picking correct options gives 1 credit');
+                    var res = mark_part(p, [[true,true],[true,true]]);
+                    assert.equal(res.credit,0,'Picking all options gives 0 credit');
+                });
+
                 QUnit.module('Gapfill');
                 QUnit.test('One JME gap with answer "x+2"', function(assert) {
-                    var p = make_part_from_json('gapfill',{gaps: [{type: 'jme', answer: 'x+2'}]});
+                    var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
                     var scope = p.getScope();
                     scope.question = {getPart: function(path){ console.log(path); return p.gaps.filter(function(p){return p.path==path})[0]; }};
                     var res = mark_part(p,[['x+2']]);
@@ -246,25 +310,25 @@
 
                 console.clear();
 
-                var p = make_part_from_json('numberentry',{minValue: '1/3', maxValue: '1/3', precisionString: '2', precisionType: 'dp', notationStyles: ['si-fr']});
+                var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precisionString: '2', precisionType: 'dp', notationStyles: ['si-fr']});
                 mark_part(p,'0,33');
 
-                var p = make_part_from_json('jme',{answer: 'x+2'});
+                var p = createPartFromJSON({type:'jme', answer: 'x+2'});
                 mark_part(p,'x+2');
 
-                var p = make_part_from_json('jme',{answer: 'x+2', notallowed: {strings: ['*'], message: 'oops', partialCredit: 0.5}});
+                var p = createPartFromJSON({type:'jme', answer: 'x+2', notallowed: {strings: ['*'], message: 'oops', partialCredit: 0.5}});
                 mark_part(p,'x+2+0*1');
 
-                var p = make_part_from_json('gapfill',{gaps: [{type: 'jme', answer: 'x+2'}]});
+                var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
                 var scope = p.getScope();
                 scope.question = {getPart: function(path){ console.log(path); return p.gaps.filter(function(p){return p.path==path})[0]; }};
                 mark_part(p,[['x+2']]);
 
-                mark_part(make_part_from_json('matrix', {correctAnswer: 'id(2)'}), [2,2,[['1','0'],['0','1']]]);
+                mark_part(createPartFromJSON({type:'matrix', correctAnswer: 'id(2)'}), [2,2,[['1','0'],['0','1']]]);
 
-                mark_part(make_part_from_json('patternmatch', {answer: 'hi+', displayAnswer: 'hi', caseSensitive: true}), 'Hi');
+                mark_part(createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi', caseSensitive: true}), 'Hi');
 
-                var p = make_part_from_json('m_n_x', {
+                var p = createPartFromJSON({type:'m_n_x', 
                     minMarks: 1, 
                     maxMarks: 2, 
                     minAnswers: 2,
@@ -282,9 +346,9 @@
                 mark_part(p, [[true, false, false], [false, true, false], [false, false, false]]);
                 mark_part(p, [[false, false, false], [false, false, false], [true, false, true]]);
 
-                mark_part(make_part_from_json('1_n_2',{choices:['a','b','c'], matrix: [[1],[0],[0]]}),[[true],[false],[false]]);
+                mark_part(createPartFromJSON({type:'1_n_2', choices:['a','b','c'], matrix: [[1],[0],[0]]}),[[true],[false],[false]]);
 
-                mark_part(p=make_part_from_json('m_n_2',{choices:['a','b','c'], matrix: [[1],[1],[0]]}),[[true],[true],[false]]);
+                mark_part(p=createPartFromJSON({type:'m_n_2', choices:['a','b','c'], matrix: [[1],[1],[0]]}),[[true],[true],[false]]);
 
                 window.p = p;
                 */
