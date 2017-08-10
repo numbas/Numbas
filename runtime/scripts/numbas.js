@@ -227,7 +227,9 @@ Numbas.checkAllScriptsLoaded = function() {
             continue;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            Numbas.display.die(new Numbas.Error('die.script not loaded',{file:file}));
+            var err = new Numbas.Error('die.script not loaded',{file:file});
+            console.log(err.message);
+            Numbas.display && Numbas.display.die(err);
             break;
         }
     }

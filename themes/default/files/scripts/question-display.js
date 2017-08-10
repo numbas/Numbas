@@ -187,6 +187,8 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
 
                 // make mathjax process the question text (render the maths)
                 Numbas.display.typeset(qd.html,qd.postTypesetF);
+
+                q.signals.trigger('HTMLAttached');
             });
         },
 

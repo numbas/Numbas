@@ -87,7 +87,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
 	if(type==null) {
 		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
 	}
-    var part = createPart(type,path, question, parentPart);
+    var part = createPart(type, path, question, parentPart);
     part.loadFromXML(xml);
     part.finaliseLoad();
     return part;
@@ -106,7 +106,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
     if(!data.type) {
 		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
 	}
-    var part = createPart(data.type,path, question, parentPart);
+    var part = createPart(data.type, path, question, parentPart);
     part.loadFromJSON(data);
     part.finaliseLoad();
     return part;
@@ -132,7 +132,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart)
 	this.parentPart = parentPart;
 	
 	//remember a path for this part, for stuff like marking and warnings
-	this.path = path;
+	this.path = path || 'p0';
     if(this.question) {
     	this.question.partDictionary[path] = this;
     }
@@ -154,8 +154,6 @@ var Part = Numbas.parts.Part = function( path, question, parentPart)
 	this.warnings = [];
 
 	this.scripts = {};
-
-	this.applyScripts();
 }
 
 Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
@@ -264,6 +262,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded
      */
     finaliseLoad: function() {
+        this.applyScripts();
+
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
         }

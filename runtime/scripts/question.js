@@ -18,20 +18,18 @@ Copyright 2011-14 Newcastle University
 
 Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension'],function() {});
 
-Numbas.queueScript('question',['base','schedule','jme','jme-variables','xml','util','scorm-storage','part','standard_parts'],function() {
+Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','part','standard_parts'],function() {
 
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 
-var tryGetAttribute = Numbas.xml.tryGetAttribute;
-
-var job = function(fn,that) {
-    function handleError(e) {
-        e.message = R('question.error',{'number':q.number+1,message:e.message});
-        throw(e);
-    }
-    Numbas.schedule.add({task: fn, error: handleError},that);
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(exam, group, number, xml, gscope) {
+    var q = new Question(exam, group, number, gscope);
+    q.loadFromXML(xml);
+    q.finaliseLoad();
+    
+    return q;
 }
 
 
@@ -46,14 +44,14 @@ var job = function(fn,that) {
  * @param {Boolean} loading - is this question being resumed from an existing session?
  * @param {Numbas.jme.Scope} gscope - global JME scope
  */
-var Question = Numbas.Question = function( exam, group, xml, number, loading, gscope)
+var Question = Numbas.Question = function( exam, group, number, gscope)
 {
 	var question = this;
 	var q = question;
     q.signals = new Numbas.schedule.SignalBox();
 	q.exam = exam;
     q.group = group;
-	q.adviceThreshold = q.exam.adviceGlobalThreshold;
+	q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
 	q.number = number;
 	q.scope = new jme.Scope(gscope);
     q.scope.question = q;
@@ -74,13 +72,6 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 	q.parts = [];
     q.partDictionary = {};
 
-    q.loadFromXML(xml);
-    q.finaliseLoad();
-    if(loading) {
-        q.resume();
-    } else {
-        q.signals.trigger('generateVariables');
-    }
 }
 Question.prototype = /** @lends Numbas.Question.prototype */ 
 {
@@ -89,6 +80,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     loadFromXML: function(xml) {
         var q = this;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
         q.xml = xml;
         q.originalXML = q.xml;
 
@@ -153,12 +146,20 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var partNodes = q.xml.selectNodes('parts/part');
             for(var j = 0; j<partNodes.length; j++) {
                 var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null);
-                q.parts[j] = part;
-                q.marks += part.marks;
+                q.addPart(part,j);
             }
             q.signals.trigger('partsGenerated');
         })
 
+    },
+
+    /** Add a part to the question
+     * @param {Numbas.parts.Part} part
+     * @param {Number} index
+     */
+    addPart: function(part, index) {
+        this.parts.splice(index, 0, part);
+        this.marks += part.marks;
     },
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
@@ -222,11 +223,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         q.signals.on(['variablesGenerated','partsGenerated'], function() {
-            if(Numbas.display) {
-                //initialise display - get question HTML, make menu item, etc.
-                q.display.makeHTML();
-                q.signals.trigger('HTMLAttached');
-            }
+            //initialise display - get question HTML, make menu item, etc.
+            q.display && q.display.makeHTML();
         });
 
         q.signals.on(['variablesGenerated','partsGenerated'], function() {
@@ -238,10 +236,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
 
         q.signals.on(['variablesGenerated','partsGenerated','HTMLAttached'], function() {
-            if(q.display) {
-                q.display.showScore();
-            }
+            q.display && q.display.showScore();
         });
+    },
+
+    generateVariables: function() {
+        this.signals.trigger('generateVariables');
     },
 
     /** Load saved data about this question from storage
@@ -285,9 +285,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
 
             q.parts.forEach(function(p) {
-                if(p.display) {
-                    p.display.restoreAnswer();
-                }
+                p.display && p.display.restoreAnswer();
             });
 
             q.updateScore();
@@ -380,9 +378,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @see Numbas.display.QuestionDisplay.leave
 	 */
 	leave: function() {
-        if(this.display) {
-    		this.display.leave();
-        }
+    	this.display && this.display.leave();
 	},
 
 	/** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
@@ -416,10 +412,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	getAdvice: function(dontStore)
 	{
 		this.adviceDisplayed = true;
-        if(this.display) {
-    		this.display.showAdvice(true);
-        }
-		if(!dontStore) {
+    	this.display && this.display.showAdvice(true);
+		if(Numbas.store && !dontStore) {
 			Numbas.store.adviceDisplayed(this);
         }
 	},
@@ -447,11 +441,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	    	this.display.showScore();
         }
 
-		if(!dontStore) {
+		if(Numbas.store && !dontStore) {
 			Numbas.store.answerRevealed(this);
 		}
 
-		this.exam.updateScore();
+		this.exam && this.exam.updateScore();
 	},
 
 	/** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
@@ -488,9 +482,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	leavingDirtyQuestion: function() {
 		if(this.answered && this.isDirty()) {
-            if(Numbas.display) {
-    			Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
-            }
+    		Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
 			return true;
 		}
 	},
@@ -551,11 +543,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 							
 		this.updateScore();
 
-		if(this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
-		{
+		if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
 			this.getAdvice();
 		}
-		Numbas.store.questionSubmitted(this);
+		Numbas.store && Numbas.store.questionSubmitted(this);
 	},
 
 	/** Recalculate the student's score, update the display, and notify storage. */
@@ -565,15 +556,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		this.calculateScore('uwNone');
 
 		//update total exam score
-		this.exam.updateScore();
+		this.exam && this.exam.updateScore();
 
-        if(this.display) {
-    		//display score - ticks and crosses etc.
-	    	this.display.showScore();
-        }
+    	//display score - ticks and crosses etc.
+	    this.display && this.display.showScore();
 
 		//notify storage
-		Numbas.store.saveQuestion(this);
+		Numbas.store && Numbas.store.saveQuestion(this);
 	},
 
 	/** Add a callback function to run when the question's HTML is attached to the page

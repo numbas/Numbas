@@ -422,7 +422,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var questionNodes = group.xml.selectNodes("questions/question");
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
-    				var question = new Numbas.Question( exam, group, questionNodes[n], questionAcc++, loading, exam.scope );
+    				var question = Numbas.createQuestionFromXML( exam, group, questionAcc++, questionNodes[n], exam.scope );
+                    if(loading) {
+                        question.resume();
+                    } else {
+                        question.generateVariables();
+                    }
                     exam.questionList.push(question);
                     group.questionList.push(question);
                 },group,n);
@@ -688,17 +693,19 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		var n = oq.number;
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
-		job(e.display.startRegen,e.display);
-		job(function() {
-            var q = new Numbas.Question(e, oq.group, oq.originalXML, oq.number, false, e.scope);
-			e.questionList[n] = group.questionList[n_in_group] = q;
-		})
-		job(function() {
-			e.changeQuestion(n);
-			e.currentQuestion.display.init();
-			e.display.showQuestion();
-		});
-		job(e.display.endRegen,e.display);
+		e.display.startRegen();
+        var q = Numbas.createQuestionFromXML(e, oq.group, oq.number, oq.originalXML, e.scope);
+        q.generateVariables();
+
+        q.signals.on('ready',function() {
+            e.questionList[n] = group.questionList[n_in_group] = q;
+            e.changeQuestion(n);
+        });
+        q.signals.on(['ready','HTMLAttached'], function() {
+            e.currentQuestion.display.init();
+            e.display.showQuestion();
+	    	e.display.endRegen();
+        });
 	},
 
 	/**

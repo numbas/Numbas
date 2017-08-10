@@ -16,7 +16,11 @@
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/marking.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/schedule.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/question.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/part.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/information.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/extension.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/numberentry.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/jme.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/parts/matrixentry.js" charset="utf-8"></script>
@@ -52,7 +56,7 @@
 		<div id="qunit-fixture">test markup, will be hidden</div>
         <script>
 			Numbas.queueScript('base',[],function() {});
-			Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill'],function() {
+			Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question'],function() {
 				let jme = Numbas.jme;
                 let math = Numbas.math;
 
@@ -128,7 +132,6 @@
                     var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', strictPrecision: true});
                     var res = mark_part(p,'0.1');
                     assert.equal(res.credit,0,'"0.1" incorrect');
-                    console.log(p.settings.strictPrecision);
                 });
 
                 QUnit.module('JME')
@@ -170,7 +173,6 @@
                     var res = mark_part(p,[3,3,[['1','0','0'],['0','1','0'],['0','0','0']]]);
                     assert.equal(res.credit,0,'[[1,0,0],[0,1,0],[0,0,0]] is incorrect');
                     assert.ok(res.states.filter(function(s){return s.note=='wrong_size' && s.credit==0}).length>0, '[[1,0,0],[0,1,0],[0,0,0]] fails because wrong size');
-                    console.log(res);
                 });
 
                 QUnit.module('Choose one from a list');
@@ -231,128 +233,22 @@
                 QUnit.test('One JME gap with answer "x+2"', function(assert) {
                     var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
                     var scope = p.getScope();
-                    scope.question = {getPart: function(path){ console.log(path); return p.gaps.filter(function(p){return p.path==path})[0]; }};
+                    scope.question = {getPart: function(path){ return p.gaps.filter(function(p){return p.path==path})[0]; }};
                     var res = mark_part(p,[['x+2']]);
                     assert.equal(res.credit,1,'"x+2" correct');
                 });
 
-                /*
-                function element(name,attr,content) {
-                    var e = document.createElement(name);
-                    for(var key in attr) {
-                        e.setAttribute(key,attr[key]);
-                    }
-                    if(content!==undefined) {
-                        e.innerHTML = content;
-                    }
-                    return e;
-                }
-
-                function debug(message) {
-                    document.body.appendChild(element('p',{},message));
-                    console.log(message);
-                }
-
-                function make_part(type, settings, marks) {
-                    var p = Numbas.createPart(type,'p0');
-                    Object.assign(p.settings, settings);
-                    marks = marks === undefined ? 1 : marks;
-                    p.marks = marks;
-                    return p;
-                }
-
-                mark_part(make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}), '1');
-                mark_part(make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}), '0');
-
-                mark_part(make_part('jme', {correctAnswerString: 'x+2', failureRate: 1}), 'x+2');
-                mark_part(make_part('jme', {correctAnswerString: 'x+2', failureRate: 1}), 'x+3');
-
-                mark_part(make_part('patternmatch', {correctAnswerString: 'hi', displayAnswerString: 'hi'}), 'hi');
-                mark_part(make_part('patternmatch', {correctAnswerString: 'hi', displayAnswerString: 'hi'}), 'ahi');
-
-                mark_part(make_part('matrix', {correctAnswerString: 'id(2)'}), [2,2,[['1','0'],['0','1']]]);
-                mark_part(make_part('matrix', {correctAnswerString: 'id(2)'}), [2,2,[['1','1'],['0','0']]]);
-
-                var p = make_part('1_n_2', {markingMatrixArray: [[1],[0]], distractors: [[''],['']], minAnswersString: '1', maxAnswersString: '1'});
-                p.numAnswers = 2;
-                p.numChoices = 1;
-                mark_part(p, [[true],[false]]);
-                mark_part(p, [[false],[true]]);
-
-                var p = make_part('m_n_2', {markingMatrixArray: [[1],[1],[0]], distractors: [[''],[''],['']], minAnswersString: '1', maxAnswersString: '2'});
-                p.numAnswers = 3;
-                p.numChoices = 1;
-                mark_part(p, [[true],[true],[false]]);
-                mark_part(p, [[false],[false],[true]]);
-
-                var p = make_part('m_n_x', {markingMatrixArray: [[1,0],[0,1]], distractors: [['',''],['','']], minAnswersString: '1', maxAnswersString: '2'});
-                p.numAnswers = 2;
-                p.numChoices = 2;
-                mark_part(p, [[true,false],[false,true]]);
-                mark_part(p, [[false,true],[false,true]]);
-
-                var gaps = {
-                    'p0g0': make_part('numberentry',{minvalueString: '1', maxvalueString: '1'}),
-                    'p0g1': make_part('jme', {correctAnswerString: 'x+2', failureRate: 1})
-                };
-                gaps['p0g0'].stagedAnswer = ['1'];
-                gaps['p0g1'].stagedAnswer = ['x+2'];
-                var p = make_part('gapfill',{},1);
-                var scope = p.getScope();
-                Object.values(gaps).forEach(function(g,i){ g.path='p0g'+i; p.addGap(g,i) });
-                scope.question = {getPart: function(path){ console.log(path); return gaps[path]; }};
-                debug("Gapfill part");
-                p.submit();
-                p.markingFeedback.forEach(m=>debug(m.message));
-                document.body.appendChild(element('hr'));
-
-                document.body.appendChild(element('h2',{},'From JSON'));
-
-                console.clear();
-
-                var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precisionString: '2', precisionType: 'dp', notationStyles: ['si-fr']});
-                mark_part(p,'0,33');
-
-                var p = createPartFromJSON({type:'jme', answer: 'x+2'});
-                mark_part(p,'x+2');
-
-                var p = createPartFromJSON({type:'jme', answer: 'x+2', notallowed: {strings: ['*'], message: 'oops', partialCredit: 0.5}});
-                mark_part(p,'x+2+0*1');
-
-                var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
-                var scope = p.getScope();
-                scope.question = {getPart: function(path){ console.log(path); return p.gaps.filter(function(p){return p.path==path})[0]; }};
-                mark_part(p,[['x+2']]);
-
-                mark_part(createPartFromJSON({type:'matrix', correctAnswer: 'id(2)'}), [2,2,[['1','0'],['0','1']]]);
-
-                mark_part(createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi', caseSensitive: true}), 'Hi');
-
-                var p = createPartFromJSON({type:'m_n_x', 
-                    minMarks: 1, 
-                    maxMarks: 2, 
-                    minAnswers: 2,
-                    maxAnswers: 2,
-                    shuffleChoices: true, 
-                    shuffleAnswers: true, 
-                    displayType: 'checkbox', 
-                    warningType: 'prevent', 
-                    layoutType: 'lowertriangle', 
-                    choices: ['a','b','c'], 
-                    answers: ['A','B','C'], 
-                    matrix: [[1,0,0],[1,1,0],[-2,-2,-2]],
-                    distractors: [['','',''],['','',''],['','','']]
+                QUnit.module('Question');
+                QUnit.test('Question', function(assert) {
+                    var q = new Numbas.Question(null,null,0);
+                    var p = Numbas.createPartFromJSON({type:'jme',answer:'x+2', marks: 1},'p0');
+                    q.addPart(p);
+                    p.answerList = p.stagedAnswer = ['x+2'];
+                    p.setStudentAnswer();
+                    q.submit();
+                    
+                    assert.equal(q.score,1,'Score is 1');
                 });
-                mark_part(p, [[true, false, false], [false, true, false], [false, false, false]]);
-                mark_part(p, [[false, false, false], [false, false, false], [true, false, true]]);
-
-                mark_part(createPartFromJSON({type:'1_n_2', choices:['a','b','c'], matrix: [[1],[0],[0]]}),[[true],[false],[false]]);
-
-                mark_part(p=createPartFromJSON({type:'m_n_2', choices:['a','b','c'], matrix: [[1],[1],[0]]}),[[true],[true],[false]]);
-
-                window.p = p;
-                */
-
             });
         </script>
 	</body>
