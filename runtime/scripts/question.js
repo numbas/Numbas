@@ -72,7 +72,10 @@ var Question = Numbas.Question = function( number, exam, group, gscope)
 {
 	var question = this;
 	var q = question;
-    q.signals = new Numbas.schedule.SignalBox();
+    q.signals = new Numbas.schedule.SignalBox(function(e) {
+        e.message = R('question.error',{'number':q.number+1,message:e.message});
+        throw(e);
+	});
 	q.exam = exam;
     q.group = group;
 	q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
@@ -85,6 +88,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope)
 		'css': ''
 	};
     q.functionsTodo = [];
+    q.variablesTodo = {};
     q.rulesets = {};
 
     q.variablesTest = {

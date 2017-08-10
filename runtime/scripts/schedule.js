@@ -167,7 +167,7 @@ SignalBox.prototype = {
         });
         var promise = Promise.all(promises);
         if(fn) {
-            promise.then(fn);
+            promise = promise.then(fn);
         }
         return promise;
     },

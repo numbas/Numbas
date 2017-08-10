@@ -293,7 +293,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(typeof(data.matrix)=='string') {
             settings.markingMatrixString = data.matrix;
         } else {
-            settings.markingMatrixArray = data.matrix;
+            settings.markingMatrixArray = data.matrix.map(function(row){return typeof(row)=='object' ? row : [row]});
         }
 
         tryLoad(data, ['distractors'], settings);
