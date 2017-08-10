@@ -422,7 +422,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var questionNodes = group.xml.selectNodes("questions/question");
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
-    				var question = Numbas.createQuestionFromXML( exam, group, questionAcc++, questionNodes[n], exam.scope );
+    				var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope);
                     if(loading) {
                         question.resume();
                     } else {
@@ -694,7 +694,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
 		e.display.startRegen();
-        var q = Numbas.createQuestionFromXML(e, oq.group, oq.number, oq.originalXML, e.scope);
+        var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope);
         q.generateVariables();
 
         q.signals.on('ready',function() {

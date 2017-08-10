@@ -161,18 +161,16 @@ var xml = Numbas.xml = {
 			var name = variableNodes[i].getAttribute('name').toLowerCase();
             var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
 
-            var vars = [];
-
             if(value.trim()=='') {
                 throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
             }
 
             try {
-                var tree = Numbas.jme.compile(value,scope,true);
+                var tree = Numbas.jme.compile(value);
             } catch(e) {
-                throw(new Numbas.Error('xml.error in variable definition',{name:name}));
+                throw(new Numbas.Error('variable.error in variable definition',{name:name}));
             }
-            vars = vars.merge(Numbas.jme.findvars(tree));
+            var vars = Numbas.jme.findvars(tree);
             todo[name]={
                 tree: tree,
                 vars: vars

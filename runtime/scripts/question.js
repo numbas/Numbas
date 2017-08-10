@@ -24,11 +24,37 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(exam, group, number, xml, gscope) {
-    var q = new Question(exam, group, number, gscope);
+/** Create a {@link Numbas.Question} object from an XML definition
+ * @memberof Numbas
+ * @param {Element} xml
+ * @param {Number} number - the number of the question in the exam
+ * @param {Numbas.Exam} [exam] - the exam this question belongs to
+ * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
+ * @param {Numbas.jme.Scope} [scope] - the global JME scope
+ * @returns Numbas.Question
+ */
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope) {
+    var q = new Question(number, exam, group, gscope);
     q.loadFromXML(xml);
     q.finaliseLoad();
     
+    return q;
+}
+
+/** Create a {@link Numbas.Question} object from a JSON object
+ * @memberof Numbas
+ * @param {Object} data
+ * @param {Number} number - the number of the question in the exam
+ * @param {Numbas.Exam} [exam] - the exam this question belongs to
+ * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
+ * @param {Numbas.jme.Scope} [scope] - the global JME scope
+ * @returns Numbas.Question
+ */
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope) {
+    var q = new Question(number, exam, group, gscope);
+    q.loadFromJSON(data);
+    q.finaliseLoad();
+
     return q;
 }
 
@@ -37,14 +63,12 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(exam, group,
  *
  * @constructor
  * @memberof Numbas
- * @param {Numbas.Exam} exam - parent exam
- * @param {Numbas.QuestionGroup} group - group this question belongs to
- * @param {Element} xml
  * @param {Number} number - index of this question in the exam (starting at 0)
- * @param {Boolean} loading - is this question being resumed from an existing session?
- * @param {Numbas.jme.Scope} gscope - global JME scope
+ * @param {Numbas.Exam} [exam] - parent exam
+ * @param {Numbas.QuestionGroup} [group] - group this question belongs to
+ * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - global JME scope
  */
-var Question = Numbas.Question = function( exam, group, number, gscope)
+var Question = Numbas.Question = function( number, exam, group, gscope)
 {
 	var question = this;
 	var q = question;
@@ -53,16 +77,15 @@ var Question = Numbas.Question = function( exam, group, number, gscope)
     q.group = group;
 	q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
 	q.number = number;
+    gscope = gscope || (exam && exam.scope) || Numbas.jme.builtinScope;
 	q.scope = new jme.Scope(gscope);
     q.scope.question = q;
 	q.preamble = {
 		'js': '',
 		'css': ''
 	};
-	q.callbacks = {
-		HTMLAttached: [],
-		variablesGenerated: []
-	};
+    q.functionsTodo = [];
+    q.rulesets = {};
 
     q.variablesTest = {
         condition: '',
@@ -100,7 +123,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 		//make rulesets
 		var rulesetNodes = q.xml.selectNodes('rulesets/set');
-
 		q.rulesets = {};
 		for(var i=0; i<rulesetNodes.length; i++) {
 			var name = rulesetNodes[i].getAttribute('name');
@@ -153,6 +175,81 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
     },
 
+    /** Load the question's settings from a JSON object
+     * @param {Object} data
+     */
+    loadFromJSON: function(data) {
+        var q = this;
+        var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
+
+        tryLoad(data,'name',q);
+
+        var preambles = tryGet(data,'preamble');
+        if(preambles) {
+            Object.keys(preambles).forEach(function(key) {
+                q.preamble[key] = preambles[key];
+            });
+        }
+        q.signals.trigger('preambleLoaded');
+
+        var functions = tryGet(data,'functions');
+        if(functions) {
+            q.functionsTodo = Object.keys(functions).map(function(name) {
+                var fd = functions[name];
+                return {
+                    name: name,
+                    definition: fd.definition,
+                    language: fd.language,
+                    outtype: fd.type,
+                    parameters: fd.parameters.map(function(p){ return {name:p[0], type: p[1]}})
+                };
+            });
+        }
+        q.signals.trigger('functionsLoaded');
+
+        var rulesets = tryGet(data,'rulesets');
+        if(rulesets) {
+            Object.keys(rulesets).forEach(function(name) {
+                q.rulesets[name] = rulesets[name];
+            });
+        }
+        q.signals.trigger('rulesetsLoaded');
+
+        var variables = tryGet(data,'variables');
+        if(variables) {
+            Object.keys(variables).map(function(name) {
+                var vd = variables[name];
+                try {
+                    var tree = Numbas.jme.compile(vd.definition);
+                } catch(e) {
+                    throw(new Numbas.Error('variable.error in variable definition',{name:name}));
+                }
+                var vars = Numbas.jme.findvars(tree);
+                q.variablesTodo[name] = {
+                    tree: tree,
+                    vars: vars
+                }
+            });
+        }
+        var variablesTest = tryGet(data,'variablesTest');
+        if(variablesTest) {
+            tryLoad(variablesTest,['condition','maxRuns'],q.variablesTest);
+        }
+        q.signals.trigger('variableDefinitionsLoaded');
+
+        q.signals.on('variablesGenerated', function() {
+            var parts = tryGet(data,'parts');
+            if(parts) {
+                parts.forEach(function(pd,i) {
+                    var p = Numbas.createPartFromJSON(pd, 'p'+i, q);
+                    q.addPart(p,i);
+                });
+                q.signals.trigger('partsGenerated');
+            }
+        });
+    },
+
     /** Add a part to the question
      * @param {Numbas.parts.Part} part
      * @param {Number} index
@@ -181,7 +278,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.signals.trigger('rulesetsMade');
         });
 
-        q.signals.on(['generateVariables','functionsMade','rulesetsMade'], function() {
+        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variableDefinitionsLoaded'], function() {
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;

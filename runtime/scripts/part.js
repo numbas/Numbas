@@ -44,6 +44,47 @@ Numbas.parts = {};
 var partConstructors = Numbas.partConstructors = {};
 
 
+/** Create a question part based on an XML definition.
+ * @memberof Numbas
+ * @param {Element} xml
+ * @param {partpath} [path]
+ * @param {Numbas.Question} [question]
+ * @param {Numbas.parts.Part} [parentPart]
+ * @returns {Numbas.parts.Part}
+ * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
+ */
+var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart) {
+    var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+	var type = tryGetAttribute(null,xml,'.','type',[]);
+	if(type==null) {
+		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
+	}
+    var part = createPart(type, path, question, parentPart);
+    part.loadFromXML(xml);
+    part.finaliseLoad();
+    return part;
+}
+
+/** Create a question part based on an XML definition.
+ * @memberof Numbas
+ * @param {Object} data
+ * @param {partpath} [path]
+ * @param {Numbas.Question} [question]
+ * @param {Numbas.parts.Part} [parentPart]
+ * @returns {Numbas.parts.Part}
+ * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
+ */
+var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart) {
+    if(!data.type) {
+		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
+	}
+    var part = createPart(data.type, path, question, parentPart);
+    part.loadFromJSON(data);
+    part.finaliseLoad();
+    return part;
+}
+
 /** Create a new question part.
  * @see Numbas.partConstructors
  * @param {String} type
@@ -71,52 +112,11 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart)
 	}
 }
 
-/** Create a question part based on an XML definition.
- * @param {Element} xml
- * @param {partpath} path
- * @param {Numbas.Question} question
- * @param {Numbas.parts.Part} parentPart
- * @returns {Numbas.parts.Part}
- * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
- * @memberof Numbas
- */
-var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart) {
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-
-	var type = tryGetAttribute(null,xml,'.','type',[]);
-	if(type==null) {
-		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
-	}
-    var part = createPart(type, path, question, parentPart);
-    part.loadFromXML(xml);
-    part.finaliseLoad();
-    return part;
-}
-
-/** Create a question part based on an XML definition.
- * @param {Object} data
- * @param {partpath} path
- * @param {Numbas.Question} question
- * @param {Numbas.parts.Part} parentPart
- * @returns {Numbas.parts.Part}
- * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
- * @memberof Numbas
- */
-var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart) {
-    if(!data.type) {
-		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
-	}
-    var part = createPart(data.type, path, question, parentPart);
-    part.loadFromJSON(data);
-    part.finaliseLoad();
-    return part;
-}
-
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
  * @param {Element} xml
- * @param {partpath} path
+ * @param {partpath} [path='p0']
  * @param {Numbas.Question} Question
  * @param {Numbas.parts.Part} parentPart
  * @see Numbas.createPart

@@ -240,14 +240,27 @@
 
                 QUnit.module('Question');
                 QUnit.test('Question', function(assert) {
-                    var q = new Numbas.Question(null,null,0);
-                    var p = Numbas.createPartFromJSON({type:'jme',answer:'x+2', marks: 1},'p0');
-                    q.addPart(p);
-                    p.answerList = p.stagedAnswer = ['x+2'];
-                    p.setStudentAnswer();
-                    q.submit();
-                    
-                    assert.equal(q.score,1,'Score is 1');
+                    var done = assert.async();
+
+                    var q = Numbas.createQuestionFromJSON({
+                        name:'Barg',
+                        parts: [
+                            {type:'jme',answer:'x+2', marks: 1}
+                        ]
+                    }, 0);
+                    q.generateVariables();
+                    q.signals.on('ready',function() {
+                        var p = q.getPart('p0');
+                        assert.ok(p,'Part created');
+                        p.answerList = p.stagedAnswer = ['x+2'];
+                        p.setStudentAnswer();
+                        q.submit();
+
+                        assert.equal(q.name,'Barg');
+                        assert.equal(q.score,1,'Score is 1');
+
+                        done();
+                    });
                 });
             });
         </script>
