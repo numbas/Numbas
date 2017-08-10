@@ -159,7 +159,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	}
 
 };
-['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+['loadFromXML','resume','finaliseLoad','loadFromJSON'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {

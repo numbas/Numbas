@@ -267,7 +267,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 		return new Numbas.jme.types.TString(this.studentAnswer);
 	}
 };
-['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
 });
 

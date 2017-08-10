@@ -67,7 +67,7 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
 
 	doesMarking: false
 };
-['finaliseLoad'].forEach(function(method) {
+['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
 });
 

@@ -75,7 +75,7 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         }
     }
 };
-['finaliseLoad'].forEach(function(method) {
+['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
 });
 

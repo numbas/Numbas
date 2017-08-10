@@ -298,7 +298,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
         tryLoad(data, ['distractors'], settings);
         if(!settings.distractors) {
-            console.log(this.type, this.numChoices, this.numAnswers);
             settings.distractors = [];
             for(var i=0;i<this.numChoices; i++) {
                 var row = [];
@@ -729,7 +728,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
     }
 };
-['revealAnswer','loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(Part.prototype[method],MultipleResponsePart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {

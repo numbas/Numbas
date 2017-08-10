@@ -225,7 +225,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		return studentMatrix;
 	}
 };
-['loadFromXML','resume','finaliseLoad'].forEach(function(method) {
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
 });
 

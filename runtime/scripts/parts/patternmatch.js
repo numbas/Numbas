@@ -130,7 +130,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	},
 
 };
-['finaliseLoad','resume','loadFromXML'].forEach(function(method) {
+['finaliseLoad','resume','loadFromXML','loadFromJSON'].forEach(function(method) {
     PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
 });
 
