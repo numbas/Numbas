@@ -82,6 +82,20 @@
                     assert.equal(p.marks,3,'3 marks');
                 });
 
+                QUnit.module('Custom marking JavaScript');
+                QUnit.test('set credit to 1', function(assert) {
+                    var data = {"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{"mark":{"script":"this.setCredit(1,\"Top marks!\");\nthis.answered = true;","order":"instead"}},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"};
+
+                    var p = createPartFromJSON(data);
+
+                    var res = mark_part(p,'1');
+                    assert.ok(p.answered,'Part is answerd');
+                    assert.equal(p.credit,1,'1 credit');
+                    assert.equal(p.markingFeedback[0].message,'Top marks!', 'Feedback message is "Top marks!" as set in script');
+
+                    window.p = p;
+                });
+
                 QUnit.module('Number entry');
                 QUnit.test('Answer is 1', function(assert) {
                     var p = createPartFromJSON({type:'numberentry', marks: 1, minValue: '1', maxValue: '1'});
@@ -210,7 +224,6 @@
                     var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[1]], minAnswers: 2});
                     var res = mark_part(p, [[false], [true]]);
                     assert.equal(res.credit,0,'Picking one is incorrect');
-                    window.p = p;
                 });
 
                 QUnit.module('Match choices with answers');
@@ -271,8 +284,21 @@
                     q.generateVariables();
                     var promise = q.signals.on('ready',function() {
                         assert.ok(q);
+
+                        var p1 = q.getPart('p1');
+                        var p5 = q.getPart('p5');
+                        p1.stagedAnswer = [2,2,[['2','0'],['0','1']]];
+                        p1.submit();
+                        assert.equal(p1.credit,0.75,'0.75 credit on part b for one cell wrong');
+                        p5.stagedAnswer = '2';
+                        p5.submit();
+                        assert.equal(p5.credit,1,'Adaptive marking used for part f');
+
                         done();
                     });
+
+                    window.q = q;
+
                 });
 
             });

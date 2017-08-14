@@ -790,7 +790,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * A dictionary representing the results of marking a student's answer.
      * @property {Array.<String>} warnings - Warning messages.
      * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages.
-     * @property {Object} validation - dictionary of data to be used by {@link Numbas.parts.Part#validate} to determine if the student's answer could be marked.
      * @property {Number} credit - Proportion of the available marks to award to the student.
      * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
