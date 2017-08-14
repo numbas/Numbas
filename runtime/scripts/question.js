@@ -175,8 +175,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.addPart(part,j);
             }
             q.signals.trigger('partsGenerated');
-        })
-
+        });
     },
 
     /** Load the question's settings from a JSON object

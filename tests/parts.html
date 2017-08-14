@@ -297,10 +297,21 @@
                         done();
                     });
 
-                    window.q = q;
-
                 });
 
+                QUnit.test("Catch error in a marking script", function(assert) {
+                    var done = assert.async();
+                    var data = {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]};
+
+                    var q = Numbas.createQuestionFromJSON(data);
+                    window.q = q;
+                    q.generateVariables();
+                    var promise = q.signals.on('ready').catch(function(e){
+                        assert.equal(e.originalMessage,'marking.script.error parsing notes','Error is "marking.script.error parsing notes"');
+                        done();
+                    });
+
+                });
             });
         </script>
 	</body>

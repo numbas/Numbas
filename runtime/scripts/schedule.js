@@ -157,23 +157,44 @@ SignalBox.prototype = {
 
     on: function(events, fn) {
         var sb = this;
+        if(sb.error) {
+            return Promise.reject(sb.error);
+        }
         if(typeof(events)=='string') {
             events = [events];
         }
         var promises = [];
-        events.forEach(function(name) {
+        var callbacks = events.map(function(name) {
             var callback = sb.getCallback(name);
             promises.push(callback.promise);
+            return callback;
         });
         var promise = Promise.all(promises);
         if(fn) {
-            promise = promise.then(fn);
+            promise = promise.then(function() {
+                return new Promise(function(resolve,reject) {
+                    try {
+                        var result = fn();
+                        resolve(result);
+                    } catch(e) {
+                        reject(e);
+                    }
+                });
+            }).catch(function(e){
+                sb.error = e;
+                for(var x in sb.callbacks) {
+                    sb.callbacks[x].reject(e);
+                }
+            });
         }
         return promise;
     },
 
     trigger: function(name) {
         var callback = this.getCallback(name);
+        if(this.error) {
+            callback.reject(error);
+        }
         callback.resolved = true;
         callback.resolve();
     }
