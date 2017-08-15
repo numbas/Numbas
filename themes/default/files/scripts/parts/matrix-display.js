@@ -142,6 +142,9 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                 var numColumns = parseInt(this.numColumns());
                 
                 var value = this.value();
+                if(numRows==value.length && (numRows==0 || numColumns==value[0]().length)) {
+                    return;
+                }
                 value.splice(numRows,value.length-numRows);
                 for(var i=0;i<numRows;i++) {
                     var row;
