@@ -162,7 +162,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
 		},
 		'name': function(a,b) {
-			return a.name == b.name;
+			return a.name.toLowerCase() == b.name.toLowerCase();
 		},
 		'string': function(a,b) {
 			return a.value==b.value;

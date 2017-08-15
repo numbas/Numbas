@@ -587,16 +587,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		}
 	},
 
-	/** Mark the student's answer to a given part/gap/step.
-	 */
-	doPart: function(answerList, partRef)
-	{
-		var part = this.getPart(partRef);
-		if(!part)
-			throw(new Numbas.Error('question.no such part',{path:partRef}));
-		part.storeAnswer(answerList);
-	},
-
 	/** Calculate the student's total score for this questoin - adds up all part scores 
 	 */
 	calculateScore: function()

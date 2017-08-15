@@ -64,14 +64,7 @@
 
                 function mark_part(p, answer) {
                     var answer = answer;
-                    if(p.type=='gapfill') {
-                        p.answerList = p.stagedAnswer = answer;
-                        p.gaps.forEach(function(g,i) {
-                            g.answerList = g.stagedAnswer = answer[i];
-                        });
-                    } else {
-                        p.answerList = p.stagedAnswer = typeof(answer)=='string' ? [answer] : answer;
-                    }
+                    p.storeAnswer(answer);
                     p.setStudentAnswer();
                     return p.mark();
                 }
@@ -180,11 +173,11 @@
                 QUnit.module('Matrix entry');
                 QUnit.test('Answer is id(2)', function(assert) {
                     var p = createPartFromJSON({type:'matrix', correctAnswer: 'id(2)'});
-                    var res = mark_part(p,[2,2,[['1','0'],['0','1']]]);
+                    var res = mark_part(p,{rows:2,columns:2,matrix:[['1','0'],['0','1']]});
                     assert.equal(res.credit,1,'[[1,0],[0,1]] is correct');
-                    var res = mark_part(p,[2,2,[['1','1'],['0','1']]]);
+                    var res = mark_part(p,{rows:2,columns:2,matrix:[['1','1'],['0','1']]});
                     assert.equal(res.credit,0,'[[1,1],[0,1]] is incorrect');
-                    var res = mark_part(p,[3,3,[['1','0','0'],['0','1','0'],['0','0','0']]]);
+                    var res = mark_part(p,{rows:3,columns:3,matrix:[['1','0','0'],['0','1','0'],['0','0','0']]});
                     assert.equal(res.credit,0,'[[1,0,0],[0,1,0],[0,0,0]] is incorrect');
                     assert.ok(res.states.filter(function(s){return s.note=='wrong_size' && s.credit==0}).length>0, '[[1,0,0],[0,1,0],[0,0,0]] fails because wrong size');
                 });
@@ -192,7 +185,7 @@
                 QUnit.module('Choose one from a list');
                 QUnit.test('Three choices, first answer is correct', function(assert) {
                     var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
-                    var res = mark_part(p, [[true], [false], [false]]);
+                    var res = mark_part(p, [[true],[false],[false]]);
                     assert.equal(res.credit,1,'Picking first choice is correct');
                     var res = mark_part(p, [[false], [true], [false]]);
                     assert.equal(res.credit,0,'Picking second choice is incorrect');
@@ -265,7 +258,7 @@
                     q.signals.on('ready',function() {
                         var p = q.getPart('p0');
                         assert.ok(p,'Part created');
-                        p.answerList = p.stagedAnswer = ['x+2'];
+                        p.storeAnswer('x+2');
                         p.setStudentAnswer();
                         q.submit();
 
@@ -287,10 +280,10 @@
 
                         var p1 = q.getPart('p1');
                         var p5 = q.getPart('p5');
-                        p1.stagedAnswer = [2,2,[['2','0'],['0','1']]];
+                        p1.storeAnswer({rows:2,columns:2,matrix:[['2','0'],['0','1']]});
                         p1.submit();
                         assert.equal(p1.credit,0.75,'0.75 credit on part b for one cell wrong');
-                        p5.stagedAnswer = '2';
+                        p5.storeAnswer('2');
                         p5.submit();
                         assert.equal(p5.credit,1,'Adaptive marking used for part f');
 

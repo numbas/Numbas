@@ -273,7 +273,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         try {
             this.tree = jme.compile(this.expr);
         } catch(e) {
-            throw(new Numbas.Error("marking.note.compilation error",{name:name, message:e.message}));
+            throw(new Numbas.Error("marking.note.compilation error",{name:this.name, message:e.message}));
         }
         this.vars = jme.findvars(this.tree);
     }

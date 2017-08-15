@@ -256,7 +256,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
 	 */
 	setStudentAnswer: function() {
-		this.studentAnswer = this.answerList[0];
+		this.studentAnswer = this.stagedAnswer;
 	},
 
 	/** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm

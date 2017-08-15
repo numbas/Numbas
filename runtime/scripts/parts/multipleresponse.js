@@ -635,14 +635,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     },
 
     /** Store the student's choices */
-    storeAnswer: function(answerList)
+    storeTick: function(answer)
     {
         this.setDirty(true);
         this.display && this.display.removeWarnings();
         //get choice and answer 
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
-        var answerIndex = answerList[0];
-        var choiceIndex = answerList[1];
+        var answerIndex = answer.answer;
+        var choiceIndex = answer.choice;
 
         switch(this.settings.displayType)
         {
@@ -654,7 +654,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
             break;
         default:
-            this.stagedAnswer[answerIndex][choiceIndex] = answerList[2];
+            this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
     },
 

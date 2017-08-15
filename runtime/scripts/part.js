@@ -317,6 +317,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {Boolean} extend_base - Does this script extend the built-in script?
      */
     setMarkingScript: function(markingScriptString, extend_base) {
+        var p = this;
         var oldMarkingScript = this.markingScript;
 
         var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
@@ -407,11 +408,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @type {Array.<String>}
 	 */
 	stagedAnswer: undefined,
-
-	/** Student's last submitted answer - a copy of {@link Numbas.parts.Part.stagedAnswer} taken when they submitted.
-	 * @type {Array.<String>}
-	 */
-	answerList: undefined,
 
 	/** Has this part been answered?
 	 * @type {Boolean}
@@ -617,9 +613,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	},
 
 	/** Update the stored answer from the student (called when the student changes their answer, but before submitting) 
+     * @param {*} answer
+     * @see {Numbas.parts.Part.stagedAnswer}
 	 */
-	storeAnswer: function(answerList) {
-		this.stagedAnswer = answerList;
+	storeAnswer: function(answer) {
+		this.stagedAnswer = answer;
 		this.setDirty(true);
 		this.display && this.display.removeWarnings();
 	},
@@ -671,9 +669,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     : R('part.marking.revealed steps no penalty'));
 		}
 
-		if(this.stagedAnswer) {
-			this.answerList = util.copyarray(this.stagedAnswer);
-		}
 		this.setStudentAnswer();
 
 		if(this.doesMarking) {
@@ -872,7 +867,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	getCorrectAnswer: function(scope) {},
 
-	/** Save a copy of the student's answer as entered on the page, for use in marking.
+	/** Save an answer entered by the student, for use in marking.
 	 * @abstract
 	 */
 	setStudentAnswer: function() {},
@@ -899,12 +894,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.marking.finalised_state}
      */
     mark: function() {
-		if(this.answerList==undefined) {
+        var studentAnswer = this.rawStudentAnswerAsJME();
+		if(studentAnswer==undefined) {
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return;
 		}
 		
-        var result = this.mark_answer(this.rawStudentAnswerAsJME());
+        var result = this.mark_answer(studentAnswer);
 
         var finalised_result = marking.finalise_state(result.states.mark)
         this.apply_feedback(finalised_result);

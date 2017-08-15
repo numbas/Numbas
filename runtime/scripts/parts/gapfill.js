@@ -106,11 +106,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 		return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
 	},
 
+    storeAnswer: function(answer) {
+        this.gaps.forEach(function(g,i) {
+            g.storeAnswer(answer[i]);
+        })
+    },
+
     setStudentAnswer: function() {
         this.studentAnswer = this.gaps.map(function(g) {
-            if(g.stagedAnswer) {
-                g.answerList = util.copyarray(g.stagedAnswer);
-            }
             g.setStudentAnswer();
             return g.studentAnswer;
         });
@@ -159,7 +162,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 	}
 
 };
-['loadFromXML','resume','finaliseLoad','loadFromJSON'].forEach(function(method) {
+['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {

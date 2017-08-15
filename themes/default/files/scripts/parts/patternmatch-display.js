@@ -31,7 +31,7 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
         this.displayAnswer = ko.observable(p.settings.displayAnswer);
 
         ko.computed(function() {
-            p.storeAnswer([this.studentAnswer()]);
+            p.storeAnswer(this.studentAnswer());
         },this);
     }
     display.PatternMatchPartDisplay.prototype = 

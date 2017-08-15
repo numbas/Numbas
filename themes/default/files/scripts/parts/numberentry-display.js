@@ -26,7 +26,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         this.correctAnswer = ko.observable(p.settings.displayAnswer);
 
         ko.computed(function() {
-            p.storeAnswer([this.studentAnswer()]);
+            p.storeAnswer(this.studentAnswer());
         },this);
 
         /** Cleaned-up version of student answer (remove commas and trim whitespace)

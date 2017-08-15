@@ -43,7 +43,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             var newColumns = this.studentAnswerColumns();
             var newMatrix = this.studentAnswer();
             if(newRows != oldRows || newColumns != oldColumns || !util.arraysEqual(oldMatrix,newMatrix)) {
-                p.storeAnswer([this.studentAnswerRows(),this.studentAnswerColumns(),this.studentAnswer()]);
+                p.storeAnswer({
+                    rows: this.studentAnswerRows(),
+                    columns: this.studentAnswerColumns(),
+                    matrix: this.studentAnswer()
+                });
             }
         },this);
 

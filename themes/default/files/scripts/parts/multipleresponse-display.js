@@ -16,7 +16,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         function makeTicker(answer,choice) {
             var obs = ko.observable(p.ticks[answer][choice]);
             ko.computed(function() {
-                p.storeAnswer([answer,choice,obs()]);
+                p.storeTick({answer:answer, choice:choice, ticked:obs()});
             },p);
             return obs;
         }
@@ -29,14 +29,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             ko.computed(function() {
                 var answer = parseInt(obs());
-                p.storeAnswer([answer,choice]);
+                p.storeAnswer({answer:answer, choice:choice});
             },p);
             return obs;
         }
         function makeCheckboxTicker(answer,choice) {
             var obs = ko.observable(p.ticks[answer][choice]);
             ko.computed(function() {
-                p.storeAnswer([answer,choice,obs()]);
+                p.storeAnswer({answer:answer, choice:choice, ticked:obs()});
             });
             return obs;
         }
@@ -59,11 +59,11 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             ko.computed(function() {
                 if(this.studentAnswer()==='') {
                     oldAnswer = null;
-                    p.storeAnswer([null,0]);
+                    p.storeAnswer({answer:null, choice: 0});
                 }
                 var i = parseInt(this.studentAnswer());
                 if(i!==oldAnswer && !isNaN(i)) {
-                    p.storeAnswer([i,0]);
+                    p.storeAnswer({answer:i, choice:0});
                     oldAnswer = i;
                 }
             },this);

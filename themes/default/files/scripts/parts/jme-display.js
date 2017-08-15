@@ -37,7 +37,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.answerSimplification,p.question.scope);
 
         ko.computed(function() {
-            p.storeAnswer([this.studentAnswer()]);
+            p.storeAnswer(this.studentAnswer());
         },this);
 
         /** The student's answer, in LaTeX form

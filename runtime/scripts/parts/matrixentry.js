@@ -183,9 +183,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
 	 */
 	setStudentAnswer: function() {
-		this.studentAnswerRows = parseInt(this.stagedAnswer[0]);
-		this.studentAnswerColumns = parseInt(this.stagedAnswer[1]);
-		this.studentAnswer = this.stagedAnswer[2];
+		this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
+		this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
+		this.studentAnswer = this.stagedAnswer.matrix;
 	},
 
 	/** Get the student's answer as it was entered as a JME data type, to be used in the marking script

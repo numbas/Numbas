@@ -165,18 +165,6 @@ Numbas.controls = /** @lends Numbas.controls */ {
 		job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
 	},
 
-	/** Call when the student has changed their answer to a part
-	 * @param {Array} answerList - student's answer
-	 * @param {partpath} - id of the part being answered
-	 * @see Numbas.Question#doPart
-	 */
-	doPart: function( answerList, partRef )
-	{
-		job(function() {
-			Numbas.exam.currentQuestion.doPart(answerList, partRef);
-		});
-	},
-
 	/* Show steps for a question part
 	 * @param {partpath} partRef - id of the part
 	 * @see Numbas.parts.Part#showSteps
