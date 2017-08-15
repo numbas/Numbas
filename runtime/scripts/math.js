@@ -435,8 +435,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @param {Number} b
 	 * @returns {Boolean}
 	 */
-	eq: function(a,b)
-	{
+	eq: function(a,b) {
+        if(isNaN(a)) {
+            return isNaN(b);
+        }
 		if(a.complex)
 		{
 			if(b.complex)

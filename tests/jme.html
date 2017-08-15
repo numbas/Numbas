@@ -125,6 +125,7 @@
 
                     checkNumber('infinity',Infinity);
                     checkNumber('infty',Infinity);
+                    checkNumber('nan',NaN);
 				});
 
 				QUnit.test('Names',function(assert) {
@@ -236,7 +237,8 @@
 					assert.equal(Numbas.math.countSigFigs('1.23e-6'),3,"math.countSigFigs('1.23e-6')==3");
 					assert.equal(Numbas.math.countSigFigs('1.23E6'),3,"math.countSigFigs('1.23e6')==3");
 					assert.equal(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
-					assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
+                    assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
+                    assert.ok(Numbas.math.eq(NaN,NaN),'NaN = NaN');
 				});
 
                 var evaluate = function(t,scope) { 
@@ -434,6 +436,8 @@
 					closeEqual(assert, evaluate('false xor true').value,true,'false xor true');
 					closeEqual(assert, evaluate('true xor true').value,false,'true xor true');
 					closeEqual(assert, evaluate('false xor false').value,false,'false xor false');
+
+					closeEqual(assert, evaluate('NaN=NaN').value,true,'nan=NaN');
 				});
 
 				QUnit.test('Number functions',function(assert) {

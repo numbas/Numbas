@@ -52,7 +52,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 		'pi': Math.PI,
 		'i': math.complex(0,1),
 		'infinity': Infinity,
-		'infty': Infinity
+		'infty': Infinity,
+        'nan': NaN
 	},
 
 	/** Regular expressions to match tokens */
@@ -143,18 +144,15 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			{
 				var name = result[2];
 				var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
-				if(!annotation)
-				{
+				if(!annotation) {
 					var lname = name.toLowerCase();
 					// fill in constants here to avoid having more 'variables' than necessary
 					if(lname in jme.constants) {
 						token = new TNum(jme.constants[lname]);
-					}else{
+					} else {
 						token = new TName(name);
 					}
-				}
-				else
-				{
+				} else {
 					token = new TName(name,annotation);
 				}
 				
