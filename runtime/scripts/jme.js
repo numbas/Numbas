@@ -1049,7 +1049,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.token}
      */
     getVariable: function(name) {
-        return this.resolve('variables',name);
+        return this.resolve('variables',name.toLowerCase());
     },
 
     /** Set the given variable name
