@@ -107,7 +107,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
             if(values.type!='list') {
-                p.error('part.mcq.options def not a list',nodeName);
+                p.error('part.mcq.options def not a list',{properties: nodeName});
             }
             var numValues = values.value.length;
             values.value.map(function(value) {
@@ -264,7 +264,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
                 if(settings.choices.type!='list') {
-                    this.error('part.mcq.options def not a list','choice');
+                    this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }
                 settings.choices = jme.unwrapValue(choices);
             } else {
@@ -277,7 +277,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
                 if(settings.answers.type!='list') {
-                    this.error('part.mcq.options def not a list','answer');
+                    this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
                 settings.answers = jme.unwrapValue(answers);
             } else {
@@ -556,7 +556,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         numNumbers++;
                         break;
                     default:
-                        this.error('part.mcq.matrix wrong type',matrix.value[i].type);
+                        this.error('part.mcq.matrix wrong type',{type: matrix.value[i].type});
                     }
                 }
                 if(numLists == matrix.value.length) {

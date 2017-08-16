@@ -163,7 +163,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 		} else if(correctAnswer && correctAnswer.type=='vector') {
 			settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
 		} else {
-			this.error('part.setting not present','correct answer');
+			this.error('part.setting not present',{property:'correct answer'});
 		}
 
 		settings.precision = jme.subvars(settings.precisionString, scope);
