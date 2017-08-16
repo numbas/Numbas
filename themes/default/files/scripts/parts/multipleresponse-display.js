@@ -29,7 +29,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             ko.computed(function() {
                 var answer = parseInt(obs());
-                p.storeAnswer({answer:answer, choice:choice});
+                p.storeAnswer({answer:answer, choice:choice, ticked: true});
             },p);
             return obs;
         }

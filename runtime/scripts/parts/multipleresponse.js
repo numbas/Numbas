@@ -90,6 +90,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             // so swap "answers" and "choices"
             // this all stems from an extremely bad design decision made very early on
             this.numAnswers = choiceNodes.length;
+            this.numChoices = 1;
             answersNode = choicesNode;
             choicesNode = null;
         } else {
@@ -421,9 +422,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
         this.getCorrectAnswer(scope);
 
-        var matrix = this.settings.matrix;
-        
         if(this.marks == 0) {    //if marks not set explicitly
+            var matrix = this.settings.matrix;
+        
             var flat = [];
             switch(this.type)
             {
@@ -656,6 +657,23 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         default:
             this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
+    },
+
+    storeAnswer: function(answer) {
+        this.setDirty(true);
+        this.display.removeWarnings();
+		switch(this.settings.displayType)
+		{
+		case 'radiogroup':							//for radiogroup parts, only one answer can be selected.
+		case 'dropdownlist':
+			for(var i=0; i<this.numAnswers; i++)
+			{
+				this.stagedAnswer[i][answer.choice]= i===answer.answer;
+			}
+			break;
+		default:
+			this.stagedAnswer[answer.answer][answer.choice] = answer.ticked;
+		}
     },
 
     /** Save a copy of the student's answer as entered on the page, for use in marking.
