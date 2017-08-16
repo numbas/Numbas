@@ -29,14 +29,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             ko.computed(function() {
                 var answer = parseInt(obs());
-                p.storeAnswer({answer:answer, choice:choice, ticked: true});
+                p.storeTick({answer:answer, choice:choice, ticked: true});
             },p);
             return obs;
         }
         function makeCheckboxTicker(answer,choice) {
             var obs = ko.observable(p.ticks[answer][choice]);
             ko.computed(function() {
-                p.storeAnswer({answer:answer, choice:choice, ticked:obs()});
+                p.storeTick({answer:answer, choice:choice, ticked:obs()});
             });
             return obs;
         }

@@ -247,9 +247,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
-            // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
-            // so swap "answers" and "choices"
-            // this all stems from an extremely bad design decision made very early on
             this.flipped = true;
         } else {
             this.flipped = false;
@@ -295,14 +292,23 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.markingMatrixString = data.matrix;
         } else {
             settings.markingMatrixArray = data.matrix.map(function(row){return typeof(row)=='object' ? row : [row]});
+            if(!this.flipped) {
+                var m = settings.markingMatrixArray;
+                m.rows = this.numChoices;
+                m.columns = this.numAnswers;
+                settings.markingMatrixArray = Numbas.matrixmath.transpose(settings.markingMatrixArray);
+            }
         }
 
         tryLoad(data, ['distractors'], settings);
+        if(settings.distractors && this.type=='1_n_2' || this.type=='m_n_2') {
+            settings.distractors = settings.distractors.map(function(d){return [d]});
+        }
         if(!settings.distractors) {
             settings.distractors = [];
-            for(var i=0;i<this.numChoices; i++) {
+            for(var i=0;i<this.numAnswers; i++) {
                 var row = [];
-                for(var j=0;j<this.numAnswers; j++) {
+                for(var j=0;j<this.numChoices; j++) {
                     row.push('');
                 }
                 settings.distractors.push(row);
@@ -640,6 +646,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     {
         this.setDirty(true);
         this.display && this.display.removeWarnings();
+
         //get choice and answer 
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
         var answerIndex = answer.answer;
@@ -657,23 +664,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         default:
             this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
-    },
-
-    storeAnswer: function(answer) {
-        this.setDirty(true);
-        this.display.removeWarnings();
-		switch(this.settings.displayType)
-		{
-		case 'radiogroup':							//for radiogroup parts, only one answer can be selected.
-		case 'dropdownlist':
-			for(var i=0; i<this.numAnswers; i++)
-			{
-				this.stagedAnswer[i][answer.choice]= i===answer.answer;
-			}
-			break;
-		default:
-			this.stagedAnswer[answer.answer][answer.choice] = answer.ticked;
-		}
     },
 
     /** Save a copy of the student's answer as entered on the page, for use in marking.
