@@ -115,6 +115,12 @@ def haskey(data,key):
             return True
     return False
 
+def case_insensitive_get(data,key):
+    key = key.lower()
+    for k,v in data.items():
+        if k.lower()==key:
+            return v
+
 #exam object
 class Exam(object):
     name = ''                        #title of exam
@@ -760,13 +766,15 @@ class JMEPart(Part):
         if haskey(data,'expectedvariablenames'):
             part.expectedVariableNames = Restriction('expectedvariablenames')
             try:
-                part.expectedVariableNames.strings = list(data['expectedvariablenames'])#
+                part.expectedVariableNames.strings = list(case_insensitive_get(data,'expectedvariablenames'))
             except TypeError:
                 raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
 
-        if haskey(data,'vsetrange') and len(data['vsetrange']) == 2:
-            part.vsetRangeStart = data['vsetrange'][0]
-            part.vsetRangeEnd = data['vsetrange'][1]
+        if haskey(data,'vsetrange'):
+            vsetrange = case_insensitive_get(data,'vsetrange')
+            if len(vsetrange) == 2:
+                part.vsetRangeStart = vsetrange[0]
+                part.vsetRangeEnd = vsetrange[1]
 
         return part
 
