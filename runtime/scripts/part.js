@@ -915,7 +915,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see Numbas.marking.finalise_state
      */
     apply_feedback: function(feedback) {
-        var valid = true;
+        var valid = feedback.valid;
         var part = this;
         var end = false;
         var states = feedback.states.slice();
