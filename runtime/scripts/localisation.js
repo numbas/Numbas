@@ -5,6 +5,7 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
         keySeparator: false,
         nsSeparator: false,
         interpolation: {
+            unescapePrefix: '-',
             format: function(value,format) {
                 if(format=='niceNumber') {
                     return Numbas.math.niceNumber(value);
