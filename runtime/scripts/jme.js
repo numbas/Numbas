@@ -205,7 +205,13 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			else if(expr.length)
 			{
 				//invalid character or not able to match a token
-				throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
+                var position = oexpr.length - expr.length;
+                if(oexpr.length>20) {
+                    var nearby = oexpr.slice(Math.max(0,position-5), position+5);
+    				throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
+                } else {
+    				throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
+                }
 			}
 			else
 				break;
