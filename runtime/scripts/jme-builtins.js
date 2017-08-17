@@ -1099,6 +1099,14 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
 	return tree;
 }
 
+function tok_is_true(item){return item.type=='boolean' && item.value}
+newBuiltin('all',[TList],TBool,function(list) {
+    return list.every(tok_is_true);
+});
+newBuiltin('some',[TList],TBool,function(list) {
+    return list.some(tok_is_true);
+});
+
 newBuiltin('let',['?'],TList, null, {
 	evaluate: function(args,scope)
 	{
