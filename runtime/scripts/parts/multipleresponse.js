@@ -127,8 +127,9 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(xml, pat
 
 			switch(value.type) {
 			case 'string':
+            case 'number':
                 var d = document.createElement('d');
-                d.innerHTML = value.value;
+                d.innerHTML = value.type == 'string' ? value.value : Numbas.math.niceNumber(value.value);
                 var newNode;
                 try {
 		    		newNode = xml.ownerDocument.importNode(d,true);
