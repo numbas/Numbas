@@ -190,18 +190,15 @@ newBuiltin('dict',['*keypair'],TDict,null,{
             return new TDict({});
         }
         var value = {};
-        switch(args[0].tok.type) {
-        case 'list':
+        if(args[0].tok.type=='keypair') {
+            args.forEach(function(kp) {
+                value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+            });
+        } else {
             var list = scope.evaluate(args[0]);
             list.value.forEach(function(pair) {
                 value[pair.value[0].value] = pair.value[1];
             });
-            break;
-        case 'keypair':
-            args.forEach(function(kp) {
-                value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
-            });
-            break;
         }
         return new TDict(value);
     }
