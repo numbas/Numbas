@@ -767,6 +767,7 @@
                     equals(evaluate('"__proto__" in dict()').value,false,'"__proto__" in dict()');
                     deepCloseEqual(jme.unwrapValue(evaluate('["a":1,"b":2]+["a":4,"c":3]')),{a:4,b:2,c:3},'["a":1,"b":2]+["a":4,"c":3]');
                     deepCloseEqual(jme.unwrapValue(evaluate('map(let(bits,x,["a":bits]),x,[1,2,3])')),[{a:1},{a:2},{a:3}],'map(let(bits,x,["a":bits]),x,[1,2,3])');
+                    deepCloseEqual(jme.unwrapValue(evaluate('dict([["a",1],["b",2]])')),{a:1,b:2},'dict([["a",1],["b",2]])');
                 });
 
 				test('Branching',function() {

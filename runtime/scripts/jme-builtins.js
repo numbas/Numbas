@@ -186,10 +186,23 @@ newBuiltin('list',[TRange],TList,function(range) {
 
 newBuiltin('dict',['*keypair'],TDict,null,{
     evaluate: function(args,scope) {
+        if(args.length==0) {
+            return new TDict({});
+        }
         var value = {};
-        args.forEach(function(kp) {
-            value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
-        });
+        switch(args[0].tok.type) {
+        case 'list':
+            var list = scope.evaluate(args[0]);
+            list.value.forEach(function(pair) {
+                value[pair.value[0].value] = pair.value[1];
+            });
+            break;
+        case 'keypair':
+            args.forEach(function(kp) {
+                value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+            });
+            break;
+        }
         return new TDict(value);
     }
 });
