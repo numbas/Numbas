@@ -316,6 +316,7 @@ newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
 newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});
+newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(sub)>=0 });
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
