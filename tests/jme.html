@@ -966,6 +966,9 @@
 					equals(simplifyExpression('-3x-4',['all']),'-3x - 4','-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers');
 					equals(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
 
+					equals(simplifyExpression('3!',[]),'3!','3!');
+					equals(simplifyExpression('(3+1)!',[]),'(3 + 1)!','3!');
+
 					equals(simplifyExpression('pi*x',['all']),'pi*x','pi*x doesn\t omit the *');
 					equals(simplifyExpression('e*x',['all']),'e*x','e*x doesn\t omit the *');
 					equals(simplifyExpression('1*pi/4',['all']),'pi/4','1*pi/4 cancels the 1');
