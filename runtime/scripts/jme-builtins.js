@@ -188,10 +188,20 @@ newBuiltin('dict',[TList],TDict,null, {
 
 newBuiltin('dict',['*keypair'],TDict,null,{
     evaluate: function(args,scope) {
+        if(args.length==0) {
+            return new TDict({});
+        }
         var value = {};
-        args.forEach(function(kp) {
-            value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
-        });
+        if(args[0].tok.type=='keypair') {
+            args.forEach(function(kp) {
+                value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+            });
+        } else {
+            var list = scope.evaluate(args[0]);
+            list.value.forEach(function(pair) {
+                value[pair.value[0].value] = pair.value[1];
+            });
+        }
         return new TDict(value);
     }
 });
@@ -316,6 +326,9 @@ newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
 });
 newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
+newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
+newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});
+newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(sub)>=0 });
 
 newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
     var re = new RegExp(pattern);

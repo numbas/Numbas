@@ -1330,7 +1330,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var arg_type = args[i].tok.type;
 			var arg_value = args[i].tok.value;
 			var pd;
-            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
+            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact')
 
             var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true // if this kind of op as an argument to the parent op always gets brackets
             bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
@@ -1382,6 +1382,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         case 'fact':
             op = '!';
+            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name')) {
+                bits[0] = '('+bits[0]+')';
+            }
             break;
 		}
 

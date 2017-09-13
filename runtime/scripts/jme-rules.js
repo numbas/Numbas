@@ -372,17 +372,39 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
 			if(ruleTok.type!=exprTok.type || ruleTok.name!=exprTok.name) {
 				return false;
 			}
+            var i = 0;
+            var j = 0;
 			for(var i=0;i<ruleTree.args.length;i++)
 			{
-				var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
-				if(m==false) {
-					return false;
-				} else {
-					for(var x in m) {
-						d[x]=m[x];
-					}
-				}
+                if(jme.isFunction(ruleTree.args[i].tok,'m_all')) {
+                    while(j<exprTree.args.length) {
+                        var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
+                        if(!m) {
+                            break;
+                        }
+                        for(var x in m) {
+                            d[x]=m[x];
+                        }
+                        j += 1;
+                    }
+                } else if(jme.isName(ruleTree.args[i].tok,'m_nothing')) {
+                    continue;
+                } else {
+                    var m = matchTree(ruleTree.args[i],exprTree.args[j],doCommute);
+                    if(m===false) {
+                        return false;
+                    } else {
+                        for(var x in m) {
+                            d[x]=m[x];
+                        }
+                        j += 1;
+                    }
+                }
 			}
+            // if not all terms in the rule have been matched, the rule doesn't match
+            if(j<i) {
+                return false;
+            }
 			return d
 		}
 	case 'name':
@@ -469,9 +491,9 @@ function mergeRulesets(r1,r2) {
 }
 
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
- * @param {string|Array<string>} set - can be a comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {object} scopeSets - a dictionary of rulesets
- * @returns {Numbas.jme.rules.Ruleset}
+ * @param {String|Array.<String|Numbas.jme.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {Object.<Numbas.jme.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @returns Numbas.jme.Ruleset
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 {
@@ -488,6 +510,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 
 	if(typeof(set)=='string') {
 		set = set.split(',');
+        set.splice(0,0,'basic');
 	}
 	else {
 		flags = $.extend(flags,set.flags);
