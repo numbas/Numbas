@@ -202,9 +202,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         // create the JME marking script for the part
         var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
         var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
+        var markingScript = {};
+        tryGetAttribute(markingScript,this.xml,markingScriptNode,['extend']);
         if(markingScriptString) {
             // extend the base marking algorithm if asked to do so
-            var extend_base = markingScriptNode.getAttribute('extend') || true;
+            var extend_base = markingScript.extend;
             this.setMarkingScript(markingScriptString,extend_base);
         }
 

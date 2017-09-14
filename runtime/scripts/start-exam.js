@@ -22,6 +22,10 @@ Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout','sari
 
 Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
+    for(var name in Numbas.custom_part_types) {
+        Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+    };
+
 	/**
 	 * Initialise the exam:
 	 *

@@ -59,5 +59,6 @@ Copyright 2011-16 Newcastle University
     {% include 'xslt/parts/matrix.xslt' %}
     {% include 'xslt/parts/information.xslt' %}
     {% include 'xslt/parts/extension.xslt' %}
+    {% include 'xslt/parts/custom.xslt' %}
 
 </xsl:stylesheet>
