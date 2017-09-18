@@ -215,6 +215,8 @@
     "part.gapfill.feedback header": "<strong>Gap {{index}}</strong>",
     "part.extension.not implemented": "Part hasn't implemented the <code>{{name}}</code> method.",
     "part.custom.unrecognised input type": "Unrecognised setting type <code>{{input_type}}</code>",
+    "part.custom.error evaluating input option": "Error evaluating input option <code>{{option}}</code>: {{-error}}",
+    "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
     "question.loaded name mismatch": "Can't resume this attempt - the package has changed since the last session.",
     "question.error": "Question {{number}}: {{-message}}",
     "question.preamble.error": "Error in preamble: {{-message}}",

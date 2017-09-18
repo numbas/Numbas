@@ -764,7 +764,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @returns {Boolean}
 	 */
 	hasStagedAnswer: function() {
-		return !(this.stagedAnswer==undefined || this.stagedAnswer=='');
+		return !(this.stagedAnswer==undefined || this.stagedAnswer==='');
 	},
 
 	/** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part)
