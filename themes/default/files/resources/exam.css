@@ -171,7 +171,7 @@ input.jme {
 	font-family: monospace;
 }
 
-.type-jme .preview, .type-numberentry .preview {
+.jme-preview {
 	background-color: #eee;
 	padding: 0.2em;
 	font-family: serif;

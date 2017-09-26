@@ -225,9 +225,11 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
             this.partDisplay = params.partDisplay;
             this.disable = params.disable;
             this.widget = params.widget;
+            this.classes = {'answer-widget':true};
+            this.classes['answer-widget-'+this.widget] = true;
         },
         template: '\
-        <span data-bind="component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable}}"></span>\
+        <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable}}"></span>\
         '
     });
 
@@ -242,7 +244,7 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
             },this);
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
+            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
         '
     });
 
@@ -250,12 +252,14 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             this.input = ko.observable(ko.unwrap(this.answerJSON() || ''));
+            this.part = params.part;
+            this.disable = params.disable;
             ko.computed(function() {
                 this.answerJSON(this.input());
             },this);
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
+            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
         '
     });
 
@@ -263,13 +267,39 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             this.input = ko.observable(ko.unwrap(this.answerJSON() || ''));
+            this.part = params.part;
+            var p = this.part.part;
+
+            this.latex = ko.computed(function() {
+                var input = this.input();
+                if(input==='') {
+                    return '';
+                }
+
+                p.removeWarnings();
+
+                try {
+                    var tex = Numbas.jme.display.exprToLaTeX(input,'',p.question.scope);
+                    if(tex===undefined) {
+                        throw(new Numbas.Error('display.part.jme.error making maths'));
+                    }
+                }
+                catch(e) {
+                    p.giveWarning(e.message);
+                    return '';
+                }
+
+                return tex;
+            },this).extend({throttle:100});
+
+            this.disable = params.disable;
             ko.computed(function() {
                 this.answerJSON(this.input());
             },this);
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
-            <span class="preview" data-bind="JME: input"></span>\
+            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
+            <span class="jme-preview" data-bind="visible: latex, maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
 

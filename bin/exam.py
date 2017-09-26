@@ -942,7 +942,7 @@ class MatrixEntryPart(Part):
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
-    def fromDATA(builder, self, data):
+    def loadDATA(self, builder, data):
         tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],self)
 
     def toxml(self):
@@ -989,8 +989,7 @@ class MultipleChoicePart(Part):
     layoutType = 'all'
     layoutExpression = ''
     
-    def __init__(self,kind,marks=0,prompt=''):
-        self.kind = kind
+    def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
         self.choices = []
@@ -1165,7 +1164,7 @@ class GapFillPart(Part):
         self.gaps = []
 
     def loadDATA(self, builder, data):
-        super(CustomPart,self).loadDATA(builder, data)
+        super(GapFillPart,self).loadDATA(builder, data)
 
         if haskey(data,'gaps'):
             gaps = data['gaps']
