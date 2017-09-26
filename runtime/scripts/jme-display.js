@@ -112,11 +112,12 @@ jme.display = /** @lends Numbas.jme.display */ {
 	 * @param {Numbas.jme.tree} exprTree
 	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
 	 * @param {Numbas.jme.Scope} scope
+     * @param {Boolean} allowUnbound
 	 * @returns {Numbas.jme.tree}
 	 *
 	 * @see Numbas.jme.display.simplify
 	 */
-	simplifyTree: function(exprTree,ruleset,scope)
+	simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
 	{
 		if(!scope)
 			throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
@@ -143,7 +144,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
-						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope);
+						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
 					}
 				}
 				applied = false;
@@ -152,7 +153,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 					var match;
 					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
 					{
-						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]));
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
 						applied = true;
                         depth += 1;
                         if(depth > 100) {

@@ -1728,6 +1728,18 @@ newBuiltin('matches',[TExpression,TString],TBool,null, {
     }
 });
 
+newBuiltin('replace',[TString,TString,TExpression],TExpression,null,{
+    evaluate: function(args, scope) {
+        var pattern = args[0].value;
+        var repl = args[1].value;
+        var expr = args[2].tree;
+
+        var rule = new jme.rules.Rule(pattern,[],repl);
+        var set = new jme.rules.Ruleset([rule]);
+        return new TExpression(jme.display.simplifyTree(expr,set,scope,true));
+    }
+});
+
 newBuiltin('canonical_compare',['?','?'],TNum,null, {
     evaluate: function(args,scope) {
         var cmp = jme.compareTrees(args[0],args[1]);
