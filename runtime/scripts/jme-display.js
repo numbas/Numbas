@@ -164,9 +164,11 @@ jme.display = /** @lends Numbas.jme.display */ {
 /// all private methods below here
 
 
-function texifyWouldBracketOpArg(thing,i) {
+function texifyWouldBracketOpArg(thing,i, settings) {
+    settings = settings || {};
+    var tok = thing.args[i].tok;
 	var precedence = jme.precedence;
-	if(thing.args[i].tok.type=='op') {	//if this is an op applied to an op, might need to bracket
+	if(tok.type=='op') {	//if this is an op applied to an op, might need to bracket
 		var op1 = thing.args[i].tok.name;	//child op
 		var op2 = thing.tok.name;			//parent op
 		var p1 = precedence[op1];	//precedence of child op
@@ -176,10 +178,12 @@ function texifyWouldBracketOpArg(thing,i) {
 		return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
 	}
 	//complex numbers might need brackets round them when multiplied with something else or unary minusing
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') ) {
+	else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
 		var v = thing.args[i].tok.value;
 		return !(v.re==0 || v.im==0);
-	}
+	} else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+        return true;
+    }
 	return false;
 }
 
@@ -299,7 +303,7 @@ var texOps = jme.display.texOps = {
 	'^': (function(thing,texArgs,settings) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp')) {
+        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp') || texifyWouldBracketOpArg(thing, 0, settings)) {
             tex0 = '\\left ( ' +tex0+' \\right )';    
         }
         var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
