@@ -1062,6 +1062,7 @@
                     equals(exprToLaTeX('2 * e'), '2 e','');
                     equals(exprToLaTeX('2*(i^3)'), '2 i^{ 3 }','');
                     equals(exprToLaTeX('x*i'), 'x i','');
+                    equals(exprToLaTeX('x*i','alwaystimes'), 'x \\times i','');
 				});
 			});
 		</script>

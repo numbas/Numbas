@@ -314,7 +314,7 @@ var texOps = jme.display.texOps = {
 	}),
 
 
-	'*': (function(thing,texArgs) {
+	'*': (function(thing, texArgs, settings) {
 		var s = texifyOpArg(thing,texArgs,0);
 		for(var i=1; i<thing.args.length; i++ )
 		{
@@ -322,39 +322,43 @@ var texOps = jme.display.texOps = {
             var right = thing.args[i];
             var use_symbol = false;
 
-            // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) { 
+            if(settings.alwaystimes) {
                 use_symbol = true;
-            //anything times e^(something) or (not number)^(something)
-			} else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || right.args[0].tok.type!='number')) {
-                use_symbol = false;
-            //real number times Pi or E
-			} else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
-                use_symbol = false
-            //number times a power of i
-			} else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number')	{
-                use_symbol = false;
-            // times sign when LHS or RHS is a factorial
-			} else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
-                use_symbol = true;
-            //(anything except i) times i
-			} else if ( !(left.tok.type=='number' && math.eq(left.tok.value,math.complex(0,1))) && right.tok.type=='number' && math.eq(right.tok.value,math.complex(0,1))) {
-                use_symbol = false;
-            // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-			} else if ( right.tok.type=='number'
-					||
-						jme.isOp(right.tok,'-u')
-					||
-					(
-						!jme.isOp(right.tok,'-u') 
-						&& (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] 
-							&& (right.args[0].tok.type=='number' 
-							&& right.args[0].tok.value!=Math.E)
-						)
-					)
-			) {
-                use_symbol = true;
-			}
+            } else {
+                // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
+                if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) { 
+                    use_symbol = true;
+                //anything times e^(something) or (not number)^(something)
+                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || right.args[0].tok.type!='number')) {
+                    use_symbol = false;
+                //real number times Pi or E
+                } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
+                    use_symbol = false
+                //number times a power of i
+                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number')	{
+                    use_symbol = false;
+                // times sign when LHS or RHS is a factorial
+                } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
+                    use_symbol = true;
+                //(anything except i) times i
+                } else if ( !(left.tok.type=='number' && math.eq(left.tok.value,math.complex(0,1))) && right.tok.type=='number' && math.eq(right.tok.value,math.complex(0,1))) {
+                    use_symbol = false;
+                // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
+                } else if ( right.tok.type=='number'
+                        ||
+                            jme.isOp(right.tok,'-u')
+                        ||
+                        (
+                            !jme.isOp(right.tok,'-u') 
+                            && (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] 
+                                && (right.args[0].tok.type=='number' 
+                                && right.args[0].tok.value!=Math.E)
+                            )
+                        )
+                ) {
+                    use_symbol = true;
+                }
+            }
             s += use_symbol ? ' \\times ' : ' ';
 			s += texifyOpArg(thing,texArgs,i);
 		}
@@ -1328,7 +1332,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		{
 			//number or brackets followed by name or brackets doesn't need a times symbol
 			//except <anything>*(-<something>) does
-			if( ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )	
+			if(!settings.alwaystimes && ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )	
 			{
 				op = '';
 			}

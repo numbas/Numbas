@@ -1049,7 +1049,8 @@ jme.re.re_strip_whitespace = new RegExp('^'+jme.re.re_whitespace+'+|'+jme.re.re_
  */
 var displayFlags = jme.displayFlags = {
 	fractionnumbers: undefined,
-	rowvector: undefined
+	rowvector: undefined,
+    alwaystimes: undefined
 };
 
 var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
