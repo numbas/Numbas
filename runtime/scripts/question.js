@@ -45,7 +45,6 @@ var Question = Numbas.Question = function( exam, group, xml, number, loading, gs
 	var q = question;
 	q.exam = exam;
     q.group = group;
-	q.adviceThreshold = q.exam.adviceGlobalThreshold;
 	q.xml = xml;
 	q.originalXML = q.xml;
 	q.number = number;
@@ -261,11 +260,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 * @type {Number}
 	 */
 	score: 0,
-
-	/** Percentage score below which the advice is revealed
-	 * @type {Number}
-	 */
-	adviceThreshold: 0,
 
 	/** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
 	 * @type {Boolean}
@@ -504,10 +498,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 							
 		this.updateScore();
 
-		if(this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold )
-		{
-			this.getAdvice();
-		}
 		Numbas.store.questionSubmitted(this);
 	},
 

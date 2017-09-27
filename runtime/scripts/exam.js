@@ -74,8 +74,6 @@ function Exam()
 	var feedbackPath = 'settings/feedback';
 	tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName']);
 
-	tryGetAttribute(settings,xml,feedbackPath+'/advice',['threshold'],['adviceGlobalThreshold']);
-
     var serializer = new XMLSerializer();
     var isEmpty = Numbas.xml.isEmpty;
 
@@ -183,7 +181,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	 * @property {Boolean} showTotalMark - show total marks in exam?
 	 * @property {Boolean} showAnswerState - tell student if answer is correct/wrong/partial?
 	 * @property {Boolean} allowRevealAnswer - allow 'reveal answer' button?
-	 * @property {Number} adviceGlobalThreshold - if student scores lower than this percentage on a question, the advice is displayed
      * @property {Boolean} showQuestionGroupNames - show the names of question groups?
      * @memberof Numbas.Exam.prototype
      * @instance
@@ -208,7 +205,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		showTotalMark: false,		
 		showAnswerState: false,		
 		allowRevealAnswer: false,	
-		adviceGlobalThreshold: 0, 	
         showQuestionGroupNames: false,
         showStudentName: true
 	},
