@@ -16,7 +16,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|JME} studentAnswer
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.studentAnswer = ko.observable('');
+        this.studentAnswer = Knockout.observable('');
 
         /** The correct answer
          * @member {observable|JME} correctAnswer
@@ -36,7 +36,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          */
         this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.answerSimplification,p.question.scope);
 
-        ko.computed(function() {
+        Knockout.computed(function() {
             p.storeAnswer([this.studentAnswer()]);
         },this);
 
@@ -44,7 +44,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.studentAnswerLaTeX = ko.computed(function() {
+        this.studentAnswerLaTeX = Knockout.computed(function() {
             var studentAnswer = this.studentAnswer();
             if(studentAnswer=='')
                 return '';
@@ -96,7 +96,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|boolean} inputHasFocus
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.inputHasFocus = ko.observable(false);
+        this.inputHasFocus = Knockout.observable(false);
 
         /** Give the input box focus
          * @member {function} focusInput

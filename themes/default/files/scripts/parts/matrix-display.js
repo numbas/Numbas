@@ -17,24 +17,24 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.studentAnswer = ko.observable(p.studentAnswer);
+        this.studentAnswer = Knockout.observable(p.studentAnswer);
 
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.correctAnswer = ko.observable(p.settings.correctAnswer);
-        this.correctAnswerLaTeX = ko.computed(function() {
+        this.correctAnswer = Knockout.observable(p.settings.correctAnswer);
+        this.correctAnswerLaTeX = Knockout.computed(function() {
             var correctAnswer = this.correctAnswer();
             var m = new Numbas.jme.types.TMatrix(correctAnswer);
             return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
         },this);
 
-        this.studentAnswerRows = ko.observable(p.settings.numRows);
-        this.studentAnswerColumns = ko.observable(p.settings.numColumns);
-        this.allowResize = ko.observable(p.settings.allowResize);
+        this.studentAnswerRows = Knockout.observable(p.settings.numRows);
+        this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
+        this.allowResize = Knockout.observable(p.settings.allowResize);
 
-        ko.computed(function() {
+        Knockout.computed(function() {
             var stagedAnswer = p.stagedAnswer || [null,null,null];
             var oldRows = stagedAnswer[0];
             var oldColumns = stagedAnswer[1];
@@ -57,7 +57,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.studentAnswerLaTeX = ko.computed(function() {
+        this.studentAnswerLaTeX = Knockout.computed(function() {
             return 'student answer latex';
         },this);
     }
@@ -73,24 +73,24 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
     };
     display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
 
-    ko.components.register('matrix-input',{
+    Knockout.components.register('matrix-input',{
         viewModel: function(params) {
-            this.allowResize = params.allowResize ? params.allowResize : ko.observable(false);
+            this.allowResize = params.allowResize ? params.allowResize : Knockout.observable(false);
             if(typeof params.rows=='function') {
                 this.numRows = params.rows;
             } else {
-                this.numRows = ko.observable(params.rows || 2);
+                this.numRows = Knockout.observable(params.rows || 2);
             }
             if(typeof params.columns=='function') {
                 this.numColumns = params.columns;
             } else {
-                this.numColumns = ko.observable(params.columns || 2);
+                this.numColumns = Knockout.observable(params.columns || 2);
             }
 
             var v = params.value();
             this.numRows(v.length || 1);
             this.numColumns(v.length ? v[0].length : 1);
-            this.value = ko.observableArray(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
+            this.value = Knockout.observableArray(v.map(function(r){return Knockout.observableArray(r.map(function(c){return {cell:Knockout.observable(c)}}))}));
 
             this.disable = params.disable || false;
 
@@ -143,7 +143,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                     var row;
                     if(value.length<=i) {
                         row = [];
-                        value.push(ko.observableArray(row));
+                        value.push(Knockout.observableArray(row));
                     } else {
                         row = value[i]();
                     }
@@ -152,7 +152,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                     for(var j=0;j<numColumns;j++) {
                         var cell;
                         if(row.length<=j) {
-                            cell = ko.observable('');
+                            cell = Knockout.observable('');
                             row.push({cell:cell});
                         } else {
                             cell = row[j];
@@ -163,10 +163,10 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                 this.value(value);
             }
 
-            ko.computed(this.update,this);
+            Knockout.computed(this.update,this);
             
             // update model with value
-            ko.computed(function() {
+            Knockout.computed(function() {
                 var v = params.value();
                 var ov = this.value();
                 this.numRows(v.length);
@@ -184,7 +184,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             
             var firstGo = true;
             //update value with model
-            ko.computed(function() {
+            Knockout.computed(function() {
                 var v = this.value().map(function(row,i){
                     return row().map(function(cell,j){return cell.cell()})
                 })

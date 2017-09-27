@@ -14,28 +14,28 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         var p = this.part;
 
         function makeTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeAnswer([answer,choice,obs()]);
             },p);
             return obs;
         }
 
         function makeRadioTicker(choice) {
-            var obs = ko.observable(null);
+            var obs = Knockout.observable(null);
             for(var i=0;i<p.numAnswers;i++) {
                 if(p.ticks[i][choice])
                     obs(i);
             }
-            ko.computed(function() {
+            Knockout.computed(function() {
                 var answer = parseInt(obs());
                 p.storeAnswer([answer,choice]);
             },p);
             return obs;
         }
         function makeCheckboxTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeAnswer([answer,choice,obs()]);
             });
             return obs;
@@ -49,14 +49,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @member {observable|number} studentAnswer
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.studentAnswer = ko.observable(null);
+            this.studentAnswer = Knockout.observable(null);
             for(var i=0;i<p.numAnswers;i++) {
                 if(p.ticks[i][0])
                     this.studentAnswer(i);
             }
 
             var oldAnswer = null;
-            ko.computed(function() {
+            Knockout.computed(function() {
                 if(this.studentAnswer()==='') {
                     oldAnswer = null;
                     p.storeAnswer([null,0]);
@@ -79,7 +79,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @member {observable|number} correctAnswer
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.correctAnswer = ko.observable(maxi);
+            this.correctAnswer = Knockout.observable(maxi);
 
             break;
         case 'm_n_2':
@@ -104,7 +104,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
 
             if(p.settings.warningType!='none') {
-                ko.computed(function() {
+                Knockout.computed(function() {
                     this.removeWarnings();
                     var ticked = 0;
                     this.ticks.map(function(tick) {
@@ -150,7 +150,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 }
 
                 if(p.settings.warningType!='none') {
-                    ko.computed(function() {
+                    Knockout.computed(function() {
                         this.removeWarnings();
                         var ticked = 0;
                         this.ticks.map(function(row) {

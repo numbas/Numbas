@@ -16,21 +16,21 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.PatternMatchPartDisplay
          */
-        this.studentAnswer = ko.observable(this.part.studentAnswer);
+        this.studentAnswer = Knockout.observable(this.part.studentAnswer);
 
         /** The correct answer regular expression
          * @member {observable|RegExp} correctAnswer
          * @memberof Numbas.display.PatternMatchPartDisplay
          */
-        this.correctAnswer = ko.observable(p.settings.correctAnswer);
+        this.correctAnswer = Knockout.observable(p.settings.correctAnswer);
 
         /** A representative correct answer to display when answers are revealed
          * @member {observable|string} displayAnswer
          * @memberof Numbas.display.PatternMatchPartDisplay
          */
-        this.displayAnswer = ko.observable(p.settings.displayAnswer);
+        this.displayAnswer = Knockout.observable(p.settings.displayAnswer);
 
-        ko.computed(function() {
+        Knockout.computed(function() {
             p.storeAnswer([this.studentAnswer()]);
         },this);
     }
