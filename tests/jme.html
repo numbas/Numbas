@@ -1057,6 +1057,11 @@
                     equals(exprToLaTeX('(0.5)^3','fractionnumbers'), '\\left ( \\frac{1}{2} \\right )^{ 3 }', 'bracket fractions taken to a power');
                     equals(exprToLaTeX('(5)^3','fractionnumbers'), '5^{ 3 }', 'don\'t bracket whole numbers taken to a power');
                     equals(exprToLaTeX('(1+i)^3','fractionnumbers'), '\\left ( 1 + i \\right )^{ 3 }', 'bracket complex numbers taken to a power');
+                    equals(exprToLaTeX('2*e^2'),'2 e^{ 2 }','');
+                    equals(exprToLaTeX('2 * pi'), '2 \\pi','');
+                    equals(exprToLaTeX('2 * e'), '2 e','');
+                    equals(exprToLaTeX('2*(i^3)'), '2 i^{ 3 }','');
+                    equals(exprToLaTeX('x*i'), 'x i','');
 				});
 			});
 		</script>
