@@ -39,17 +39,19 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	constants: {
 		'e': Math.E,
 		'pi': Math.PI,
+        'π': Math.PI,
 		'i': math.complex(0,1),
 		'infinity': Infinity,
-		'infty': Infinity
+		'infty': Infinity,
+        '∞': Infinity
 	},
 
 	/** Regular expressions to match tokens */
 	re: {
 		re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
+		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
+		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_comment: /^\/\/.*(?:\n|$)/,
@@ -1695,7 +1697,16 @@ var opSynonyms = jme.opSynonyms = {
 	'&':'and',
 	'&&':'and',
 	'divides': '|',
-	'||':'or'
+	'||':'or',
+    '÷': '/',
+    '×': '*',
+    '∈': 'in',
+    '∧': 'and',
+    '∨': 'or',
+    '⟹': 'implies',
+    '≠': '<>',
+    '≥': '>=',
+    '≤': '<='
 }
 /** Synonyms of function names - keys in this dictionary are translated to their corresponding values 
  * @enum {String}
