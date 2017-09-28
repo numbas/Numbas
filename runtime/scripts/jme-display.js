@@ -988,6 +988,19 @@ var typeToTeX = jme.display.typeToTeX = {
 	}
 }
 
+/** Take a nested application of a single op, e.g. ((1*2)*3)*4, and flatten it so that the tree has one op two or more arguments
+ */
+function flatten(tree,op) {
+    if(!jme.isOp(tree.tok,op)) {
+        return [tree];
+    }
+    var args = [];
+    for(var i=0;i<tree.args.length;i++) {
+        args = args.concat(flatten(tree.args[i],op));
+    }
+    return args;
+}
+
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
  * @typedef texify_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
@@ -1015,6 +1028,11 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 
 	if(!settings)
 		settings = {};
+
+    if(jme.isOp(thing.tok,'*')) {
+        // flatten nested multiplications, so a string of consecutive multiplications can be considered together
+        thing = {tok: thing.tok, args: flatten(thing,'*')};
+    }
 
 	if(thing.args)
 	{
