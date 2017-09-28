@@ -2010,10 +2010,6 @@ var simplificationRules = jme.display.simplificationRules = {
 		['tanh(0)',[],'0']
 	],
 
-    trigPowers: [
-        ['sin^(?;n)(?;x)',[],'sin(x)^n']
-    ],
-
 	otherNumbers: [
 		['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
 	]
