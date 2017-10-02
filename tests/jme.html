@@ -1063,6 +1063,7 @@
                     equals(exprToLaTeX('2*(i^3)'), '2 i^{ 3 }','');
                     equals(exprToLaTeX('x*i'), 'x i','');
                     equals(exprToLaTeX('x*i','alwaystimes'), 'x \\times i','');
+                    equals(exprToLaTeX('2^3 * 2^3 * 2^3','basic'),'2^{ 3 } \\times 2^{ 3 } \\times 2^{ 3 }','several consecutive multiplications');
 				});
 			});
 		</script>
