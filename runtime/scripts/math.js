@@ -1525,6 +1525,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var out = [];
         var n = 0;
         var t = start;
+        if(step_size==0) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if((end-start)*step_size < 0) {
+            return [];
+        }
         while(start<end ? t<=end : t>=end)
         {
             out.push(t)
