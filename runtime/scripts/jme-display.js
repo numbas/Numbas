@@ -982,7 +982,7 @@ var typeToTeX = jme.display.typeToTeX = {
 	set: function(thing,tok,texArgs,settings) {
 		texArgs = [];
 		for(var i=0;i<tok.value.length;i++) {
-			texArgs.push(texify(tok.value[i],settings));
+			texArgs.push(texify({tok:tok.value[i]},settings));
 		}
 		return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
 	}
