@@ -1253,14 +1253,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		return tok.name;
 	},
 	'string': function(tree,tok,bits,settings) {
-		var str = tok.value
-					.replace(/\\/g,'\\\\')
-					.replace(/\\([{}])/g,'$1')
-					.replace(/\n/g,'\\n')
-					.replace(/"/g,'\\"')
-					.replace(/'/g,"\\'")
-		;
-		return '"'+str+'"';
+		return '"'+jme.escape(tok.value)+'"';
 	},
 	html: function(tree,tok,bits,settings) {
 		var html = $(tok.value).clone().wrap('<div>').parent().html();
@@ -1407,7 +1400,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 	},
 
 	expression: function(tree,tok,bits,settings) {
-		return treeToJME(tok.tree);
+		var expr = treeToJME(tok.tree);
+        if(settings.wrapexpressions) {
+            expr = 'expression("'+jme.escape(expr)+'")';
+        }
+        return expr;
 	}
 }
 
@@ -1423,6 +1420,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @typedef jme_display_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 
