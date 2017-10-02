@@ -982,7 +982,7 @@ var typeToTeX = jme.display.typeToTeX = {
 	set: function(thing,tok,texArgs,settings) {
 		texArgs = [];
 		for(var i=0;i<tok.value.length;i++) {
-			texArgs.push(texify({tok:tok.value[i]},settings));
+			texArgs.push(texify(tok.value[i],settings));
 		}
 		return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
 	}
@@ -1029,7 +1029,9 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	if(!settings)
 		settings = {};
 
-    if(jme.isOp(thing.tok,'*')) {
+	var tok = thing.tok || thing;
+
+    if(jme.isOp(tok,'*')) {
         // flatten nested multiplications, so a string of consecutive multiplications can be considered together
         thing = {tok: thing.tok, args: flatten(thing,'*')};
     }
@@ -1045,7 +1047,6 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 
 	settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 
-	var tok = thing.tok || thing;
 	if(tok.type in typeToTeX) {
 		return typeToTeX[tok.type](thing,tok,texArgs,settings);
 	} else {
