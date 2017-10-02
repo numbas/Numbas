@@ -1531,6 +1531,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if((end-start)*step_size < 0) {
             return [];
         }
+        if(start==end) {
+            return [start];
+        }
         while(start<end ? t<=end : t>=end)
         {
             out.push(t)
