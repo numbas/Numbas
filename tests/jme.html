@@ -1064,6 +1064,8 @@
                     equals(exprToLaTeX('x*i'), 'x i','');
                     equals(exprToLaTeX('x*i','alwaystimes'), 'x \\times i','');
                     equals(exprToLaTeX('2^3 * 2^3 * 2^3','basic'),'2^{ 3 } \\times 2^{ 3 } \\times 2^{ 3 }','several consecutive multiplications');
+                    equals(exprToLaTeX('sin(x)^5'),'\\sin^{5}\\left( x \\right)','trig function to a positive integer power');
+                    equals(exprToLaTeX('sin(x)^(-1)'),'\\sin \\left ( x \\right )^{ -1 }','trig function to a positive integer power');
 				});
 			});
 		</script>
