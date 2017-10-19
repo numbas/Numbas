@@ -1068,6 +1068,10 @@
                     equals(exprToLaTeX('sin(x)^(-1)'),'\\sin \\left ( x \\right )^{ -1 }','trig function to a positive integer power');
                     equals(exprToLaTeX('infinity',''),'\\infty','infinity');
                     equals(exprToLaTeX('infinity','fractionNumbers'),'\\infty','infinity with fractionNumbers');
+                    equals(exprToLaTeX('e','fractionNumbers'),'e','e with fractionNumbers');
+                    equals(exprToLaTeX('pi','fractionNumbers'),'\\pi','pi with fractionNumbers');
+                    equals(exprToLaTeX('e^(3x)','fractionNumbers'),'e^{ 3 x }','e^(3x) with fractionNumbers');
+                    equals(exprToLaTeX('e*i',''),'e i','e*i');
 				});
 			});
 		</script>

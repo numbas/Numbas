@@ -181,7 +181,7 @@ function texifyWouldBracketOpArg(thing,i, settings) {
 	else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
 		var v = thing.args[i].tok.value;
 		return !(v.re==0 || v.im==0);
-	} else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+	} else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
         return true;
     }
 	return false;
@@ -562,6 +562,24 @@ var texOps = jme.display.texOps = {
 	}
 }
 
+/** Convert a special number to TeX, or return undefined if not a special number.
+ *  @memberof Numbas.jme.display
+ *  @private
+ *
+ *  @param {Number} n
+ *  @returns {TeX}
+ */
+var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
+    var specials = jme.display.specialNumbers;
+    var pvalue = Math.abs(value);
+
+    for(var i=0;i<specials.length;i++) {
+        if(pvalue==specials[i].value) {
+            return (value<0 ? '-' : '') + specials[i].tex;
+        }
+    }
+}
+
 /** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
  * @memberof Numbas.jme.display
  * @private
@@ -604,10 +622,9 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
 	}
 	else
 	{
-		if(n==Infinity) {
-			return '\\infty';
-        } else if(n==-Infinity) {
-			return '-\\infty';
+        var special = texSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
         }
 
 		var piD;
@@ -692,10 +709,10 @@ function texRealNumber(n)
 	}
 	else
 	{
-		if(n==Infinity)
-			return '\\infty';
-		else if(n==-Infinity)
-			return '-\\infty';
+        var special = texSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
@@ -900,6 +917,12 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
+jme.display.specialNumbers = [
+    {value: Math.E, tex: 'e', jme: 'e'},
+    {value: Math.PI, tex: '\\pi', jme: 'pi'},
+    {value: Infinity, tex: '\\infty', jme: 'infinity'}
+];
+
 /** Dictionary of functions to turn {@link Numbas.jme.types} objects into TeX strings
  *
  * @enum
@@ -907,12 +930,7 @@ var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota
  */
 var typeToTeX = jme.display.typeToTeX = {
 	'number': function(thing,tok,texArgs,settings) {
-		if(tok.value==Math.E)
-			return 'e';
-		else if(tok.value==Math.PI)
-			return '\\pi';
-		else
-			return settings.texNumber(tok.value);
+		return settings.texNumber(tok.value);
 	},
 	'string': function(thing,tok,texArgs,settings) {
 		if(tok.latex)
@@ -1060,6 +1078,24 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	}
 }
 
+/** Convert a special number to JME, or return undefined if not a special number.
+ *  @memberof Numbas.jme.display
+ *  @private
+ *
+ *  @param {Number} n
+ *  @returns {TeX}
+ */
+var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
+    var specials = jme.display.specialNumbers;
+    var pvalue = Math.abs(value);
+
+    for(var i=0;i<specials.length;i++) {
+        if(pvalue==specials[i].value) {
+            return (value<0 ? '-' : '') + specials[i].jme;
+        }
+    }
+}
+
 /** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}
  *
  * @memberof Numbas.jme.display
@@ -1105,6 +1141,11 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 	}
 	else
 	{
+        var special = jmeSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
+
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
@@ -1195,10 +1236,10 @@ function jmeRealNumber(n,settings)
 	}
 	else
 	{
-		if(n==Infinity)
-			return 'infinity';
-		else if(n==-Infinity)
-			return '-infinity';
+        var special = jmeSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
