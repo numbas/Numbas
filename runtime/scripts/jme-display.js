@@ -917,6 +917,18 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
+/** Definition of a number with a special name
+ * @typedef special_number_definition
+ * @property {Number} value
+ * @property {TeX} tex - The TeX code for this number
+ * @property {JME} jme - The JME code for this number
+ */
+
+/** List of numbers with special names
+ *
+ * @memberof Numbas.jme.display
+ * @type {Array.<special_number_definition>}
+ */
 jme.display.specialNumbers = [
     {value: Math.E, tex: 'e', jme: 'e'},
     {value: Math.PI, tex: '\\pi', jme: 'pi'},
@@ -1301,7 +1313,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		return tok.name;
 	},
 	'string': function(tree,tok,bits,settings) {
-		return '"'+jme.escape(tok.value)+'"';
+		var str = '"'+jme.escape(tok.value)+'"';
+        if(tok.latex) {
+            return 'latex('+str+')';
+        } else {
+            return str;
+        }
 	},
 	html: function(tree,tok,bits,settings) {
 		var html = $(tok.value).clone().wrap('<div>').parent().html();
