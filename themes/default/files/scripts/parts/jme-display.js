@@ -52,7 +52,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.removeWarnings();
 
             try {
-                var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,p.settings.answerSimplification,p.question.scope);
+                var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,'',p.question.scope);
                 if(tex===undefined)
                     throw(new Numbas.Error('display.part.jme.error making maths'));
 
