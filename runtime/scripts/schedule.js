@@ -152,6 +152,12 @@ SignalBox.prototype = {
             deferred.resolve = resolve;
             deferred.reject = reject;
         });
+        deferred.promise.catch(function(e) {
+            if(!Numbas.schedule.halt) {
+    			Numbas.display.die(e);
+	    		Numbas.schedule.halt = true;
+            }
+        });
         return deferred;
     },
 
@@ -174,6 +180,9 @@ SignalBox.prototype = {
             promise = promise.then(function() {
                 return new Promise(function(resolve,reject) {
                     try {
+                        if(Numbas.schedule.halt) {
+                            reject()
+                        }
                         var result = fn();
                         resolve(result);
                     } catch(e) {

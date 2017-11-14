@@ -21,6 +21,7 @@ from numbasobject import NumbasObject
 from examparser import strcons_fix, strcons
 import sys
 import os
+import json
 from htmlescapes import removeHTMLEscapes
 
 class ExamError(Exception):
@@ -167,15 +168,9 @@ class Exam(object):
         self.extensions = []
     
     @staticmethod
-    def fromstring(string):
-        exam_object = NumbasObject(string)
-        exam = Exam.fromDATA(exam_object.data)
-        return exam
-
-    @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         exam = Exam()
-        tryLoad(data,['name','duration','percentPass','resources','extensions','showQuestionGroupNames','showstudentname'],exam)
+        tryLoad(data,['name','duration','percentPass','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname'],exam)
 
         if haskey(data,'navigation'):
             nav = data['navigation']
@@ -198,7 +193,7 @@ class Exam(object):
                 tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
             tryLoad(data['feedback'],'intro',exam,'intro')
             if haskey(data['feedback'],'feedbackmessages'):
-                exam.feedbackMessages = [FeedbackMessage.fromDATA(f) for f in data['feedback']['feedbackmessages']]
+                exam.feedbackMessages = [builder.feedback_message(f) for f in data['feedback']['feedbackmessages']]
 
         if haskey(data,'rulesets'):
             rulesets = data['rulesets']
@@ -208,13 +203,13 @@ class Exam(object):
                     if isinstance(rule,str):
                         l.append(rule)
                     else:
-                        l.append(SimplificationRule.fromDATA(rule))
+                        l.append(builder.simplification_rule(rule))
                 exam.rulesets[name] = l
 
         if haskey(data,'functions'):
             functions = data['functions']
             for function in functions.keys():
-                exam.functions.append(Function.fromDATA(function,functions[function]))
+                exam.functions.append(builder.function(function,functions[function]))
 
         if haskey(data,'variables'):
             variables = data['variables']
@@ -222,7 +217,7 @@ class Exam(object):
                 exam.variables.append(Variable(variables[variable]))
         if haskey(data,'question_groups'):
             for question in data['question_groups']:
-                exam.question_groups.append(QuestionGroup.fromDATA(question))
+                exam.question_groups.append(builder.question_group(question))
 
         return exam
 
@@ -315,12 +310,11 @@ class Exam(object):
     def tostring(self):
         try:
             xml = self.toxml()
-            indent(xml)
             return(etree.tostring(xml,encoding="UTF-8").decode('utf-8'))
         except etree.ParseError as err:
             raise ExamError('XML Error: %s' % strcons(err))
 
-class SimplificationRule:
+class SimplificationRule(object):
     pattern = ''
     result = ''
 
@@ -328,7 +322,7 @@ class SimplificationRule:
         self.conditions = []
 
     @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         rule=SimplificationRule()
         tryLoad(data,['pattern','conditions','result'],rule)
         return rule
@@ -347,7 +341,7 @@ class SimplificationRule:
         return rule
 
 
-class Event:
+class Event(object):
     kind = ''
     action = 'none'
     message = ''
@@ -363,12 +357,12 @@ class Event:
         event.append(makeContentNode(self.message))
         return event
 
-class FeedbackMessage:
+class FeedbackMessage(object):
     message = ''
     threshold = 0
 
     @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         feedbackmessage = FeedbackMessage()
         tryLoad(data,['message','threshold'],feedbackmessage)
         return feedbackmessage
@@ -380,7 +374,7 @@ class FeedbackMessage:
 
         return feedbackmessage
 
-class QuestionGroup:
+class QuestionGroup(object):
     name = ''
     pickingStrategy = 'all-ordered' # 'all-ordered', ''all-shuffled', 'random-subset'
     pickQuestions = 0
@@ -389,13 +383,13 @@ class QuestionGroup:
         self.questions = []
 
     @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         qg = QuestionGroup()
         tryLoad(data,['name','pickingStrategy','pickQuestions'],qg)
 
         if 'questions' in data:
             for q in data['questions']:
-                qg.questions.append(Question.fromDATA(q))
+                qg.questions.append(builder.question(q))
 
         return qg
 
@@ -412,7 +406,7 @@ class QuestionGroup:
 
         return qg
 
-class Question:
+class Question(object):
     name = 'Untitled Question'
     statement =''
     advice = ''
@@ -435,14 +429,14 @@ class Question:
         }
 
     @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         question = Question()
         tryLoad(data,['name','statement','advice'],question)
 
         if haskey(data,'parts'):
             parts = data['parts']
             for part in parts:
-                question.parts.append(Part.fromDATA(part))
+                question.parts.append(builder.part(part))
 
         if haskey(data,'variables'):
             variables = data['variables']
@@ -455,7 +449,7 @@ class Question:
         if haskey(data,'functions'):
             functions = data['functions']
             for function in functions.keys():
-                question.functions.append(Function.fromDATA(function,functions[function]))
+                question.functions.append(builder.function(function,functions[function]))
 
         if haskey(data,'preamble'):
             tryLoad(data['preamble'],['js','css'],question.preamble)
@@ -468,7 +462,7 @@ class Question:
                     if isinstance(rule,str):
                         l.append(rule)
                     else:
-                        l.append(SimplificationRule.fromDATA(rule))
+                        l.append(builder.simplification_rule(rule))
                 question.rulesets[name] = l
 
         return question
@@ -534,7 +528,7 @@ class Question:
 
         return question
 
-class Variable:
+class Variable(object):
     name = ''
     definition = ''
 
@@ -548,7 +542,7 @@ class Variable:
         variable.find('value').text = strcons(self.definition)
         return variable
 
-class Function:
+class Function(object):
     name = ''
     type = ''
     definition = ''
@@ -559,7 +553,7 @@ class Function:
         self.parameters = {}
     
     @staticmethod
-    def fromDATA(name,data):
+    def fromDATA(builder, name, data):
         function = Function(name)
         tryLoad(data,['parameters','type','definition','language'],function)
         return function
@@ -582,13 +576,13 @@ class Function:
 
         return function
 
-class VariableReplacement:
+class VariableReplacement(object):
     variable = ''
     part = ''
     must_go_first = False
 
     @staticmethod
-    def fromDATA(data):
+    def fromDATA(builder, data):
         vr = VariableReplacement()
         tryLoad(data,['variable','part','must_go_first'],vr)
         return vr
@@ -602,7 +596,7 @@ class VariableReplacement:
         }
         return replacement
 
-class Part:
+class Part(object):
     prompt = ''
     kind = ''
     stepsPenalty = 0
@@ -621,49 +615,26 @@ class Part:
         self.scripts = {}
         self.variable_replacements = []
 
-    @staticmethod
-    def fromDATA(data):
-        kind = data['type'].lower()
-        partConstructors = {
-                'jme': JMEPart,
-                'numberentry': NumberEntryPart,
-                'matrix': MatrixEntryPart,
-                'patternmatch': PatternMatchPart,
-                '1_n_2': MultipleChoicePart,
-                'm_n_2': MultipleChoicePart,
-                'm_n_x': MultipleChoicePart,
-                'gapfill': GapFillPart,
-                'information': InformationPart,
-                'extension': ExtensionPart,
-            }
-        if not kind in partConstructors:
-            raise ExamError(
-                'Invalid part type '+kind,
-                'Valid part types are '+', '.join(sorted([x for x in partConstructors]))
-            )
-        part = partConstructors[kind].fromDATA(data)
-
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],part);
+    def loadDATA(self, builder, data):
+        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
 
         if haskey(data,'marks'):
-            part.marks = data['marks']
+            self.marks = data['marks']
 
         if haskey(data,'prompt'):
-            part.prompt = data['prompt']
+            self.prompt = data['prompt']
 
         if haskey(data,'steps'):
             steps = data['steps']
             for step in steps:
-                part.steps.append(Part.fromDATA(step))
+                self.steps.append(builder.part(step))
 
         if haskey(data,'scripts'):
             for name,script in data['scripts'].items():
-                part.scripts[name] = script
+                self.scripts[name] = script
 
         if haskey(data,'variableReplacements'):
-            part.variable_replacements = [VariableReplacement.fromDATA(vr) for vr in data['variableReplacements']]
-
-        return part
+            self.variable_replacements = [builder.variable_replacement(vr) for vr in data['variableReplacements']]
     
     def toxml(self):
         part = makeTree(['part',
@@ -742,44 +713,42 @@ class JMEPart(Part):
         self.notAllowed = Restriction('notallowed',0,'Your answer contains elements which are not allowed.')
         self.expectedVariableNames = Restriction('expectedvariablenames')
     
-    @staticmethod
-    def fromDATA(data):
-        part = JMEPart()
-        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames'],part)
+    def loadDATA(self, builder, data):
+        super(JMEPart,self).loadDATA(builder, data)
+
+        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames'],self)
 
         #default checking accuracies
-        if part.checkingType.lower() == 'reldiff' or part.checkingType.lower() == 'absdiff':
-            part.checkingAccuracy = 0.0001
+        if self.checkingType.lower() == 'reldiff' or self.checkingType.lower() == 'absdiff':
+            self.checkingAccuracy = 0.0001
         else:    #dp or sigfig
-            part.checkingAccuracy = 5
+            self.checkingAccuracy = 5
         #get checking accuracy from data, if defined
-        tryLoad(data,'checkingAccuracy',part)
+        tryLoad(data,'checkingAccuracy',self)
 
         if haskey(data,'maxlength'):
-            part.maxLength = Restriction.fromDATA('maxlength',data['maxlength'],part.maxLength)
+            self.maxLength = builder.restriction('maxlength',data['maxlength'],self.maxLength)
         if haskey(data,'minlength'):
-            part.minLength = Restriction.fromDATA('minlength',data['minlength'],part.minLength)
+            self.minLength = builder.restriction('minlength',data['minlength'],self.minLength)
         if haskey(data,'musthave'):
-            part.mustHave = Restriction.fromDATA('musthave',data['musthave'],part.mustHave)
+            self.mustHave = builder.restriction('musthave',data['musthave'],self.mustHave)
         if haskey(data,'notallowed'):
-            part.notAllowed = Restriction.fromDATA('notallowed',data['notallowed'],part.notAllowed)
+            self.notAllowed = builder.restriction('notallowed',data['notallowed'],self.notAllowed)
         if haskey(data,'expectedvariablenames'):
-            part.expectedVariableNames = Restriction('expectedvariablenames')
+            self.expectedVariableNames = Restriction('expectedvariablenames')
             try:
-                part.expectedVariableNames.strings = list(case_insensitive_get(data,'expectedvariablenames'))
+                self.expectedVariableNames.strings = list(case_insensitive_get(data,'expectedvariablenames'))
             except TypeError:
                 raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
 
         if haskey(data,'vsetrange'):
             vsetrange = case_insensitive_get(data,'vsetrange')
             if len(vsetrange) == 2:
-                part.vsetRangeStart = vsetrange[0]
-                part.vsetRangeEnd = vsetrange[1]
-
-        return part
+                self.vsetRangeStart = vsetrange[0]
+                self.vsetRangeEnd = vsetrange[1]
 
     def toxml(self):
-        part = Part.toxml(self)
+        part = super(JMEPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['correctanswer',['math']],
                                 ['checking',
@@ -823,7 +792,7 @@ class Restriction:
         self.message = message
     
     @staticmethod
-    def fromDATA(name,data,restriction=None):
+    def fromDATA(name, data, builder, restriction=None):
         if restriction==None:
             restriction = Restriction(name)
         tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
@@ -861,15 +830,13 @@ class PatternMatchPart(Part):
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
-    @staticmethod
-    def fromDATA(data):
-        part = PatternMatchPart()
-        tryLoad(data,['caseSensitive','partialCredit','answer','displayAnswer','matchMode'],part)
+    def loadDATA(self, builder, data):
+        super(PatternMatchPart,self).loadDATA(builder, data)
 
-        return part
+        tryLoad(data,['caseSensitive','partialCredit','answer','displayAnswer','matchMode'],self)
 
     def toxml(self):
-        part = Part.toxml(self)
+        part = super(PatternMatchPart,self).toxml()
         appendMany(part,['displayanswer','correctanswer','case'])
         
         part.find('displayanswer').append(makeContentNode(self.displayAnswer))
@@ -907,22 +874,20 @@ class NumberEntryPart(Part):
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
     
-    @staticmethod
-    def fromDATA(data):
-        part = NumberEntryPart()
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],part)
-        if part.checkingType == 'range':
-            if haskey(data,'answer'):
-                part.maxvalue = part.minvalue = data['answer']
-            else:
-                tryLoad(data,['minvalue','maxvalue'],part)
-        else:
-            tryLoad(data,['answer','checkingAccuracy'],part)
+    def loadDATA(self, builder, data):
+        super(NumberEntryPart,self).loadDATA(builder, data)
 
-        return part
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],self)
+        if self.checkingType == 'range':
+            if haskey(data,'answer'):
+                self.maxvalue = self.minvalue = data['answer']
+            else:
+                tryLoad(data,['minvalue','maxvalue'],self)
+        else:
+            tryLoad(data,['answer','checkingAccuracy'],self)
 
     def toxml(self):
-        part = Part.toxml(self)
+        part = super(NumberEntryPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['precision','message'],
                             ]
@@ -977,15 +942,11 @@ class MatrixEntryPart(Part):
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
-    @staticmethod
-    def fromDATA(data):
-        part = MatrixEntryPart()
-        tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],part)
-
-        return part
+    def loadDATA(self, builder, data):
+        tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],self)
 
     def toxml(self):
-        part = Part.toxml(self)
+        part = super(MatrixEntryPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['precision','message'],
                             ]
@@ -1028,8 +989,7 @@ class MultipleChoicePart(Part):
     layoutType = 'all'
     layoutExpression = ''
     
-    def __init__(self,kind,marks=0,prompt=''):
-        self.kind = kind
+    def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
         self.choices = []
@@ -1038,54 +998,51 @@ class MultipleChoicePart(Part):
 
         self.distractors = []
 
-    @staticmethod
-    def fromDATA(data):
-        kind = data['type']
-        part = MultipleChoicePart(kind)
+    def loadDATA(self, builder, data):
+        super(MultipleChoicePart,self).loadDATA(builder, data)
+
         displayTypes = {
                 '1_n_2': 'radiogroup',
                 'm_n_2': 'checkbox',
                 'm_n_x': 'radiogroup'
         }
 
-        part.displayType = displayTypes[kind]
-        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType'],part)
+        self.displayType = displayTypes[self.kind]
+        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType'],self)
 
         if haskey(data,'minmarks'):
-            part.minMarksEnabled = True
+            self.minMarksEnabled = True
         if haskey(data,'maxmarks'):
-            part.maxMarksEnabled = True
+            self.maxMarksEnabled = True
 
         if haskey(data,'choices'):
             if isinstance(data['choices'],list):
-                part.choices = data['choices'][:]
+                self.choices = data['choices'][:]
             else:
-                part.choices = data['choices']
+                self.choices = data['choices']
 
         if haskey(data,'answers'):
             if isinstance(data['answers'],list):
-                part.answers = data['answers'][:]
+                self.answers = data['answers'][:]
             else:
-                part.answers = data['answers']
+                self.answers = data['answers']
 
         if haskey(data,'layout'):
-            tryLoad(data['layout'],'type',part,'layoutType')
-            tryLoad(data['layout'],'expression',part,'layoutExpression')
+            tryLoad(data['layout'],'type',self,'layoutType')
+            tryLoad(data['layout'],'expression',self,'layoutExpression')
     
         if haskey(data,'matrix'):
-            part.matrix = data['matrix']
-            if isinstance(part.matrix,list) and len(part.matrix)>0 and (not isinstance(part.matrix[0],list)):    #so you can give just one row without wrapping it in another array
-                part.matrix = [[x] for x in part.matrix]
+            self.matrix = data['matrix']
+            if isinstance(self.matrix,list) and len(self.matrix)>0 and (not isinstance(self.matrix[0],list)):    #so you can give just one row without wrapping it in another array
+                self.matrix = [[x] for x in self.matrix]
 
         if haskey(data,'distractors'):
-            part.distractors = data['distractors']
-            if len(part.distractors)>0 and (not isinstance(part.distractors[0],list)):
-                part.distractors = [[x] for x in part.distractors]
-
-        return part
+            self.distractors = data['distractors']
+            if len(self.distractors)>0 and (not isinstance(self.distractors[0],list)):
+                self.distractors = [[x] for x in self.distractors]
 
     def toxml(self):
-        part = Part.toxml(self)
+        part = super(MultipleChoicePart,self).toxml()
         appendMany(part,['choices','answers','layout',['marking','matrix','maxmarks','minmarks','distractors','warning']])
 
         choices = part.find('choices')
@@ -1148,15 +1105,49 @@ class MultipleChoicePart(Part):
 
         return part
 
+class ChooseOnePart(MultipleChoicePart):
+    kind = '1_n_2'
+
+class ChooseSeveralPart(MultipleChoicePart):
+    kind = 'm_n_2'
+
+class MatchChoicesWithAnswersPart(MultipleChoicePart):
+    kind = 'm_n_x'
+
 class InformationPart(Part):
     kind = 'information'
 
     def __init__(self,prompt=''):
         Part.__init__(self,0,prompt)
-    
-    @staticmethod
-    def fromDATA(data):
-        return InformationPart()
+
+def custom_part_constructor(definition):
+    class CustomPart(Part):
+        kind = definition['short_name']
+
+        def __init__(self,prompt=''):
+            Part.__init__(self,0,prompt)
+            self.settings = {}
+        
+        def loadDATA(self, builder, data):
+            super(CustomPart,self).loadDATA(builder, data)
+            for setting in definition['settings']:
+                tryLoad(data,setting['name'],self.settings)
+
+        def toxml(self):
+            part = super(CustomPart,self).toxml()
+            part.attrib['custom'] = 'true'
+            part.append(makeTree(['settings']))
+            settings = part.find('settings')
+            for name,value in self.settings.items():
+                setting = etree.Element('setting')
+                setting.attrib = {
+                    'name': strcons_fix(name),
+                    'value': strcons_fix(json.dumps(value))
+                }
+                settings.append(setting)
+            return part
+
+    return CustomPart
 
 class ExtensionPart(Part):
     kind = 'extension'
@@ -1164,10 +1155,6 @@ class ExtensionPart(Part):
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
     
-    @staticmethod
-    def fromDATA(data):
-        return ExtensionPart()
-
 class GapFillPart(Part):
     kind = 'gapfill'
 
@@ -1176,16 +1163,13 @@ class GapFillPart(Part):
         
         self.gaps = []
 
-    @staticmethod
-    def fromDATA(data):
-        part = GapFillPart()
+    def loadDATA(self, builder, data):
+        super(GapFillPart,self).loadDATA(builder, data)
 
         if haskey(data,'gaps'):
             gaps = data['gaps']
             for gap in gaps:
-                part.gaps.append(Part.fromDATA(gap))
-
-        return part
+                self.gaps.append(builder.part(gap))
     
     def toxml(self):
         self.marks = 0
@@ -1199,7 +1183,7 @@ class GapFillPart(Part):
             return '<gapfill reference="%s" />' % d
 
         self.prompt = re.sub(r"\[\[(\d+?)\]\]",replace_gapfill,self.prompt)
-        part = Part.toxml(self)
+        part = super(GapFillPart,self).toxml()
         self.prompt = prompt
 
         gaps = etree.Element('gaps')
@@ -1208,6 +1192,74 @@ class GapFillPart(Part):
         for gap in self.gaps:
             gaps.append(gap.toxml())
 
+        return part
+
+class ExamBuilder(object):
+    part_constructors = {
+        'jme': JMEPart,
+        'numberentry': NumberEntryPart,
+        'matrix': MatrixEntryPart,
+        'patternmatch': PatternMatchPart,
+        '1_n_2': ChooseOnePart,
+        'm_n_2': ChooseSeveralPart,
+        'm_n_x': MatchChoicesWithAnswersPart,
+        'gapfill': GapFillPart,
+        'information': InformationPart,
+        'extension': ExtensionPart,
+    }
+
+    def __init__(self, custom_part_types=None):
+        self.custom_part_constructors = {}
+
+    def exam_from_string(self, string):
+        exam_object = NumbasObject(string)
+
+        self.custom_part_constructors = {}
+        custom_part_types = exam_object.data.get('custom_part_types')
+        if custom_part_types:
+            for definition in custom_part_types:
+                self.custom_part_constructors[definition['short_name']] = custom_part_constructor(definition)
+
+        return self.exam(exam_object.data)
+
+    def exam(self, data):
+        return Exam.fromDATA(self, data)
+
+    def simplification_rule(self, data):
+        return SimplificationRule.fromDATA(self, data)
+
+    def feedback_message(self, data):
+        return FeedbackMessage.fromDATA(self, data)
+
+    def question_group(self, data):
+        return QuestionGroup.fromDATA(self, data)
+
+    def question(self, data):
+        return Question.fromDATA(self, data)
+
+    def function(self, name, data):
+        return Function.fromDATA(name, data, self)
+
+    def restriction(self, name, data, restriction=None):
+        return Function.fromDATA(name, data, restriction, self)
+
+    def variable_replacement(self, data):
+        return VariableReplacement.fromDATA(self, data)
+
+    def part(self, data):
+        kind = data['type'].lower()
+
+        constructors = {}
+        constructors.update(self.part_constructors)
+        constructors.update(self.custom_part_constructors)
+
+        if not kind in constructors:
+            raise ExamError(
+                'Invalid part type '+kind,
+                'Valid part types are '+', '.join(sorted([x for x in constructors]))
+            )
+        part = constructors[kind]()
+        part.loadDATA(self, data)
         return part
 
 if __name__ == '__main__':

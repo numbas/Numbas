@@ -29,7 +29,7 @@ var Part = Numbas.parts.Part;
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var InformationPart = Numbas.parts.InformationPart = function(xml, path, question, parentPart, loading)
+var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, loading)
 {
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {

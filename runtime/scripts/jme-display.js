@@ -112,11 +112,12 @@ jme.display = /** @lends Numbas.jme.display */ {
 	 * @param {Numbas.jme.tree} exprTree
 	 * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
 	 * @param {Numbas.jme.Scope} scope
+     * @param {Boolean} allowUnbound
 	 * @returns {Numbas.jme.tree}
 	 *
 	 * @see Numbas.jme.display.simplify
 	 */
-	simplifyTree: function(exprTree,ruleset,scope)
+	simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
 	{
 		if(!scope)
 			throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
@@ -143,7 +144,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 				{
 					for(var i=0;i<exprTree.args.length;i++)
 					{
-						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope);
+						exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
 					}
 				}
 				applied = false;
@@ -152,7 +153,7 @@ jme.display = /** @lends Numbas.jme.display */ {
 					var match;
 					if(match = rules[i].match(exprTree,scope))	//if rule can be applied, apply it!
 					{
-						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]));
+						exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
 						applied = true;
                         depth += 1;
                         if(depth > 100) {
@@ -1330,7 +1331,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 			var arg_type = args[i].tok.type;
 			var arg_value = args[i].tok.value;
 			var pd;
-            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^')
+            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact')
 
             var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true // if this kind of op as an argument to the parent op always gets brackets
             bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
@@ -1382,6 +1383,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         case 'fact':
             op = '!';
+            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name')) {
+                bits[0] = '('+bits[0]+')';
+            }
             break;
 		}
 

@@ -202,9 +202,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         // create the JME marking script for the part
         var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
         var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
+        var markingScript = {};
+        tryGetAttribute(markingScript,this.xml,markingScriptNode,['extend']);
         if(markingScriptString) {
             // extend the base marking algorithm if asked to do so
-            var extend_base = markingScriptNode.getAttribute('extend') || true;
+            var extend_base = markingScript.extend;
             this.setMarkingScript(markingScriptString,extend_base);
         }
 
@@ -762,7 +764,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @returns {Boolean}
 	 */
 	hasStagedAnswer: function() {
-		return !(this.stagedAnswer==undefined || this.stagedAnswer=='');
+		return !(this.stagedAnswer==undefined || this.stagedAnswer==='');
 	},
 
 	/** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part)
@@ -915,7 +917,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see Numbas.marking.finalise_state
      */
     apply_feedback: function(feedback) {
-        var valid = true;
+        var valid = feedback.valid;
         var part = this;
         var end = false;
         var states = feedback.states.slice();

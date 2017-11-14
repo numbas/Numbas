@@ -23,7 +23,7 @@ import traceback
 import shutil
 from optparse import OptionParser
 import examparser
-from exam import Exam,ExamError
+from exam import ExamBuilder,ExamError
 import xml2js
 from zipfile import ZipFile, ZipInfo
 import xml.etree.ElementTree as etree
@@ -168,10 +168,12 @@ class NumbasCompiler(object):
             Parse an exam definition from the given source
         """
         try:
-            self.exam = Exam.fromstring(self.options.source)
+            builder = ExamBuilder()
+            self.exam = builder.exam_from_string(self.options.source)
             self.examXML = self.exam.tostring()
             self.resources = self.exam.resources
             self.extensions = self.exam.extensions
+            self.custom_part_types = self.exam.custom_part_types
         except ExamError as err:
             raise CompileError('Error constructing exam:\n%s' % err)
         except examparser.ParseError as err:
@@ -259,10 +261,15 @@ class NumbasCompiler(object):
             if os.path.exists(os.path.join(extension,name+'.js')):
                 extensionfiles.append('extensions/'+name+'/'+name+'.js')
 
-        self.xmls = xml2js.rawxml_js_template.format(**{
-            'extensionfiles': str(extensionfiles),
+        custom_part_types = {}
+        for pt in self.custom_part_types:
+            custom_part_types[pt['short_name']] = pt
+
+        self.xmls = xml2js.settings_js_template.format(**{
+            'extensionfiles': extensionfiles,
             'templates': xslts_js,
             'examXML': xml2js.encode(self.examXML),
+            'custom_part_types': json.dumps(custom_part_types),
         })
 
     def render_templates(self):
