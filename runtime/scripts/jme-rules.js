@@ -42,7 +42,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
 	 * @memberof Numbas.jme.rules.Rule.prototype
 	 * @param {Numbas.jme.tree} exprTree - the syntax tree to test
 	 * @param {Numbas.jme.Scope} scope - used when checking conditions
-	 * @returns {boolean|object} - `false` if no match, or a dictionary of matched subtrees
+	 * @returns {Boolean|jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
 	 */
 	match: function(exprTree,scope)
 	{
@@ -69,9 +69,9 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
 
 	/** Check that a matched pattern satisfies all the rule's conditions
 	 * @memberof Numbas.jme.rules.Rule.prototype
-	 * @param {object} match
+	 * @param {jme_pattern_match} match
 	 * @param {Numbas.jme.Scope} scope
-	 * @returns {boolean}
+	 * @returns {Boolean}
 	 */
 	matchConditions: function(match,scope)
 	{
@@ -97,7 +97,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
 var endTermNames = {
 	'??':true,
 	'm_nothing':true,
-	'm_number': true
+    'm_number': true
 }
 function isEndTerm(term) {
 	while(term.tok.type=='function' && /^m_(?:all|pm|not|commute)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
@@ -164,13 +164,20 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
 	return {terms: terms, termnames: termnames};
 }
 
+/** A dictionary representing the results of a JME pattern match.
+ * Maps variable names to trees.
+ * @typedef jme_pattern_match
+ * @type Object.<Numbas.jme.tree>
+ * @see Numbas.jme.display.matchTree
+ */
+
 /** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.rules
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
- * @param {boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
- * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @param {Boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
+ * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
 	if(doCommute===undefined) {
@@ -441,9 +448,9 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
  *
  * @param {JME} pattern
  * @param {JME} expr
- * @param {boolean} doCommute
+ * @param {Boolean} doCommute
  *
- * @returns {boolean|object} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommute) {
 	pattern = jme.compile(pattern);
@@ -457,13 +464,24 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommut
  */
 var displayFlags = jme.rules.displayFlags = {
 	fractionnumbers: undefined,
-	rowvector: undefined
+	rowvector: undefined,
+    alwaystimes: undefined
 };
+
+/** Flags used in JME simplification rulesets
+ * @type Object.<Boolean>
+ * @typedef ruleset_flags
+ * @property {Boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
+ * @property {Boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
+ * @see Numbas.jme.Ruleset
+ */
+
 /** Set of simplification rules
  * @constructor
  * @memberof Numbas.jme.rules
  * @param {rule[]} rules
- * @param {object} flags
+ * @param {ruleset_flags} flags
  */
 var Ruleset = jme.rules.Ruleset = function(rules,flags) {
 	this.rules = rules;
@@ -813,7 +831,7 @@ var compileRules = jme.rules.compileRules = function(rules)
 		var pattern = rules[i][0];
 		var conditions = rules[i][1];
 		var result = rules[i][2];
-        rules[i] = new Rule(pattern,conditions,result);
+		rules[i] = new Rule(pattern,conditions,result);
 	}
 	return new Ruleset(rules,{});
 }

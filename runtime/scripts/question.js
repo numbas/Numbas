@@ -420,11 +420,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	 */
 	score: 0,
 
-	/** Percentage score below which the advice is revealed
-	 * @type {Number}
-	 */
-	adviceThreshold: 0,
-
 	/** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
 	 * @type {Boolean}
 	 */

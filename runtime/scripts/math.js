@@ -1524,16 +1524,19 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var start = range[0];
         var end = range[1];
         var step_size = range[2];
-        if(step_size==0) {
-            throw(new Numbas.Error('math.rangeToList.zero step size'));
-        }
-        if(start!=end) {
-            step_size = Math.abs(step_size)*math.sign(end-start);
-        }
         var out = [];
         var n = 0;
         var t = start;
-        while(start<end ? t<=end : start>end ? t>=end : t==end)
+        if(step_size==0) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if((end-start)*step_size < 0) {
+            return [];
+        }
+        if(start==end) {
+            return [start];
+        }
+        while(start<end ? t<=end : t>=end)
         {
             out.push(t)
             n += 1;

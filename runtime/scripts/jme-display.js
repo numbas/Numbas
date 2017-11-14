@@ -176,9 +176,11 @@ jme.display = /** @lends Numbas.jme.display */ {
 /// all private methods below here
 
 
-function texifyWouldBracketOpArg(thing,i) {
+function texifyWouldBracketOpArg(thing,i, settings) {
+    settings = settings || {};
+    var tok = thing.args[i].tok;
 	var precedence = jme.precedence;
-	if(thing.args[i].tok.type=='op') {	//if this is an op applied to an op, might need to bracket
+	if(tok.type=='op') {	//if this is an op applied to an op, might need to bracket
 		var op1 = thing.args[i].tok.name;	//child op
 		var op2 = thing.tok.name;			//parent op
 		var p1 = precedence[op1];	//precedence of child op
@@ -188,10 +190,12 @@ function texifyWouldBracketOpArg(thing,i) {
 		return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )	
 	}
 	//complex numbers might need brackets round them when multiplied with something else or unary minusing
-	else if(thing.args[i].tok.type=='number' && thing.args[i].tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u') ) {
+	else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
 		var v = thing.args[i].tok.value;
 		return !(v.re==0 || v.im==0);
-	}
+	} else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+        return true;
+    }
 	return false;
 }
 
@@ -311,73 +315,63 @@ var texOps = jme.display.texOps = {
 	'^': (function(thing,texArgs,settings) {
 		var tex0 = texArgs[0];
 		//if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp')) {
+        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp') || texifyWouldBracketOpArg(thing, 0, settings)) {
             tex0 = '\\left ( ' +tex0+' \\right )';    
         }
         var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
-        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name)) {
+        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && thing.args[1].tok.type=='number' && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
             return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
         }
 		return (tex0+'^{ '+texArgs[1]+' }');
 	}),
 
 
-	'*': (function(thing,texArgs) {
+	'*': (function(thing, texArgs, settings) {
 		var s = texifyOpArg(thing,texArgs,0);
 		for(var i=1; i<thing.args.length; i++ )
 		{
-            // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-			if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i))
-			{ 
-				s+=' \\times ';
-			}
-			//specials or subscripts
-			else if(thing.args[i-1].tok.type=='special' || thing.args[i].tok.type=='special')	
-			{
-				s+=' ';
-			}
-			//anything times e^(something) or (not number)^(something)
-			else if (jme.isOp(thing.args[i].tok,'^') && (thing.args[i].args[0].value==Math.E || thing.args[i].args[0].tok.type!='number'))	
-			{
-				s+=' ';
-			}
-			//real number times Pi or E
-			else if (thing.args[i].tok.type=='number' && (thing.args[i].tok.value==Math.PI || thing.args[i].tok.value==Math.E || thing.args[i].tok.value.complex) && thing.args[i-1].tok.type=='number' && !(thing.args[i-1].tok.value.complex))	
-			{
-				s+=' ';
-			}
-			//number times a power of i
-			else if (jme.isOp(thing.args[i].tok,'^') && thing.args[i].args[0].tok.type=='number' && math.eq(thing.args[i].args[0].tok.value,math.complex(0,1)) && thing.args[i-1].tok.type=='number')	
-			{
-				s+=' ';
-			}
-			// times sign when LHS or RHS is a factorial
-			else if((thing.args[i-1].tok.type=='function' && thing.args[i-1].tok.name=='fact') || (thing.args[i].tok.type=='function' && thing.args[i].tok.name=='fact')) {
-				s += ' \\times ';
-			}
-			//(anything except i) times i
-			else if ( !(thing.args[i-1].tok.type=='number' && math.eq(thing.args[i-1].tok.value,math.complex(0,1))) && thing.args[i].tok.type=='number' && math.eq(thing.args[i].tok.value,math.complex(0,1)))
-			{
-				s+=' ';
-			}
-			else if ( thing.args[i].tok.type=='number'
-					||
-						jme.isOp(thing.args[i].tok,'-u')
-					||
-					(
-						!jme.isOp(thing.args[i].tok,'-u') 
-						&& (thing.args[i].tok.type=='op' && jme.precedence[thing.args[i].tok.name]<=jme.precedence['*'] 
-							&& (thing.args[i].args[0].tok.type=='number' 
-							&& thing.args[i].args[0].tok.value!=Math.E)
-						)
-					)
-			)
-			{
-				s += ' \\times ';
-			}
-			else {
-				s+= ' ';
-			}
+            var left = thing.args[i-1];
+            var right = thing.args[i];
+            var use_symbol = false;
+
+            if(settings.alwaystimes) {
+                use_symbol = true;
+            } else {
+                // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
+                if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) { 
+                    use_symbol = true;
+                //anything times e^(something) or (not number)^(something)
+                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || right.args[0].tok.type!='number')) {
+                    use_symbol = false;
+                //real number times Pi or E
+                } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
+                    use_symbol = false
+                //number times a power of i
+                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number')	{
+                    use_symbol = false;
+                // times sign when LHS or RHS is a factorial
+                } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
+                    use_symbol = true;
+                //(anything except i) times i
+                } else if ( !(left.tok.type=='number' && math.eq(left.tok.value,math.complex(0,1))) && right.tok.type=='number' && math.eq(right.tok.value,math.complex(0,1))) {
+                    use_symbol = false;
+                // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
+                } else if ( right.tok.type=='number'
+                        ||
+                            jme.isOp(right.tok,'-u')
+                        ||
+                        (
+                            !jme.isOp(right.tok,'-u') 
+                            && (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] 
+                                && (right.args[0].tok.type=='number' 
+                                && right.args[0].tok.value!=Math.E)
+                            )
+                        )
+                ) {
+                    use_symbol = true;
+                }
+            }
+            s += use_symbol ? ' \\times ' : ' ';
 			s += texifyOpArg(thing,texArgs,i);
 		}
 		return s;
@@ -580,6 +574,24 @@ var texOps = jme.display.texOps = {
 	}
 }
 
+/** Convert a special number to TeX, or return undefined if not a special number.
+ *  @memberof Numbas.jme.display
+ *  @private
+ *
+ *  @param {Number} n
+ *  @returns {TeX}
+ */
+var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
+    var specials = jme.display.specialNumbers;
+    var pvalue = Math.abs(value);
+
+    for(var i=0;i<specials.length;i++) {
+        if(pvalue==specials[i].value) {
+            return (value<0 ? '-' : '') + specials[i].tex;
+        }
+    }
+}
+
 /** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
  * @memberof Numbas.jme.display
  * @private
@@ -622,6 +634,11 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
 	}
 	else
 	{
+        var special = texSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
+
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
@@ -704,10 +721,10 @@ function texRealNumber(n)
 	}
 	else
 	{
-		if(n==Infinity)
-			return '\\infty';
-		else if(n==-Infinity)
-			return '-\\infty';
+        var special = texSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
@@ -912,6 +929,24 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
+/** Definition of a number with a special name
+ * @typedef special_number_definition
+ * @property {Number} value
+ * @property {TeX} tex - The TeX code for this number
+ * @property {JME} jme - The JME code for this number
+ */
+
+/** List of numbers with special names
+ *
+ * @memberof Numbas.jme.display
+ * @type {Array.<special_number_definition>}
+ */
+jme.display.specialNumbers = [
+    {value: Math.E, tex: 'e', jme: 'e'},
+    {value: Math.PI, tex: '\\pi', jme: 'pi'},
+    {value: Infinity, tex: '\\infty', jme: 'infinity'}
+];
+
 /** Dictionary of functions to turn {@link Numbas.jme.types} objects into TeX strings
  *
  * @enum
@@ -919,12 +954,7 @@ var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota
  */
 var typeToTeX = jme.display.typeToTeX = {
 	'number': function(thing,tok,texArgs,settings) {
-		if(tok.value==Math.E)
-			return 'e';
-		else if(tok.value==Math.PI)
-			return '\\pi';
-		else
-			return settings.texNumber(tok.value);
+		return settings.texNumber(tok.value);
 	},
 	'string': function(thing,tok,texArgs,settings) {
 		if(tok.latex)
@@ -1006,6 +1036,19 @@ var typeToTeX = jme.display.typeToTeX = {
 	}
 }
 
+/** Take a nested application of a single op, e.g. ((1*2)*3)*4, and flatten it so that the tree has one op two or more arguments
+ */
+function flatten(tree,op) {
+    if(!jme.isOp(tree.tok,op)) {
+        return [tree];
+    }
+    var args = [];
+    for(var i=0;i<tree.args.length;i++) {
+        args = args.concat(flatten(tree.args[i],op));
+    }
+    return args;
+}
+
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
  * @typedef texify_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
@@ -1034,6 +1077,13 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 	if(!settings)
 		settings = {};
 
+	var tok = thing.tok || thing;
+
+    if(jme.isOp(tok,'*')) {
+        // flatten nested multiplications, so a string of consecutive multiplications can be considered together
+        thing = {tok: thing.tok, args: flatten(thing,'*')};
+    }
+
 	if(thing.args)
 	{
 		var texArgs = [];
@@ -1045,12 +1095,29 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
 
 	settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
 
-	var tok = thing.tok || thing;
 	if(tok.type in typeToTeX) {
 		return typeToTeX[tok.type](thing,tok,texArgs,settings);
 	} else {
 		throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
 	}
+}
+
+/** Convert a special number to JME, or return undefined if not a special number.
+ *  @memberof Numbas.jme.display
+ *  @private
+ *
+ *  @param {Number} n
+ *  @returns {TeX}
+ */
+var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
+    var specials = jme.display.specialNumbers;
+    var pvalue = Math.abs(value);
+
+    for(var i=0;i<specials.length;i++) {
+        if(pvalue==specials[i].value) {
+            return (value<0 ? '-' : '') + specials[i].jme;
+        }
+    }
 }
 
 /** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}
@@ -1098,6 +1165,11 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
 	}
 	else
 	{
+        var special = jmeSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
+
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
 			n /= Math.pow(Math.PI,piD);
@@ -1188,10 +1260,10 @@ function jmeRealNumber(n,settings)
 	}
 	else
 	{
-		if(n==Infinity)
-			return 'infinity';
-		else if(n==-Infinity)
-			return '-infinity';
+        var special = jmeSpecialNumber(n);
+        if(special !== undefined) {
+            return special;
+        }
 
 		var piD;
 		if((piD = math.piDegree(n)) > 0)
@@ -1253,14 +1325,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		return tok.name;
 	},
 	'string': function(tree,tok,bits,settings) {
-		var str = tok.value
-					.replace(/\\/g,'\\\\')
-					.replace(/\\([{}])/g,'$1')
-					.replace(/\n/g,'\\n')
-					.replace(/"/g,'\\"')
-					.replace(/'/g,"\\'")
-		;
-		return '"'+str+'"';
+		var str = '"'+jme.escape(tok.value)+'"';
+        if(tok.latex) {
+            return 'latex('+str+')';
+        } else {
+            return str;
+        }
 	},
 	html: function(tree,tok,bits,settings) {
 		var html = $(tok.value).clone().wrap('<div>').parent().html();
@@ -1348,7 +1418,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 		if(op=='*') {
 			//number or brackets followed by name or brackets doesn't need a times symbol
 			//except <anything>*(-<something>) does
-			if( ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )	
+			if(!settings.alwaystimes && ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )	
 			{
 				op = '';
 			}
@@ -1400,7 +1470,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 	},
 
 	expression: function(tree,tok,bits,settings) {
-		return treeToJME(tok.tree);
+		var expr = treeToJME(tok.tree);
+        if(settings.wrapexpressions) {
+            expr = 'expression("'+jme.escape(expr)+'")';
+        }
+        return expr;
 	}
 }
 
@@ -1423,6 +1497,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @typedef jme_display_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 

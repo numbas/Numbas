@@ -111,14 +111,14 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 			task();
 		}
 		catch(e) {
-			Numbas.display.die(e);
+			Numbas.display && Numbas.display.die(e);
 			schedule.halt = true;
 		}
 		schedule.drop();
 
 		schedule.completed++;
 
-		Numbas.display.showLoadProgress();
+		Numbas.display && Numbas.display.showLoadProgress();
 	},
 
 	/** 'pick up' the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called */
@@ -154,7 +154,7 @@ SignalBox.prototype = {
         });
         deferred.promise.catch(function(e) {
             if(!Numbas.schedule.halt) {
-    			Numbas.display.die(e);
+    			Numbas.display && Numbas.display.die(e);
 	    		Numbas.schedule.halt = true;
             }
         });

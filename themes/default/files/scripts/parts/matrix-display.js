@@ -17,24 +17,24 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.studentAnswer = ko.observable(p.studentAnswer);
+        this.studentAnswer = Knockout.observable(p.studentAnswer);
 
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.correctAnswer = ko.observable(p.settings.correctAnswer);
-        this.correctAnswerLaTeX = ko.computed(function() {
+        this.correctAnswer = Knockout.observable(p.settings.correctAnswer);
+        this.correctAnswerLaTeX = Knockout.computed(function() {
             var correctAnswer = this.correctAnswer();
             var m = new Numbas.jme.types.TMatrix(correctAnswer);
             return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
         },this);
 
-        this.studentAnswerRows = ko.observable(p.settings.numRows);
-        this.studentAnswerColumns = ko.observable(p.settings.numColumns);
-        this.allowResize = ko.observable(p.settings.allowResize);
+        this.studentAnswerRows = Knockout.observable(p.settings.numRows);
+        this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
+        this.allowResize = Knockout.observable(p.settings.allowResize);
 
-        ko.computed(function() {
+        Knockout.computed(function() {
             var stagedAnswer = p.stagedAnswer || [null,null,null];
             var oldRows = stagedAnswer[0];
             var oldColumns = stagedAnswer[1];
@@ -61,7 +61,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.studentAnswerLaTeX = ko.computed(function() {
+        this.studentAnswerLaTeX = Knockout.computed(function() {
             return 'student answer latex';
         },this);
     }

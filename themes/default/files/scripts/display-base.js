@@ -48,7 +48,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#loading').hide();
         $('#everything').show();
 
-        ko.applyBindings(Numbas.exam.display);
+        Knockout.applyBindings(Numbas.exam.display);
         for(var i=0;i<Numbas.exam.questionList.length;i++) {
             Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
         }
@@ -262,13 +262,13 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var niceNumber = Numbas.math.niceNumber;
     var scoreDisplay = '';
 
-    var newScore = ko.observable(false);
+    var newScore = Knockout.observable(false);
 
-    var answered = ko.computed(function() {
+    var answered = Knockout.computed(function() {
         return !obj.isDirty() && (obj.answered() || obj.score()>0);
     });
 
-    var state = ko.computed(function() {
+    var state = Knockout.computed(function() {
         var revealed = obj.revealed(), score = obj.score(), marks = obj.marks(), credit = obj.credit();
 
         if( obj.doesMarking() && (revealed || (settings.showAnswerState && answered())) ) {
@@ -286,7 +286,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     });
 
     return {
-        update: ko.computed({
+        update: Knockout.computed({
             read: function() {
                 return newScore();
             },
@@ -297,7 +297,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         }),
         state: state,
         answered: answered,
-        message: ko.computed(function() {
+        message: Knockout.computed(function() {
             var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
 
             var scoreobj = {
@@ -319,7 +319,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
             else
                 return '';
         }),
-        iconClass: ko.computed(function() {
+        iconClass: Knockout.computed(function() {
             
             if (!settings.showFeedbackIcon) {
                 return 'invisible';
@@ -336,7 +336,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
                 return '';
             }
         }),
-        iconAttr: ko.computed(function() {
+        iconAttr: Knockout.computed(function() {
             return {title:R('question.score feedback.'+state())};
         })
     }

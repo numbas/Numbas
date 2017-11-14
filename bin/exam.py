@@ -131,8 +131,6 @@ class Exam(object):
     showtotalmark = True            #show total marks available to student?
     showanswerstate = True            #show right/wrong on questions?
     allowrevealanswer = True        #allow student to reveal answer to question?
-    adviceType = 'onreveal'            #when is advice shown? 'onreveal' only option at the moment
-    adviceGlobalThreshold = 0        #reveal advice if student scores less than this percentage
     intro = ''                        #text shown on the front page
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
@@ -189,8 +187,6 @@ class Exam(object):
             tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
-                tryLoad(advice,'type',exam,'adviceType')
-                tryLoad(advice,'threshold',exam,'adviceGlobalThreshold')
             tryLoad(data['feedback'],'intro',exam,'intro')
             if haskey(data['feedback'],'feedbackmessages'):
                 exam.feedbackMessages = [builder.feedback_message(f) for f in data['feedback']['feedbackmessages']]
@@ -228,7 +224,6 @@ class Exam(object):
                                 ['navigation'],
                                 ['timing'],
                                 ['feedback',
-                                    ['advice'],
                                     ['intro'],
                                     ['feedbackmessages'],
                                 ],
@@ -273,7 +268,6 @@ class Exam(object):
                 'allowrevealanswer': strcons_fix(self.allowrevealanswer),
                 'showstudentname': strcons_fix(self.showstudentname),
         }
-        feedback.find('advice').attrib = {'type': strcons(self.adviceType), 'threshold': strcons_fix(self.adviceGlobalThreshold)}
         feedback.find('intro').append(makeContentNode(self.intro))
         feedbackmessages = feedback.find('feedbackmessages')
         for fm in self.feedbackMessages:

@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+        <meta charset="utf8">
 		<script src="qunit.js"></script>
 
 		<!-- numbas stuff -->
@@ -185,7 +186,7 @@
                 QUnit.module('Choose one from a list');
                 QUnit.test('Three choices, first answer is correct', function(assert) {
                     var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
-                    var res = mark_part(p, [[true],[false],[false]]);
+                    var res = mark_part(p, [[true], [false], [false]]);
                     assert.equal(res.credit,1,'Picking first choice is correct');
                     var res = mark_part(p, [[false], [true], [false]]);
                     assert.equal(res.credit,0,'Picking second choice is incorrect');

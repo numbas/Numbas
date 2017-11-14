@@ -14,7 +14,7 @@ Copyright 2011-16 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<html>
+<html lang="{{options.locale}}">
     <head>
         {% include 'head.html' %}
 	</head>
@@ -23,7 +23,7 @@ Copyright 2011-16 Newcastle University
         {% include 'die.html' %}
         {% include 'loading.html' %}
 
-		<div id="everything" style="display:none" data-bind="css: {'show-nav': viewType()=='question'}">
+		<main id="everything" style="display:none" data-bind="css: {'show-nav': viewType()=='question'}" role="main">
             {% include 'nav.html' %}
 
             <!-- main content area - info pages or questions go in here -->

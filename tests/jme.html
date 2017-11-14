@@ -1,8 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
-                    "http://www.w3.org/TR/html4/loose.dtd">
+<!doctype html>
 <html>
 	<head>
 		<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+        <meta charset="utf8">
 		<script src="qunit.js"></script>
 
 		<!-- numbas stuff -->
@@ -1083,6 +1083,24 @@
                     assert.equal(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
                     assert.equal(exprToLaTeX('(5 + 9i)*(2 + 7)'),'\\left ( 5 + 9 i \\right ) \\left ( 2 + 7 \\right )','put brackets around complex numbers when multiplying and neither Re nor Im are zero');
                     assert.equal(exprToLaTeX('(-7+9i)*(x+1)'), '\\left ( -7 + 9 i \\right ) \\left ( x + 1 \\right )','don\'t unnecessarily take unary minus out when it\'s on a complex number');
+                    assert.equal(exprToLaTeX('(0.5)^3','fractionnumbers'), '\\left ( \\frac{1}{2} \\right )^{ 3 }', 'bracket fractions taken to a power');
+                    assert.equal(exprToLaTeX('(5)^3','fractionnumbers'), '5^{ 3 }', 'don\'t bracket whole numbers taken to a power');
+                    assert.equal(exprToLaTeX('(1+i)^3','fractionnumbers'), '\\left ( 1 + i \\right )^{ 3 }', 'bracket complex numbers taken to a power');
+                    assert.equal(exprToLaTeX('2*e^2'),'2 e^{ 2 }','');
+                    assert.equal(exprToLaTeX('2 * pi'), '2 \\pi','');
+                    assert.equal(exprToLaTeX('2 * e'), '2 e','');
+                    assert.equal(exprToLaTeX('2*(i^3)'), '2 i^{ 3 }','');
+                    assert.equal(exprToLaTeX('x*i'), 'x i','');
+                    assert.equal(exprToLaTeX('x*i','alwaystimes'), 'x \\times i','');
+                    assert.equal(exprToLaTeX('2^3 * 2^3 * 2^3','basic'),'2^{ 3 } \\times 2^{ 3 } \\times 2^{ 3 }','several consecutive multiplications');
+                    assert.equal(exprToLaTeX('sin(x)^5'),'\\sin^{5}\\left( x \\right)','trig function to a positive integer power');
+                    assert.equal(exprToLaTeX('sin(x)^(-1)'),'\\sin \\left ( x \\right )^{ -1 }','trig function to a positive integer power');
+                    assert.equal(exprToLaTeX('infinity',''),'\\infty','infinity');
+                    assert.equal(exprToLaTeX('infinity','fractionNumbers'),'\\infty','infinity with fractionNumbers');
+                    assert.equal(exprToLaTeX('e','fractionNumbers'),'e','e with fractionNumbers');
+                    assert.equal(exprToLaTeX('pi','fractionNumbers'),'\\pi','pi with fractionNumbers');
+                    assert.equal(exprToLaTeX('e^(3x)','fractionNumbers'),'e^{ 3 x }','e^(3x) with fractionNumbers');
+                    assert.equal(exprToLaTeX('e*i',''),'e i','e*i');
 				});
 			});
 		</script>

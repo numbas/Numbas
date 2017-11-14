@@ -29,50 +29,50 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Number} score
          * @memberof Numbas.display.PartDisplay
          */
-        this.score = ko.observable(p.score);
+        this.score = Knockout.observable(p.score);
 
         /** The total marks available for this part ({@link Numbas.parts.Part#marks})
          * @member {observable|Number} marks
          * @memberof Numbas.display.PartDisplay
          */
-        this.marks = ko.observable(p.marks);
+        this.marks = Knockout.observable(p.marks);
 
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
          * @member {observable|Number} credit
          * @memberof Numbas.display.PartDisplay
          */
-        this.credit = ko.observable(p.credit);
+        this.credit = Knockout.observable(p.credit);
 
         /** Does this part do any marking?
          * @member {observable|Boolean} doesMarking
          * @see Numbas.parts.Part#doesMarking
          * @memberof Numbas.display.PartDisplay
          */
-        this.doesMarking = ko.observable(p.doesMarking);
+        this.doesMarking = Knockout.observable(p.doesMarking);
 
         /** Has the student answered this part?
          * @member {observable|Boolean} answered
          * @memberof Numbas.display.PartDisplay
          */
-        this.answered = ko.observable(p.answered);
+        this.answered = Knockout.observable(p.answered);
 
         /** Has the student changed their answer since the last submission?
          * @member {observable|Boolean} isDirty
          * @memberof Numbas.display.PartDisplay
          */
-        this.isDirty = ko.observable(false);
+        this.isDirty = Knockout.observable(false);
 
         /** Warnings based on the student's answer
          * @member {observable|Array.<Object.<String>>} warnings
          * @memberof Numbas.display.PartDisplay
          */
-        this.warnings = ko.observableArray([]);
+        this.warnings = Knockout.observableArray([]);
 
         /** Are the warnings visible?
          * @member {observable|Boolean} warningsShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.warningsShown = ko.observable(false);
+        this.warningsShown = Knockout.observable(false);
 
         /** Show the warnings
          * @member {function} showWarnings
@@ -96,13 +96,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} feedbackShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.feedbackShown = ko.observable(false);
+        this.feedbackShown = Knockout.observable(false);
 
         /** Text for the button to toggle the display of the feedback messages
          * @member {observable|String} toggleFeedbackText
          * @memberof Numbas.display.PartDisplay
          */
-        this.toggleFeedbackText = ko.computed(function() {
+        this.toggleFeedbackText = Knockout.computed(function() {
             return R(this.feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show');
         },this);
 
@@ -110,14 +110,14 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|String[]} feedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
-        this.feedbackMessages = ko.observableArray([]);
+        this.feedbackMessages = Knockout.observableArray([]);
         
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
          * @member {observable|Boolean} isNotOnlyPart
          * @memberof Numbas.display.PartDisplay
          */
-        this.isNotOnlyPart = ko.computed(function() {
+        this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
 
@@ -125,7 +125,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showFeedbackToggler
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackToggler = ko.computed(function() {
+        this.showFeedbackToggler = Knockout.computed(function() {
             var e = p.question.exam;
             return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
         },this);
@@ -134,7 +134,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showSubmitPart
          * @memberof Numbas.display.PartDisplay
          */
-        this.showSubmitPart = ko.computed(function() {
+        this.showSubmitPart = Knockout.computed(function() {
             return this.isNotOnlyPart() && !(this.revealed() || !this.isDirty());
         },this);
 
@@ -142,25 +142,25 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.stepsShown = ko.observable(p.stepsShown);
+        this.stepsShown = Knockout.observable(p.stepsShown);
 
         /** Are the steps currently open? ({@link Numbas.parts.Part#stepsOpen})
          * @member {observable|Boolean} stepsOpen
          * @memberof Numbas.display.PartDisplay
          */
-        this.stepsOpen = ko.observable(p.stepsOpen);
+        this.stepsOpen = Knockout.observable(p.stepsOpen);
 
         /** Have the correct answers been revealed?
          * @member {observable|Boolean} revealed
          * @memberof Numbas.display.PartDisplay
          */
-        this.revealed = ko.observable(false);
+        this.revealed = Knockout.observable(false);
 
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage
          * @memberof Numbas.display.PartDisplay
          */
-        this.stepsPenaltyMessage = ko.computed(function() {
+        this.stepsPenaltyMessage = Knockout.computed(function() {
             if(this.stepsOpen())
                 return R('question.hide steps no penalty');
             else if(this.part.settings.stepsPenalty==0 || this.revealed())
@@ -175,7 +175,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showCorrectAnswer
          * @memberof Numbas.display.PartDisplay
          */
-        this.showCorrectAnswer = ko.computed(function() {
+        this.showCorrectAnswer = Knockout.computed(function() {
             return p.settings.showCorrectAnswer && pd.revealed();
         });
 
@@ -191,7 +191,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay
          */
-        this.showMarks = ko.computed(function() {
+        this.showMarks = Knockout.computed(function() {
             return this.scoreFeedback.message() && (this.isNotOnlyPart() || this.scoreFeedback.iconClass());
         }, this);
 
@@ -199,7 +199,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showFeedbackBox
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackBox = ko.computed(function() {
+        this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
         },this);
 

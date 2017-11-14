@@ -301,8 +301,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
 
+        if(this.flipped) {
+            this.numAnswers = this.numChoices;
+            this.numChoices = 1;
+            this.answers = this.choices;
+            this.choices = null;
+        }
+
         tryLoad(data, ['distractors'], settings);
-        if(settings.distractors && this.type=='1_n_2' || this.type=='m_n_2') {
+        if(settings.distractors && (this.type=='1_n_2' || this.type=='m_n_2')) {
             settings.distractors = settings.distractors.map(function(d){return [d]});
         }
         if(!settings.distractors) {
@@ -314,13 +321,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
                 settings.distractors.push(row);
             }
-        }
-
-        if(this.flipped) {
-            this.numAnswers = this.numChoices;
-            this.numChoices = 1;
-            this.answers = this.choices;
-            this.choices = null;
         }
 
     },

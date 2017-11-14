@@ -2,7 +2,7 @@ This is an exam created by the Numbas system.
 Copyright in the exam content resides with the exam author.
 
 Numbas is:
-Copyright 2011-13 Newcastle University
+Copyright 2011-17 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ The following libraries are used:
 	MathJax (http://mathjax.org)
 	jQuery.Impromptu (http://trentrichardson.com/Impromptu)
 	jQuery.xslTransform & jQuery.debug (http://jquery.glyphix.com/)
-	JSON (http://www.JSON.org)
 	jQuery.mousewheel (http://brandonaaron.net)
 	Sarissa (http://sarissa.sf.net)
 	knockout.js (http://knockoutjs.com/)
-	R.js (https://github.com/keithamus/R.js)
+	i18next (https://www.i18next.com)
 	seedrandom.js (http://davidbau.com/encode/seedrandom.js)
-	es5-shim (https://github.com/kriskowal/es5-shim)
+	es6-promise (https://github.com/stefanpenner/es6-promise)

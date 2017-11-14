@@ -17,31 +17,31 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|String} mode
          * @memberof Numbas.display.ExamDisplay
          */
-        this.mode = ko.observable(e.mode);
+        this.mode = Knockout.observable(e.mode);
         
         /** Is {@link Numbas.store} currently saving?
          * @member {observable|Boolean} saving
          * @memberof Numbas.display.ExamDisplay
          */
-        this.saving = ko.observable(false);
+        this.saving = Knockout.observable(false);
 
         /** The name of the currently displayed info page
          * @member {observable|String} infoPage
          * @memberof Numbas.display.ExamDisplay
          */
-        this.infoPage = ko.observable(null);
+        this.infoPage = Knockout.observable(null);
 
         /** The current question ({@link Numbas.Exam#currentQuestion})
          * @member {observable|Numbas.Question} currentQuestion
          * @memberof Numbas.display.ExamDisplay
          */
-        this.currentQuestion = ko.observable(null);
+        this.currentQuestion = Knockout.observable(null);
 
         /** What kind of view are we in at the moment? 'infopage' or 'question'
          * @member {observable|String} viewType
          * @memberof Numbas.display.ExamDisplay
          */
-        this.viewType = ko.computed(function() {
+        this.viewType = Knockout.computed(function() {
             if(this.infoPage()) {
                 return 'infopage';
             } else if(this.currentQuestion()) {
@@ -53,7 +53,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Number} currentQuestionNumber 
          * @memberof Numbas.display.ExamDisplay
          */
-        this.currentQuestionNumber = ko.computed(function() {
+        this.currentQuestionNumber = Knockout.computed(function() {
             var q = this.currentQuestion();
             if(q)
                 return q.question.number;
@@ -65,13 +65,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Numbas.display.QuestionDisplay[]} questions
          * @memberof Numbas.display.ExamDisplay
          */
-        this.questions = ko.observableArray([]);
+        this.questions = Knockout.observableArray([]);
 
         /** Can the student go back to the previous question? (False if the current question is the first one
          * @member {observable|Boolean} canReverse
          * @memberof Numbas.display.ExamDisplay
          */
-        this.canReverse = ko.computed(function() {
+        this.canReverse = Knockout.computed(function() {
             return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
         },this);
         
@@ -79,7 +79,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Boolean} canAdvance
          * @memberof Numbas.display.ExamDisplay
          */
-        this.canAdvance = ko.computed(function() {
+        this.canAdvance = Knockout.computed(function() {
             return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
         },this);
 
@@ -87,25 +87,25 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Number} score
          * @memberof Numbas.display.ExamDisplay
          */
-        this.score = ko.observable(e.score);
+        this.score = Knockout.observable(e.score);
 
         /** The total marks available for the exam ({@link Numbas.Exam#mark})
          * @member {observable|Number} marks
          * @memberof Numbas.display.ExamDisplay
          */
-        this.marks = ko.observable(e.mark);
+        this.marks = Knockout.observable(e.mark);
 
         /** The percentage score the student needs to achieve to pass ({@link Numbas.Exam#percentPass}), formatted as a string.
          * @member {observable|String} percentPass
          * @memberof Numbas.display.ExamDisplay
          */
-        this.percentPass = ko.observable(e.settings.percentPass*100+'%');
+        this.percentPass = Knockout.observable(e.settings.percentPass*100+'%');
 
         /** String displaying the student's current score, and the total marks available, if allowed
          * @member {observable|String} examScoreDisplay
          * @memberof Numbas.display.ExamDisplay
          */
-        this.examScoreDisplay = ko.computed(function() {
+        this.examScoreDisplay = Knockout.computed(function() {
             var niceNumber = Numbas.math.niceNumber;
             var exam = this.exam;
             var score = this.score();
@@ -124,26 +124,26 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Number} percentScore
          * @memberof Numbas.display.ExamDisplay
          */
-        this.percentScore = ko.observable(0);
+        this.percentScore = Knockout.observable(0);
 
         /** The time left in the exam
          * @member {observable|String} displayTime
          * @memberof Numbas.display.ExamDisplay
          */
-        this.displayTime = ko.observable('');
+        this.displayTime = Knockout.observable('');
 
         /** Show the names of question groups in the menu?
          * @member {observable|String} showQuestionGroupNames
          * @memberof Numbas.display.ExamDisplay
          */
-        this.showQuestionGroupNames = ko.observable(e.settings.showQuestionGroupNames);
+        this.showQuestionGroupNames = Knockout.observable(e.settings.showQuestionGroupNames);
 
         /** Time the exam started, formatted for display
          * @mamber {observable|String} startTime
          * @memberof Numbas.display.ExamDisplay
          */
-        var _startTime = ko.observable();
-        this.startTime = ko.computed({
+        var _startTime = Knockout.observable();
+        this.startTime = Knockout.computed({
             read: function() {
                 var t = _startTime();
                 if(t) {
@@ -161,8 +161,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @mamber {observable|String} endTime
          * @memberof Numbas.display.ExamDisplay
          */
-        var _endTime = ko.observable();
-        this.endTime = ko.computed({
+        var _endTime = Knockout.observable();
+        this.endTime = Knockout.computed({
             read: function() {
                 var t = _endTime();
                 if(t) {
@@ -180,7 +180,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|String} timeSpent
          * @memberof Numbas.display.ExamDisplay
          */
-        this.timeSpent = ko.observable('');
+        this.timeSpent = Knockout.observable('');
 
         /** Is the student allowed to pause the exam?
          * @member {Boolean} allowPause
@@ -192,7 +192,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|Number} questionsAttempted
          * @memberof Numbas.display.ExamDisplay
          */
-        this.questionsAttempted = ko.computed(function() {
+        this.questionsAttempted = Knockout.computed(function() {
             return this.questions().reduce(function(s,q) { 
                 return s + (q.answered() ? 1 : 0); 
             },0);
@@ -202,7 +202,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|String} questionsAttemptedDisplay
          * @memberof Numbas.display.ExamDisplay
          */
-        this.questionsAttemptedDisplay = ko.computed(function() {
+        this.questionsAttemptedDisplay = Knockout.computed(function() {
             return this.questionsAttempted()+' / '+this.exam.settings.numQuestions;
         },this);
 
@@ -210,19 +210,19 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|String} result
          * @memberof Numbas.display.ExamDisplay
          */
-        this.result = ko.observable('');
+        this.result = Knockout.observable('');
 
         /** Did the student pass the exam?
          * @member {observable|Boolean} passed
          * @memberof Numbas.display.ExamDisplay
          */
-        this.passed = ko.observable(false);
+        this.passed = Knockout.observable(false);
 
         /** Message shown to the student based on their total score
          * @member {observable|String} feedbackMessage
          * @memberof Numbas.display.ExamDisplay
          */
-        this.feedbackMessage = ko.observable(null);
+        this.feedbackMessage = Knockout.observable(null);
 
         document.title = e.settings.name;
 
@@ -252,7 +252,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return {
                     name: g.settings.name,
                     group: g,
-                    questions: ko.observable(g.questionList.map(function(q){return q.display}))
+                    questions: Knockout.observable(g.questionList.map(function(q){return q.display}))
                 }
             });
             for(var i=0; i<this.exam.questionList.length; i++) {
@@ -390,7 +390,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         applyQuestionBindings: function(question) {
-            ko.applyBindings({exam: this, question: question.display},question.display.html[0]);
+            Knockout.applyBindings({exam: this, question: question.display},question.display.html[0]);
         },
 
         /** Called when the exam ends 

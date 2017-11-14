@@ -17,13 +17,13 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.studentAnswer = ko.observable(p.studentAnswer);
+        this.studentAnswer = Knockout.observable(p.studentAnswer);
 
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.correctAnswer = ko.observable(p.settings.displayAnswer);
+        this.correctAnswer = Knockout.observable(p.settings.displayAnswer);
 
         ko.computed(function() {
             p.storeAnswer(this.studentAnswer());
@@ -35,7 +35,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|string} cleanStudentAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.cleanStudentAnswer = ko.computed(function() {
+        this.cleanStudentAnswer = Knockout.computed(function() {
             var studentAnswer = p.cleanAnswer(this.studentAnswer());
             this.removeWarnings();
             if(studentAnswer=='')
@@ -64,7 +64,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.studentAnswerLaTeX = ko.computed(function() {
+        this.studentAnswerLaTeX = Knockout.computed(function() {
             return this.cleanStudentAnswer();
         },this);
 
@@ -72,7 +72,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|boolean} inputHasFocus
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.inputHasFocus = ko.observable(false);
+        this.inputHasFocus = Knockout.observable(false);
 
         /** Give the input box focus
          * @member {function} focusInput
@@ -87,7 +87,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|string} precisionHint
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.precisionHint = ko.computed(function() {
+        this.precisionHint = Knockout.computed(function() {
             if(this.part.settings.precisionType=='none') {
                 if(this.part.settings.mustBeReduced) {
                     return R('part.numberentry.give your answer as a reduced fraction');
@@ -109,7 +109,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|string} showPrecisionHint
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.showPrecisionHint = ko.computed(function() {
+        this.showPrecisionHint = Knockout.computed(function() {
             return this.part.settings.showPrecisionHint && this.precisionHint();
         },this);
     }

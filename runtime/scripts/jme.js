@@ -50,18 +50,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 	constants: {
 		'e': Math.E,
 		'pi': Math.PI,
+        'π': Math.PI,
 		'i': math.complex(0,1),
 		'infinity': Infinity,
 		'infty': Infinity,
-        'nan': NaN
+        'nan': NaN,
+        '∞': Infinity
 	},
 
 	/** Regular expressions to match tokens */
 	re: {
 		re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
 		re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)}?/i,
-		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
+		re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
+		re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
 		re_punctuation: /^([\(\),\[\]])/,
 		re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
 		re_comment: /^\/\/.*(?:\n|$)/,
@@ -172,29 +174,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 			{
 				var str = result[2];
 	
-				var estr = '';
-				while(true) {
-					var i = str.indexOf('\\');
-					if(i==-1)
-						break;
-					else {
-						estr += str.slice(0,i);
-						var c;
-						if((c=str.charAt(i+1))=='n') {
-							estr+='\n';
-						}
-						else if(c=='{' || c=='}') {
-							estr+='\\'+c;
-						}
-						else {
-							estr+=c;
-						}
-						str=str.slice(i+2);
-					}
-				}
-				estr+=str;
-
-				token = new TString(estr);
+				token = new TString(jme.unescape(str));
 			}
             else if(result = expr.match(jme.re.re_keypair)) {
                 if(tokens.length==0 || tokens[tokens.length-1].type!='string') {
@@ -223,6 +203,52 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
 		return(tokens);
 	},
+
+    /** Escape a string so that it will be interpreted correctly by the JME parser
+     * @param {String} str
+     * @returns {String}
+     * @see Numbas.jme.unescape
+     */
+    escape: function(str) {
+		return str
+            .replace(/\\/g,'\\\\')
+            .replace(/\\([{}])/g,'$1')
+            .replace(/\n/g,'\\n')
+            .replace(/"/g,'\\"')
+            .replace(/'/g,"\\'")
+		;
+    },
+
+    /** Unescape a string - backslashes escape special characters
+     * @param {String} str
+     * @returns {String}
+     * @see Numbas.jme.escape
+     */
+    unescape: function(str) {
+        var estr = '';
+        while(true) {
+            var i = str.indexOf('\\');
+            if(i==-1)
+                break;
+            else {
+                estr += str.slice(0,i);
+                var c;
+                if((c=str.charAt(i+1))=='n') {
+                    estr+='\n';
+                }
+                else if(c=='{' || c=='}') {
+                    estr+='\\'+c;
+                }
+                else {
+                    estr+=c;
+                }
+                str=str.slice(i+2);
+            }
+        }
+        estr+=str;
+
+        return estr;
+    },
 
 	/** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm (wikipedia has a good description)
 	 * @param {Array.<Numbas.jme.token>} tokens
@@ -1748,7 +1774,16 @@ var opSynonyms = jme.opSynonyms = {
 	'&':'and',
 	'&&':'and',
 	'divides': '|',
-	'||':'or'
+	'||':'or',
+    '÷': '/',
+    '×': '*',
+    '∈': 'in',
+    '∧': 'and',
+    '∨': 'or',
+    '⟹': 'implies',
+    '≠': '<>',
+    '≥': '>=',
+    '≤': '<='
 }
 /** Synonyms of function names - keys in this dictionary are translated to their corresponding values 
  * @enum {String}
