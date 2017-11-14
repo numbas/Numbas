@@ -549,7 +549,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	validate: function()
 	{
 		var success = true;
-		for(i=0; i<this.parts.length; i++)
+		for(var i=0; i<this.parts.length; i++)
 		{
 			success = success && (this.parts[i].answered || this.parts[i].marks==0);
 		}

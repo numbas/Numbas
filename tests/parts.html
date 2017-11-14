@@ -86,8 +86,6 @@
                     assert.ok(p.answered,'Part is answerd');
                     assert.equal(p.credit,1,'1 credit');
                     assert.equal(p.markingFeedback[0].message,'Top marks!', 'Feedback message is "Top marks!" as set in script');
-
-                    window.p = p;
                 });
 
                 QUnit.module('Number entry');
@@ -298,7 +296,6 @@
                     var data = {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]};
 
                     var q = Numbas.createQuestionFromJSON(data);
-                    window.q = q;
                     q.generateVariables();
                     var promise = q.signals.on('ready').catch(function(e){
                         assert.equal(e.originalMessage,'marking.script.error parsing notes','Error is "marking.script.error parsing notes"');

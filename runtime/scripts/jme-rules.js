@@ -1,5 +1,10 @@
 Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
 
+/** @file Code to do with JME pattern-matching rules.
+ *
+ * Provides {@link Numbas.jme.rules}
+ */
+
 var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;

@@ -14,7 +14,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 
-/** @file Sets up most of the JME stuff: compiler, built-in functions, and expression comparison functions.
+/** @file Sets up the JME compiler and evaluator.
  *
  * Provides {@link Numbas.jme}
  */

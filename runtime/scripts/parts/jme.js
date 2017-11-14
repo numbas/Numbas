@@ -106,7 +106,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(notAllowedNode)
         {
             var notAlloweds = notAllowedNode.selectNodes('string');
-            for(i=0; i<notAlloweds.length; i++)
+            for(var i=0; i<notAlloweds.length; i++)
             {
                 settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
             }
@@ -122,7 +122,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(expectedVariableNamesNode)
         {
             var nameNodes = expectedVariableNamesNode.selectNodes('string');
-            for(i=0; i<nameNodes.length; i++)
+            for(var i=0; i<nameNodes.length; i++)
                 settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
         }
     },
