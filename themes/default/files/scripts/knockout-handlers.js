@@ -476,7 +476,7 @@ Numbas.queueScript('knockout-handlers',['display-base'],function() {
         viewModel: function(params) {
             this.part = params.part;
             this.choices = ko.observableArray(this.part.input_options.choices);
-            this.choice = ko.observable(0);
+            this.choice = ko.observable(null);
             this.answerJSON = params.answerJSON;
             ko.computed(function() {
                 this.answerJSON(this.choice());

@@ -91,6 +91,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.input option missing',{option:option});
             }
         })
+        raw_input_options.hint = raw_input_options.hint || '""';
 
         for(var option in raw_input_options) {
             try {
@@ -188,7 +189,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new jme.types.TString(value);
         },
         'list_of_strings': function(def, value) {
-            return new jme.types.TList(value.map(function(s){ return new jme.types.TString(s) }));
+            var scope = this.getScope();
+            return new jme.types.TList(value.map(function(s){ 
+                if(def.subvars) {
+                    s = jme.subvars(s, scope);
+                }
+                return new jme.types.TString(s) 
+            }));
         },
         'choose_several': function(def, value) {
             var d = {};
