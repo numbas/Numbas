@@ -261,15 +261,25 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     }
     StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope,StatefulScope);
 
-    var re_note = /^((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
+    var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
     var MarkingNote = marking.MarkingNote = function(source) {
-        var m = re_note.exec(source.trim());
+        source = source.trim();
+        var m = re_note.exec(source);
         if(!m) {
-            throw(new Numbas.Error("marking.note.invalid definition",{source: source}));
+            var hint;
+            if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
+                hint = R('marking.note.invalid definition.missing colon');
+            } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
+                hint = R('marking.note.invalid definition.description missing closing bracket');
+            }
+            throw(new Numbas.Error("marking.note.invalid definition",{source: source, hint: hint}));
         }
         this.name = m[1];
         this.description = m[2];
         this.expr = m[3];
+        if(!this.expr) {
+            throw(new Numbas.Error("marking.note.empty expression",{name:this.name}));
+        }
         try {
             this.tree = jme.compile(this.expr);
         } catch(e) {
@@ -351,7 +361,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                 if(invalid_dep || Numbas.marking.ignore_note_errors) {
                     scope.state_valid[name] = false;
                 } else {
-                    throw(new Error("Error evaluating note <code>"+name+"</code> - "+e.message));
+                    throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));
                 }
             }
             scope.states[name] = scope.state.slice().map(function(s){s.note = s.note || name; return s});
