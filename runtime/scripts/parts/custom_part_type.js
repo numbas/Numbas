@@ -38,6 +38,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
         this.setMarkingScript(this.definition.marking_script);
+        return this.definition;
     },
 
     loadFromXML: function(xml) {
@@ -52,20 +53,16 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             var value = settingNode.getAttribute('value');
             raw_settings[name] = JSON.parse(value);
         });
-
-        // create the JME marking script for the part
-        var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
-        var markingScript = {};
-        tryGetAttribute(markingScript,this.xml,markingScriptNode,['extend']);
-        if(markingScriptString) {
-            // extend the base marking algorithm if asked to do so
-            var extend_base = markingScript.extend;
-            this.setMarkingScript(markingScriptString,extend_base);
-        }
     },
 
-    loadFromJSON: function() {
+    loadFromJSON: function(data) {
+        var definition = this.getDefinition();
+        var tryLoad = Numbas.json.tryLoad;
+
+        var raw_settings = this.raw_settings;
+        definition.settings.forEach(function(sdef) {
+            tryLoad(data.settings,sdef.name,raw_settings);
+        });
     },
 
     finaliseLoad: function() {

@@ -1124,8 +1124,9 @@ def custom_part_constructor(definition):
         
         def loadDATA(self, builder, data):
             super(CustomPart,self).loadDATA(builder, data)
-            for setting in definition['settings']:
-                tryLoad(data,setting['name'],self.settings)
+            if 'settings' in data:
+                for setting in definition['settings']:
+                    tryLoad(data['settings'],setting['name'],self.settings)
 
         def toxml(self):
             part = super(CustomPart,self).toxml()
