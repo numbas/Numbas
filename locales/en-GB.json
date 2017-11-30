@@ -70,6 +70,7 @@
     "jme.tokenise.invalid": "Invalid expression: <code>{{expression}}</code>",
     "jme.tokenise.invalid near": "Invalid expression: <code>{{expression}}</code> at position {{position}} near <code>{{nearby}}</code>",
     "jme.tokenise.keypair key not a string": "Dictionary key should be a string, not {{type}}.",
+    "jme.tokenise.number.object not complex": "Invalid object passed into number constructor.",
     "jme.shunt.not enough arguments": "Not enough arguments for operation <code>{{op}}</code>",
     "jme.shunt.no left bracket in function": "No matching left bracket in function application or tuple",
     "jme.shunt.no left square bracket": "No matching left bracket",
