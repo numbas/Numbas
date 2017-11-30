@@ -257,14 +257,7 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
         viewModel: function(params) {
             this.part = params.part;
             this.choices = ko.observableArray(this.part.input_options.choices);
-            var _choice = ko.observable(null);
-            this.choice = ko.computed({
-                read: _choice,
-                write: function(v) {
-                    console.log(v);
-                    return _choice(v);
-                }
-            },this);
+            this.choice = ko.observable(null);
             this.answerJSON = params.answerJSON;
             ko.computed(function() {
                 this.answerJSON(this.choice());
