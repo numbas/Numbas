@@ -786,7 +786,7 @@ class Restriction:
         self.message = message
     
     @staticmethod
-    def fromDATA(name, data, builder, restriction=None):
+    def fromDATA(builder, name, data, restriction=None):
         if restriction==None:
             restriction = Restriction(name)
         tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
@@ -1233,10 +1233,10 @@ class ExamBuilder(object):
         return Question.fromDATA(self, data)
 
     def function(self, name, data):
-        return Function.fromDATA(name, data, self)
+        return Function.fromDATA(self, name, data)
 
     def restriction(self, name, data, restriction=None):
-        return Function.fromDATA(name, data, restriction, self)
+        return Restriction.fromDATA(self, name, data, restriction)
 
     def variable_replacement(self, data):
         return VariableReplacement.fromDATA(self, data)
