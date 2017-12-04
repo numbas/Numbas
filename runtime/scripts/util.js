@@ -59,6 +59,26 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return c;
 	},
 
+    /** Extend `destination` with all the properties from subsequent arguments. 
+     * `undefined` values are not copied over.
+     * Replacement for jQuery.extend. Modified from https://stackoverflow.com/a/11197343
+     * Object.assign doesn't behave the same way - it copies over `undefined`.
+     * @param {Object} destination
+     * @param {Object} others*
+     * @returns {Object}
+     */
+    extend_object: function(destination) {
+        for(var i=1; i<arguments.length; i++) {
+            
+            for(var key in arguments[i]) {
+                if(arguments[i].hasOwnProperty(key) && arguments[i][key]!==undefined) {
+                    destination[key] = arguments[i][key];
+                }
+            }
+        }
+        return destination;
+    },
+
 	/** Clone an array, with array elements copied too.
 	 * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
 	 * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.

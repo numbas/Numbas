@@ -490,7 +490,7 @@ var displayFlags = jme.rules.displayFlags = {
  */
 var Ruleset = jme.rules.Ruleset = function(rules,flags) {
 	this.rules = rules;
-	this.flags = $.extend({},displayFlags,flags);
+	this.flags = util.extend_object({},displayFlags,flags);
 }
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
 	/** Test whether flag is set 
@@ -509,7 +509,7 @@ var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
 
 function mergeRulesets(r1,r2) {
 	var rules = r1.rules.merge(r2.rules,ruleSort);
-	var flags = $.extend({},r1.flags,r2.flags);
+	var flags = util.extend_object({},r1.flags,r2.flags);
 	return new Ruleset(rules, flags);
 }
 
@@ -536,7 +536,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
         set.splice(0,0,'basic');
 	}
 	else {
-		flags = $.extend(flags,set.flags);
+		flags = util.extend_object(flags,set.flags);
 		if(set.rules)
 			set = set.rules;
 	}
@@ -561,7 +561,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 
 				var sub = collectRuleset(scopeSets[name],scopeSets);
 
-				flags = $.extend(flags,sub.flags);
+				flags = util.extend_object(flags,sub.flags);
 
 				scopeSets[name] = sub;
 				if(neg)

@@ -873,7 +873,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 case 'html':
                     return v;
                 default:
-                    if($.isArray(v)) {
+                    if(Array.isArray(v)) {
                         // it would be nice to abstract this, but some types need the arguments to be wrapped, while others don't
                         switch(typeHint) {
                         case 'matrix':
@@ -1014,7 +1014,7 @@ var Scope = jme.Scope = function(scopes) {
 	if(scopes===undefined) {
         return;
     } 
-    if(!$.isArray(scopes)) {
+    if(!Array.isArray(scopes)) {
         scopes = [scopes,undefined];
     }
     this.question = scopes[0].question || this.question;
@@ -1432,7 +1432,13 @@ var THTML = types.THTML = types.html = function(html) {
     if(html.ownerDocument===undefined && !html.jquery) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
-	this.value = $(html);
+    if(window.jQuery) {
+        this.value = $(html);
+    } else {
+        var elem = document.createElement('div');
+        elem.innerHTML = html;
+        this.value = elem.children;
+    }
 }
 THTML.prototype.type = 'html';
 THTML.doc = {
