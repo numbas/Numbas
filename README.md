@@ -22,7 +22,7 @@ Numbas is open source, and we welcome contributions of any sort. Bug reports or 
 
 See [our page on contributing to Numbas](http://www.numbas.org.uk/contributing-to-numbas/) for more information on how you can help.
 
-We keep a list of tasks specifically for new contributors, under [the up-for-grabs label](https://github.com/numbas/Numbas/labels/up-for-grabs). There's [a corresponding list in the editor repository](https://github.com/numbas/editor/labels/up-for-grabs), too. These tasks should be fairly straightforward to implement without much knowledge of how all the code fits together.
+We keep a list of tasks specifically for new contributors, under the [good-first-issue label](https://github.com/numbas/Numbas/labels/good%20first%20issue). There's [a corresponding list in the editor repository](https://github.com/numbas/editor/labels/good%20first%20issue), too. These tasks should be fairly straightforward to implement without much knowledge of how all the code fits together.
 
 This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
 
