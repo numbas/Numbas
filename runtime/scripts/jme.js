@@ -1554,7 +1554,7 @@ TVector.prototype.type = 'vector';
 TVector.doc = {
 	name: 'vector',
 	usage: ['vector(1,2)','vector([1,2,3,4])'],
-	description: 'The components of a vector must be numbers.\n\n When combining vectors of different dimensions, the smaller vector is padded with zeroes to make up the difference.'
+	description: 'The components of a vector must be numbers.\n\n When combining vectors of different dimensions, the smaller vector is padded with zeros to make up the difference.'
 }
 
 /** Matrix type
@@ -1581,7 +1581,7 @@ TMatrix.prototype.type = 'matrix';
 TMatrix.doc = {
 	name: 'matrix',
 	usage: ['matrix([1,2,3],[4,5,6])','matrix(row1,row2)'],
-	description: "Matrices are constructed from lists of numbers, representing the rows.\n\n When combining matrices of different dimensions, the smaller matrix is padded with zeroes to make up the difference."
+	description: "Matrices are constructed from lists of numbers, representing the rows.\n\n When combining matrices of different dimensions, the smaller matrix is padded with zeros to make up the difference."
 }
 
 /** A range of numerical values - either discrete or continuous

@@ -867,7 +867,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @param {Number|String} n
 	 * @param {String} precisionType - either 'dp' or 'sigfig'
 	 * @param {Number} precision - number of desired digits of precision
-	 * @param {Boolean} strictPrecision - must trailing zeroes be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
+	 * @param {Boolean} strictPrecision - must trailing zeros be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
 	 * @returns {Boolean}
 	 */
 	toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
@@ -1660,7 +1660,7 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
 
 /** Vector operations.
  *
- * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of vectors don't line up exactly
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of vectors don't line up exactly
  * @namespace Numbas.vectormath
  */
 var vectormath = Numbas.vectormath = {
@@ -1940,7 +1940,7 @@ var vectormath = Numbas.vectormath = {
 
 /** Matrix operations.
  *
- * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of matrices don't line up exactly
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of matrices don't line up exactly
  * @namespace Numbas.matrixmath
  */
 var matrixmath = Numbas.matrixmath = {
