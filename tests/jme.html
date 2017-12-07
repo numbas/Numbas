@@ -60,7 +60,26 @@
 						expect = Numbas.math.precround(expect,10);
 					}
 					return assert.deepEqual(value,expect,message);
-				}
+                }
+
+                function remove_pos(tree) {
+                    if(tree.tok) {
+                        delete tree.tok.pos;
+                    }
+                    if(tree.args) {
+                        tree.args.forEach(function(a) { remove_pos(a) });
+                    }
+                    return tree;
+                }
+
+                function treesEqual(assert, a, b, message) {
+                    return deepCloseEqual(assert, remove_pos(a), remove_pos(b), message);
+                }
+
+                function tokWithPos(tok,pos) {
+                    tok.pos = pos;
+                    return tok;
+                }
 
 				QUnit.module('Subvars');
 				QUnit.test('contentsplitbrackets',function(assert) {
@@ -87,15 +106,19 @@
 
 				QUnit.module('Compiling');
 
-				QUnit.test('Booleans', function(assert) {
-					deepCloseEqual(assert, tokenise('true'),[new types.TBool(true)],'true');
-					deepCloseEqual(assert, tokenise('TRUE'),[new types.TBool(true)],'TRUE');
-					deepCloseEqual(assert, tokenise('True'),[new types.TBool(true)],'True');
+                QUnit.test('Booleans', function(assert) {
+                    var t_true = new types.TBool(true);
+                    t_true.pos = 0
+					deepCloseEqual(assert, tokenise('true'),[t_true],'true');
+					deepCloseEqual(assert, tokenise('TRUE'),[t_true],'TRUE');
+					deepCloseEqual(assert, tokenise('True'),[t_true],'True');
 					assert.equal(tokenise('true')[0].value,true,'value is true');
 
-					deepCloseEqual(assert, tokenise('false'),[new types.TBool(false)],'false');
-					deepCloseEqual(assert, tokenise('FALSE'),[new types.TBool(false)],'FALSE');
-					deepCloseEqual(assert, tokenise('False'),[new types.TBool(false)],'False');
+                    var t_false = new types.TBool(false);
+                    t_false.pos = 0
+					deepCloseEqual(assert, tokenise('false'),[t_false],'false');
+					deepCloseEqual(assert, tokenise('FALSE'),[t_false],'FALSE');
+					deepCloseEqual(assert, tokenise('False'),[t_false],'False');
 					assert.equal(tokenise('false')[0].value,false,'value is false');
 				});
                 QUnit.test('Numbers', function(assert) {
@@ -129,83 +152,87 @@
 				});
 
 				QUnit.test('Names',function(assert) {
-					deepCloseEqual(assert, tokenise('x'),[new types.TName('x')],'x');
-					deepCloseEqual(assert, tokenise('arg123'),[new types.TName('arg123')],'arg123');
-					deepCloseEqual(assert, tokenise('a1b2'),[new types.TName('a1b2')],'a1b2');
-					deepCloseEqual(assert, tokenise('X'),[new types.TName('X')],'X');
-					deepCloseEqual(assert, tokenise('xyz'),[new types.TName('xyz')],'xyz');
-					deepCloseEqual(assert, tokenise('$x'),[new types.TName('$x')],'$x');
-					deepCloseEqual(assert, tokenise("f'''"),[new types.TName("f'''")],"f'''");
-					deepCloseEqual(assert, tokenise("_"),[new types.TName("_")],"_");
-					deepCloseEqual(assert, tokenise("a_1"),[new types.TName("a_1")],"a_1");
-					deepCloseEqual(assert, tokenise("in_code"),[new types.TName("in_code")],"in_code");
+					deepCloseEqual(assert, tokenise('x'),[tokWithPos(new types.TName('x'),0)],'x');
+					deepCloseEqual(assert, tokenise('arg123'),[tokWithPos(new types.TName('arg123'),0)],'arg123');
+					deepCloseEqual(assert, tokenise('a1b2'),[tokWithPos(new types.TName('a1b2'),0)],'a1b2');
+					deepCloseEqual(assert, tokenise('X'),[tokWithPos(new types.TName('X'),0)],'X');
+					deepCloseEqual(assert, tokenise('xyz'),[tokWithPos(new types.TName('xyz'),0)],'xyz');
+					deepCloseEqual(assert, tokenise('$x'),[tokWithPos(new types.TName('$x'),0)],'$x');
+					deepCloseEqual(assert, tokenise("f'''"),[tokWithPos(new types.TName("f'''"),0)],"f'''");
+					deepCloseEqual(assert, tokenise("_"),[tokWithPos(new types.TName("_"),0)],"_");
+					deepCloseEqual(assert, tokenise("a_1"),[tokWithPos(new types.TName("a_1"),0)],"a_1");
+					deepCloseEqual(assert, tokenise("in_code"),[tokWithPos(new types.TName("in_code"),0)],"in_code");
 				});
 
                 QUnit.test('Whitespace',function(assert) {
                     var one = new types.TNum(1);
                     one.originalValue = '1';
+                    one.pos = 1;
 					deepCloseEqual(assert, tokenise('\u00A01'),[one],'\\u00A01');
+                    var one = new types.TNum(1);
+                    one.originalValue = '1';
+                    one.pos = 0;
 					deepCloseEqual(assert, tokenise('1        '),[one],'1       (whitespace at end of expression)');
-					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[new types.TName('a'),new types.TOp('+'),new types.TName('b')],'a &nbsp; + b (html-escaped space)');
+					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[tokWithPos(new types.TName('a'),0),tokWithPos(new types.TOp('+'),9),tokWithPos(new types.TName('b'),11)],'a &nbsp; + b (html-escaped space)');
 				});
 
 				QUnit.test('Operators', function(assert) {
-					deepCloseEqual(assert, tokenise('..'),[new types.TOp('..')],'..');
-					deepCloseEqual(assert, tokenise('#'),[new types.TOp('#')],'#');
-					deepCloseEqual(assert, tokenise('<='),[new types.TOp('<=')],'<=');
-					deepCloseEqual(assert, tokenise('>='),[new types.TOp('>=')],'>=');
-					deepCloseEqual(assert, tokenise('<>'),[new types.TOp('<>')],'<>');
-					deepCloseEqual(assert, tokenise('&&'),[new types.TOp('and')],'^^');
-					deepCloseEqual(assert, tokenise('||'),[new types.TOp('or')],'||');
-					deepCloseEqual(assert, tokenise('|'),[new types.TOp('|')],'|');
-					deepCloseEqual(assert, tokenise('*'),[new types.TOp('*')],'*');
-					deepCloseEqual(assert, tokenise('+'),[new types.TOp('+u',false,true)],'+');
-					deepCloseEqual(assert, tokenise('-'),[new types.TOp('-u',false,true)],'-');
-					deepCloseEqual(assert, tokenise('/'),[new types.TOp('/')],'/');
-					deepCloseEqual(assert, tokenise('^'),[new types.TOp('^')],'^');
-					deepCloseEqual(assert, tokenise('<'),[new types.TOp('<')],'<');
-					deepCloseEqual(assert, tokenise('>'),[new types.TOp('>')],'>');
-					deepCloseEqual(assert, tokenise('='),[new types.TOp('=')],'=');
-					deepCloseEqual(assert, tokenise('!'),[new types.TOp('not',false,true)],'!');
-					deepCloseEqual(assert, tokenise('not'),[new types.TOp('not')],'not');
-					deepCloseEqual(assert, tokenise('and'),[new types.TOp('and')],'and');
-					deepCloseEqual(assert, tokenise('or'),[new types.TOp('or')],'or');
-					deepCloseEqual(assert, tokenise('isa'),[new types.TOp('isa')],'isa');
-					deepCloseEqual(assert, tokenise('except'),[new types.TOp('except')],'except');
+					deepCloseEqual(assert, tokenise('..'),[tokWithPos(new types.TOp('..'),0)],'..');
+					deepCloseEqual(assert, tokenise('#'),[tokWithPos(new types.TOp('#'),0)],'#');
+					deepCloseEqual(assert, tokenise('<='),[tokWithPos(new types.TOp('<='),0)],'<=');
+					deepCloseEqual(assert, tokenise('>='),[tokWithPos(new types.TOp('>='),0)],'>=');
+					deepCloseEqual(assert, tokenise('<>'),[tokWithPos(new types.TOp('<>'),0)],'<>');
+					deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and'),0)],'^^');
+					deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or'),0)],'||');
+					deepCloseEqual(assert, tokenise('|'),[tokWithPos(new types.TOp('|'),0)],'|');
+					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*'),0)],'*');
+					deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true),0)],'+');
+					deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true),0)],'-');
+					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/'),0)],'/');
+					deepCloseEqual(assert, tokenise('^'),[tokWithPos(new types.TOp('^'),0)],'^');
+					deepCloseEqual(assert, tokenise('<'),[tokWithPos(new types.TOp('<'),0)],'<');
+					deepCloseEqual(assert, tokenise('>'),[tokWithPos(new types.TOp('>'),0)],'>');
+					deepCloseEqual(assert, tokenise('='),[tokWithPos(new types.TOp('='),0)],'=');
+					deepCloseEqual(assert, tokenise('!'),[tokWithPos(new types.TOp('not',false,true),0)],'!');
+					deepCloseEqual(assert, tokenise('not'),[tokWithPos(new types.TOp('not'),0)],'not');
+					deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and'),0)],'and');
+					deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or'),0)],'or');
+					deepCloseEqual(assert, tokenise('isa'),[tokWithPos(new types.TOp('isa'),0)],'isa');
+					deepCloseEqual(assert, tokenise('except'),[tokWithPos(new types.TOp('except'),0)],'except');
 				});
 
 				QUnit.test('Punctuation',function(assert) {
-					deepCloseEqual(assert, tokenise('('),[new types.TPunc('(')],'(');
-					deepCloseEqual(assert, tokenise(')'),[new types.TPunc(')')],')');
-					deepCloseEqual(assert, tokenise(','),[new types.TPunc(',')],',');
-					deepCloseEqual(assert, tokenise('['),[new types.TPunc('[')],']');
-					deepCloseEqual(assert, tokenise(']'),[new types.TPunc(']')],']');
+					deepCloseEqual(assert, tokenise('('),[tokWithPos(new types.TPunc('('),0)],'(');
+					deepCloseEqual(assert, tokenise(')'),[tokWithPos(new types.TPunc(')'),0)],')');
+					deepCloseEqual(assert, tokenise(','),[tokWithPos(new types.TPunc(','),0)],',');
+					deepCloseEqual(assert, tokenise('['),[tokWithPos(new types.TPunc('['),0)],']');
+					deepCloseEqual(assert, tokenise(']'),[tokWithPos(new types.TPunc(']'),0)],']');
 				});
 
 				QUnit.test('String',function(assert) {
-					deepCloseEqual(assert, tokenise('"hi"'),[new types.TString('hi')],'"hi"');
-					deepCloseEqual(assert, tokenise("'hi'"),[new types.TString('hi')],"'hi'");
-					deepCloseEqual(assert, tokenise('""'),[new types.TString('')],'"" -- empty string');
-					deepCloseEqual(assert, tokenise("''"),[new types.TString('')],"'' -- empty string");
+					deepCloseEqual(assert, tokenise('"hi"'),[tokWithPos(new types.TString('hi'),0)],'"hi"');
+					deepCloseEqual(assert, tokenise("'hi'"),[tokWithPos(new types.TString('hi'),0)],"'hi'");
+					deepCloseEqual(assert, tokenise('""'),[tokWithPos(new types.TString(''),0)],'"" -- empty string');
+					deepCloseEqual(assert, tokenise("''"),[tokWithPos(new types.TString(''),0)],"'' -- empty string");
 
-					deepCloseEqual(assert, tokenise('"hi \\"Bob\\""'),[new types.TString('hi "Bob"')],'"hi \\"Bob\\"" -- escape quotes');
-					deepCloseEqual(assert, tokenise("'hi \\'Bob\\''"),[new types.TString("hi 'Bob'")],"'hi \\'Bob\\'' -- escape quotes");
-                    deepCloseEqual(assert, tokenise("'hi \\{Bob\\}'"),[new types.TString("hi \\{Bob\\}")],"'hi \\{Bob\\}' -- keep slashes before braces");
+					deepCloseEqual(assert, tokenise('"hi \\"Bob\\""'),[tokWithPos(new types.TString('hi "Bob"'),0)],'"hi \\"Bob\\"" -- escape quotes');
+					deepCloseEqual(assert, tokenise("'hi \\'Bob\\''"),[tokWithPos(new types.TString("hi 'Bob'"),0)],"'hi \\'Bob\\'' -- escape quotes");
+                    deepCloseEqual(assert, tokenise("'hi \\{Bob\\}'"),[tokWithPos(new types.TString("hi \\{Bob\\}"),0)],"'hi \\{Bob\\}' -- keep slashes before braces");
 
 					raisesNumbasError(assert, function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
 					raisesNumbasError(assert, function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');
 
-					deepCloseEqual(assert, tokenise('"hi \\n there"'),[new types.TString('hi \n there')],'"hi \\n there"');
-					deepCloseEqual(assert, tokenise('"hi \\\\n there"'),[new types.TString('hi \\n there')],'"hi \\\\n there"');
-					deepCloseEqual(assert, tokenise('"hi \\\\\\n there"'),[new types.TString('hi \\\n there')],'"hi \\\\\\n there"');
+					deepCloseEqual(assert, tokenise('"hi \\n there"'),[tokWithPos(new types.TString('hi \n there'),0)],'"hi \\n there"');
+					deepCloseEqual(assert, tokenise('"hi \\\\n there"'),[tokWithPos(new types.TString('hi \\n there'),0)],'"hi \\\\n there"');
+					deepCloseEqual(assert, tokenise('"hi \\\\\\n there"'),[tokWithPos(new types.TString('hi \\\n there'),0)],'"hi \\\\\\n there"');
 				});
 
 				QUnit.test('Implicit multiplication',function(assert) {
-					deepCloseEqual(assert, compile('x 5'),compile('x*5'),'x 5');
-					deepCloseEqual(assert, compile('5x'),compile('5*x'),'5x');
-					deepCloseEqual(assert, compile('x x'),compile('x*x'),'x x');
-					deepCloseEqual(assert, compile('5(x+1)'),compile('5*(x+1)'),'5(x+1)');
-					deepCloseEqual(assert, compile('(x+1)(x+2)'),compile('(x+1)*(x+2)'),'(x+1)(x+2)');
+					treesEqual(assert, compile('x 5'),compile('x*5'),'x 5');
+					treesEqual(assert, compile('5x'),compile('5*x'),'5x');
+					treesEqual(assert, compile('x x'),compile('x*x'),'x x');
+					treesEqual(assert, compile('5(x+1)'),compile('5*(x+1)'),'5(x+1)');
+					treesEqual(assert, compile('(x+1)(x+2)'),compile('(x+1)*(x+2)'),'(x+1)(x+2)');
 				});
 
 				QUnit.test('Invalid expressions',function(assert) {
