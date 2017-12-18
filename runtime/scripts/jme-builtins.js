@@ -316,6 +316,8 @@ newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
 newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});
 newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(sub)>=0 });
+newBuiltin('lpad',[TString,TNum,TString], TString, util.lpad);
+newBuiltin('rpad',[TString,TNum,TString], TString, util.rpad);
 
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
@@ -561,6 +563,7 @@ newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return
 newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
+newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TString, function(s,style) {return util.parseNumber(s,false,style);});
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
 newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
