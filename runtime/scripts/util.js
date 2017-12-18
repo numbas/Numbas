@@ -510,8 +510,22 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	lpad: function(s,n,p)
 	{
 		s=s.toString();
-		p=p[0];
+		p=(p+'').slice(0,1);
 		while(s.length<n) { s=p+s; }
+		return s;
+	},
+
+	/** Pad string `s` on the right with a character `p` until it is `n` characters long.
+	 * @param {String} s
+	 * @param {Number} n
+	 * @param {String} p
+	 * @returns {String}
+	 */
+	rpad: function(s,n,p)
+	{
+		s=s.toString();
+		p=(p+'').slice(0,1);
+		while(s.length<n) { s=s+p; }
 		return s;
 	},
 

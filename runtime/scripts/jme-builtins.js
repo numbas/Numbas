@@ -329,6 +329,8 @@ newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
 newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});
 newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(sub)>=0 });
+newBuiltin('lpad',[TString,TNum,TString], TString, util.lpad);
+newBuiltin('rpad',[TString,TNum,TString], TString, util.rpad);
 
 newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
     var re = new RegExp(pattern);
@@ -586,6 +588,7 @@ newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return
 newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
+newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style);});
 newBuiltin('parsenumber', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,false,styles);}, {unwrapValues: true});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style);});
