@@ -854,10 +854,10 @@
 					equals(Numbas.math.niceNumber(-Infinity),'-infinity','niceNumber recognises -infinity');
 					equals(Numbas.math.niceNumber(-Math.PI),'-pi','niceNumber on -pi doesn\'t say -1pi');
                     equals(Numbas.math.niceNumber(Math.PI,{precisionType: 'dp', precision:2}),'3.14','niceNumber doesn\'t show pi when given a precisionType');
-                    equals(Numbas.math.niceNumber(6e-10,{precisionType:'sigfig',precision:3}),'6.00e-10','niceNumber adds digits to exponential-form numbers correctly');
-                    equals(Numbas.math.niceNumber(2.2e-10,{precisionType:'sigfig',precision:3}),'2.20e-10','niceNumber adds digits to exponential-form numbers correctly');
-                    equals(Numbas.math.niceNumber(2e-10,{precisionType:'dp',precision:12}),'2.00e-10','niceNumber adds digits to exponential-form numbers correctly');
-                    equals(Numbas.math.niceNumber(2.2e-10,{precisionType:'dp',precision:12}),'2.20e-10','niceNumber adds digits to exponential-form numbers correctly');
+                    equals(Numbas.math.niceNumber(6e-10,{precisionType:'sigfig',precision:3}),'0.000000000600','niceNumber adds digits to exponential-form numbers correctly');
+                    equals(Numbas.math.niceNumber(2.2e-10,{precisionType:'sigfig',precision:3}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
+                    equals(Numbas.math.niceNumber(2e-10,{precisionType:'dp',precision:12}),'0.000000000200','niceNumber adds digits to exponential-form numbers correctly');
+                    equals(Numbas.math.niceNumber(2.2e-10,{precisionType:'dp',precision:12}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
 				});
 
                 test('Number notation styles',function() {
