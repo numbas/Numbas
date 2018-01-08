@@ -620,7 +620,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 */
 	unPercent: function(s)
 	{
-		return (parseFloat(s.replace(/%/,''))/100);
+		return (util.parseNumber(s.replace(/%/,''))/100);
 	},
 
 
