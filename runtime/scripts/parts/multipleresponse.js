@@ -516,13 +516,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * Extends {@link Numbas.parts.Part#settings}
      * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
      * @property {String} minAnswersString - minimum number of responses the student must select, without variables substituted in.
-     * @property {String} maxAnswersString - maxmimum number of responses the student must select, without variables substituted in.
+     * @property {String} maxAnswersString - maximum number of responses the student must select, without variables substituted in.
      * @property {Number} minAnswers - minimum number of responses the student must select. Generated from `minAnswersString`.
-     * @property {Number} maxAnswers - maxmimum number of responses the student must select. Generated from `maxAnswersString`.
+     * @property {Number} maxAnswers - maximum number of responses the student must select. Generated from `maxAnswersString`.
      * @property {String} shuffleChoices - should the order of choices be randomised?
      * @property {String} shuffleAnswers - should the order of answers be randomised?
      * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
-     * @property {String} displayType - how to display the response selectors. Can be `radiogroup` or `checkbox`
+     * @property {String} displayType - how to display the response selectors. Can be `radiogroup`, `checkbox` or `dropdownlist`.
      * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
      * @property {String} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.

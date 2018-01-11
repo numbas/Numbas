@@ -452,9 +452,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {Boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
 	 * @property {Number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {Boolean} showCorrectAnswer - Show the correct answer on reveal?
+     * @property {Boolean} showFeedbackIcon - Show the tick/cross feedback symbol after this part is submitted?
 	 * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
-     * @property {Object} markingScript
 	 */
 	settings: 
 	{

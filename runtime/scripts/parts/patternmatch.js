@@ -88,6 +88,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 * @property {String} displayAnswer - a representative correct answer to display when answers are revealed
 	 * @property {Boolean} caseSensitive - does case matter?
 	 * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
+     * @property {String} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
 	 */
 	settings: {
 	 	correctAnswerString: '.*',
