@@ -482,6 +482,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		throw(new Numbas.Error('part.error',{path: niceName, message: message}));
 	},
 
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return null;
+    },
+
 	applyScripts: function() {
         var part = this;
 		this.originalScripts = {};

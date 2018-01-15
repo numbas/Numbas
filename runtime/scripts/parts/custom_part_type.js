@@ -77,7 +77,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             if(!p.setting_evaluators[s.input_type]) {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }
-            settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+            try {
+                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+            } catch(e) {
+                throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message}));
+            }
         });
 
         var settings_scope = new Numbas.jme.Scope([scope,{variables:{settings:new Numbas.jme.types.TDict(settings)}}]);
@@ -118,8 +122,12 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.studentAnswer = this.stagedAnswer;
     },
 
+    input_widget: function() {
+        return this.definition.input_widget;
+    },
+
     rawStudentAnswerAsJME: function() {
-        return this.student_answer_jme_types[this.definition.input_widget](this.studentAnswer);
+        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer);
     },
 
     student_answer_jme_types: {

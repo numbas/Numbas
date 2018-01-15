@@ -151,6 +151,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         strictPrecision: true
 	},
 
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return 'matrix';
+    },
+
 	/** Compute the correct answer, based on the given scope
 	 */
 	getCorrectAnswer: function(scope) {

@@ -100,6 +100,13 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 	 	matchMode: 'regex'
     },
 
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return 'string';
+    },
+
 	/** Compute the correct answer, based on the given scope
 	 */
 	getCorrectAnswer: function(scope) {

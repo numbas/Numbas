@@ -89,7 +89,7 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
             this.answerJSON = params.answerJSON;
             var part = params.part;
             this.gaps = ko.computed(function() {
-                return part.gaps().map(function(gap) {
+                return Knockout.unwrap(part.gaps).map(function(gap) {
                     return {answerJSON: ko.observable(), part: gap};
                 });
             },this)
@@ -102,7 +102,7 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
                 <tbody data-bind="foreach: gaps">\
                     <tr>\
                         <th><span data-bind="text: part.header"></span></th>\
-                        <td><div data-bind="component: {name: \'answer-widget\', params: {answer: answerJSON, widget: part.type().widget, part: part}}"></div></td>\
+                        <td><div data-bind="component: {name: \'answer-widget\', params: {answer: answerJSON, widget: Knockout.unwrap(part.type).widget, part: part}}"></div></td>\
                     </tr>\
                 </tbody>\
             </table>\

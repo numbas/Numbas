@@ -543,6 +543,20 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         layoutExpression: ''
     },
 
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        switch(this.type) {
+            case '1_n_2':
+                return 'radios';
+            case 'm_n_2':
+                return 'checkboxes';
+            case 'm_n_x':
+                return 'm_n_x';
+        }
+    },
+
     /** Compute the correct answer, based on the given scope
      */
     getCorrectAnswer: function(scope) {

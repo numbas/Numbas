@@ -15,7 +15,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|string} input_widget
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.input_widget = p.definition.input_widget;
+        this.input_widget = p.input_widget();
 
         /** Options for the input widget.
          * @member {observable|Object} input_options
