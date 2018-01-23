@@ -619,6 +619,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();
+
+		this.display && this.display.showScore(this.answered);
 	},
 
 	/** Update the stored answer from the student (called when the student changes their answer, but before submitting) 
@@ -638,7 +640,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.isDirty = dirty;
 		if(this.display) {
 			this.display && this.display.isDirty(dirty);
-			if(dirty && this.parentPart) {
+			if(dirty && this.parentPart && !this.isStep) {
 				this.parentPart.setDirty(true);
 			}
 			this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
@@ -754,7 +756,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 
 		this.store && this.store.partAnswered(this);
-		this.display && this.display.showScore(this.answered);
 
 		this.submitting = false;
 

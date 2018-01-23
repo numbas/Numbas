@@ -265,7 +265,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var newScore = Knockout.observable(false);
 
     var answered = Knockout.computed(function() {
-        return !obj.isDirty() && (obj.answered() || obj.score()>0);
+        return !obj.isDirty() && (obj.answered() || obj.credit()>0);
     });
 
     var state = Knockout.computed(function() {
