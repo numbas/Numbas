@@ -142,6 +142,8 @@ newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross, {doc: {usage: 'cr
 newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'}});
 newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'}});
 newBuiltin('det', [TMatrix], TNum, matrixmath.abs, {doc: {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'}});
+newBuiltin('numrows',[TMatrix], TNum, function(m){ return m.rows });
+newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 
