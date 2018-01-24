@@ -1361,28 +1361,33 @@ newBuiltin('matrix',[TList],TMatrix,null, {
 		var rows = list.vars;
 		var columns = 0;
 		var value = [];
-		switch(list.value[0].type)
-		{
-		case 'number':
-			value = [list.value.map(function(e){return e.value})];
-			rows = 1;
-			columns = list.vars;
-			break;
-		case 'vector':
-			value = list.value.map(function(v){return v.value});
-			columns = list.value[0].value.length;
-			break;
-		case 'list':
-			for(var i=0;i<rows;i++)
-			{
-				var row = list.value[i].value;
-				value.push(row.map(function(x){return x.value}));
-				columns = Math.max(columns,row.length);
-			}
-			break;
-		default:
-			throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
-		}
+        if(!list.value.length) {
+            rows = 0;
+            columns = 0;
+        } else {
+            switch(list.value[0].type)
+            {
+            case 'number':
+                value = [list.value.map(function(e){return e.value})];
+                rows = 1;
+                columns = list.vars;
+                break;
+            case 'vector':
+                value = list.value.map(function(v){return v.value});
+                columns = list.value[0].value.length;
+                break;
+            case 'list':
+                for(var i=0;i<rows;i++)
+                {
+                    var row = list.value[i].value;
+                    value.push(row.map(function(x){return x.value}));
+                    columns = Math.max(columns,row.length);
+                }
+                break;
+            default:
+                throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
+            }
+        }
 		value.rows = rows;
 		value.columns = columns;
 		return new TMatrix(value);
