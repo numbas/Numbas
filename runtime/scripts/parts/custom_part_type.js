@@ -84,7 +84,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             }
         });
 
-        var settings_scope = new Numbas.jme.Scope([scope,{variables:{settings:new Numbas.jme.types.TDict(settings)}}]);
+        var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
 
         ['correctAnswer','hint'].forEach(function(option) {
@@ -92,11 +92,22 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.input option missing',{option:option});
             }
         })
-        raw_input_options.hint = raw_input_options.hint || '""';
+
+        function evaluate_input_option(option) {
+            if(typeof(option)=='string') {
+                return jme.unwrapValue(settings_scope.evaluate(option));
+            } else {
+                if(option.static) {
+                    return option.value;
+                } else {
+                    return jme.unwrapValue(settings_scope.evaluate(option.value));
+                }
+            }
+        }
 
         for(var option in raw_input_options) {
             try {
-                p.input_options[option] = Numbas.jme.unwrapValue(settings_scope.evaluate(raw_input_options[option]));
+                p.input_options[option] = evaluate_input_option(raw_input_options[option]);
             } catch(e) {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message});
             }
@@ -141,7 +152,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TExpression(answer);
         },
         'matrix': function(answer) {
-            return new types.TMatrix(answer);
+            return jme.wrapValue(answer);
         },
         'radios': function(answer) {
             return new types.TNum(answer);

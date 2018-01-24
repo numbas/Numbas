@@ -112,12 +112,14 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
     ko.components.register('answer-widget-matrix', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            this.input = ko.observable([]);
+            this.input = ko.observable([['']]);
             ko.computed(function() {
-                var value = this.input();
+                var value = this.input().slice().map(function(r){return r.slice()});
                 var numRows = value.length;
                 var numColumns = numRows>0 ? value[0].length : 0;
-                this.answerJSON({rows: numRows, columns: numColumns, matrix: value});
+                value.rows = numRows;
+                value.columns = numColumns;
+                this.answerJSON(value);
             },this);
         },
         template: '\
