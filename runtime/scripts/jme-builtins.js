@@ -1638,7 +1638,7 @@ newBuiltin('exec',[TOp,TList],TExpression,null, {
 newBuiltin('simplify',[TExpression,TString],TExpression,null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
-        var ruleset = jme.collectRuleset(args[1].value,scope.allRulesets());
+        var ruleset = jme.rules.collectRuleset(args[1].value,scope.allRulesets());
         return new TExpression(jme.display.simplifyTree(tree, ruleset, scope));
     }
 });
@@ -1646,7 +1646,7 @@ newBuiltin('simplify',[TExpression,TString],TExpression,null, {
 newBuiltin('simplify',[TExpression,TList],TExpression,null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
-        var ruleset = jme.collectRuleset(args[1].value.map(function(x){ return x.value}),scope.allRulesets());
+        var ruleset = jme.rules.collectRuleset(args[1].value.map(function(x){ return x.value}),scope.allRulesets());
         return new TExpression(jme.display.simplifyTree(tree, ruleset, scope));
     }
 });
