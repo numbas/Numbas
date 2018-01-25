@@ -65,6 +65,12 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         });
     },
 
+    marking_parameters: function(studentAnswer) {
+        var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        o.input_options = jme.wrapValue(this.input_options);
+        return o;
+    },
+
     finaliseLoad: function() {
         var p = this;
         var settings = this.settings;
@@ -138,7 +144,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     },
 
     rawStudentAnswerAsJME: function() {
-        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer);
+        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options);
     },
 
     student_answer_jme_types: {
@@ -146,13 +152,17 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TString(answer);
         },
         'number': function(answer) {
-            return new types.TNum(util.parseNumber(answer));
+            return new types.TNum(answer);
         },
         'jme': function(answer) {
             return new types.TExpression(answer);
         },
-        'matrix': function(answer) {
-            return jme.wrapValue(answer);
+        'matrix': function(answer,options) {
+            if(options.parseCells) {
+                return new types.TMatrix(answer);
+            } else {
+                return jme.wrapValue(answer);
+            }
         },
         'radios': function(answer) {
             return new types.TNum(answer);
@@ -214,11 +224,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             }));
         },
         'choose_several': function(def, value) {
-            var d = {};
-            for(var x in value) {
-                d[x] = new jme.types.TBool(value[x]);
-            }
-            return new jme.types.TDict(d);
+            return new jme.wrapValue(value);
         }
     }
 };

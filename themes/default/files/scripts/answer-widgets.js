@@ -1,4 +1,7 @@
-Numbas.queueScript('answer-widgets',['knockout'],function() {
+Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
+
+    var util = Numbas.util;
+
     ko.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
@@ -6,22 +9,24 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
             this.partDisplay = params.partDisplay;
             this.disable = params.disable;
             this.widget = params.widget;
+            this.widget_options = params.widget_options;
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
         },
         template: '\
-        <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable}}"></span>\
+        <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span>\
         '
     });
 
     ko.components.register('answer-widget-string', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            this.input = ko.observable(ko.unwrap(this.answerJSON() || ''));
+            var init = ko.unwrap(this.answerJSON);
+            this.input = ko.observable(init.valid ? init.value || '' : '');
             this.part = params.part;
             this.disable = params.disable;
             ko.computed(function() {
-                this.answerJSON(this.input());
+                this.answerJSON({valid: true, value: this.input()});
             },this);
         },
         template: '\
@@ -32,11 +37,33 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
     ko.components.register('answer-widget-number', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            this.input = ko.observable(ko.unwrap(this.answerJSON() || ''));
-            this.part = params.part;
+            this.part = params.part.part;
+            this.options = params.options;
+            this.allowFractions = this.options.allowFractions || false;
+            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
+
+            var init = ko.unwrap(this.answerJSON);
+            this.input = ko.observable(init.valid ? Numbas.math.niceNumber(init.value,{style: this.allowedNotationStyles[0]}) || '' : '');
+
+            this.result = ko.computed(function() {
+                var input = this.input().trim();
+                if(input=='') {
+                    return {valid:false};
+                }
+                if(!util.isNumber(input,this.allowFractions,this.allowedNotationStyles)) {
+                    if(util.isNumber(input, true, this.allowedNotationStyles)) {
+                        return {valid: false, warnings: [R('answer.number.fractions not allowed')]};
+                    } else {
+                        return {valid:false, warnings: [R('answer.number.not a number')]};
+                    }
+                } else {
+                    var n = Numbas.util.parseNumber(input,this.allowFractions,this.allowedNotationStyles);
+                    return {valid:true, value: n};
+                }
+            },this);
             ko.computed(function() {
-                this.answerJSON(this.input());
+                this.answerJSON(this.result())
             },this);
         },
         template: '\
@@ -47,17 +74,22 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
     ko.components.register('answer-widget-jme', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            this.input = ko.observable(ko.unwrap(this.answerJSON() || ''));
+
             this.part = params.part;
             var p = this.part.part;
+            this.options = params.options;
+            this.showPreview = this.options.showPreview || false;
+
+            this.disable = params.disable;
+
+            var init = ko.unwrap(this.answerJSON);
+            this.input = ko.observable(init.valid ? Numbas.jme.display.treeToJME(init.value) || '' : '');
 
             this.latex = ko.computed(function() {
                 var input = this.input();
                 if(input==='') {
                     return '';
                 }
-
-                p.removeWarnings();
 
                 try {
                     var tex = Numbas.jme.display.exprToLaTeX(input,'',p.question.scope);
@@ -66,21 +98,37 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
                     }
                 }
                 catch(e) {
-                    p.giveWarning(e.message);
                     return '';
                 }
 
                 return tex;
             },this).extend({throttle:100});
 
-            this.disable = params.disable;
+            this.result = ko.computed(function() {
+                var input = this.input().trim();
+
+                if(input=='') {
+                    return {valid:false};
+                }
+
+                try {
+                    var expr = Numbas.jme.compile(input);
+                    var scope = p.getScope();
+                    var ruleset = new Numbas.jme.rules.Ruleset([],{});
+                    expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
+                    return {valid: true, value: expr}
+                } catch(e) {
+                    return {valid: false, warnings: [R('answer.jme.invalid expression',{message:e.message})]};
+                }
+                
+            },this);
             ko.computed(function() {
-                this.answerJSON(this.input());
+                this.answerJSON(this.result())
             },this);
         },
         template: '\
             <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
-            <span class="jme-preview" data-bind="visible: latex, maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
+            <span class="jme-preview" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
 
@@ -111,19 +159,59 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
 
     ko.components.register('answer-widget-matrix', {
         viewModel: function(params) {
+            var vm = this;
             this.answerJSON = params.answerJSON;
-            this.input = ko.observable([['']]);
-            ko.computed(function() {
+            this.options = params.options;
+            this.disable = params.disable;
+            this.allowFractions = this.options.allowFractions || false;
+            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
+            this.allowResize = this.options.allowResize===undefined ? true : this.options.allowResize;
+            this.numRows = this.options.numRows || 1;
+            this.numColumns = this.options.numColumns || 1;
+            this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
+
+            var init = ko.unwrap(this.answerJSON);
+            var value = init.value;
+            if(!value) {
+                value = [];
+                for(var i=0;i<this.numRows;i++) {
+                    var row = [];
+                    for(var j=0;j<this.numColumns;j++) {
+                        row.push('');
+                    }
+                    value.push(row);
+                }
+            }
+            this.input = ko.observable(value);
+
+            this.result = ko.computed(function() {
                 var value = this.input().slice().map(function(r){return r.slice()});
-                var numRows = value.length;
-                var numColumns = numRows>0 ? value[0].length : 0;
-                value.rows = numRows;
-                value.columns = numColumns;
-                this.answerJSON(value);
+                var cells = Array.prototype.concat.apply([],value);
+                if(this.parseCells) {
+                    var valid = cells.every(function(cell){ return util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
+                    if(!valid) {
+                        var validFractions = cells.every(function(cell){ return util.isNumber(cell,true,vm.allowedNotationStyles) });
+                        if(validFractions) {
+                            return {valid: false, warnings: [R('answer.matrix.fractions not allowed')]};
+                        } else {
+                            return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
+                        }
+                    } else {
+                        var matrix = value.map(function(row){ return row.map(function(cell){ return Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles) }) });
+                        matrix.rows = value.length;
+                        matrix.columns = matrix.rows>0 ? value[0].length : 0;
+                        return {valid:true, value: matrix};
+                    }
+                } else {
+                    return {valid: true, value: value};
+                }
+            },this);
+            ko.computed(function() {
+                this.answerJSON(this.result());
             },this);
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true"></matrix-input>\
+            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns"></matrix-input>\
         '
     });
 
@@ -261,14 +349,20 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
             this.choices = ko.observableArray(this.part.input_options.choices);
             this.choice = ko.observable(null);
             this.answerJSON = params.answerJSON;
+            var init = ko.unwrap(this.answerJSON);
+            if(init.valid) {
+                this.choice(init.value);
+            }
+
             ko.computed(function() {
-                this.answerJSON(this.choice());
+                var choice = this.choice();
+                this.answerJSON({valid: choice!==null, value: choice});
             },this);
         },
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice"> <span data-bind="html: $data"></span></label></li>\
+                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice"> <span data-bind="html: label"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -277,22 +371,24 @@ Numbas.queueScript('answer-widgets',['knockout'],function() {
     ko.components.register('answer-widget-checkboxes', {
         viewModel: function(params) {
             this.part = params.part;
-            this.choices = ko.observableArray(this.part.input_options.choices.map(function(choice) {
+            this.answerJSON = params.answerJSON;
+            var init = ko.unwrap(this.answerJSON);
+
+            this.choices = ko.observableArray(this.part.input_options.choices.map(function(choice,i) {
                 return {
                     content: choice,
-                    ticked: ko.observable(false)
+                    ticked: ko.observable(init.valid ? init.value[i] : false)
                 }
             }));
 
-            this.answerJSON = params.answerJSON;
             ko.computed(function() {
-                this.answerJSON(this.choices().map(function(c){return c.ticked()}));
+                this.answerJSON({valid: true, value: this.choices().map(function(c){return c.ticked()})});
             },this);
         },
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked"> <span data-bind="html: content"></span></label></li>\
+                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked"> <span data-bind="html: content.label"></span></label></li>\
             </ul>\
             </form>\
         '

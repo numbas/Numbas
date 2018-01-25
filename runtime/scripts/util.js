@@ -320,6 +320,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * @returns {Boolean}
 	 */
 	isNumber: function(n,allowFractions,styles) {
+        if(n===undefined || n===null) {
+            return false;
+        }
         n = util.cleanNumber(n,styles);
 		if(!isNaN(n)) {
 			return true;
