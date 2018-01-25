@@ -523,7 +523,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 	scopeSets = util.copyobj(scopeSets);
 
 	if(!set)
-		return [];
+		return new Ruleset([],{});
 
 	if(!scopeSets)
 		throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
