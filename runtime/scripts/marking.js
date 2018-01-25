@@ -59,6 +59,22 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         };
     }));
 
+    correctif = function(condition,correctMessage,incorrectMessage) {
+        var state;
+        if(condition) {
+            state = [{op:"set_credit", credit:1, message: correctMessage || R('part.marking.correct')}];
+        } else {
+            state = [{op:"set_credit", credit:0, message: incorrectMessage || R('part.marking.incorrect')}];
+        }
+        return {
+            return: condition,
+            state: state
+        };
+    }
+
+    state_functions.push(state_fn('correctif',[TBool],TBool,correctif));
+    state_functions.push(state_fn('correctif',[TBool,TString,TString],TBool,correctif));
+
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
