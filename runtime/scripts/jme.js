@@ -479,6 +479,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return o;
             case 'name':
                 return v.name;
+            case 'expression':
+                return v.tree;
             default:
                 return v.value;
         }
