@@ -1,4 +1,9 @@
 Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],function() {
+
+    Knockout.onError = function(err) {
+        Numbas.display.die(err);
+    };
+
     function resizeF() {
         var w = $.textMetrics(this).width;
         $(this).width(Math.max(w+30,60)+'px');
