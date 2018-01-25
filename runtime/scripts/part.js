@@ -666,7 +666,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	submit: function() {
 		this.shouldResubmit = false;
-		this.display && this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
 		this.submitting = true;
@@ -684,6 +683,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.doesMarking) {
 			if(this.hasStagedAnswer()) {
+                this.display && this.display.removeWarnings();
 				this.setDirty(false);
 
 				// save existing feedback
