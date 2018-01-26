@@ -22,7 +22,7 @@ Numbas.queueScript('schedule',['base'],function() {
  * @namespace Numbas.schedule 
  */
 
-Numbas.schedule = /** @lends Numbas.schedule */ {
+var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
 
 	/** Functions to call 
 	 * @type {function[]}
@@ -44,9 +44,26 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	total: 0,
 
 	/** Should the scheduler stop running tasks?
+     * Don't use this directly - use {@link Numbas.schedule.halt}
 	 * @type {Boolean}
 	 */
-	halt:false,
+	halted:false,
+
+    /** Error which caused the scheduler to halt
+     * @type {Error}
+     */
+    halt_error: null,
+
+    /** Prevent the scheduler from running any more tasks, and save the error message which caused this.
+     * @param {Error} error
+     * @see Numbas.schedule.halted
+     * @see Numbas.schedule.halt_error
+     */
+    halt: function(error) {
+        Numbas.display && Numbas.display.die(error);
+        schedule.halted = true;
+        schedule.halt_error = error;
+    },
 
     /** @typedef {Object} Numbas.schedule.task_object
      * @property {function} task - The function to execute.
@@ -59,9 +76,7 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	 */
 	add: function(fn,that)
 	{
-		var schedule = Numbas.schedule;
-
-		if(schedule.halt)
+		if(schedule.halted)
 			return;
 
 		var args = [],l=arguments.length;
@@ -99,10 +114,8 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	 */
 	pop: function()
 	{
-		var schedule = Numbas.schedule;
-
 		var calls = schedule.calls;
-		if(!calls.length || schedule.halt){return;}
+		if(!calls.length || schedule.halted){return;}
 
 		var task = calls.shift();
 
@@ -111,8 +124,7 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 			task();
 		}
 		catch(e) {
-			Numbas.display && Numbas.display.die(e);
-			schedule.halt = true;
+            schedule.halt(e);
 		}
 		schedule.drop();
 
@@ -124,22 +136,18 @@ Numbas.schedule = /** @lends Numbas.schedule */ {
 	/** 'pick up' the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called */
 	lift: function()
 	{
-		var schedule = Numbas.schedule;
-
 		schedule.lifts.push(schedule.calls);
 		schedule.calls=new Array();
 	},
 
 	/** Put the last lifted queue back on the end of the real queue */
-	drop:function()
+	drop: function()
 	{
-		var schedule = Numbas.schedule;
-
 		schedule.calls = schedule.calls.concat(schedule.lifts.pop());
 	},
 };
 
-var SignalBox = Numbas.schedule.SignalBox = function() {
+var SignalBox = schedule.SignalBox = function() {
     this.callbacks = {};
 }
 SignalBox.prototype = {
@@ -153,10 +161,7 @@ SignalBox.prototype = {
             deferred.reject = reject;
         });
         deferred.promise.catch(function(e) {
-            if(!Numbas.schedule.halt) {
-    			Numbas.display && Numbas.display.die(e);
-	    		Numbas.schedule.halt = true;
-            }
+            deferred.reject(e);
         });
         return deferred;
     },
@@ -180,8 +185,8 @@ SignalBox.prototype = {
             promise = promise.then(function() {
                 return new Promise(function(resolve,reject) {
                     try {
-                        if(Numbas.schedule.halt) {
-                            reject()
+                        if(schedule.halted) {
+                            reject(schedule.halt_error)
                         }
                         var result = fn();
                         resolve(result);

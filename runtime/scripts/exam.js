@@ -446,6 +446,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     exam.mark += exam.questionList[i].marks;
                 }
                 exam.signals.trigger('question list initialised');
+            }).catch(function(e) {
+                Numbas.schedule.halt(e);
             });
         });
 

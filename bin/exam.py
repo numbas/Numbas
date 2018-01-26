@@ -787,7 +787,7 @@ class Restriction:
         self.message = message
     
     @staticmethod
-    def fromDATA(name, data, builder, restriction=None):
+    def fromDATA(builder, name, data, restriction=None):
         if restriction==None:
             restriction = Restriction(name)
         tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
@@ -1125,8 +1125,9 @@ def custom_part_constructor(definition):
         
         def loadDATA(self, builder, data):
             super(CustomPart,self).loadDATA(builder, data)
-            for setting in definition['settings']:
-                tryLoad(data,setting['name'],self.settings)
+            if 'settings' in data:
+                for setting in definition['settings']:
+                    tryLoad(data['settings'],setting['name'],self.settings)
 
         def toxml(self):
             part = super(CustomPart,self).toxml()
@@ -1233,10 +1234,10 @@ class ExamBuilder(object):
         return Question.fromDATA(self, data)
 
     def function(self, name, data):
-        return Function.fromDATA(name, data, self)
+        return Function.fromDATA(self, name, data)
 
     def restriction(self, name, data, restriction=None):
-        return Function.fromDATA(name, data, restriction, self)
+        return Restriction.fromDATA(self, name, data, restriction)
 
     def variable_replacement(self, data):
         return VariableReplacement.fromDATA(self, data)

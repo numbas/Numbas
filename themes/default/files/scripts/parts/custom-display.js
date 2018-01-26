@@ -15,7 +15,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|string} input_widget
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.input_widget = p.definition.input_widget;
+        this.input_widget = p.input_widget();
 
         /** Options for the input widget.
          * @member {observable|Object} input_options
@@ -27,12 +27,20 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.studentAnswer = ko.observable(this.part.studentAnswer);
+        this.studentAnswer = ko.observable({valid: false, value: this.part.studentAnswer});
 
-        this.correctAnswer = ko.observable(this.input_options.correctAnswer);
+        this.correctAnswer = ko.observable({valid: true, value: this.input_options.correctAnswer});
 
         ko.computed(function() {
-            p.storeAnswer(this.studentAnswer());
+            var answer = this.studentAnswer();
+            if(answer.valid) {
+                p.storeAnswer(answer.value);
+            } else {
+                p.storeAnswer(undefined);
+            }
+            if(answer.warnings) {
+                answer.warnings.forEach(function(warning){ p.giveWarning(warning); });
+            }
         },this);
     };
     display.CustomPartDisplay = extend(display.PartDisplay,display.CustomPartDisplay,true);

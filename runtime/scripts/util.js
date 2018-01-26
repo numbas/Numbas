@@ -59,6 +59,26 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return c;
 	},
 
+    /** Extend `destination` with all the properties from subsequent arguments. 
+     * `undefined` values are not copied over.
+     * Replacement for jQuery.extend. Modified from https://stackoverflow.com/a/11197343
+     * Object.assign doesn't behave the same way - it copies over `undefined`.
+     * @param {Object} destination
+     * @param {Object} others*
+     * @returns {Object}
+     */
+    extend_object: function(destination) {
+        for(var i=1; i<arguments.length; i++) {
+            
+            for(var key in arguments[i]) {
+                if(arguments[i].hasOwnProperty(key) && arguments[i][key]!==undefined) {
+                    destination[key] = arguments[i][key];
+                }
+            }
+        }
+        return destination;
+    },
+
 	/** Clone an array, with array elements copied too.
 	 * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
 	 * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
@@ -300,6 +320,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 * @returns {Boolean}
 	 */
 	isNumber: function(n,allowFractions,styles) {
+        if(n===undefined || n===null) {
+            return false;
+        }
         n = util.cleanNumber(n,styles);
 		if(!isNaN(n)) {
 			return true;
@@ -490,8 +513,22 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	lpad: function(s,n,p)
 	{
 		s=s.toString();
-		p=p[0];
+		p=(p+'').slice(0,1);
 		while(s.length<n) { s=p+s; }
+		return s;
+	},
+
+	/** Pad string `s` on the right with a character `p` until it is `n` characters long.
+	 * @param {String} s
+	 * @param {Number} n
+	 * @param {String} p
+	 * @returns {String}
+	 */
+	rpad: function(s,n,p)
+	{
+		s=s.toString();
+		p=(p+'').slice(0,1);
+		while(s.length<n) { s=s+p; }
 		return s;
 	},
 
@@ -586,7 +623,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	 */
 	unPercent: function(s)
 	{
-		return (parseFloat(s.replace(/%/,''))/100);
+		return (util.parseNumber(s.replace(/%/,''))/100);
 	},
 
 

@@ -452,9 +452,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 * @property {Boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
 	 * @property {Number} minimumMarks - Lower limit on the score the student can be awarded for this part
 	 * @property {Boolean} showCorrectAnswer - Show the correct answer on reveal?
+     * @property {Boolean} showFeedbackIcon - Show the tick/cross feedback symbol after this part is submitted?
 	 * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
-     * @property {Object} markingScript
 	 */
 	settings: 
 	{
@@ -481,6 +481,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
 		throw(new Numbas.Error('part.error',{path: niceName, message: message}));
 	},
+
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return null;
+    },
 
 	applyScripts: function() {
         var part = this;
@@ -612,6 +619,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.parentPart && !this.parentPart.submitting)
 			this.parentPart.calculateScore();
+
+		this.display && this.display.showScore(this.answered);
 	},
 
 	/** Update the stored answer from the student (called when the student changes their answer, but before submitting) 
@@ -631,7 +640,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.isDirty = dirty;
 		if(this.display) {
 			this.display && this.display.isDirty(dirty);
-			if(dirty && this.parentPart) {
+			if(dirty && this.parentPart && !this.isStep) {
 				this.parentPart.setDirty(true);
 			}
 			this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
@@ -657,7 +666,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 	 */
 	submit: function() {
 		this.shouldResubmit = false;
-		this.display && this.display.removeWarnings();
 		this.credit = 0;
 		this.markingFeedback = [];
 		this.submitting = true;
@@ -675,6 +683,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
 		if(this.doesMarking) {
 			if(this.hasStagedAnswer()) {
+                this.display && this.display.removeWarnings();
 				this.setDirty(false);
 
 				// save existing feedback
@@ -747,7 +756,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		}
 
 		this.store && this.store.partAnswered(this);
-		this.display && this.display.showScore(this.answered);
 
 		this.submitting = false;
 

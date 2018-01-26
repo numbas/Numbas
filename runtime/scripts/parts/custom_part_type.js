@@ -38,6 +38,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
         this.setMarkingScript(this.definition.marking_script);
+        return this.definition;
     },
 
     loadFromXML: function(xml) {
@@ -52,20 +53,22 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             var value = settingNode.getAttribute('value');
             raw_settings[name] = JSON.parse(value);
         });
-
-        // create the JME marking script for the part
-        var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
-        var markingScript = {};
-        tryGetAttribute(markingScript,this.xml,markingScriptNode,['extend']);
-        if(markingScriptString) {
-            // extend the base marking algorithm if asked to do so
-            var extend_base = markingScript.extend;
-            this.setMarkingScript(markingScriptString,extend_base);
-        }
     },
 
-    loadFromJSON: function() {
+    loadFromJSON: function(data) {
+        var definition = this.getDefinition();
+        var tryLoad = Numbas.json.tryLoad;
+
+        var raw_settings = this.raw_settings;
+        definition.settings.forEach(function(sdef) {
+            tryLoad(data.settings,sdef.name,raw_settings);
+        });
+    },
+
+    marking_parameters: function(studentAnswer) {
+        var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        o.input_options = jme.wrapValue(this.input_options);
+        return o;
     },
 
     finaliseLoad: function() {
@@ -80,10 +83,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             if(!p.setting_evaluators[s.input_type]) {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }
-            settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+            try {
+                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+            } catch(e) {
+                throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message}));
+            }
         });
 
-        var settings_scope = new Numbas.jme.Scope([scope,{variables:{settings:new Numbas.jme.types.TDict(settings)}}]);
+        var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
 
         ['correctAnswer','hint'].forEach(function(option) {
@@ -92,9 +99,21 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             }
         })
 
+        function evaluate_input_option(option) {
+            if(typeof(option)=='string') {
+                return jme.unwrapValue(settings_scope.evaluate(option));
+            } else {
+                if(option.static) {
+                    return option.value;
+                } else {
+                    return jme.unwrapValue(settings_scope.evaluate(option.value));
+                }
+            }
+        }
+
         for(var option in raw_input_options) {
             try {
-                p.input_options[option] = Numbas.jme.unwrapValue(settings_scope.evaluate(raw_input_options[option]));
+                p.input_options[option] = evaluate_input_option(raw_input_options[option]);
             } catch(e) {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message});
             }
@@ -120,8 +139,12 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.studentAnswer = this.stagedAnswer;
     },
 
+    input_widget: function() {
+        return this.definition.input_widget;
+    },
+
     rawStudentAnswerAsJME: function() {
-        return this.student_answer_jme_types[this.definition.input_widget](this.studentAnswer);
+        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options);
     },
 
     student_answer_jme_types: {
@@ -129,13 +152,17 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TString(answer);
         },
         'number': function(answer) {
-            return new types.TNum(util.parseNumber(answer));
+            return new types.TNum(answer);
         },
         'jme': function(answer) {
             return new types.TExpression(answer);
         },
-        'matrix': function(answer) {
-            return new types.TMatrix(answer);
+        'matrix': function(answer,options) {
+            if(options.parseCells) {
+                return new types.TMatrix(answer);
+            } else {
+                return jme.wrapValue(answer);
+            }
         },
         'radios': function(answer) {
             return new types.TNum(answer);
@@ -188,14 +215,16 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new jme.types.TString(value);
         },
         'list_of_strings': function(def, value) {
-            return new jme.types.TList(value.map(function(s){ return new jme.types.TString(s) }));
+            var scope = this.getScope();
+            return new jme.types.TList(value.map(function(s){ 
+                if(def.subvars) {
+                    s = jme.subvars(s, scope);
+                }
+                return new jme.types.TString(s) 
+            }));
         },
         'choose_several': function(def, value) {
-            var d = {};
-            for(var x in value) {
-                d[x] = new jme.types.TBool(value[x]);
-            }
-            return new jme.types.TDict(d);
+            return new jme.wrapValue(value);
         }
     }
 };

@@ -219,7 +219,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 var np = p;
                 while(np.isGap)
                     np = np.parentPart;
-                np.display.removeWarnings();
                 np.submit();
                 if(!np.answered)
                 {

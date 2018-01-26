@@ -142,6 +142,8 @@ newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross, {doc: {usage: 'cr
 newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'}});
 newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'}});
 newBuiltin('det', [TMatrix], TNum, matrixmath.abs, {doc: {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'}});
+newBuiltin('numrows',[TMatrix], TNum, function(m){ return m.rows });
+newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 
@@ -329,6 +331,8 @@ newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
 newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});
 newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(sub)>=0 });
+newBuiltin('lpad',[TString,TNum,TString], TString, util.lpad);
+newBuiltin('rpad',[TString,TNum,TString], TString, util.rpad);
 
 newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
     var re = new RegExp(pattern);
@@ -524,11 +528,11 @@ newBuiltin('arccosh', [TNum], TNum, math.arccosh, {doc: {usage: 'arccosh(x)', de
 newBuiltin('arctanh', [TNum], TNum, math.arctanh, {doc: {usage: 'arctanh(x)', description: 'Inverse hyperbolic tangent.'}} );
 newBuiltin('ceil', [TNum], TNum, math.ceil, {doc: {usage: 'ceil(x)', description: 'Round up to nearest integer.', tags: ['ceiling']}} );
 newBuiltin('floor', [TNum], TNum, math.floor, {doc: {usage: 'floor(x)', description: 'Round down to nearest integer.'}} );
+newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
 newBuiltin('trunc', [TNum], TNum, math.trunc, {doc: {usage: 'trunc(x)', description: 'If the argument is positive, round down to the nearest integer; if it is negative, round up to the nearest integer.', tags: ['truncate','integer part']}} );
 newBuiltin('fract', [TNum], TNum, math.fract, {doc: {usage: 'fract(x)', description: 'Fractional part of a number. Equivalent to @x-trunc(x)@.'}} );
 newBuiltin('degrees', [TNum], TNum, math.degrees, {doc: {usage: 'degrees(pi/2)', description: 'Convert radians to degrees.'}} );
 newBuiltin('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', description: 'Convert degrees to radians.'}} );
-newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
 newBuiltin('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
 
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
@@ -581,28 +585,26 @@ newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround, {doc: {us
 newBuiltin('siground', [TNum,TNum], TNum, math.siground, {doc: {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']}} );
 newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
 newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeroes if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeroes if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeroes if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeroes if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
+newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
+newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
+newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
+newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
+newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style);});
 newBuiltin('parsenumber', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,false,styles);}, {unwrapValues: true});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style);});
 newBuiltin('parsenumber_or_fraction', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,true,styles);}, {unwrapValues: true});
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
-newBuiltin('countdp',[TString],TNum,math.countDP);
-newBuiltin('countsigfigs',[TString],TNum,math.countSigFigs);
+newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
+newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs(util.cleanNumber(s)); });
 newBuiltin('rationalapproximation',[TNum,TNum],TList,math.rationalApproximation,{unwrapValues:true});
 newBuiltin('isnan',[TNum],TBool,function(n) {
     return isNaN(n);
 });
-newBuiltin('isfloat',[TString],TBool,util.isfloat);
-newBuiltin('isfraction',[TString],TBool,util.isFraction);
-newBuiltin('isnumber',[TString],TBool,util.isNumber);
 newBuiltin('cleannumber',[TString,TList],TString,util.cleanNumber,{unwrapValues:true});
-newBuiltin('isbool',[TString],TBool,util.isfloat);
+newBuiltin('isbool',[TString],TBool,util.isBool);
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
 newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
 newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
@@ -1359,28 +1361,33 @@ newBuiltin('matrix',[TList],TMatrix,null, {
 		var rows = list.vars;
 		var columns = 0;
 		var value = [];
-		switch(list.value[0].type)
-		{
-		case 'number':
-			value = [list.value.map(function(e){return e.value})];
-			rows = 1;
-			columns = list.vars;
-			break;
-		case 'vector':
-			value = list.value.map(function(v){return v.value});
-			columns = list.value[0].value.length;
-			break;
-		case 'list':
-			for(var i=0;i<rows;i++)
-			{
-				var row = list.value[i].value;
-				value.push(row.map(function(x){return x.value}));
-				columns = Math.max(columns,row.length);
-			}
-			break;
-		default:
-			throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
-		}
+        if(!list.value.length) {
+            rows = 0;
+            columns = 0;
+        } else {
+            switch(list.value[0].type)
+            {
+            case 'number':
+                value = [list.value.map(function(e){return e.value})];
+                rows = 1;
+                columns = list.vars;
+                break;
+            case 'vector':
+                value = list.value.map(function(v){return v.value});
+                columns = list.value[0].value.length;
+                break;
+            case 'list':
+                for(var i=0;i<rows;i++)
+                {
+                    var row = list.value[i].value;
+                    value.push(row.map(function(x){return x.value}));
+                    columns = Math.max(columns,row.length);
+                }
+                break;
+            default:
+                throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
+            }
+        }
 		value.rows = rows;
 		value.columns = columns;
 		return new TMatrix(value);
@@ -1562,17 +1569,11 @@ newBuiltin('table',[TList],THTML,
 	}
 );
 
-newBuiltin('parse',[TString],TExpression,function(expr) {
-    return jme.compile(expr);
+newBuiltin('parse',[TString],TExpression,function(str) {
+    return jme.compile(str);
 });
 newBuiltin('expression',[TString],TExpression,function(str) {
     return jme.compile(str);
-});
-
-newBuiltin('head',[TExpression],'?',null, {
-    evaluate: function(args,scope) {
-        return args[0].tree.tok;
-    }
 });
 
 newBuiltin('args',[TExpression],TList,null, {
@@ -1637,7 +1638,7 @@ newBuiltin('exec',[TOp,TList],TExpression,null, {
 newBuiltin('simplify',[TExpression,TString],TExpression,null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
-        var ruleset = jme.collectRuleset(args[1].value,scope.allRulesets());
+        var ruleset = jme.rules.collectRuleset(args[1].value,scope.allRulesets());
         return new TExpression(jme.display.simplifyTree(tree, ruleset, scope));
     }
 });
@@ -1645,7 +1646,7 @@ newBuiltin('simplify',[TExpression,TString],TExpression,null, {
 newBuiltin('simplify',[TExpression,TList],TExpression,null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
-        var ruleset = jme.collectRuleset(args[1].value.map(function(x){ return x.value}),scope.allRulesets());
+        var ruleset = jme.rules.collectRuleset(args[1].value.map(function(x){ return x.value}),scope.allRulesets());
         return new TExpression(jme.display.simplifyTree(tree, ruleset, scope));
     }
 });
@@ -1703,7 +1704,7 @@ newBuiltin('match',[TExpression,TString],TDict,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = Numbas.jme.compile(args[1].value);
-        var match = Numbas.jme.display.matchTree(pattern,expr,true);
+        var match = Numbas.jme.display.matchTree(pattern,expr,false);
         if(!match) {
             return jme.wrapValue({match: false, groups: {}});
         } else {
@@ -1723,7 +1724,7 @@ newBuiltin('matches',[TExpression,TString],TBool,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = Numbas.jme.compile(args[1].value);
-        var match = Numbas.jme.display.matchTree(pattern,expr,true);
+        var match = Numbas.jme.display.matchTree(pattern,expr,false);
         return new TBool(match && true);
     }
 });

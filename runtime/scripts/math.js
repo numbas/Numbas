@@ -647,6 +647,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 					out = math.precround(n,10)+'';
 				}
 			}
+            out = math.unscientific(out);
             if(options.style && Numbas.util.numberNotationStyles[options.style]) {
                 var match_neg = /^(-)?(.*)/.exec(out);
                 var minus = match_neg[1] || '';
@@ -794,6 +795,38 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 		}
 	},
 
+    /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
+     * For example, '1.23e-5' is returned as '0.0000123'
+     * @param {String} str
+     * @returns String
+     */
+    unscientific: function(str) {
+        var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
+        if(!m) {
+            return str;
+        }
+        var minus = m[1] || '';
+        var digits = m[2]+(m[3] || '');
+        var pow = parseInt(m[4]);
+        var l = digits.length;
+        var out;
+        if(pow>=l-1) {
+            out = digits;
+            for(var i=l-1;i<pow;i++) {
+                out += '0';
+            }
+        } else if(pow<0) {
+            out = digits;
+            for(var i=1;i<-pow;i++) {
+                out = '0'+out;
+            }
+            out = '0.'+out;
+        } else {
+            out = digits.slice(0,pow+1) + '.' + digits.slice(pow+1);
+        }
+        return minus + out;
+    },
+
 	/** Round `a` to `b` significant figures. Real and imaginary parts of complex numbers are rounded independently.
 	 * @param {Number} n
 	 * @param {Number} b
@@ -867,7 +900,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	 * @param {Number|String} n
 	 * @param {String} precisionType - either 'dp' or 'sigfig'
 	 * @param {Number} precision - number of desired digits of precision
-	 * @param {Boolean} strictPrecision - must trailing zeroes be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
+	 * @param {Boolean} strictPrecision - must trailing zeros be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
 	 * @returns {Boolean}
 	 */
 	toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
@@ -1660,7 +1693,7 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
 
 /** Vector operations.
  *
- * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of vectors don't line up exactly
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of vectors don't line up exactly
  * @namespace Numbas.vectormath
  */
 var vectormath = Numbas.vectormath = {
@@ -1940,7 +1973,7 @@ var vectormath = Numbas.vectormath = {
 
 /** Matrix operations.
  *
- * These operations are very lax about the dimensions of vectors - they stick zeroes in when pairs of matrices don't line up exactly
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of matrices don't line up exactly
  * @namespace Numbas.matrixmath
  */
 var matrixmath = Numbas.matrixmath = {
