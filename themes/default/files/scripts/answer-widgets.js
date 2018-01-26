@@ -368,6 +368,32 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         '
     });
 
+    ko.components.register('answer-widget-dropdown', {
+        viewModel: function(params) {
+            this.part = params.part;
+            this.choices = this.part.input_options.choices.map(function(c,i){return {label: c, index: i}});
+            this.choices.splice(0,0,{label: '', index: null});
+            this.choice = ko.observable(null);
+            this.answerJSON = params.answerJSON;
+            var init = ko.unwrap(this.answerJSON);
+            if(init.valid) {
+                this.choice(this.choices[init.value]+1);
+            }
+
+            ko.computed(function() {
+                var choice = this.choice();
+                if(choice && choice.index!==null) {
+                    this.answerJSON({valid: true, value: choice.index});
+                } else {
+                    this.answerJSON({valid: false});
+                }
+            },this);
+        },
+        template: '\
+            <select data-bind="options: choices, optionsText: \'label\', value: choice"></select>\
+        '
+    });
+
     ko.components.register('answer-widget-checkboxes', {
         viewModel: function(params) {
             this.part = params.part;
