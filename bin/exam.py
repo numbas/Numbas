@@ -164,6 +164,7 @@ class Exam(object):
 
         self.resources = []
         self.extensions = []
+        self.custom_part_types = []
     
     @staticmethod
     def fromDATA(builder, data):
@@ -1209,7 +1210,7 @@ class ExamBuilder(object):
         exam_object = NumbasObject(string)
 
         self.custom_part_constructors = {}
-        custom_part_types = exam_object.data.get('custom_part_types')
+        custom_part_types = exam_object.data.get('custom_part_types',[])
         if custom_part_types:
             for definition in custom_part_types:
                 self.custom_part_constructors[definition['short_name']] = custom_part_constructor(definition)
