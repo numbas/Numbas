@@ -1006,10 +1006,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {object} a dictionary `{states, values, scope, state_valid, state_errors}`
      */
     mark_answer: function(studentAnswer) {
-        var result = this.markingScript.evaluate(
-            this.getScope(), 
-            this.marking_parameters(studentAnswer)
-        );
+        try {
+            var result = this.markingScript.evaluate(
+                this.getScope(), 
+                this.marking_parameters(studentAnswer)
+            );
+        } catch(e) {
+            throw(new Numbas.Error("part.marking.error in marking script"));
+        }
         if(result.state_errors.mark) {
             throw(result.state_errors.mark);
         }
