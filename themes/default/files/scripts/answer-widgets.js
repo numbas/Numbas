@@ -25,8 +25,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.input = ko.observable(init.valid ? init.value || '' : '');
             this.part = params.part;
             this.disable = params.disable;
+            this.options = params.options;
+            this.allowEmpty = this.options.allowEmpty;
             ko.computed(function() {
-                this.answerJSON({valid: true, value: this.input()});
+                var value = this.input();
+                var valid = value!='' || this.allowEmpty;
+                this.answerJSON({valid: valid, value: value});
             },this);
         },
         template: '\
