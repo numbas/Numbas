@@ -34,9 +34,13 @@ var math = Numbas.math;
  * @returns Numbas.Question
  */
 var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope) {
-    var q = new Question(number, exam, group, gscope);
-    q.loadFromXML(xml);
-    q.finaliseLoad();
+    try {
+        var q = new Question(number, exam, group, gscope);
+        q.loadFromXML(xml);
+        q.finaliseLoad();
+    } catch(e) {
+        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+    }
     
     return q;
 }
@@ -51,9 +55,13 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @returns Numbas.Question
  */
 var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope) {
-    var q = new Question(number, exam, group, gscope);
-    q.loadFromJSON(data);
-    q.finaliseLoad();
+    try {
+        var q = new Question(number, exam, group, gscope);
+        q.loadFromJSON(data);
+        q.finaliseLoad();
+    } catch(e) {
+        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+    }
 
     return q;
 }
