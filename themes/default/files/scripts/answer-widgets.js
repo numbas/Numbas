@@ -362,7 +362,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice"> <span data-bind="html: label"></span></label></li>\
+                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice"> <span data-bind="html: $data"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -414,7 +414,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked"> <span data-bind="html: content.label"></span></label></li>\
+                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked"> <span data-bind="html: content"></span></label></li>\
             </ul>\
             </form>\
         '
