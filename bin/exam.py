@@ -938,6 +938,7 @@ class MatrixEntryPart(Part):
         Part.__init__(self,marks,prompt)
 
     def loadDATA(self, builder, data):
+        super(MatrixEntryPart,self).loadDATA(builder, data)
         tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],self)
 
     def toxml(self):
