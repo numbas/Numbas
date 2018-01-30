@@ -79,7 +79,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.error('part.mcq.choices missing');
         }
 
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffleChoices','displayType'],['minAnswersString','maxAnswersString','shuffleChoices']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType'],['minAnswersString','maxAnswersString','shuffleChoices']);
 
         var choiceNodes = choicesNode.selectNodes('choice');
 
@@ -97,7 +97,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = choiceNodes.length;
             answersNode = xml.selectSingleNode('answers');
             if(answersNode) {
-                tryGetAttribute(settings,null,answersNode,'shuffleAnswers','shuffleAnswers');
+                tryGetAttribute(settings,null,answersNode,'shuffle','shuffleAnswers');
                 answerNodes = answersNode.selectNodes('answer');
                 this.numAnswers = answerNodes.length;
             }

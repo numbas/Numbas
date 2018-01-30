@@ -1057,7 +1057,7 @@ class MultipleChoicePart(Part):
                 choices.append(makeTree(['choice',makeContentNode(choice)]))
 
         answers = part.find('answers')
-        answers.attrib = {'order': strcons_fix(self.shuffleAnswers)}
+        answers.attrib = {'shuffle': strcons_fix(self.shuffleAnswers)}
         if isinstance(self.answers,str):
             answers.attrib['def'] = strcons(self.answers)
         else:
