@@ -79,7 +79,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @member {observable|number} correctAnswer
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.correctAnswer = Knockout.observable(maxi);
+            this.correctAnswer = Knockout.observable(maxi+'');
 
             break;
         case 'm_n_2':
