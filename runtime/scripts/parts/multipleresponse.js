@@ -673,7 +673,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         case 'dropdownlist':
             for(var i=0; i<this.numAnswers; i++)
             {
-                this.stagedAnswer[i][choiceIndex]= i===answerIndex;
+                this.stagedAnswer[i][choiceIndex] = i===answerIndex;
             }
             break;
         default:

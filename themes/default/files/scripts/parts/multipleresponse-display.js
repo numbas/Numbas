@@ -59,11 +59,11 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             Knockout.computed(function() {
                 if(this.studentAnswer()==='') {
                     oldAnswer = null;
-                    p.storeAnswer({answer:null, choice: 0});
+                    p.storeTick({answer:null, choice: 0});
                 }
                 var i = parseInt(this.studentAnswer());
                 if(i!==oldAnswer && !isNaN(i)) {
-                    p.storeAnswer({answer:i, choice:0});
+                    p.storeTick({answer:i, choice:0});
                     oldAnswer = i;
                 }
             },this);
