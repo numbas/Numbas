@@ -31,11 +31,12 @@ var math = Numbas.math;
  * @param {Numbas.Exam} [exam] - the exam this question belongs to
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @returns Numbas.Question
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope) {
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope, store) {
     try {
-        var q = new Question(number, exam, group, gscope);
+        var q = new Question(number, exam, group, gscope, store);
         q.loadFromXML(xml);
         q.finaliseLoad();
     } catch(e) {
@@ -52,11 +53,12 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {Numbas.Exam} [exam] - the exam this question belongs to
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @returns Numbas.Question
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope) {
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope, store) {
     try {
-        var q = new Question(number, exam, group, gscope);
+        var q = new Question(number, exam, group, gscope, store);
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
@@ -75,11 +77,12 @@ var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, numb
  * @param {Numbas.Exam} [exam] - parent exam
  * @param {Numbas.QuestionGroup} [group] - group this question belongs to
  * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - global JME scope
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  */
-var Question = Numbas.Question = function( number, exam, group, gscope)
+var Question = Numbas.Question = function( number, exam, group, gscope, store)
 {
-	var question = this;
-	var q = question;
+	var q = this;
+    q.store = store;
     q.signals = new Numbas.schedule.SignalBox(function(e) {
         e.message = R('question.error',{'number':q.number+1,message:e.message});
         throw(e);
@@ -110,6 +113,12 @@ var Question = Numbas.Question = function( number, exam, group, gscope)
 }
 Question.prototype = /** @lends Numbas.Question.prototype */ 
 {
+
+    /** Storage engine
+     * @type {Numbas.storage.BlankStorage}
+     */
+    store: undefined,
+
     /** Load the question's settings from an XML <question> node
      * @param {Element} xml
      */
@@ -179,7 +188,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             //load parts
             var partNodes = q.xml.selectNodes('parts/part');
             for(var j = 0; j<partNodes.length; j++) {
-                var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null);
+                var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
                 q.addPart(part,j);
             }
             q.signals.trigger('partsGenerated');
@@ -253,7 +262,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var parts = tryGet(data,'parts');
             if(parts) {
                 parts.forEach(function(pd,i) {
-                    var p = Numbas.createPartFromJSON(pd, 'p'+i, q);
+                    var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
                     q.addPart(p,i);
                 });
                 q.signals.trigger('partsGenerated');
@@ -355,15 +364,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Load saved data about this question from storage
      */
     resume: function() {
+        if(!this.store) {
+            return;
+        }
         var q = this;
 		// check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
-		var qobj = Numbas.store.loadQuestion(q);
+		var qobj = this.store.loadQuestion(q);
 
 		if(qobj.name && qobj.name!=q.name) {
 			throw(new Numbas.Error('question.loaded name mismatch'));
 		}
 
-        var qobj = Numbas.store.loadQuestion(q);
         for(var x in qobj.variables) {
             q.scope.variables[x] = qobj.variables[x];
         }
@@ -375,6 +386,20 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     part.resume();
                 }
             });
+
+            q.signals.on('ready',function() {
+                q.parts.forEach(function(part) {
+                    part.steps.forEach(function(step) {
+                        if(step.answered) {
+                            step.submit();
+                        }
+                    });
+                    if(part.answered) {
+                        part.submit();
+                    }
+                });
+            });
+
             q.signals.trigger('partsResumed');
         });
 
@@ -516,8 +541,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	{
 		this.adviceDisplayed = true;
     	this.display && this.display.showAdvice(true);
-		if(Numbas.store && !dontStore) {
-			Numbas.store.adviceDisplayed(this);
+		if(this.store && !dontStore) {
+			this.store.adviceDisplayed(this);
         }
 	},
 
@@ -544,8 +569,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	    	this.display.showScore();
         }
 
-		if(Numbas.store && !dontStore) {
-			Numbas.store.answerRevealed(this);
+		if(this.store && !dontStore) {
+			this.store.answerRevealed(this);
 		}
 
 		this.exam && this.exam.updateScore();
@@ -639,7 +664,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
 			this.getAdvice();
 		}
-		Numbas.store && Numbas.store.questionSubmitted(this);
+		this.store && this.store.questionSubmitted(this);
 	},
 
 	/** Recalculate the student's score, update the display, and notify storage. */
@@ -655,7 +680,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 	    this.display && this.display.showScore();
 
 		//notify storage
-		Numbas.store && Numbas.store.saveQuestion(this);
+		this.store && this.store.saveQuestion(this);
 	},
 
 	/** Add a callback function to run when the question's HTML is attached to the page

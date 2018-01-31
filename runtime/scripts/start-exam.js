@@ -54,7 +54,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 		{
 			var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
 			
-			var exam = Numbas.exam = new Numbas.Exam();					//create the exam object, and load in everything from the XML
+			var exam = Numbas.exam = new Numbas.Exam(store);					//create the exam object, and load in everything from the XML
 			exam.seed = Numbas.util.hashCode(seed);
 
 			var entry = store.getEntry();
@@ -66,41 +66,43 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 			case 'ab-initio':
 				job(exam.init,exam);
                 exam.signals.on('question list initialised', function() {
-				job(function() {
-                        Numbas.display.init();
-                });
-				job(function() {
-					if(exam.settings.showFrontPage)
-					{
-						exam.display.showInfoPage('frontpage');
-					}
-					else
-					{
-						exam.begin();
-					}
-				});	
+                    job(function() {
+                            Numbas.display.init();
+                    });
+                    job(function() {
+                        if(exam.settings.showFrontPage)
+                        {
+                            exam.display.showInfoPage('frontpage');
+                        }
+                        else
+                        {
+                            exam.begin();
+                        }
+                    });	
                 })
 				break;
 
 			case 'resume':
 			case 'review':
 				job(exam.load,exam);
-				job(Numbas.display.init);
+                exam.signals.on('question list initialised', function() {
+                    job(Numbas.display.init);
 
-				job(function() {
-					if(entry == 'review')
-					{
-						job(exam.end,exam,false);
-					}
-					else if(exam.currentQuestion !== undefined)
-					{
-						job(exam.display.showInfoPage,exam.display,'suspend');
-					}
-					else
-					{
-						job(exam.display.showInfoPage,exam.display,'frontpage');
-					}
-				});
+                    job(function() {
+                        if(entry == 'review')
+                        {
+                            job(exam.end,exam,false);
+                        }
+                        else if(exam.currentQuestion !== undefined)
+                        {
+                            job(exam.display.showInfoPage,exam.display,'suspend');
+                        }
+                        else
+                        {
+                            job(exam.display.showInfoPage,exam.display,'frontpage');
+                        }
+                    });
+                });
 
 				break;
 			}

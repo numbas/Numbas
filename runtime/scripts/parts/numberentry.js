@@ -92,7 +92,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision, style: settings.correctAnswerStyle});
         }
 
-        this.stagedAnswer = [''];
+        this.stagedAnswer = '';
 
         if(Numbas.display) {
             this.display = new Numbas.display.NumberEntryPartDisplay(this);
@@ -104,7 +104,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             return;
         }
 		var pobj = this.store.loadNumberEntryPart(this);
-		this.stagedAnswer = [pobj.studentAnswer+''];
+		this.stagedAnswer = pobj.studentAnswer+'';
     },
 
 	/** The student's last submitted answer */

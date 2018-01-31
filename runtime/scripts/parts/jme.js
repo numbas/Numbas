@@ -146,11 +146,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             return;
         }
 		var pobj = this.store.loadJMEPart(this);
-		this.stagedAnswer = [pobj.studentAnswer];
+		this.stagedAnswer = pobj.studentAnswer;
     },
 
     finaliseLoad: function() {
-        this.stagedAnswer = [''];
+        this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
         if(Numbas.display) {
             this.display = new Numbas.display.JMEPartDisplay(this);

@@ -35,10 +35,10 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.allowResize = Knockout.observable(p.settings.allowResize);
 
         Knockout.computed(function() {
-            var stagedAnswer = p.stagedAnswer || [null,null,null];
-            var oldRows = stagedAnswer[0];
-            var oldColumns = stagedAnswer[1];
-            var oldMatrix = stagedAnswer[2];
+            var stagedAnswer = p.stagedAnswer || {rows:null, columns: null, matrix: null};
+            var oldRows = stagedAnswer.rows;
+            var oldColumns = stagedAnswer.columns;
+            var oldMatrix = stagedAnswer.matrix;
             var newRows = this.studentAnswerRows();
             var newColumns = this.studentAnswerColumns();
             var newMatrix = this.studentAnswer();

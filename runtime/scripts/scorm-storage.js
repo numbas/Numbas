@@ -241,22 +241,29 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 		{
 		case '1_n_2':
 		case 'm_n_2':
-		case 'm_n_x':
 			this.set(prepath+'type','choice');
 			
-			var pattern='';
-			for(var i=0;i<p.settings.matrix.length;i++)
-			{
-				for(var j=0;j<p.settings.matrix[i].length;j++)
-				{
-					if(p.settings.matrix[i][j]>0)
-					{
-						if(pattern.length>0){pattern+='[,]';}
-						pattern+=i+'-'+j;
+            var good_choices = [];
+			for(var i=0;i<p.numAnswers;i++) {
+                if(p.settings.maxMatrix[i][0]) {
+                    good_choices.push(i);
+                }
+			}
+			this.set(prepath+'correct_responses.0.pattern',good_choices.join('[,]'));
+
+            break;
+		case 'm_n_x':
+			this.set(prepath+'type','matching');
+			
+			var good_choices = [];
+			for(var i=0;i<p.settings.maxMatrix.length;i++) {
+				for(var j=0;j<p.settings.maxMatrix[i].length;j++) {
+					if(p.settings.maxMatrix[i][j]) {
+                        good_choices.push(i+'[.]'+j);
 					}
 				}
 			}
-			this.set(prepath+'correct_responses.0.pattern',pattern);
+			this.set(prepath+'correct_responses.0.pattern',good_choices.join('[,]'));
 
 			break;
 		case 'numberentry':
@@ -596,18 +603,34 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 				ticks[i].push(false);
 			}
 		}
-		var tick_re=/(\d+)-(\d+)/;
-		var bits = out.answer.split('[,]');
-		for(var i=0;i<bits.length;i++)
-		{
-			var m = bits[i].match(tick_re);
-			if(m)
-			{
-				var x = parseInt(m[1],10);
-				var y = parseInt(m[2],10);
-				ticks[x][y]=true;
-			}
-		}
+        switch(part.type) {
+        case '1_n_2':
+            var tick = parseInt(out.answer,10);
+            if(!isNaN(tick)) {
+                ticks[tick][0] = true;
+            }
+            break;
+        case 'm_n_2':
+            out.answer.split('[,]').forEach(function(tickstr) {
+                var tick = parseInt(tickstr,10);
+                if(!isNaN(tick)) {
+                    ticks[tick][0] = true;
+                }
+            });
+            break;
+        case 'm_n_x':
+            var tick_re=/(\d+)\[\.\](\d+)/;
+            var bits = out.answer.split('[,]');
+            for(var i=0;i<bits.length;i++) {
+                var m = bits[i].match(tick_re);
+                if(m) {
+                    var x = parseInt(m[1],10);
+                    var y = parseInt(m[2],10);
+                    ticks[x][y] = true;
+                }
+            }
+            break;
+        }
 		out.ticks = ticks;
 		return out;
 	},
@@ -717,24 +740,33 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 			this.set(prepath+'learner_response',part.studentAnswer);
 			break;
 		case 'matrix':
-			this.set(prepath+'learner_response',JSON.stringify(part.studentAnswer));
+            var data = JSON.stringify({
+                rows: part.studentAnswerRows,
+                columns: part.studentAnswerColumns,
+                matrix: part.studentAnswer
+            });
+			this.set(prepath+'learner_response', data);
 			break;
 		case '1_n_2':
 		case 'm_n_2':
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.ticks[i][0]) {
+                    choices.push(i);
+                }
+            }
+            this.set(prepath+'learner_response', choices.join('[,]'));
+            break;
 		case 'm_n_x':
-			var s='';
-			for(var i=0;i<part.numAnswers;i++)
-			{
-				for( var j=0;j<part.numChoices;j++ )
-				{
-					if(part.ticks[i][j])
-					{
-						if(s.length){s+='[,]';}
-						s+=i+'-'+j;
+			var choices = [];
+			for(var i=0;i<part.numAnswers;i++) {
+				for( var j=0;j<part.numChoices;j++ ) {
+					if(part.ticks[i][j]) {
+						choices.push(i+'[.]'+j);
 					}
 				}
 			}
-			this.set(prepath+'learner_response',s);
+			this.set(prepath+'learner_response',choices.join('[,]'));
 			break;
 		}
 		this.setSuspendData();

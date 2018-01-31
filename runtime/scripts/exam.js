@@ -24,12 +24,15 @@ Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','st
 /** Keeps track of all info we need to know while exam is running.
  *
  * Loads XML from {@link Numbas.xml.examXML}
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @constructor
  * @memberof Numbas
  */
-function Exam()
+function Exam(store)
 {
 	var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+    this.store = store;
 
 	//get the exam info out of the XML and into the exam object
 	var xml = this.xml = Numbas.xml.examXML.selectSingleNode('/exam');
@@ -163,6 +166,11 @@ function Exam()
 }
 Numbas.Exam = Exam;
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
+    /** Storage engine
+     * @type {Numbas.storage.BlankStorage}
+     */
+    store: undefined,
+
 	/** Settings
 	 * @property {String} name - Title of exam
 	 * @property {Number} percentPass - Percentage of max. score student must achieve to pass 
@@ -344,15 +352,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
 		job(exam.chooseQuestionSubset,exam);			//choose questions to use
 		job(exam.makeQuestionList,exam);				//create question objects
-		job(Numbas.store.init,Numbas.store,exam);		//initialise storage
-		job(Numbas.store.save,Numbas.store);			//make sure data get saved to LMS
+        if(this.store) {
+    		job(this.store.init,this.store,exam);		//initialise storage
+	    	job(this.store.save,this.store);			//make sure data get saved to LMS
+        }
 	},
 
 	/** Restore previously started exam from storage */
 	load: function()
 	{
+        if(!this.store) {
+            return;
+        }
 		this.loading = true;
-		var suspendData = Numbas.store.load(this);	//get saved info from storage
+		var suspendData = this.store.load(this);	//get saved info from storage
 
 		job(function() {
             var e = this;
@@ -418,7 +431,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var questionNodes = group.xml.selectNodes("questions/question");
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
-    				var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope);
+    				var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope, exam.store);
                     if(loading) {
                         question.resume();
                     } else {
@@ -497,7 +510,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 		this.endTiming();
 		this.display.showInfoPage('suspend');
 
-		Numbas.store.pause();
+		this.store && this.store.pause();
 	},
 
 	/**
@@ -581,7 +594,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 	{
 		this.calculateScore();
 		this.display.showScore();
-		Numbas.store.saveExam(this);
+		this.store && this.store.saveExam(this);
 	},
 
 	/** Calculate the student's score */
@@ -668,7 +681,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 			throw(new Numbas.Error('exam.changeQuestion.no questions'));
 		}
 		this.currentQuestion.visited = true;
-		Numbas.store.changeQuestion(this.currentQuestion);
+		this.store && this.store.changeQuestion(this.currentQuestion);
 	},
 
 	/**
@@ -768,7 +781,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 			this.endTiming();
 
 			//send result to LMS, and tell it we're finished
-			Numbas.store.end();
+			this.store && this.store.end();
 		}
 
 		this.display.end();

@@ -653,6 +653,29 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
 
+        switch(this.type) {
+        case '1_n_2':
+            var max = 0, maxi = null;
+            for(var i=0;i<this.numAnswers;i++) {
+                if(matrix[i][0]>max || maxi===null) {
+                    max = matrix[i][0];
+                    maxi = i;
+                }
+            }
+            var best = [];
+            for(var i=0;i<this.numAnswers;i++) {
+                best.push([i==maxi]);
+            }
+            settings.maxMatrix = best;
+            break;
+        case 'm_n_2':
+            settings.maxMatrix = matrix.map(function(r){ return [r[0]>0]; });
+            break;
+        case 'm_n_x':
+            settings.maxMatrix = matrix.map(function(r){ return r.map(function(c){return c>0; }) });
+            break;
+        }
+
         settings.matrix = matrix;
     },
 

@@ -66,9 +66,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
 		var pobj = this.store.loadMatrixEntryPart(this);
 		if(pobj.studentAnswer) {
-			var rows = pobj.studentAnswer.length;
-			var columns = rows>0 ? pobj.studentAnswer[0].length : 0;
-			this.stagedAnswer = [rows, columns, pobj.studentAnswer];
+			this.stagedAnswer = pobj.studentAnswer;
 		}
     },
 

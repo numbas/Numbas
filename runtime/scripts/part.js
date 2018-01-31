@@ -50,17 +50,18 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
-var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart) {
+var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
 
 	var type = tryGetAttribute(null,xml,'.','type',[]);
 	if(type==null) {
 		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
 	}
-    var part = createPart(type, path, question, parentPart);
+    var part = createPart(type, path, question, parentPart, store);
     part.loadFromXML(xml);
     part.finaliseLoad();
     return part;
@@ -72,14 +73,15 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
  * @param {partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
-var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart) {
+var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart, store) {
     if(!data.type) {
 		throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
 	}
-    var part = createPart(data.type, path, question, parentPart);
+    var part = createPart(data.type, path, question, parentPart, store);
     part.loadFromJSON(data);
     part.finaliseLoad();
     return part;
@@ -91,16 +93,17 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
  * @param {partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(type, path, question, parentPart)
+var createPart = Numbas.createPart = function(type, path, question, parentPart, store)
 {
 	if(partConstructors[type])
 	{
 		var cons = partConstructors[type];
-		var part = new cons(path, question, parentPart);
+		var part = new cons(path, question, parentPart, store);
         part.type = type;
 		if(part.customConstructor) {
 			part.customConstructor.apply(part);
@@ -121,9 +124,11 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart)
  * @param {Numbas.parts.Part} parentPart
  * @see Numbas.createPart
  */
-var Part = Numbas.parts.Part = function( path, question, parentPart)
+var Part = Numbas.parts.Part = function( path, question, parentPart, store)
 {
     var p = this;
+
+    this.store = store;
 
 	//remember parent question object
 	this.question = question;
@@ -183,7 +188,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var stepNodes = this.xml.selectNodes('steps/part');
         for(var i=0; i<stepNodes.length; i++)
         {
-            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this);
+            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
             this.addStep(step,i);
         }
 
@@ -242,7 +247,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         if('steps' in data) {
             data.steps.map(function(sd,i) {
-                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this);
+                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this, this.store);
                 p.addStep(sd,i);
             });
         }
@@ -272,6 +277,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
 
     /** Load saved data about this part from storage
+     *  The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
      */
     resume: function() {
         var part = this;
@@ -283,11 +289,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		this.stepsShown = pobj.stepsShown;
 		this.stepsOpen = pobj.stepsOpen;
 
-		if(this.answered) {
-			this.question && this.question.onHTMLAttached(function() {part.submit()});
-		}
-
         this.steps.forEach(function(s){ s.resume() });
+
+        this.display && this.question.signals.on('HTMLAttached', function() {
+            part.display.restoreAnswer();
+        })
     },
 
     /** Add a step to this part

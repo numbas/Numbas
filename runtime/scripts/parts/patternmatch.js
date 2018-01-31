@@ -67,7 +67,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
             return;
         }
  		var pobj = this.store.loadPatternMatchPart(this);
- 		this.stagedAnswer = [pobj.studentAnswer];
+ 		this.stagedAnswer = pobj.studentAnswer;
     },
 
 	/** The student's last submitted answer 
