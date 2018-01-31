@@ -33,7 +33,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
 
         ko.computed(function() {
             var answer = this.studentAnswer();
-            if(answer==p.stagedAnswer || !answer.valid && p.stagedAnswer===undefined) {
+            if(answer.value==p.stagedAnswer || !answer.valid && p.stagedAnswer===undefined) {
                 return;
             }
             if(answer.valid) {

@@ -27,10 +27,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
             this.options = params.options;
             this.allowEmpty = this.options.allowEmpty;
+            var lastValue = this.input();
             ko.computed(function() {
                 var value = this.input();
                 var valid = value!='' || this.allowEmpty;
-                this.answerJSON({valid: valid, value: value});
+                if(value != lastValue) {
+                    this.answerJSON({valid: valid, value: value});
+                }
+                lastValue = value;
             },this);
         },
         template: '\
@@ -210,8 +214,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return {valid: true, value: value};
                 }
             },this);
+            var lastValue = this.result();
             ko.computed(function() {
-                this.answerJSON(this.result());
+                var result = this.result();
+                var valuesSame = result.value.every(function(row,i) { return row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) });
+                if(!valuesSame || result.valid!=lastValue.valid) {
+                    this.answerJSON(result);
+                }
+                lastValue = result;
             },this);
         },
         template: '\
@@ -411,8 +421,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
             }));
 
+            var lastValue = this.choices().map(function(c){ return c.ticked() });
             ko.computed(function() {
-                this.answerJSON({valid: true, value: this.choices().map(function(c){return c.ticked()})});
+                var value = this.choices().map(function(c){return c.ticked()});
+                var same = value.every(function(c,i){ return c==lastValue[i] });
+                if(!same) {
+                    this.answerJSON({valid: true, value: value});
+                }
+                lastValue = value;
             },this);
         },
         template: '\
