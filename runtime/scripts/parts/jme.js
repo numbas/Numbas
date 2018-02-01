@@ -145,7 +145,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(!this.store) {
             return;
         }
-		var pobj = this.store.loadJMEPart(this);
+		var pobj = this.store.loadPart(this);
 		this.stagedAnswer = pobj.studentAnswer;
     },
 

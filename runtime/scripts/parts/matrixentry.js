@@ -64,8 +64,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         if(!this.store) {
             return;
         }
-		var pobj = this.store.loadMatrixEntryPart(this);
-		if(pobj.studentAnswer) {
+		var pobj = this.store.loadPart(this);
+		if(pobj.studentAnswer!==undefined) {
 			this.stagedAnswer = pobj.studentAnswer;
 		}
     },

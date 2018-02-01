@@ -66,7 +66,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         if(!this.store) {
             return;
         }
- 		var pobj = this.store.loadPatternMatchPart(this);
+ 		var pobj = this.store.loadPart(this);
  		this.stagedAnswer = pobj.studentAnswer;
     },
 

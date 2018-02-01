@@ -329,23 +329,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadMultipleResponsePart(this);
+        var pobj = this.store.loadPart(this);
         this.shuffleChoices = pobj.shuffleChoices;
         this.shuffleAnswers = pobj.shuffleAnswers;
-        this.ticks = pobj.ticks;
+        this.ticks = pobj.studentAnswer;
 
         this.stagedAnswer = [];
         for( i=0; i<this.numAnswers; i++ ) {
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {
-                this.stagedAnswer[i].push(false);
-            }
-        }
-        for( i=0;i<this.numAnswers;i++) {
-            for(j=0;j<this.numChoices;j++) {
-                if(pobj.ticks[i][j]) {
-                    this.stagedAnswer[i][j] = true;
-                }
+                this.stagedAnswer[i].push(pobj.ticks[i][j] || false);
             }
         }
     },

@@ -52,7 +52,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 
 		job(function()
 		{
-			var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
+			var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();	//The storage object manages communication between the LMS and the exam
 			
 			var exam = Numbas.exam = new Numbas.Exam(store);					//create the exam object, and load in everything from the XML
 			exam.seed = Numbas.util.hashCode(seed);

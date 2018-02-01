@@ -103,7 +103,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         if(!this.store) {
             return;
         }
-		var pobj = this.store.loadNumberEntryPart(this);
+		var pobj = this.store.loadPart(this);
 		this.stagedAnswer = pobj.studentAnswer+'';
     },
 
