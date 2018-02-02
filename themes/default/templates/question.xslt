@@ -20,7 +20,7 @@ Copyright 2011-16 Newcastle University
 
     <xsl:template match="question">
         <div class="question clearfix" data-bind="with: question, visible: $root.exam.currentQuestionNumber()=={@number}">
-            <form>
+            <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <h3 data-bind="text: displayName" class="print-only"></h3>
                 <xsl:apply-templates />
@@ -47,7 +47,7 @@ Copyright 2011-16 Newcastle University
     {% include 'xslt/prompt.xslt' %}
     {% include 'xslt/advice.xslt' %}
 
-     
+
     {% include 'xslt/parts/1_n_2.xslt' %}
     {% include 'xslt/parts/m_n_2.xslt' %}
     {% include 'xslt/parts/choices.xslt' %}
