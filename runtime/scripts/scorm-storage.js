@@ -222,6 +222,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 		}
 	},
 
+    getPartStorage: function(p) {
+        if(p.is_custom_part_type) {
+            return scorm.partTypeStorage['custom'];
+        } else {
+            return scorm.partTypeStorage[p.type];
+        }
+    },
+
 	/** Initialise a part - make an interaction for it, and set up correct responses.
 	 * @param {Numbas.parts.Part} part
 	 */
@@ -240,7 +248,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 		this.set(prepath+'result',0);
 		this.set(prepath+'description',p.type);
 
-        var typeStorage = scorm.partTypeStorage[p.type];
+        var typeStorage = this.getPartStorage(p);
         if(typeStorage) {
             this.set(prepath+'type', typeStorage.interaction_type(p));
             var correct_answer = typeStorage.correct_answer(p);
@@ -332,7 +340,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 			stepsOpen: part.stepsOpen
 		};
 
-        var typeStorage = scorm.partTypeStorage[part.type];
+        var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
             if(data) {
@@ -475,7 +483,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
 			pobj.answer = get('learner_response');
 
-            var typeStorage = scorm.partTypeStorage[part.type];
+            var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
                 var studentAnswer = typeStorage.load(part, pobj);
                 if(studentAnswer!==undefined) {
@@ -572,7 +580,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
 		this.set(prepath+'result',part.score);
 
-        var typeStorage = scorm.partTypeStorage[part.type];
+        var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var answer = typeStorage.student_answer(part,this);
             this.set(prepath+'learner_response', answer+'');

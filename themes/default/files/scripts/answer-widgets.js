@@ -27,9 +27,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
             this.options = params.options;
             this.allowEmpty = this.options.allowEmpty;
+
             var lastValue = this.input();
-            ko.computed(function() {
-                var value = this.input();
+
+            this.answerJSON.subscribe(function(v) {
+                if(v.value!=this.input()) {
+                    this.input(v.value);
+                }
+            },this);
+            this.input.subscribe(function(value) {
                 var valid = value!='' || this.allowEmpty;
                 if(value != lastValue) {
                     this.answerJSON({valid: valid, value: value});
@@ -44,6 +50,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
     ko.components.register('answer-widget-number', {
         viewModel: function(params) {
+            var vm = this;
             this.answerJSON = params.answerJSON;
             this.part = params.part.part;
             this.options = params.options;
@@ -52,8 +59,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
 
             var init = ko.unwrap(this.answerJSON);
-            this.input = ko.observable(init.valid ? Numbas.math.niceNumber(init.value,{style: this.allowedNotationStyles[0]}) || '' : '');
 
+            function cleanNumber(n) {
+                if(n===undefined) {
+                    return '';
+                }
+                return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
+            }
+
+            this.input = ko.observable(init.valid ? cleanNumber(init.value) : '');
+
+            var lastValue = init.value;
             this.result = ko.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
@@ -70,6 +86,18 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return {valid:true, value: n};
                 }
             },this);
+
+            this.answerJSON.subscribe(function(v) {
+                if(v.value==this.result().value) {
+                    return;
+                }
+                var s = cleanNumber(v.value);
+                if(s!=this.input() && v.valid) {
+                    this.input(s);
+                }
+            },this);
+
+
             ko.computed(function() {
                 this.answerJSON(this.result())
             },this);
@@ -91,7 +119,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
 
             var init = ko.unwrap(this.answerJSON);
-            this.input = ko.observable(init.valid ? Numbas.jme.display.treeToJME(init.value) || '' : '');
+
+            function cleanExpression(expr) {
+                return Numbas.jme.display.treeToJME(expr) || '';
+            }
+
+            this.input = ko.observable(init.valid ? cleanExpression(init.value) : '');
 
             this.latex = ko.computed(function() {
                 var input = this.input();
@@ -130,6 +163,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 
             },this);
+
+            this.answerJSON.subscribe(function(v) {
+                if(v.value==this.result().value) {
+                    return;
+                }
+                var s = cleanExpression(v.value);
+                if(s!=this.input() && v.valid) {
+                    this.input(s);
+                }
+            },this);
+
             ko.computed(function() {
                 this.answerJSON(this.result())
             },this);
@@ -214,10 +258,20 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return {valid: true, value: value};
                 }
             },this);
+
+            this.answerJSON.subscribe(function(v) {
+                if(v.value==this.result().value) {
+                    return;
+                }
+                if(v.valid) {
+                    this.input(v.value);
+                }
+            },this);
+
             var lastValue = this.result();
             ko.computed(function() {
                 var result = this.result();
-                var valuesSame = result.value.every(function(row,i) { return row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) });
+                var valuesSame = result.length == lastValue.value.length && result.value.every(function(row,i) { return row.length== lastValue.value[i].length && row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) });
                 if(!valuesSame || result.valid!=lastValue.valid) {
                     this.answerJSON(result);
                 }
@@ -231,6 +285,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
     ko.components.register('matrix-input',{
         viewModel: function(params) {
+            var vm = this;
             this.allowResize = params.allowResize ? params.allowResize : ko.observable(false);
             if(typeof params.rows=='function') {
                 this.numRows = params.rows;
@@ -243,10 +298,16 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 this.numColumns = ko.observable(params.columns || 2);
             }
 
+            this.value = ko.observableArray([]);
+
             var v = params.value();
-            this.numRows(v.length || 1);
-            this.numColumns(v.length ? v[0].length : 1);
-            this.value = ko.observableArray(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
+
+            function setMatrix(v) {
+                vm.numRows(v.length || 1);
+                vm.numColumns(v.length ? v[0].length : 1);
+                vm.value(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
+            }
+            setMatrix(ko.unwrap(params.value));
 
             this.disable = params.disable || false;
 
@@ -323,12 +384,24 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
             ko.computed(this.update,this);
             
-            var firstGo = true;
-            //update value with model
-            ko.computed(function() {
+            this.result = ko.computed(function() {
                 var v = this.value().map(function(row,i){
                     return row().map(function(cell,j){return cell.cell()})
                 })
+                return v;
+            },this);
+
+            params.value.subscribe(function(v) {
+                if(v==this.result) {
+                    return;
+                }
+                setMatrix(v);
+            },this);
+
+            var firstGo = true;
+            //update value with model
+            ko.computed(function() {
+                var v = this.result();
                 if(firstGo) {
                     firstGo = false;
                     return;

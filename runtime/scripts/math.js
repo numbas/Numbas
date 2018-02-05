@@ -576,6 +576,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 	niceNumber: function(n,options)
 	{
 		options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
 		if(n.complex)
 		{
 			var re = math.niceNumber(n.re,options);

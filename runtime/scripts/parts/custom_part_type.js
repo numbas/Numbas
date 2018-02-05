@@ -35,6 +35,9 @@ var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, 
     this.input_options = {};
 }
 CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
+
+    is_custom_part_type: true,
+
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
         this.setMarkingScript(this.definition.marking_script);
@@ -69,6 +72,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         o.input_options = jme.wrapValue(this.input_options);
         return o;
+    },
+
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+		var pobj = this.store.loadPart(this);
+		this.stagedAnswer = pobj.studentAnswer;
     },
 
     finaliseLoad: function() {
@@ -228,7 +239,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
     }
 };
-['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
 });
 

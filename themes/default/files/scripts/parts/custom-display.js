@@ -46,5 +46,10 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
             }
         },this);
     };
+    display.CustomPartDisplay.prototype = {
+        restoreAnswer: function() {
+            this.studentAnswer({valid: this.part.studentAnswer!==undefined, value: this.part.studentAnswer});
+        }
+    };
     display.CustomPartDisplay = extend(display.PartDisplay,display.CustomPartDisplay,true);
 });
