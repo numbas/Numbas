@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
-	<form>
+	<form autocomplete="nope">
 		<table class="choices-grid">
 			<thead localise-data-jme-context-description="part.mcq.answers">
 				<td/>
@@ -25,7 +25,7 @@
 	<xsl:variable name="displaytype" select="choices/@displaytype"/>
 	<div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
 		<localise>part.correct answer</localise>
-		<form>
+		<form autocomplete="nope">
 		<table class="choices-grid">
 			<thead>
 				<td/>
