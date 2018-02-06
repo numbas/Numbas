@@ -441,6 +441,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 this.choice(init.value);
             }
 
+            this.answerJSON.subscribe(function(v) {
+                if(v.value!=this.choice()) {
+                    this.choice(v.value);
+                }
+            },this);
+
             ko.computed(function() {
                 var choice = this.choice();
                 this.answerJSON({valid: choice!==null, value: choice});
@@ -464,8 +470,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answerJSON;
             var init = ko.unwrap(this.answerJSON);
             if(init.valid) {
-                this.choice(this.choices[init.value]+1);
+                this.choice(this.choices[init.value+1]);
             }
+
+            this.answerJSON.subscribe(function(v) {
+                var current = this.choice()
+                if(!current || v.value!=this.choice().index) {
+                    this.choice(this.choices[v.value+1]);
+                }
+            },this);
 
             ko.computed(function() {
                 var choice = this.choice();
@@ -493,6 +506,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     ticked: ko.observable(init.valid ? init.value[i] : false)
                 }
             }));
+
+            this.answerJSON.subscribe(function(v) {
+                var current = this.choices().map(function(c){ return c.ticked() });
+                if(current.length==v.value.length && current.every(function(t,i){ return t==v.value[i]; })) {
+                    return;
+                }
+                this.choices().map(function(c,i) { c.ticked(v.value[i]); });
+            }, this);
 
             var lastValue = this.choices().map(function(c){ return c.ticked() });
             ko.computed(function() {
