@@ -203,6 +203,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 		return !util.eq(a,b);
 	},
 
+	objects_equal: function(a,b) {
+		if(typeof(a)!=typeof(b)) {
+			return false;
+		}
+		if(typeof(a)=='object') {
+			if(Array.isArray(a) && Array.isArray(b)) {
+				return util.arraysEqual(a,b);
+			} else {
+				return Object.keys(a).every(function(k){ return util.objects_equal(a[k],b[k]) }) && Object.keys(b).every(function(k){ return a.hasOwnProperty(k); });
+			}
+		}
+		return a==b;
+	},
+
 	/** Are two arrays equal? True if their elements are all equal
 	 * @param {Array} a
 	 * @param {Array} b
@@ -221,7 +235,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 					return false;
 				}
 			} else {
-				if(a!=b) {
+				if(!util.objects_equal(a[i],b[i])) {
 					return false;
 				}
 			}
