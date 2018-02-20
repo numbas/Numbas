@@ -174,8 +174,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
             },this);
 
+			var lastValue = this.input();
             ko.computed(function() {
-                this.answerJSON(this.result())
+				if(this.input()!=lastValue) {
+        	        this.answerJSON(this.result());
+					lastValue = this.input();
+				}
             },this);
         },
         template: '\

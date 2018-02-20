@@ -417,10 +417,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.getAdvice(true);
             }
 
-            q.parts.forEach(function(p) {
-                p.display && p.display.restoreAnswer();
-            });
-
             q.updateScore();
         });
     },

@@ -291,7 +291,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         this.steps.forEach(function(s){ s.resume() });
 
-        this.display && this.question.signals.on('HTMLAttached', function() {
+        this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer();
         })
     },
