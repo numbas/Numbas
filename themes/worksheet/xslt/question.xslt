@@ -139,7 +139,7 @@ Copyright 2011 Newcastle University
 	</div>
 </xsl:template>
 
- 
+
 <xsl:template match="@*|node()" mode="content">
 	<xsl:copy>
 		<xsl:apply-templates select="@*|node()" mode="content" />
@@ -152,7 +152,7 @@ Copyright 2011 Newcastle University
 	<xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
 	<xsl:choose>
 		<xsl:when test="@displaytype='radiogroup'">
-			<form>
+			<form autocomplete="nope">
 			<ul class="multiplechoice">
 				<xsl:apply-templates select="choice" mode="radiogroup">
 					<xsl:with-param name="path" select="$path"/>
@@ -161,7 +161,7 @@ Copyright 2011 Newcastle University
 			</form>
 		</xsl:when>
 		<xsl:when test="@displaytype='checkbox'">
-			<form>
+			<form autocomplete="nope">
 			<ul class="multiplechoice">
 				<xsl:apply-templates select="choice" mode="checkbox">
 					<xsl:with-param name="path" select="$path"/>
@@ -184,9 +184,9 @@ Copyright 2011 Newcastle University
 	<xsl:param name="path"/>
 	<xsl:param name="answernum" select="0"/>
 	<xsl:variable name="cols" select="../@displaycolumns"/>
-	
+
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
-	
+
 	<xsl:variable name="break">
 		<xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
 			<xsl:text>clear:both;</xsl:text>
@@ -221,7 +221,7 @@ Copyright 2011 Newcastle University
 <xsl:template match="choice" mode="dropdownlist">
 	<xsl:param name="path"/>
 	<xsl:param name="answernum" select="0"/>
-	
+
 	<xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
 	<option id="choice-{$answernum}-{$choicenum}">
 		<xsl:apply-templates select="content"/>
@@ -230,7 +230,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="part[@type='1_n_2' or @type='CUEdt.MR1_n_2Part']" mode="typespecific">
 	<xsl:param name="path"/>
-	
+
 	<xsl:apply-templates select="choices" mode="one">
 		<xsl:with-param name="path" select="$path"/>
 	</xsl:apply-templates>
@@ -291,7 +291,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="part[@type='patternmatch' or @type='CUEdt.PatternMatchPart']" mode="typespecific">
 	<xsl:param name="path"/>
-	
+
 	<input type="text" spellcheck="false" class="patternmatch" size="12.5" id="patternmatch"></input>
 </xsl:template>
 
@@ -301,7 +301,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="gapfill" mode="content">
 	<xsl:param name="path"/>
-	
+
 	<xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
 	<xsl:apply-templates select="ancestor::part[1]/gaps/part[$n+1]" />
 </xsl:template>
@@ -314,7 +314,7 @@ Copyright 2011 Newcastle University
 
 <xsl:template match="part[@type='numberentry' or @type='CUEdt.NumberEntryPart']" mode="typespecific">
 	<xsl:param name="path"/>
-	
+
 	<input type="text" step="{answer/inputstep/@value}" class="numberentry" id="numberentry"/>
 </xsl:template>
 
