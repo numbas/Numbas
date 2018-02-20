@@ -927,7 +927,10 @@ scorm.inputWidgetStorage = {
         student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
         load: function(part, data) { 
             try {
-                return JSON.parse(data.answer);
+                var m = JSON.parse(data.answer);
+				m.rows = m.length;
+				m.columns = m.length>0 ? m[0].length : 0;
+				return m;
             } catch(e) {
                 return undefined;
             }
@@ -960,7 +963,9 @@ scorm.inputWidgetStorage = {
             return ticked.join('[,]');
         },
         load: function(part, data) { 
-            return data.answer.split('[,]').map(function(c){ return parseInt(c,10) }); 
+			var ticked = part.input_options.choices.map(function(c){ return false; });
+            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; }); 
+			return ticked;
         }
     },
     'dropdown': {

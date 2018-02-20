@@ -228,6 +228,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
             var init = ko.unwrap(this.answerJSON);
             var value = init.value;
+			if(value!==undefined) {
+				value = value.map(function(r){ return r.map(function(c){ return vm.parseCells ? Numbas.math.niceNumber(c,{style: vm.allowedNotationStyles[0]}) || '' : c }) });
+			}
             if(!value) {
                 value = [];
                 for(var i=0;i<this.numRows;i++) {
@@ -244,7 +247,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 var value = this.input().slice().map(function(r){return r.slice()});
                 var cells = Array.prototype.concat.apply([],value);
                 if(this.parseCells) {
-                    var valid = cells.every(function(cell){ return util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
+                    var valid = cells.every(function(cell){ return cell.trim() && util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
                     if(!valid) {
                         var validFractions = cells.every(function(cell){ return util.isNumber(cell,true,vm.allowedNotationStyles) });
                         if(validFractions) {
@@ -275,7 +278,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var lastValue = this.result();
             ko.computed(function() {
                 var result = this.result();
-                var valuesSame = result.value.length == lastValue.value.length && result.value.every(function(row,i) { return row.length== lastValue.value[i].length && row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) });
+                var valuesSame = (!result.valid && !lastValue.valid) || ((result.value!==undefined && lastValue.value!==undefined) && result.value.length == lastValue.value.length && result.value.every(function(row,i) { return row.length== lastValue.value[i].length && row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) }));
                 if(!valuesSame || result.valid!=lastValue.valid) {
                     this.answerJSON(result);
                 }
@@ -306,10 +309,23 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
             var v = params.value();
 
+			function make_result() {
+                var v = vm.value().map(function(row,i){
+                    return row().map(function(cell,j){return cell.cell()})
+                })
+                vm.result(v);
+            };
+
+			function make_cell(c) {
+				var cell = {cell: ko.observable(c)};
+				cell.cell.subscribe(make_result);
+				return cell;
+			}
+
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);
-                vm.value(v.map(function(r){return ko.observableArray(r.map(function(c){return {cell:ko.observable(c)}}))}));
+                vm.value(v.map(function(r){return ko.observableArray(r.map(function(c){return make_cell(c)}))}));
             }
             setMatrix(ko.unwrap(params.value));
 
@@ -353,6 +369,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 return false;
             }
             
+            this.result = ko.observableArray([]);
+
+			make_result();
+            
             this.update = function() {
                 // update value when number of rows or columns changes
                 var numRows = parseInt(this.numRows());
@@ -375,28 +395,21 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     for(var j=0;j<numColumns;j++) {
                         var cell;
                         if(row.length<=j) {
-                            cell = ko.observable('');
-                            row.push({cell:cell});
+                            row.push(make_cell(''));
                         } else {
                             cell = row[j];
                         }
                     }
                     value[i](row);
                 }
-                this.value(value);
+                this.value(value.slice());
+				make_result();
             }
 
             ko.computed(this.update,this);
-            
-            this.result = ko.computed(function() {
-                var v = this.value().map(function(row,i){
-                    return row().map(function(cell,j){return cell.cell()})
-                })
-                return v;
-            },this);
 
             params.value.subscribe(function(v) {
-                if(v==this.result) {
+                if(v==this.result()) {
                     return;
                 }
                 setMatrix(v);
