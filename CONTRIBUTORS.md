@@ -7,6 +7,7 @@
 * Anthony Youd
 * Chris Graham
 * Stacey Aston
+* George Stagg
 
 ## Other contributors
 
