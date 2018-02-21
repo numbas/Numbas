@@ -21,7 +21,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|Object} input_options
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.input_options = p.input_options;
+        this.input_options = p.input_options();
 
         /** The student's current answer (not necessarily submitted)
          * @member {observable|string} studentAnswer

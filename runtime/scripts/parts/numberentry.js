@@ -162,6 +162,16 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         return 'number';
     },
 
+	/** Options for this part's input widget
+	 * @returns {Object}
+	 */
+	input_options: function() {
+		return {
+			allowFractions: this.settings.allowFractions,
+			allowedNotationStyles: this.settings.notationStyles
+		};
+	},
+
 	/** Compute the correct answer, based on the given scope
 	 */
 	getCorrectAnswer: function(scope) {

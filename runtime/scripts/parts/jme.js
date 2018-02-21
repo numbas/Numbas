@@ -238,6 +238,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         return 'jme';
     },
 
+    /** Options for this part's input widget
+     * @returns {Object}
+     */
+    input_options: function() {
+        return {
+            showPreview: this.settings.showPreview
+        };
+    },
+
 
 	/** Compute the correct answer, based on the given scope
 	 */

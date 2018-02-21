@@ -909,25 +909,25 @@ scorm.partTypeStorage = {
 scorm.inputWidgetStorage = {
     'string': {
         interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return part.input_options.correctAnswer; },
+        correct_answer: function(part) { return part.input_options().correctAnswer; },
         student_answer: function(part) { return part.studentAnswer; },
         load: function(part, data) { return data.answer; }
     },
     'number': {
         interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.math.niceNumber(part.input_options.correctAnswer); },
+        correct_answer: function(part) { return Numbas.math.niceNumber(part.input_options().correctAnswer); },
         student_answer: function(part) { return Numbas.math.niceNumber(part.studentAnswer); },
-        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options.allowFractions, part.input_options.allowedNotationStyles); }
+        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
         interaction_type: function(part) { return 'long-fill-in'; },
-        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options.correctAnswer); },
+        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer); },
         student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer); },
         load: function(part, data) { return Numbas.jme.compile(data.answer); }
     },
     'matrix': {
         interaction_type: function(part) { return 'long-fill-in'; },
-        correct_answer: function(part) { return JSON.stringify(part.input_options.correctAnswer); },
+        correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
         student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
         load: function(part, data) { 
             try {
@@ -942,7 +942,7 @@ scorm.inputWidgetStorage = {
     },
     'radios': {
         interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options.correctAnswer+''; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
         student_answer: function(part) { return part.studentAnswer+''; },
         load: function(part, data) { return parseInt(data.answer,10); }
     },
@@ -950,7 +950,7 @@ scorm.inputWidgetStorage = {
         interaction_type: function(part) { return 'choice'; },
         correct_answer: function(part) { 
             var good_choices = [];
-            part.input_options.correctAnswer.forEach(function(c,i) {
+            part.input_options().correctAnswer.forEach(function(c,i) {
                 if(c) {
                     good_choices.push(i);
                 }
@@ -967,14 +967,14 @@ scorm.inputWidgetStorage = {
             return ticked.join('[,]');
         },
         load: function(part, data) { 
-			var ticked = part.input_options.choices.map(function(c){ return false; });
+			var ticked = part.input_options().choices.map(function(c){ return false; });
             data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; }); 
 			return ticked;
         }
     },
     'dropdown': {
         interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options.correctAnswer+''; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
         student_answer: function(part) { return part.studentAnswer+''; },
         load: function(part, data) { return parseInt(data.answer,10); }
     }

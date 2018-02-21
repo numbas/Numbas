@@ -107,6 +107,15 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         return 'string';
     },
 
+	/** Options for this part's input widget
+	 * @returns {Object}
+	 */
+	input_options: function() {
+		return {
+			allowEmpty: false
+		}
+	},
+
 	/** Compute the correct answer, based on the given scope
 	 */
 	getCorrectAnswer: function(scope) {

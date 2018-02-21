@@ -495,6 +495,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return null;
     },
 
+	/** Options for this part's input widget
+	 * @returns {Object}
+	 */
+	input_options: function() {
+		return {};
+	},
+
 	applyScripts: function() {
         var part = this;
 		this.originalScripts = {};

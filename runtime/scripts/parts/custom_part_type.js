@@ -32,7 +32,7 @@ var Part = Numbas.parts.Part;
  */
 var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, loading) {
     this.raw_settings = {};
-    this.input_options = {};
+    this.resolved_input_options = {};
 }
 CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
 
@@ -70,7 +70,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
 
     marking_parameters: function(studentAnswer) {
         var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
-        o.input_options = jme.wrapValue(this.input_options);
+        o.input_options = jme.wrapValue(this.input_options());
         return o;
     },
 
@@ -78,8 +78,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         if(!this.store) {
             return;
         }
-		var pobj = this.store.loadPart(this);
-		this.stagedAnswer = pobj.studentAnswer;
+        var pobj = this.store.loadPart(this);
+        this.stagedAnswer = pobj.studentAnswer;
     },
 
     finaliseLoad: function() {
@@ -124,7 +124,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
 
         for(var option in raw_input_options) {
             try {
-                p.input_options[option] = evaluate_input_option(raw_input_options[option]);
+                p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
             } catch(e) {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message});
             }
@@ -154,8 +154,12 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.definition.input_widget;
     },
 
+    input_options: function() {
+        return this.resolved_input_options;
+    },
+
     rawStudentAnswerAsJME: function() {
-        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options);
+        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
 
     student_answer_jme_types: {

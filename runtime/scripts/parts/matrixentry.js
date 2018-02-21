@@ -156,6 +156,20 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return 'matrix';
     },
 
+	/** Options for this part's input widget
+	 * @returns {Object}
+	 */
+	input_options: function() {
+		return {
+			allowFractions: this.settings.allowFractions,
+			allowedNotationStyles: ['plain','en','si-en'],
+			allowResize: this.settings.allowResize,
+			numRows: this.settings.numRows,
+			numColumns: this.settings.numColumns,
+			parseCells: false
+		};
+	},
+
 	/** Compute the correct answer, based on the given scope
 	 */
 	getCorrectAnswer: function(scope) {
@@ -188,9 +202,14 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 	/** Save a copy of the student's answer as entered on the page, for use in marking.
 	 */
 	setStudentAnswer: function() {
-		this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
-		this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
-		this.studentAnswer = this.stagedAnswer.matrix;
+		if(this.stagedAnswer !== undefined) {
+			this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
+			this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
+		} else {
+			this.studentAnswerRows = 0;
+			this.studentAnswerColumns = 0;
+		}
+			this.studentAnswer = this.stagedAnswer;
 	},
 
 	/** Get the student's answer as it was entered as a JME data type, to be used in the marking script
