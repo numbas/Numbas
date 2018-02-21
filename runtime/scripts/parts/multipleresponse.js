@@ -338,7 +338,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         for( i=0; i<this.numAnswers; i++ ) {
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {
-                this.stagedAnswer[i].push(pobj.ticks[i][j] || false);
+                this.stagedAnswer[i].push(pobj.studentAnswer[i][j] || false);
             }
         }
     },

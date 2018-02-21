@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
 
 /** @file Provides a storage API {@link Numbas.storage.SCORMStorage} which interfaces with SCORM */
 
-Numbas.queueScript('scorm-storage',['base','SCORM_API_wrapper','storage'],function() {
+Numbas.queueScript('scorm-storage',['base','util','SCORM_API_wrapper','storage'],function() {
 
 var scorm = Numbas.storage.scorm = {};
 
@@ -493,7 +493,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
 			return pobj;
 		} catch(e) {
-			throw(new Numbas.Error('scorm.error loading part',{part:part.path,message:e.message}));
+			throw(new Numbas.Error('scorm.error loading part',{part:Numbas.util.nicePartName(part.path),message:e.message}));
 		}
 	},
 
@@ -837,7 +837,7 @@ scorm.partTypeStorage = {
         suspend_data: function() {},
         load: function(part, data) {
             if(data.answer) {
-                return JSON.parse(out.answer);
+                return JSON.parse(data.answer);
             }
         }
     },
