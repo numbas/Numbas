@@ -580,11 +580,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
 		this.set(prepath+'result',part.score);
 
-        var typeStorage = this.getPartStorage(part);
-        if(typeStorage) {
-            var answer = typeStorage.student_answer(part,this);
-            this.set(prepath+'learner_response', answer+'');
-        }
+		if(part.answered) {
+			var typeStorage = this.getPartStorage(part);
+			if(typeStorage) {
+				var answer = typeStorage.student_answer(part,this);
+				this.set(prepath+'learner_response', answer+'');
+			}
+		} else {
+			this.set(prepath+'learner_response', '');
+		}
         
 		this.setSuspendData();
 	},
