@@ -48,6 +48,9 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	tryGetAttribute(settings,this.xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
 	tryGetAttribute(settings,this.xml,'answer/precision','precision','precisionString',{'string':true});
 
+	tryGetAttribute(settings,this.xml,'answer/fraction',['type','partialcredit','strict','showfractionhint'],['fractionType','fractionPC','strictPrecision','showFractionHint']);
+	tryGetAttribute(settings,this.xml,'answer/fraction','fraction','fractionString',{'string':true});
+
 	if(settings.precisionType!='none') {
 		settings.allowFractions = false;
 	}
@@ -72,7 +75,7 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	}
 
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
-	
+
 	if(loading)
 	{
 		var pobj = Numbas.store.loadNumberEntryPart(this);
@@ -96,10 +99,13 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
 	 * @property {Number} displayAnswer - representative correct answer to display when revealing answers
 	 * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+	 * @property {String} fractionType -
 	 * @property {Number} precisionString - definition of precision setting, before variables are substituted in
 	 * @property {Number} precision - how many decimal places or significant figures to require
+	 * @property {Number} fraction -
 	 * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
 	 * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+	 * @property {String} fractionMessage - message to display in the marking feedback if their answer was not given to the required fraction
 	 * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
 	 * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
 	 */
@@ -117,6 +123,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		precisionPC: 0,
 		mustBeReduced: false,
 		mustBeReducedPC: 0,
+		fractionType: 'none',
+		fraction: 0,
+		fractionPC: 0,
+		fractionMessage: R('You have not given your answer to the correct fraction.'),
+        showFractionHint: true
 		precisionMessage: R('You have not given your answer to the correct precision.'),
         showPrecisionHint: true
 	},
@@ -209,7 +220,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			this.setCredit(0,R('part.marking.nothing entered'));
 			return false;
 		}
-		
+
 		if( this.studentAnswer.length>0 && util.isNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles) ) {
 			var answerFloat = this.studentAnswerAsFloat();
 			if( answerFloat <= this.settings.maxvalue && answerFloat >= this.settings.minvalue ) {
@@ -245,7 +256,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 		if(!this.answered) {
 			this.giveWarning(R('part.marking.not submitted'));
 		}
-		
+
 		return this.answered;
 	}
 };

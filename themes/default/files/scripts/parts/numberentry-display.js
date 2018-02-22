@@ -112,6 +112,37 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         this.showPrecisionHint = Knockout.computed(function() {
             return this.part.settings.showPrecisionHint && this.precisionHint();
         },this);
+
+
+        /** Some text describing what precision the student should round their answer to
+         * @member {observable|string} fractionHint
+         * @memberof Numbas.display.NumberEntryPartDisplay
+         */
+        this.fractionHint = Knockout.computed(function() {
+            if(this.part.settings.fractionType=='none') {
+                if(this.part.settings.mustBeReduced) {
+                    return R('part.numberentry.give your answer as a reduced fraction');
+                } else {
+                    return '';
+                }
+            } else {
+                var fraction = this.part.settings.fraction;
+                var fractionType = R('part.numberentry.fraction type.'+this.part.settings.fractionType,{count:fraction});
+                if (fraction === 0) {
+                  return R('part.numberentry.give your answer to fraction_0',{count: fraction,fractionType: fractionType});
+                } else {
+                  return R('part.numberentry.give your answer to fraction',{count: fraction,fractionType: fractionType});
+                }
+            }
+        },this);
+
+        /** Show the fraction restriction hint?
+         * @member {observable|string} showFractionHint
+         * @memberof Numbas.display.NumberEntryPartDisplay
+         */
+        this.showFractionHint = Knockout.computed(function() {
+            return this.part.settings.showFractionHint && this.fractionHint();
+        },this);
     }
     display.NumberEntryPartDisplay.prototype =
     {
