@@ -27,7 +27,7 @@
 * Lionel F. (French / Français)
 * Marlon Arcila (Spanish / Español)
 * Michele Passante (Italian / Italiano)
-* Moafak M (Arabic / العربية)
+* Moafak Mkhallalati (Arabic / العربية)
 * Pascal Renauld (French / Français)
 * Pedro A. García-Sánchez (Spanish / Español)
 * Ricardo Monge (Spanish / Español)
