@@ -62,15 +62,6 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, questio
 	if(messageNode)
 		settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
 
-	var displayAnswer = (settings.minvalue + settings.maxvalue)/2;
-	if(settings.correctAnswerFraction) {
-        var diff = Math.abs(settings.maxvalue-settings.minvalue)/2;
-        var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
-		settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
-	} else {
-		settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType,precision:settings.precision, style: settings.correctAnswerStyle});
-	}
-
 	this.display = new Numbas.display.NumberEntryPartDisplay(this);
 	
 	if(loading)
@@ -151,6 +142,15 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 			maxvalue = maxvalue.value;
 		} else {
 			throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
+		}
+
+		var displayAnswer = (minvalue + maxvalue)/2;
+		if(settings.correctAnswerFraction) {
+			var diff = Math.abs(maxvalue-minvalue)/2;
+			var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
+			settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
+		} else {
+			settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
 		}
 
 		switch(settings.precisionType) {
