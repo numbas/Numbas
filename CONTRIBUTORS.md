@@ -7,6 +7,7 @@
 * Anthony Youd
 * Chris Graham
 * Stacey Aston
+* George Stagg
 
 ## Other contributors
 
@@ -21,18 +22,21 @@
 * Florent Cayré (French / Français)
 * Frank Podborski (Polish / Polski)
 * Helge Münnich (German / Deutsch)
+* Hugo Ribeiro (Brazilian Portuguese / Português brasileiro)
 * José Klenner (Spanish / Español)
 * Julio Mosquera (Spanish / Español)
 * Lionel F. (French / Français)
 * Marlon Arcila (Spanish / Español)
 * Michele Passante (Italian / Italiano)
-* Moafak M (Arabic / العربية)
+* Moafak Mkhallalati (Arabic / العربية)
 * Pascal Renauld (French / Français)
 * Pedro A. García-Sánchez (Spanish / Español)
 * Ricardo Monge (Spanish / Español)
 * S. Y. Lee (Korean / 한국어)
+* Takahiro Nakahara (Japanese / 日本語)
 * Tore Gaupseth (Norwegian Bokmål / Norsk bokmål)
-* Welton Vaz (Brazilian Portuguese / Português)
+* Welton Vaz (Brazilian Portuguese / Português brasileiro)
+* Yasuyuki Nakamura (Japanese / 日本語)
 * *Add your name here - [help to translate Numbas](https://poeditor.com/join/project/4yrwn1Nc2l)!*
 
 ### Code
