@@ -28,7 +28,7 @@ This repository is just one part of the Numbas ecosystem. See [the numbas organi
 
 ### Copyright
 
-> Copyright 2011-16 Newcastle University
+> Copyright 2011-18 Newcastle University
 > 
 > Licensed under the Apache License, Version 2.0 (the "License");
 > you may not use this file except in compliance with the License.
