@@ -213,6 +213,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var part = params.part;
+            this.disable = params.disable;
             this.gaps = ko.computed(function() {
                 return Knockout.unwrap(part.gaps).map(function(gap) {
                     return {answerJSON: ko.observable(), part: gap};
@@ -232,7 +233,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 <tbody data-bind="foreach: gaps">\
                     <tr>\
                         <th><span data-bind="text: part.header"></span></th>\
-                        <td><div data-bind="component: {name: \'answer-widget\', params: {answer: answerJSON, widget: Knockout.unwrap(part.type).widget, part: part}}"></div></td>\
+                        <td><div data-bind="component: {name: \'answer-widget\', params: {answer: answerJSON, widget: Knockout.unwrap(part.type).widget, part: part, disable: disable}}"></div></td>\
                     </tr>\
                 </tbody>\
             </table>\
@@ -492,6 +493,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
     ko.components.register('answer-widget-radios', {
         viewModel: function(params) {
             this.part = params.part;
+            this.disable = params.disable;
             this.options = params.options;
             this.choices = ko.observableArray(this.options.choices);
             this.answerAsArray = this.options.answerAsArray;
@@ -536,7 +538,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice"> <span data-bind="html: $data"></span></label></li>\
+                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable"> <span data-bind="html: $data"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -545,6 +547,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
     ko.components.register('answer-widget-dropdown', {
         viewModel: function(params) {
             this.part = params.part;
+            this.disable = params.disable;
             this.options = params.options;
             this.choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
             this.choices.splice(0,0,{label: '', index: null});
@@ -593,7 +596,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <select data-bind="options: choices, optionsText: \'label\', value: choice"></select>\
+            <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable"></select>\
         '
     });
 
@@ -601,6 +604,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             var vm = this;
             this.part = params.part;
+            this.disable = params.disable;
             this.options = params.options;
             this.answerJSON = params.answerJSON;
             var init = ko.unwrap(this.answerJSON);
@@ -655,7 +659,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked"> <span data-bind="html: content"></span></label></li>\
+                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable"> <span data-bind="html: content"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -665,6 +669,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.part = params.part;
             this.answerJSON = params.answerJSON;
+            this.disable = params.disable;
 
             this.options = params.options;
             this.choices = ko.observableArray(this.options.choices);
@@ -722,7 +727,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     <tr>\
                         <th><span data-bind="html: $parent.choices()[$index()]"></span></th>\
                         <!-- ko foreach: $data -->\
-                        <td><input type="checkbox" data-bind="checked: ticked"></td>\
+                        <td><input type="checkbox" data-bind="checked: ticked, disable: $parents[1].disable"></td>\
                         <!-- /ko -->\
                     </tr>\
                 </tbody>\
