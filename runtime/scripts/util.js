@@ -208,6 +208,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 			return false;
 		}
 		if(typeof(a)=='object') {
+			if(a===null || b===null) {
+				return a===b;
+			}
 			if(Array.isArray(a) && Array.isArray(b)) {
 				return util.arraysEqual(a,b);
 			} else {
