@@ -163,6 +163,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 	},
 
 	equalityTests: {
+        'nothing': function(a,b) {
+            return true;
+        },
 		'number': function(a,b) {
 			return Numbas.math.eq(a.value,b.value);
 		},

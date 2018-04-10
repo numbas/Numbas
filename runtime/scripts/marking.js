@@ -4,6 +4,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var jme = Numbas.jme;
     var math = Numbas.math;
 
+    var TNothing = jme.types.TNothing;
     var TString = jme.types.TString;
     var TList = jme.types.TList;
     var TName = jme.types.TName;
@@ -144,7 +145,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         if(args[0].tok.type=='name') {
             var name = args[0].tok.name.toLowerCase();
             return {
-                return: args[0].tok,
+                return: new TNothing(),
                 state: scope.states[name] || []
             };
         } else {

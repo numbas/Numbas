@@ -1375,6 +1375,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
  */
 var types = jme.types = {}
 
+/** Nothing type.
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @constructor
+ */
+var TNothing = types.TNothing = types.nothing = function() {};
+TNothing.prototype.type = 'nothing';
+
 /** Number type.
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token

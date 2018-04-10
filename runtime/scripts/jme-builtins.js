@@ -54,6 +54,8 @@ var TOp = Numbas.jme.types.TOp;
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 
+builtinScope.setVariable('nothing',new types.TNothing);
+
 var funcs = {};
 
 function newBuiltin(name,intype,outcons,fn,options) {

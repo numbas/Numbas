@@ -953,6 +953,9 @@ jme.display.specialNumbers = [
  * @memberof Numbas.jme.display
  */
 var typeToTeX = jme.display.typeToTeX = {
+    'nothing': function(thing,tok,texArgs,settings) {
+        return '\\text{nothing}';
+    },
 	'number': function(thing,tok,texArgs,settings) {
 		return settings.texNumber(tok.value);
 	},
@@ -1310,6 +1313,9 @@ function jmeRealNumber(n,settings)
  * @memberof Numbas.jme.display
  */
 var typeToJME = Numbas.jme.display.typeToJME = {
+    'nothing': function(tree,tok,bits,settings) {
+        return 'nothing';
+    },
 	'number': function(tree,tok,bits,settings) {
 		switch(tok.value)
 		{
