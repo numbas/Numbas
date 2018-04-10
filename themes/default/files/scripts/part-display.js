@@ -2,7 +2,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
-
     /** Display methods for a generic question part
      * @name PartDisplay
      * @memberof Numbas.display
@@ -11,69 +10,58 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
      */
     display.PartDisplay = function(p)
     {
-
         var pd = this;
         /** The associated part object
          * @member {Numbas.parts.Part} part
          * @memberof Numbas.display.PartDisplay
          */
         this.part = p;
-
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay
          */
         this.question = p.question;
-
         /** The student's current score ({@link Numbas.parts.Part#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.PartDisplay
          */
         this.score = Knockout.observable(p.score);
-
         /** The total marks available for this part ({@link Numbas.parts.Part#marks})
          * @member {observable|Number} marks
          * @memberof Numbas.display.PartDisplay
          */
         this.marks = Knockout.observable(p.marks);
-
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
          * @member {observable|Number} credit
          * @memberof Numbas.display.PartDisplay
          */
         this.credit = Knockout.observable(p.credit);
-
         /** Does this part do any marking?
          * @member {observable|Boolean} doesMarking
          * @see Numbas.parts.Part#doesMarking
          * @memberof Numbas.display.PartDisplay
          */
         this.doesMarking = Knockout.observable(p.doesMarking);
-
         /** Has the student answered this part?
          * @member {observable|Boolean} answered
          * @memberof Numbas.display.PartDisplay
          */
         this.answered = Knockout.observable(p.answered);
-
         /** Has the student changed their answer since the last submission?
          * @member {observable|Boolean} isDirty
          * @memberof Numbas.display.PartDisplay
          */
         this.isDirty = Knockout.observable(false);
-
         /** Warnings based on the student's answer
          * @member {observable|Array.<Object.<String>>} warnings
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = Knockout.observableArray([]);
-
         /** Are the warnings visible?
          * @member {observable|Boolean} warningsShown
          * @memberof Numbas.display.PartDisplay
          */
         this.warningsShown = Knockout.observable(false);
-
         /** Show the warnings
          * @member {function} showWarnings
          * @method
@@ -82,7 +70,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showWarnings = function() {
             this.warningsShown(true);
         }
-
         /** Hide the warnings
          * @member {function} hideWarnings
          * @method
@@ -91,13 +78,11 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.hideWarnings = function() {
             this.warningsShown(false);
         }
-
         /** Are the marking feedback messages visible?
          * @member {observable|Boolean} feedbackShown
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackShown = Knockout.observable(false);
-
         /** Text for the button to toggle the display of the feedback messages
          * @member {observable|String} toggleFeedbackText
          * @memberof Numbas.display.PartDisplay
@@ -105,13 +90,11 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.toggleFeedbackText = Knockout.computed(function() {
             return R(this.feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show');
         },this);
-
         /** Feedback messages
          * @member {observable|String[]} feedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackMessages = Knockout.observableArray([]);
-        
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
          * @member {observable|Boolean} isNotOnlyPart
@@ -120,7 +103,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
-
         /** Should the button to toggle feedback messages be shown?
          * @member {observable|Boolean} showFeedbackToggler
          * @memberof Numbas.display.PartDisplay
@@ -129,7 +111,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             var e = p.question.exam;
             return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
         },this);
-
         /** Show the "submit part" button?
          * @member {observable|Boolean} showSubmitPart
          * @memberof Numbas.display.PartDisplay
@@ -137,25 +118,21 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showSubmitPart = Knockout.computed(function() {
             return this.isNotOnlyPart() && !(this.revealed() || !this.isDirty());
         },this);
-
         /** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
          * @member {observable|Boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsShown = Knockout.observable(p.stepsShown);
-
         /** Are the steps currently open? ({@link Numbas.parts.Part#stepsOpen})
          * @member {observable|Boolean} stepsOpen
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsOpen = Knockout.observable(p.stepsOpen);
-
         /** Have the correct answers been revealed?
          * @member {observable|Boolean} revealed
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = Knockout.observable(false);
-
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage
          * @memberof Numbas.display.PartDisplay
@@ -170,7 +147,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             else
                 return R('question.show steps penalty',{count:this.part.settings.stepsPenalty});
         },this);
-
         /** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true
          * @member {observable|Boolean} showCorrectAnswer
          * @memberof Numbas.display.PartDisplay
@@ -178,7 +154,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showCorrectAnswer = Knockout.computed(function() {
             return p.settings.showCorrectAnswer && pd.revealed();
         });
-
         /** Display of this parts's current score / answered status
          * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
          * @memberof Numbas.display.PartDisplay
@@ -186,7 +161,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
         this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
-
         /** Show the marks feedback?
          * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay
@@ -194,7 +168,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showMarks = Knockout.computed(function() {
             return this.scoreFeedback.message() && (this.isNotOnlyPart() || this.scoreFeedback.iconClass());
         }, this);
-
         /** Should the box containing part marks and the submit and feedback buttons be shown?
          * @member {observable|Boolean} showFeedbackBox
          * @memberof Numbas.display.PartDisplay
@@ -202,7 +175,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
         },this);
-
         /** Control functions
          * @member {Object} controls
          * @memberof Numbas.display.PartDisplay
@@ -233,7 +205,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 p.hideSteps();
             }
         }
-
         /** Event bindings
          * @member {Object} inputEvents
          * @memberof Numbas.display.PartDisplay
@@ -247,7 +218,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     return true;
             }
         }
-
         var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';
         var index = p.isStep || p.isGap ? p.index : util.letterOrdinal(p.index);
         p.xml.setAttribute('jme-context-description',R(label)+' '+index);
@@ -262,7 +232,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         {
             this.warnings.push({message:warning+''});
         },
-
         /** Set the list of warnings
          * @param {Array.<String>} warnings
          * @memberof Numbas.display.PartDisplay
@@ -270,15 +239,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         setWarnings: function(warnings) {
             this.warnings(warnings.map(function(warning){return {message: warning+''}}));
         },
-
-        /** Remove all previously displayed warnings 
+        /** Remove all previously displayed warnings
          * @memberof Numbas.display.PartDisplay
          */
         removeWarnings: function()
         {
             this.part.removeWarnings();
         },
-
         /** Called when the part is displayed (basically when question is changed)
          * @see Numbas.display.QuestionDisplay.show
          * @memberof Numbas.display.PartDisplay
@@ -286,31 +253,25 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         show: function()
         {
             var p = this.part;
-
             this.feedbackShown(false);
-
             this.showScore(this.part.answered,true);
         },
-
-        /** Show/update the student's score and answer status on this part 
+        /** Show/update the student's score and answer status on this part
          * @memberof Numbas.display.PartDisplay
          */
         showScore: function(valid,noUpdate)
         {
             var p = this.part;
             var exam = p.question.exam;
-
             this.score(p.score);
             this.marks(p.marks);
             this.credit(p.credit);
             if(!noUpdate) {
                 this.scoreFeedback.update(true);
             }
-
             if(valid===undefined)
                 valid = this.part.answered;
             this.answered(valid);
-
             if(this.part.markingFeedback.length && !this.part.question.revealed)
             {
                 var messages = [];
@@ -320,7 +281,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 {
                     var action = this.part.markingFeedback[i];
                     var change = 0;
-
                     switch(action.op) {
                     case 'addCredit':
                         change = action.credit*maxMarks;
@@ -329,12 +289,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                         t += change;
                         break;
                     }
-
                     var message = action.message || '';
                     if(util.isNonemptyHTML(message))
                     {
                         var marks = Math.abs(change);
-
                         if(change>0)
                             message+='\n\n'+R('feedback.you were awarded',{count:marks});
                         else if(change<0)
@@ -343,51 +301,44 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     if(util.isNonemptyHTML(message))
                         messages.push(message);
                 }
-                
                 this.feedbackMessages(messages);
             }
         },
-
-        /** Called when 'show steps' button is pressed, or coming back to a part after steps shown 
+        /** Called when 'show steps' button is pressed, or coming back to a part after steps shown
          * @memberof Numbas.display.PartDisplay
          */
         showSteps: function()
         {
             this.stepsShown(this.part.stepsShown);
             this.stepsOpen(this.part.stepsOpen);
-
             for(var i=0;i<this.part.steps.length;i++)
             {
                 this.part.steps[i].display.show();
             }
         },
-
-        /** Hide the steps 
+        /** Hide the steps
          * @memberof Numbas.display.PartDisplay
          */
         hideSteps: function()
         {
             this.stepsOpen(this.part.stepsOpen);
         },
-
         /** Fill the student's last submitted answer into inputs
          * @abstract
          * @memberof Numbas.display.PartDisplay
          */
-        restoreAnswer: function() 
+        restoreAnswer: function()
         {
         },
-
-        /** Show the correct answers to this part 
+        /** Show the correct answers to this part
          * @memberof Numbas.display.PartDisplay
          */
-        revealAnswer: function() 
+        revealAnswer: function()
         {
             this.revealed(true);
             this.removeWarnings();
             this.showScore();
         },
-
         /** Initialise this part's display
          * @see Numbas.display.QuestionDisplay.init
          * @memberof Numbas.display.PartDisplay
@@ -398,8 +349,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 this.part.steps[i].display.init();
             }
         },
-
-        /** Called when the exam ends 
+        /** Called when the exam ends
          * @memberof Numbas.display.PartDisplay
          */
         end: function() {

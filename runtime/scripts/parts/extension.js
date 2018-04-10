@@ -1,27 +1,19 @@
 /*
 Copyright 2011-15 Newcastle University
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 /** @file The {@link Numbas.parts.} object */
-
 Numbas.queueScript('parts/extension',['base','util','part'],function() {
-
 var util = Numbas.util;
-
 var Part = Numbas.parts.Part;
-
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
  * @constructor
  * @memberof Numbas.parts
@@ -32,36 +24,28 @@ var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parent
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     loadFromXML: function() {},
-
     loadFromJSON: function() {},
-
     finaliseLoad: function() {
         if(Numbas.display) {
-        	this.display = new Numbas.display.ExtensionPartDisplay(this);
+    this.display = new Numbas.display.ExtensionPartDisplay(this);
         }
     },
-
-	validate: function() {
+    validate: function() {
         return false;
-	},
-
-	hasStagedAnswer: function() {
-		return true;
-	},
-
-	doesMarking: true,
-
+    },
+    hasStagedAnswer: function() {
+        return true;
+    },
+    doesMarking: true,
     mark: function() {
         this.markingComment(R('part.extension.not implemented',{name:'mark'}));
     },
-
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
      * @ returns {object}
      */
     createSuspendData: function() {
         return {};
     },
-
     /** Get the suspend data created in a previous session for this part, if it exists.
      * @ param {object} data
      */
@@ -78,6 +62,5 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
 ['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
 });
-
 Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
 });

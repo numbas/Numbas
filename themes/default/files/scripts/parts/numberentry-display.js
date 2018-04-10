@@ -2,7 +2,6 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
-
     /** Display code for a {@link Numbas.parts.NumberEntryPart}
      * @augments Numbas.display.PartDisplay
      * @constructor
@@ -12,23 +11,19 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
     display.NumberEntryPartDisplay = function()
     {
         var p = this.part;
-
         /** The student's current (not necessarily submitted) answer
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
-
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.correctAnswer = Knockout.observable(p.settings.displayAnswer);
-
         ko.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
-
         /** Cleaned-up version of student answer (remove commas and trim whitespace)
          *
          * Also check for validity and give warnings
@@ -40,7 +35,6 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             this.removeWarnings();
             if(studentAnswer=='')
                 return '';
-
             if(p.settings.integerAnswer) {
                 var dp = Numbas.math.countDP(studentAnswer);
                 if(dp>0)
@@ -53,13 +47,11 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles);
             return n+'';
         },this);
-
         /** Show a LaTeX rendering of the answer?
          * @member {boolean} showPreview
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.showPreview = false;
-
         /** TeX version of student's answer
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.NumberEntryPartDisplay
@@ -67,13 +59,11 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         this.studentAnswerLaTeX = Knockout.computed(function() {
             return this.cleanStudentAnswer();
         },this);
-
         /** Does the input box have focus?
          * @member {observable|boolean} inputHasFocus
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.inputHasFocus = Knockout.observable(false);
-
         /** Give the input box focus
          * @member {function} focusInput
          * @method
@@ -82,7 +72,6 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         this.focusInput = function() {
             this.inputHasFocus(true);
         }
-
         /** Some text describing what precision the student should round their answer to
          * @member {observable|string} precisionHint
          * @memberof Numbas.display.NumberEntryPartDisplay
@@ -104,7 +93,6 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                 }
             }
         },this);
-
         /** Show the precision restriction hint?
          * @member {observable|string} showPrecisionHint
          * @memberof Numbas.display.NumberEntryPartDisplay

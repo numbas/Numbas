@@ -2,7 +2,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
-
     /** Display code for a {@link Numbas.parts.MultipleResponsePart}
      * @augments Numbas.display.PartDisplay
      * @constructor
@@ -12,7 +11,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     display.MultipleResponsePartDisplay = function()
     {
         var p = this.part;
-
         function makeTicker(answer,choice) {
             var obs = ko.observable(p.ticks[answer][choice]);
             ko.computed(function() {
@@ -20,7 +18,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             },p);
             return obs;
         }
-
         function makeRadioTicker(choice) {
             var obs = Knockout.observable(null);
             for(var i=0;i<p.numAnswers;i++) {
@@ -40,9 +37,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             });
             return obs;
         }
-
         this.layout = util.copyarray(p.layout);
-
         switch(p.type) {
         case '1_n_2':
             /** Index of student's current answer choice (not necessarily submitted)
@@ -54,7 +49,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 if(p.ticks[i][0])
                     this.studentAnswer(i);
             }
-
             var oldAnswer = null;
             Knockout.computed(function() {
                 if(this.studentAnswer()==='') {
@@ -67,7 +61,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                     oldAnswer = i;
                 }
             },this);
-
             var max = 0, maxi = -1;
             for(var i=0;i<p.numAnswers;i++) {
                 if(p.settings.matrix[i][0]>max || maxi==-1) {
@@ -80,7 +73,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
             this.correctAnswer = Knockout.observable(maxi+'');
-
             break;
         case 'm_n_2':
             /** For each choice, has the student selected it?
@@ -90,7 +82,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
             this.ticks = [];
-
             /** For each choice, should it be selected to get the most marks?
              *
              * For m_n_2 parts, this is a list of booleans. For m_n_x radiogroup parts, it's a list of indices. For m_n_x checkbox parts, it's a 2d array of booleans.
@@ -102,7 +93,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 this.ticks[i] = makeTicker(i,0);
                 this.correctTicks[i] = p.settings.matrix[i][0]>0;
             }
-
             if(p.settings.warningType!='none') {
                 Knockout.computed(function() {
                     this.removeWarnings();
@@ -110,13 +100,11 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                     this.ticks.map(function(tick) {
                         ticked += tick() ? 1 : 0;
                     });
-
                     if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
                         p.giveWarning(R('part.mcq.wrong number of choices'));
                     };
                 },this);
             }
-
             break;
         case 'm_n_x':
             switch(p.settings.displayType) {
@@ -148,7 +136,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                         correctRow.push(p.settings.matrix[i][j]>0);
                     }
                 }
-
                 if(p.settings.warningType!='none') {
                     Knockout.computed(function() {
                         this.removeWarnings();
@@ -158,13 +145,11 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                                 ticked += tick() ? 1 : 0;
                             });
                         });
-
                         if(ticked<p.settings.minAnswers || ticked>p.settings.maxAnswers) {
                             p.giveWarning(R('part.mcq.wrong number of choices'));
                         };
                     },this);
                 }
-
                 break;
             }
             break;

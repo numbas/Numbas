@@ -1,29 +1,21 @@
 /*
 Copyright 2011-15 Newcastle University
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 /** @file The {@link Numbas.parts.MultipleResponsePart} object */
-
 Numbas.queueScript('parts/multipleresponse',['base','jme','jme-variables','util','part','marking_scripts'],function() {
-
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-
 var Part = Numbas.parts.Part;
-
 /** Multiple choice part - either pick one from a list, pick several from a list, or match choices with answers (2d grid, either pick one from each row or tick several from each row)
  *
  * Types:
@@ -40,7 +32,6 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
     var p = this;
     var settings = this.settings;
     util.copyinto(MultipleResponsePart.prototype.settings,settings);
-
 }
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
@@ -48,7 +39,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var scope = this.getScope();
-
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
@@ -58,7 +48,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.flipped = false;
         }
-
         //work out marks available
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
         if(settings.maxMarksEnabled) {
@@ -66,25 +55,19 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             tryGetAttribute(this,xml,'.','marks');
         }
-        
         //get minimum marks setting
         tryGetAttribute(settings,xml,'marking/minmarks','enabled','minMarksEnabled');
         if(settings.minMarksEnabled) {
             tryGetAttribute(settings,xml,'marking/minmarks','value','minimumMarks');
         }
-
         //get restrictions on number of choices
         var choicesNode = xml.selectSingleNode('choices');
         if(!choicesNode) {
             this.error('part.mcq.choices missing');
         }
-
         tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType'],['minAnswersString','maxAnswersString','shuffleChoices']);
-
         var choiceNodes = choicesNode.selectNodes('choice');
-
         var answersNode, answerNodes;
-
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
             // so swap "answers" and "choices"
@@ -102,9 +85,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.numAnswers = answerNodes.length;
             }
         }
-    
         var def;
-
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
             if(values.type!='list') {
@@ -118,7 +99,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 content.appendChild(span);
                 node.appendChild(content);
                 topNode.appendChild(node);
-
                 switch(value.type) {
                 case 'string':
                 case 'number':
@@ -134,7 +114,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     while(newNode.childNodes.length) {
                         span.appendChild(newNode.childNodes[0]);
                     }
-
                     break;
                 case 'html':
                     var selection = $(value.value);
@@ -156,7 +135,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             });
             return numValues;
         }
-
         if(def = answersNode.getAttribute('def')) {
             settings.answersDef = def;
             var nodeName = this.flipped ? 'choice' : 'answer';
@@ -170,18 +148,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             choiceNodes = choicesNode.selectNodes('choice');
             this.numChoices = choiceNodes.length;
         }
-
         //get warning type and message for wrong number of choices
         warningNode = xml.selectSingleNode('marking/warning');
         if(warningNode) {
             tryGetAttribute(settings,null,warningNode,'type','warningType');
         }
-        
         if(this.type=='m_n_x') {
             var layoutNode = xml.selectSingleNode('layout');
             tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
         }
-
         //fill marks matrix
         var def;
         var markingMatrixNode = xml.selectSingleNode('marking/matrix');
@@ -201,18 +176,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             for( i=0; i<matrixNodes.length; i++ ) {
                 var cell = {value: ""};
                 tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
-
                 if(this.flipped) {
                     // possible answers are recorded as choices in the multiple choice types.
                     // switch the indices round, so we don't have to worry about this again
                     cell.answerIndex = cell.choiceIndex;
                     cell.choiceIndex = 0;
                 }
-
                 markingMatrixArray[cell.answerIndex][cell.choiceIndex] = cell.value;
             }
         }
-
         var distractors = [];
         for( i=0; i<this.numAnswers; i++ ) {
             var row = [];
@@ -228,37 +200,31 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             cell.message = $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
             cell.message = jme.contentsubvars(cell.message,scope);
-
-            if(this.type == '1_n_2' || this.type == 'm_n_2') {    
+            if(this.type == '1_n_2' || this.type == 'm_n_2') {
                 // possible answers are recorded as choices in the multiple choice types.
                 // switch the indices round, so we don't have to worry about this again
                 cell.answerIndex = cell.choiceIndex;
                 cell.choiceIndex = 0;
             }
-
             distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
         }
         settings.distractors = distractors;
     },
-
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         var scope = this.getScope();
-
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             this.flipped = true;
         } else {
             this.flipped = false;
         }
-
         tryLoad(data, ['maxMarks'], this, ['marks']);
         tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType']);
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
-
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
@@ -271,7 +237,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
             this.numChoices = settings.choices.length;
         }
-
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
@@ -284,11 +249,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
             this.numAnswers = settings.answers.length;
         }
-
         if(this.flipped) {
             this.numAnswers = 1;
         }
-
         if(typeof(data.matrix)=='string') {
             settings.markingMatrixString = data.matrix;
         } else {
@@ -300,14 +263,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 settings.markingMatrixArray = Numbas.matrixmath.transpose(settings.markingMatrixArray);
             }
         }
-
         if(this.flipped) {
             this.numAnswers = this.numChoices;
             this.numChoices = 1;
             this.answers = this.choices;
             this.choices = null;
         }
-
         tryLoad(data, ['distractors'], settings);
         if(settings.distractors && (this.type=='1_n_2' || this.type=='m_n_2')) {
             settings.distractors = settings.distractors.map(function(d){return [d]});
@@ -322,9 +283,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 settings.distractors.push(row);
             }
         }
-
     },
-
     resume: function() {
         if(!this.store) {
             return;
@@ -333,7 +292,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.shuffleChoices = pobj.shuffleChoices;
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
-
         this.stagedAnswer = [];
         for( i=0; i<this.numAnswers; i++ ) {
             this.stagedAnswer.push([]);
@@ -342,34 +300,28 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
     },
-
     finaliseLoad: function() {
         var settings = this.settings;
         var scope = this.getScope();
-
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             settings.shuffleAnswers = settings.shuffleChoices;
             settings.shuffleChoices = false;
         }
-
         this.shuffleChoices = [];
         if(settings.shuffleChoices) {
             this.shuffleChoices = math.deal(this.numChoices);
         } else {
             this.shuffleChoices = math.range(this.numChoices);
         }
-
         this.shuffleAnswers = [];
         if(settings.shuffleAnswers) {
             this.shuffleAnswers = math.deal(this.numAnswers);
         } else {
             this.shuffleAnswers = math.range(this.numAnswers);
         }
-
         this.marks = util.parseNumber(this.marks) || 0;
         settings.minimumMarks = util.parseNumber(settings.minimumMarks) || 0;
-
         var minAnswers = jme.subvars(settings.minAnswersString, scope);
         minAnswers = jme.evaluate(minAnswers, scope);
         if(minAnswers && minAnswers.type=='number') {
@@ -377,7 +329,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.error('part.setting not present',{property: 'minimum answers'});
         }
-
         var maxAnswers = jme.subvars(settings.maxAnswersString, scope);
         maxAnswers = jme.evaluate(maxAnswers, scope);
         if(maxAnswers && maxAnswers.type=='number') {
@@ -385,7 +336,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.error('part.setting not present',{property: 'maximum answers'});
         }
-
         // fill layout matrix
         var layout = this.layout = [];
         if(this.type=='m_n_x') {
@@ -413,18 +363,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 layout.push(row);
             }
         }
-
         if(this.type=='1_n_2') {
             settings.maxAnswers = 1;
         } else if(settings.maxAnswers==0) {
             settings.maxAnswers = this.numAnswers * this.numChoices;
         }
-
         this.getCorrectAnswer(scope);
-
         if(this.marks == 0) {    //if marks not set explicitly
             var matrix = this.settings.matrix;
-        
             var flat = [];
             switch(this.type)
             {
@@ -462,7 +408,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.marks+=flat[i];
             }
         }
-
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
@@ -474,37 +419,30 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.stagedAnswer[i].push(false);
             }
         }
-
         if(Numbas.display) {
             this.display = new Numbas.display.MultipleResponsePartDisplay(this);
         }
     },
-
     /** Student's last submitted answer/choice selections
      * @type {Array.<Array.<Boolean>>}
      */
     ticks: [],
-    
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
     markingScript: Numbas.marking_scripts.multipleresponse,
-
     /** Number of choices - used by `m_n_x` parts
      * @type {Number}
      */
     numChoices: 0,
-
     /** Number of answers
      * @type {Number}
      */
     numAnswers: 0,
-
     /** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)
      * @type {Boolean}
      */
     flipped: false,
-
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
@@ -535,42 +473,38 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         layoutType: 'all',
         layoutExpression: ''
     },
-
     /** The name of the input widget this part uses, if any.
-
      * @returns {String}
      */
     input_widget: function() {
         switch(this.type) {
             case '1_n_2':
-				switch(this.settings.displayType) {
-					case 'radiogroup':
-		                return 'radios'	;
-					case 'dropdownlist':
-						return 'dropdown';
-				}
+                switch(this.settings.displayType) {
+                    case 'radiogroup':
+                        return 'radios'	;
+                    case 'dropdownlist':
+                        return 'dropdown';
+                }
             case 'm_n_2':
                 return 'checkboxes';
             case 'm_n_x':
                 return 'm_n_x';
         }
     },
-	/** Options for this part's input widget
-	 * @returns {Object}
-	 */
-	input_options: function() {
-		return {
-			choices: this.settings.choices,
-			answers: this.settings.answers,
-			answerAsArray: true
-		};
-	},
-
+    /** Options for this part's input widget
+     * @returns {Object}
+     */
+    input_options: function() {
+        return {
+            choices: this.settings.choices,
+            answers: this.settings.answers,
+            answerAsArray: true
+        };
+    },
     /** Compute the correct answer, based on the given scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-
         var matrix = [];
         if(settings.markingMatrixString) {
             matrix = jme.evaluate(settings.markingMatrixString,scope);
@@ -616,14 +550,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             if(matrix.length!=this.numChoices) {
                 this.error('part.mcq.matrix wrong size');
             }
-
             // take into account shuffling;
             for(var i=0;i<this.numChoices;i++) {
                 if(matrix[i].length!=this.numAnswers) {
                     this.error('part.mcq.matrix wrong size');
                 }
             }
-
             matrix = Numbas.matrixmath.transpose(matrix);
         } else {
             for(var i=0;i<this.numAnswers;i++) {
@@ -647,12 +579,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         }
                         value = parseFloat(value);
                     }
-
                     row[j] = value;
                 }
             }
         }
-
         for(var i=0;i<matrix.length;i++) {
             var l = matrix[i].length;
             for(var j=0;j<l;j++) {
@@ -661,7 +591,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
             }
         }
-
         switch(this.type) {
         case '1_n_2':
             var max = 0, maxi = null;
@@ -684,21 +613,17 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxMatrix = matrix.map(function(r){ return r.map(function(c){return c>0; }) });
             break;
         }
-
         settings.matrix = matrix;
     },
-
     /** Store the student's choices */
     storeTick: function(answer)
     {
         this.setDirty(true);
         this.display && this.display.removeWarnings();
-
-        //get choice and answer 
+        //get choice and answer
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
         var answerIndex = answer.answer;
         var choiceIndex = answer.choice;
-
         switch(this.settings.displayType)
         {
         case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
@@ -712,13 +637,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
     },
-
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
         this.ticks = util.copyarray(this.stagedAnswer,true);
     },
-
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
      * @abstract
      * @returns {Numbas.jme.token}
@@ -726,7 +649,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     rawStudentAnswerAsJME: function() {
         return Numbas.jme.wrapValue(this.ticks);
     },
-
     /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
      * @abstract
      * @returns {Numbas.jme.token}
@@ -764,8 +686,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
         }
     },
-
-    /** Reveal the correct answers, and any distractor messages for the student's choices 
+    /** Reveal the correct answers, and any distractor messages for the student's choices
      * Extends {@link Numbas.parts.Part.revealAnswer}
      */
     revealAnswer: function()
@@ -789,8 +710,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 ['revealAnswer'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
-
-
 /** Layouts for multiple response types
  * @type {Object.<function>
  */
@@ -802,9 +721,7 @@ Numbas.parts.MultipleResponsePart.layoutTypes = {
     strictuppertriangle: function(row,column) { return row<column; },
     expression: function(row,column) { return layoutMatrix[row][column]; }
 };
-
 Numbas.partConstructors['1_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_x'] = util.extend(Part,MultipleResponsePart);
 });
-

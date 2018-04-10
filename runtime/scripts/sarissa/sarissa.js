@@ -11,25 +11,25 @@ Numbas.queueScript('sarissa',[],function(module) {
  * ====================================================================
  * Licence
  * ====================================================================
- * Sarissa is free software distributed under the GNU GPL version 2 (see <a href="gpl.txt">gpl.txt</a>) or higher, 
- * GNU LGPL version 2.1 (see <a href="lgpl.txt">lgpl.txt</a>) or higher and Apache Software License 2.0 or higher 
- * (see <a href="asl.txt">asl.txt</a>). This means you can choose one of the three and use that if you like. If 
+ * Sarissa is free software distributed under the GNU GPL version 2 (see <a href="gpl.txt">gpl.txt</a>) or higher,
+ * GNU LGPL version 2.1 (see <a href="lgpl.txt">lgpl.txt</a>) or higher and Apache Software License 2.0 or higher
+ * (see <a href="asl.txt">asl.txt</a>). This means you can choose one of the three and use that if you like. If
  * you make modifications under the ASL, i would appreciate it if you submitted those.
  * In case your copy of Sarissa does not include the license texts, you may find
- * them online in various formats at <a href="http://www.gnu.org">http://www.gnu.org</a> and 
+ * them online in various formats at <a href="http://www.gnu.org">http://www.gnu.org</a> and
  * <a href="http://www.apache.org">http://www.apache.org</a>.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY 
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
- * WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE 
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE
+ * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 /**
- * <p>Sarissa is a utility class. Provides "static" methods for DOMDocument, 
+ * <p>Sarissa is a utility class. Provides "static" methods for DOMDocument,
  * DOM Node serialization to XML strings and other utility goodies.</p>
  * @constructor
  * @static
@@ -45,7 +45,7 @@ Sarissa.REMOTE_CALL_FLAG = "gr.abiss.sarissa.REMOTE_CALL_FLAG";
 Sarissa._lastUniqueSuffix = 0;
 /** @private */
 Sarissa._getUniqueSuffix = function(){
-	return Sarissa._lastUniqueSuffix++;
+    return Sarissa._lastUniqueSuffix++;
 };
 /** @private */
 Sarissa._SARISSA_IEPREFIX4XSLPARAM = "";
@@ -68,20 +68,18 @@ Sarissa._SARISSA_IS_OPERA = navigator.userAgent.toLowerCase().indexOf("opera") !
 if(!window.Node || !Node.ELEMENT_NODE){
     Node = {ELEMENT_NODE: 1, ATTRIBUTE_NODE: 2, TEXT_NODE: 3, CDATA_SECTION_NODE: 4, ENTITY_REFERENCE_NODE: 5,  ENTITY_NODE: 6, PROCESSING_INSTRUCTION_NODE: 7, COMMENT_NODE: 8, DOCUMENT_NODE: 9, DOCUMENT_TYPE_NODE: 10, DOCUMENT_FRAGMENT_NODE: 11, NOTATION_NODE: 12};
 }
-
 //This breaks for(x in o) loops in the old Safari
 if(Sarissa._SARISSA_IS_SAFARI_OLD){
-	HTMLHtmlElement = document.createElement("html").constructor;
-	Node = HTMLElement = {};
-	HTMLElement.prototype = HTMLHtmlElement.__proto__.__proto__;
-	HTMLDocument = Document = document.constructor;
-	var x = new DOMParser();
-	XMLDocument = x.constructor;
-	Element = x.parseFromString("<Single />", "text/xml").documentElement.constructor;
-	x = null;
+    HTMLHtmlElement = document.createElement("html").constructor;
+    Node = HTMLElement = {};
+    HTMLElement.prototype = HTMLHtmlElement.__proto__.__proto__;
+    HTMLDocument = Document = document.constructor;
+    var x = new DOMParser();
+    XMLDocument = x.constructor;
+    Element = x.parseFromString("<Single />", "text/xml").documentElement.constructor;
+    x = null;
 }
-if(typeof XMLDocument == "undefined" && typeof Document !="undefined"){ XMLDocument = Document; } 
-
+if(typeof XMLDocument == "undefined" && typeof Document !="undefined"){ XMLDocument = Document; }
 // IE initialization
 if(Sarissa._SARISSA_IS_IE){
     // for XSLT parameter names, prefix needed by IE
@@ -123,9 +121,9 @@ if(Sarissa._SARISSA_IS_IE){
     _SARISSA_THREADEDDOM_PROGID = null;
     _SARISSA_XSLTEMPLATE_PROGID = null;
     _SARISSA_XMLHTTP_PROGID = null;
-    // commenting the condition out; we need to redefine XMLHttpRequest 
-    // anyway as IE7 hardcodes it to MSXML3.0 causing version problems 
-    // between different activex controls 
+    // commenting the condition out; we need to redefine XMLHttpRequest
+    // anyway as IE7 hardcodes it to MSXML3.0 causing version problems
+    // between different activex controls
     //if(!window.XMLHttpRequest){
     /**
      * Emulate XMLHttpRequest
@@ -145,31 +143,29 @@ if(Sarissa._SARISSA_IS_IE){
     // see non-IE version
     Sarissa.getDomDocument = function(sUri, sName){
         if(!_SARISSA_DOM_PROGID){
-        	try{
-        		_SARISSA_DOM_PROGID = Sarissa.pickRecentProgID(["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"]);
-        	}catch(e){
-        		_SARISSA_DOM_PROGID = "noActiveX";
-        	}
+    try{
+        _SARISSA_DOM_PROGID = Sarissa.pickRecentProgID(["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"]);
+    }catch(e){
+        _SARISSA_DOM_PROGID = "noActiveX";
+    }
         }
-
         // Not sure how far IE can carry this but try to do something useful when ActiveX is disabled
         var oDoc = _SARISSA_DOM_PROGID == "noActiveX" ? document.createElement("xml") : new ActiveXObject(_SARISSA_DOM_PROGID);
         // set validation off, make sure older IEs dont choke (no time or IEs to test ;-)
         try{
-        	oDoc.validateOnParse = false; 
-        	oDoc.resolveExternals = "false";
-        	oDoc.setProperty("ProhibitDTD", false);
+    oDoc.validateOnParse = false;
+    oDoc.resolveExternals = "false";
+    oDoc.setProperty("ProhibitDTD", false);
         }catch(e){}
-        
         // if a root tag name was provided, we need to load it in the DOM object
         if (sName){
-            // create an artifical namespace prefix 
+            // create an artifical namespace prefix
             // or reuse existing prefix if applicable
             var prefix = "";
             if(sUri){
                 if(sName.indexOf(":") > 1){
                     prefix = sName.substring(0, sName.indexOf(":"));
-                    sName = sName.substring(sName.indexOf(":")+1); 
+                    sName = sName.substring(sName.indexOf(":")+1);
                 }else{
                     prefix = "a" + Sarissa._getUniqueSuffix();
                 }
@@ -183,14 +179,14 @@ if(Sarissa._SARISSA_IS_IE){
         }
         return oDoc;
     };
-    // see non-IE version   
+    // see non-IE version
     Sarissa.getParseErrorText = function (oDoc) {
         var parseErrorText = Sarissa.PARSED_OK;
         if(oDoc && oDoc.parseError && oDoc.parseError.errorCode && oDoc.parseError.errorCode != 0){
-            parseErrorText = "XML Parsing Error: " + oDoc.parseError.reason + 
-                "\nLocation: " + oDoc.parseError.url + 
-                "\nLine Number " + oDoc.parseError.line + ", Column " + 
-                oDoc.parseError.linepos + 
+            parseErrorText = "XML Parsing Error: " + oDoc.parseError.reason +
+                "\nLocation: " + oDoc.parseError.url +
+                "\nLine Number " + oDoc.parseError.line + ", Column " +
+                oDoc.parseError.linepos +
                 ":\n" + oDoc.parseError.srcText +
                 "\n";
             for(var i = 0;  i < oDoc.parseError.linepos;i++){
@@ -234,17 +230,17 @@ if(Sarissa._SARISSA_IS_IE){
         var converted = new ActiveXObject(_SARISSA_THREADEDDOM_PROGID);
         // make included/imported stylesheets work if exist and xsl was originally loaded from url
         try{
-            converted.resolveExternals = true; 
-            converted.setProperty("AllowDocumentFunction", true); 
+            converted.resolveExternals = true;
+            converted.setProperty("AllowDocumentFunction", true);
             converted.setProperty("AllowXsltScript", true);
         }
         catch(e){
             // Ignore. "AllowDocumentFunction" and "AllowXsltScript" is only supported in MSXML 3.0 SP4+ and 3.0 SP8+ respectively.
-        } 
+        }
         if(xslDoc.url && xslDoc.selectSingleNode("//xsl:*[local-name() = 'import' or local-name() = 'include']") != null){
             converted.async = false;
             converted.load(xslDoc.url);
-        } 
+        }
         else {
             converted.loadXML(xslDoc.xml);
         }
@@ -253,16 +249,15 @@ if(Sarissa._SARISSA_IS_IE){
         //this.outputMethod = output ? output.getAttribute("method") : "html";
         if(output) {
             this.outputMethod = output.getAttribute("method");
-        } 
+        }
         else {
             delete this.outputMethod;
-        } 
+        }
         this.template.stylesheet = converted;
         this.processor = this.template.createProcessor();
         // for getParameter and clearParameters
         this.paramsSet = [];
     };
-
     /**
      * Transform the given XML DOM and return the transformation result as a new DOM document
      * @param {DOMDocument} sourceDoc The XML DOMDocument to transform
@@ -284,14 +279,13 @@ if(Sarissa._SARISSA_IS_IE){
             }
             this.processor.input = sourceDoc;
             outDoc = new ActiveXObject(_SARISSA_DOM_XMLWRITER);
-            this.processor.output = outDoc; 
+            this.processor.output = outDoc;
             this.processor.transform();
             var oDoc = new ActiveXObject(_SARISSA_DOM_PROGID);
             oDoc.loadXML(outDoc.output+"");
             return oDoc;
         }
     };
-    
     /**
      * Transform the given XML DOM and return the transformation result as a new DOM fragment.
      * <b>Note</b>: The xsl:output method must match the nature of the owner document (XML/HTML).
@@ -328,10 +322,9 @@ if(Sarissa._SARISSA_IS_IE){
         }
         return f;
     };
-    
     /**
-     * Set global XSLT parameter of the imported stylesheet. This method should 
-     * only be used <strong>after</strong> the importStylesheet method for the 
+     * Set global XSLT parameter of the imported stylesheet. This method should
+     * only be used <strong>after</strong> the importStylesheet method for the
      * context XSLTProcessor instance.
      * @param {String} nsURI The parameter namespace URI
      * @param {String} name The parameter base name
@@ -368,7 +361,6 @@ if(Sarissa._SARISSA_IS_IE){
             return null;
         }
     };
-    
     /**
      * Clear parameters (set them to default values as defined in the stylesheet itself)
      */
@@ -417,11 +409,9 @@ if(Sarissa._SARISSA_IS_IE){
                 oDoc.onreadystatechange();
             }
         };
-        
         Sarissa.getDomDocument = function(sUri, sName){
             var oDoc = document.implementation.createDocument(sUri?sUri:null, sName?sName:null, null);
             if(!oDoc.onreadystatechange){
-            
                 /**
                 * <p>Emulate IE's onreadystatechange attribute</p>
                 */
@@ -444,7 +434,7 @@ if(Sarissa._SARISSA_IS_IE){
             // do nothing
         }// TODO: check if the new document has content before trying to copynodes, check  for error handling in DOM 3 LS
         else if(Sarissa._SARISSA_HAS_DOM_FEATURE && window.Document && !Document.prototype.load && document.implementation.hasFeature('LS', '3.0')){
-    		//Opera 9 may get the XPath branch which gives creates XMLDocument, therefore it doesn't reach here which is good
+        //Opera 9 may get the XPath branch which gives creates XMLDocument, therefore it doesn't reach here which is good
             /**
             * <p>Factory method to obtain a new DOM Document object</p>
             * @memberOf Sarissa
@@ -479,10 +469,10 @@ if(Sarissa._SARISSA_IS_IE || !window.DOMParser){
          * @constructor
          */
         DOMParser = function() { };
-        /** 
+        /**
         * Construct a new DOM Document from the given XMLstring
         * @param {String} sXml the given XML string
-        * @param {String} contentType the content type of the document the given string represents (one of text/xml, application/xml, application/xhtml+xml). 
+        * @param {String} contentType the content type of the document the given string represents (one of text/xml, application/xml, application/xhtml+xml).
         * @return {DOMDocument} a new DOM Document from the given XML string
         */
         DOMParser.prototype.parseFromString = function(sXml, contentType){
@@ -496,15 +486,14 @@ if(Sarissa._SARISSA_IS_IE || !window.DOMParser){
         DOMParser.prototype.parseFromString = function(sXml, contentType){
             var doc = Sarissa.getDomDocument();
             try{
-            	doc.validateOnParse = false; 
-            	doc.setProperty("ProhibitDTD", false);
+    doc.validateOnParse = false;
+    doc.setProperty("ProhibitDTD", false);
             }catch(e){}
             doc.loadXML(sXml);
             return doc;
         };
     }
 }
-
 if((typeof(document.importNode) == "undefined") && Sarissa._SARISSA_IS_IE){
     try{
         /**
@@ -573,7 +562,7 @@ if(!Sarissa.getParseErrorText){
  * Get a string with the concatenated values of all string nodes under the given node
  * @param {DOMNode} oNode the given DOM node
  * @param {boolean} deep whether to recursively scan the children nodes of the given node for text as well. Default is <code>false</code>
- * @memberOf Sarissa 
+ * @memberOf Sarissa
  */
 Sarissa.getText = function(oNode, deep){
     var s = "";
@@ -608,10 +597,9 @@ if(Sarissa._SARISSA_IS_IE || !window.XMLSerializer && Sarissa.getDomDocument && 
         return oNode.xml;
     };
 }
-
 /**
- * Strips tags from the given markup string. If the given string is 
- * <code>undefined</code>, <code>null</code> or empty, it is returned as is. 
+ * Strips tags from the given markup string. If the given string is
+ * <code>undefined</code>, <code>null</code> or empty, it is returned as is.
  * @memberOf Sarissa
  * @param {String} s the string to strip the tags from
  */
@@ -631,7 +619,7 @@ Sarissa.clearChildNodes = function(oNode) {
 };
 /**
  * <p> Copies the childNodes of nodeFrom to nodeTo</p>
- * <p> <b>Note:</b> The second object's original content is deleted before 
+ * <p> <b>Note:</b> The second object's original content is deleted before
  * the copy operation, unless you supply a true third parameter</p>
  * @memberOf Sarissa
  * @param {DOMNode} nodeFrom the Node to copy the childNodes from
@@ -640,9 +628,8 @@ Sarissa.clearChildNodes = function(oNode) {
  */
 Sarissa.copyChildNodes = function(nodeFrom, nodeTo, bPreserveExisting) {
     if(Sarissa._SARISSA_IS_SAFARI && nodeTo.nodeType == Node.DOCUMENT_NODE){ // SAFARI_OLD ??
-    	nodeTo = nodeTo.documentElement; //Apparently there's a bug in safari where you can't appendChild to a document node
+    nodeTo = nodeTo.documentElement; //Apparently there's a bug in safari where you can't appendChild to a document node
     }
-    
     if((!nodeFrom) || (!nodeTo)){
         throw "Both source and destination nodes must be provided";
     }
@@ -662,16 +649,15 @@ Sarissa.copyChildNodes = function(nodeFrom, nodeTo, bPreserveExisting) {
         }
     }
 };
-
 /**
  * <p> Moves the childNodes of nodeFrom to nodeTo</p>
- * <p> <b>Note:</b> The second object's original content is deleted before 
+ * <p> <b>Note:</b> The second object's original content is deleted before
  * the move operation, unless you supply a true third parameter</p>
  * @memberOf Sarissa
  * @param {DOMNode} nodeFrom the Node to copy the childNodes from
  * @param {DOMNode} nodeTo the Node to copy the childNodes to
  * @param {boolean} bPreserveExisting whether to preserve the original content of nodeTo, default is
- */ 
+ */
 Sarissa.moveChildNodes = function(nodeFrom, nodeTo, bPreserveExisting) {
     if((!nodeFrom) || (!nodeTo)){
         throw "Both source and destination nodes must be provided";
@@ -700,17 +686,16 @@ Sarissa.moveChildNodes = function(nodeFrom, nodeTo, bPreserveExisting) {
         Sarissa.clearChildNodes(nodeFrom);
     }
 };
-
-/** 
+/**
  * <p>Serialize any <strong>non</strong> DOM object to an XML string. All properties are serialized using the property name
- * as the XML element name. Array elements are rendered as <code>array-item</code> elements, 
+ * as the XML element name. Array elements are rendered as <code>array-item</code> elements,
  * using their index/key as the value of the <code>key</code> attribute.</p>
  * @memberOf Sarissa
  * @param {Object} anyObject the object to serialize
  * @param {String} objectName a name for that object, to be used as the root element name
- * @param {String} indentSpace Optional, the indentation space to use, default is an empty 
+ * @param {String} indentSpace Optional, the indentation space to use, default is an empty
  *        string. A single space character is added in any recursive call.
- * @param {noolean} skipEscape Optional, whether to skip escaping characters that map to the 
+ * @param {noolean} skipEscape Optional, whether to skip escaping characters that map to the
  *        five predefined XML entities. Default is <code>false</code>.
  * @return {String} the XML serialization of the given object as a string
  */
@@ -725,18 +710,17 @@ Sarissa.xmlize = function(anyObject, objectName, indentSpace, skipEscape){
         s += "\n";
         var isArrayItem = anyObject instanceof Array;
         for(var name in anyObject){
-        	// do not xmlize functions 
-        	if (anyObject[name] instanceof Function){
-        		continue;
-        	} 
+    // do not xmlize functions
+    if (anyObject[name] instanceof Function){
+        continue;
+    }
             s += Sarissa.xmlize(anyObject[name], (isArrayItem?"array-item key=\""+name+"\"":name), indentSpace + " ");
         }
         s += indentSpace;
     }
     return (s += (objectName.indexOf(' ')!=-1?"</array-item>\n":"</" + objectName + ">\n"));
 };
-
-/** 
+/**
  * Escape the given string chacters that correspond to the five predefined XML entities
  * @memberOf Sarissa
  * @param {String} sXml the string to escape
@@ -744,9 +728,8 @@ Sarissa.xmlize = function(anyObject, objectName, indentSpace, skipEscape){
 Sarissa.escape = function(sXml){
     return sXml.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 };
-
-/** 
- * Unescape the given string. This turns the occurences of the predefined XML 
+/**
+ * Unescape the given string. This turns the occurences of the predefined XML
  * entities to become the characters they represent correspond to the five predefined XML entities
  * @memberOf Sarissa
  * @param  {String}sXml the string to unescape
@@ -754,25 +737,23 @@ Sarissa.escape = function(sXml){
 Sarissa.unescape = function(sXml){
     return sXml.replace(/&apos;/g,"'").replace(/&quot;/g,"\"").replace(/&gt;/g,">").replace(/&lt;/g,"<").replace(/&amp;/g,"&");
 };
-
 /** @private */
 Sarissa.updateCursor = function(oTargetElement, sValue) {
     if(oTargetElement && oTargetElement.style && oTargetElement.style.cursor != undefined ){
         oTargetElement.style.cursor = sValue;
     }
 };
-
 /**
- * Asynchronously update an element with response of a GET request on the given URL.  Passing a configured XSLT 
+ * Asynchronously update an element with response of a GET request on the given URL.  Passing a configured XSLT
  * processor will result in transforming and updating oNode before using it to update oTargetElement.
- * You can also pass a callback function to be executed when the update is finished. The function will be called as 
+ * You can also pass a callback function to be executed when the update is finished. The function will be called as
  * <code>functionName(oNode, oTargetElement);</code>
  * @memberOf Sarissa
  * @param {String} sFromUrl the URL to make the request to
  * @param {DOMElement} oTargetElement the element to update
  * @param {XSLTProcessor} xsltproc (optional) the transformer to use on the returned
  *                  content before updating the target element with it
- * @param {Function} callback (optional) a Function object to execute once the update is finished successfuly, called as <code>callback(sFromUrl, oTargetElement)</code>. 
+ * @param {Function} callback (optional) a Function object to execute once the update is finished successfuly, called as <code>callback(sFromUrl, oTargetElement)</code>.
  *        In case an exception is thrown during execution, the callback is called as called as <code>callback(sFromUrl, oTargetElement, oException)</code>
  * @param {boolean} skipCache (optional) whether to skip any cache
  */
@@ -783,26 +764,26 @@ Sarissa.updateContentFromURI = function(sFromUrl, oTargetElement, xsltproc, call
         xmlhttp.open("GET", sFromUrl, true);
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState == 4) {
-            	try{
-            		var oDomDoc = xmlhttp.responseXML;
-	            	if(oDomDoc && Sarissa.getParseErrorText(oDomDoc) == Sarissa.PARSED_OK){
-		                Sarissa.updateContentFromNode(xmlhttp.responseXML, oTargetElement, xsltproc);
-        				if(callback){
-		                	callback(sFromUrl, oTargetElement);
-		                }
-	            	}
-	            	else{
-	            		throw Sarissa.getParseErrorText(oDomDoc);
-	            	}
-            	}
-            	catch(e){
-            		if(callback){
-			        	callback(sFromUrl, oTargetElement, e);
-			        }
-			        else{
-			        	throw e;
-			        }
-            	}
+    try{
+        var oDomDoc = xmlhttp.responseXML;
+    if(oDomDoc && Sarissa.getParseErrorText(oDomDoc) == Sarissa.PARSED_OK){
+                        Sarissa.updateContentFromNode(xmlhttp.responseXML, oTargetElement, xsltproc);
+                if(callback){
+    callback(sFromUrl, oTargetElement);
+                        }
+    }
+    else{
+        throw Sarissa.getParseErrorText(oDomDoc);
+    }
+    }
+    catch(e){
+        if(callback){
+    callback(sFromUrl, oTargetElement, e);
+                    }
+                    else{
+    throw e;
+                    }
+    }
             }
         };
         if (skipCache) {
@@ -814,23 +795,22 @@ Sarissa.updateContentFromURI = function(sFromUrl, oTargetElement, xsltproc, call
     catch(e){
         Sarissa.updateCursor(oTargetElement, "auto");
         if(callback){
-        	callback(sFromUrl, oTargetElement, e);
+    callback(sFromUrl, oTargetElement, e);
         }
         else{
-        	throw e;
+    throw e;
         }
     }
 };
-
 /**
- * Update an element's content with the given DOM node. Passing a configured XSLT 
+ * Update an element's content with the given DOM node. Passing a configured XSLT
  * processor will result in transforming and updating oNode before using it to update oTargetElement.
- * You can also pass a callback function to be executed when the update is finished. The function will be called as 
+ * You can also pass a callback function to be executed when the update is finished. The function will be called as
  * <code>functionName(oNode, oTargetElement);</code>
  * @memberOf Sarissa
  * @param {DOMNode} oNode the URL to make the request to
  * @param {DOMElement} oTargetElement the element to update
- * @param {XSLTProcessor} xsltproc (optional) the transformer to use on the given 
+ * @param {XSLTProcessor} xsltproc (optional) the transformer to use on the given
  *                  DOM node before updating the target element with it
  */
 Sarissa.updateContentFromNode = function(oNode, oTargetElement, xsltproc) {
@@ -865,14 +845,12 @@ Sarissa.updateContentFromNode = function(oNode, oTargetElement, xsltproc) {
         }
     }
     catch(e) {
-    	throw e;
+    throw e;
     }
     finally{
         Sarissa.updateCursor(oTargetElement, "auto");
     }
 };
-
-
 /**
  * Creates an HTTP URL query string from the given HTML form data
  * @memberOf Sarissa
@@ -882,9 +860,9 @@ Sarissa.formToQueryString = function(oForm){
     var qs = "";
     for(var i = 0;i < oForm.elements.length;i++) {
         var oField = oForm.elements[i];
-        var sFieldName = oField.getAttribute("name") ? oField.getAttribute("name") : oField.getAttribute("id"); 
+        var sFieldName = oField.getAttribute("name") ? oField.getAttribute("name") : oField.getAttribute("id");
         // ensure we got a proper name/id and that the field is not disabled
-        if(sFieldName && 
+        if(sFieldName &&
             ((!oField.disabled) || oField.type == "hidden")) {
             switch(oField.type) {
                 case "hidden":
@@ -914,24 +892,22 @@ Sarissa.formToQueryString = function(oForm){
         }
     }
     // return after removing last '&'
-    return qs.substr(0, qs.length - 1); 
+    return qs.substr(0, qs.length - 1);
 };
-
-
 /**
- * Asynchronously update an element with response of an XMLHttpRequest-based emulation of a form submission. <p>The form <code>action</code> and 
- * <code>method</code> attributess will be followed. Passing a configured XSLT processor will result in 
+ * Asynchronously update an element with response of an XMLHttpRequest-based emulation of a form submission. <p>The form <code>action</code> and
+ * <code>method</code> attributess will be followed. Passing a configured XSLT processor will result in
  * transforming and updating the server response before using it to update the target element.
- * You can also pass a callback function to be executed when the update is finished. The function will be called as 
+ * You can also pass a callback function to be executed when the update is finished. The function will be called as
  * <code>functionName(oNode, oTargetElement);</code></p>
  * <p>Here is an example of using this in a form element:</p>
  * <pre name="code" class="xml">
  * &lt;div id="targetId"&gt; this content will be updated&lt;/div&gt;
- * &lt;form action="/my/form/handler" method="post" 
+ * &lt;form action="/my/form/handler" method="post"
  *     onbeforesubmit="return Sarissa.updateContentFromForm(this, document.getElementById('targetId'));"&gt;<pre>
  * <p>If JavaScript is supported, the form will not be submitted. Instead, Sarissa will
- * scan the form and make an appropriate AJAX request, also adding a parameter 
- * to signal to the server that this is an AJAX call. The parameter is 
+ * scan the form and make an appropriate AJAX request, also adding a parameter
+ * to signal to the server that this is an AJAX call. The parameter is
  * constructed as <code>Sarissa.REMOTE_CALL_FLAG = "=true"</code> so you can change the name in your webpage
  * simply by assigning another value to Sarissa.REMOTE_CALL_FLAG. If JavaScript is not supported
  * the form will be submitted normally.
@@ -940,17 +916,17 @@ Sarissa.formToQueryString = function(oForm){
  * @param {DOMElement} oTargetElement the element to update
  * @param {XSLTProcessor} xsltproc (optional) the transformer to use on the returned
  *                  content before updating the target element with it
- * @param {Function} callback (optional) a Function object to execute once the update is finished successfuly, called as <code>callback(oNode, oTargetElement)</code>. 
- *        In case an exception occurs during excecution and a callback function was provided, the exception is cought and the callback is called as 
+ * @param {Function} callback (optional) a Function object to execute once the update is finished successfuly, called as <code>callback(oNode, oTargetElement)</code>.
+ *        In case an exception occurs during excecution and a callback function was provided, the exception is cought and the callback is called as
  *        <code>callback(oForm, oTargetElement, exception)</code>
  */
 Sarissa.updateContentFromForm = function(oForm, oTargetElement, xsltproc, callback) {
     try{
-    	Sarissa.updateCursor(oTargetElement, "wait");
+    Sarissa.updateCursor(oTargetElement, "wait");
         // build parameters from form fields
         var params = Sarissa.formToQueryString(oForm) + "&" + Sarissa.REMOTE_CALL_FLAG + "=true";
         var xmlhttp = new XMLHttpRequest();
-        var bUseGet = oForm.getAttribute("method") && oForm.getAttribute("method").toLowerCase() == "get"; 
+        var bUseGet = oForm.getAttribute("method") && oForm.getAttribute("method").toLowerCase() == "get";
         if(bUseGet) {
             xmlhttp.open("GET", oForm.getAttribute("action")+"?"+params, true);
         }
@@ -961,98 +937,95 @@ Sarissa.updateContentFromForm = function(oForm, oTargetElement, xsltproc, callba
             xmlhttp.setRequestHeader("Connection", "close");
         }
         xmlhttp.onreadystatechange = function() {
-        	try{
-	            if (xmlhttp.readyState == 4) {
-	            	var oDomDoc = xmlhttp.responseXML;
-	            	if(oDomDoc && Sarissa.getParseErrorText(oDomDoc) == Sarissa.PARSED_OK){
-		                Sarissa.updateContentFromNode(xmlhttp.responseXML, oTargetElement, xsltproc);
-        				if(callback){
-		                	callback(oForm, oTargetElement);
-		                }
-	            	}
-	            	else{
-	            		throw Sarissa.getParseErrorText(oDomDoc);
-	            	}
-	            }
-        	}
-        	catch(e){
-        		if(callback){
-        			callback(oForm, oTargetElement, e);
-        		}
-        		else{
-        			throw e;
-        		}
-        	}
+    try{
+                if (xmlhttp.readyState == 4) {
+    var oDomDoc = xmlhttp.responseXML;
+    if(oDomDoc && Sarissa.getParseErrorText(oDomDoc) == Sarissa.PARSED_OK){
+                        Sarissa.updateContentFromNode(xmlhttp.responseXML, oTargetElement, xsltproc);
+                if(callback){
+    callback(oForm, oTargetElement);
+                        }
+    }
+    else{
+        throw Sarissa.getParseErrorText(oDomDoc);
+    }
+                }
+    }
+    catch(e){
+        if(callback){
+            callback(oForm, oTargetElement, e);
+        }
+        else{
+            throw e;
+        }
+    }
         };
         xmlhttp.send(bUseGet?"":params);
     }
     catch(e){
         Sarissa.updateCursor(oTargetElement, "auto");
         if(callback){
-        	callback(oForm, oTargetElement, e);
+    callback(oForm, oTargetElement, e);
         }
         else{
-        	throw e;
+    throw e;
         }
     }
     return false;
 };
-
 /**
  * Get the name of a function created like:
  * <pre>function functionName(){}</pre>
- * If a name is not found, attach the function to 
+ * If a name is not found, attach the function to
  * the window object with a new name and return that
  * @param {Function} oFunc the function object
  */
 Sarissa.getFunctionName = function(oFunc){
-	if(!oFunc || (typeof oFunc != 'function' )){
-		throw "The value of parameter 'oFunc' must be a function";
-	}
-	if(oFunc.name) { 
-		return oFunc.name; 
-	} 
-	// try to parse the function name from the defintion 
-	var sFunc = oFunc.toString(); 
-	alert("sFunc: "+sFunc);
-	var name = sFunc.substring(sFunc.indexOf('function') + 8 , sFunc.indexOf('(')); 
-	if(!name || name.length == 0 || name == " "){
-		// attach to window object under a new name
-		name = "SarissaAnonymous" + Sarissa._getUniqueSuffix();
-		window[name] = oFunc;
-	}
-	return name;
+    if(!oFunc || (typeof oFunc != 'function' )){
+        throw "The value of parameter 'oFunc' must be a function";
+    }
+    if(oFunc.name) {
+        return oFunc.name;
+    }
+    // try to parse the function name from the defintion
+    var sFunc = oFunc.toString();
+    alert("sFunc: "+sFunc);
+    var name = sFunc.substring(sFunc.indexOf('function') + 8 , sFunc.indexOf('('));
+    if(!name || name.length == 0 || name == " "){
+        // attach to window object under a new name
+        name = "SarissaAnonymous" + Sarissa._getUniqueSuffix();
+        window[name] = oFunc;
+    }
+    return name;
 };
-
 /**
  *
  */
 Sarissa.setRemoteJsonCallback = function(url, callback, callbackParam) {
-	if(!callbackParam){
-		callbackParam = "callback";
-	}
-	var callbackFunctionName = Sarissa.getFunctionName(callback);
-	//alert("callbackFunctionName: '" + callbackFunctionName+"', length: "+callbackFunctionName.length);
-	var id = "sarissa_json_script_id_" + Sarissa._getUniqueSuffix(); 
-	var oHead = document.getElementsByTagName("head")[0];
-	var scriptTag = document.createElement('script');
-	scriptTag.type = 'text/javascript';
-	scriptTag.id = id;
-	scriptTag.onload = function(){
-		// cleanUp
-		// document.removeChild(scriptTag);
-	};
-	if(url.indexOf("?") != -1){
-		url += ("&" + callbackParam + "=" + callbackFunctionName);
-	}
-	else{
-		url += ("?" + callbackParam + "=" + callbackFunctionName);
-	}
-	scriptTag.src = url;
-  	oHead.appendChild(scriptTag);
-  	return id;
+    if(!callbackParam){
+        callbackParam = "callback";
+    }
+    var callbackFunctionName = Sarissa.getFunctionName(callback);
+    //alert("callbackFunctionName: '" + callbackFunctionName+"', length: "+callbackFunctionName.length);
+    var id = "sarissa_json_script_id_" + Sarissa._getUniqueSuffix();
+    var oHead = document.getElementsByTagName("head")[0];
+    var scriptTag = document.createElement('script');
+    scriptTag.type = 'text/javascript';
+    scriptTag.id = id;
+    scriptTag.onload = function(){
+        // cleanUp
+        // document.removeChild(scriptTag);
+    };
+    if(url.indexOf("?") != -1){
+        url += ("&" + callbackParam + "=" + callbackFunctionName);
+    }
+    else{
+        url += ("?" + callbackParam + "=" + callbackFunctionName);
+    }
+    scriptTag.src = url;
+    oHead.appendChild(scriptTag);
+    return id;
 };
-
 //   EOF
 module.exports.Sarissa = Sarissa;
 });

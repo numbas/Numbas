@@ -1,30 +1,22 @@
 /*
 Copyright 2011-15 Newcastle University
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 /** @file The {@link Numbas.parts.} object */
-
 Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part'],function() {
-
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var types = Numbas.jme.types;
-
 var Part = Numbas.parts.Part;
-
 /** Custom part - a part type defined in {@link Numbas.custom_part_types}
  * @constructor
  * @memberof Numbas.parts
@@ -35,21 +27,17 @@ var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, 
     this.resolved_input_options = {};
 }
 CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
-
     is_custom_part_type: true,
-
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
         this.setMarkingScript(this.definition.marking_script);
         return this.definition;
     },
-
     loadFromXML: function(xml) {
         var p = this;
         var raw_settings = this.raw_settings;
         this.getDefinition();
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-
         var settingNodes = xml.selectNodes('settings/setting');
         settingNodes.forEach(function(settingNode) {
             var name = settingNode.getAttribute('name');
@@ -57,23 +45,19 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             raw_settings[name] = JSON.parse(value);
         });
     },
-
     loadFromJSON: function(data) {
         var definition = this.getDefinition();
         var tryLoad = Numbas.json.tryLoad;
-
         var raw_settings = this.raw_settings;
         definition.settings.forEach(function(sdef) {
             tryLoad(data.settings,sdef.name,raw_settings);
         });
     },
-
     marking_parameters: function(studentAnswer) {
         var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         o.input_options = jme.wrapValue(this.input_options());
         return o;
     },
-
     resume: function() {
         if(!this.store) {
             return;
@@ -81,13 +65,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var pobj = this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
-
     finaliseLoad: function() {
         var p = this;
         var settings = this.settings;
         var raw_settings = this.raw_settings;
         var scope = this.getScope();
-
         this.definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
@@ -100,16 +82,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message}));
             }
         });
-
         var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
-
         ['correctAnswer','hint'].forEach(function(option) {
             if(raw_input_options[option]===undefined) {
                 p.error('part.custom.input option missing',{option:option});
             }
         })
-
         function evaluate_input_option(option) {
             if(typeof(option)=='string') {
                 return jme.unwrapValue(settings_scope.evaluate(option));
@@ -121,7 +100,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 }
             }
         }
-
         for(var option in raw_input_options) {
             try {
                 p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
@@ -129,39 +107,31 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message});
             }
         }
-
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
             this.error(e.message);
         }
-
         if(Numbas.display) {
             this.display = new Numbas.display.CustomPartDisplay(this);
         }
     },
-
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
     },
-
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;
     },
-
     input_widget: function() {
         return this.definition.input_widget;
     },
-
     input_options: function() {
         return this.resolved_input_options;
     },
-
     rawStudentAnswerAsJME: function() {
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
-
     student_answer_jme_types: {
         'string': function(answer) {
             return new types.TString(answer);
@@ -189,7 +159,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TNum(answer);
         }
     },
-
     setting_evaluators: {
         'string': function(def, value) {
             var scope = this.getScope();
@@ -231,11 +200,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         },
         'list_of_strings': function(def, value) {
             var scope = this.getScope();
-            return new jme.types.TList(value.map(function(s){ 
+            return new jme.types.TList(value.map(function(s){
                 if(def.subvars) {
                     s = jme.subvars(s, scope);
                 }
-                return new jme.types.TString(s) 
+                return new jme.types.TString(s)
             }));
         },
         'choose_several': function(def, value) {
@@ -246,6 +215,5 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
 });
-
 CustomPart = Numbas.parts.CustomPart = util.extend(Part,CustomPart);
 });

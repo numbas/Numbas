@@ -2,7 +2,6 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
-
     /** Display code for a {@link Numbas.parts.MatrixEntryPart}
      * @augments Numbas.display.PartDisplay
      * @constructor
@@ -12,13 +11,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
     display.MatrixEntryPartDisplay = function()
     {
         var p = this.part;
-
         /** The student's current (not necessarily submitted) answer
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
-
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
@@ -29,11 +26,9 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             var m = new Numbas.jme.types.TMatrix(correctAnswer);
             return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
         },this);
-
         this.studentAnswerRows = Knockout.observable(p.settings.numRows);
         this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
         this.allowResize = Knockout.observable(p.settings.allowResize);
-
         Knockout.computed(function() {
             var stagedAnswer = p.stagedAnswer || {rows:null, columns: null, matrix: null};
             var oldRows = stagedAnswer.rows;
@@ -43,19 +38,17 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             var newColumns = this.studentAnswerColumns();
             var newMatrix = this.studentAnswer();
             if(newRows != oldRows || newColumns != oldColumns || !util.arraysEqual(oldMatrix,newMatrix)) {
-				var m = this.studentAnswer();
-				m.rows = this.studentAnswerRows();
-				m.columns = this.studentAnswerColumns();
+                var m = this.studentAnswer();
+                m.rows = this.studentAnswerRows();
+                m.columns = this.studentAnswerColumns();
                 p.storeAnswer(m);
             }
         },this);
-
         /** Show a LaTeX rendering of the answer?
          * @member {boolean} showPreview
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
         this.showPreview = false;
-
         /** TeX version of student's answer
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.MatrixEntryPartDisplay
@@ -75,5 +68,4 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         }
     };
     display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
-
 });

@@ -1,7 +1,5 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
-
     var util = Numbas.util;
-
     ko.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
@@ -16,7 +14,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span>\
         '
     });
-
     ko.components.register('answer-widget-string', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
@@ -26,9 +23,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
             this.options = params.options;
             this.allowEmpty = this.options.allowEmpty;
-
             var lastValue = this.input();
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(v.value!=this.input()) {
@@ -43,7 +38,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     lastValue = value;
                 },this)
             ];
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
             }
@@ -52,7 +46,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
         '
     });
-
     ko.components.register('answer-widget-number', {
         viewModel: function(params) {
             var vm = this;
@@ -62,18 +55,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
-
             var init = ko.unwrap(this.answerJSON);
-
             function cleanNumber(n) {
                 if(n===undefined) {
                     return '';
                 }
                 return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
             }
-
             this.input = ko.observable(init.valid ? cleanNumber(init.value) : '');
-
             var lastValue = init.value;
             this.result = ko.computed(function() {
                 var input = this.input().trim();
@@ -91,7 +80,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return {valid:true, value: n};
                 }
             },this);
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(v.value==this.result().value) {
@@ -103,36 +91,28 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
-
             this.setAnswerJSON = ko.computed(function() {
                 this.answerJSON(this.result())
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.result.dispose();
                 this.setAnswerJSON.dispose();
             }
-
         },
         template: '\
             <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: ko.unwrap(disable) || ko.unwrap(part.revealed)">\
         '
     });
-
     ko.components.register('answer-widget-jme', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-
             var p = this.part = params.part;
             this.options = params.options;
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
-
             this.disable = params.disable;
-
             var init = ko.unwrap(this.answerJSON);
-
             function cleanExpression(expr) {
                 if(typeof(expr)=='string') {
                     return expr;
@@ -143,15 +123,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     throw(e);
                 }
             }
-
             this.input = ko.observable(init.valid ? cleanExpression(init.value) : '');
-
             this.latex = ko.computed(function() {
                 var input = this.input();
                 if(input==='') {
                     return '';
                 }
-
                 try {
                     var tex = Numbas.jme.display.exprToLaTeX(input,'',p.question.scope);
                     if(tex===undefined) {
@@ -161,17 +138,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 catch(e) {
                     return '';
                 }
-
                 return tex;
             },this).extend({throttle:100});
-
             this.result = ko.computed(function() {
                 var input = this.input().trim();
-
                 if(input=='') {
                     return {valid:false};
                 }
-
                 if(this.options.returnString) {
                     return {valid: true, value: input};
                 } else {
@@ -185,9 +158,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         return {valid: false, warnings: [R('answer.jme.invalid expression',{message:e.message})]};
                     }
                 }
-                
             },this);
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(v.value==this.result().value) {
@@ -199,7 +170,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
-
             var lastValue = this.input();
             this.setAnswerJSON = ko.computed(function() {
                 if(this.input()!=lastValue) {
@@ -207,7 +177,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     lastValue = this.input();
                 }
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.latex.dispose();
@@ -220,7 +189,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             <span class="jme-preview" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
-
     ko.components.register('answer-widget-gapfill', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
@@ -234,7 +202,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.setAnswerJSON = ko.computed(function() {
                 this.answerJSON(this.gaps().map(function(g){return g.answerJSON()}));
             },this);
-
             this.dispose = function() {
                 this.gaps.dispose();
                 this.setAnswerJSON.dispose();
@@ -251,7 +218,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </table>\
         '
     });
-
     ko.components.register('answer-widget-matrix', {
         viewModel: function(params) {
             var vm = this;
@@ -264,7 +230,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.numRows = this.options.numRows || 1;
             this.numColumns = this.options.numColumns || 1;
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
-
             var init = ko.unwrap(this.answerJSON);
             var value = init.value;
             if(value!==undefined) {
@@ -281,7 +246,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
             }
             this.input = ko.observable(value);
-
             this.result = ko.computed(function() {
                 var value = this.input().slice().map(function(r){return r.slice()});
                 var cells = Array.prototype.concat.apply([],value);
@@ -304,7 +268,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return {valid: true, value: value};
                 }
             },this);
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(util.objects_equal(v.value,this.result().value)) {
@@ -315,7 +278,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
-
             var lastValue = this.result();
             this.setAnswerJSON = ko.computed(function() {
                 var result = this.result();
@@ -325,7 +287,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 lastValue = result;
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.result.dispose();
@@ -336,7 +297,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns"></matrix-input>\
         '
     });
-
     ko.components.register('matrix-input',{
         viewModel: function(params) {
             var vm = this;
@@ -351,39 +311,30 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             } else {
                 this.numColumns = ko.observable(params.columns || 2);
             }
-
             this.value = ko.observableArray([]);
-
             var v = params.value();
-
             function make_result() {
                 var v = vm.value().map(function(row,i){
                     return row().map(function(cell,j){return cell.cell()})
                 })
                 vm.result(v);
             };
-
             function make_cell(c) {
                 var cell = {cell: ko.observable(c)};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
-
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);
                 vm.value(v.map(function(r){return ko.observableArray(r.map(function(c){return make_cell(c)}))}));
             }
             setMatrix(ko.unwrap(params.value));
-
             this.disable = params.disable || false;
-
             this.keydown = function(obj,e) {
                 this.oldPos = e.target.selectionStart;
                 return true;
             }
-
-
             this.moveArrow = function(obj,e) {
                 var cell = $(e.target).parent('td');
                 var selectionStart = e.target.selectionStart;
@@ -415,11 +366,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 return false;
             }
-            
             this.result = ko.observableArray([]);
-
             make_result();
-            
             this.update = function() {
                 // update value when number of rows or columns changes
                 var numRows = parseInt(this.numRows());
@@ -438,7 +386,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         row = value[i]();
                     }
                     row.splice(numColumns,row.length-numColumns);
-                    
                     for(var j=0;j<numColumns;j++) {
                         var cell;
                         if(row.length<=j) {
@@ -452,9 +399,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 this.value(value.slice());
                 make_result();
             }
-
             this.updateComputed = ko.computed(this.update,this);
-
             this.subscriptions = [
                 params.value.subscribe(function(v) {
                     if(v==this.result()) {
@@ -463,7 +408,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     setMatrix(v);
                 },this)
             ];
-
             var firstGo = true;
             //update value with model
             this.setValue = ko.computed(function() {
@@ -474,14 +418,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 params.value(v);
             },this)
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.updateComputed.dispose();
                 this.setValue.dispose();
             }
         },
-        template: 
+        template:
          '<div class="matrix-input">'
         +'    <!-- ko if: allowResize --><div class="matrix-size">'
         +'        <label class="num-rows">Rows: <input type="number" min="1" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
@@ -501,7 +444,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'</div>'
         }
     )
-
     ko.components.register('answer-widget-radios', {
         viewModel: function(params) {
             this.part = params.part;
@@ -522,7 +464,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     this.choice(init.value);
                 }
             }
-
             this.choiceArray = ko.pureComputed(function() {
                 var choice = this.choice();
                 if(choice===null || choice===undefined) {
@@ -530,7 +471,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 return this.choices().map(function(c,i){ return [i==choice]; })
             },this);
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v.valid) {
@@ -543,12 +483,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
-
             this.setAnswerJSON = ko.computed(function() {
                 var value = this.answerAsArray ? this.choiceArray() : this.choice();
                 this.answerJSON({valid: value!==null, value: value});
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -562,7 +500,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </form>\
         '
     });
-
     ko.components.register('answer-widget-dropdown', {
         viewModel: function(params) {
             this.part = params.part;
@@ -584,7 +521,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     this.choice(this.choices[init.value+1]);
                 }
             }
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v.valid) {
@@ -598,7 +534,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
-
             this.setAnswerJSON = ko.computed(function() {
                 var choice = this.choice();
                 if(choice && choice.index!==null) {
@@ -615,7 +550,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 }
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -625,7 +559,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable"></select>\
         '
     });
-
     ko.components.register('answer-widget-checkboxes', {
         viewModel: function(params) {
             var vm = this;
@@ -635,7 +568,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answerJSON;
             var init = ko.unwrap(this.answerJSON);
             this.answerAsArray = this.options.answerAsArray;
-
             this.choices = ko.computed(function() {
                 return ko.unwrap(this.options.choices).map(function(choice,i) {
                     return {
@@ -644,7 +576,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 });
             },this);
-
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
@@ -658,14 +589,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     this.choices().map(function(c,i) { c.ticked(v.value[i]); });
                 }, this)
             ];
-
             this.make_result = function() {
                 var v = this.choices().map(function(c){ return c.ticked() });
                 if(this.answerAsArray) {
                     return v.map(function(c){ return [c]; });
                 }
             }
-
             var lastValue = this.make_result();
             this.setAnswerJSON = ko.computed(function() {
                 var value = this.make_result();
@@ -675,7 +604,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 lastValue = value;
             },this);
-
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -689,13 +617,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </form>\
         '
     });
-
     ko.components.register('answer-widget-m_n_x', {
         viewModel: function(params) {
             this.part = params.part;
             this.answerJSON = params.answerJSON;
             this.disable = params.disable;
-
             this.options = params.options;
             this.choices = ko.observableArray(this.options.choices);
             this.answers = ko.observableArray(this.options.answers);
@@ -712,8 +638,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 return ticks;
             },this);
-
-
             var init = ko.unwrap(this.answerJSON);
             if(init.valid) {
                 var ticks = this.ticks();
@@ -723,13 +647,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 }
             }
-
             this.setAnswerJSON = ko.computed(function() {
                 var ticks = this.ticks().map(function(r){return r.map(function(d){return d.ticked()})});
-
                 // because of the never-ending madness to do with the order of matrices in multiple choice parts,
                 // this matrix needs to be transposed
-                // It makes more sense for the array to go [choice][answer], because that's how they're displayed, but 
+                // It makes more sense for the array to go [choice][answer], because that's how they're displayed, but
                 // changing that would mean breaking old questions.
                 var numAnswers = this.answers().length;
                 var numChoices = this.choices().length;
@@ -743,7 +665,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 this.answerJSON({valid: true, value: oticks});
             },this);
-
             this.dispose = function() {
                 this.ticks.dispose();
                 this.setAnswerJSON.dispose();
@@ -771,5 +692,4 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </form>\
         '
     });
-
 });

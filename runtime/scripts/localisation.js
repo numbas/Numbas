@@ -16,4 +16,3 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
     });
     window.R = function(){{ return i18next.t.apply(i18next,arguments) }};
 });
-

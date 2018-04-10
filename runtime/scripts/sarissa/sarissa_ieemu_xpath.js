@@ -3,34 +3,34 @@ Numbas.queueScript('sarissa_ieemu_xpath',['sarissa'],function() {
  * ====================================================================
  * About
  * ====================================================================
- * Sarissa cross browser XML library - IE XPath Emulation 
+ * Sarissa cross browser XML library - IE XPath Emulation
  * @version 0.9.9.5
  * @author: Copyright 2004-2007 Emmanouil Batsis, mailto: mbatsis at users full stop sourceforge full stop net
  *
  * This script emulates Internet Explorer's selectNodes and selectSingleNode
  * for Mozilla. Associating namespace prefixes with URIs for your XPath queries
- * is easy with IE's setProperty. 
+ * is easy with IE's setProperty.
  * USers may also map a namespace prefix to a default (unprefixed) namespace in the
  * source document with Sarissa.setXpathNamespaces
  *
  * ====================================================================
  * Licence
  * ====================================================================
- * Sarissa is free software distributed under the GNU GPL version 2 (see <a href="gpl.txt">gpl.txt</a>) or higher, 
- * GNU LGPL version 2.1 (see <a href="lgpl.txt">lgpl.txt</a>) or higher and Apache Software License 2.0 or higher 
- * (see <a href="asl.txt">asl.txt</a>). This means you can choose one of the three and use that if you like. If 
+ * Sarissa is free software distributed under the GNU GPL version 2 (see <a href="gpl.txt">gpl.txt</a>) or higher,
+ * GNU LGPL version 2.1 (see <a href="lgpl.txt">lgpl.txt</a>) or higher and Apache Software License 2.0 or higher
+ * (see <a href="asl.txt">asl.txt</a>). This means you can choose one of the three and use that if you like. If
  * you make modifications under the ASL, i would appreciate it if you submitted those.
  * In case your copy of Sarissa does not include the license texts, you may find
- * them online in various formats at <a href="http://www.gnu.org">http://www.gnu.org</a> and 
+ * them online in various formats at <a href="http://www.gnu.org">http://www.gnu.org</a> and
  * <a href="http://www.apache.org">http://www.apache.org</a>.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY 
- * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE 
- * WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE 
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ * KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR PURPOSE
+ * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR 
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 if(Sarissa._SARISSA_HAS_DOM_FEATURE && document.implementation.hasFeature("XPath", "3.0")){
@@ -44,13 +44,13 @@ if(Sarissa._SARISSA_HAS_DOM_FEATURE && document.implementation.hasFeature("XPath
     SarissaNodeList = function (i){
         this.length = i;
     };
-    /** 
-     * <p>Set an Array as the prototype object</p> 
+    /**
+     * <p>Set an Array as the prototype object</p>
      * @private
      */
     SarissaNodeList.prototype = [];
-    /** 
-     * <p>Inherit the Array constructor </p> 
+    /**
+     * <p>Inherit the Array constructor </p>
      * @private
      */
     SarissaNodeList.prototype.constructor = Array;
@@ -171,7 +171,7 @@ if(Sarissa._SARISSA_HAS_DOM_FEATURE && document.implementation.hasFeature("XPath
                 nsresolver,
                 XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         }
-        return result;      
+        return result;
     };
     /**
     * <p>Extends the Element to emulate IE's selectNodes</p>

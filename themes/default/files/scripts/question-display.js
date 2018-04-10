@@ -10,13 +10,11 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
     {
         this.question = q;
         var exam = q.exam;
-
         /** Has the advice been shown?
          * @member {observable|Boolean} adviceDisplayed
          * @memberof Numbas.display.QuestionDisplay
          */
         this.adviceDisplayed = Knockout.observable(false);
-
         /** Get the {@link Numbas.display.PartDisplay} object for the given path.
          * @param {partpath} path
          * @returns {Numbas.display.PartDisplay}
@@ -26,25 +24,21 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         this.getPart = function(path) {
             return q.getPart(path).display;
         }
-
         /** Text for the "submit all answers" button
          * @member {observable|String} submitMessage
          * @memberof Numbas.display.QuestionDisplay
          */
         this.submitMessage = Knockout.observable('');
-
         /** The name to display for this question - in default locale, it's "Question {N}"
          * @member {observable|String} displayName
          * @memberof Numbas.display.QuestionDisplay
          */
         this.displayName = Knockout.observable(R('question.header',{'number':q.number+1}));
-
         /** Has the student looked at this question? ({@link Numbas.Question#visited})
          * @member {observable|Boolean} visited
          * @memberof Numbas.display.QuestionDisplay
          */
         this.visited = Knockout.observable(q.visited);
-
         /** Is this question visible in the list?
          * @member {observable|Boolean} visible
          * @memberof Numbas.display.QuestionDisplay
@@ -53,30 +47,26 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var currentQuestionNumber = exam.display.currentQuestionNumber();
             return (q.number==currentQuestionNumber
-                || exam.settings.navigateBrowse 												// is browse navigation enabled?
-                || this.visited()							// if not, we can still move backwards to questions already seen if reverse navigation is enabled
-                || (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())	// or you can always move to the next question
+                || exam.settings.navigateBrowse                                                 // is browse navigation enabled?
+                || this.visited()                            // if not, we can still move backwards to questions already seen if reverse navigation is enabled
+                || (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())    // or you can always move to the next question
             )
         },this);
-
         /** Number of parts in this question
          * @member {observable|Number} numParts
          * @memberof Numbas.display.QuestionDisplay
          */
         this.numParts = Knockout.observable(q.parts.length);
-
         /** Student's current score ({@link Numbas.Question#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.QuestionDisplay
          */
         this.score = Knockout.observable(q.score);
-
         /** Total marks available for this question ({@link Numbas.Question#marks})
          * @member {observable|Number} marks
          * @memberof Numbas.display.QuestionDisplay
          */
         this.marks = Knockout.observable(q.marks);
-
         /** Proportion of available marks awarded to the student
          * @member {observable|Number} credit
          * @memberof Numbas.display.QuestionDisplay
@@ -84,7 +74,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         this.credit = Knockout.computed(function() {
             return this.score()/this.marks();
         },this);
-
         /** Does this question do any marking?
          * @member {observable|Boolean} doesMarking
          * @memberof Numbas.display.QuestionDisplay
@@ -92,31 +81,26 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         this.doesMarking = Knockout.computed(function() {
             return this.marks()>0
         },this);
-
         /** Has this question been answered? ({@link Numbas.Question#answered})
          * @member {observable|Boolean} answered
          * @memberof Numbas.display.QuestionDisplay
          */
         this.answered = Knockout.observable(q.answered);
-
         /** Have the correct answers been revealed? ({@link Numbas.Question#revealed})
          * @member {observable|Boolean} revealed
          * @memberof Numbas.display.QuestionDisplay
          */
         this.revealed = Knockout.observable(q.revealed);
-
         /** Have any of this question's parts been answered?
          * @member {observable|Boolean} anyAnswered
          * @memberof Numbas.display.QuestionDisplay
          */
         this.anyAnswered = Knockout.observable(false);
-
         /** Has the student changed any of their answers since submitting?
          * @member {observable|Boolean} isDirty
          * @memberof Numbas.display.QuestionDisplay
          */
         this.isDirty = Knockout.observable(false);
-
         /** Is the student able to reveal the correct answers?
          * @member {observable|Boolean} canReveal
          * @memberof Numbas.display.QuestionDisplay
@@ -124,13 +108,11 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         this.canReveal = Knockout.computed(function() {
             return exam.settings.allowRevealAnswer && !this.revealed();
         },this);
-
         /** Score feedback string
          * @member {{update: function, message: observable|String}} scoreFeedback
          * @memberof Numbas.display.QuestionDisplay
          */
         this.scoreFeedback = display.showScoreFeedback(this,q.exam.settings);
-
         /** Show this question in review mode
          * @member {function} review
          * @method
@@ -146,15 +128,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @type {Numbas.Question}
          * @memberof Numbas.display.QuestionDisplay
          */
-        question: undefined,			//reference back to the main question object
-
+        question: undefined,            //reference back to the main question object
         /** HTML representing the question
          * @type {Element}
          * @memberof Numbas.display.QuestionDisplay
          */
-        html: '',						//HTML for displaying question
-
-        /** Make the HTML to display the question 
+        html: '',                        //HTML for displaying question
+        /** Make the HTML to display the question
          * @memberof Numbas.display.QuestionDisplay
          */
         makeHTML: function() {
@@ -163,9 +143,8 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
             html.addClass('jme-scope').data('jme-scope',q.scope);
             html.attr('data-jme-context-description',R('question.header',{number:q.number+1}));
-            html.find('table').wrap('<div class="table-responsive">');	// wrap tables so they have a scrollbar when they overflow
+            html.find('table').wrap('<div class="table-responsive">');    // wrap tables so they have a scrollbar when they overflow
             $('#questionDisplay').append(html);
-
             qd.css = document.createElement('style');
             qd.css.setAttribute('type','text/css');
             if(qd.css.styleSheet) {
@@ -173,26 +152,21 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             } else {
                 qd.css.appendChild(document.createTextNode(q.preamble.css));
             }
-
             Numbas.schedule.add(function()
             {
                 html.each(function(e) {
                     Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
                 })
-
                 // trigger a signal that the question HTML is attached
                 // DEPRECATED: use question.onHTMLAttached(fn) instead
                 $('body').trigger('question-html-attached',q,qd);
                 $('body').unbind('question-html-attached');
-
                 // make mathjax process the question text (render the maths)
                 Numbas.display.typeset(qd.html,qd.postTypesetF);
-
                 q.signals.trigger('HTMLAttached');
             });
         },
-
-        /** Show the question 
+        /** Show the question
          * @memberof Numbas.display.QuestionDisplay
          */
         show: function()
@@ -200,14 +174,10 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var qd = this;
             var exam = q.exam;
-
             this.html.append(this.css);
-
             this.visited(q.visited);
-
             //update the question menu - highlight this question, etc.
             exam.display.updateQuestionMenu();
-
             switch(exam.mode) {
             case 'normal':
                 this.submitMessage( R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts') );
@@ -215,46 +185,37 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             case 'review':
                 break;
             }
-
             //show parts
             this.postTypesetF = function(){};
             for(var i=0;i<q.parts.length;i++)
             {
                 q.parts[i].display.show();
             }
-
             //display advice if appropriate
             this.showAdvice();
-
             //show correct answers if appropriate
             this.revealAnswer();
-            
             //display score if appropriate
             this.showScore(true);
-            
             //scroll back to top of page
             scroll(0,0);
-
             // make mathjax process the question text (render the maths)
             Numbas.display.typeset(this.html,this.postTypesetF);
         },
-
-        /** Called when the student leaves the question 
+        /** Called when the student leaves the question
          * @memberof Numbas.display.QuestionDisplay
          */
         leave: function() {
             $(this.css).remove();
         },
-
-        /** Show this question's advice 
+        /** Show this question's advice
          * @memberof Numbas.display.QuestionDisplay
          */
         showAdvice: function( fromButton )
         {
             this.adviceDisplayed(this.question.adviceDisplayed);
         },
-
-        /** Reveal the answers to this question 
+        /** Reveal the answers to this question
          * @memberof Numbas.display.QuestionDisplay
          */
         revealAnswer: function()
@@ -264,22 +225,19 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 return;
             scroll(0,0);
         },
-
-        /** Display question score and answer state 
+        /** Display question score and answer state
          * @memberof Numbas.display.QuestionDisplay
          */
         showScore: function(noUpdate)
         {
             var q = this.question;
             var exam = q.exam;
-
             this.score(q.score);
             this.marks(q.marks);
             this.answered(q.answered);
             if(!noUpdate) {
                 this.scoreFeedback.update(true);
             }
-
             var anyAnswered = false;
             for(var i=0;i<q.parts.length;i++)
             {
@@ -287,15 +245,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             }
             this.anyAnswered(anyAnswered);
         },
-
-        /** Scroll to the first part submission error 
+        /** Scroll to the first part submission error
          * @memberof Numbas.display.QuestionDisplay
          */
         scrollToError: function() {
             scrollTo($('.warning-icon:visible:first'));
         },
-
-        /** Initialise this question's display 
+        /** Initialise this question's display
          * @memberof Numbas.display.QuestionDisplay
          */
         init: function() {
@@ -306,8 +262,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             }
             this.numParts(q.parts.length);
         },
-
-        /** Called when the exam ends 
+        /** Called when the exam ends
          * @memberof Numbas.display.QuestionDisplay
          */
         end: function() {
@@ -318,7 +273,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             }
         }
     };
-
     function scrollTo(el)
     {
         if(!(el).length)
