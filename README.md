@@ -26,6 +26,8 @@ We keep a list of tasks specifically for new contributors, under the [good-first
 
 This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
 
+The Makefile in this repository collects together scripts to run the unit tests.
+
 ### Copyright
 
 > Copyright 2011-18 Newcastle University
