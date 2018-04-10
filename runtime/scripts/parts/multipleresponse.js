@@ -206,7 +206,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 cell.answerIndex = cell.choiceIndex;
                 cell.choiceIndex = 0;
             }
-            distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
+            distractors[cell.answerIndex][cell.choiceIndex] = util.isNonemptyHTML(cell.message) ? cell.message : '';
         }
         settings.distractors = distractors;
     },
