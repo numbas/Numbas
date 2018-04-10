@@ -656,6 +656,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );
+                this.display && this.display.showScore(this.answered);
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;

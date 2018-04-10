@@ -103,14 +103,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
-        /** Should the button to toggle feedback messages be shown?
-         * @member {observable|Boolean} showFeedbackToggler
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.showFeedbackToggler = Knockout.computed(function() {
-            var e = p.question.exam;
-            return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;
-        },this);
         /** Show the "submit part" button?
          * @member {observable|Boolean} showSubmitPart
          * @memberof Numbas.display.PartDisplay
@@ -173,7 +165,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showFeedbackBox = Knockout.computed(function() {
-            return this.doesMarking() && (this.showFeedbackToggler() || this.showSubmitPart() || this.showMarks());
+            return this.doesMarking() && this.showMarks();
         },this);
         /** Control functions
          * @member {Object} controls
@@ -282,7 +274,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     var action = this.part.markingFeedback[i];
                     var change = 0;
                     switch(action.op) {
-                    case 'addCredit':
+                    case 'add_credit':
                         change = action.credit*maxMarks;
                         if(action.gap!=undefined)
                             change *= this.part.gaps[action.gap].marks/this.part.marks;

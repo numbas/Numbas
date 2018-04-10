@@ -174,6 +174,7 @@
     "part.missing type attribute": "{{part}}: Missing part type attribute",
     "part.unknown type": "{{part}}: Unrecognised part type {{type}}",
     "part.setting not present": "Property '{{property}}' not set",
+    "part.feedback out of date": "This feedback is on your last submitted answer. Submit your changed answer to get updated feedback.",
     "part.jme.answer missing": "Correct answer is missing",
     "part.jme.answer too long": "Your answer is too long.",
     "part.jme.answer too short": "Your answer is too short.",

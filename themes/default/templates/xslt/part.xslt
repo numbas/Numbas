@@ -75,21 +75,19 @@
         </span>
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="partFeedback .col-2 well pull-right" data-bind="visible: showFeedbackBox">
-                        <button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, slideVisible: showSubmitPart"><localise>question.submit part</localise></button>
-                        <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
-                            <span class="score" data-bind="html: scoreFeedback.message, visible: isNotOnlyPart"></span>
-                            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
-                        </div>
-                        <button class="btn btn-primary" id="feedbackToggle" data-bind="slideVisible: showFeedbackToggler, click: controls.toggleFeedback, text: toggleFeedbackText"></button>
-                    </div>
-                </div>
-                <div class="row">
-                    <ol class="feedbackMessages well col-lg-6 col-md-6 col-xs-12 pull-right" data-bind="slideVisible: feedbackShown, foreach: feedbackMessages" localise-data-jme-context-description="part.feedback">
+            <div class="submit-and-feedback">
+                <button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit, disable: !showSubmitPart()"><localise>question.submit part</localise></button>
+                <div class="feedbackMessages" data-bind="css: {{'out-of-date': isDirty}}, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
+                    <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
+                    <ol data-bind="foreach: feedbackMessages">
                         <li class="feedbackMessage" data-bind="latex: $data"></li>
                     </ol>
+                </div>
+                <div class="partFeedback" data-bind="visible: showFeedbackBox">
+                    <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
+                        <span class="score" data-bind="html: scoreFeedback.message, visible: isNotOnlyPart"></span>
+                        <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+                    </div>
                 </div>
             </div>
         </xsl:if>
