@@ -1025,7 +1025,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.marking_parameters(studentAnswer)
             );
         } catch(e) {
-            throw(new Numbas.Error("part.marking.error in marking script"));
+            throw(new Numbas.Error("part.marking.error in marking script",{message:e.message}));
         }
         if(result.state_errors.mark) {
             throw(result.state_errors.mark);
