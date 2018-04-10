@@ -243,7 +243,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     input_options: function() {
         return {
-            showPreview: this.settings.showPreview
+            showPreview: this.settings.showPreview,
+            returnString: true
         };
     },
 
