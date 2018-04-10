@@ -713,6 +713,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 return ticks;
             },this);
 
+
+            var init = ko.unwrap(this.answerJSON);
+            if(init.valid) {
+                var ticks = this.ticks();
+                for(var i=0;i<ticks.length;i++) {
+                    for(var j=0;j<ticks[i].length;j++) {
+                        ticks[i][j].ticked(init.value[i][j]);
+                    }
+                }
+            }
+
             this.setAnswerJSON = ko.computed(function() {
                 var ticks = this.ticks().map(function(r){return r.map(function(d){return d.ticked()})});
 
@@ -730,7 +741,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         row.push(ticks[j][i]);
                     }
                 }
-                this.answerJSON(oticks);
+                this.answerJSON({valid: true, value: oticks});
             },this);
 
             this.dispose = function() {
