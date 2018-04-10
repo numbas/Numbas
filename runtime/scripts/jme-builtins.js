@@ -48,23 +48,18 @@ var funcs = {};
 function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
-newBuiltin('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});
-newBuiltin('+u', [TVector], TVector, function(a){return a;}, {doc: {usage: '+x', description: "Vector unary addition.", tags: ['plus','positive']}});
-newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;}, {doc: {usage: '+x', description: "Matrix unary addition.", tags: ['plus','positive']}});
-newBuiltin('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
-newBuiltin('-u', [TVector], TVector, vectormath.negate, {doc: {usage: '-x', description: "Vector negation.", tags: ['minus','negative','negate']}});
-newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate, {doc: {usage: '-x', description: "Matrix negation.", tags: ['minus','negative','negate']}});
-newBuiltin('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
+newBuiltin('+u', [TNum], TNum, function(a){return a;});
+newBuiltin('+u', [TVector], TVector, function(a){return a;});
+newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;});
+newBuiltin('-u', [TNum], TNum, math.negate);
+newBuiltin('-u', [TVector], TVector, vectormath.negate);
+newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate);
+newBuiltin('+', [TNum,TNum], TNum, math.add);
 newBuiltin('+', [TList,TList], TList, null, {
     evaluate: function(args,scope)
     {
         var value = args[0].value.concat(args[1].value);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list1+list2','[1,2,3]+[4,5,6]'],
-        description: "Concatenate two lists.",
-        tags: ['join','append','concatenation']
     }
 });
 newBuiltin('+',[TList,'?'],TList, null, {
@@ -73,11 +68,6 @@ newBuiltin('+',[TList,'?'],TList, null, {
         var value = args[0].value.slice();
         value.push(args[1]);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list+3','[1,2] + 3'],
-        description: "Add an item to a list",
-        tags: ['push','append','insert']
     }
 });
 newBuiltin('+',[TDict,TDict],TDict, null,{
@@ -93,42 +83,42 @@ newBuiltin('+',[TDict,TDict],TDict, null,{
     }
 });
 var fconc = function(a,b) { return a+b; }
-newBuiltin('+', [TString,'?'], TString, fconc, {doc: {usage: '\'Hello \' + name', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
-newBuiltin('+', ['?',TString], TString, fconc, {doc: {usage: 'name + \' is OK.\'', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
-newBuiltin('+', [TVector,TVector], TVector, vectormath.add, {doc: {usage: 'vector(1,2) + vector(0,1)', description: 'Add two vectors.', tags: ['addition','plus']}});
-newBuiltin('+', [TMatrix,TMatrix], TMatrix, matrixmath.add, {doc: {usage: 'matrix([1,0],[0,1]) + matrix([2,2],[2,2])', description: 'Add two matrices.', tags: ['addition','plus']}});
-newBuiltin('-', [TNum,TNum], TNum, math.sub, {doc: {usage: ['x-y','2 - 1'], description: 'Subtract one number from another.', tags: ['minus','take away','subtraction']}});
-newBuiltin('-', [TVector,TVector], TVector, vectormath.sub, {doc: {usage: 'vector(1,2) - vector(2,3)', description: 'Subtract one vector from another.', tags: ['subtraction','minus','take away']}});
-newBuiltin('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub, {doc: {usage: 'matrix([1,1],[2,3]) - matrix([3,3],[2,2])', description: 'Subtract one matrix from another.', tags: ['subtraction','minus','take away']}});
-newBuiltin('*', [TNum,TNum], TNum, math.mul, {doc: {usage: ['3x','3*x','x*y','x*3'], description: 'Multiply two numbers.', tags: ['multiplication','compose','composition','times']}} );
-newBuiltin('*', [TNum,TVector], TVector, vectormath.mul, {doc: {usage: '3*vector(1,2,3)', description: 'Multiply a vector on the left by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TMatrix,TVector], TVector, vectormath.matrixmul, {doc: {usage: 'matrix([1,0],[0,1]) * vector(1,2)', description: 'Multiply a matrix by a vector.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul, {doc: {usage: '3*matrix([1,0],[0,1])', description: 'Multiply a matrix on the left by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul, {doc: {usage: 'matrix([1,0],[1,1]) * matrix([2,3],[3,4])', description: 'Multiply two matrices.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TVector,TMatrix], TVector, vectormath.vectormatrixmul, {doc: {usage: 'vector(1,2) * matrix([2,3],[3,4])', description: 'Multiply a vector by a matrix.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('/', [TNum,TNum], TNum, math.div, {doc: {usage: ['x/y','3/2'], description: 'Divide two numbers.', tags: ['division','quotient','fraction']}} );
-newBuiltin('/', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalardiv(a,b); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('/', [TVector,TNum], TVector, function(a,b){return vectormath.div(a,b)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('^', [TNum,TNum], TNum, math.pow, {doc: {usage: ['x^y','x^2','2^x','e^x'], description: 'Exponentiation.', tags: ['power','exponentiate','raise']}} );
-newBuiltin('dot',[TVector,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), vector(2,3,4) )', description: 'Dot product of two vectors', tags: ['projection','project']}});
-newBuiltin('dot',[TMatrix,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
-newBuiltin('dot',[TVector,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
-newBuiltin('dot',[TMatrix,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), matrix( [1],[2],[3] )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the dot product.', tags: ['projection','project']}});
-newBuiltin('cross',[TVector,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), vector(1,2,3) )', description: 'Cross product of two vectors.'}});
-newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the cross product with another vector.'}});
-newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'}});
-newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'}});
-newBuiltin('det', [TMatrix], TNum, matrixmath.abs, {doc: {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'}});
+newBuiltin('+', [TString,'?'], TString, fconc);
+newBuiltin('+', ['?',TString], TString, fconc);
+newBuiltin('+', [TVector,TVector], TVector, vectormath.add);
+newBuiltin('+', [TMatrix,TMatrix], TMatrix, matrixmath.add);
+newBuiltin('-', [TNum,TNum], TNum, math.sub);
+newBuiltin('-', [TVector,TVector], TVector, vectormath.sub);
+newBuiltin('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub);
+newBuiltin('*', [TNum,TNum], TNum, math.mul );
+newBuiltin('*', [TNum,TVector], TVector, vectormath.mul);
+newBuiltin('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)});
+newBuiltin('*', [TMatrix,TVector], TVector, vectormath.matrixmul);
+newBuiltin('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul );
+newBuiltin('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); } );
+newBuiltin('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul);
+newBuiltin('*', [TVector,TMatrix], TVector, vectormath.vectormatrixmul);
+newBuiltin('/', [TNum,TNum], TNum, math.div );
+newBuiltin('/', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalardiv(a,b); } );
+newBuiltin('/', [TVector,TNum], TVector, function(a,b){return vectormath.div(a,b)});
+newBuiltin('^', [TNum,TNum], TNum, math.pow );
+newBuiltin('dot',[TVector,TVector],TNum,vectormath.dot);
+newBuiltin('dot',[TMatrix,TVector],TNum,vectormath.dot);
+newBuiltin('dot',[TVector,TMatrix],TNum,vectormath.dot);
+newBuiltin('dot',[TMatrix,TMatrix],TNum,vectormath.dot);
+newBuiltin('cross',[TVector,TVector],TVector,vectormath.cross);
+newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross);
+newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross);
+newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
+newBuiltin('det', [TMatrix], TNum, matrixmath.abs);
 newBuiltin('numrows',[TMatrix], TNum, function(m){ return m.rows });
 newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
-newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose, {doc: {usage: 'transpose( vector(1,2,3) )', description: 'Transpose of a vector.'}});
-newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose, {doc: {usage: 'transpose( matrix([1,2,3],[4,5,6]) )', description: 'Transpose of a matrix.'}});
-newBuiltin('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', description: 'Identity matrix with $n$ rows and columns.'}});
-newBuiltin('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
-newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}});
+newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
+newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('id',[TNum],TMatrix, matrixmath.id);
+newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
+newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
     var start = r[0];
     var end = r[1];
@@ -255,17 +245,13 @@ newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
 },{unwrapValues:true});
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
-newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
-newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
+newBuiltin('html',[TString],THTML,function(html) { return $(html) });
+newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); });
 newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
         s.latex = true;
         return s;
-    },
-    doc: {
-        usage: ['latex("something")'],
-        description: 'Output a string as raw LaTeX. Normally, strings are wrapped in a \\textrm command.'
     }
 });
 newBuiltin('safe',[TString],TString,null, {
@@ -281,9 +267,9 @@ newBuiltin('safe',[TString],TString,null, {
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
-newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the first letter of a string', tags: ['upper-case','case','upper']}});
-newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
-newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
+newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
+newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
+newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
 newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
     return list.map(jme.tokenToDisplayString).join(delimiter);
@@ -322,12 +308,7 @@ newBuiltin('except', [TRange,TRange], TList,
             except = math.rangeToList(except);
             return math.except(range,except).map(function(i){return new TNum(i)});
         }
-    },
-    {doc: {
-        usage: '-9..9 except -1..1',
-        description: 'Exclude a range of numbers from a larger range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 newBuiltin('except', [TRange,TList], TList,
     function(range,except) {
@@ -337,12 +318,7 @@ newBuiltin('except', [TRange,TList], TList,
         range = math.rangeToList(range)
         except = except.map(function(i){ return i.value; });
         return math.except(range,except).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '-9..9 except [-1,1]',
-        description: 'Exclude a list of numbers from a range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 newBuiltin('except', [TRange,TNum], TList,
     function(range,except) {
@@ -351,12 +327,7 @@ newBuiltin('except', [TRange,TNum], TList,
         }
         range = math.rangeToList(range);
         return math.except(range,[except]).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '-9..9 except 0',
-        description: 'Exclude a number from a range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 //exclude numbers from a list, so use the math.except function
 newBuiltin('except', [TList,TRange], TList,
@@ -364,32 +335,17 @@ newBuiltin('except', [TList,TRange], TList,
         range = range.map(function(i){ return i.value; });
         except = math.rangeToList(except);
         return math.except(range,except).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '[1,4,9,16,25,36] except 10..30',
-        description: 'Exclude a range of numbers from a list.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 //exclude values of any type from a list containing values of any type, so use the util.except function
 newBuiltin('except', [TList,TList], TList,
     function(list,except) {
         return util.except(list,except);
-    },
-    {doc: {
-        usage: ["['a','b','c'] except ['b','d']",'[vector(0,1),vector(1,0),vector(1,1)] except [vector(1,1),vector(2,2)]'],
-        description: 'Remove elements of the second list from the first.',
-        tags: ['except', 'exclude', 'filter', 'remove']
-    }}
+    }
 );
 newBuiltin('except',[TList,'?'], TList, null, {
     evaluate: function(args,scope) {
         return new TList(util.except(args[0].value,[args[1]]));
-    },
-    doc: {
-        usage: '[a,b,c,d] except b',
-        description: 'Exclude a value from a list.',
-        tags: ['except', 'exclude', 'filter', 'remove']
     }
 });
 newBuiltin('distinct',[TList],TList, util.distinct,{unwrapValues: false});
@@ -398,40 +354,30 @@ newBuiltin('in',['?',TList],TBool,null,{
         return new TBool(util.contains(args[1].value,args[0]));
     }
 });
-newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
-newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
+newBuiltin('<', [TNum,TNum], TBool, math.lt);
+newBuiltin('>', [TNum,TNum], TBool, math.gt );
+newBuiltin('<=', [TNum,TNum], TBool, math.leq );
+newBuiltin('>=', [TNum,TNum], TBool, math.geq );
 newBuiltin('<>', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
         return new TBool(util.neq(args[0],args[1]));
-    },
-    doc: {
-        usage: ['\'this string\' <> \'that string\'', 'a <> b', '1<>2','sin(90)<>1'],
-        description: 'Inequality test.',
-        tags: ['comparison','not equal']
     }
 });
 newBuiltin('=', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
         return new TBool(util.eq(args[0],args[1]));
-    },
-    doc: {
-        usage: ['x=y','vector(1,2)=vector(1,2,0)','0.1=0.2'],
-        description: 'Equality test.',
-        tags: ['comparison','same','identical']
     }
 });
-newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
-newBuiltin('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );
-newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
-newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
-newBuiltin('implies', [TBool,TBool], TBool, function(a,b){return !a || b;}, {doc: {usage: 'a implies b', description: 'Logical implication.', tags: ['implication']}} );
-newBuiltin('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
-newBuiltin('abs', [TString], TNum, function(s){return s.length}, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
-newBuiltin('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
-newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
-newBuiltin('abs', [TVector], TNum, vectormath.abs, {doc: {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']}});
+newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
+newBuiltin('not', [TBool], TBool, function(a){return !a;} );
+newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
+newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);} );
+newBuiltin('implies', [TBool,TBool], TBool, function(a,b){return !a || b;} );
+newBuiltin('abs', [TNum], TNum, math.abs );
+newBuiltin('abs', [TString], TNum, function(s){return s.length} );
+newBuiltin('abs', [TList], TNum, function(l) { return l.length; });
+newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); });
+newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
     var n = 0;
     for(var x in d) {
@@ -439,44 +385,44 @@ newBuiltin('abs', [TDict], TNum, function(d) {
     }
     return n;
 });
-newBuiltin('arg', [TNum], TNum, math.arg, {doc: {usage: 'arg(1+i)', description: 'Argument of a complex number.', tags: ['angle','direction']}} );
-newBuiltin('re', [TNum], TNum, math.re, {doc: {usage: 're(1 + 2i)', description: 'Real part of a complex number.'}} );
-newBuiltin('im', [TNum], TNum, math.im, {doc: {usage: 'im(1 + 2i)', description: 'Imaginary part of a complex number.'}} );
-newBuiltin('conj', [TNum], TNum, math.conjugate, {doc: {usage: 'conj(1 + 2i)', description: 'Conjugate of a complex number.'}} );
-newBuiltin('isint',[TNum],TBool, function(a){ return util.isInt(a); }, {doc: {usage: 'isint(1)', description: 'Returns @true@ if the argument is an integer.', tags: ['test','whole number']}});
-newBuiltin('sqrt', [TNum], TNum, math.sqrt, {doc: {usage: 'sqrt(x)', description: 'Square root.'}} );
-newBuiltin('ln', [TNum], TNum, math.log, {doc: {usage: 'ln(x)', description: 'Natural logarithm.', tags: ['base e']}} );
-newBuiltin('log', [TNum], TNum, math.log10, {doc: {usage: 'log(x)', description: 'Logarithm with base $10$.'}} );
-newBuiltin('log', [TNum,TNum], TNum, math.log_base, {doc: {usage: 'log(x,b)', description: 'Logarithm with base $b$.'}} );
-newBuiltin('exp', [TNum], TNum, math.exp, {doc: {usage: 'exp(x)', description: 'Exponentiation. Equivalent to @e^x@. ', tags: ['exponential']}} );
-newBuiltin('fact', [TNum], TNum, math.factorial, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
-newBuiltin('gamma', [TNum], TNum, math.gamma, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
-newBuiltin('sin', [TNum], TNum, math.sin, {doc: {usage: 'sin(x)', description: 'Sine.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cos', [TNum], TNum, math.cos, {doc: {usage: 'cos(x)', description: 'Cosine.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('tan', [TNum], TNum, math.tan, {doc: {usage: 'tan(x)', description: 'Tangent.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cosec', [TNum], TNum, math.cosec, {doc: {usage: 'cosec(x)', description: 'Cosecant.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('sec', [TNum], TNum, math.sec, {doc: {usage: 'sec(x)', description: 'Secant.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cot', [TNum], TNum, math.cot, {doc: {usage: 'cot(x)', description: 'Cotangent.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('arcsin', [TNum], TNum, math.arcsin, {doc: {usage: 'arcsin(x)', description: 'Inverse sine.', tags: ['arcsine']}} );
-newBuiltin('arccos', [TNum], TNum, math.arccos, {doc: {usage: 'arccos(x)', description: 'Inverse cosine.', tags: ['arccosine']}} );
-newBuiltin('arctan', [TNum], TNum, math.arctan, {doc: {usage: 'arctan(x)', description: 'Inverse tangent.', tags: ['arctangent']}} );
-newBuiltin('sinh', [TNum], TNum, math.sinh, {doc: {usage: 'sinh(x)', description: 'Hyperbolic sine.'}} );
-newBuiltin('cosh', [TNum], TNum, math.cosh, {doc: {usage: 'cosh(x)', description: 'Hyperbolic cosine.'}} );
-newBuiltin('tanh', [TNum], TNum, math.tanh, {doc: {usage: 'tanh(x)', description: 'Hyperbolic tangent.'}} );
-newBuiltin('cosech', [TNum], TNum, math.cosech, {doc: {usage: 'cosech(x)', description: 'Hyperbolic cosecant.'}} );
-newBuiltin('sech', [TNum], TNum, math.sech, {doc: {usage: 'sech(x)', description: 'Hyperbolic secant.'}} );
-newBuiltin('coth', [TNum], TNum, math.coth, {doc: {usage: 'coth(x)', description: 'Hyperbolic cotangent.'}} );
-newBuiltin('arcsinh', [TNum], TNum, math.arcsinh, {doc: {usage: 'arcsinh(x)', description: 'Inverse hyperbolic sine.'}} );
-newBuiltin('arccosh', [TNum], TNum, math.arccosh, {doc: {usage: 'arccosh(x)', description: 'Inverse hyperbolic cosine.'}} );
-newBuiltin('arctanh', [TNum], TNum, math.arctanh, {doc: {usage: 'arctanh(x)', description: 'Inverse hyperbolic tangent.'}} );
-newBuiltin('ceil', [TNum], TNum, math.ceil, {doc: {usage: 'ceil(x)', description: 'Round up to nearest integer.', tags: ['ceiling']}} );
-newBuiltin('floor', [TNum], TNum, math.floor, {doc: {usage: 'floor(x)', description: 'Round down to nearest integer.'}} );
-newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
-newBuiltin('trunc', [TNum], TNum, math.trunc, {doc: {usage: 'trunc(x)', description: 'If the argument is positive, round down to the nearest integer; if it is negative, round up to the nearest integer.', tags: ['truncate','integer part']}} );
-newBuiltin('fract', [TNum], TNum, math.fract, {doc: {usage: 'fract(x)', description: 'Fractional part of a number. Equivalent to @x-trunc(x)@.'}} );
-newBuiltin('degrees', [TNum], TNum, math.degrees, {doc: {usage: 'degrees(pi/2)', description: 'Convert radians to degrees.'}} );
-newBuiltin('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', description: 'Convert degrees to radians.'}} );
-newBuiltin('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
+newBuiltin('arg', [TNum], TNum, math.arg );
+newBuiltin('re', [TNum], TNum, math.re );
+newBuiltin('im', [TNum], TNum, math.im );
+newBuiltin('conj', [TNum], TNum, math.conjugate );
+newBuiltin('isint',[TNum],TBool, function(a){ return util.isInt(a); });
+newBuiltin('sqrt', [TNum], TNum, math.sqrt );
+newBuiltin('ln', [TNum], TNum, math.log );
+newBuiltin('log', [TNum], TNum, math.log10 );
+newBuiltin('log', [TNum,TNum], TNum, math.log_base );
+newBuiltin('exp', [TNum], TNum, math.exp );
+newBuiltin('fact', [TNum], TNum, math.factorial );
+newBuiltin('gamma', [TNum], TNum, math.gamma );
+newBuiltin('sin', [TNum], TNum, math.sin );
+newBuiltin('cos', [TNum], TNum, math.cos );
+newBuiltin('tan', [TNum], TNum, math.tan );
+newBuiltin('cosec', [TNum], TNum, math.cosec );
+newBuiltin('sec', [TNum], TNum, math.sec );
+newBuiltin('cot', [TNum], TNum, math.cot );
+newBuiltin('arcsin', [TNum], TNum, math.arcsin );
+newBuiltin('arccos', [TNum], TNum, math.arccos );
+newBuiltin('arctan', [TNum], TNum, math.arctan );
+newBuiltin('sinh', [TNum], TNum, math.sinh );
+newBuiltin('cosh', [TNum], TNum, math.cosh );
+newBuiltin('tanh', [TNum], TNum, math.tanh );
+newBuiltin('cosech', [TNum], TNum, math.cosech );
+newBuiltin('sech', [TNum], TNum, math.sech );
+newBuiltin('coth', [TNum], TNum, math.coth );
+newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
+newBuiltin('arccosh', [TNum], TNum, math.arccosh );
+newBuiltin('arctanh', [TNum], TNum, math.arctanh );
+newBuiltin('ceil', [TNum], TNum, math.ceil );
+newBuiltin('floor', [TNum], TNum, math.floor );
+newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('trunc', [TNum], TNum, math.trunc );
+newBuiltin('fract', [TNum], TNum, math.fract );
+newBuiltin('degrees', [TNum], TNum, math.degrees );
+newBuiltin('radians', [TNum], TNum, math.radians );
+newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
     return math.rationalApproximation(n);
 },{unwrapValues:true});
@@ -487,44 +433,34 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
-newBuiltin('random', [TRange], TNum, math.random, {random:true, doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
+newBuiltin('random', [TRange], TNum, math.random, {random:true} );
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
     {
         return math.choose(args[0].value);
-    },
-    doc: {
-        usage: 'random([1,1,2,3,5])',
-        description: 'Choose a random item from a list.',
-        tags: ['pick','select']
     }
 });
 newBuiltin( 'random',[],'?', null, {
     random:true,
     typecheck: function() { return true; },
-    evaluate: function(args,scope) { return math.choose(args);},
-    doc: {
-        usage: 'random(1,2,3,4,5)',
-        description: 'Choose at random from the given arguments.',
-        tags: ['pick','select']
-    }
+    evaluate: function(args,scope) { return math.choose(args);}
 });
-newBuiltin('mod', [TNum,TNum], TNum, math.mod, {doc: {usage: 'mod(a,b)', description: 'Modulus, i.e. $a \\bmod{b}.$', tags: ['remainder','modulo']}} );
-newBuiltin('max', [TNum,TNum], TNum, math.max, {doc: {usage: 'max(x,y)', description: 'Maximum of two numbers.', tags: ['supremum','biggest','largest','greatest']}} );
-newBuiltin('min', [TNum,TNum], TNum, math.min, {doc: {usage: 'min(x,y)', description: 'Minimum of two numbers.', tags: ['smallest','least']}} );
+newBuiltin('mod', [TNum,TNum], TNum, math.mod );
+newBuiltin('max', [TNum,TNum], TNum, math.max );
+newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
-newBuiltin('precround', [TNum,TNum], TNum, math.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('siground', [TNum,TNum], TNum, math.siground, {doc: {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']}} );
-newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
+newBuiltin('precround', [TNum,TNum], TNum, math.precround );
+newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround );
+newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround );
+newBuiltin('siground', [TNum,TNum], TNum, math.siground );
+newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground );
+newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground );
+newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true} );
+newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true} );
+newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true} );
+newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
 newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style);});
@@ -541,11 +477,11 @@ newBuiltin('isnan',[TNum],TBool,function(n) {
 });
 newBuiltin('cleannumber',[TString,TList],TString,util.cleanNumber,{unwrapValues:true});
 newBuiltin('isbool',[TString],TBool,util.isBool);
-newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
-newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
-newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
-newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
-newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
+newBuiltin('perm', [TNum,TNum], TNum, math.permutations );
+newBuiltin('comb', [TNum,TNum], TNum, math.combinations );
+newBuiltin('root', [TNum,TNum], TNum, math.root );
+newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);} );
+newBuiltin('gcd', [TNum,TNum], TNum, math.gcf );
 newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
         if(a.complex && a.re==0) {
             a = a.im;
@@ -557,7 +493,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take 
         b = b/math.pow(Math.PI,math.piDegree(b));
         return math.gcf(a,b);
 } );
-newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
+newBuiltin('lcm', [TNum,TNum], TNum, math.lcm );
 newBuiltin('lcm', [TList], TNum, function(l){
         if(l.length==0) {
             return 1;
@@ -567,13 +503,13 @@ newBuiltin('lcm', [TList], TNum, function(l){
             return math.lcm.apply(math,l);
         }
     },
-    {unwrapValues: true, doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}}
+    {unwrapValues: true}
 );
-newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @x@ divides @y@.', tags: ['multiple of']}} );
-newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
-newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
-newBuiltin('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
-newBuiltin('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
+newBuiltin('|', [TNum,TNum], TBool, math.divides );
+newBuiltin('diff', ['?','?',TNum], '?', null);
+newBuiltin('pdiff', ['?',TName,TNum], '?', null);
+newBuiltin('int', ['?','?'], '?', null);
+newBuiltin('defint', ['?','?',TNum,TNum], '?', null);
 newBuiltin('sum',[TList],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('deal',[TNum],TList,
@@ -583,12 +519,7 @@ newBuiltin('deal',[TNum],TList,
         });
     },
     {
-        random:true,
-        doc: {
-            usage: ['deal(n)','deal(5)'],
-            description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
-            tags: ['permutation','order','shuffle']
-        }
+        random:true
     }
 );
 newBuiltin('shuffle',[TList],TList,
@@ -596,12 +527,7 @@ newBuiltin('shuffle',[TList],TList,
         return math.shuffle(list);
     },
     {
-        random:true,
-        doc: {
-            usage: ['shuffle(list)','shuffle([1,2,3])'],
-            description: 'Randomly reorder a list.',
-            tags: ['permutation','order','shuffle','deal']
-        }
+        random:true
     }
 );
 newBuiltin('shuffle',[TRange],TList,
@@ -610,12 +536,7 @@ newBuiltin('shuffle',[TRange],TList,
         return math.shuffle(list);
     },
     {
-        random:true,
-        doc: {
-            usage: ['shuffle(list)','shuffle([1,2,3])'],
-            description: 'Randomly reorder a list.',
-            tags: ['permutation','order','shuffle','deal']
-        }
+        random:true
     }
 );
 //if needs to be a bit different because it can return any type
@@ -627,11 +548,6 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
             return jme.evaluate(args[1],scope);
         else
             return jme.evaluate(args[2],scope);
-    },
-    doc: {
-        usage: 'if(test,a,b)',
-        description: 'If @test@ is true, return @a@, otherwise return @b@.',
-        tags: ['test','decide']
     }
 });
 newBuiltin('switch',[],'?', null, {
@@ -671,11 +587,6 @@ newBuiltin('switch',[],'?', null, {
             return jme.evaluate(args[args.length-1],scope);
         else
             throw(new Numbas.Error('jme.func.switch.no default case'));
-    },
-    doc: {
-        usage: 'switch(test1,a1,test2,a2,b)',
-        description: 'Select cases. Alternating boolean expressions with values to return, with the final argument representing the default case.',
-        tags: ['choose','test']
     }
 });
 newBuiltin('isa',['?',TString],TBool, null, {
@@ -694,11 +605,6 @@ newBuiltin('isa',['?',TString],TBool, null, {
             match = args[0].tok.type == kind;
         }
         return new TBool(match);
-    },
-    doc: {
-        usage: 'x isa \'number\'',
-        description: 'Determine the data-type of an expression.',
-        tags: ['typeof','test','is a']
     }
 });
 // repeat(expr,n) evaluates expr n times and returns a list of the results
@@ -712,10 +618,6 @@ newBuiltin('repeat',['?',TNum],TList, null, {
             value[i] = jme.evaluate(args[0],scope);
         }
         return new TList(value);
-    },
-    doc: {
-        usage: ['repeat(expr,n)','repeat( random(1..3), 5)'],
-        description: 'Evaluate the given expression $n$ times, returning the results in a list.'
     }
 });
 function satisfy(names,definitions,conditions,scope,maxRuns) {
@@ -783,11 +685,6 @@ newBuiltin('listval',[TList,TNum],'?', null, {
             return list.value[index];
         else
             throw(new Numbas.Error('jme.func.listval.invalid index',{index:index,size:list.value.length}));
-    },
-    doc: {
-        usage: ['list[i]','[0,1,2,3][2]'],
-        description: 'Return a particular element of a list.',
-        tags: ['index','item','access']
     }
 });
 newBuiltin('listval',[TList,TRange],TList, null, {
@@ -800,11 +697,6 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var end = util.wrapListIndex(range[1]),size;
         var value = list.value.slice(start,end);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list[1..3]','[0,1,2,3,4][1..3]'],
-        description: 'Slice a list - return the elements with indices in the given range.',
-        tags: ['range','section','part']
     }
 });
 newBuiltin('listval',[TVector,TNum],TNum, null, {
@@ -813,11 +705,6 @@ newBuiltin('listval',[TVector,TNum],TNum, null, {
         var vector = args[0].value;
         var index = util.wrapListIndex(args[1].value,vector.length);
         return new TNum(vector[index] || 0);
-    },
-    doc: {
-        usage: ['vec[1]','vector(0,1,2)[1]'],
-        description: 'Return a particular component of a vector.',
-        tags: ['index','item','access']
     }
 });
 newBuiltin('listval',[TVector,TRange],TVector,null, {
@@ -840,11 +727,6 @@ newBuiltin('listval',[TMatrix,TNum],TVector, null, {
         var matrix = args[0].value;
         var index = util.wrapListIndex(args[1].value,matrix.length);
         return new TVector(matrix[index] || []);
-    },
-    doc: {
-        usage: ['mat[1]','matrix([1,0],[0,1])[1]'],
-        description: 'Return a particular row of a matrix.',
-        tags: ['index','item','access','element','cell']
     }
 });
 newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
@@ -937,10 +819,6 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
             names = args[1].args.map(function(t){return t.tok.name;});
         }
         return jme.mapFunctions[value.type](lambda,names,value.value,scope);
-    },
-    doc: {
-        usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
-        description: 'Apply the given expression to every value in a list.'
     }
 });
 jme.findvarsOps.map = function(tree,boundvars,scope) {
@@ -1078,10 +956,6 @@ newBuiltin('sort',[TList],TList, null, {
                 return 0;
         });
         return newlist;
-    },
-    doc: {
-        usage: 'sort(list)',
-        description: 'Sort a list.'
     }
 });
 newBuiltin('reverse',[TList],TList,null, {
@@ -1199,11 +1073,6 @@ newBuiltin('vector',['*TNum'],TVector, null, {
             value.push(args[i].value);
         }
         return new TVector(value);
-    },
-    doc: {
-        usage: ['vector(1,2,3)','vector(a,b)'],
-        description: 'Create a vector with the given components.',
-        tags: ['constructor','new']
     }
 });
 newBuiltin('vector',[TList],TVector, null, {
@@ -1212,11 +1081,6 @@ newBuiltin('vector',[TList],TVector, null, {
         var list = args[0];
         var value = list.value.map(function(x){return x.value});
         return new TVector(value);
-    },
-    doc: {
-        usage: ['vector([1,2,3])','vector(list)'],
-        description: 'Create a vector from a list of numbers.',
-        tags: ['constructor','new','convert','cast']
     }
 });
 newBuiltin('matrix',[TList],TMatrix,null, {
@@ -1256,11 +1120,6 @@ newBuiltin('matrix',[TList],TMatrix,null, {
         value.rows = rows;
         value.columns = columns;
         return new TMatrix(value);
-    },
-    doc: {
-        usage: ['matrix([ [1,2], [3,4] ])', 'matrix([ row1, row2 ])'],
-        tags: ['convert','cast','constructor','new'],
-        description: 'Create a matrix from a list of rows. This constructor is useful if the number of rows is not a constant.'
     }
 });
 newBuiltin('matrix',['*list'],TMatrix, null, {
@@ -1278,11 +1137,6 @@ newBuiltin('matrix',['*list'],TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         return new TMatrix(value);
-    },
-    doc: {
-        usage: ['matrix([1,0],[0,1])','matrix(row1,row2,row3)'],
-        description: 'Create a matrix. The arguments are lists of numbers, representing the rows.',
-        tags: ['constructor', 'new']
     }
 });
 newBuiltin('rowvector',['*number'],TMatrix, null, {
@@ -1297,11 +1151,6 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         return new TMatrix(matrix);
-    },
-    doc: {
-        usage: 'rowvector(1,2,3)',
-        description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
-        tags: ['constructor','new']
     }
 });
 newBuiltin('rowvector',[TList],TMatrix, null, {
@@ -1313,11 +1162,6 @@ newBuiltin('rowvector',[TList],TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         return new TMatrix(matrix);
-    },
-    doc: {
-        usage: 'rowvector(1,2,3)',
-        description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
-        tags: ['constructor','new']
     }
 });
 //cast vector to list
@@ -1327,11 +1171,6 @@ newBuiltin('list',[TVector],TList,null, {
         var vector = args[0];
         var value = vector.value.map(function(n){ return new TNum(n)});
         return new TList(value);
-    },
-    doc: {
-        usage: ['list(vector(0,1,2))','list(vector)'],
-        description: 'Cast a vector to a list.',
-        tags: ['convert']
     }
 });
 //cast matrix to list of lists
@@ -1346,11 +1185,6 @@ newBuiltin('list',[TMatrix],TList,null, {
             value.push(row);
         }
         return new TList(value);
-    },
-    doc: {
-        usage: ['list(matrix([0,1],[2,3]))'],
-        tags: ['convert','cast'],
-        description: 'Cast a matrix to a list of its rows.'
     }
 });
 newBuiltin('table',[TList,TList],THTML,
@@ -1379,12 +1213,7 @@ newBuiltin('table',[TList,TList],THTML,
         return new THTML(table);
     },
     {
-        unwrapValues: true,
-        doc: {
-            usage: ['table([ [1,2,3], [4,5,6] ], [\'Header 1\', \'Header 2\'])', 'table(data,headers)'],
-            tags: ['table','tabular','data','html'],
-            description: 'Create a table to display a list of rows of data, with the given headers.'
-        }
+        unwrapValues: true
     }
 );
 newBuiltin('table',[TList],THTML,
@@ -1405,12 +1234,7 @@ newBuiltin('table',[TList],THTML,
         return new THTML(table);
     },
     {
-        unwrapValues: true,
-        doc: {
-            usage: ['table([ [1,2,3], [4,5,6] ])', 'table(data)'],
-            tags: ['table','tabular','data','html'],
-            description: 'Create a table to display a list of rows of data.'
-        }
+        unwrapValues: true
     }
 );
 newBuiltin('parse',[TString],TExpression,function(str) {
