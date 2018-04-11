@@ -20,13 +20,13 @@ score_ticks (The score for each choice/answer pair):
       let(distractor,settings["distractors"][x][y], credit, if(marks=0,0,settings["matrix"][x][y]/marks),
         switch(
           credit<>0,
-            if(distractor="",
+            if(not nonemptyhtml(distractor),
               add_credit(credit,translate(if(credit>0,'part.mcq.correct choice','part.mcq.incorrect choice')))
             ,
               add_credit(credit,distractor)
             )
           ,
-            if(distractor<>"",feedback(distractor),false)
+            if(nonemptyhtml(distractor),feedback(distractor),if(marks<>0,feedback(translate('part.mcq.incorrect choice')),false))
         );credit
       )
     ,
@@ -41,8 +41,7 @@ total_score: sum(score_ticks)
 mark:
   assert(marks>0,correct());  // any answer is correct when 0 marks are available
   apply(wrongNumber);
-  apply(score_ticks);
-  if(total_score<=0,incorrect(),true)
+  apply(score_ticks)
 
 interpreted_answer (The student's answer, to be reused by other parts):
   studentAnswer

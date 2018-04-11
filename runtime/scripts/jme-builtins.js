@@ -246,6 +246,9 @@ newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,function(html) { return $(html) });
+newBuiltin('nonemptyhtml',[TString],TBool,function(html) {
+    return util.isNonemptyHTML(html);
+});
 newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); });
 newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
