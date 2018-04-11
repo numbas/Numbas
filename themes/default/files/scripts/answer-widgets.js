@@ -593,6 +593,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 var v = this.choices().map(function(c){ return c.ticked() });
                 if(this.answerAsArray) {
                     return v.map(function(c){ return [c]; });
+                } else {
+                    return v;
                 }
             }
             var lastValue = this.make_result();
