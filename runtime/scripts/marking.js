@@ -76,33 +76,33 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
+            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
+            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
+            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
+            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:FeedBackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
+            state = [{op:FeedbackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
         } else {
-            state = [{op:FeedBackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
+            state = [{op:FeedbackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
         }
         return {
             return: condition,
@@ -114,7 +114,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedBackOps.SET_CREDIT, credit:n, message: message}]
+            state: [{op:FeedbackOps.SET_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
@@ -126,13 +126,13 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedBackOps.ADD_CREDIT, credit:n, message: message}]
+            state: [{op:FeedbackOps.ADD_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedBackOps.SUB_CREDIT, credit:n, message: message}]
+            state: [{op:FeedbackOps.SUB_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('end',[],TBool,function() {
@@ -145,7 +145,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return {
             return: message,
             state: [
-                {op:FeedBackOps.SET_CREDIT, credit:0, message:message},
+                {op:FeedbackOps.SET_CREDIT, credit:0, message:message},
                 {op:FeedbackOps.END, invalid:true}
             ]
         };
@@ -502,7 +502,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         for(var i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
-                case FeedBackOps.SET_CREDIT:
+                case FeedbackOps.SET_CREDIT:
                     out_states.push(state);
                     credit = state.credit;
                     break;
@@ -510,11 +510,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     out_states.push(state);
                     credit *= state.factor;
                     break;
-                case FeedBackOps.ADD_CREDIT:
+                case FeedbackOps.ADD_CREDIT:
                     out_states.push(state);
                     credit += state.credit;
                     break;
-                case FeedBackOps.SUB_CREDIT:
+                case FeedbackOps.SUB_CREDIT:
                     out_states.push(state);
                     credit -= state.credit;
                     break;

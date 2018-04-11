@@ -822,16 +822,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var state = states[i];
             var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
-                case FeedBackOps.SET_CREDIT:
+                case FeedbackOps.SET_CREDIT:
                     part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
                     part.multCredit(scale*state.factor, state.message);
                     break;
-                case FeedBackOps.ADD_CREDIT:
+                case FeedbackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
                     break;
-                case FeedBackOps.SUB_CREDIT:
+                case FeedbackOps.SUB_CREDIT:
                     part.subCredit(scale*state.credit, state.message);
                     break;
                 case FeedbackOps.WARNING:
