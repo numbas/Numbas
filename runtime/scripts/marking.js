@@ -30,33 +30,33 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", credit:1, message:R('part.marking.correct')}]
+            state: [{op:"set_credit", reason: 'correct', credit:1, message:R('part.marking.correct')}]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", credit:1, message:message}]
+            state: [{op:"set_credit", reason: 'correct', credit:1, message:message}]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", credit:0, message:R('part.marking.incorrect')}]
+            state: [{op:"set_credit", reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", credit:0, message:message}]
+            state: [{op:"set_credit", reason: 'incorrect', credit:0, message:message}]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:"set_credit", credit:1, message: correctMessage || R('part.marking.correct')}];
+            state = [{op:"set_credit", credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
         } else {
-            state = [{op:"set_credit", credit:0, message: incorrectMessage || R('part.marking.incorrect')}];
+            state = [{op:"set_credit", credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
         }
         return {
             return: condition,

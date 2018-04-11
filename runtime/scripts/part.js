@@ -513,8 +513,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
-            if(this.settings.enableMinimumMarks)                                //make sure awarded score is not less than minimum allowed
-                this.score = Math.max(this.score,this.settings.minimumMarks);
+            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+                this.score = this.settings.minimumMarks;
+                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+            }
             if(stepsMarks!=0 && stepsScore!=0)
             {
                 if(this.credit==1)
@@ -529,9 +531,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         else
         {
             this.score = this.credit * this.marks;
-            //make sure awarded score is not less than minimum allowed
-            if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
-                this.score = Math.max(this.score,this.settings.minimumMarks);
+            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+                this.score = this.settings.minimumMarks;
+                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+            }
         }
         if(this.revealed) {
             this.score = 0;
@@ -814,7 +817,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var state = states[i];
             switch(state.op) {
                 case 'set_credit':
-                    part.setCredit(scale*state.credit, state.message);
+                    part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
                 case 'multiply_credit':
                     part.multCredit(scale*state.factor, state.message);
@@ -897,15 +900,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Set the `credit` to an absolute value
      * @param {Number} credit
      * @param {String} message - message to show in feedback to explain this action
+     * @param {String} reason - why was the credit set to this value? If given, either 'correct' or 'incorrect'.
      */
-    setCredit: function(credit,message)
+    setCredit: function(credit,message,reason)
     {
         var oCredit = this.credit;
         this.credit = credit;
         this.markingFeedback.push({
-            op: 'add_credit',
+            op: 'set_credit',
             credit: this.credit - oCredit,
-            message: message
+            message: message,
+            reason: reason
         });
     },
     /** Add an absolute value to `credit`
@@ -929,7 +934,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     {
         this.credit -= credit;
         this.markingFeedback.push({
-            op: 'subCredit',
+            op: 'sub_credit',
             credit: credit,
             message: message
         });
@@ -943,7 +948,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var oCredit = this.credit
         this.credit *= factor;
         this.markingFeedback.push({
-            op: 'add_credit',
+            op: 'mult_credit',
             credit: this.credit - oCredit,
             message: message
         });

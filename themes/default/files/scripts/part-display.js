@@ -272,15 +272,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 for(var i=0;i<this.part.markingFeedback.length;i++)
                 {
                     var action = this.part.markingFeedback[i];
-                    var change = 0;
-                    switch(action.op) {
-                    case 'add_credit':
-                        change = action.credit*maxMarks;
-                        if(action.gap!=undefined)
-                            change *= this.part.gaps[action.gap].marks/this.part.marks;
-                        t += change;
-                        break;
-                    }
+                    var change = action.credit*maxMarks;
+                    if(action.gap!=undefined)
+                        change *= this.part.gaps[action.gap].marks/this.part.marks;
+                    t += change;
                     var message = action.message || '';
                     if(util.isNonemptyHTML(message))
                     {
@@ -290,8 +285,23 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                         else if(change<0)
                             message+='\n\n'+R('feedback.taken away',{count:marks});
                     }
-                    if(util.isNonemptyHTML(message))
-                        messages.push(message);
+                    var change_desc = change>0 ? 'positive' : change<0 ? 'negative' : 'neutral';
+                    switch(action.reason) {
+                        case 'correct':
+                            change_desc = 'positive';
+                            break;
+                        case 'incorrect':
+                            change_desc = 'negative';
+                            break;
+                    }
+                    var icons = {
+                        'positive': 'icon-ok',
+                        'negative': 'icon-remove',
+                        'neutral': ''
+                    }
+                    if(util.isNonemptyHTML(message)) {
+                        messages.push({credit_change: change_desc, message: message, icon: icons[change_desc]});
+                    }
                 }
                 this.feedbackMessages(messages);
             }
