@@ -17,7 +17,7 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
- * @typedef partpath
+ * @typedef Numbas.parts.partpath
  * @type {String}
  */
 /** Part type constructors
@@ -36,7 +36,7 @@ var partConstructors = Numbas.partConstructors = {};
 /** Create a question part based on an XML definition.
  * @memberof Numbas
  * @param {Element} xml
- * @param {partpath} [path]
+ * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -57,7 +57,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
 /** Create a question part based on an XML definition.
  * @memberof Numbas
  * @param {Object} data
- * @param {partpath} [path]
+ * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -76,7 +76,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
 /** Create a new question part.
  * @see Numbas.partConstructors
  * @param {String} type
- * @param {partpath} path
+ * @param {Numbas.parts.partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -100,11 +100,12 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         throw(new Numbas.Error('part.unknown type',{part:util.nicePartName(path),type:type}));
     }
 }
+
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
  * @param {Element} xml
- * @param {partpath} [path='p0']
+ * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} Question
  * @param {Numbas.parts.Part} parentPart
  * @see Numbas.createPart
@@ -312,7 +313,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     parentPart: undefined,
     /** A question-wide unique 'address' for this part.
-     * @type {partpath}
+     * @type {Numbas.parts.partpath}
      */
     path: '',
     /** This part's type, e.g. "jme", "numberentry", ...
@@ -351,10 +352,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Array.<String>}
      */
     stagedAnswer: undefined,
+
     /** Has this part been answered?
      * @type {Boolean}
      */
     answered: false,
+
     /** Child gapfill parts
      * @type {Numbas.parts.Part[]}
      */
@@ -399,10 +402,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst'
     },
+
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
     markingScript: null,
+
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
      * @returns {Numbas.Error}
@@ -785,8 +790,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Function which marks the student's answer: run `this.settings.markingScript`, which sets the credit for the student's answer to a number between 0 and 1 and produces a list of feedback messages and warnings.
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
-     * @see Numbas.parts.Part.settings.markingScript
-     * @see Numbas.parts.Part.answered
+     * @see Numbas.parts.Part#markingScript
+     * @see Numbas.parts.Part#answered
      * @returns {Numbas.marking.finalised_state}
      */
     mark: function() {
@@ -802,7 +807,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return finalised_result;
     },
     /** Apply a finalised list of feedback states to this part.
-     * @param {object[]} feedback
+     * @param {Numbas.marking.feedback_item[]} feedback
      * @see Numbas.marking.finalise_state
      */
     apply_feedback: function(feedback) {
@@ -815,28 +820,29 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var scale = 1;
         while(i<states.length) {
             var state = states[i];
+            var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
-                case 'set_credit':
+                case FeedBackOps.SET_CREDIT:
                     part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
-                case 'multiply_credit':
+                case FeedbackOps.MULTIPLY_CREDIT:
                     part.multCredit(scale*state.factor, state.message);
                     break;
-                case 'add_credit':
+                case FeedBackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
                     break;
-                case 'sub_credit':
+                case FeedBackOps.SUB_CREDIT:
                     part.subCredit(scale*state.credit, state.message);
                     break;
-                case 'warning':
+                case FeedbackOps.WARNING:
                     part.giveWarning(state.message);
                     break;
-                case 'feedback':
+                case FeedbackOps.FEEDBACK:
                     part.markingComment(state.message);
                     break;
-                case 'end':
+                case FeedbackOps.END:
                     if(lifts.length) {
-                        while(i+1<states.length && states[i+1].op!='end_lift') {
+                        while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
@@ -846,7 +852,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         }
                     }
                     break;
-                case 'start_lift':
+                case "start_lift":
                     lifts.push({credit: this.credit,scale:scale});
                     this.credit = 0;
                     scale = state.scale;
@@ -881,7 +887,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      * @param {Numbas.jme.token} studentAnswer
      * @see Numbas.parts.Part#mark
-     * @returns {object} a dictionary `{states, values, scope, state_valid, state_errors}`
+     * @returns {Numbas.marking.marking_script_result}
      */
     mark_answer: function(studentAnswer) {
         try {
@@ -927,8 +933,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         });
     },
     /** Subtract an absolute value from `credit`
-     * @param {number} credit - amount to subtract
-     * @param {string} message - message to show in feedback to explain this action
+     * @param {Number} credit - amount to subtract
+     * @param {String} message - message to show in feedback to explain this action
      */
     subCredit: function(credit,message)
     {

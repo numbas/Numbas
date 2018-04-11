@@ -16,7 +16,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         this.adviceDisplayed = Knockout.observable(false);
         /** Get the {@link Numbas.display.PartDisplay} object for the given path.
-         * @param {partpath} path
+         * @param {Numbas.parts.partpath} path
          * @returns {Numbas.display.PartDisplay}
          * @method getPart
          * @memberof Numbas.display.QuestionDisplay

@@ -18,20 +18,18 @@ Numbas.queueScript('jme-display',['base','math','jme','util','jme-rules'],functi
 var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
-/** A JME expression
- * @typedef JME
- * @type {String}
- */
+
 /** A LaTeX string
  * @typedef TeX
  * @type {String}
  */
+
 /** @namespace Numbas.jme.display */
 jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
      * @returns {TeX}
      */
@@ -50,7 +48,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
      * @returns {JME}
      *
@@ -65,7 +63,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.jme.tree}
      *
@@ -93,7 +91,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a syntax tree according to the given ruleset
      *
      * @param {Numbas.jme.tree} exprTree
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} allowUnbound
      * @returns {Numbas.jme.tree}
@@ -716,7 +714,7 @@ function texRealNumber(n)
  * @private
  *
  * @param {Array.<Number>|Numbas.jme.tree} v
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
 function texVector(v,settings)
@@ -740,7 +738,7 @@ function texVector(v,settings)
  * @private
  *
  * @param {Array.<Array.<Number>>|Numbas.jme.tree} m
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  * @param {Boolean} parens - enclose the matrix in parentheses?
  * @returns {TeX}
  */
@@ -863,7 +861,7 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 }
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 /** Definition of a number with a special name
- * @typedef special_number_definition
+ * @typedef Numbas.jme.display.special_number_definition
  * @property {Number} value
  * @property {TeX} tex - The TeX code for this number
  * @property {JME} jme - The JME code for this number
@@ -871,7 +869,7 @@ var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota
 /** List of numbers with special names
  *
  * @memberof Numbas.jme.display
- * @type {Array.<special_number_definition>}
+ * @type {Array.<Numbas.jme.display.special_number_definition>}
  */
 jme.display.specialNumbers = [
     {value: Math.E, tex: 'e', jme: 'e'},
@@ -982,7 +980,7 @@ function flatten(tree,op) {
     return args;
 }
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
- * @typedef texify_settings
+ * @typedef Numbas.jme.display.texify_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
@@ -996,7 +994,7 @@ function flatten(tree,op) {
  * @method
  *
  * @param {Numbas.jme.tree} thing
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  *
  * @returns {TeX}
  */
@@ -1048,7 +1046,7 @@ var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
  * @private
  *
  * @param {Number} n
- * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
@@ -1131,7 +1129,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  * @private
  *
  * @param {Number} n
- * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 function jmeRealNumber(n,settings)
@@ -1394,7 +1392,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
- * @typedef jme_display_settings
+ * @typedef Numbas.jme.display.jme_display_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
@@ -1405,7 +1403,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @method
  *
  * @param {Numbas.jme.tree} tree
- * @param {jme_display_settings} settings
+ * @param {Numbas.jme.display.jme_display_settings} settings
  * @returns {JME}
  */
 var treeToJME = jme.display.treeToJME = function(tree,settings)

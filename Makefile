@@ -1,3 +1,5 @@
+everything: update_tests docs
+
 RUNTIME_SOURCE_PATH=.
 
 update_tests: runtime marking_scripts
@@ -89,3 +91,10 @@ tests/locales.js: $(LOCALES)
 	$(created)
 
 locales: tests/locales.js
+
+docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
+	@echo "Making API documentation..."
+	jsdoc -c jsdoc.conf -t ../numbas-jsdoc-template
+	$(created)
+
+docs: docs/index.html

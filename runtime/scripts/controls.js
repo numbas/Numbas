@@ -141,7 +141,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
         job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
     },
     /* Show steps for a question part
-     * @param {partpath} partRef - id of the part
+     * @param {Numbas.parts.partpath} partRef - id of the part
      * @see Numbas.parts.Part#showSteps
      */
     showSteps: function( partRef )
@@ -151,7 +151,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
         });
     },
     /** Hide the steps for a question part
-     * @param {partpath} partRef - id of the part
+     * @param {Numbas.parts.partpath} partRef - id of the part
      * @see Numbas.parts.Part#hideSteps
      */
     hideSteps: function( partRef )

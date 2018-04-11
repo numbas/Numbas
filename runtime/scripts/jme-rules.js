@@ -3,6 +3,7 @@ Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
  *
  * Provides {@link Numbas.jme.rules}
  */
+/** @namespace Numbas.jme.rules */
 var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
@@ -40,7 +41,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
      * @memberof Numbas.jme.rules.Rule.prototype
      * @param {Numbas.jme.tree} exprTree - the syntax tree to test
      * @param {Numbas.jme.Scope} scope - used when checking conditions
-     * @returns {Boolean|jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
+     * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
      */
     match: function(exprTree,scope)
     {
@@ -64,7 +65,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     },
     /** Check that a matched pattern satisfies all the rule's conditions
      * @memberof Numbas.jme.rules.Rule.prototype
-     * @param {jme_pattern_match} match
+     * @param {Numbas.jme.rules.jme_pattern_match} match
      * @param {Numbas.jme.Scope} scope
      * @returns {Boolean}
      */
@@ -109,9 +110,9 @@ function isEndTerm(term) {
 }
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
  * @param {Numbas.jme.tree} tree
- * @param {string} op
- * @param {Array<string>} names
- * @returns {object} - {terms: a list of subtrees, termnames: the match names set in each term}
+ * @param {String} op
+ * @param {String[]} names
+ * @returns {Object} - {terms: a list of subtrees, termnames: the match names set in each term}
  */
 var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,names) {
     if(names===undefined) {
@@ -155,9 +156,9 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
 }
 /** A dictionary representing the results of a JME pattern match.
  * Maps variable names to trees.
- * @typedef jme_pattern_match
+ * @typedef Numbas.jme.rules.jme_pattern_match
  * @type Object.<Numbas.jme.tree>
- * @see Numbas.jme.display.matchTree
+ * @see {Numbas.jme.rules#matchTree}
  */
 /** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.rules
@@ -165,7 +166,7 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
- * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
     if(doCommute===undefined) {
@@ -416,7 +417,7 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
  * @param {JME} expr
  * @param {Boolean} doCommute
  *
- * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommute) {
     pattern = jme.compile(pattern);
@@ -434,17 +435,17 @@ var displayFlags = jme.rules.displayFlags = {
 };
 /** Flags used in JME simplification rulesets
  * @type Object.<Boolean>
- * @typedef ruleset_flags
+ * @typedef Numbas.jme.rules.ruleset_flags
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {Boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
- * @see Numbas.jme.Ruleset
+ * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules
  * @constructor
  * @memberof Numbas.jme.rules
- * @param {rule[]} rules
- * @param {ruleset_flags} flags
+ * @param {Numbas.jme.rules.Rule[]} rules
+ * @param {Numbas.jme.rules.ruleset_flags} flags
  */
 var Ruleset = jme.rules.Ruleset = function(rules,flags) {
     this.rules = rules;
@@ -469,9 +470,9 @@ function mergeRulesets(r1,r2) {
     return new Ruleset(rules, flags);
 }
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
- * @param {String|Array.<String|Numbas.jme.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {Object.<Numbas.jme.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
- * @returns Numbas.jme.Ruleset
+ * @param {String|Array.<String|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {Object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @returns Numbas.jme.rules.Ruleset
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 {
@@ -738,7 +739,7 @@ var expandBracketsRules = [
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
- * @returns {Numbas.jme.Ruleset}
+ * @returns {Numbas.jme.rules.Ruleset}
  */
 var compileRules = jme.rules.compileRules = function(rules)
 {

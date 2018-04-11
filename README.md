@@ -4,9 +4,9 @@
 
 For more information about Numbas and what it does, see our website at [numbas.org.uk](http://www.numbas.org.uk).
 
-### Documentation
+### How to use Numbas
 
-Documentation is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
+Documentation for Numbas users is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
 
 ### Installation
 
@@ -26,7 +26,12 @@ We keep a list of tasks specifically for new contributors, under the [good-first
 
 This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
 
-The Makefile in this repository collects together scripts to run the unit tests.
+The Makefile in this repository collects together scripts to run the unit tests. 
+
+API documentation for developers is at [numbas.github.io/Numbas](https://numbas.github.io/Numbas).
+This is generated using [JSDoc](http://usejsdoc.org), with [a custom template](http://github.com/numbas/numbas-jsdoc-template).
+Run `make docs` to rebuild the API documentation into `../numbas-docs`.
+
 
 ### Copyright
 

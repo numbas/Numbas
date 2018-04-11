@@ -71,7 +71,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     exam: undefined,            //reference to the main exam object
     /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices */
     questionIndices:{},        //associate question ids with objective indices
-    /** Dictionary mapping {@link partpath} ids to `cmi.interaction` indices */
+    /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices */
     partIndices:{},            //associate part ids with interaction indices
     /** The last `cmi.suspend_data` object
      * @type {Numbas.storage.exam_suspend_data}

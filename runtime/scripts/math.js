@@ -516,13 +516,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
     },
     /** Settings for {@link Numbas.math.niceNumber}
-     * @typedef niceNumber_settings
+     * @typedef Numbas.math.niceNumber_settings
      * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
      */
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
      * @param {Number} n
-     * @param {niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+     * @param {Numbas.math.niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
      * @see Numbas.util.numberNotationStyles
      * @returns {String}
      */
@@ -1416,7 +1416,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Convert a range to a list - enumerate all the elements of the range
      * @param {range} range
-     * @returns {number[]}
+     * @returns {Number[]}
      */
     rangeToList: function(range) {
         var start = range[0];
@@ -1444,7 +1444,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Calculate the number of elements in a range
      * @param {range} range
-     * @returns {number}
+     * @returns {Number}
      */
     rangeSize: function(range) {
         var diff = range[1]-range[0];

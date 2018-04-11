@@ -710,8 +710,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 ['revealAnswer'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
+
 /** Layouts for multiple response types
- * @type {Object.<function>
+ * @type {Object.<function>}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row,column) { return true; },

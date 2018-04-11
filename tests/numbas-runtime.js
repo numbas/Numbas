@@ -2998,13 +2998,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
     },
     /** Settings for {@link Numbas.math.niceNumber}
-     * @typedef niceNumber_settings
+     * @typedef Numbas.math.niceNumber_settings
      * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
      */
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
      * @param {Number} n
-     * @param {niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+     * @param {Numbas.math.niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
      * @see Numbas.util.numberNotationStyles
      * @returns {String}
      */
@@ -3898,7 +3898,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Convert a range to a list - enumerate all the elements of the range
      * @param {range} range
-     * @returns {number[]}
+     * @returns {Number[]}
      */
     rangeToList: function(range) {
         var start = range[0];
@@ -3926,7 +3926,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Calculate the number of elements in a range
      * @param {range} range
-     * @returns {number}
+     * @returns {Number}
      */
     rangeSize: function(range) {
         var diff = range[1]-range[0];
@@ -4583,6 +4583,7 @@ var setmath = Numbas.setmath = {
     }
 }
 });
+
 Numbas.queueScript('i18next',[],function(module) {
         var exports = {};
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.i18next=e()}(this,function(){"use strict";function t(t){return null==t?"":""+t}function e(t,e,n){t.forEach(function(t){e[t]&&(n[t]=e[t])})}function n(t,e,n){function o(t){return t&&t.indexOf("###")>-1?t.replace(/###/g,"."):t}function r(){return!t||"string"==typeof t}for(var i="string"!=typeof e?[].concat(e):e.split(".");i.length>1;){if(r())return{};var a=o(i.shift());!t[a]&&n&&(t[a]=new n),t=t[a]}return r()?{}:{obj:t,k:o(i.shift())}}function o(t,e,o){var r=n(t,e,Object),i=r.obj,a=r.k;i[a]=o}function r(t,e,o,r){var i=n(t,e,Object),a=i.obj,s=i.k;a[s]=a[s]||[],r&&(a[s]=a[s].concat(o)),r||a[s].push(o)}function i(t,e){var o=n(t,e),r=o.obj,i=o.k;if(r)return r[i]}function a(t,e,n){for(var o in e)o in t?"string"==typeof t[o]||t[o]instanceof String||"string"==typeof e[o]||e[o]instanceof String?n&&(t[o]=e[o]):a(t[o],e[o],n):t[o]=e[o];return t}function s(t){return t.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")}function l(t){return"string"==typeof t?t.replace(/[&<>"'\/]/g,function(t){return E[t]}):t}function u(t){return t.interpolation={unescapeSuffix:"HTML"},t.interpolation.prefix=t.interpolationPrefix||"__",t.interpolation.suffix=t.interpolationSuffix||"__",t.interpolation.escapeValue=t.escapeInterpolation||!1,t.interpolation.nestingPrefix=t.reusePrefix||"$t(",t.interpolation.nestingSuffix=t.reuseSuffix||")",t}function c(t){return t.resStore&&(t.resources=t.resStore),t.ns&&t.ns.defaultNs?(t.defaultNS=t.ns.defaultNs,t.ns=t.ns.namespaces):t.defaultNS=t.ns||"translation",t.fallbackToDefaultNS&&t.defaultNS&&(t.fallbackNS=t.defaultNS),t.saveMissing=t.sendMissing,t.saveMissingTo=t.sendMissingTo||"current",t.returnNull=!t.fallbackOnNull,t.returnEmptyString=!t.fallbackOnEmpty,t.returnObjects=t.returnObjectTrees,t.joinArrays="\n",t.returnedObjectHandler=t.objectTreeKeyHandler,t.parseMissingKeyHandler=t.parseMissingKey,t.appendNamespaceToMissingKey=!0,t.nsSeparator=t.nsseparator||":",t.keySeparator=t.keyseparator||".","sprintf"===t.shortcutFunction&&(t.overloadTranslationOptionHandler=function(t){for(var e=[],n=1;n<t.length;n++)e.push(t[n]);return{postProcess:"sprintf",sprintf:e}}),t.whitelist=t.lngWhitelist,t.preload=t.preload,"current"===t.load&&(t.load="currentOnly"),"unspecific"===t.load&&(t.load="languageOnly"),t.backend=t.backend||{},t.backend.loadPath=t.resGetPath||"locales/__lng__/__ns__.json",t.backend.addPath=t.resPostPath||"locales/add/__lng__/__ns__",t.backend.allowMultiLoading=t.dynamicLoad,t.cache=t.cache||{},t.cache.prefix="res_",t.cache.expirationTime=6048e5,t.cache.enabled=t.useLocalStorage,t=u(t),t.defaultVariables&&(t.interpolation.defaultVariables=t.defaultVariables),t}function p(t){return t=u(t),t.joinArrays="\n",t}function f(t){return(t.interpolationPrefix||t.interpolationSuffix||void 0!==t.escapeInterpolation)&&(t=u(t)),t.nsSeparator=t.nsseparator,t.keySeparator=t.keyseparator,t.returnObjects=t.returnObjectTrees,t}function g(t){t.lng=function(){return C.deprecate("i18next.lng() can be replaced by i18next.language for detected language or i18next.languages for languages ordered by translation lookup."),t.services.languageUtils.toResolveHierarchy(t.language)[0]},t.preload=function(e,n){C.deprecate("i18next.preload() can be replaced with i18next.loadLanguages()"),t.loadLanguages(e,n)},t.setLng=function(e,n,o){return C.deprecate("i18next.setLng() can be replaced with i18next.changeLanguage() or i18next.getFixedT() to get a translation function with fixed language or namespace."),"function"==typeof n&&(o=n,n={}),n||(n={}),n.fixLng===!0&&o?o(null,t.getFixedT(e)):t.changeLanguage(e,o)},t.addPostProcessor=function(e,n){C.deprecate("i18next.addPostProcessor() can be replaced by i18next.use({ type: 'postProcessor', name: 'name', process: fc })"),t.use({type:"postProcessor",name:e,process:n})}}function h(t){return t.charAt(0).toUpperCase()+t.slice(1)}function d(){var t={};return H.forEach(function(e){e.lngs.forEach(function(n){t[n]={numbers:e.nr,plurals:U[e.fc]}})}),t}function y(t,e){for(var n=t.indexOf(e);n!==-1;)t.splice(n,1),n=t.indexOf(e)}function v(){return{debug:!1,initImmediate:!0,ns:["translation"],defaultNS:["translation"],fallbackLng:["dev"],fallbackNS:!1,whitelist:!1,nonExplicitWhitelist:!1,load:"all",preload:!1,simplifyPluralSuffix:!0,keySeparator:".",nsSeparator:":",pluralSeparator:"_",contextSeparator:"_",saveMissing:!1,saveMissingTo:"fallback",missingKeyHandler:!1,postProcess:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:function(){},parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,appendNamespaceToCIMode:!1,overloadTranslationOptionHandler:function(t){return{defaultValue:t[1]}},interpolation:{escapeValue:!0,format:function(t,e,n){return t},prefix:"{{",suffix:"}}",formatSeparator:",",unescapePrefix:"-",nestingPrefix:"$t(",nestingSuffix:")",defaultVariables:void 0}}}function b(t){return"string"==typeof t.ns&&(t.ns=[t.ns]),"string"==typeof t.fallbackLng&&(t.fallbackLng=[t.fallbackLng]),"string"==typeof t.fallbackNS&&(t.fallbackNS=[t.fallbackNS]),t.whitelist&&t.whitelist.indexOf("cimode")<0&&t.whitelist.push("cimode"),t}function m(){}var x="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},S=function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")},k=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var o in n)Object.prototype.hasOwnProperty.call(n,o)&&(t[o]=n[o])}return t},w=function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)},O=function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e},L=function(){function t(t,e){var n=[],o=!0,r=!1,i=void 0;try{for(var a,s=t[Symbol.iterator]();!(o=(a=s.next()).done)&&(n.push(a.value),!e||n.length!==e);o=!0);}catch(t){r=!0,i=t}finally{try{!o&&s.return&&s.return()}finally{if(r)throw i}}return n}return function(e,n){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,n);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),j=function(t){if(Array.isArray(t)){for(var e=0,n=Array(t.length);e<t.length;e++)n[e]=t[e];return n}return Array.from(t)},N={type:"logger",log:function(t){this.output("log",t)},warn:function(t){this.output("warn",t)},error:function(t){this.output("error",t)},output:function(t,e){var n;console&&console[t]&&(n=console)[t].apply(n,j(e))}},P=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.init(e,n)}return t.prototype.init=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this.prefix=e.prefix||"i18next:",this.logger=t||N,this.options=e,this.debug=e.debug},t.prototype.setDebug=function(t){this.debug=t},t.prototype.log=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"log","",!0)},t.prototype.warn=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","",!0)},t.prototype.error=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"error","")},t.prototype.deprecate=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","WARNING DEPRECATED: ",!0)},t.prototype.forward=function(t,e,n,o){return o&&!this.debug?null:("string"==typeof t[0]&&(t[0]=""+n+this.prefix+" "+t[0]),this.logger[e](t))},t.prototype.create=function(e){return new t(this.logger,k({prefix:this.prefix+":"+e+":"},this.options))},t}(),C=new P,R=function(){function t(){S(this,t),this.observers={}}return t.prototype.on=function(t,e){var n=this;t.split(" ").forEach(function(t){n.observers[t]=n.observers[t]||[],n.observers[t].push(e)})},t.prototype.off=function(t,e){var n=this;this.observers[t]&&this.observers[t].forEach(function(){if(e){var o=n.observers[t].indexOf(e);o>-1&&n.observers[t].splice(o,1)}else delete n.observers[t]})},t.prototype.emit=function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];if(this.observers[t]){var r=[].concat(this.observers[t]);r.forEach(function(t){t.apply(void 0,n)})}if(this.observers["*"]){var i=[].concat(this.observers["*"]);i.forEach(function(e){var o;e.apply(e,(o=[t]).concat.apply(o,n))})}},t}(),E={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;"},A=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{ns:["translation"],defaultNS:"translation"};S(this,e);var r=O(this,t.call(this));return r.data=n,r.options=o,r}return w(e,t),e.prototype.addNamespaces=function(t){this.options.ns.indexOf(t)<0&&this.options.ns.push(t)},e.prototype.removeNamespaces=function(t){var e=this.options.ns.indexOf(t);e>-1&&this.options.ns.splice(e,1)},e.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{},r=o.keySeparator||this.options.keySeparator;void 0===r&&(r=".");var a=[t,e];return n&&"string"!=typeof n&&(a=a.concat(n)),n&&"string"==typeof n&&(a=a.concat(r?n.split(r):n)),t.indexOf(".")>-1&&(a=t.split(".")),i(this.data,a)},e.prototype.addResource=function(t,e,n,r){var i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{silent:!1},a=this.options.keySeparator;void 0===a&&(a=".");var s=[t,e];n&&(s=s.concat(a?n.split(a):n)),t.indexOf(".")>-1&&(s=t.split("."),r=e,e=s[1]),this.addNamespaces(e),o(this.data,s,r),i.silent||this.emit("added",t,e,n,r)},e.prototype.addResources=function(t,e,n){for(var o in n)"string"==typeof n[o]&&this.addResource(t,e,o,n[o],{silent:!0});this.emit("added",t,e,n)},e.prototype.addResourceBundle=function(t,e,n,r,s){var l=[t,e];t.indexOf(".")>-1&&(l=t.split("."),r=n,n=e,e=l[1]),this.addNamespaces(e);var u=i(this.data,l)||{};r?a(u,n,s):u=k({},u,n),o(this.data,l,u),this.emit("added",t,e,n)},e.prototype.removeResourceBundle=function(t,e){this.hasResourceBundle(t,e)&&delete this.data[t][e],this.removeNamespaces(e),this.emit("removed",t,e)},e.prototype.hasResourceBundle=function(t,e){return void 0!==this.getResource(t,e)},e.prototype.getResourceBundle=function(t,e){return e||(e=this.options.defaultNS),"v1"===this.options.compatibilityAPI?k({},this.getResource(t,e)):this.getResource(t,e)},e.prototype.toJSON=function(){return this.data},e}(R),T={processors:{},addPostProcessor:function(t){this.processors[t.name]=t},handle:function(t,e,n,o,r){var i=this;return t.forEach(function(t){i.processors[t]&&(e=i.processors[t].process(e,n,o,r))}),e}},M=function(t){function n(o){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,n);var i=O(this,t.call(this));return e(["resourceStore","languageUtils","pluralResolver","interpolator","backendConnector"],o,i),i.options=r,i.logger=C.create("translator"),i}return w(n,t),n.prototype.changeLanguage=function(t){t&&(this.language=t)},n.prototype.exists=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{interpolation:{}};return"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0!==this.resolve(t,e)},n.prototype.extractFromKey=function(t,e){var n=e.nsSeparator||this.options.nsSeparator;void 0===n&&(n=":");var o=e.keySeparator||this.options.keySeparator||".",r=e.ns||this.options.defaultNS;if(n&&t.indexOf(n)>-1){var i=t.split(n);(n!==o||n===o&&this.options.ns.indexOf(i[0])>-1)&&(r=i.shift()),t=i.join(o)}return"string"==typeof r&&(r=[r]),{key:t,namespaces:r}},n.prototype.translate=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("object"!==("undefined"==typeof e?"undefined":x(e))?e=this.options.overloadTranslationOptionHandler(arguments):"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0===t||null===t||""===t)return"";"number"==typeof t&&(t=String(t)),"string"==typeof t&&(t=[t]);var n=e.keySeparator||this.options.keySeparator||".",o=this.extractFromKey(t[t.length-1],e),r=o.key,i=o.namespaces,a=i[i.length-1],s=e.lng||this.language,l=e.appendNamespaceToCIMode||this.options.appendNamespaceToCIMode;if(s&&"cimode"===s.toLowerCase()){if(l){var u=e.nsSeparator||this.options.nsSeparator;return a+u+r}return r}var c=this.resolve(t,e),p=Object.prototype.toString.apply(c),g=["[object Number]","[object Function]","[object RegExp]"],h=void 0!==e.joinArrays?e.joinArrays:this.options.joinArrays;if(c&&"string"!=typeof c&&g.indexOf(p)<0&&(!h||"[object Array]"!==p)){if(!e.returnObjects&&!this.options.returnObjects)return this.logger.warn("accessing an object - but returnObjects options is not enabled!"),this.options.returnedObjectHandler?this.options.returnedObjectHandler(r,c,e):"key '"+r+" ("+this.language+")' returned an object instead of string.";if(e.keySeparator||this.options.keySeparator){var d="[object Array]"===p?[]:{};for(var y in c)Object.prototype.hasOwnProperty.call(c,y)&&(d[y]=this.translate(""+r+n+y,k({},e,{joinArrays:!1,ns:i})));c=d}}else if(h&&"[object Array]"===p)c=c.join(h),c&&(c=this.extendTranslation(c,r,e));else{var v=!1,b=!1;if(this.isValidLookup(c)||void 0===e.defaultValue||(v=!0,c=e.defaultValue),this.isValidLookup(c)||(b=!0,c=r),b||v){this.logger.log("missingKey",s,a,r,c);var m=[],S=this.languageUtils.getFallbackCodes(this.options.fallbackLng,e.lng||this.language);if("fallback"===this.options.saveMissingTo&&S&&S[0])for(var w=0;w<S.length;w++)m.push(S[w]);else"all"===this.options.saveMissingTo?m=this.languageUtils.toResolveHierarchy(e.lng||this.language):m.push(e.lng||this.language);this.options.saveMissing&&(this.options.missingKeyHandler?this.options.missingKeyHandler(m,a,r,c):this.backendConnector&&this.backendConnector.saveMissing&&this.backendConnector.saveMissing(m,a,r,c)),this.emit("missingKey",m,a,r,c)}c=this.extendTranslation(c,r,e),b&&c===r&&this.options.appendNamespaceToMissingKey&&(c=a+":"+r),b&&this.options.parseMissingKeyHandler&&(c=this.options.parseMissingKeyHandler(c))}return c},n.prototype.extendTranslation=function(t,e,n){var o=this;n.interpolation&&this.interpolator.init(k({},n,{interpolation:k({},this.options.interpolation,n.interpolation)}));var r=n.replace&&"string"!=typeof n.replace?n.replace:n;this.options.interpolation.defaultVariables&&(r=k({},this.options.interpolation.defaultVariables,r)),t=this.interpolator.interpolate(t,r,n.lng||this.language),n.nest!==!1&&(t=this.interpolator.nest(t,function(){return o.translate.apply(o,arguments)},n)),n.interpolation&&this.interpolator.reset();var i=n.postProcess||this.options.postProcess,a="string"==typeof i?[i]:i;return void 0!==t&&a&&a.length&&n.applyPostProcessor!==!1&&(t=T.handle(a,t,e,n,this)),t},n.prototype.resolve=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=void 0;return"string"==typeof t&&(t=[t]),t.forEach(function(t){if(!e.isValidLookup(o)){var r=e.extractFromKey(t,n),i=r.key,a=r.namespaces;e.options.fallbackNS&&(a=a.concat(e.options.fallbackNS));var s=void 0!==n.count&&"string"!=typeof n.count,l=void 0!==n.context&&"string"==typeof n.context&&""!==n.context,u=n.lngs?n.lngs:e.languageUtils.toResolveHierarchy(n.lng||e.language);a.forEach(function(t){e.isValidLookup(o)||u.forEach(function(r){if(!e.isValidLookup(o)){var a=i,u=[a],c=void 0;s&&(c=e.pluralResolver.getSuffix(r,n.count)),s&&l&&u.push(a+c),l&&u.push(a+=""+e.options.contextSeparator+n.context),s&&u.push(a+=c);for(var p=void 0;p=u.pop();)e.isValidLookup(o)||(o=e.getResource(r,t,p,n))}})})}}),o},n.prototype.isValidLookup=function(t){return!(void 0===t||!this.options.returnNull&&null===t||!this.options.returnEmptyString&&""===t)},n.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};return this.resourceStore.getResource(t,e,n,o)},n}(R),_=function(){function t(e){S(this,t),this.options=e,this.whitelist=this.options.whitelist||!1,this.logger=C.create("languageUtils")}return t.prototype.getScriptPartFromCode=function(t){if(!t||t.indexOf("-")<0)return null;var e=t.split("-");return 2===e.length?null:(e.pop(),this.formatLanguageCode(e.join("-")))},t.prototype.getLanguagePartFromCode=function(t){if(!t||t.indexOf("-")<0)return t;var e=t.split("-");return this.formatLanguageCode(e[0])},t.prototype.formatLanguageCode=function(t){if("string"==typeof t&&t.indexOf("-")>-1){var e=["hans","hant","latn","cyrl","cans","mong","arab"],n=t.split("-");return this.options.lowerCaseLng?n=n.map(function(t){return t.toLowerCase()}):2===n.length?(n[0]=n[0].toLowerCase(),n[1]=n[1].toUpperCase(),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase()))):3===n.length&&(n[0]=n[0].toLowerCase(),2===n[1].length&&(n[1]=n[1].toUpperCase()),"sgn"!==n[0]&&2===n[2].length&&(n[2]=n[2].toUpperCase()),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase())),e.indexOf(n[2].toLowerCase())>-1&&(n[2]=h(n[2].toLowerCase()))),n.join("-")}return this.options.cleanCode||this.options.lowerCaseLng?t.toLowerCase():t},t.prototype.isWhitelisted=function(t){return("languageOnly"===this.options.load||this.options.nonExplicitWhitelist)&&(t=this.getLanguagePartFromCode(t)),!this.whitelist||!this.whitelist.length||this.whitelist.indexOf(t)>-1},t.prototype.getFallbackCodes=function(t,e){if(!t)return[];if("string"==typeof t&&(t=[t]),"[object Array]"===Object.prototype.toString.apply(t))return t;if(!e)return t.default||[];var n=t[e];return n||(n=t[this.getScriptPartFromCode(e)]),n||(n=t[this.formatLanguageCode(e)]),n||(n=t.default),n||[]},t.prototype.toResolveHierarchy=function(t,e){var n=this,o=this.getFallbackCodes(e||this.options.fallbackLng||[],t),r=[],i=function(t){t&&(n.isWhitelisted(t)?r.push(t):n.logger.warn("rejecting non-whitelisted language code: "+t))};return"string"==typeof t&&t.indexOf("-")>-1?("languageOnly"!==this.options.load&&i(this.formatLanguageCode(t)),"languageOnly"!==this.options.load&&"currentOnly"!==this.options.load&&i(this.getScriptPartFromCode(t)),"currentOnly"!==this.options.load&&i(this.getLanguagePartFromCode(t))):"string"==typeof t&&i(this.formatLanguageCode(t)),o.forEach(function(t){r.indexOf(t)<0&&i(n.formatLanguageCode(t))}),r},t}(),H=[{lngs:["ach","ak","am","arn","br","fil","gun","ln","mfe","mg","mi","oc","tg","ti","tr","uz","wa"],nr:[1,2],fc:1},{lngs:["af","an","ast","az","bg","bn","ca","da","de","dev","el","en","eo","es","es_ar","et","eu","fi","fo","fur","fy","gl","gu","ha","he","hi","hu","hy","ia","it","kn","ku","lb","mai","ml","mn","mr","nah","nap","nb","ne","nl","nn","no","nso","pa","pap","pms","ps","pt","pt_br","rm","sco","se","si","so","son","sq","sv","sw","ta","te","tk","ur","yo"],nr:[1,2],fc:2},{lngs:["ay","bo","cgg","fa","id","ja","jbo","ka","kk","km","ko","ky","lo","ms","sah","su","th","tt","ug","vi","wo","zh"],nr:[1],fc:3},{lngs:["be","bs","dz","hr","ru","sr","uk"],nr:[1,2,5],fc:4},{lngs:["ar"],nr:[0,1,2,3,11,100],fc:5},{lngs:["cs","sk"],nr:[1,2,5],fc:6},{lngs:["csb","pl"],nr:[1,2,5],fc:7},{lngs:["cy"],nr:[1,2,3,8],fc:8},{lngs:["fr"],nr:[1,2],fc:9},{lngs:["ga"],nr:[1,2,3,7,11],fc:10},{lngs:["gd"],nr:[1,2,3,20],fc:11},{lngs:["is"],nr:[1,2],fc:12},{lngs:["jv"],nr:[0,1],fc:13},{lngs:["kw"],nr:[1,2,3,4],fc:14},{lngs:["lt"],nr:[1,2,10],fc:15},{lngs:["lv"],nr:[1,2,0],fc:16},{lngs:["mk"],nr:[1,2],fc:17},{lngs:["mnk"],nr:[0,1,2],fc:18},{lngs:["mt"],nr:[1,2,11,20],fc:19},{lngs:["or"],nr:[2,1],fc:2},{lngs:["ro"],nr:[1,2,20],fc:20},{lngs:["sl"],nr:[5,1,2,3],fc:21}],U={1:function(t){return Number(t>1)},2:function(t){return Number(1!=t)},3:function(t){return 0},4:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},5:function(t){return Number(0===t?0:1==t?1:2==t?2:t%100>=3&&t%100<=10?3:t%100>=11?4:5)},6:function(t){return Number(1==t?0:t>=2&&t<=4?1:2)},7:function(t){return Number(1==t?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},8:function(t){return Number(1==t?0:2==t?1:8!=t&&11!=t?2:3)},9:function(t){return Number(t>=2)},10:function(t){return Number(1==t?0:2==t?1:t<7?2:t<11?3:4)},11:function(t){return Number(1==t||11==t?0:2==t||12==t?1:t>2&&t<20?2:3)},12:function(t){return Number(t%10!=1||t%100==11)},13:function(t){return Number(0!==t)},14:function(t){return Number(1==t?0:2==t?1:3==t?2:3)},15:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&(t%100<10||t%100>=20)?1:2)},16:function(t){return Number(t%10==1&&t%100!=11?0:0!==t?1:2)},17:function(t){return Number(1==t||t%10==1?0:1)},18:function(t){return Number(0==t?0:1==t?1:2)},19:function(t){return Number(1==t?0:0===t||t%100>1&&t%100<11?1:t%100>10&&t%100<20?2:3)},20:function(t){return Number(1==t?0:0===t||t%100>0&&t%100<20?1:2)},21:function(t){return Number(t%100==1?1:t%100==2?2:t%100==3||t%100==4?3:0)}},V=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.languageUtils=e,this.options=n,this.logger=C.create("pluralResolver"),this.rules=d()}return t.prototype.addRule=function(t,e){this.rules[t]=e},t.prototype.getRule=function(t){return this.rules[this.languageUtils.getLanguagePartFromCode(t)]},t.prototype.needsPlural=function(t){var e=this.getRule(t);return e&&e.numbers.length>1},t.prototype.getSuffix=function(t,e){var n=this,o=this.getRule(t);if(o){if(1===o.numbers.length)return"";var r=o.noAbs?o.plurals(e):o.plurals(Math.abs(e)),i=o.numbers[r];this.options.simplifyPluralSuffix&&2===o.numbers.length&&1===o.numbers[0]&&(2===i?i="plural":1===i&&(i=""));var a=function(){return n.options.prepend&&i.toString()?n.options.prepend+i.toString():i.toString()};return"v1"===this.options.compatibilityJSON?1===i?"":"number"==typeof i?"_plural_"+i.toString():a():"v2"===this.options.compatibilityJSON||2===o.numbers.length&&1===o.numbers[0]?a():2===o.numbers.length&&1===o.numbers[0]?a():this.options.prepend&&r.toString()?this.options.prepend+r.toString():r.toString()}return this.logger.warn("no plural rule found for: "+t),""},t}(),I=function(){function e(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};S(this,e),this.logger=C.create("interpolator"),this.init(t,!0)}return e.prototype.init=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=arguments[1];e&&(this.options=t,this.format=t.interpolation&&t.interpolation.format||function(t){return t},this.escape=t.interpolation&&t.interpolation.escape||l),t.interpolation||(t.interpolation={escapeValue:!0});var n=t.interpolation;this.escapeValue=void 0===n.escapeValue||n.escapeValue,this.prefix=n.prefix?s(n.prefix):n.prefixEscaped||"{{",this.suffix=n.suffix?s(n.suffix):n.suffixEscaped||"}}",this.formatSeparator=n.formatSeparator?n.formatSeparator:n.formatSeparator||",",this.unescapePrefix=n.unescapeSuffix?"":n.unescapePrefix||"-",this.unescapeSuffix=this.unescapePrefix?"":n.unescapeSuffix||"",this.nestingPrefix=n.nestingPrefix?s(n.nestingPrefix):n.nestingPrefixEscaped||s("$t("),this.nestingSuffix=n.nestingSuffix?s(n.nestingSuffix):n.nestingSuffixEscaped||s(")"),this.resetRegExp()},e.prototype.reset=function(){this.options&&this.init(this.options)},e.prototype.resetRegExp=function(){var t=this.prefix+"(.+?)"+this.suffix;this.regexp=new RegExp(t,"g");var e=""+this.prefix+this.unescapePrefix+"(.+?)"+this.unescapeSuffix+this.suffix;this.regexpUnescape=new RegExp(e,"g");var n=this.nestingPrefix+"(.+?)"+this.nestingSuffix;this.nestingRegexp=new RegExp(n,"g")},e.prototype.interpolate=function(e,n,o){function r(t){return t.replace(/\$/g,"$$$$")}var a=this,s=void 0,l=void 0,u=function(t){if(t.indexOf(a.formatSeparator)<0)return i(n,t);var e=t.split(a.formatSeparator),r=e.shift().trim(),s=e.join(a.formatSeparator).trim();return a.format(i(n,r),s,o)};for(this.resetRegExp();s=this.regexpUnescape.exec(e);)l=u(s[1].trim()),e=e.replace(s[0],l),this.regexpUnescape.lastIndex=0;for(;s=this.regexp.exec(e);)l=u(s[1].trim()),"string"!=typeof l&&(l=t(l)),l||(this.logger.warn("missed to pass in variable "+s[1]+" for interpolating "+e),l=""),l=r(this.escapeValue?this.escape(l):l),e=e.replace(s[0],l),this.regexp.lastIndex=0;return e},e.prototype.nest=function(e,n){function o(t){if(t.indexOf(",")<0)return t;var e=t.split(",");t=e.shift();var n=e.join(",");n=this.interpolate(n,s),n=n.replace(/'/g,'"');try{s=JSON.parse(n)}catch(e){this.logger.error("failed parsing options string in nesting for key "+t,e)}return t}var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},i=void 0,a=void 0,s=k({},r);for(s.applyPostProcessor=!1;i=this.nestingRegexp.exec(e);){if(a=n(o.call(this,i[1].trim()),s),a&&i[0]===e&&"string"!=typeof a)return a;"string"!=typeof a&&(a=t(a)),a||(this.logger.warn("missed to resolve "+i[1]+" for nesting "+e),a=""),e=e.replace(i[0],a),this.regexp.lastIndex=0}return e},e}(),F=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.backend=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("backendConnector"),a.state={},a.queue=[],a.backend&&a.backend.init&&a.backend.init(r,i.backend,i),a}return w(e,t),e.prototype.queueLoad=function(t,e,n){var o=this,r=[],i=[],a=[],s=[];return t.forEach(function(t){var n=!0;e.forEach(function(e){var a=t+"|"+e;o.store.hasResourceBundle(t,e)?o.state[a]=2:o.state[a]<0||(1===o.state[a]?i.indexOf(a)<0&&i.push(a):(o.state[a]=1,n=!1,i.indexOf(a)<0&&i.push(a),r.indexOf(a)<0&&r.push(a),s.indexOf(e)<0&&s.push(e)))}),n||a.push(t)}),(r.length||i.length)&&this.queue.push({pending:i,loaded:{},errors:[],callback:n}),{toLoad:r,pending:i,toLoadLanguages:a,toLoadNamespaces:s}},e.prototype.loaded=function(t,e,n){var o=this,i=t.split("|"),a=L(i,2),s=a[0],l=a[1];e&&this.emit("failedLoading",s,l,e),n&&this.store.addResourceBundle(s,l,n),this.state[t]=e?-1:2,this.queue.forEach(function(n){r(n.loaded,[s],l),y(n.pending,t),e&&n.errors.push(e),0!==n.pending.length||n.done||(o.emit("loaded",n.loaded),n.done=!0,n.errors.length?n.callback(n.errors):n.callback())}),this.queue=this.queue.filter(function(t){return!t.done})},e.prototype.read=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:0,r=this,i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:250,a=arguments[5];return t.length?this.backend[n](t,e,function(s,l){return s&&l&&o<5?void setTimeout(function(){r.read.call(r,t,e,n,o+1,2*i,a)},i):void a(s,l)}):a(null,{})},e.prototype.load=function(t,e,n){var o=this;if(!this.backend)return this.logger.warn("No backend was added via i18next.use. Will not load resources."),n&&n();var r=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]);var a=this.queueLoad(t,e,n);return a.toLoad.length?void(r.allowMultiLoading&&this.backend.readMulti?this.read(a.toLoadLanguages,a.toLoadNamespaces,"readMulti",null,null,function(t,e){t&&o.logger.warn("loading namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading failed",t),!t&&e&&o.logger.log("successfully loaded namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading",e),a.toLoad.forEach(function(n){var r=n.split("|"),a=L(r,2),s=a[0],l=a[1],u=i(e,[s,l]);if(u)o.loaded(n,t,u);else{var c="loading namespace "+l+" for language "+s+" via multiloading failed";o.loaded(n,c),o.logger.error(c)}})}):a.toLoad.forEach(function(t){o.loadOne(t)})):(a.pending.length||n(),null)},e.prototype.reload=function(t,e){var n=this;this.backend||this.logger.warn("No backend was added via i18next.use. Will not load resources.");var o=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]),o.allowMultiLoading&&this.backend.readMulti?this.read(t,e,"readMulti",null,null,function(o,r){o&&n.logger.warn("reloading namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading failed",o),!o&&r&&n.logger.log("successfully reloaded namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading",r),t.forEach(function(t){e.forEach(function(e){var a=i(r,[t,e]);if(a)n.loaded(t+"|"+e,o,a);else{var s="reloading namespace "+e+" for language "+t+" via multiloading failed";n.loaded(t+"|"+e,s),n.logger.error(s)}})})}):t.forEach(function(t){e.forEach(function(e){n.loadOne(t+"|"+e,"re")})})},e.prototype.loadOne=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"",o=t.split("|"),r=L(o,2),i=r[0],a=r[1];this.read(i,a,"read",null,null,function(o,r){o&&e.logger.warn(n+"loading namespace "+a+" for language "+i+" failed",o),!o&&r&&e.logger.log(n+"loaded namespace "+a+" for language "+i,r),e.loaded(t,o,r)})},e.prototype.saveMissing=function(t,e,n,o){this.backend&&this.backend.create&&this.backend.create(t,e,n,o),t&&t[0]&&this.store.addResource(t[0],e,n,o)},e}(R),D=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.cache=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("cacheConnector"),a.cache&&a.cache.init&&a.cache.init(r,i.cache,i),a}return w(e,t),e.prototype.load=function(t,e,n){var o=this;if(!this.cache)return n&&n();var r=k({},this.cache.options,this.options.cache),i="string"==typeof t?this.services.languageUtils.toResolveHierarchy(t):t;r.enabled?this.cache.load(i,function(t,e){if(t&&o.logger.error("loading languages "+i.join(", ")+" from cache failed",t),e)for(var r in e)if(Object.prototype.hasOwnProperty.call(e,r))for(var a in e[r])if(Object.prototype.hasOwnProperty.call(e[r],a)&&"i18nStamp"!==a){var s=e[r][a];s&&o.store.addResourceBundle(r,a,s)}n&&n()}):n&&n()},e.prototype.save=function(){this.cache&&this.options.cache&&this.options.cache.enabled&&this.cache.save(this.store.data)},e}(R),K=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments[1];S(this,e);var r=O(this,t.call(this));if(r.options=b(n),r.services={},r.logger=C,r.modules={external:[]},o&&!r.isInitialized&&!n.isClone){var i;if(!r.options.initImmediate)return i=r.init(n,o),O(r,i);setTimeout(function(){r.init(n,o)},0)}return r}return w(e,t),e.prototype.init=function(t,e){function n(t){return t?"function"==typeof t?new t:t:null}var o=this;if("function"==typeof t&&(e=t,t={}),t||(t={}),"v1"===t.compatibilityAPI?this.options=k({},v(),b(c(t)),{}):"v1"===t.compatibilityJSON?this.options=k({},v(),b(p(t)),{}):this.options=k({},v(),this.options,b(t)),this.format=this.options.interpolation.format,e||(e=m),!this.options.isClone){this.modules.logger?C.init(n(this.modules.logger),this.options):C.init(null,this.options);var r=new _(this.options);this.store=new A(this.options.resources,this.options);var i=this.services;i.logger=C,i.resourceStore=this.store,i.resourceStore.on("added removed",function(t,e){i.cacheConnector.save()}),i.languageUtils=r,i.pluralResolver=new V(r,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON,simplifyPluralSuffix:this.options.simplifyPluralSuffix}),i.interpolator=new I(this.options),i.backendConnector=new F(n(this.modules.backend),i.resourceStore,i,this.options),i.backendConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),i.backendConnector.on("loaded",function(t){i.cacheConnector.save()}),i.cacheConnector=new D(n(this.modules.cache),i.resourceStore,i,this.options),i.cacheConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.languageDetector&&(i.languageDetector=n(this.modules.languageDetector),i.languageDetector.init(i,this.options.detection,this.options)),this.translator=new M(this.services,this.options),
@@ -4594,6 +4595,7 @@ Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
  *
  * Provides {@link Numbas.jme.rules}
  */
+/** @namespace Numbas.jme.rules */
 var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
@@ -4631,7 +4633,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
      * @memberof Numbas.jme.rules.Rule.prototype
      * @param {Numbas.jme.tree} exprTree - the syntax tree to test
      * @param {Numbas.jme.Scope} scope - used when checking conditions
-     * @returns {Boolean|jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
+     * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
      */
     match: function(exprTree,scope)
     {
@@ -4655,7 +4657,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     },
     /** Check that a matched pattern satisfies all the rule's conditions
      * @memberof Numbas.jme.rules.Rule.prototype
-     * @param {jme_pattern_match} match
+     * @param {Numbas.jme.rules.jme_pattern_match} match
      * @param {Numbas.jme.Scope} scope
      * @returns {Boolean}
      */
@@ -4700,9 +4702,9 @@ function isEndTerm(term) {
 }
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
  * @param {Numbas.jme.tree} tree
- * @param {string} op
- * @param {Array<string>} names
- * @returns {object} - {terms: a list of subtrees, termnames: the match names set in each term}
+ * @param {String} op
+ * @param {String[]} names
+ * @returns {Object} - {terms: a list of subtrees, termnames: the match names set in each term}
  */
 var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,names) {
     if(names===undefined) {
@@ -4746,9 +4748,9 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
 }
 /** A dictionary representing the results of a JME pattern match.
  * Maps variable names to trees.
- * @typedef jme_pattern_match
+ * @typedef Numbas.jme.rules.jme_pattern_match
  * @type Object.<Numbas.jme.tree>
- * @see Numbas.jme.display.matchTree
+ * @see {Numbas.jme.rules#matchTree}
  */
 /** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
  * @memberof Numbas.jme.rules
@@ -4756,7 +4758,7 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
- * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
     if(doCommute===undefined) {
@@ -5007,7 +5009,7 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
  * @param {JME} expr
  * @param {Boolean} doCommute
  *
- * @returns {Boolean|jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
 var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommute) {
     pattern = jme.compile(pattern);
@@ -5025,17 +5027,17 @@ var displayFlags = jme.rules.displayFlags = {
 };
 /** Flags used in JME simplification rulesets
  * @type Object.<Boolean>
- * @typedef ruleset_flags
+ * @typedef Numbas.jme.rules.ruleset_flags
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {Boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
- * @see Numbas.jme.Ruleset
+ * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules
  * @constructor
  * @memberof Numbas.jme.rules
- * @param {rule[]} rules
- * @param {ruleset_flags} flags
+ * @param {Numbas.jme.rules.Rule[]} rules
+ * @param {Numbas.jme.rules.ruleset_flags} flags
  */
 var Ruleset = jme.rules.Ruleset = function(rules,flags) {
     this.rules = rules;
@@ -5060,9 +5062,9 @@ function mergeRulesets(r1,r2) {
     return new Ruleset(rules, flags);
 }
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
- * @param {String|Array.<String|Numbas.jme.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {Object.<Numbas.jme.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
- * @returns Numbas.jme.Ruleset
+ * @param {String|Array.<String|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {Object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @returns Numbas.jme.rules.Ruleset
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 {
@@ -5329,7 +5331,7 @@ var expandBracketsRules = [
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
- * @returns {Numbas.jme.Ruleset}
+ * @returns {Numbas.jme.rules.Ruleset}
  */
 var compileRules = jme.rules.compileRules = function(rules)
 {
@@ -5357,6 +5359,7 @@ compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -5385,11 +5388,19 @@ Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules'],function(){
 Numbas.queueScript('jme-base',['base','math','util'],function() {
 var util = Numbas.util;
 var math = Numbas.math;
+
+/** A JME expression.
+ * @typedef JME
+ * @type {String}
+ * @see {@link http://numbas-editor.readthedocs.io/en/latest/jme-reference.html}
+ */
+
 /** @typedef Numbas.jme.tree
   * @type {Object}
   * @property {Array.<Numbas.jme.tree>} args - the token's arguments (if it's an op or function)
   * @property {Numbas.jme.token} tok - the token at this node
   */
+
 /** @namespace Numbas.jme */
 var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Mathematical constants */
@@ -5417,18 +5428,37 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             .replace(/'/g,"\\'")
         ;
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#compile}
+     * @param {JME} expr
+     * @see Numbas.jme.Parser#compile
+     * @returns {Numbas.jme.tree}
+     */
     compile: function(expr) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.compile(expr);
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#tokenise}
+     * @param {JME} expr
+     * @see Numbas.jme.Parser#tokenise
+     * @returns {Numbas.jme.token[]}
+     */
     tokenise: function(expr) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.tokenise(expr);
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#shunt}
+     * @param {Numbas.jme.token[]} tokens
+     * @see Numbas.jme.Parser#shunt
+     * @returns {Numbas.jme.tree}
+     */
     shunt: function(tokens) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.shunt(expr);
     },
+
     /** Unescape a string - backslashes escape special characters
      * @param {String} str
      * @returns {String}
@@ -5907,16 +5937,34 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
     }
 };
-jme.Parser = function(scope, options) {
-    this.scope = scope;
+
+/** Options for {@link Numbas.jme.Parser}
+ *
+ * @typedef {Object} Numbas.jme.parser_options
+ * @property {Boolean} closeMissingBrackets - Silently ignore "missing right bracket" errors?
+ * @property {Boolean} addMissingArguments - When an op or function call is missing required arguments, insert `?` as a placeholder.
+ */
+
+/** A parser for {@link JME} expressions
+ * @memberof Numbas.jme
+ * @constructor
+ * 
+ * @param {Numbas.jme.parser_options} options
+ */
+var Parser = jme.Parser = function(options) {
     this.options = util.extend_object({}, this.option_defaults, options);
 }
-jme.Parser.prototype = {
+jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
+    /** Default options for new parsers
+     * @type {Numbas.jme.parser_options}
+     */
     option_defaults: {
         closeMissingBrackets: false,
         addMissingArguments: false
     },
-    /** Regular expressions to match tokens */
+    /** Regular expressions to match tokens 
+     * @type {Object.<RegExp>}
+     */
     re: {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
@@ -5930,7 +5978,7 @@ jme.Parser.prototype = {
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
      * @param {JME} expr
      * @returns {Array.<Numbas.jme.token>}
-     * @see Numbas.jme.compile
+     * @see Numbas.jme.Parser#compile
      */
     tokenise: function(expr) {
         if(!expr)
@@ -6042,8 +6090,8 @@ jme.Parser.prototype = {
     /** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm (wikipedia has a good description)
      * @param {Array.<Numbas.jme.token>} tokens
      * @returns {Numbas.jme.tree}
-     * @see Numbas.jme.tokenise
-     * @see Numbas.jme.compile
+     * @see Numbas.jme.Parser#tokenise
+     * @see Numbas.jme.Parser#compile
      */
     shunt: function(tokens) {
         var parser = this;
@@ -6231,10 +6279,11 @@ jme.Parser.prototype = {
         }
         return(output[0]);
     },
+
     /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt})
      * @param {JME} expr
-     * @see Numbas.jme.tokenise
-     * @see Numbas.jme.shunt
+     * @see Numbas.jme.Parser#tokenise
+     * @see Numbas.jme.Parser#shunt
      * @returns {Numbas.jme.tree}
      */
     compile: function(expr) {
@@ -6256,14 +6305,22 @@ jme.Parser.prototype = {
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
 jme.Parser.prototype.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
 jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+');
+
+/** Regular expressions for parser tokens.
+ * Included for backwards-compatibility
+ * @type {Object.<RegExp>}
+ * @see {Numbas.jme.Parser.re}
+ */
 jme.re = jme.Parser.prototype.re;
+
 var fnSort = util.sortBy('id');
 /** Options for the {@link Numbas.jme.funcObj} constructor
- * @typedef {Object} scope_deletions
+ * @typedef {Object} Numbas.jme.scope_deletions
  * @property {Object} variables - Names of deleted variables.
  * @property {Object} functions - Names of deleted functions.
  * @property {Object} rulesets - Names of deleted rulesets.
  */
+
 /**
  * A JME evaluation environment.
  * Stores variable, function, and ruleset definitions.
@@ -6274,8 +6331,8 @@ var fnSort = util.sortBy('id');
  * @constructor
  * @property {Object.<Numbas.jme.token>} variables - Dictionary of variables defined **at this level in the scope**. To resolve a variable in the scope, use {@link Numbas.jme.Scope.getVariable}.
  * @property {Object.<Array.<Numbas.jme.funcObj>>} functions - Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use {@link Numbas.jme.Scope.getFunction}.
- * @property {Object.<Numbas.jme.Ruleset>} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
- * @property {scope_deletions} deleted - Names of deleted variables/functions/rulesets.
+ * @property {Object.<Numbas.jme.rules.Ruleset>} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
+ * @property {Numbas.jme.scope_deletions} deleted - Names of deleted variables/functions/rulesets.
  * @property {Numbas.Question} question - The question this scope belongs to.
  *
  * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in this scope
@@ -6328,15 +6385,15 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
     /** Mark the given variable name as deleted from the scope.
-     * @param {string} name
+     * @param {String} name
      */
     deleteVariable: function(name) {
         this.deleted.variables[name] = true;
     },
     /** Get the object with given name from the given collection
-     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
-     * @param {string} name - the name of the object to retrieve
-     * @returns {object}
+     * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {String} name - the name of the object to retrieve
+     * @returns {Object}
      */
     resolve: function(collection,name) {
         var scope = this;
@@ -6351,21 +6408,21 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
     /** Find the value of the variable with the given name, if it's defined
-     * @param {string} name
+     * @param {String} name
      * @returns {Numbas.jme.token}
      */
     getVariable: function(name) {
         return this.resolve('variables',name.toLowerCase());
     },
     /** Set the given variable name
-     * @param {string} name
+     * @param {String} name
      * @param {Numbas.jme.token} value
      */
     setVariable: function(name, value) {
         this.variables[name.toLowerCase()] = value;
     },
     /** Get all definitions of the given function name.
-     * @param {string} name
+     * @param {String} name
      * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
      */
     getFunction: function(name) {
@@ -6383,22 +6440,22 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this._resolved_functions[name];
     },
     /** Get the ruleset with the gien name
-     * @param {string} name
-     * @returns {Numbas.jme.Ruleset}
+     * @param {String} name
+     * @returns {Numbas.jme.rules.Ruleset}
      */
     getRuleset: function(name) {
         return this.resolve('rulesets',name);
     },
     /** Set the given ruleset name
-     * @param {string} name
-     * @param {Numbas.jme.Ruleset[]} rules
+     * @param {String} name
+     * @param {Numbas.jme.rules.Ruleset[]} rules
      */
     setRuleset: function(name, rules) {
         this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
     },
     /** Collect together all items from the given collection
-     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
-     * @returns {object} a dictionary of names to values
+     * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @returns {Object} a dictionary of names to values
      */
     collect: function(collection,name) {
         var scope = this;
@@ -6419,13 +6476,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return out;
     },
     /** Gather all variables defined in this scope
-     * @returns {object} a dictionary of variables
+     * @returns {Object.<Numbas.jme.token>} a dictionary of variables
      */
     allVariables: function() {
         return this.collect('variables');
     },
     /** Gather all rulesets defined in this scope
-     * @returns {object} a dictionary of rulesets
+     * @returns {Object.<Numbas.jme.rules.Ruleset>} a dictionary of rulesets
      */
     allRulesets: function() {
         if(!this._allRulesets) {
@@ -6434,7 +6491,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this._allRulesets;
     },
     /** Gather all functions defined in this scope
-     * @returns {object} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
+     * @returns {Object.<Numbas.jme.funcObj[]>} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
      */
     allFunctions: function() {
         var scope = this;
@@ -7545,6 +7602,7 @@ jme.compareTrees = function(a,b) {
     return 0;
 }
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -7595,23 +7653,18 @@ var funcs = {};
 function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
-newBuiltin('+u', [TNum], TNum, function(a){return a;}, {doc: {usage: '+x', description: "Unary addition.", tags: ['plus','positive']}});
-newBuiltin('+u', [TVector], TVector, function(a){return a;}, {doc: {usage: '+x', description: "Vector unary addition.", tags: ['plus','positive']}});
-newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;}, {doc: {usage: '+x', description: "Matrix unary addition.", tags: ['plus','positive']}});
-newBuiltin('-u', [TNum], TNum, math.negate, {doc: {usage: '-x', description: "Negation.", tags: ['minus','negative','negate']}});
-newBuiltin('-u', [TVector], TVector, vectormath.negate, {doc: {usage: '-x', description: "Vector negation.", tags: ['minus','negative','negate']}});
-newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate, {doc: {usage: '-x', description: "Matrix negation.", tags: ['minus','negative','negate']}});
-newBuiltin('+', [TNum,TNum], TNum, math.add, {doc: {usage: 'x+y', description: "Add two numbers together.", tags: ['plus','add','addition']}});
+newBuiltin('+u', [TNum], TNum, function(a){return a;});
+newBuiltin('+u', [TVector], TVector, function(a){return a;});
+newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;});
+newBuiltin('-u', [TNum], TNum, math.negate);
+newBuiltin('-u', [TVector], TVector, vectormath.negate);
+newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate);
+newBuiltin('+', [TNum,TNum], TNum, math.add);
 newBuiltin('+', [TList,TList], TList, null, {
     evaluate: function(args,scope)
     {
         var value = args[0].value.concat(args[1].value);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list1+list2','[1,2,3]+[4,5,6]'],
-        description: "Concatenate two lists.",
-        tags: ['join','append','concatenation']
     }
 });
 newBuiltin('+',[TList,'?'],TList, null, {
@@ -7620,11 +7673,6 @@ newBuiltin('+',[TList,'?'],TList, null, {
         var value = args[0].value.slice();
         value.push(args[1]);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list+3','[1,2] + 3'],
-        description: "Add an item to a list",
-        tags: ['push','append','insert']
     }
 });
 newBuiltin('+',[TDict,TDict],TDict, null,{
@@ -7640,42 +7688,42 @@ newBuiltin('+',[TDict,TDict],TDict, null,{
     }
 });
 var fconc = function(a,b) { return a+b; }
-newBuiltin('+', [TString,'?'], TString, fconc, {doc: {usage: '\'Hello \' + name', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
-newBuiltin('+', ['?',TString], TString, fconc, {doc: {usage: 'name + \' is OK.\'', description: '_string_ + _anything else_ is string concatenation.', tags: ['concatenate','concatenation','add','join','strings','plus']}});
-newBuiltin('+', [TVector,TVector], TVector, vectormath.add, {doc: {usage: 'vector(1,2) + vector(0,1)', description: 'Add two vectors.', tags: ['addition','plus']}});
-newBuiltin('+', [TMatrix,TMatrix], TMatrix, matrixmath.add, {doc: {usage: 'matrix([1,0],[0,1]) + matrix([2,2],[2,2])', description: 'Add two matrices.', tags: ['addition','plus']}});
-newBuiltin('-', [TNum,TNum], TNum, math.sub, {doc: {usage: ['x-y','2 - 1'], description: 'Subtract one number from another.', tags: ['minus','take away','subtraction']}});
-newBuiltin('-', [TVector,TVector], TVector, vectormath.sub, {doc: {usage: 'vector(1,2) - vector(2,3)', description: 'Subtract one vector from another.', tags: ['subtraction','minus','take away']}});
-newBuiltin('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub, {doc: {usage: 'matrix([1,1],[2,3]) - matrix([3,3],[2,2])', description: 'Subtract one matrix from another.', tags: ['subtraction','minus','take away']}});
-newBuiltin('*', [TNum,TNum], TNum, math.mul, {doc: {usage: ['3x','3*x','x*y','x*3'], description: 'Multiply two numbers.', tags: ['multiplication','compose','composition','times']}} );
-newBuiltin('*', [TNum,TVector], TVector, vectormath.mul, {doc: {usage: '3*vector(1,2,3)', description: 'Multiply a vector on the left by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TMatrix,TVector], TVector, vectormath.matrixmul, {doc: {usage: 'matrix([1,0],[0,1]) * vector(1,2)', description: 'Multiply a matrix by a vector.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul, {doc: {usage: '3*matrix([1,0],[0,1])', description: 'Multiply a matrix on the left by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul, {doc: {usage: 'matrix([1,0],[1,1]) * matrix([2,3],[3,4])', description: 'Multiply two matrices.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('*', [TVector,TMatrix], TVector, vectormath.vectormatrixmul, {doc: {usage: 'vector(1,2) * matrix([2,3],[3,4])', description: 'Multiply a vector by a matrix.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('/', [TNum,TNum], TNum, math.div, {doc: {usage: ['x/y','3/2'], description: 'Divide two numbers.', tags: ['division','quotient','fraction']}} );
-newBuiltin('/', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalardiv(a,b); }, {doc: {usage: 'matrix([1,0],[1,2]) * 3', description: 'Multiply a matrix on the right by a scalar.', tags: ['multiplication','composition','compose','times']}} );
-newBuiltin('/', [TVector,TNum], TVector, function(a,b){return vectormath.div(a,b)}, {doc: {usage: 'vector(1,2,3) * 3', description: 'Multiply a vector on the right by a scalar.', tags: ['multiplication','composition','compose','times']}});
-newBuiltin('^', [TNum,TNum], TNum, math.pow, {doc: {usage: ['x^y','x^2','2^x','e^x'], description: 'Exponentiation.', tags: ['power','exponentiate','raise']}} );
-newBuiltin('dot',[TVector,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), vector(2,3,4) )', description: 'Dot product of two vectors', tags: ['projection','project']}});
-newBuiltin('dot',[TMatrix,TVector],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
-newBuiltin('dot',[TVector,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the dot product with another vector.', tags: ['projection','project']}});
-newBuiltin('dot',[TMatrix,TMatrix],TNum,vectormath.dot, {doc: {usage: 'dot( matrix([1],[2],[3]), matrix( [1],[2],[3] )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the dot product.', tags: ['projection','project']}});
-newBuiltin('cross',[TVector,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), vector(1,2,3) )', description: 'Cross product of two vectors.'}});
-newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), vector(1,2,3) )', description: 'If the left operand is a matrix with one column, treat it as a vector, so we can calculate the cross product with another vector.'}});
-newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( vector(1,2,3), matrix([1],[2],[3]) )', description: 'If the right operand is a matrix with one column, treat it as a vector, so we can calculate the crossproduct with another vector.'}});
-newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross, {doc: {usage: 'cross( matrix([1],[2],[3]), matrix([1],[2],[3]) )', description: 'If both operands are matrices with one column, treat them as vectors, so we can calculate the cross product with another vector.'}});
-newBuiltin('det', [TMatrix], TNum, matrixmath.abs, {doc: {usage: 'det( matrix([1,2],[2,3]) )', description: 'Determinant of a matrix.'}});
+newBuiltin('+', [TString,'?'], TString, fconc);
+newBuiltin('+', ['?',TString], TString, fconc);
+newBuiltin('+', [TVector,TVector], TVector, vectormath.add);
+newBuiltin('+', [TMatrix,TMatrix], TMatrix, matrixmath.add);
+newBuiltin('-', [TNum,TNum], TNum, math.sub);
+newBuiltin('-', [TVector,TVector], TVector, vectormath.sub);
+newBuiltin('-', [TMatrix,TMatrix], TMatrix, matrixmath.sub);
+newBuiltin('*', [TNum,TNum], TNum, math.mul );
+newBuiltin('*', [TNum,TVector], TVector, vectormath.mul);
+newBuiltin('*', [TVector,TNum], TVector, function(a,b){return vectormath.mul(b,a)});
+newBuiltin('*', [TMatrix,TVector], TVector, vectormath.matrixmul);
+newBuiltin('*', [TNum,TMatrix], TMatrix, matrixmath.scalarmul );
+newBuiltin('*', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalarmul(b,a); } );
+newBuiltin('*', [TMatrix,TMatrix], TMatrix, matrixmath.mul);
+newBuiltin('*', [TVector,TMatrix], TVector, vectormath.vectormatrixmul);
+newBuiltin('/', [TNum,TNum], TNum, math.div );
+newBuiltin('/', [TMatrix,TNum], TMatrix, function(a,b){ return matrixmath.scalardiv(a,b); } );
+newBuiltin('/', [TVector,TNum], TVector, function(a,b){return vectormath.div(a,b)});
+newBuiltin('^', [TNum,TNum], TNum, math.pow );
+newBuiltin('dot',[TVector,TVector],TNum,vectormath.dot);
+newBuiltin('dot',[TMatrix,TVector],TNum,vectormath.dot);
+newBuiltin('dot',[TVector,TMatrix],TNum,vectormath.dot);
+newBuiltin('dot',[TMatrix,TMatrix],TNum,vectormath.dot);
+newBuiltin('cross',[TVector,TVector],TVector,vectormath.cross);
+newBuiltin('cross',[TMatrix,TVector],TVector,vectormath.cross);
+newBuiltin('cross',[TVector,TMatrix],TVector,vectormath.cross);
+newBuiltin('cross',[TMatrix,TMatrix],TVector,vectormath.cross);
+newBuiltin('det', [TMatrix], TNum, matrixmath.abs);
 newBuiltin('numrows',[TMatrix], TNum, function(m){ return m.rows });
 newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
-newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose, {doc: {usage: 'transpose( vector(1,2,3) )', description: 'Transpose of a vector.'}});
-newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose, {doc: {usage: 'transpose( matrix([1,2,3],[4,5,6]) )', description: 'Transpose of a matrix.'}});
-newBuiltin('id',[TNum],TMatrix, matrixmath.id, {doc: {usage: 'id(3)', description: 'Identity matrix with $n$ rows and columns.'}});
-newBuiltin('..', [TNum,TNum], TRange, math.defineRange, {doc: {usage: ['a..b','1..2'], description: 'Define a range', tags: ['interval']}});
-newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps, {doc: {usage: ['a..b#c','0..1 # 0.1'], description: 'Set the step size for a range.'}});
+newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
+newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('id',[TNum],TMatrix, matrixmath.id);
+newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
+newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
     var start = r[0];
     var end = r[1];
@@ -7802,17 +7850,16 @@ newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
 },{unwrapValues:true});
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
-newBuiltin('html',[TString],THTML,function(html) { return $(html) }, {doc: {usage: ['html(\'<div>things</div>\')'], description: 'Parse HTML from a string', tags: ['element','node']}});
-newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); }, {doc: {usage: ['image(\'picture.png\')'], description: 'Load an image from the given URL', tags: ['element','image','html']}});
+newBuiltin('html',[TString],THTML,function(html) { return $(html) });
+newBuiltin('nonemptyhtml',[TString],TBool,function(html) {
+    return util.isNonemptyHTML(html);
+});
+newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); });
 newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
         s.latex = true;
         return s;
-    },
-    doc: {
-        usage: ['latex("something")'],
-        description: 'Output a string as raw LaTeX. Normally, strings are wrapped in a \\textrm command.'
     }
 });
 newBuiltin('safe',[TString],TString,null, {
@@ -7828,9 +7875,9 @@ newBuiltin('safe',[TString],TString,null, {
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
-newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); }, {doc: {usage: ['capitalise(\'hello there\')'], description: 'Capitalise the first letter of a string', tags: ['upper-case','case','upper']}});
-newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); }, {doc: {usage: ['upper(\'hello there\')'], description: 'Change all the letters in a string to capitals.', tags: ['upper-case','case','upper','capitalise','majuscule']}});
-newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); }, {doc: {usage: ['lower(\'HELLO, you!\')'], description: 'Change all the letters in a string to minuscules.', tags: ['lower-case','lower','case']}});
+newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
+newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
+newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
 newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
     return list.map(jme.tokenToDisplayString).join(delimiter);
@@ -7869,12 +7916,7 @@ newBuiltin('except', [TRange,TRange], TList,
             except = math.rangeToList(except);
             return math.except(range,except).map(function(i){return new TNum(i)});
         }
-    },
-    {doc: {
-        usage: '-9..9 except -1..1',
-        description: 'Exclude a range of numbers from a larger range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 newBuiltin('except', [TRange,TList], TList,
     function(range,except) {
@@ -7884,12 +7926,7 @@ newBuiltin('except', [TRange,TList], TList,
         range = math.rangeToList(range)
         except = except.map(function(i){ return i.value; });
         return math.except(range,except).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '-9..9 except [-1,1]',
-        description: 'Exclude a list of numbers from a range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 newBuiltin('except', [TRange,TNum], TList,
     function(range,except) {
@@ -7898,12 +7935,7 @@ newBuiltin('except', [TRange,TNum], TList,
         }
         range = math.rangeToList(range);
         return math.except(range,[except]).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '-9..9 except 0',
-        description: 'Exclude a number from a range.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 //exclude numbers from a list, so use the math.except function
 newBuiltin('except', [TList,TRange], TList,
@@ -7911,32 +7943,17 @@ newBuiltin('except', [TList,TRange], TList,
         range = range.map(function(i){ return i.value; });
         except = math.rangeToList(except);
         return math.except(range,except).map(function(i){return new TNum(i)});
-    },
-    {doc: {
-        usage: '[1,4,9,16,25,36] except 10..30',
-        description: 'Exclude a range of numbers from a list.',
-        tags: ['except', 'exclude', 'filter', 'remove', 'numbers']
-    }}
+    }
 );
 //exclude values of any type from a list containing values of any type, so use the util.except function
 newBuiltin('except', [TList,TList], TList,
     function(list,except) {
         return util.except(list,except);
-    },
-    {doc: {
-        usage: ["['a','b','c'] except ['b','d']",'[vector(0,1),vector(1,0),vector(1,1)] except [vector(1,1),vector(2,2)]'],
-        description: 'Remove elements of the second list from the first.',
-        tags: ['except', 'exclude', 'filter', 'remove']
-    }}
+    }
 );
 newBuiltin('except',[TList,'?'], TList, null, {
     evaluate: function(args,scope) {
         return new TList(util.except(args[0].value,[args[1]]));
-    },
-    doc: {
-        usage: '[a,b,c,d] except b',
-        description: 'Exclude a value from a list.',
-        tags: ['except', 'exclude', 'filter', 'remove']
     }
 });
 newBuiltin('distinct',[TList],TList, util.distinct,{unwrapValues: false});
@@ -7945,40 +7962,30 @@ newBuiltin('in',['?',TList],TBool,null,{
         return new TBool(util.contains(args[1].value,args[0]));
     }
 });
-newBuiltin('<', [TNum,TNum], TBool, math.lt, {doc: {usage: ['x<y','1<2'], description: 'Returns @true@ if the left operand is less than the right operand.', tags: ['comparison','inequality','numbers']}});
-newBuiltin('>', [TNum,TNum], TBool, math.gt, {doc: {usage: ['x>y','2>1'], description: 'Returns @true@ if the left operand is greater than the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('<=', [TNum,TNum], TBool, math.leq, {doc: {usage: ['x <= y','1<=1'], description: 'Returns @true@ if the left operand is less than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
-newBuiltin('>=', [TNum,TNum], TBool, math.geq, {doc: {usage: 'x >= y', description: 'Returns @true@ if the left operand is greater than or equal to the right operand.', tags: ['comparison','inequality','numbers']}} );
+newBuiltin('<', [TNum,TNum], TBool, math.lt);
+newBuiltin('>', [TNum,TNum], TBool, math.gt );
+newBuiltin('<=', [TNum,TNum], TBool, math.leq );
+newBuiltin('>=', [TNum,TNum], TBool, math.geq );
 newBuiltin('<>', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
         return new TBool(util.neq(args[0],args[1]));
-    },
-    doc: {
-        usage: ['\'this string\' <> \'that string\'', 'a <> b', '1<>2','sin(90)<>1'],
-        description: 'Inequality test.',
-        tags: ['comparison','not equal']
     }
 });
 newBuiltin('=', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
         return new TBool(util.eq(args[0],args[1]));
-    },
-    doc: {
-        usage: ['x=y','vector(1,2)=vector(1,2,0)','0.1=0.2'],
-        description: 'Equality test.',
-        tags: ['comparison','same','identical']
     }
 });
-newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;}, {doc: {usage: ['true && true','true and true'], description: 'Logical AND.'}} );
-newBuiltin('not', [TBool], TBool, function(a){return !a;}, {doc: {usage: ['not x','!x'], description: 'Logical NOT.'}} );
-newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;}, {doc: {usage: ['x || y','x or y'], description: 'Logical OR.'}} );
-newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);}, {doc: {usage: 'a xor b', description: 'Logical XOR.', tags: ['exclusive or']}} );
-newBuiltin('implies', [TBool,TBool], TBool, function(a,b){return !a || b;}, {doc: {usage: 'a implies b', description: 'Logical implication.', tags: ['implication']}} );
-newBuiltin('abs', [TNum], TNum, math.abs, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
-newBuiltin('abs', [TString], TNum, function(s){return s.length}, {doc: {usage: 'abs(x)', description: 'Absolute value of a number.', tags: ['norm','length','complex']}} );
-newBuiltin('abs', [TList], TNum, function(l) { return l.length; }, {doc: {usage: 'abs([1,2,3])', description: 'Length of a list.', tags: ['size','number','elements']}});
-newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); }, {doc: {usage: 'abs(1..5)', description: 'Number of elements in a numerical range.', tags: ['size','length']}});
-newBuiltin('abs', [TVector], TNum, vectormath.abs, {doc: {usage: 'abs(vector(1,2,3))', description: 'Modulus of a vector.', tags: ['size','length','norm']}});
+newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
+newBuiltin('not', [TBool], TBool, function(a){return !a;} );
+newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
+newBuiltin('xor', [TBool,TBool], TBool, function(a,b){return (a || b) && !(a && b);} );
+newBuiltin('implies', [TBool,TBool], TBool, function(a,b){return !a || b;} );
+newBuiltin('abs', [TNum], TNum, math.abs );
+newBuiltin('abs', [TString], TNum, function(s){return s.length} );
+newBuiltin('abs', [TList], TNum, function(l) { return l.length; });
+newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); });
+newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
     var n = 0;
     for(var x in d) {
@@ -7986,44 +7993,44 @@ newBuiltin('abs', [TDict], TNum, function(d) {
     }
     return n;
 });
-newBuiltin('arg', [TNum], TNum, math.arg, {doc: {usage: 'arg(1+i)', description: 'Argument of a complex number.', tags: ['angle','direction']}} );
-newBuiltin('re', [TNum], TNum, math.re, {doc: {usage: 're(1 + 2i)', description: 'Real part of a complex number.'}} );
-newBuiltin('im', [TNum], TNum, math.im, {doc: {usage: 'im(1 + 2i)', description: 'Imaginary part of a complex number.'}} );
-newBuiltin('conj', [TNum], TNum, math.conjugate, {doc: {usage: 'conj(1 + 2i)', description: 'Conjugate of a complex number.'}} );
-newBuiltin('isint',[TNum],TBool, function(a){ return util.isInt(a); }, {doc: {usage: 'isint(1)', description: 'Returns @true@ if the argument is an integer.', tags: ['test','whole number']}});
-newBuiltin('sqrt', [TNum], TNum, math.sqrt, {doc: {usage: 'sqrt(x)', description: 'Square root.'}} );
-newBuiltin('ln', [TNum], TNum, math.log, {doc: {usage: 'ln(x)', description: 'Natural logarithm.', tags: ['base e']}} );
-newBuiltin('log', [TNum], TNum, math.log10, {doc: {usage: 'log(x)', description: 'Logarithm with base $10$.'}} );
-newBuiltin('log', [TNum,TNum], TNum, math.log_base, {doc: {usage: 'log(x,b)', description: 'Logarithm with base $b$.'}} );
-newBuiltin('exp', [TNum], TNum, math.exp, {doc: {usage: 'exp(x)', description: 'Exponentiation. Equivalent to @e^x@. ', tags: ['exponential']}} );
-newBuiltin('fact', [TNum], TNum, math.factorial, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
-newBuiltin('gamma', [TNum], TNum, math.gamma, {doc: {usage: ['fact(x)','x!'], description: 'Factorial.', tags: ['!']}} );
-newBuiltin('sin', [TNum], TNum, math.sin, {doc: {usage: 'sin(x)', description: 'Sine.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cos', [TNum], TNum, math.cos, {doc: {usage: 'cos(x)', description: 'Cosine.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('tan', [TNum], TNum, math.tan, {doc: {usage: 'tan(x)', description: 'Tangent.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cosec', [TNum], TNum, math.cosec, {doc: {usage: 'cosec(x)', description: 'Cosecant.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('sec', [TNum], TNum, math.sec, {doc: {usage: 'sec(x)', description: 'Secant.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('cot', [TNum], TNum, math.cot, {doc: {usage: 'cot(x)', description: 'Cotangent.', tags: ['trigonometric','trigonometry']}} );
-newBuiltin('arcsin', [TNum], TNum, math.arcsin, {doc: {usage: 'arcsin(x)', description: 'Inverse sine.', tags: ['arcsine']}} );
-newBuiltin('arccos', [TNum], TNum, math.arccos, {doc: {usage: 'arccos(x)', description: 'Inverse cosine.', tags: ['arccosine']}} );
-newBuiltin('arctan', [TNum], TNum, math.arctan, {doc: {usage: 'arctan(x)', description: 'Inverse tangent.', tags: ['arctangent']}} );
-newBuiltin('sinh', [TNum], TNum, math.sinh, {doc: {usage: 'sinh(x)', description: 'Hyperbolic sine.'}} );
-newBuiltin('cosh', [TNum], TNum, math.cosh, {doc: {usage: 'cosh(x)', description: 'Hyperbolic cosine.'}} );
-newBuiltin('tanh', [TNum], TNum, math.tanh, {doc: {usage: 'tanh(x)', description: 'Hyperbolic tangent.'}} );
-newBuiltin('cosech', [TNum], TNum, math.cosech, {doc: {usage: 'cosech(x)', description: 'Hyperbolic cosecant.'}} );
-newBuiltin('sech', [TNum], TNum, math.sech, {doc: {usage: 'sech(x)', description: 'Hyperbolic secant.'}} );
-newBuiltin('coth', [TNum], TNum, math.coth, {doc: {usage: 'coth(x)', description: 'Hyperbolic cotangent.'}} );
-newBuiltin('arcsinh', [TNum], TNum, math.arcsinh, {doc: {usage: 'arcsinh(x)', description: 'Inverse hyperbolic sine.'}} );
-newBuiltin('arccosh', [TNum], TNum, math.arccosh, {doc: {usage: 'arccosh(x)', description: 'Inverse hyperbolic cosine.'}} );
-newBuiltin('arctanh', [TNum], TNum, math.arctanh, {doc: {usage: 'arctanh(x)', description: 'Inverse hyperbolic tangent.'}} );
-newBuiltin('ceil', [TNum], TNum, math.ceil, {doc: {usage: 'ceil(x)', description: 'Round up to nearest integer.', tags: ['ceiling']}} );
-newBuiltin('floor', [TNum], TNum, math.floor, {doc: {usage: 'floor(x)', description: 'Round down to nearest integer.'}} );
-newBuiltin('round', [TNum], TNum, math.round, {doc: {usage: 'round(x)', description: 'Round to nearest integer.', tags: ['whole number']}} );
-newBuiltin('trunc', [TNum], TNum, math.trunc, {doc: {usage: 'trunc(x)', description: 'If the argument is positive, round down to the nearest integer; if it is negative, round up to the nearest integer.', tags: ['truncate','integer part']}} );
-newBuiltin('fract', [TNum], TNum, math.fract, {doc: {usage: 'fract(x)', description: 'Fractional part of a number. Equivalent to @x-trunc(x)@.'}} );
-newBuiltin('degrees', [TNum], TNum, math.degrees, {doc: {usage: 'degrees(pi/2)', description: 'Convert radians to degrees.'}} );
-newBuiltin('radians', [TNum], TNum, math.radians, {doc: {usage: 'radians(90)', description: 'Convert degrees to radians.'}} );
-newBuiltin('sign', [TNum], TNum, math.sign, {doc: {usage: 'sign(x)', description: 'Sign of a number. Equivalent to $\\frac{x}{|x|}$, or $0$ when $x=0$.', tags: ['positive','negative']}} );
+newBuiltin('arg', [TNum], TNum, math.arg );
+newBuiltin('re', [TNum], TNum, math.re );
+newBuiltin('im', [TNum], TNum, math.im );
+newBuiltin('conj', [TNum], TNum, math.conjugate );
+newBuiltin('isint',[TNum],TBool, function(a){ return util.isInt(a); });
+newBuiltin('sqrt', [TNum], TNum, math.sqrt );
+newBuiltin('ln', [TNum], TNum, math.log );
+newBuiltin('log', [TNum], TNum, math.log10 );
+newBuiltin('log', [TNum,TNum], TNum, math.log_base );
+newBuiltin('exp', [TNum], TNum, math.exp );
+newBuiltin('fact', [TNum], TNum, math.factorial );
+newBuiltin('gamma', [TNum], TNum, math.gamma );
+newBuiltin('sin', [TNum], TNum, math.sin );
+newBuiltin('cos', [TNum], TNum, math.cos );
+newBuiltin('tan', [TNum], TNum, math.tan );
+newBuiltin('cosec', [TNum], TNum, math.cosec );
+newBuiltin('sec', [TNum], TNum, math.sec );
+newBuiltin('cot', [TNum], TNum, math.cot );
+newBuiltin('arcsin', [TNum], TNum, math.arcsin );
+newBuiltin('arccos', [TNum], TNum, math.arccos );
+newBuiltin('arctan', [TNum], TNum, math.arctan );
+newBuiltin('sinh', [TNum], TNum, math.sinh );
+newBuiltin('cosh', [TNum], TNum, math.cosh );
+newBuiltin('tanh', [TNum], TNum, math.tanh );
+newBuiltin('cosech', [TNum], TNum, math.cosech );
+newBuiltin('sech', [TNum], TNum, math.sech );
+newBuiltin('coth', [TNum], TNum, math.coth );
+newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
+newBuiltin('arccosh', [TNum], TNum, math.arccosh );
+newBuiltin('arctanh', [TNum], TNum, math.arctanh );
+newBuiltin('ceil', [TNum], TNum, math.ceil );
+newBuiltin('floor', [TNum], TNum, math.floor );
+newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('trunc', [TNum], TNum, math.trunc );
+newBuiltin('fract', [TNum], TNum, math.fract );
+newBuiltin('degrees', [TNum], TNum, math.degrees );
+newBuiltin('radians', [TNum], TNum, math.radians );
+newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
     return math.rationalApproximation(n);
 },{unwrapValues:true});
@@ -8034,44 +8041,34 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
-newBuiltin('random', [TRange], TNum, math.random, {random:true, doc: {usage: 'random(1..4)', description: 'A random number in the given range.', tags: ['choose','pick']}} );
+newBuiltin('random', [TRange], TNum, math.random, {random:true} );
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
     {
         return math.choose(args[0].value);
-    },
-    doc: {
-        usage: 'random([1,1,2,3,5])',
-        description: 'Choose a random item from a list.',
-        tags: ['pick','select']
     }
 });
 newBuiltin( 'random',[],'?', null, {
     random:true,
     typecheck: function() { return true; },
-    evaluate: function(args,scope) { return math.choose(args);},
-    doc: {
-        usage: 'random(1,2,3,4,5)',
-        description: 'Choose at random from the given arguments.',
-        tags: ['pick','select']
-    }
+    evaluate: function(args,scope) { return math.choose(args);}
 });
-newBuiltin('mod', [TNum,TNum], TNum, math.mod, {doc: {usage: 'mod(a,b)', description: 'Modulus, i.e. $a \\bmod{b}.$', tags: ['remainder','modulo']}} );
-newBuiltin('max', [TNum,TNum], TNum, math.max, {doc: {usage: 'max(x,y)', description: 'Maximum of two numbers.', tags: ['supremum','biggest','largest','greatest']}} );
-newBuiltin('min', [TNum,TNum], TNum, math.min, {doc: {usage: 'min(x,y)', description: 'Minimum of two numbers.', tags: ['smallest','least']}} );
+newBuiltin('mod', [TNum,TNum], TNum, math.mod );
+newBuiltin('max', [TNum,TNum], TNum, math.max );
+newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
-newBuiltin('precround', [TNum,TNum], TNum, math.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('siground', [TNum,TNum], TNum, math.siground, {doc: {usage: 'siground(x,3)', description: 'Round to given number of significant figures.', tags: ['sig figs','sigfig']}} );
-newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground, {doc: {usage: 'precround(x,3)', description: 'Round to given number of decimal places.', tags: ['dp']}} );
-newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of decimal points and pad with zeros if necessary.', tags: ['dp','decimal points','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
-newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true, doc: {usage: 'dpformat(x,3)', description: 'Round to given number of significant figures and pad with zeros if necessary.', tags: ['sig figs','sigfig','format','display','precision']}} );
+newBuiltin('precround', [TNum,TNum], TNum, math.precround );
+newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround );
+newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround );
+newBuiltin('siground', [TNum,TNum], TNum, math.siground );
+newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground );
+newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground );
+newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true} );
+newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true} );
+newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true} );
+newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
 newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style);});
@@ -8088,11 +8085,11 @@ newBuiltin('isnan',[TNum],TBool,function(n) {
 });
 newBuiltin('cleannumber',[TString,TList],TString,util.cleanNumber,{unwrapValues:true});
 newBuiltin('isbool',[TString],TBool,util.isBool);
-newBuiltin('perm', [TNum,TNum], TNum, math.permutations, {doc: {usage: 'perm(6,3)', description: 'Count permutations. $^n \\kern-2pt P_r$.', tags: ['combinatorics']}} );
-newBuiltin('comb', [TNum,TNum], TNum, math.combinations , {doc: {usage: 'comb(6,3)', description: 'Count combinations. $^n \\kern-2pt C_r$.', tags: ['combinatorics']}});
-newBuiltin('root', [TNum,TNum], TNum, math.root, {doc: {usage: ['root(8,3)','root(x,n)'], description: '$n$<sup>th</sup> root.', tags: ['cube']}} );
-newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);}, {doc: {usage: ['award(a,b)','award(5,x=y)'], description: 'If @b@ is @true@, returns @a@, otherwise returns @0@.', tags: ['mark']}} );
-newBuiltin('gcd', [TNum,TNum], TNum, math.gcf, {doc: {usage: 'gcd(a,b)', description: 'Greatest common denominator of two integers.', tags: ['highest']}} );
+newBuiltin('perm', [TNum,TNum], TNum, math.permutations );
+newBuiltin('comb', [TNum,TNum], TNum, math.combinations );
+newBuiltin('root', [TNum,TNum], TNum, math.root );
+newBuiltin('award', [TNum,TBool], TNum, function(a,b){return (b?a:0);} );
+newBuiltin('gcd', [TNum,TNum], TNum, math.gcf );
 newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
         if(a.complex && a.re==0) {
             a = a.im;
@@ -8104,7 +8101,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take 
         b = b/math.pow(Math.PI,math.piDegree(b));
         return math.gcf(a,b);
 } );
-newBuiltin('lcm', [TNum,TNum], TNum, math.lcm, {doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}} );
+newBuiltin('lcm', [TNum,TNum], TNum, math.lcm );
 newBuiltin('lcm', [TList], TNum, function(l){
         if(l.length==0) {
             return 1;
@@ -8114,13 +8111,13 @@ newBuiltin('lcm', [TList], TNum, function(l){
             return math.lcm.apply(math,l);
         }
     },
-    {unwrapValues: true, doc: {usage: 'lcm(a,b)', description: 'Lowest common multiple of two integers.', tags: ['least']}}
+    {unwrapValues: true}
 );
-newBuiltin('|', [TNum,TNum], TBool, math.divides, {doc: {usage: 'x|y', description: 'Returns @true@ if @x@ divides @y@.', tags: ['multiple of']}} );
-newBuiltin('diff', ['?','?',TNum], '?', null, {doc: {usage: ['diff(f(x),x,n)', 'diff(x^2,x,1)','diff(y,x,1)'], description: '$n$<sup>th</sup> derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
-newBuiltin('pdiff', ['?',TName,TNum], '?', null, {doc: {usage: ['pdiff(f(x,y),x,n)','pdiff(x+y,x,1)'], description: '$n$<sup>th</sup> partial derivative. Currently for display only - can\'t be evaluated.', tags: ['differentiate','differential','differentiation']}});
-newBuiltin('int', ['?','?'], '?', null, {doc: {usage: 'int(f(x),x)', description: 'Integral. Currently for display only - can\'t be evaluated.'}});
-newBuiltin('defint', ['?','?',TNum,TNum], '?', null, {doc: {usage: 'defint(f(x),y,0,1)', description: 'Definite integral. Currently for display only - can\'t be evaluated.'}});
+newBuiltin('|', [TNum,TNum], TBool, math.divides );
+newBuiltin('diff', ['?','?',TNum], '?', null);
+newBuiltin('pdiff', ['?',TName,TNum], '?', null);
+newBuiltin('int', ['?','?'], '?', null);
+newBuiltin('defint', ['?','?',TNum,TNum], '?', null);
 newBuiltin('sum',[TList],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('deal',[TNum],TList,
@@ -8130,12 +8127,7 @@ newBuiltin('deal',[TNum],TList,
         });
     },
     {
-        random:true,
-        doc: {
-            usage: ['deal(n)','deal(5)'],
-            description: 'A random shuffling of the integers $[0 \\dots n-1]$.',
-            tags: ['permutation','order','shuffle']
-        }
+        random:true
     }
 );
 newBuiltin('shuffle',[TList],TList,
@@ -8143,12 +8135,7 @@ newBuiltin('shuffle',[TList],TList,
         return math.shuffle(list);
     },
     {
-        random:true,
-        doc: {
-            usage: ['shuffle(list)','shuffle([1,2,3])'],
-            description: 'Randomly reorder a list.',
-            tags: ['permutation','order','shuffle','deal']
-        }
+        random:true
     }
 );
 newBuiltin('shuffle',[TRange],TList,
@@ -8157,12 +8144,7 @@ newBuiltin('shuffle',[TRange],TList,
         return math.shuffle(list);
     },
     {
-        random:true,
-        doc: {
-            usage: ['shuffle(list)','shuffle([1,2,3])'],
-            description: 'Randomly reorder a list.',
-            tags: ['permutation','order','shuffle','deal']
-        }
+        random:true
     }
 );
 //if needs to be a bit different because it can return any type
@@ -8174,11 +8156,6 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
             return jme.evaluate(args[1],scope);
         else
             return jme.evaluate(args[2],scope);
-    },
-    doc: {
-        usage: 'if(test,a,b)',
-        description: 'If @test@ is true, return @a@, otherwise return @b@.',
-        tags: ['test','decide']
     }
 });
 newBuiltin('switch',[],'?', null, {
@@ -8218,11 +8195,6 @@ newBuiltin('switch',[],'?', null, {
             return jme.evaluate(args[args.length-1],scope);
         else
             throw(new Numbas.Error('jme.func.switch.no default case'));
-    },
-    doc: {
-        usage: 'switch(test1,a1,test2,a2,b)',
-        description: 'Select cases. Alternating boolean expressions with values to return, with the final argument representing the default case.',
-        tags: ['choose','test']
     }
 });
 newBuiltin('isa',['?',TString],TBool, null, {
@@ -8241,11 +8213,6 @@ newBuiltin('isa',['?',TString],TBool, null, {
             match = args[0].tok.type == kind;
         }
         return new TBool(match);
-    },
-    doc: {
-        usage: 'x isa \'number\'',
-        description: 'Determine the data-type of an expression.',
-        tags: ['typeof','test','is a']
     }
 });
 // repeat(expr,n) evaluates expr n times and returns a list of the results
@@ -8259,10 +8226,6 @@ newBuiltin('repeat',['?',TNum],TList, null, {
             value[i] = jme.evaluate(args[0],scope);
         }
         return new TList(value);
-    },
-    doc: {
-        usage: ['repeat(expr,n)','repeat( random(1..3), 5)'],
-        description: 'Evaluate the given expression $n$ times, returning the results in a list.'
     }
 });
 function satisfy(names,definitions,conditions,scope,maxRuns) {
@@ -8330,11 +8293,6 @@ newBuiltin('listval',[TList,TNum],'?', null, {
             return list.value[index];
         else
             throw(new Numbas.Error('jme.func.listval.invalid index',{index:index,size:list.value.length}));
-    },
-    doc: {
-        usage: ['list[i]','[0,1,2,3][2]'],
-        description: 'Return a particular element of a list.',
-        tags: ['index','item','access']
     }
 });
 newBuiltin('listval',[TList,TRange],TList, null, {
@@ -8347,11 +8305,6 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var end = util.wrapListIndex(range[1]),size;
         var value = list.value.slice(start,end);
         return new TList(value);
-    },
-    doc: {
-        usage: ['list[1..3]','[0,1,2,3,4][1..3]'],
-        description: 'Slice a list - return the elements with indices in the given range.',
-        tags: ['range','section','part']
     }
 });
 newBuiltin('listval',[TVector,TNum],TNum, null, {
@@ -8360,11 +8313,6 @@ newBuiltin('listval',[TVector,TNum],TNum, null, {
         var vector = args[0].value;
         var index = util.wrapListIndex(args[1].value,vector.length);
         return new TNum(vector[index] || 0);
-    },
-    doc: {
-        usage: ['vec[1]','vector(0,1,2)[1]'],
-        description: 'Return a particular component of a vector.',
-        tags: ['index','item','access']
     }
 });
 newBuiltin('listval',[TVector,TRange],TVector,null, {
@@ -8387,11 +8335,6 @@ newBuiltin('listval',[TMatrix,TNum],TVector, null, {
         var matrix = args[0].value;
         var index = util.wrapListIndex(args[1].value,matrix.length);
         return new TVector(matrix[index] || []);
-    },
-    doc: {
-        usage: ['mat[1]','matrix([1,0],[0,1])[1]'],
-        description: 'Return a particular row of a matrix.',
-        tags: ['index','item','access','element','cell']
     }
 });
 newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
@@ -8484,10 +8427,6 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
             names = args[1].args.map(function(t){return t.tok.name;});
         }
         return jme.mapFunctions[value.type](lambda,names,value.value,scope);
-    },
-    doc: {
-        usage: ['map(expr,x,list)','map(x^2,x,[0,2,4,6])'],
-        description: 'Apply the given expression to every value in a list.'
     }
 });
 jme.findvarsOps.map = function(tree,boundvars,scope) {
@@ -8625,10 +8564,6 @@ newBuiltin('sort',[TList],TList, null, {
                 return 0;
         });
         return newlist;
-    },
-    doc: {
-        usage: 'sort(list)',
-        description: 'Sort a list.'
     }
 });
 newBuiltin('reverse',[TList],TList,null, {
@@ -8746,11 +8681,6 @@ newBuiltin('vector',['*TNum'],TVector, null, {
             value.push(args[i].value);
         }
         return new TVector(value);
-    },
-    doc: {
-        usage: ['vector(1,2,3)','vector(a,b)'],
-        description: 'Create a vector with the given components.',
-        tags: ['constructor','new']
     }
 });
 newBuiltin('vector',[TList],TVector, null, {
@@ -8759,11 +8689,6 @@ newBuiltin('vector',[TList],TVector, null, {
         var list = args[0];
         var value = list.value.map(function(x){return x.value});
         return new TVector(value);
-    },
-    doc: {
-        usage: ['vector([1,2,3])','vector(list)'],
-        description: 'Create a vector from a list of numbers.',
-        tags: ['constructor','new','convert','cast']
     }
 });
 newBuiltin('matrix',[TList],TMatrix,null, {
@@ -8803,11 +8728,6 @@ newBuiltin('matrix',[TList],TMatrix,null, {
         value.rows = rows;
         value.columns = columns;
         return new TMatrix(value);
-    },
-    doc: {
-        usage: ['matrix([ [1,2], [3,4] ])', 'matrix([ row1, row2 ])'],
-        tags: ['convert','cast','constructor','new'],
-        description: 'Create a matrix from a list of rows. This constructor is useful if the number of rows is not a constant.'
     }
 });
 newBuiltin('matrix',['*list'],TMatrix, null, {
@@ -8825,11 +8745,6 @@ newBuiltin('matrix',['*list'],TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         return new TMatrix(value);
-    },
-    doc: {
-        usage: ['matrix([1,0],[0,1])','matrix(row1,row2,row3)'],
-        description: 'Create a matrix. The arguments are lists of numbers, representing the rows.',
-        tags: ['constructor', 'new']
     }
 });
 newBuiltin('rowvector',['*number'],TMatrix, null, {
@@ -8844,11 +8759,6 @@ newBuiltin('rowvector',['*number'],TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         return new TMatrix(matrix);
-    },
-    doc: {
-        usage: 'rowvector(1,2,3)',
-        description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
-        tags: ['constructor','new']
     }
 });
 newBuiltin('rowvector',[TList],TMatrix, null, {
@@ -8860,11 +8770,6 @@ newBuiltin('rowvector',[TList],TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         return new TMatrix(matrix);
-    },
-    doc: {
-        usage: 'rowvector(1,2,3)',
-        description: 'Create a row vector, i.e. an $n \\times 1$ matrix, with the given components.',
-        tags: ['constructor','new']
     }
 });
 //cast vector to list
@@ -8874,11 +8779,6 @@ newBuiltin('list',[TVector],TList,null, {
         var vector = args[0];
         var value = vector.value.map(function(n){ return new TNum(n)});
         return new TList(value);
-    },
-    doc: {
-        usage: ['list(vector(0,1,2))','list(vector)'],
-        description: 'Cast a vector to a list.',
-        tags: ['convert']
     }
 });
 //cast matrix to list of lists
@@ -8893,11 +8793,6 @@ newBuiltin('list',[TMatrix],TList,null, {
             value.push(row);
         }
         return new TList(value);
-    },
-    doc: {
-        usage: ['list(matrix([0,1],[2,3]))'],
-        tags: ['convert','cast'],
-        description: 'Cast a matrix to a list of its rows.'
     }
 });
 newBuiltin('table',[TList,TList],THTML,
@@ -8926,12 +8821,7 @@ newBuiltin('table',[TList,TList],THTML,
         return new THTML(table);
     },
     {
-        unwrapValues: true,
-        doc: {
-            usage: ['table([ [1,2,3], [4,5,6] ], [\'Header 1\', \'Header 2\'])', 'table(data,headers)'],
-            tags: ['table','tabular','data','html'],
-            description: 'Create a table to display a list of rows of data, with the given headers.'
-        }
+        unwrapValues: true
     }
 );
 newBuiltin('table',[TList],THTML,
@@ -8952,12 +8842,7 @@ newBuiltin('table',[TList],THTML,
         return new THTML(table);
     },
     {
-        unwrapValues: true,
-        doc: {
-            usage: ['table([ [1,2,3], [4,5,6] ])', 'table(data)'],
-            tags: ['table','tabular','data','html'],
-            description: 'Create a table to display a list of rows of data.'
-        }
+        unwrapValues: true
     }
 );
 newBuiltin('parse',[TString],TExpression,function(str) {
@@ -9126,6 +9011,7 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 },{unwrapValues:true});
 ///end of builtins
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -9146,20 +9032,18 @@ Numbas.queueScript('jme-display',['base','math','jme','util','jme-rules'],functi
 var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
-/** A JME expression
- * @typedef JME
- * @type {String}
- */
+
 /** A LaTeX string
  * @typedef TeX
  * @type {String}
  */
+
 /** @namespace Numbas.jme.display */
 jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
      * @returns {TeX}
      */
@@ -9178,7 +9062,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
      * @returns {JME}
      *
@@ -9193,7 +9077,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.jme.tree}
      *
@@ -9221,7 +9105,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Simplify a syntax tree according to the given ruleset
      *
      * @param {Numbas.jme.tree} exprTree
-     * @param {Array.<String>|Numbas.jme.Ruleset} ruleset
+     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} allowUnbound
      * @returns {Numbas.jme.tree}
@@ -9844,7 +9728,7 @@ function texRealNumber(n)
  * @private
  *
  * @param {Array.<Number>|Numbas.jme.tree} v
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
 function texVector(v,settings)
@@ -9868,7 +9752,7 @@ function texVector(v,settings)
  * @private
  *
  * @param {Array.<Array.<Number>>|Numbas.jme.tree} m
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  * @param {Boolean} parens - enclose the matrix in parentheses?
  * @returns {TeX}
  */
@@ -9991,7 +9875,7 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 }
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 /** Definition of a number with a special name
- * @typedef special_number_definition
+ * @typedef Numbas.jme.display.special_number_definition
  * @property {Number} value
  * @property {TeX} tex - The TeX code for this number
  * @property {JME} jme - The JME code for this number
@@ -9999,7 +9883,7 @@ var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota
 /** List of numbers with special names
  *
  * @memberof Numbas.jme.display
- * @type {Array.<special_number_definition>}
+ * @type {Array.<Numbas.jme.display.special_number_definition>}
  */
 jme.display.specialNumbers = [
     {value: Math.E, tex: 'e', jme: 'e'},
@@ -10110,7 +9994,7 @@ function flatten(tree,op) {
     return args;
 }
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
- * @typedef texify_settings
+ * @typedef Numbas.jme.display.texify_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
@@ -10124,7 +10008,7 @@ function flatten(tree,op) {
  * @method
  *
  * @param {Numbas.jme.tree} thing
- * @param {texify_settings} settings
+ * @param {Numbas.jme.display.texify_settings} settings
  *
  * @returns {TeX}
  */
@@ -10176,7 +10060,7 @@ var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
  * @private
  *
  * @param {Number} n
- * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
@@ -10259,7 +10143,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  * @private
  *
  * @param {Number} n
- * @param {jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
 function jmeRealNumber(n,settings)
@@ -10522,7 +10406,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
- * @typedef jme_display_settings
+ * @typedef Numbas.jme.display.jme_display_settings
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
@@ -10533,7 +10417,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @method
  *
  * @param {Numbas.jme.tree} tree
- * @param {jme_display_settings} settings
+ * @param {Numbas.jme.display.jme_display_settings} settings
  * @returns {JME}
  */
 var treeToJME = jme.display.treeToJME = function(tree,settings)
@@ -10581,6 +10465,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     jme.display[name] = jme.rules[name];
 });
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -10603,9 +10488,26 @@ Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 var jme = Numbas.jme;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
+
+/** A dictionary describing a variable to be evaluated
+ * @typedef {Object} Numbas.jme.variables.variable_data_dict
+ * @property {Numbas.jme.tree} tree - definition of variable
+ * @property {String[]} vars - names of variables this variable depends on
+ */
+
+/** The definition of a custom JME function.
+ * @typedef Numbas.jme.variables.func_data
+ * @type {Object}
+ * @property {String} name
+ * @property {String} definition - definition of the function, either in {@link JME} or JavaScript
+ * @property {String} language - either `"jme"` or `"javascript"`
+ * @property {String} outtype - name of the {@link Numbas.jme.token} type this function returns
+ * @property {Array.<Object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
+ */
+
 jme.variables = /** @lends Numbas.jme.variables */ {
     /** Make a new function, whose definition is written in JME.
-     * @param {object} fn - contains `definition` and `paramNames`.
+     * @param {Object} fn - contains `definition` and `paramNames`.
      * @param {Numbas.jme.Scope} scope
      * @returns {function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
      */
@@ -10625,8 +10527,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * The JavaScript is wrapped with `(function(<paramNames>){ ` and ` }`)
      *
-     * @param {object} fn - contains `definition` and `paramNames`.
-     * @param {object} withEnv - dictionary of local variables for javascript functions
+     * @param {Object} fn - contains `definition` and `paramNames`.
+     * @param {Object} withEnv - dictionary of local variables for javascript functions
      * @returns {function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
      */
     makeJavascriptFunction: function(fn,withEnv) {
@@ -10664,10 +10566,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {object} tmpfn - contains `definition`, `name`, `language`, `parameters`
+     * @param {Object} tmpfn - contains `definition`, `name`, `language`, `parameters`
      * @param {Numbas.jme.Scope} scope
-     * @param {object} withEnv - dictionary of local variables for javascript functions
-     * @returns {object} - contains `outcons`, `intype`, `evaluate`
+     * @param {Object} withEnv - dictionary of local variables for javascript functions
+     * @returns {Object} - contains `outcons`, `intype`, `evaluate`
      */
     makeFunction: function(tmpfn,scope,withEnv) {
         var intype = [],
@@ -10700,10 +10602,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return fn
     },
     /** Make up custom functions
-     * @param {object[]} tmpFunctions
+     * @param {Numbas.jme.variables.func_data[]} tmpFunctions
      * @param {Numbas.jme.Scope} scope
-     * @param {object} withEnv - dictionary of local variables for javascript functions
-     * @returns {object[]}
+     * @param {Object} withEnv - dictionary of local variables for javascript functions
+     * @returns {Object.<Numbas.jme.funcObj>}
      * @see Numbas.jme.variables.makeFunction
      */
     makeFunctions: function(tmpFunctions,scope,withEnv)
@@ -10721,10 +10623,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return functions;
     },
     /** Evaluate a variable, evaluating all its dependencies first.
-     * @param {string} name - the name of the variable to evaluate
-     * @param {object} todo - dictionary of variables still to evaluate
+     * @param {String} name - the name of the variable to evaluate
+     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables still to evaluate
      * @param {Numbas.jme.Scope} scope
-     * @param {string[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
+     * @param {String[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
      * @returns {Numbas.jme.token}
      */
     computeVariable: function(name,todo,scope,path,computeFn)
@@ -10772,11 +10674,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return scope.variables[name];
     },
     /** Evaluate dictionary of variables
-     * @param {object} todo - dictionary of variables mapped to their definitions
+     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
      * @param {function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
-     * @returns {object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
+     * @returns {Object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
      */
     makeVariables: function(todo,scope,condition,computeFn)
     {
@@ -10799,11 +10701,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
     /** Collect together a ruleset, evaluating all its dependencies first.
-     * @param {string} name - the name of the ruleset to evaluate
-     * @param {object} todo - dictionary of rulesets still to evaluate
+     * @param {String} name - the name of the ruleset to evaluate
+     * @param {Object.<String[]>} todo - dictionary of rulesets still to evaluate
      * @param {Numbas.jme.Scope} scope
-     * @param {string[]} path - Breadcrumbs - rulesets names currently being evaluated, so we can detect circular dependencies
-     * @returns {Numbas.jme.Ruleset}
+     * @param {String[]} path - Breadcrumbs - rulesets names currently being evaluated, so we can detect circular dependencies
+     * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
         if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
@@ -10830,9 +10732,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return ruleset;
     },
     /** Gather together a set of ruleset definitions
-     * @param {object} todo - a dictionary mapping ruleset names to definitions
+     * @param {Object.<String[]>} todo - a dictionary mapping ruleset names to definitions
      * @param {Numbas.jme.Scope} scope - the scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
-     * @returns {object} a dictionary of rulesets
+     * @returns {Object.<Numbas.jme.rules.Ruleset>} a dictionary of rulesets
      */
     makeRulesets: function(todo,scope) {
         var out = {};
@@ -10842,9 +10744,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return out;
     },
     /** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
-     * @param {object} todo - dictionary of variables mapped to their definitions
-     * @param {string[]} ancestors - list of variable names whose dependants we should find
-     * @returns {object} - a copy of the todo list, only including the dependants of the given variables
+     * @param {Object} todo - dictionary of variables mapped to their definitions
+     * @param {String[]} ancestors - list of variable names whose dependants we should find
+     * @returns {Object} - a copy of the todo list, only including the dependants of the given variables
      */
     variableDependants: function(todo,ancestors) {
         // a dictionary mapping variable names to lists of names of variables they depend on
@@ -10903,7 +10805,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
-     * @param {string} str - the contents of the text node
+     * @param {String} str - the contents of the text node
      * @param {Numbas.jme.Scope} scope
      * @param {Document} doc - the document the text node belongs to.
      * @returns {Node[]} - array of DOM nodes to replace the string with
@@ -11075,6 +10977,7 @@ DOMcontentsubber.prototype = {
     }
 }
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -11094,7 +10997,7 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
- * @typedef partpath
+ * @typedef Numbas.parts.partpath
  * @type {String}
  */
 /** Part type constructors
@@ -11113,7 +11016,7 @@ var partConstructors = Numbas.partConstructors = {};
 /** Create a question part based on an XML definition.
  * @memberof Numbas
  * @param {Element} xml
- * @param {partpath} [path]
+ * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -11134,7 +11037,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
 /** Create a question part based on an XML definition.
  * @memberof Numbas
  * @param {Object} data
- * @param {partpath} [path]
+ * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -11153,7 +11056,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
 /** Create a new question part.
  * @see Numbas.partConstructors
  * @param {String} type
- * @param {partpath} path
+ * @param {Numbas.parts.partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
@@ -11177,11 +11080,12 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         throw(new Numbas.Error('part.unknown type',{part:util.nicePartName(path),type:type}));
     }
 }
+
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
  * @param {Element} xml
- * @param {partpath} [path='p0']
+ * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} Question
  * @param {Numbas.parts.Part} parentPart
  * @see Numbas.createPart
@@ -11389,7 +11293,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     parentPart: undefined,
     /** A question-wide unique 'address' for this part.
-     * @type {partpath}
+     * @type {Numbas.parts.partpath}
      */
     path: '',
     /** This part's type, e.g. "jme", "numberentry", ...
@@ -11428,10 +11332,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Array.<String>}
      */
     stagedAnswer: undefined,
+
     /** Has this part been answered?
      * @type {Boolean}
      */
     answered: false,
+
     /** Child gapfill parts
      * @type {Numbas.parts.Part[]}
      */
@@ -11476,10 +11382,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst'
     },
+
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
     markingScript: null,
+
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
      * @returns {Numbas.Error}
@@ -11590,8 +11498,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
-            if(this.settings.enableMinimumMarks)                                //make sure awarded score is not less than minimum allowed
-                this.score = Math.max(this.score,this.settings.minimumMarks);
+            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+                this.score = this.settings.minimumMarks;
+                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+            }
             if(stepsMarks!=0 && stepsScore!=0)
             {
                 if(this.credit==1)
@@ -11606,9 +11516,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         else
         {
             this.score = this.credit * this.marks;
-            //make sure awarded score is not less than minimum allowed
-            if(this.settings.enableMinimumMarks && this.credit*this.marks<this.settings.minimumMarks)
-                this.score = Math.max(this.score,this.settings.minimumMarks);
+            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+                this.score = this.settings.minimumMarks;
+                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+            }
         }
         if(this.revealed) {
             this.score = 0;
@@ -11733,6 +11644,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );
+                this.display && this.display.showScore(this.answered);
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;
@@ -11858,8 +11770,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Function which marks the student's answer: run `this.settings.markingScript`, which sets the credit for the student's answer to a number between 0 and 1 and produces a list of feedback messages and warnings.
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
-     * @see Numbas.parts.Part.settings.markingScript
-     * @see Numbas.parts.Part.answered
+     * @see Numbas.parts.Part#markingScript
+     * @see Numbas.parts.Part#answered
      * @returns {Numbas.marking.finalised_state}
      */
     mark: function() {
@@ -11875,7 +11787,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return finalised_result;
     },
     /** Apply a finalised list of feedback states to this part.
-     * @param {object[]} feedback
+     * @param {Numbas.marking.feedback_item[]} feedback
      * @see Numbas.marking.finalise_state
      */
     apply_feedback: function(feedback) {
@@ -11888,28 +11800,29 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var scale = 1;
         while(i<states.length) {
             var state = states[i];
+            var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
-                case 'set_credit':
-                    part.setCredit(scale*state.credit, state.message);
+                case FeedBackOps.SET_CREDIT:
+                    part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
-                case 'multiply_credit':
+                case FeedbackOps.MULTIPLY_CREDIT:
                     part.multCredit(scale*state.factor, state.message);
                     break;
-                case 'add_credit':
+                case FeedBackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
                     break;
-                case 'sub_credit':
+                case FeedBackOps.SUB_CREDIT:
                     part.subCredit(scale*state.credit, state.message);
                     break;
-                case 'warning':
+                case FeedbackOps.WARNING:
                     part.giveWarning(state.message);
                     break;
-                case 'feedback':
+                case FeedbackOps.FEEDBACK:
                     part.markingComment(state.message);
                     break;
-                case 'end':
+                case FeedbackOps.END:
                     if(lifts.length) {
-                        while(i+1<states.length && states[i+1].op!='end_lift') {
+                        while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
@@ -11919,7 +11832,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         }
                     }
                     break;
-                case 'start_lift':
+                case "start_lift":
                     lifts.push({credit: this.credit,scale:scale});
                     this.credit = 0;
                     scale = state.scale;
@@ -11954,7 +11867,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      * @param {Numbas.jme.token} studentAnswer
      * @see Numbas.parts.Part#mark
-     * @returns {object} a dictionary `{states, values, scope, state_valid, state_errors}`
+     * @returns {Numbas.marking.marking_script_result}
      */
     mark_answer: function(studentAnswer) {
         try {
@@ -11973,15 +11886,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Set the `credit` to an absolute value
      * @param {Number} credit
      * @param {String} message - message to show in feedback to explain this action
+     * @param {String} reason - why was the credit set to this value? If given, either 'correct' or 'incorrect'.
      */
-    setCredit: function(credit,message)
+    setCredit: function(credit,message,reason)
     {
         var oCredit = this.credit;
         this.credit = credit;
         this.markingFeedback.push({
-            op: 'add_credit',
+            op: 'set_credit',
             credit: this.credit - oCredit,
-            message: message
+            message: message,
+            reason: reason
         });
     },
     /** Add an absolute value to `credit`
@@ -11998,14 +11913,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         });
     },
     /** Subtract an absolute value from `credit`
-     * @param {number} credit - amount to subtract
-     * @param {string} message - message to show in feedback to explain this action
+     * @param {Number} credit - amount to subtract
+     * @param {String} message - message to show in feedback to explain this action
      */
     subCredit: function(credit,message)
     {
         this.credit -= credit;
         this.markingFeedback.push({
-            op: 'subCredit',
+            op: 'sub_credit',
             credit: credit,
             message: message
         });
@@ -12019,7 +11934,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var oCredit = this.credit
         this.credit *= factor;
         this.markingFeedback.push({
-            op: 'add_credit',
+            op: 'mult_credit',
             credit: this.credit - oCredit,
             message: message
         });
@@ -12093,6 +12008,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     }
 };
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12539,7 +12455,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.signals.trigger('preambleRun');
     },
     /** Get the part object corresponding to a path
-     * @param {partpath} path
+     * @param {Numbas.parts.partpath} path
      * @returns {Numbas.parts.Part}
      */
     getPart: function(path)
@@ -12686,6 +12602,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     }
 };
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -12872,7 +12789,9 @@ SignalBox.prototype = {
 }
 });
 Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
+    /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
+
     var jme = Numbas.jme;
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
@@ -12882,6 +12801,49 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var TNum = jme.types.TNum;
     var TBool = jme.types.TBool;
     var TDict = jme.types.TDict;
+
+    /** A line of feedback to give to the student, produced while marking their answer.
+     * Can modify the credit awarded.
+     *
+     * @typedef {Object} Numbas.marking.feedback_item
+     *
+     * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
+     * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
+     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change.
+     * @property {String} [message] - A message to display to the student.
+     */
+
+    /** Kinds of feedback item
+     * @readonly
+     * @enum {String}
+     * @memberof Numbas.marking
+     */
+    var FeedbackOps = Numbas.marking.FeedbackOps = {
+        /** Set the credit to the given value */
+        SET_CREDIT: 'set_credit',
+
+        /** Add the given amount of credit */
+        ADD_CREDIT: 'add_credit',
+
+        /** Multiply the current credit by the given amount */
+        MULTIPLY_CREDIT: 'multiply_credit',
+
+        /** Subtract the given amount of credit */
+        SUB_CREDIT: 'sub_credit',
+
+        /** End marking */
+        END: 'end',
+
+        /** Give the student a warning next to the answer widget */
+        WARNING: 'warning',
+
+        /** Give the student a message */
+        FEEDBACK: 'feedback',
+
+        /** Add the given list of items to the end of the current list of feedback items */
+        CONCAT: 'concat'
+    }
+
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -12899,37 +12861,38 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             }
         });
     }
+
     var state_functions = [];
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", credit:1, message:R('part.marking.correct')}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", credit:1, message:message}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", credit:0, message:R('part.marking.incorrect')}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", credit:0, message:message}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:"set_credit", credit:1, message: correctMessage || R('part.marking.correct')}];
+            state = [{op:FeedBackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
         } else {
-            state = [{op:"set_credit", credit:0, message: incorrectMessage || R('part.marking.incorrect')}];
+            state = [{op:FeedBackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
         }
         return {
             return: condition,
@@ -12941,39 +12904,39 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"set_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.SET_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"multiply_credit", factor: n, message: message}]
+            state: [{op:FeedbackOps.MULTIPLY_CREDIT, factor: n, message: message}]
         }
     }));
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"add_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.ADD_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"sub_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.SUB_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('end',[],TBool,function() {
         return {
             return: true,
-            state: [{op:"end"}]
+            state: [{op:FeedbackOps.END}]
         }
     }));
     state_functions.push(state_fn('fail',[TString],TString,function(message) {
         return {
             return: message,
             state: [
-                {op:"set_credit", credit:0, message:message},
-                {op:"end", invalid:true}
+                {op:FeedBackOps.SET_CREDIT, credit:0, message:message},
+                {op:FeedbackOps.END, invalid:true}
             ]
         };
     }));
@@ -13080,10 +13043,26 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(feedback, scale) {
         return {
             return: feedback,
-            state: {op: "concat", messages: feedback, scale: scale}
+            state: {op: FeedbackOps.CONCAT, messages: feedback, scale: scale}
         }
     }));
-    var StatefulScope = function() {
+
+
+    /** A JME scope with marking state attached.
+     *  The "current" state is a list of feedback items. 
+     *  The scope can also refer to previously computed states by name.
+     *  The state can be modified by functions as they are called.
+     *  This should be the base 
+     *
+     *  @memberof Numbas.marking
+     *  @augments Numbas.jme.Scope
+     *  @constructor
+     *  @property {Numbas.marking.feedback_item[]} state
+     *  @property {Object.<Numbas.marking.feedback_item[]>} states - Previously computed states
+     *  @property {Object.<Boolean>} state_valid - Record of whether previously computed states were valid
+     *  @property {Object.<Error>} state_errors - The errors that caused states to become invalid, if any.
+     */
+    var StatefulScope = marking.StatefulScope = function() {
         this.new_state = true;
         this.state = [];
         this.states = {};
@@ -13094,7 +13073,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             scope.addFunction(fn);
         });
     }
-    StatefulScope.prototype = {
+    StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ { 
         evaluate: function(expr, variables) {
             var is_top = this.state===undefined || this.new_state;
             this.new_state = false;
@@ -13114,7 +13093,31 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
     }
     StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope,StatefulScope);
+
     var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
+
+
+    /** A definition of a marking note.
+     *
+     *  The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+     *
+     * @typedef {String} Numbas.marking.note_definition
+     */
+
+    /** A note forming part of a marking script.
+     *  Evaluates to a JME value and a list of feedback items.
+     *
+     *  @memberof Numbas.marking
+     *  @constructor
+     *
+     *  @property {String} name
+     *  @property {String} description
+     *  @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
+     *  @property {Numbas.jme.tree} tree - The compiled form of the expression
+     *  @property {String[]} vars - The names of the variables this note depends on
+     *  
+     *  @param {JME} source
+     */
     var MarkingNote = marking.MarkingNote = function(source) {
         source = source.trim();
         var m = re_note.exec(source);
@@ -13140,6 +13143,33 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         this.vars = jme.findvars(this.tree);
     }
+
+    /** The result of a marking script.
+     *
+     * @typedef {Object} Numbas.marking.marking_script_result
+     *
+     * @property {Object.<Numbas.marking.feedback_item[]>} states - the feedback resulting from each of the notes
+     * @property {Object.<Numbas.jme.token>} values - the values of each of the notes
+     * @property {Object.<Boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}
+     * @property {Object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}
+     */
+
+    /** A script to mark a part.
+     *  A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
+     *
+     *  Two notes are required:
+     *  
+     *  * The `mark` note is the final note, used to provide feedback on the part.
+     *  * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     *  
+     *  @memberof Numbas.marking
+     *  @constructor
+     *  
+     *  @param {String} source - The definitions of the script's notes.
+     *  @param {Numbas.marking.MarkingScript} [base] - a base script to extend.
+     *
+     *  @property {Numbas.marking.MarkingNote[]} notes
+     */
     var MarkingScript = marking.MarkingScript = function(source, base) {
         try {
             var notes = source.split(/\n(\s*\n)+/);
@@ -13166,7 +13196,15 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         this.notes = todo;
     }
-    MarkingScript.prototype = {
+    MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+
+        /** Evaluate all of this script's notes in the given scope.
+         *
+         * @param {Numbas.jme.Scope} scope
+         * @param {Object.<Numbas.jme.token>} - Extra variables defined in the scope
+         *
+         * @returns {Numbas.marking.marking_script_result}
+         */
         evaluate: function(scope, variables) {
             scope = new StatefulScope([
                 scope, {variables: variables}
@@ -13175,12 +13213,24 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             return {
                 states: scope.states,
                 values: result.variables,
-                scope: result.scope,
                 state_valid: scope.state_valid,
                 state_errors: scope.state_errors
             };
         }
     }
+
+    /** Compute the marking note with the given name in the given scope
+     *
+     * @memberof Numbas.marking
+     * @function
+     * @see Numbas.jme.variables.computeVariable
+     *
+     * @param {String} name
+     * @param {Object} todo - dictionary of notes still to evaluate
+     * @param {Numbas.marking.StatefulScope} scope
+     *
+     * @returns {Numbas.jme.token}
+     */
     var compute_note = marking.compute_note = function(name,todo,scope) {
         if(scope.getVariable(name)) {
             return;
@@ -13217,18 +13267,23 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         return scope.variables[name];
     }
-    /** @typedef Numbas.marking.finalised_state
+    /** The result of attempting to mark a part.
+     * @typedef Numbas.marking.finalised_state
      * @type {Object}
      * @property {Boolean} valid - Can the answer be marked?
      * @property {Number} credit - Proportion of the credit to award
      * @property {Array.<Object>} states - Feedback actions
      */
+
     /** Run through a sequence of state operations, accumulating credit.
      * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
      * @see Numbas.parts.Part#apply_feedback
-     * @returns {Numbas.marking.finalised_state} a dictionary `{valid: boolean, credit: number, states: object[]}`
+     * @function
+     * @memberof Numbas.marking
+     * @param {Numbas.marking.feedback_item[]} states
+     * @returns {Numbas.marking.finalised_state}
      */
-    marking.finalise_state = function(states) {
+    var finalise_state = marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
         var credit = 0;
@@ -13237,25 +13292,25 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         for(var i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
-                case 'set_credit':
+                case FeedBackOps.SET_CREDIT:
                     out_states.push(state);
                     credit = state.credit;
                     break;
-                case 'multiply_credit':
+                case FeedbackOps.MULTIPLY_CREDIT:
                     out_states.push(state);
                     credit *= state.factor;
                     break;
-                case 'add_credit':
+                case FeedBackOps.ADD_CREDIT:
                     out_states.push(state);
                     credit += state.credit;
                     break;
-                case 'sub_credit':
+                case FeedBackOps.SUB_CREDIT:
                     out_states.push(state);
                     credit -= state.credit;
                     break;
-                case 'end':
+                case FeedbackOps.END:
                     if(num_lifts) {
-                        while(i+1<states.length && states[i+1].op!='end_lift') {
+                        while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
@@ -13265,7 +13320,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         }
                     }
                     break;
-                case 'concat':
+                case FeedbackOps.CONCAT:
                     states = states.slice(0,i+1).concat(
                         [{op:"start_lift",scale:state.scale}],
                         state.messages,
@@ -13273,11 +13328,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         states.slice(i+1)
                     );
                     break;
-                case 'start_lift':
+                case "start_lift":
                     num_lifts += 1;
                     out_states.push(state);
                     break;
-                case 'end_lift':
+                case "end_lift":
                     num_lifts -= 1;
                     out_states.push(state);
                     break;
@@ -13295,6 +13350,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
     }
 });
+
 /** @file Stuff to do with loading from JSON objects. Provides {@link Numbas.json}. */
 Numbas.queueScript('json',['base'],function() {
 /** @namespace Numbas.json */
@@ -13935,6 +13991,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 var v = this.choices().map(function(c){ return c.ticked() });
                 if(this.answerAsArray) {
                     return v.map(function(c){ return [c]; });
+                } else {
+                    return v;
                 }
             }
             var lastValue = this.make_result();
@@ -14035,6 +14093,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         '
     });
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14914,7 +14973,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 cell.answerIndex = cell.choiceIndex;
                 cell.choiceIndex = 0;
             }
-            distractors[cell.answerIndex][cell.choiceIndex] = cell.message;
+            distractors[cell.answerIndex][cell.choiceIndex] = util.isNonemptyHTML(cell.message) ? cell.message : '';
         }
         settings.distractors = distractors;
     },
@@ -15418,8 +15477,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 ['revealAnswer'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
+
 /** Layouts for multiple response types
- * @type {Object.<function>
+ * @type {Object.<function>}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row,column) { return true; },
@@ -15433,6 +15493,7 @@ Numbas.partConstructors['1_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_x'] = util.extend(Part,MultipleResponsePart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");

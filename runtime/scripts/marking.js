@@ -1,5 +1,7 @@
 Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
+    /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
+
     var jme = Numbas.jme;
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
@@ -9,6 +11,49 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var TNum = jme.types.TNum;
     var TBool = jme.types.TBool;
     var TDict = jme.types.TDict;
+
+    /** A line of feedback to give to the student, produced while marking their answer.
+     * Can modify the credit awarded.
+     *
+     * @typedef {Object} Numbas.marking.feedback_item
+     *
+     * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
+     * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
+     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change.
+     * @property {String} [message] - A message to display to the student.
+     */
+
+    /** Kinds of feedback item
+     * @readonly
+     * @enum {String}
+     * @memberof Numbas.marking
+     */
+    var FeedbackOps = Numbas.marking.FeedbackOps = {
+        /** Set the credit to the given value */
+        SET_CREDIT: 'set_credit',
+
+        /** Add the given amount of credit */
+        ADD_CREDIT: 'add_credit',
+
+        /** Multiply the current credit by the given amount */
+        MULTIPLY_CREDIT: 'multiply_credit',
+
+        /** Subtract the given amount of credit */
+        SUB_CREDIT: 'sub_credit',
+
+        /** End marking */
+        END: 'end',
+
+        /** Give the student a warning next to the answer widget */
+        WARNING: 'warning',
+
+        /** Give the student a message */
+        FEEDBACK: 'feedback',
+
+        /** Add the given list of items to the end of the current list of feedback items */
+        CONCAT: 'concat'
+    }
+
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -26,37 +71,38 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             }
         });
     }
+
     var state_functions = [];
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", reason: 'correct', credit:1, message:R('part.marking.correct')}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:"set_credit", reason: 'correct', credit:1, message:message}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:"set_credit", reason: 'incorrect', credit:0, message:message}]
+            state: [{op:FeedBackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:"set_credit", credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
+            state = [{op:FeedBackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
         } else {
-            state = [{op:"set_credit", credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
+            state = [{op:FeedBackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
         }
         return {
             return: condition,
@@ -68,39 +114,39 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"set_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.SET_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"multiply_credit", factor: n, message: message}]
+            state: [{op:FeedbackOps.MULTIPLY_CREDIT, factor: n, message: message}]
         }
     }));
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"add_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.ADD_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:"sub_credit", credit:n, message: message}]
+            state: [{op:FeedBackOps.SUB_CREDIT, credit:n, message: message}]
         }
     }));
     state_functions.push(state_fn('end',[],TBool,function() {
         return {
             return: true,
-            state: [{op:"end"}]
+            state: [{op:FeedbackOps.END}]
         }
     }));
     state_functions.push(state_fn('fail',[TString],TString,function(message) {
         return {
             return: message,
             state: [
-                {op:"set_credit", credit:0, message:message},
-                {op:"end", invalid:true}
+                {op:FeedBackOps.SET_CREDIT, credit:0, message:message},
+                {op:FeedbackOps.END, invalid:true}
             ]
         };
     }));
@@ -207,10 +253,26 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(feedback, scale) {
         return {
             return: feedback,
-            state: {op: "concat", messages: feedback, scale: scale}
+            state: {op: FeedbackOps.CONCAT, messages: feedback, scale: scale}
         }
     }));
-    var StatefulScope = function() {
+
+
+    /** A JME scope with marking state attached.
+     *  The "current" state is a list of feedback items. 
+     *  The scope can also refer to previously computed states by name.
+     *  The state can be modified by functions as they are called.
+     *  This should be the base 
+     *
+     *  @memberof Numbas.marking
+     *  @augments Numbas.jme.Scope
+     *  @constructor
+     *  @property {Numbas.marking.feedback_item[]} state
+     *  @property {Object.<Numbas.marking.feedback_item[]>} states - Previously computed states
+     *  @property {Object.<Boolean>} state_valid - Record of whether previously computed states were valid
+     *  @property {Object.<Error>} state_errors - The errors that caused states to become invalid, if any.
+     */
+    var StatefulScope = marking.StatefulScope = function() {
         this.new_state = true;
         this.state = [];
         this.states = {};
@@ -221,7 +283,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             scope.addFunction(fn);
         });
     }
-    StatefulScope.prototype = {
+    StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ { 
         evaluate: function(expr, variables) {
             var is_top = this.state===undefined || this.new_state;
             this.new_state = false;
@@ -241,7 +303,31 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
     }
     StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope,StatefulScope);
+
     var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
+
+
+    /** A definition of a marking note.
+     *
+     *  The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+     *
+     * @typedef {String} Numbas.marking.note_definition
+     */
+
+    /** A note forming part of a marking script.
+     *  Evaluates to a JME value and a list of feedback items.
+     *
+     *  @memberof Numbas.marking
+     *  @constructor
+     *
+     *  @property {String} name
+     *  @property {String} description
+     *  @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
+     *  @property {Numbas.jme.tree} tree - The compiled form of the expression
+     *  @property {String[]} vars - The names of the variables this note depends on
+     *  
+     *  @param {JME} source
+     */
     var MarkingNote = marking.MarkingNote = function(source) {
         source = source.trim();
         var m = re_note.exec(source);
@@ -267,6 +353,33 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         this.vars = jme.findvars(this.tree);
     }
+
+    /** The result of a marking script.
+     *
+     * @typedef {Object} Numbas.marking.marking_script_result
+     *
+     * @property {Object.<Numbas.marking.feedback_item[]>} states - the feedback resulting from each of the notes
+     * @property {Object.<Numbas.jme.token>} values - the values of each of the notes
+     * @property {Object.<Boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}
+     * @property {Object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}
+     */
+
+    /** A script to mark a part.
+     *  A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
+     *
+     *  Two notes are required:
+     *  
+     *  * The `mark` note is the final note, used to provide feedback on the part.
+     *  * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     *  
+     *  @memberof Numbas.marking
+     *  @constructor
+     *  
+     *  @param {String} source - The definitions of the script's notes.
+     *  @param {Numbas.marking.MarkingScript} [base] - a base script to extend.
+     *
+     *  @property {Numbas.marking.MarkingNote[]} notes
+     */
     var MarkingScript = marking.MarkingScript = function(source, base) {
         try {
             var notes = source.split(/\n(\s*\n)+/);
@@ -293,7 +406,15 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         this.notes = todo;
     }
-    MarkingScript.prototype = {
+    MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+
+        /** Evaluate all of this script's notes in the given scope.
+         *
+         * @param {Numbas.jme.Scope} scope
+         * @param {Object.<Numbas.jme.token>} - Extra variables defined in the scope
+         *
+         * @returns {Numbas.marking.marking_script_result}
+         */
         evaluate: function(scope, variables) {
             scope = new StatefulScope([
                 scope, {variables: variables}
@@ -302,12 +423,24 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             return {
                 states: scope.states,
                 values: result.variables,
-                scope: result.scope,
                 state_valid: scope.state_valid,
                 state_errors: scope.state_errors
             };
         }
     }
+
+    /** Compute the marking note with the given name in the given scope
+     *
+     * @memberof Numbas.marking
+     * @function
+     * @see Numbas.jme.variables.computeVariable
+     *
+     * @param {String} name
+     * @param {Object} todo - dictionary of notes still to evaluate
+     * @param {Numbas.marking.StatefulScope} scope
+     *
+     * @returns {Numbas.jme.token}
+     */
     var compute_note = marking.compute_note = function(name,todo,scope) {
         if(scope.getVariable(name)) {
             return;
@@ -344,18 +477,23 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         return scope.variables[name];
     }
-    /** @typedef Numbas.marking.finalised_state
+    /** The result of attempting to mark a part.
+     * @typedef Numbas.marking.finalised_state
      * @type {Object}
      * @property {Boolean} valid - Can the answer be marked?
      * @property {Number} credit - Proportion of the credit to award
      * @property {Array.<Object>} states - Feedback actions
      */
+
     /** Run through a sequence of state operations, accumulating credit.
      * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
      * @see Numbas.parts.Part#apply_feedback
-     * @returns {Numbas.marking.finalised_state} a dictionary `{valid: boolean, credit: number, states: object[]}`
+     * @function
+     * @memberof Numbas.marking
+     * @param {Numbas.marking.feedback_item[]} states
+     * @returns {Numbas.marking.finalised_state}
      */
-    marking.finalise_state = function(states) {
+    var finalise_state = marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
         var credit = 0;
@@ -364,25 +502,25 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         for(var i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
-                case 'set_credit':
+                case FeedBackOps.SET_CREDIT:
                     out_states.push(state);
                     credit = state.credit;
                     break;
-                case 'multiply_credit':
+                case FeedbackOps.MULTIPLY_CREDIT:
                     out_states.push(state);
                     credit *= state.factor;
                     break;
-                case 'add_credit':
+                case FeedBackOps.ADD_CREDIT:
                     out_states.push(state);
                     credit += state.credit;
                     break;
-                case 'sub_credit':
+                case FeedBackOps.SUB_CREDIT:
                     out_states.push(state);
                     credit -= state.credit;
                     break;
-                case 'end':
+                case FeedbackOps.END:
                     if(num_lifts) {
-                        while(i+1<states.length && states[i+1].op!='end_lift') {
+                        while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
@@ -392,7 +530,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         }
                     }
                     break;
-                case 'concat':
+                case FeedbackOps.CONCAT:
                     states = states.slice(0,i+1).concat(
                         [{op:"start_lift",scale:state.scale}],
                         state.messages,
@@ -400,11 +538,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         states.slice(i+1)
                     );
                     break;
-                case 'start_lift':
+                case "start_lift":
                     num_lifts += 1;
                     out_states.push(state);
                     break;
-                case 'end_lift':
+                case "end_lift":
                     num_lifts -= 1;
                     out_states.push(state);
                     break;

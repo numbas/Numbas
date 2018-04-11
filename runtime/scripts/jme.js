@@ -26,11 +26,19 @@ Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules'],function(){
 Numbas.queueScript('jme-base',['base','math','util'],function() {
 var util = Numbas.util;
 var math = Numbas.math;
+
+/** A JME expression.
+ * @typedef JME
+ * @type {String}
+ * @see {@link http://numbas-editor.readthedocs.io/en/latest/jme-reference.html}
+ */
+
 /** @typedef Numbas.jme.tree
   * @type {Object}
   * @property {Array.<Numbas.jme.tree>} args - the token's arguments (if it's an op or function)
   * @property {Numbas.jme.token} tok - the token at this node
   */
+
 /** @namespace Numbas.jme */
 var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Mathematical constants */
@@ -58,18 +66,37 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             .replace(/'/g,"\\'")
         ;
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#compile}
+     * @param {JME} expr
+     * @see Numbas.jme.Parser#compile
+     * @returns {Numbas.jme.tree}
+     */
     compile: function(expr) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.compile(expr);
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#tokenise}
+     * @param {JME} expr
+     * @see Numbas.jme.Parser#tokenise
+     * @returns {Numbas.jme.token[]}
+     */
     tokenise: function(expr) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.tokenise(expr);
     },
+
+    /** Wrapper around {@link Numbas.jme.Parser#shunt}
+     * @param {Numbas.jme.token[]} tokens
+     * @see Numbas.jme.Parser#shunt
+     * @returns {Numbas.jme.tree}
+     */
     shunt: function(tokens) {
-        var parser = new jme.Parser(jme.builtinScope);
+        var parser = new jme.Parser();
         return parser.shunt(expr);
     },
+
     /** Unescape a string - backslashes escape special characters
      * @param {String} str
      * @returns {String}
@@ -548,16 +575,34 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
     }
 };
-jme.Parser = function(scope, options) {
-    this.scope = scope;
+
+/** Options for {@link Numbas.jme.Parser}
+ *
+ * @typedef {Object} Numbas.jme.parser_options
+ * @property {Boolean} closeMissingBrackets - Silently ignore "missing right bracket" errors?
+ * @property {Boolean} addMissingArguments - When an op or function call is missing required arguments, insert `?` as a placeholder.
+ */
+
+/** A parser for {@link JME} expressions
+ * @memberof Numbas.jme
+ * @constructor
+ * 
+ * @param {Numbas.jme.parser_options} options
+ */
+var Parser = jme.Parser = function(options) {
     this.options = util.extend_object({}, this.option_defaults, options);
 }
-jme.Parser.prototype = {
+jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
+    /** Default options for new parsers
+     * @type {Numbas.jme.parser_options}
+     */
     option_defaults: {
         closeMissingBrackets: false,
         addMissingArguments: false
     },
-    /** Regular expressions to match tokens */
+    /** Regular expressions to match tokens 
+     * @type {Object.<RegExp>}
+     */
     re: {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
@@ -571,7 +616,7 @@ jme.Parser.prototype = {
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
      * @param {JME} expr
      * @returns {Array.<Numbas.jme.token>}
-     * @see Numbas.jme.compile
+     * @see Numbas.jme.Parser#compile
      */
     tokenise: function(expr) {
         if(!expr)
@@ -683,8 +728,8 @@ jme.Parser.prototype = {
     /** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm (wikipedia has a good description)
      * @param {Array.<Numbas.jme.token>} tokens
      * @returns {Numbas.jme.tree}
-     * @see Numbas.jme.tokenise
-     * @see Numbas.jme.compile
+     * @see Numbas.jme.Parser#tokenise
+     * @see Numbas.jme.Parser#compile
      */
     shunt: function(tokens) {
         var parser = this;
@@ -872,10 +917,11 @@ jme.Parser.prototype = {
         }
         return(output[0]);
     },
+
     /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt})
      * @param {JME} expr
-     * @see Numbas.jme.tokenise
-     * @see Numbas.jme.shunt
+     * @see Numbas.jme.Parser#tokenise
+     * @see Numbas.jme.Parser#shunt
      * @returns {Numbas.jme.tree}
      */
     compile: function(expr) {
@@ -897,14 +943,22 @@ jme.Parser.prototype = {
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
 jme.Parser.prototype.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
 jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+');
+
+/** Regular expressions for parser tokens.
+ * Included for backwards-compatibility
+ * @type {Object.<RegExp>}
+ * @see {Numbas.jme.Parser.re}
+ */
 jme.re = jme.Parser.prototype.re;
+
 var fnSort = util.sortBy('id');
 /** Options for the {@link Numbas.jme.funcObj} constructor
- * @typedef {Object} scope_deletions
+ * @typedef {Object} Numbas.jme.scope_deletions
  * @property {Object} variables - Names of deleted variables.
  * @property {Object} functions - Names of deleted functions.
  * @property {Object} rulesets - Names of deleted rulesets.
  */
+
 /**
  * A JME evaluation environment.
  * Stores variable, function, and ruleset definitions.
@@ -915,8 +969,8 @@ var fnSort = util.sortBy('id');
  * @constructor
  * @property {Object.<Numbas.jme.token>} variables - Dictionary of variables defined **at this level in the scope**. To resolve a variable in the scope, use {@link Numbas.jme.Scope.getVariable}.
  * @property {Object.<Array.<Numbas.jme.funcObj>>} functions - Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use {@link Numbas.jme.Scope.getFunction}.
- * @property {Object.<Numbas.jme.Ruleset>} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
- * @property {scope_deletions} deleted - Names of deleted variables/functions/rulesets.
+ * @property {Object.<Numbas.jme.rules.Ruleset>} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
+ * @property {Numbas.jme.scope_deletions} deleted - Names of deleted variables/functions/rulesets.
  * @property {Numbas.Question} question - The question this scope belongs to.
  *
  * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in this scope
@@ -969,15 +1023,15 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
     /** Mark the given variable name as deleted from the scope.
-     * @param {string} name
+     * @param {String} name
      */
     deleteVariable: function(name) {
         this.deleted.variables[name] = true;
     },
     /** Get the object with given name from the given collection
-     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
-     * @param {string} name - the name of the object to retrieve
-     * @returns {object}
+     * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {String} name - the name of the object to retrieve
+     * @returns {Object}
      */
     resolve: function(collection,name) {
         var scope = this;
@@ -992,21 +1046,21 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
     /** Find the value of the variable with the given name, if it's defined
-     * @param {string} name
+     * @param {String} name
      * @returns {Numbas.jme.token}
      */
     getVariable: function(name) {
         return this.resolve('variables',name.toLowerCase());
     },
     /** Set the given variable name
-     * @param {string} name
+     * @param {String} name
      * @param {Numbas.jme.token} value
      */
     setVariable: function(name, value) {
         this.variables[name.toLowerCase()] = value;
     },
     /** Get all definitions of the given function name.
-     * @param {string} name
+     * @param {String} name
      * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
      */
     getFunction: function(name) {
@@ -1024,22 +1078,22 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this._resolved_functions[name];
     },
     /** Get the ruleset with the gien name
-     * @param {string} name
-     * @returns {Numbas.jme.Ruleset}
+     * @param {String} name
+     * @returns {Numbas.jme.rules.Ruleset}
      */
     getRuleset: function(name) {
         return this.resolve('rulesets',name);
     },
     /** Set the given ruleset name
-     * @param {string} name
-     * @param {Numbas.jme.Ruleset[]} rules
+     * @param {String} name
+     * @param {Numbas.jme.rules.Ruleset[]} rules
      */
     setRuleset: function(name, rules) {
         this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
     },
     /** Collect together all items from the given collection
-     * @param {string} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
-     * @returns {object} a dictionary of names to values
+     * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @returns {Object} a dictionary of names to values
      */
     collect: function(collection,name) {
         var scope = this;
@@ -1060,13 +1114,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return out;
     },
     /** Gather all variables defined in this scope
-     * @returns {object} a dictionary of variables
+     * @returns {Object.<Numbas.jme.token>} a dictionary of variables
      */
     allVariables: function() {
         return this.collect('variables');
     },
     /** Gather all rulesets defined in this scope
-     * @returns {object} a dictionary of rulesets
+     * @returns {Object.<Numbas.jme.rules.Ruleset>} a dictionary of rulesets
      */
     allRulesets: function() {
         if(!this._allRulesets) {
@@ -1075,7 +1129,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         return this._allRulesets;
     },
     /** Gather all functions defined in this scope
-     * @returns {object} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
+     * @returns {Object.<Numbas.jme.funcObj[]>} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
      */
     allFunctions: function() {
         var scope = this;

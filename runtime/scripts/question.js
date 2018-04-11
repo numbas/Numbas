@@ -444,7 +444,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.signals.trigger('preambleRun');
     },
     /** Get the part object corresponding to a path
-     * @param {partpath} path
+     * @param {Numbas.parts.partpath} path
      * @returns {Numbas.parts.Part}
      */
     getPart: function(path)

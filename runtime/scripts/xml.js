@@ -69,18 +69,9 @@ var xml = Numbas.xml = {
         }
         return doc;
     },
-    /** The definition of a custom JME function.
-     * @typedef func_data
-     * @type {Object}
-     * @property {String} name
-     * @property {String} definition - definition of the function, either in {@link JME} or JavaScript
-     * @property {String} language - either `"jme"` or `"javascript"`
-     * @property {String} outtype - name of the {@link Numbas.jme.token} type this function returns
-     * @property {Array.<Object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
-     */
     /** Load user-defined functions from an XML node
      * @param {Element} xml
-     * @returns {func_data[]}
+     * @returns {Numbas.jme.variables.func_data[]}
      */
     loadFunctions: function(xml)
     {
@@ -115,14 +106,10 @@ var xml = Numbas.xml = {
         }
         return tmpFunctions;
     },
-    /** @typedef {Object} variable_data_dict
-     * @property {Numbas.jme.tree} tree - definition of variable
-     * @property {String[]} vars - names of variables this variable depends on
-     */
     /** Load variable definitions from an XML node
      * @param {Element} xml
      * @param {Numbas.jme.Scope} - scope to compile relative to
-     * @returns {variable_data_dict[]}
+     * @returns {Numbas.jme.variables.variable_data_dict[]}
      */
     loadVariables: function(xml,scope) {
         var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
