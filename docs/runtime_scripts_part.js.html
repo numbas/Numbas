@@ -427,7 +427,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     settings:
     {
         stepsPenalty: 0,
-        enableMinimumMarks: false,
+        enableMinimumMarks: true,
         minimumMarks: 0,
         showCorrectAnswer: true,
         showFeedbackIcon: true,
@@ -552,6 +552,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             if(this.settings.enableMinimumMarks &amp;&amp; this.score&lt;this.settings.minimumMarks) {
                 this.score = this.settings.minimumMarks;
+                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
                 this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
             }
             if(stepsMarks!=0 &amp;&amp; stepsScore!=0)
@@ -570,6 +571,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.score = this.credit * this.marks;
             if(this.settings.enableMinimumMarks &amp;&amp; this.score&lt;this.settings.minimumMarks) {
                 this.score = this.settings.minimumMarks;
+                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
                 this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
             }
         }
@@ -854,16 +856,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var state = states[i];
             var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
-                case FeedBackOps.SET_CREDIT:
+                case FeedbackOps.SET_CREDIT:
                     part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
                     part.multCredit(scale*state.factor, state.message);
                     break;
-                case FeedBackOps.ADD_CREDIT:
+                case FeedbackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
                     break;
-                case FeedBackOps.SUB_CREDIT:
+                case FeedbackOps.SUB_CREDIT:
                     part.subCredit(scale*state.credit, state.message);
                     break;
                 case FeedbackOps.WARNING:

@@ -291,7 +291,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var name2 = m[2].trim();
             jme.variables.computeRuleset(name2,todo,scope,newpath);
         });
-        var ruleset = Numbas.jme.collectRuleset(todo[name],scope.rulesets);
+        var ruleset = Numbas.jme.collectRuleset(todo[name],scope.allRulesets());
         scope.setRuleset(name,ruleset);
         return ruleset;
     },
