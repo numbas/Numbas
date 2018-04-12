@@ -1,4 +1,8 @@
 studentExpr (The student's answer, parsed): 
+    assert(trim(studentAnswer)<>"",
+        warn(translate("part.marking.nothing entered"));
+        fail(translate("part.marking.nothing entered"))
+    );
     try(
         simplify(parse(studentAnswer),[])
     , message,

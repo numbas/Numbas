@@ -709,12 +709,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else if(expr.length) {
                 //invalid character or not able to match a token
                 var position = oexpr.length - expr.length;
-                if(oexpr.length>20) {
-                    var nearby = oexpr.slice(Math.max(0,position-5), position+5);
-                    throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
-                } else {
-                    throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
-                }
+                var nearby = oexpr.slice(Math.max(0,position), position+5);
+                throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
             } else {
                 break;
             }

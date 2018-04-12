@@ -100,6 +100,9 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
     {
+        if(!exprTree) {
+            throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
+        }
         if(!scope)
             throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
         scope = Numbas.util.copyobj(scope);
