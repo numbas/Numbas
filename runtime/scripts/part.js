@@ -395,7 +395,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     settings:
     {
         stepsPenalty: 0,
-        enableMinimumMarks: false,
+        enableMinimumMarks: true,
         minimumMarks: 0,
         showCorrectAnswer: true,
         showFeedbackIcon: true,
@@ -520,6 +520,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
                 this.score = this.settings.minimumMarks;
+                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
                 this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
             }
             if(stepsMarks!=0 && stepsScore!=0)
@@ -538,6 +539,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.score = this.credit * this.marks;
             if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
                 this.score = this.settings.minimumMarks;
+                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
                 this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
             }
         }

@@ -214,7 +214,8 @@
                     var res = mark_part(p, [[true,false],[false,true]]);
                     assert.equal(res.credit,1,'Picking correct options gives 1 credit');
                     var res = mark_part(p, [[true,true],[true,true]]);
-                    assert.equal(res.credit,0,'Picking all options gives 0 credit');
+                    p.calculateScore();
+                    assert.equal(p.credit,0,'Picking all options gives 0 credit');
                 });
 
                 QUnit.module('Gapfill');
