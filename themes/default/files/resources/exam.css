@@ -629,6 +629,10 @@ table {
     margin-top: 0.5em;
 }
 
+.part .feedbackMessage {
+    display: flex;
+}
+
 .part .feedbackMessage .feedback-icon {
     width: 1em;
     margin-right: 0.5em;
