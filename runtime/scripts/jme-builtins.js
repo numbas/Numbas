@@ -280,6 +280,7 @@ newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
 });
+newBuiltin('trim',[TString],TString, function(str) { return str.trim(); });
 newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
