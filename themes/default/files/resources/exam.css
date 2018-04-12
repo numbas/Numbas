@@ -279,6 +279,9 @@ input.jme {
 .feedback-icon.icon-remove {
 	color: red;
 }
+.feedback-icon.icon-exclamation-sign {
+	color: red;
+}
 .feedback-icon.none {
 	display: none;
 }

@@ -19,7 +19,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
      *
      * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
      * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
-     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change.
+     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
      * @property {String} [message] - A message to display to the student.
      */
 
@@ -145,7 +145,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return {
             return: message,
             state: [
-                {op:FeedbackOps.SET_CREDIT, credit:0, message:message},
+                {op:FeedbackOps.SET_CREDIT, credit:0, message:message, reason: 'invalid'},
                 {op:FeedbackOps.END, invalid:true}
             ]
         };

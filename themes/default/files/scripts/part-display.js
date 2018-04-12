@@ -293,11 +293,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                         case 'incorrect':
                             change_desc = 'negative';
                             break;
+                        case 'invalid':
+                            change_desc = 'invalid';
+                            break;
                     }
                     var icons = {
                         'positive': 'icon-ok',
                         'negative': 'icon-remove',
-                        'neutral': ''
+                        'neutral': '',
+                        'invalid': 'icon-exclamation-sign'
                     }
                     if(util.isNonemptyHTML(message)) {
                         messages.push({credit_change: change_desc, message: message, icon: icons[change_desc]});

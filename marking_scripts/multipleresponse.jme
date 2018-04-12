@@ -40,6 +40,10 @@ total_score: sum(score_ticks)
 
 mark:
   assert(marks>0,correct());  // any answer is correct when 0 marks are available
+  assert(numTicks>0,
+    warn(translate("part.marking.nothing entered"));
+    fail(translate("part.marking.nothing entered"))
+  );
   apply(wrongNumber);
   apply(score_ticks)
 
