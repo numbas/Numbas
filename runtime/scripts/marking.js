@@ -459,7 +459,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             } catch(e) {
                 scope.state_errors[name] = e;
                 var invalid_dep = null;
-                for(var x of todo[name].vars) {
+                for(var i=0;i<todo[name].vars.length;i++) {
+                    var x = todo[name].vars[i];
                     if(x in todo) {
                         if(!scope.state_valid[x]) {
                             invalid_dep = x;
