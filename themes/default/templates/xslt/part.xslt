@@ -76,10 +76,10 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback">
-                <button class="btn btn-primary submitPart" data-bind="css: {{dirty: isDirty}}, click: controls.submit"><localise>question.submit part</localise></button>
+                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, css: {{dirty: isDirty}}, click: controls.submit"><localise>question.submit part</localise></button>
                 <div class="feedbackMessages" data-bind="css: {{'out-of-date': isDirty}}, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
-                    <ol data-bind="foreach: feedbackMessages">
+                    <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>
                     </ol>
                 </div>

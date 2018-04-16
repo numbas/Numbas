@@ -103,13 +103,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
-        /** Show the "submit part" button?
-         * @member {observable|Boolean} showSubmitPart
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.showSubmitPart = Knockout.computed(function() {
-            return this.isNotOnlyPart() && !(this.revealed() || !this.isDirty());
-        },this);
         /** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
          * @member {observable|Boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
@@ -125,6 +118,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = Knockout.observable(false);
+        /** Show the "submit part" button?
+         * @member {observable|Boolean} showSubmitPart
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showSubmitPart = Knockout.computed(function() {
+            return !this.revealed();
+        },this);
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage
          * @memberof Numbas.display.PartDisplay
@@ -167,6 +167,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking() && this.showMarks();
         },this);
+        /** Should the feedback messages be shown?
+         * @member {observable|Boolean} showFeedbackMessages
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showFeedbackMessages = Knockout.pureComputed(function() {
+            var e = p.question.exam;
+            return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;            
+        },this);
+
         /** Control functions
          * @member {Object} controls
          * @memberof Numbas.display.PartDisplay
