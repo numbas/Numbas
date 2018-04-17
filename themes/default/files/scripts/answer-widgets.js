@@ -31,9 +31,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this),
                 this.input.subscribe(function(value) {
-                    var valid = value!='' || this.allowEmpty;
+                    var empty = value=='';
+                    var valid = !empty || this.allowEmpty;
                     if(value != lastValue) {
-                        this.answerJSON({valid: valid, value: value});
+                        this.answerJSON({valid: valid, value: value, empty: empty});
                     }
                     lastValue = value;
                 },this)
@@ -67,7 +68,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
-                    return {valid:false};
+                    return {valid:false, empty: true};
                 }
                 if(!util.isNumber(input,this.allowFractions,this.allowedNotationStyles)) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
@@ -143,7 +144,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
-                    return {valid:false};
+                    return {valid:false,empty:true};
                 }
                 if(this.options.returnString) {
                     return {valid: true, value: input};
@@ -249,6 +250,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var value = this.input().slice().map(function(r){return r.slice()});
                 var cells = Array.prototype.concat.apply([],value);
+                var empty = cells.every(function(cell){return !cell.trim()});
+                if(empty) {
+                    return {valid: false, empty: true};
+                }
                 if(this.parseCells) {
                     var valid = cells.every(function(cell){ return cell.trim() && util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
                     if(!valid) {
@@ -485,7 +490,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             ];
             this.setAnswerJSON = ko.computed(function() {
                 var value = this.answerAsArray ? this.choiceArray() : this.choice();
-                this.answerJSON({valid: value!==null, value: value});
+                this.answerJSON({valid: value!==null, value: value, empty: value===null});
             },this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
@@ -546,7 +551,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     this.answerJSON({valid: true, value: value});
                 } else {
                     if(this.answerJSON().valid) {
-                        this.answerJSON({valid: false});
+                        this.answerJSON({valid: false, empty: true});
                     }
                 }
             },this);
