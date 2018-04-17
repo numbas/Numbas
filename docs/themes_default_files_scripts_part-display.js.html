@@ -135,13 +135,6 @@
         this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
-        /** Show the "submit part" button?
-         * @member {observable|Boolean} showSubmitPart
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.showSubmitPart = Knockout.computed(function() {
-            return this.isNotOnlyPart() &amp;&amp; !(this.revealed() || !this.isDirty());
-        },this);
         /** Have the steps ever been shown? ({@link Numbas.parts.Part#stepsShown})
          * @member {observable|Boolean} stepsShown
          * @memberof Numbas.display.PartDisplay
@@ -157,6 +150,13 @@
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = Knockout.observable(false);
+        /** Show the "submit part" button?
+         * @member {observable|Boolean} showSubmitPart
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showSubmitPart = Knockout.computed(function() {
+            return !this.revealed();
+        },this);
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage
          * @memberof Numbas.display.PartDisplay
@@ -199,6 +199,15 @@
         this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking() &amp;&amp; this.showMarks();
         },this);
+        /** Should the feedback messages be shown?
+         * @member {observable|Boolean} showFeedbackMessages
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showFeedbackMessages = Knockout.pureComputed(function() {
+            var e = p.question.exam;
+            return (p.question.display.revealed() || e.settings.showAnswerState) &amp;&amp; pd.feedbackMessages().length;            
+        },this);
+
         /** Control functions
          * @member {Object} controls
          * @memberof Numbas.display.PartDisplay
@@ -325,11 +334,15 @@
                         case 'incorrect':
                             change_desc = 'negative';
                             break;
+                        case 'invalid':
+                            change_desc = 'invalid';
+                            break;
                     }
                     var icons = {
                         'positive': 'icon-ok',
                         'negative': 'icon-remove',
-                        'neutral': ''
+                        'neutral': '',
+                        'invalid': 'icon-exclamation-sign'
                     }
                     if(util.isNonemptyHTML(message)) {
                         messages.push({credit_change: change_desc, message: message, icon: icons[change_desc]});
@@ -619,6 +632,8 @@
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
 		

@@ -741,12 +741,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else if(expr.length) {
                 //invalid character or not able to match a token
                 var position = oexpr.length - expr.length;
-                if(oexpr.length>20) {
-                    var nearby = oexpr.slice(Math.max(0,position-5), position+5);
-                    throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
-                } else {
-                    throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
-                }
+                var nearby = oexpr.slice(Math.max(0,position), position+5);
+                throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
             } else {
                 break;
             }
@@ -2497,6 +2493,8 @@ jme.compareTrees = function(a,b) {
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
 		

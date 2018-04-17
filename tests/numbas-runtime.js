@@ -6071,12 +6071,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else if(expr.length) {
                 //invalid character or not able to match a token
                 var position = oexpr.length - expr.length;
-                if(oexpr.length>20) {
-                    var nearby = oexpr.slice(Math.max(0,position-5), position+5);
-                    throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
-                } else {
-                    throw(new Numbas.Error('jme.tokenise.invalid',{expression:oexpr}));
-                }
+                var nearby = oexpr.slice(Math.max(0,position), position+5);
+                throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
             } else {
                 break;
             }
@@ -7885,6 +7881,7 @@ newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
 });
+newBuiltin('trim',[TString],TString, function(str) { return str.trim(); });
 newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
@@ -8079,7 +8076,6 @@ newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGiven
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
 newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs(util.cleanNumber(s)); });
-newBuiltin('rationalapproximation',[TNum,TNum],TList,math.rationalApproximation,{unwrapValues:true});
 newBuiltin('isnan',[TNum],TBool,function(n) {
     return isNaN(n);
 });
@@ -8114,10 +8110,6 @@ newBuiltin('lcm', [TList], TNum, function(l){
     {unwrapValues: true}
 );
 newBuiltin('|', [TNum,TNum], TBool, math.divides );
-newBuiltin('diff', ['?','?',TNum], '?', null);
-newBuiltin('pdiff', ['?',TName,TNum], '?', null);
-newBuiltin('int', ['?','?'], '?', null);
-newBuiltin('defint', ['?','?',TNum,TNum], '?', null);
 newBuiltin('sum',[TList],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('deal',[TNum],TList,
@@ -9114,6 +9106,9 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
     {
+        if(!exprTree) {
+            throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
+        }
         if(!scope)
             throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
         scope = Numbas.util.copyobj(scope);
@@ -12811,7 +12806,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
      *
      * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
      * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
-     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change.
+     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
      * @property {String} [message] - A message to display to the student.
      */
 
@@ -12937,7 +12932,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return {
             return: message,
             state: [
-                {op:FeedbackOps.SET_CREDIT, credit:0, message:message},
+                {op:FeedbackOps.SET_CREDIT, credit:0, message:message, reason: 'invalid'},
                 {op:FeedbackOps.END, invalid:true}
             ]
         };
@@ -13251,7 +13246,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             } catch(e) {
                 scope.state_errors[name] = e;
                 var invalid_dep = null;
-                for(var x of todo[name].vars) {
+                for(var i=0;i<todo[name].vars.length;i++) {
+                    var x = todo[name].vars[i];
                     if(x in todo) {
                         if(!scope.state_valid[x]) {
                             invalid_dep = x;
@@ -13431,9 +13427,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this),
                 this.input.subscribe(function(value) {
-                    var valid = value!='' || this.allowEmpty;
+                    var empty = value=='';
+                    var valid = !empty || this.allowEmpty;
                     if(value != lastValue) {
-                        this.answerJSON({valid: valid, value: value});
+                        this.answerJSON({valid: valid, value: value, empty: empty});
                     }
                     lastValue = value;
                 },this)
@@ -13467,7 +13464,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
-                    return {valid:false};
+                    return {valid:false, empty: true};
                 }
                 if(!util.isNumber(input,this.allowFractions,this.allowedNotationStyles)) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
@@ -13543,7 +13540,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
-                    return {valid:false};
+                    return {valid:false,empty:true};
                 }
                 if(this.options.returnString) {
                     return {valid: true, value: input};
@@ -13649,6 +13646,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.result = ko.computed(function() {
                 var value = this.input().slice().map(function(r){return r.slice()});
                 var cells = Array.prototype.concat.apply([],value);
+                var empty = cells.every(function(cell){return !cell.trim()});
+                if(empty) {
+                    return {valid: false, empty: true};
+                }
                 if(this.parseCells) {
                     var valid = cells.every(function(cell){ return cell.trim() && util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
                     if(!valid) {
@@ -13885,7 +13886,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             ];
             this.setAnswerJSON = ko.computed(function() {
                 var value = this.answerAsArray ? this.choiceArray() : this.choice();
-                this.answerJSON({valid: value!==null, value: value});
+                this.answerJSON({valid: value!==null, value: value, empty: value===null});
             },this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
@@ -13946,7 +13947,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     this.answerJSON({valid: true, value: value});
                 } else {
                     if(this.answerJSON().valid) {
-                        this.answerJSON({valid: false});
+                        this.answerJSON({valid: false, empty: true});
                     }
                 }
             },this);
