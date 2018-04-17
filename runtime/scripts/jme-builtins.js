@@ -475,7 +475,6 @@ newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGiven
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
 newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs(util.cleanNumber(s)); });
-newBuiltin('rationalapproximation',[TNum,TNum],TList,math.rationalApproximation,{unwrapValues:true});
 newBuiltin('isnan',[TNum],TBool,function(n) {
     return isNaN(n);
 });
@@ -510,10 +509,6 @@ newBuiltin('lcm', [TList], TNum, function(l){
     {unwrapValues: true}
 );
 newBuiltin('|', [TNum,TNum], TBool, math.divides );
-newBuiltin('diff', ['?','?',TNum], '?', null);
-newBuiltin('pdiff', ['?',TName,TNum], '?', null);
-newBuiltin('int', ['?','?'], '?', null);
-newBuiltin('defint', ['?','?',TNum,TNum], '?', null);
 newBuiltin('sum',[TList],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('deal',[TNum],TList,
