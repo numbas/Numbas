@@ -408,7 +408,7 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
     }
     return matches;
 }
-/** Match expresison against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
+/** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
  *
  * @memberof Numbas.jme.rules
  * @method
@@ -693,12 +693,14 @@ var simplificationRules = jme.rules.simplificationRules = {
     cancelFactors: [
         // x*y or rest*x*y
         ['(?;rest*(?;x)^(?;n)) * (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^(n+m)'],
-        ['(?;rest*(?;x)*(?;n)) * ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
+        ['(?;rest*(?;x)^(?;n)) * ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
         ['(?;rest*?;x) * (?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
         ['(?;rest*?;x) * ?;y',['canonical_compare(x,y)=0'],'rest*x^2'],
         ['(?;x)^(?;n)*(?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'x^eval(n+m)'],
         ['(?;x)^(?;n)*?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
+        ['(?;x)^(-?;n)*?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(-n+1)'],
         ['?;x*(?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
+        ['?;x*(?;y)^(-?;n)',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(-n+1)'],
         ['?;x*?;y',['canonical_compare(x,y)=0'],'x^2'],
         // x/y or rest*x/y
         ['(?;rest*(?;x)^(?;n)) / ((?;y)^(?;m))',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n-m)'],
@@ -717,7 +719,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(?;rest/((?;x)^(?;n))) / ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(n+1))'],
         ['(?;rest/?;x) / ((?;y)^(?;n))',['n isa "number"','canonical_compare(x,y)=0'],'rest/(x^eval(1+n))'],
         ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^2)'],
-        ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^0)']
+        ['(?;rest/?;x) * ?;y',['canonical_compare(x,y)=0'],'rest/(x^0)']
     ],
     collectLikeFractions: [
         ['?;a/?;b+?;c/?;d',['canonical_compare(b,d)=0'],'(a+c)/b']

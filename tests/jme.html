@@ -124,7 +124,7 @@
                     checkNumber('0',0);
                     checkNumber('0.0',0);
 
-					raisesNumbasError(assert, function(){ tokenise('.1')},'jme.tokenise.invalid','Invalid: .1');
+					raisesNumbasError(assert, function(){ tokenise('.1')},'jme.tokenise.invalid near','Invalid: .1');
 
                     checkNumber('1',1);
                     checkNumber('1.0023',1.0023);
@@ -210,8 +210,8 @@
 					deepCloseEqual(assert, tokenise("'hi \\'Bob\\''"),[tokWithPos(new types.TString("hi 'Bob'"),0)],"'hi \\'Bob\\'' -- escape quotes");
                     deepCloseEqual(assert, tokenise("'hi \\{Bob\\}'"),[tokWithPos(new types.TString("hi \\{Bob\\}"),0)],"'hi \\{Bob\\}' -- keep slashes before braces");
 
-					raisesNumbasError(assert, function() {tokenise('"hi')},'jme.tokenise.invalid','Invalid: "hi');
-					raisesNumbasError(assert, function() {tokenise('hi"')},'jme.tokenise.invalid','Invalid: hi"');
+					raisesNumbasError(assert, function() {tokenise('"hi')},'jme.tokenise.invalid near','Invalid: "hi');
+					raisesNumbasError(assert, function() {tokenise('hi"')},'jme.tokenise.invalid near','Invalid: hi"');
 
 					deepCloseEqual(assert, tokenise('"hi \\n there"'),[tokWithPos(new types.TString('hi \n there'),0)],'"hi \\n there"');
 					deepCloseEqual(assert, tokenise('"hi \\\\n there"'),[tokWithPos(new types.TString('hi \\n there'),0)],'"hi \\\\n there"');
@@ -227,7 +227,7 @@
 				});
 
 				QUnit.test('Invalid expressions',function(assert) {
-					raisesNumbasError(assert, function(){tokenise('x.1')},'jme.tokenise.invalid','Invalid: x.1');
+					raisesNumbasError(assert, function(){tokenise('x.1')},'jme.tokenise.invalid near','Invalid: x.1');
 				});
 
 				var compile = function(s){ return jme.compile(s,jme.builtinScope) };
