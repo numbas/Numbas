@@ -732,12 +732,18 @@ var canonicalOrderRules = [
     ['-?;x+?;y',['canonical_compare(x,y)=1'],'y-x'],
     ['-?;x-?;y',['canonical_compare(x,y)=1'],'(-y)-x'],
     ['(?;x+?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)+y'],
+    ['(?;x+?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)+y'],
+    ['(?;x-?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)-y'],
+    ['(?;x-?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)-y'],
     ['?;x*?;y',['canonical_compare(x,y)=-1'],'y*x'],
-    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y']
+    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y'],
+    ['?;x*(?;y*?;z)',['canonical_compare(x,y)=-1'],'y*(x*z)'],
 ]
 var expandBracketsRules = [
     ['(?;x+?;y)*?;z',[],'x*z+y*z'],
-    ['?;x*(?;y+?;z)',[],'x*y+x*z']
+    ['?;x*(?;y+?;z)',[],'x*y+x*z'],
+    ['(?;x-?;y)*?;z',[],'x*z-y*z'],
+    ['?;x*(?;y-?;z)',[],'x*y-x*z']
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules

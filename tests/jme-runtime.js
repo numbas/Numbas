@@ -5324,12 +5324,18 @@ var canonicalOrderRules = [
     ['-?;x+?;y',['canonical_compare(x,y)=1'],'y-x'],
     ['-?;x-?;y',['canonical_compare(x,y)=1'],'(-y)-x'],
     ['(?;x+?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)+y'],
+    ['(?;x+?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)+y'],
+    ['(?;x-?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)-y'],
+    ['(?;x-?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)-y'],
     ['?;x*?;y',['canonical_compare(x,y)=-1'],'y*x'],
-    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y']
+    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y'],
+    ['?;x*(?;y*?;z)',['canonical_compare(x,y)=-1'],'y*(x*z)'],
 ]
 var expandBracketsRules = [
     ['(?;x+?;y)*?;z',[],'x*z+y*z'],
-    ['?;x*(?;y+?;z)',[],'x*y+x*z']
+    ['?;x*(?;y+?;z)',[],'x*y+x*z'],
+    ['(?;x-?;y)*?;z',[],'x*z-y*z'],
+    ['?;x*(?;y-?;z)',[],'x*y-x*z']
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
@@ -5904,7 +5910,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Does this expression behave randomly?
      *  True if it contains any instances of functions or operations, defined in the given scope, which could behave randomly.
      *
-     *  @param {JME} expr
+     *  @param {Numbas.jme.tree} expr
      *  @param {Numbas.jme.Scope} scope
      *  @returns {Boolean}
      */
@@ -5937,6 +5943,33 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             default:
                 return false;
         }
+    },
+
+    /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
+     * @param {Numbas.jme.tree}
+     * @returns {Object} the degree of the monomial
+     */
+    isMonomial: function(tree) {
+        function unwrapUnaryMinus(tree) {
+            while(jme.isOp(tree.tok,'-u')) {
+                tree = tree.args[0];
+            }
+            return tree;
+        }
+        tree = unwrapUnaryMinus(tree);
+        if(jme.isOp(tree.tok,'*')) {
+            if(unwrapUnaryMinus(tree.args[0]).tok.type!='number') {
+                return false;
+            }
+            tree = tree.args[1];
+        }
+        if(tree.tok.type=='name') {
+            return {base:tree, degree:1};
+        }
+        if(jme.isOp(tree.tok,'^') && tree.args[0].tok.type=='name' && unwrapUnaryMinus(tree.args[1]).tok.type=='number') {
+            return {base:tree.args[0], degree:tree.args[1].tok.value};
+        }
+        return false;
     }
 };
 
@@ -7511,7 +7544,17 @@ var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAc
         return util.eq(r1,r2);
     }
 };
-jme.varsUsed = function(tree) {
+
+/** List names of variables used in `tree`, obtained by depth-first search.
+ *
+ * Differs from {@link Numbas.jme.findvars} by including duplicates, and ignoring {@link Numbas.jme.findvarsOps}.
+ * 
+ * @memberof Numbas.jme
+ * @method
+ * @param {Numbas.jme.tree} tree
+ * @returns {String[]}
+ */
+var varsUsed = jme.varsUsed = function(tree) {
     switch(tree.tok.type) {
         case 'name':
             return [tree.tok.name];
@@ -7526,15 +7569,27 @@ jme.varsUsed = function(tree) {
             return [];
     }
 };
-/*
- * compare vars used lexically, then longest goes first if one is a prefix of the other
- * then by data type
- * then by function name
- * otherwise return 0
+/** Compare two trees.
  *
- * @returns -1 if a is less, 0 if equal, 1 if a is more
+ * * Compare lists of variables lexically using {@link Numbas.jme.varsUsed}; longest goes first if one is a prefix of the other
+ * * then monomials before anything else
+ * * then by data type
+ * * then by function name
+ * * otherwise return 0
+ *
+ * @memberof Numbas.jme
+ * @method
+ * @param {Numbas.jme.tree} a
+ * @param {Numbas.jme.tree} b
+ * @returns {Number} -1 if `a` should appear to the left of `b`, 0 if equal, 1 if `a` should appear to the right of `b`
  */
-jme.compareTrees = function(a,b) {
+var compareTrees = jme.compareTrees = function(a,b) {
+    while(jme.isOp(a.tok,'-u')) {
+        a = a.args[0];
+    }
+    while(jme.isOp(b.tok,'-u')) {
+        b = b.args[0];
+    }
     var va = jme.varsUsed(a);
     var vb = jme.varsUsed(b);
     for(var i=0;i<va.length;i++) {
@@ -7548,6 +7603,23 @@ jme.compareTrees = function(a,b) {
     if(vb.length>va.length) {
         return 1;
     }
+
+    var ma = jme.isMonomial(a);
+    var mb = jme.isMonomial(b);
+    var isma = ma!==false;
+    var ismb = mb!==false;
+    if(isma!=ismb) {
+        return isma ? -1 : 1;
+    }
+    if(isma && ismb && !(a.tok.type=='name' && b.tok.type=='name')) {
+        var d = jme.compareTrees(ma.base,mb.base);
+        if(d==0) {
+            return ma.degree<mb.degree ? 1 : ma.degree>mb.degree ? -1 : 0;
+        } else {
+            return d;
+        }
+    }
+
     if(a.tok.type!=b.tok.type) {
         var order = ['op','function'];
         var oa = order.indexOf(a.tok.type);
@@ -9142,15 +9214,18 @@ jme.display = /** @lends Numbas.jme.display */ {
                     var match;
                     if(match = rules[i].match(exprTree,scope))    //if rule can be applied, apply it!
                     {
+                        var oExprTree = exprTree;
                         exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
                         applied = true;
                         depth += 1;
                         if(depth > 100) {
                             var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.contains(str)) {
+                            if(seen.some(function(r){return r.str==str})) {
+                                seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
+                                console.log(seen);
                                 throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                             }
-                            seen.push(str);
+                            seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
                         }
                         break;
                     }

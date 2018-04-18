@@ -858,7 +858,7 @@
 				QUnit.module('Scopes');
 
 				QUnit.test('Variables',function(assert) {
-					deepCloseEqual(assert, jme.builtinScope.variables,{},'builtin scope has no variables');
+                    deepCloseEqual(assert, jme.builtinScope.variables,{"nothing": new Numbas.jme.types.TNothing},'builtin scope has only a "nothing" variable');
 					deepCloseEqual(assert, new jme.Scope().variables,{},'scope from constructor has no variables');
 					var scope = new jme.Scope({
 						variables: {
@@ -1039,6 +1039,8 @@
 
                     assert.equal(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
 
+                    assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
+                    assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 2*x^3 - 13*x^2 - 26x - 24','Large product with a negative term expanded and collected');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
