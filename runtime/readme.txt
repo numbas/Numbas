@@ -19,12 +19,12 @@ Copyright 2011-17 Newcastle University
 The icons are from Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome
 
 The following libraries are used:
-	jQuery (http://jquery.com)
-	jQuery-UI (http://jqueryui.com/)
-	MathJax (http://mathjax.org)
-	jQuery.xslTransform & jQuery.debug (http://jquery.glyphix.com/)
-	Sarissa (http://sarissa.sf.net)
-	knockout.js (http://knockoutjs.com/)
-	i18next (https://www.i18next.com)
-	seedrandom.js (http://davidbau.com/encode/seedrandom.js)
-	es6-promise (https://github.com/stefanpenner/es6-promise)
+    jQuery (http://jquery.com)
+    jQuery-UI (http://jqueryui.com/)
+    MathJax (http://mathjax.org)
+    jQuery.xslTransform & jQuery.debug (http://jquery.glyphix.com/)
+    Sarissa (http://sarissa.sf.net)
+    knockout.js (http://knockoutjs.com/)
+    i18next (https://www.i18next.com)
+    seedrandom.js (http://davidbau.com/encode/seedrandom.js)
+    es6-promise (https://github.com/stefanpenner/es6-promise)
