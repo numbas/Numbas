@@ -2,7 +2,7 @@ everything: update_tests docs
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: runtime marking_scripts
+update_tests: jme runtime marking_scripts
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js i18next/i18next.js
