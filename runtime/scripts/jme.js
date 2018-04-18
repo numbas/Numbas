@@ -1168,6 +1168,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             for(var name in scope.functions) {
                 add(name,scope.functions[name])
             }
+            scope = scope.parent;
         }
         return out;
     },
