@@ -11,7 +11,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.classes['answer-widget-'+this.widget] = true;
         },
         template: '\
-        <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span></span>\
         '
     });
     ko.components.register('answer-widget-string', {
