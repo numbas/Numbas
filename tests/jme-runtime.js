@@ -6538,6 +6538,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             for(var name in scope.functions) {
                 add(name,scope.functions[name])
             }
+            scope = scope.parent;
         }
         return out;
     },
@@ -9214,18 +9215,15 @@ jme.display = /** @lends Numbas.jme.display */ {
                     var match;
                     if(match = rules[i].match(exprTree,scope))    //if rule can be applied, apply it!
                     {
-                        var oExprTree = exprTree;
                         exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
                         applied = true;
                         depth += 1;
                         if(depth > 100) {
                             var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.some(function(r){return r.str==str})) {
-                                seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
-                                console.log(seen);
+                            if(seen.contains(str)) {
                                 throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                             }
-                            seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
+                            seen.push(str);
                         }
                         break;
                     }
@@ -9394,7 +9392,7 @@ var texOps = jme.display.texOps = {
                 } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
                     use_symbol = false
                 //number times a power of i
-                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number')	{
+                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number') {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {

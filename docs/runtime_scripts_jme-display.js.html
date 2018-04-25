@@ -343,7 +343,7 @@ var texOps = jme.display.texOps = {
                 } else if (right.tok.type=='number' &amp;&amp; (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) &amp;&amp; left.tok.type=='number' &amp;&amp; !(left.tok.value.complex)) {
                     use_symbol = false
                 //number times a power of i
-                } else if (jme.isOp(right.tok,'^') &amp;&amp; right.args[0].tok.type=='number' &amp;&amp; math.eq(right.args[0].tok.value,math.complex(0,1)) &amp;&amp; left.tok.type=='number')	{
+                } else if (jme.isOp(right.tok,'^') &amp;&amp; right.args[0].tok.type=='number' &amp;&amp; math.eq(right.args[0].tok.value,math.complex(0,1)) &amp;&amp; left.tok.type=='number') {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
                 } else if((left.tok.type=='function' &amp;&amp; left.tok.name=='fact') || (right.tok.type=='function' &amp;&amp; right.tok.name=='fact')) {
@@ -1932,6 +1932,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 		
 			<li class="search-result" data-longname="Numbas.jme.compare_settings"><a href="Numbas.jme.html#.compare_settings">Numbas.jme.compare_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.compareTrees"><a href="Numbas.jme.html#.compareTrees">Numbas.jme.compareTrees</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.compile"><a href="Numbas.jme.html#.compile">Numbas.jme.compile</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compileList"><a href="Numbas.jme.html#.compileList">Numbas.jme.compileList</a></li>
@@ -2063,6 +2065,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 			<li class="search-result" data-longname="Numbas.jme.funcSynonyms"><a href="Numbas.jme.html#.funcSynonyms">Numbas.jme.funcSynonyms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isFunction"><a href="Numbas.jme.html#.isFunction">Numbas.jme.isFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isMonomial"><a href="Numbas.jme.html#.isMonomial">Numbas.jme.isMonomial</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isName"><a href="Numbas.jme.html#.isName">Numbas.jme.isName</a></li>
 		
@@ -2259,6 +2263,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 			<li class="search-result" data-longname="Numbas.jme.variables.variable_data_dict"><a href="Numbas.jme.variables.html#.variable_data_dict">Numbas.jme.variables.variable_data_dict</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.variableDependants"><a href="Numbas.jme.variables.html#.variableDependants">Numbas.jme.variables.variableDependants</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.varsUsed"><a href="Numbas.jme.html#.varsUsed">Numbas.jme.varsUsed</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.wrapValue"><a href="Numbas.jme.html#.wrapValue">Numbas.jme.wrapValue</a></li>
 		

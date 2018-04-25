@@ -119,6 +119,20 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <h5 class="subsection-title">Properties:</h5>
 
     
@@ -161,7 +175,7 @@ Stores variable, function, and ruleset definitions.</p>
 
             
 
-            <td class="description last"><p>Dictionary of variables defined <strong>at this level in the scope</strong>. To resolve a variable in the scope, use Numbas.jme.Scope.getVariable.</p></td>
+            <td class="description last"><p>Dictionary of variables defined <strong>at this level in the scope</strong>. To resolve a variable in the scope, use <code>Numbas.jme.Scope.getVariable</code>.</p></td>
         </tr>
 
     
@@ -184,7 +198,7 @@ Stores variable, function, and ruleset definitions.</p>
 
             
 
-            <td class="description last"><p>Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use Numbas.jme.Scope.getFunction.</p></td>
+            <td class="description last"><p>Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use <code>Numbas.jme.Scope.getFunction</code>.</p></td>
         </tr>
 
     
@@ -207,7 +221,7 @@ Stores variable, function, and ruleset definitions.</p>
 
             
 
-            <td class="description last"><p>Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use Numbas.jme.Scope.getRuleset.</p></td>
+            <td class="description last"><p>Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use <code>Numbas.jme.Scope.getRuleset</code>.</p></td>
         </tr>
 
     
@@ -292,7 +306,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L974">runtime/scripts/jme.js, line 974</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1001">runtime/scripts/jme.js, line 1001</a>
     </li></ul></dd>
     
 
@@ -302,20 +316,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -468,6 +468,20 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -497,7 +511,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1013">runtime/scripts/jme.js, line 1013</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1040">runtime/scripts/jme.js, line 1040</a>
     </li></ul></dd>
     
 
@@ -507,20 +521,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -557,6 +557,51 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="Numbas.jme.funcObj.html">Numbas.jme.funcObj</a>>></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -586,7 +631,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1130">runtime/scripts/jme.js, line 1130</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1157">runtime/scripts/jme.js, line 1157</a>
     </li></ul></dd>
     
 
@@ -596,42 +641,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="Numbas.jme.funcObj.html">Numbas.jme.funcObj</a>>></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -668,6 +677,51 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a>></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>a dictionary of rulesets</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -697,7 +751,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1121">runtime/scripts/jme.js, line 1121</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1148">runtime/scripts/jme.js, line 1148</a>
     </li></ul></dd>
     
 
@@ -707,42 +761,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a dictionary of rulesets</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a>></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -779,6 +797,51 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="Numbas.jme.html#.token">Numbas.jme.token</a>></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>a dictionary of variables</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -808,7 +871,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1115">runtime/scripts/jme.js, line 1115</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1142">runtime/scripts/jme.js, line 1142</a>
     </li></ul></dd>
     
 
@@ -818,42 +881,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a dictionary of variables</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="Numbas.jme.html#.token">Numbas.jme.token</a>></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -939,6 +966,51 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>a dictionary of names to values</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -968,7 +1040,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1094">runtime/scripts/jme.js, line 1094</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1121">runtime/scripts/jme.js, line 1121</a>
     </li></ul></dd>
     
 
@@ -978,42 +1050,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>a dictionary of names to values</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -1099,6 +1135,20 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1128,7 +1178,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1024">runtime/scripts/jme.js, line 1024</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1051">runtime/scripts/jme.js, line 1051</a>
     </li></ul></dd>
     
 
@@ -1138,20 +1188,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1280,6 +1316,49 @@ Stores variable, function, and ruleset definitions.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1309,7 +1388,7 @@ Stores variable, function, and ruleset definitions.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1160">runtime/scripts/jme.js, line 1160</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1188">runtime/scripts/jme.js, line 1188</a>
     </li></ul></dd>
     
 
@@ -1319,38 +1398,6 @@ Stores variable, function, and ruleset definitions.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -1389,6 +1436,20 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1418,7 +1479,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1151">runtime/scripts/jme.js, line 1151</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1179">runtime/scripts/jme.js, line 1179</a>
     </li></ul></dd>
     
 
@@ -1428,20 +1489,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1527,6 +1574,51 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="Numbas.jme.funcObj.html">Numbas.jme.funcObj</a>></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>A list of all definitions of the given name.</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1556,7 +1648,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1062">runtime/scripts/jme.js, line 1062</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1089">runtime/scripts/jme.js, line 1089</a>
     </li></ul></dd>
     
 
@@ -1566,42 +1658,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>A list of all definitions of the given name.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="Numbas.jme.funcObj.html">Numbas.jme.funcObj</a>></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -1687,6 +1743,49 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1716,7 +1815,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1080">runtime/scripts/jme.js, line 1080</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1107">runtime/scripts/jme.js, line 1107</a>
     </li></ul></dd>
     
 
@@ -1726,38 +1825,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -1843,6 +1910,49 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -1872,7 +1982,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1048">runtime/scripts/jme.js, line 1048</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1075">runtime/scripts/jme.js, line 1075</a>
     </li></ul></dd>
     
 
@@ -1882,38 +1992,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -2022,6 +2100,49 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -2051,7 +2172,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1032">runtime/scripts/jme.js, line 1032</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1059">runtime/scripts/jme.js, line 1059</a>
     </li></ul></dd>
     
 
@@ -2061,38 +2182,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
 
 
 
@@ -2201,6 +2290,20 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -2230,7 +2333,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1087">runtime/scripts/jme.js, line 1087</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1114">runtime/scripts/jme.js, line 1114</a>
     </li></ul></dd>
     
 
@@ -2240,20 +2343,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2362,6 +2451,20 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <dl class="details">
 
     
@@ -2391,7 +2494,7 @@ Shouldn't be applied to any scope other than the question scope.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1055">runtime/scripts/jme.js, line 1055</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1082">runtime/scripts/jme.js, line 1082</a>
     </li></ul></dd>
     
 
@@ -2401,20 +2504,6 @@ Shouldn't be applied to any scope other than the question scope.</p>
 
     
 </dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2874,6 +2963,8 @@ Shouldn't be applied to any scope other than the question scope.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.compare_settings"><a href="Numbas.jme.html#.compare_settings">Numbas.jme.compare_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.compareTrees"><a href="Numbas.jme.html#.compareTrees">Numbas.jme.compareTrees</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.compile"><a href="Numbas.jme.html#.compile">Numbas.jme.compile</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compileList"><a href="Numbas.jme.html#.compileList">Numbas.jme.compileList</a></li>
@@ -3005,6 +3096,8 @@ Shouldn't be applied to any scope other than the question scope.</p>
 			<li class="search-result" data-longname="Numbas.jme.funcSynonyms"><a href="Numbas.jme.html#.funcSynonyms">Numbas.jme.funcSynonyms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isFunction"><a href="Numbas.jme.html#.isFunction">Numbas.jme.isFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isMonomial"><a href="Numbas.jme.html#.isMonomial">Numbas.jme.isMonomial</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isName"><a href="Numbas.jme.html#.isName">Numbas.jme.isName</a></li>
 		
@@ -3201,6 +3294,8 @@ Shouldn't be applied to any scope other than the question scope.</p>
 			<li class="search-result" data-longname="Numbas.jme.variables.variable_data_dict"><a href="Numbas.jme.variables.html#.variable_data_dict">Numbas.jme.variables.variable_data_dict</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.variableDependants"><a href="Numbas.jme.variables.html#.variableDependants">Numbas.jme.variables.variableDependants</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.varsUsed"><a href="Numbas.jme.html#.varsUsed">Numbas.jme.varsUsed</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.wrapValue"><a href="Numbas.jme.html#.wrapValue">Numbas.jme.wrapValue</a></li>
 		

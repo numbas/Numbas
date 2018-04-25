@@ -175,6 +175,11 @@ tt, code, kbd, samp {
     font-family: Consolas, Monaco, 'Andale Mono', monospace;
 }
 
+p code {
+    background: #eee;
+    padding: 0 0.1em;
+}
+
 .class-description {
     font-size: 130%;
     line-height: 140%;
@@ -459,6 +464,7 @@ tr > th:last-child { border-right: 1px solid #ddd; }
     font-size: 100%;
 }
 
+.returns td.description > p:first-child,
 .params td.description > p:first-child,
 .props td.description > p:first-child
 {
@@ -466,6 +472,7 @@ tr > th:last-child { border-right: 1px solid #ddd; }
     padding-top: 0;
 }
 
+.returns td.description > p:last-child,
 .params td.description > p:last-child,
 .props td.description > p:last-child
 {

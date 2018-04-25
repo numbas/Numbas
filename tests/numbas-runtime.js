@@ -6538,6 +6538,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             for(var name in scope.functions) {
                 add(name,scope.functions[name])
             }
+            scope = scope.parent;
         }
         return out;
     },
@@ -9214,18 +9215,15 @@ jme.display = /** @lends Numbas.jme.display */ {
                     var match;
                     if(match = rules[i].match(exprTree,scope))    //if rule can be applied, apply it!
                     {
-                        var oExprTree = exprTree;
                         exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
                         applied = true;
                         depth += 1;
                         if(depth > 100) {
                             var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.some(function(r){return r.str==str})) {
-                                seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
-                                console.log(seen);
+                            if(seen.contains(str)) {
                                 throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                             }
-                            seen.push({str:str,ostr: Numbas.jme.display.treeToJME(oExprTree),pattern:rules[i].patternString,rule:rules[i]});
+                            seen.push(str);
                         }
                         break;
                     }
@@ -9394,7 +9392,7 @@ var texOps = jme.display.texOps = {
                 } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
                     use_symbol = false
                 //number times a power of i
-                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number')	{
+                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number') {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
@@ -13484,7 +13482,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.classes['answer-widget-'+this.widget] = true;
         },
         template: '\
-        <span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span></span>\
         '
     });
     ko.components.register('answer-widget-string', {
@@ -15912,7 +15910,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         var pobj = this.store.loadPart(this);
         if(pobj.studentAnswer!==undefined) {
-            this.stagedAnswer = pobj.studentAnswer;
+            this.stagedAnswer = pobj.studentAnswer.matrix;
+            this.stagedAnswer.rows = pobj.studentAnswer.rows;
+            this.stagedAnswer.columns = pobj.studentAnswer.columns;
         }
     },
     finaliseLoad: function() {
@@ -16075,6 +16075,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 });
 Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
 Licensed under the Apache License, Version 2.0 (the "License");
