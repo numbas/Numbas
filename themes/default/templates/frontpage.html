@@ -18,6 +18,7 @@
     </tr>
 </table>
 <div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+<div id="standalone-warning" class="alert alert-info col-sm-6 col-sm-offset-3" data-bind="visible: !Numbas.storage.lmsConnected" data-localise="frontpage.scorm.lms not connected"></div>
 <div class="info-buttons col-sm-6 col-sm-offset-3">
     <button class="btn btn-primary" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
 </div>
