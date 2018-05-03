@@ -20,7 +20,10 @@ var scorm = Numbas.storage.scorm = {};
  */
 var SCORMStorage = scorm.SCORMStorage = function()
 {
-    if(!pipwerks.SCORM.init())
+    if(pipwerks.SCORM.init()){
+       Numbas.storage.lmsConnected = true;
+    }
+    else
     {
         var errorCode = pipwerks.SCORM.debug.getCode();
         if(errorCode) {
@@ -67,6 +70,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * * `resume` - loaded attempt in progress
      */
     mode: 'ab-initio',
+    /** Indicates whether a true SCORM connection to an LMS exists */
+    lmsConnected: false,
     /** reference to the {@link Numbas.Exam} object for the current exam */
     exam: undefined,            //reference to the main exam object
     /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices */
