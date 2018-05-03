@@ -6516,10 +6516,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Object.<Numbas.jme.rules.Ruleset>} a dictionary of rulesets
      */
     allRulesets: function() {
-        if(!this._allRulesets) {
-            this._allRulesets = this.collect('rulesets');
-        }
-        return this._allRulesets;
+        return this.collect('rulesets');
     },
     /** Gather all functions defined in this scope
      * @returns {Object.<Numbas.jme.funcObj[]>} a dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}
