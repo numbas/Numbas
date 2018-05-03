@@ -10833,9 +10833,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(name in todo) {
                 var newpath = path.slice();
                 newpath.push(name);
-            todo[name].vars.map(function(name2) {
-            d = d.concat(name2,findDependants(name2,newpath));
-    });
+                todo[name].vars.map(function(name2) {
+                    d = d.concat(name2,findDependants(name2,newpath));
+                });
             }
             // make a new list with duplicates removed
             var o = [];
