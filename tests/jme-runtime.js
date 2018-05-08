@@ -5956,18 +5956,24 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             }
             return tree;
         }
-        tree = unwrapUnaryMinus(tree);
+        var coefficient;
         if(jme.isOp(tree.tok,'*')) {
             if(unwrapUnaryMinus(tree.args[0]).tok.type!='number') {
                 return false;
             }
+            coefficient = tree.args[0];
             tree = tree.args[1];
+        } else if(jme.isOp(tree.tok,'-u')) {
+            coefficient = {tok:new TNum(-1)};
+            tree = tree.args[0];
+        } else {
+            coefficient = {tok:new TNum(1)};
         }
         if(tree.tok.type=='name') {
-            return {base:tree, degree:1};
+            return {base:tree, degree:1, coefficient: coefficient};
         }
         if(jme.isOp(tree.tok,'^') && tree.args[0].tok.type=='name' && unwrapUnaryMinus(tree.args[1]).tok.type=='number') {
-            return {base:tree.args[0], degree:tree.args[1].tok.value};
+            return {base:tree.args[0], degree:tree.args[1].tok.value, coefficient: coefficient};
         }
         return false;
     }
@@ -7582,11 +7588,15 @@ var varsUsed = jme.varsUsed = function(tree) {
  * @returns {Number} -1 if `a` should appear to the left of `b`, 0 if equal, 1 if `a` should appear to the right of `b`
  */
 var compareTrees = jme.compareTrees = function(a,b) {
+    var sign_a = 1;
     while(jme.isOp(a.tok,'-u')) {
         a = a.args[0];
+        sign_a *= -1;
     }
+    var sign_b = 1;
     while(jme.isOp(b.tok,'-u')) {
         b = b.args[0];
+        sign_b *= -1;
     }
     var va = jme.varsUsed(a);
     var vb = jme.varsUsed(b);
@@ -7612,7 +7622,7 @@ var compareTrees = jme.compareTrees = function(a,b) {
     if(isma && ismb && !(a.tok.type=='name' && b.tok.type=='name')) {
         var d = jme.compareTrees(ma.base,mb.base);
         if(d==0) {
-            return ma.degree<mb.degree ? 1 : ma.degree>mb.degree ? -1 : 0;
+            return ma.degree<mb.degree ? 1 : ma.degree>mb.degree ? -1 : compareTrees(ma.coefficient,mb.coefficient);
         } else {
             return d;
         }
@@ -7661,13 +7671,13 @@ var compareTrees = jme.compareTrees = function(a,b) {
                 na = na.complex ? na : {re:na,im:0};
                 nb = nb.complex ? nb : {re:nb,im:0};
                 var gt = na.re > nb.re || (na.re==nb.re && na.im>nb.im);
-                var eq = na.re==nb.re && na.im==nb.im;
+                var eq = na.re==nb.re && na.im==nb.im && sign_a==sign_b;
                 return gt ? 1 : eq ? 0 : -1;
             } else {
-                return a.tok.value<b.tok.value ? -1 : a.tok.value>b.tok.value ? 1 : 0;
+                return a.tok.value<b.tok.value ? -1 : a.tok.value>b.tok.value ? 1 : sign_a==sign_b ? 0 : sign_a ? 1 : -1;
             }
     }
-    return 0;
+    return sign_a==sign_b ? 0 : sign_a ? 1 : -1;
 }
 });
 
