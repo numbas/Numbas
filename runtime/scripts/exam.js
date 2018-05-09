@@ -74,18 +74,14 @@ function Exam(store)
         this.feedbackMessages.push(feedbackMessage);
     }
     this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
-    var scopes = [
-        Numbas.jme.builtinScope
-    ];
+    var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
     for(var extension in Numbas.extensions) {
         if('scope' in Numbas.extensions[extension]) {
-            scopes.push(Numbas.extensions[extension].scope);
+            scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
         }
     }
-    scopes.push({
-        functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)
-    });
-    this.scope = new Numbas.jme.Scope(scopes);
+    scope = new Numbas.jme.Scope([scope,{functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)}]);
+    this.scope = scope;
     //rulesets
     var rulesetNodes = xml.selectNodes('settings/rulesets/set');
     var sets = {};
