@@ -252,17 +252,17 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(condition) {
             var condition_vars = jme.findvars(condition);
             condition_vars.map(function(v) {
-                computeFn(v,todo,scope,undefined,computeFn);
+                computeFn(v,todo,nscope,undefined,computeFn);
             });
-            conditionSatisfied = jme.evaluate(condition,scope).value;
+            conditionSatisfied = jme.evaluate(condition,nscope).value;
         }
         if(conditionSatisfied) {
             for(var x in todo)
             {
-                computeFn(x,todo,scope,undefined,computeFn);
+                computeFn(x,todo,nscope,undefined,computeFn);
             }
         }
-        return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
+        return {variables: nscope.variables, conditionSatisfied: conditionSatisfied, scope: nscope};
     },
     /** Collect together a ruleset, evaluating all its dependencies first.
      * @param {String} name - the name of the ruleset to evaluate
@@ -330,9 +330,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(name in todo) {
                 var newpath = path.slice();
                 newpath.push(name);
-            todo[name].vars.map(function(name2) {
-            d = d.concat(name2,findDependants(name2,newpath));
-    });
+                todo[name].vars.map(function(name2) {
+                    d = d.concat(name2,findDependants(name2,newpath));
+                });
             }
             // make a new list with duplicates removed
             var o = [];
@@ -3190,6 +3190,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#initPart"><a href="Numbas.storage.SCORMStorage.html#initPart">Numbas.storage.SCORMStorage#initPart</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#initQuestion"><a href="Numbas.storage.SCORMStorage.html#initQuestion">Numbas.storage.SCORMStorage#initQuestion</a></li>
+		
+			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#lmsConnected"><a href="Numbas.storage.SCORMStorage.html#lmsConnected">Numbas.storage.SCORMStorage#lmsConnected</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#load"><a href="Numbas.storage.SCORMStorage.html#load">Numbas.storage.SCORMStorage#load</a></li>
 		
