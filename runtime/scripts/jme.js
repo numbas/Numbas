@@ -571,6 +571,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 }
                 return false;
             default:
+                if(!expr.args) {
+                    return false;
+                }
+                for(var i=0;i<expr.args.length;i++) {
+                    if(jme.isRandom(expr.args[i],scope)) {
+                        return true;
+                    }
+                }
                 return false;
         }
     },
