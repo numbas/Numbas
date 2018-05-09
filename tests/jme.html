@@ -854,6 +854,22 @@
                     assert.equal(jme.wrapValue({a:1}).type,'dict','wrapValue on object gives dict');
                     assert.equal(jme.wrapValue(new Numbas.jme.types.TList(1)).type,'list','wrapValue on a token returns it unchanged');
 				});
+
+                QUnit.test('isRandom',function(assert) {
+                    function check(expr,expected) {
+                        assert.equal(jme.isRandom(jme.compile(expr),Numbas.jme.builtinScope),expected,expr);
+                    }
+
+                    check('1',false);
+                    check('random(1,2)',true);
+                    check('1+random(3,4)',true);
+                    check('[1]',false);
+                    check('[random(1,2)]',true);
+                    check('["A":1]',false);
+                    check('["A":random("b","c")]',true);
+                    check('f(random(1,2))',true);
+                });
+
 				
 				QUnit.module('Scopes');
 
