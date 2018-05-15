@@ -223,7 +223,8 @@
                     var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
                     var scope = p.getScope();
                     scope.question = {getPart: function(path){ return p.gaps.filter(function(p){return p.path==path})[0]; }};
-                    var res = mark_part(p,[['x+2']]);
+                    var res = mark_part(p,['x+2']);
+                    console.log(p.gaps[0].studentAnswer);
                     assert.equal(res.credit,1,'"x+2" correct');
                 });
 

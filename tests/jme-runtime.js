@@ -10767,23 +10767,22 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeVariables: function(todo,scope,condition,computeFn)
     {
-        var nscope = new jme.Scope(scope);
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
             var condition_vars = jme.findvars(condition);
             condition_vars.map(function(v) {
-                computeFn(v,todo,nscope,undefined,computeFn);
+                computeFn(v,todo,scope,undefined,computeFn);
             });
-            conditionSatisfied = jme.evaluate(condition,nscope).value;
+            conditionSatisfied = jme.evaluate(condition,scope).value;
         }
         if(conditionSatisfied) {
             for(var x in todo)
             {
-                computeFn(x,todo,nscope,undefined,computeFn);
+                computeFn(x,todo,scope,undefined,computeFn);
             }
         }
-        return {variables: nscope.variables, conditionSatisfied: conditionSatisfied, scope: nscope};
+        return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
     /** Collect together a ruleset, evaluating all its dependencies first.
      * @param {String} name - the name of the ruleset to evaluate
