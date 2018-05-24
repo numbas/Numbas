@@ -73,7 +73,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
-            console.log(name,s.input_type,value);
             if(!p.setting_evaluators[s.input_type]) {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }
