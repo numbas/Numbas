@@ -73,13 +73,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
+            console.log(name,s.input_type,value);
             if(!p.setting_evaluators[s.input_type]) {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }
             try {
                 settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
             } catch(e) {
-                throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message}));
+                p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
             }
         });
         var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
@@ -169,10 +170,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         },
         'mathematical_expression': function(def, value) {
             var scope = this.getScope();
+            if(!value.trim()) {
+                throw(new Numbas.Error("part.custom.empty setting"));
+            }
             if(def.subvars) {
                 value = jme.subvars(value, scope);
             }
-            return new jme.types.TExpression(value);
+            var result = new jme.types.TExpression(value);
         },
         'checkbox': function(def, value) {
             return new jme.types.TBool(value);
@@ -182,6 +186,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         },
         'code': function(def, value) {
             var scope = this.getScope();
+            if(!value.trim()) {
+                throw(new Numbas.Error('part.custom.empty setting'));
+            }
             if(def.evaluate) {
                 return scope.evaluate(value);
             } else {

@@ -231,6 +231,7 @@
     "part.matrix.size mismatch": "The question author hasn't allowed the student to decide the dimensions of their answer, but the correct answer is {{correct_dimensions}} while the answer input is {{input_dimensions}}",
     "part.gapfill.feedback header": "<strong>Gap {{index}}</strong>",
     "part.extension.not implemented": "Part hasn't implemented the <code>{{name}}</code> method.",
+    "part.custom.empty setting": "No value given.",
     "part.custom.unrecognised input type": "Unrecognised setting type <code>{{input_type}}</code>",
     "part.custom.error evaluating input option": "Error evaluating input option <code>{{option}}</code>: {{-error}}",
     "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
