@@ -1771,7 +1771,7 @@ var funcSynonyms = jme.funcSynonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe','sort_by'];
 var rightAssociative = {
     '^': true,
     '+u': true,

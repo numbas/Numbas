@@ -7141,7 +7141,7 @@ var funcSynonyms = jme.funcSynonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe'];
+var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe','sort_by'];
 var rightAssociative = {
     '^': true,
     '+u': true,
@@ -8632,22 +8632,178 @@ jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
         tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
     }
 }
-newBuiltin('sort',[TList],TList, null, {
-    evaluate: function(args,scope)
+var sortCompare = function(a, b) {
+    // We can't compare complex numbers
+    if (a.complex || b.complex) {
+        throw new Numbas.Error('math.order complex numbers');
+    }
+    return (a.value - b.value);
+};
+newBuiltin('sort', [TList], TList, null, {
+    evaluate: function(args, scope)
     {
-        var list = args[0];
-        var newlist = new TList(list.vars);
-        newlist.value = list.value.slice().sort(function(a,b){
-            if(math.gt(a.value,b.value))
-                return 1;
-            else if(math.lt(a.value,b.value))
-                return -1;
-            else
-                return 0;
-        });
-        return newlist;
+        var listCopy = args[0].value.slice();
+        listCopy.sort(sortCompare); // In-place
+        return new TList(listCopy);
     }
 });
+var sortByHelper = function(list, accessor, extra) {
+    return new TList(
+        // Start from the value of the given list
+        list.value
+        // Make a copy because sorting is in-place
+        .slice()
+        // Map each element to a pair (key, val):
+        // - key: Key to compare on
+        // - val: Value in the list (the element)
+        .map(function(elem) {
+            return {
+                key: accessor(elem, extra),
+                val: elem
+            };
+        })
+        // Sort according to the key (IN-PLACE!)
+        .sort(function(pair0, pair1) {
+            return sortCompare(pair0.key, pair1.key);
+        })
+        // Re-map to just the values
+        .map(function(tup) {
+            return tup.val;
+        })
+    );
+};
+var sortByAccessors = {
+    'number': function accessIndexOfList(elem, index) {
+        if (elem.type !== 'list') {
+            // Element is not a list
+            throw new Numbas.Error('jme.typecheck.invalid type', {
+                expected: 'list',
+                received: elem.type,
+            });
+        }
+        if (index < 0 || index >= elem.vars) {
+            // Index out-of-bounds
+            throw new Numbas.Error('jme.func.listval.invalid index', {
+                index: index,
+                size: elem.vars,
+            });
+        }
+        return elem.value[index];
+    },
+    'string': function accessKeyOfDict(elem, key) {
+        if (elem.type !== 'dict') {
+            // Element is not a dict
+            throw new Numbas.Error('jme.typecheck.invalid type', {
+                expected: 'list',
+                received: elem.type,
+            });
+        }
+        if(!elem.value.hasOwnProperty(key)) {
+            // Dict does not have the given key
+            throw new Numbas.Error('jme.func.listval.key not in dict', {
+                key: key
+            });
+        }
+        return elem.value[key];
+    },
+}
+newBuiltin('sort_by',['?', '?', '?'], TList, null, {
+    evaluate: function(args, scope)
+    {
+        var list       = jme.evaluate(args[0], scope);
+        var lambdaBody = args[1];
+        var lambdaHead = args[2];
+
+        if (list.type !== 'list') {
+            // First argument must be a list
+            // Due to the dynamical nature of the method, we must check
+            // the type manually at run-time, because we can't know
+            // the type of the first argument beforehand if it happens
+            // to be a function call, eg: sort_by(values( ... ), ...)
+            throw new Numbas.Error('jme.typecheck.invalid type', {
+                expected: 'list',
+                received: list.type
+            });
+        }
+
+        if (lambdaHead == null) {
+            // If the third argument is null, we're being called
+            // in a shorthand form, either:
+            // - sort_by([...], number)
+            // - sort_by([...], string)
+            lambdaBody = jme.evaluate(args[1], scope);
+
+            if (!(lambdaBody.type in sortByAccessors)) {
+                // First argument must be a list
+                // Due to the dynamical nature of the method, we must check
+                // the type manually at run-time, because we can't know
+                // the type of the first argument beforehand if it happens
+                // to be a function call, eg: sort_by(values( ... ), ...)
+                throw new Numbas.Error('jme.typecheck.invalid type', {
+                    expected: 'number/string',
+                    received: lambdaBody.type
+                });
+            }
+
+            return sortByHelper(
+                list,
+                sortByAccessors[lambdaBody.type],
+                lambdaBody.value
+            );
+        }
+
+        var lambdaExecutionScope = new Scope(scope);
+        var prepareScopeArgs;
+
+        if (lambdaHead.tok.type == 'name') {
+            prepareScopeArgs = function(val) {
+                lambdaExecutionScope.variables[lambdaHead.tok.name] = val;
+                return lambdaExecutionScope;
+            };
+        }
+        else {
+            prepareScopeArgs = function(vals) {
+                lambdaHead.args.forEach(function(arg, i) {
+                    lambdaExecutionScope.variables[arg.tok.name] = vals.value[i];
+                });
+                return lambdaExecutionScope;
+            }
+        }
+
+        return sortByHelper(list, function accessValueThroughLambda(elem) {
+            return prepareScopeArgs(elem).evaluate(lambdaBody);
+        });
+    }
+});
+jme.findvarsOps.sort_by = function(tree, boundvars, scope) {
+    if (tree.args.length !== 3) {
+        return jme.findvars(tree.args[0], boundvars)
+    }
+
+    boundvars = boundvars.slice();
+
+    if (tree.args[2].tok.type == 'list') {
+        tree.args[2].args.forEach(function(arg) {
+            boundvars.push(arg.tok.name.toLowerCase());
+        });
+    }
+    else {
+        boundvars.push(tree.args[2].tok.name.toLowerCase());
+    }
+
+    return jme
+        .findvars(tree.args[1], boundvars, scope)
+        .merge(jme.findvars(tree.args[0], boundvars));
+};
+jme.substituteTreeOps.sort_by = function(tree, scope, allowUnbound) {
+    tree.args[0] = jme.substituteTree(tree.args[0], scope, allowUnbound);
+
+    if (tree.args.length !== 3) {
+        tree.args[1] = jme.substituteTree(tree.args[1], scope, allowUnbound);
+    }
+
+    return tree;
+};
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
