@@ -637,7 +637,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     trig: [
         ['sin(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(sin(n))'],
+		['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(sin(n/m))'],
         ['cos(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(cos(n))'],
+		['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(cos(n/m))'],
         ['tan(?;n)',['n isa "number"','isint(n/pi)'],'0'],
         ['cosh(0)',[],'1'],
         ['sinh(0)',[],'0'],
