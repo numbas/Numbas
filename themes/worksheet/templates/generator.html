@@ -1,0 +1,15 @@
+<div id="generatorControls">
+    <p>Generate <input type="number" id="numExams" data-bind="textInput: numExams"> <span data-bind="text: numExams()==1 ? 'exam' : 'exams'"></span>, <button data-bind="click: generate">please</button> (starting with ID no. <input type="number" data-bind="textInput: offset"/>).</p>
+    <div id="progress">
+        <ol id="examProgress" data-bind="foreach: exams">
+            <li><span data-bind="text: progressText"></span></li>
+        </ol>
+        <p id="typesetProgress" data-bind="text: progressText"></p>
+    </div>
+    <div id="print">
+        <p>Now <button id="printButton" data-bind="click: print">print</button></p>
+        <ul id="sheettype" data-bind="foreach: sheetTypes">
+            <li><label><input type="radio" name="sheettype" data-bind="checked: $parent.sheetType, checkedValue: $data"/><span data-bind="text: label"></span></label></li>
+        </ul>
+    </div>
+</div>

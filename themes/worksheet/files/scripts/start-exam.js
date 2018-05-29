@@ -10,7 +10,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
 		job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
 		job(function() {
-			var store = Numbas.store = new Numbas.storage.SCORMStorage();	//The storage object manages communication between the LMS and the exam
+			var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();	//The storage object manages communication between the LMS and the exam
 			Numbas.display.init();
 		});
 	};
