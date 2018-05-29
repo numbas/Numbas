@@ -264,8 +264,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
-                var result = jme.variables.makeVariables(q.variablesTodo,q.scope,condition);
-                scope.variables = result.variables;
+                var result = jme.variables.makeVariables(q.variablesTodo,scope,condition);
                 conditionSatisfied = result.conditionSatisfied;
             }
             if(!conditionSatisfied) {
