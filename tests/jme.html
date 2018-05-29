@@ -1062,6 +1062,13 @@
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
+
+                    var r = new Numbas.jme.rules.Rule('?;m*?;n',['m isa "number"'],'eval(m*n)');
+                    var s = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
+                    var m = r.match(Numbas.jme.compile('x*2'),s);
+                    assert.equal(m,false,"don't sub variables from the scope when checking simplification rule conditions");
+
+                    assert.equal(Numbas.jme.display.simplifyExpression('4x+2','all',s),'4x + 2','x is defined in the scope as a number');
 				});
 
 				QUnit.test('texName', function(assert) {

@@ -71,18 +71,16 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
      */
     matchConditions: function(match,scope)
     {
+        scope = new Numbas.jme.Scope(scope);
         for(var i=0;i<this.conditions.length;i++)
         {
-            var c = Numbas.util.copyobj(this.conditions[i],true);
-            c = jme.substituteTree(c,new jme.Scope([{variables:match}]));
-            try
-            {
-                var result = jme.evaluate(c,scope);
+            var condition_tree = Numbas.util.copyobj(this.conditions[i],true);
+            condition_tree = jme.substituteTree(condition_tree,new jme.Scope([{variables:match}]));
+            try {
+                var result = scope.evaluate(condition_tree, null, true);
                 if(result.value==false)
                     return false;
-            }
-            catch(e)
-            {
+            } catch(e) {
                 return false;
             }
         }

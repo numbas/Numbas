@@ -1194,9 +1194,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
      * @param {JME} expr
      * @param {Object.<Numbas.jme.token|Object>} [variables] - Dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
+     * @param {Boolean} [noSubstitution] - if true, don't substitute variable values from the scope into the expression.
      * @returns {Numbas.jme.token}
      */
-    evaluate: function(expr,variables) {
+    evaluate: function(expr,variables, noSubstitution) {
         var scope = this;
         if(variables) {
             scope = new Scope([this]);
@@ -1214,7 +1215,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         if(!tree) {
             return null;
         }
-        tree = jme.substituteTree(tree,scope,true);
+        if(!noSubstitution) {
+            tree = jme.substituteTree(tree,scope,true);
+        }
         var tok = tree.tok;
         switch(tok.type)
         {
@@ -1228,7 +1231,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var value = [];
                 for(var i=0;i<tree.args.length;i++)
                 {
-                    value[i] = jme.evaluate(tree.args[i],scope);
+                    value[i] = scope.evaluate(tree.args[i],null,noSubstitution);
                 }
                 tok = new TList(value);
             }
@@ -1238,7 +1241,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var value = {};
                 for(var i=0;i<tree.args.length;i++) {
                     var kp = tree.args[i];
-                    value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
+                    value[kp.tok.key] = scope.evaluate(kp.args[0],null,noSubstitution);
                 }
                 tok = new TDict(value);
             }
@@ -1255,7 +1258,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             }
         case 'name':
             var v = scope.getVariable(tok.name.toLowerCase());
-            if(v) {
+            if(v && !noSubstitution) {
                 return v;
             } else {
                 tok = new TName(tok.name);
@@ -1270,7 +1273,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             }
             else {
                 for(var i=0;i<tree.args.length;i++) {
-                    tree.args[i] = jme.evaluate(tree.args[i],scope);
+                    tree.args[i] = scope.evaluate(tree.args[i],null,noSubstitution);
                 }
                 var matchedFunction;
                 var fns = scope.getFunction(op);
