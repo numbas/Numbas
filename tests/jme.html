@@ -1056,6 +1056,10 @@
 					assert.equal(simplifyExpression('cos(pi/2)',['all']),'0','cos(pi/2) evaluated');
 					assert.equal(simplifyExpression('cos(1.5pi)',['all']),'0','cos(1.5pi) evaluated');
 					assert.equal(simplifyExpression('cos(3pi/2)',['all']),'0','cos(3pi/2) evaluated');
+					assert.equal(simplifyExpression('sin(0.5pi)',['all']),'1','sin(0.5pi) evaluated');
+					assert.equal(simplifyExpression('sin(pi/2)',['all']),'1','sin(pi/2) evaluated');
+					assert.equal(simplifyExpression('sin(1.5pi)',['all']),'-1','sin(1.5pi) evaluated');
+					assert.equal(simplifyExpression('sin(3pi/2)',['all']),'-1','sin(3pi/2) evaluated');
 
                     assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');

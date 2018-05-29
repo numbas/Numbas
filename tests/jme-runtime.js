@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/i18next/i18next.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
+// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/i18next/i18next.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/patternmatch.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/numberentry.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -5229,7 +5229,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     trig: [
         ['sin(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(sin(n))'],
+		['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(sin(n/m))'],
         ['cos(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(cos(n))'],
+		['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(cos(n/m))'],
         ['tan(?;n)',['n isa "number"','isint(n/pi)'],'0'],
         ['cosh(0)',[],'1'],
         ['sinh(0)',[],'0'],

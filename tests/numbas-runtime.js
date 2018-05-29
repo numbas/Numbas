@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/i18next/i18next.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/patternmatch.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js
+// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/i18next/i18next.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/patternmatch.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/information.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -5229,7 +5229,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     trig: [
         ['sin(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(sin(n))'],
+		['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(sin(n/m))'],
         ['cos(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(cos(n))'],
+		['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(2*(n/m)/pi)'],'eval(cos(n/m))'],
         ['tan(?;n)',['n isa "number"','isint(n/pi)'],'0'],
         ['cosh(0)',[],'1'],
         ['sinh(0)',[],'0'],
@@ -14188,74 +14190,53 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
 /*
 Copyright 2011-15 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+   http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
-/** @file The {@link Numbas.parts.NumberEntryPart} object */
-Numbas.queueScript('parts/numberentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+/** @file The {@link Numbas.parts.PatternMatchPart} object */
+Numbas.queueScript('parts/patternmatch',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
-/** Number entry part - student's answer must be within given range, and written to required precision.
+/** Text-entry part - student's answer must match the given regular expression
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
-{
+var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading) {
     var settings = this.settings;
-    util.copyinto(NumberEntryPart.prototype.settings,settings);
+    util.copyinto(PatternMatchPart.prototype.settings,settings);
 }
-NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
-{
+PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
-        tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
-        var answerNode = xml.selectSingleNode('answer');
-        var notationStyles = answerNode.getAttribute('notationstyles');
-        if(notationStyles) {
-            settings.notationStyles = notationStyles.split(',');
-        }
-        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
-        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-        }
+        settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
+        tryGetAttribute(settings,xml,'correctanswer',['mode'],['matchMode']);
+        var displayAnswerNode = xml.selectSingleNode('displayanswer');
+        if(!displayAnswerNode)
+            this.error('part.patternmatch.display answer missing');
+        settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+        tryGetAttribute(settings,xml,'case',['sensitive','partialCredit'],'caseSensitive');
     },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
-        tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
-        tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
-        tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
+        tryLoad(data, ['caseSensitive', 'partialCredit'], settings);
     },
     finaliseLoad: function() {
-        var settings = this.settings;
-        if(settings.precisionType!='none') {
-            settings.allowFractions = false;
-        }
-        try {
-            this.getCorrectAnswer(this.getScope());
-        } catch(e) {
-            this.error(e.message);
-        }
-        this.stagedAnswer = '';
+        this.getCorrectAnswer(this.getScope());
         if(Numbas.display) {
-            this.display = new Numbas.display.NumberEntryPartDisplay(this);
+            this.display = new Numbas.display.PatternMatchPartDisplay(this);
         }
     },
     resume: function() {
@@ -14263,129 +14244,65 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.stagedAnswer = pobj.studentAnswer+'';
+        this.stagedAnswer = pobj.studentAnswer;
     },
-    /** The student's last submitted answer */
+    /** The student's last submitted answer
+     * @type {String}
+     */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.numberentry,
-    /** Properties set when the part is generated
+    markingScript: Numbas.marking_scripts.patternmatch,
+    /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}
-     * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
-     * @property {Number} minvalue - minimum value marked correct
-     * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
-     * @property {Number} maxvalue - maximum value marked correct
-     * @property {Number} correctAnswerFraction - display the correct answer as a fraction?
-     * @property {Boolean} allowFractions - can the student enter a fraction as their answer?
-     * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
-     * @property {Number} displayAnswer - representative correct answer to display when revealing answers
-     * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-     * @property {Number} precisionString - definition of precision setting, before variables are substituted in
-     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
-     * @property {Number} precision - how many decimal places or significant figures to require
-     * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-     * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
-     * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
-     * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+     * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.
+     * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
+     * @property {String} displayAnswerString - the definition of the display answer, without variables substituted in.
+     * @property {String} displayAnswer - a representative correct answer to display when answers are revealed
+     * @property {Boolean} caseSensitive - does case matter?
+     * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
+     * @property {String} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
      */
-    settings:
-    {
-        minvalueString: '0',
-        maxvalueString: '0',
-        minvalue: 0,
-        maxvalue: 0,
-        correctAnswerFraction: false,
-        allowFractions: false,
-        notationStyles: ['en','si-en'],
-        displayAnswer: 0,
-        precisionType: 'none',
-        precisionString: '0',
-        strictPrecision: false,
-        precision: 0,
-        precisionPC: 0,
-        mustBeReduced: false,
-        mustBeReducedPC: 0,
-        precisionMessage: R('You have not given your answer to the correct precision.'),
-        showPrecisionHint: true
+    settings: {
+    correctAnswerString: '.*',
+    correctAnswer: /.*/,
+    displayAnswerString: '',
+    displayAnswer: '',
+    caseSensitive: false,
+    partialCredit: 0,
+    matchMode: 'regex'
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
      */
     input_widget: function() {
-        return 'number';
+        return 'string';
     },
     /** Options for this part's input widget
      * @returns {Object}
      */
     input_options: function() {
         return {
-            allowFractions: this.settings.allowFractions,
-            allowedNotationStyles: this.settings.notationStyles
-        };
+            allowEmpty: false
+        }
     },
     /** Compute the correct answer, based on the given scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        var precision = jme.subvars(settings.precisionString, scope);
-        settings.precision = scope.evaluate(precision).value;
-        if(settings.precisionType=='sigfig' && settings.precision<=0) {
-            throw(new Numbas.Error('part.numberentry.zero sig fig'));
+        settings.correctAnswer = jme.subvars(settings.correctAnswerString, scope, true);
+        switch(this.settings.matchMode) {
+            case 'regex':
+                settings.correctAnswer = '^'+settings.correctAnswer+'$';
+                break;
         }
-        if(settings.precisionType=='dp' && settings.precision<0) {
-            throw(new Numbas.Error('part.numberentry.negative decimal places'));
-        }
-        var minvalue = jme.subvars(settings.minvalueString,scope);
-        minvalue = scope.evaluate(minvalue);
-        if(minvalue && minvalue.type=='number') {
-            minvalue = minvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('minimum value')}));
-        }
-        var maxvalue = jme.subvars(settings.maxvalueString,scope);
-        maxvalue = scope.evaluate(maxvalue);
-        if(maxvalue && maxvalue.type=='number') {
-            maxvalue = maxvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
-        }
-        var displayAnswer = (minvalue + maxvalue)/2;
-        if(settings.correctAnswerFraction) {
-            var diff = Math.abs(maxvalue-minvalue)/2;
-            var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
-            settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
-        } else {
-            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
-        }
-        switch(settings.precisionType) {
-        case 'dp':
-            minvalue = math.precround(minvalue,settings.precision);
-            maxvalue = math.precround(maxvalue,settings.precision);
-            break;
-        case 'sigfig':
-            minvalue = math.siground(minvalue,settings.precision);
-            maxvalue = math.siground(maxvalue,settings.precision);
-            break;
-        }
-        var fudge = 0.00000000001;
-        settings.minvalue = minvalue - fudge;
-        settings.maxvalue = maxvalue + fudge;
-    },
-    /** Tidy up the student's answer - at the moment, just remove space.
-     * You could override this to do more substantial filtering of the student's answer.
-     * @param {String} answer
-     * @returns {String}
-     */
-    cleanAnswer: function(answer) {
-        answer = answer.toString().trim();
-        return answer;
+        settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.studentAnswer = this.cleanAnswer(this.stagedAnswer);
+        this.studentAnswer = this.stagedAnswer;
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
      * @abstract
@@ -14394,17 +14311,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
     },
-    /** Get the student's answer as a floating point number
-     * @returns {Number}
-     */
-    studentAnswerAsFloat: function() {
-        return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
-    }
 };
-['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
-    NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
+['finaliseLoad','resume','loadFromXML','loadFromJSON'].forEach(function(method) {
+    PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
 });
-Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
+Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
 });
 /*
 Copyright 2011-15 Newcastle University
@@ -14418,139 +14329,278 @@ Copyright 2011-15 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-/** @file The {@link Numbas.parts.GapFillPart} object */
-Numbas.queueScript('parts/gapfill',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+/** @file The {@link Numbas.parts.MatrixEntryPart} object */
+Numbas.queueScript('parts/matrixentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
-/** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
+/** Matrix entry part - student enters a matrix of numbers
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
-{
+var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
+    var settings = this.settings;
+    util.copyinto(MatrixEntryPart.prototype.settings,settings);
 }
-GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
+MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 {
     loadFromXML: function(xml) {
-        var gapXML = xml.selectNodes('gaps/part');
-        this.marks = 0;
-        for( var i=0 ; i<gapXML.length; i++ ) {
-            var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this, this.store);
-            this.addGap(gap,i);
+        var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+        tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
+        tryGetAttribute(settings,xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
+        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
+        var messageNode = xml.selectSingleNode('answer/precision/message');
+        if(messageNode) {
+            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
     },
     loadFromJSON: function(data) {
-        var p = this;
-        if('gaps' in data) {
-            data.gaps.forEach(function(gd,i) {
-                var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p, p.store);
-                p.addGap(gap, i)
-            });
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
+        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precision', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+    },
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+        var pobj = this.store.loadPart(this);
+        if(pobj.studentAnswer!==undefined) {
+            this.stagedAnswer = pobj.studentAnswer.matrix;
+            this.stagedAnswer.rows = pobj.studentAnswer.rows;
+            this.stagedAnswer.columns = pobj.studentAnswer.columns;
         }
     },
     finaliseLoad: function() {
+        var settings = this.settings;
+        var scope = this.getScope();
+        var numRows = jme.subvars(settings.numRows, scope);
+        settings.numRows = scope.evaluate(numRows).value;
+        var numColumns = jme.subvars(settings.numColumns, scope);
+        settings.numColumns = scope.evaluate(numColumns).value;
+        var tolerance = jme.subvars(settings.tolerance, scope);
+        settings.tolerance = scope.evaluate(tolerance).value;
+        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
+        if(settings.precisionType!='none') {
+            settings.allowFractions = false;
+        }
+        this.studentAnswer = [];
+        for(var i=0;i<this.settings.numRows;i++) {
+            var row = [];
+            for(var j=0;j<this.settings.numColumns;j++) {
+                row.push('');
+            }
+            this.studentAnswer.push(row);
+        }
+        this.getCorrectAnswer(scope);
+        if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
+            var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
+            var answerSize = settings.numRows+'×'+settings.numColumns;
+            throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
+        }
         if(Numbas.display) {
-            this.display = new Numbas.display.GapFillPartDisplay(this);
+            this.display = new Numbas.display.MatrixEntryPartDisplay(this);
         }
     },
-    /** Add a gap to this part
-     * @param {Numbas.parts.Part} gap
-     * @param {Number} index - the position of the gap
-     */
-    addGap: function(gap, index) {
-        gap.isGap = true;
-        this.marks += gap.marks;
-        this.gaps.splice(index,0,gap);
-    },
-    resume: function() {
-        var p = this;
-        this.gaps.forEach(function(g){
-            g.resume();
-            p.answered = p.answered || g.answered;
-        });
-    },
-    /** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
-     */
-    stagedAnswer: 'something',
+    /** The student's last submitted answer */
+    studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.gapfill,
-    /** Reveal the answers to all of the child gaps
-     * Extends {@link Numbas.parts.Part.revealAnswer}
+    markingScript: Numbas.marking_scripts.matrixentry,
+    /** Properties set when part is generated
+     * Extends {@link Numbas.parts.Part#settings}
+     * @property {matrix} correctAnswer - the correct answer to the part
+     * @property {JME} numRows - default number of rows in the student's answer
+     * @property {JME} numColumns - default number of columns in the student's answer
+     * @property {Boolean} allowResize - allow the student to change the dimensions of their answer?
+     * @property {JME} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
+     * @property {Boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
+     * @property {Boolean} allowFractions - can the student enter a fraction as their answer for a cell?
+     * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+     * @property {Number} precision - how many decimal places or significant figures to require
+     * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+     * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
      */
-    revealAnswer: function(dontStore)
-    {
-        for(var i=0; i<this.gaps.length; i++)
-            this.gaps[i].revealAnswer(dontStore);
+    settings: {
+        correctAnswer: null,
+        correctAnswerFractions: false,
+        numRows: '3',
+        numColumns: '3',
+        allowResize: true,
+        tolerance: '0',
+        markPerCell: false,
+        allowFractions: false,
+        precisionType: 'none',    //'none', 'dp' or 'sigfig'
+        precisionString: '0',
+        precision: 0,
+        precisionPC: 0,
+        precisionMessage: R('You have not given your answer to the correct precision.'),
+        strictPrecision: true
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return 'matrix';
+    },
+    /** Options for this part's input widget
+     * @returns {Object}
+     */
+    input_options: function() {
+        return {
+            allowFractions: this.settings.allowFractions,
+            allowedNotationStyles: ['plain','en','si-en'],
+            allowResize: this.settings.allowResize,
+            numRows: this.settings.numRows,
+            numColumns: this.settings.numColumns,
+            parseCells: false
+        };
+    },
+    /** Compute the correct answer, based on the given scope
+     */
+    getCorrectAnswer: function(scope) {
+        var settings = this.settings;
+        var correctAnswer = jme.subvars(settings.correctAnswerString,scope);
+        correctAnswer = jme.evaluate(correctAnswer,scope);
+        if(correctAnswer && correctAnswer.type=='matrix') {
+            settings.correctAnswer = correctAnswer.value;
+        } else if(correctAnswer && correctAnswer.type=='vector') {
+            settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
+        } else {
+            this.error('part.setting not present',{property:'correct answer'});
+        }
+        settings.precision = jme.subvars(settings.precisionString, scope);
+        settings.precision = jme.evaluate(settings.precision,scope).value;
+        switch(settings.precisionType) {
+        case 'dp':
+            settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
+            break;
+        case 'sigfig':
+            settings.correctAnswer = Numbas.matrixmath.siground(settings.correctAnswer,settings.precision);
+            break;
+        }
+    },
+    /** Save a copy of the student's answer as entered on the page, for use in marking.
+     */
+    setStudentAnswer: function() {
+        if(this.stagedAnswer !== undefined) {
+            this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
+            this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
+        } else {
+            this.studentAnswerRows = 0;
+            this.studentAnswerColumns = 0;
+        }
+            this.studentAnswer = this.stagedAnswer;
+    },
+    /** Get the student's answer as it was entered as a JME data type, to be used in the marking script
      * @abstract
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
-        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
+        return jme.wrapValue(this.studentAnswer);
     },
-    storeAnswer: function(answer) {
-        this.gaps.forEach(function(g,i) {
-            g.storeAnswer(answer[i]);
-        })
-    },
-    setStudentAnswer: function() {
-        this.studentAnswer = this.gaps.map(function(g) {
-            g.setStudentAnswer();
-            return g.studentAnswer;
-        });
-    },
-    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
-     * @abstract
-     * @returns {Numbas.jme.token}
+    /** Get the student's answer as a matrix
+     * @returns {matrix}
      */
-    studentAnswerAsJME: function() {
-        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
-    },
-    /** Mark this part - add up the scores from each of the child gaps.
-     */
-    mark_old: function()
-    {
-        this.credit=0;
-        if(this.marks>0)
-        {
-            for(var i=0; i<this.gaps.length; i++)
-            {
-                var gap = this.gaps[i];
-            gap.submit();
-                this.credit += gap.credit*gap.marks;
-                if(this.gaps.length>1)
-                    this.markingComment(R('part.gapfill.feedback header',{index:i+1}));
-                for(var j=0;j<gap.markingFeedback.length;j++)
-                {
-                    var action = util.copyobj(gap.markingFeedback[j]);
-                    action.gap = i;
-                    this.markingFeedback.push(action);
+    studentAnswerAsMatrix: function() {
+        var rows = this.studentAnswerRows;
+        var columns = this.studentAnswerColumns;
+        var studentMatrix = [];
+        for(var i=0;i<rows;i++) {
+            var row = [];
+            for(var j=0;j<columns;j++) {
+                var cell = this.studentAnswer[i][j];
+                var n = util.parseNumber(cell,this.settings.allowFractions);
+                if(isNaN(n)) {
+                    return null;
+                } else {
+                    row.push(n);
                 }
             }
-            this.credit/=this.marks;
+            studentMatrix.push(row);
         }
-        //go through all gaps, and if any one fails to validate then
-        //whole part fails to validate
-        var success = true;
-        for(var i=0; i<this.gaps.length; i++) {
-            success = success && this.gaps[i].answered;
-        }
-        this.answered = success;
+        studentMatrix.rows = rows;
+        studentMatrix.columns = columns;
+        return studentMatrix;
     }
 };
-['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
-    GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+    MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
 });
-['revealAnswer'].forEach(function(method) {
-    GapFillPart.prototype[method] = util.extend(GapFillPart.prototype[method], Part.prototype[method]);
+Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
 });
-Numbas.partConstructors['gapfill'] = util.extend(Part,GapFillPart);
+
+/*
+Copyright 2011-15 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file The {@link Numbas.parts.} object */
+Numbas.queueScript('parts/extension',['base','util','part'],function() {
+var util = Numbas.util;
+var Part = Numbas.parts.Part;
+/** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart)
+{
+}
+ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
+    loadFromXML: function() {},
+    loadFromJSON: function() {},
+    finaliseLoad: function() {
+        if(Numbas.display) {
+    this.display = new Numbas.display.ExtensionPartDisplay(this);
+        }
+    },
+    validate: function() {
+        return false;
+    },
+    hasStagedAnswer: function() {
+        return true;
+    },
+    doesMarking: true,
+    mark: function() {
+        this.markingComment(R('part.extension.not implemented',{name:'mark'}));
+    },
+    /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
+     * @ returns {object}
+     */
+    createSuspendData: function() {
+        return {};
+    },
+    /** Get the suspend data created in a previous session for this part, if it exists.
+     * @ param {object} data
+     */
+    loadSuspendData: function(data) {
+        if(!this.store) {
+            return;
+        }
+        var pobj = this.store.loadExtensionPart(this);
+        if(pobj) {
+            return pobj.extension_data;
+        }
+    }
+};
+['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+    ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
+});
+Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
 });
 /*
 Copyright 2011-15 Newcastle University
@@ -14565,170 +14615,52 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/information',['base','jme','jme-variables','util','part'],function() {
+Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
+var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
-/** Information only part - no input, no marking, just display some content to the student.
+/** Custom part - a part type defined in {@link Numbas.custom_part_types}
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, loading)
-{
+var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, loading) {
+    this.raw_settings = {};
+    this.resolved_input_options = {};
 }
-InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
-    loadFromXML: function() {
+CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
+    is_custom_part_type: true,
+    getDefinition: function() {
+        this.definition = Numbas.custom_part_types[this.type];
+        this.setMarkingScript(this.definition.marking_script);
+        return this.definition;
     },
-    loadFromJSON: function() {
-    },
-    finaliseLoad: function() {
-        this.answered = true;
-        this.isDirty = false;
-        if(Numbas.display) {
-            this.display = new Numbas.display.InformationPartDisplay(this);
-        }
-    },
-    /** This part is always valid
-     * @returns {Boolean} true
-     */
-    validate: function() {
-        this.answered = true;
-        return true;
-    },
-    /** This part is never dirty
-     */
-    setDirty: function() {
-        this.isDirty = false;
-    },
-    hasStagedAnswer: function() {
-        return true;
-    },
-    doesMarking: false
-};
-['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
-});
-Numbas.partConstructors['information'] = util.extend(Part,InformationPart);
-});
-/*
-Copyright 2011-15 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file The {@link Numbas.parts.JMEPart} object */
-Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','marking_scripts'],function() {
-var util = Numbas.util;
-var jme = Numbas.jme;
-var math = Numbas.math;
-var nicePartName = util.nicePartName;
-var Part = Numbas.parts.Part;
-/** Judged Mathematical Expression
- *
- * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
- * @constructor
- * @memberof Numbas.parts
- * @augments Numbas.parts.Part
- */
-var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
-{
-    var settings = this.settings;
-    util.copyinto(JMEPart.prototype.settings,settings);
-    settings.mustHave = [];
-    settings.notAllowed = [];
-    settings.expectedVariableNames = [];
-}
-JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
-{
     loadFromXML: function(xml) {
-        var settings = this.settings;
+        var p = this;
+        var raw_settings = this.raw_settings;
+        this.getDefinition();
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        //parse correct answer from XML
-        answerNode = xml.selectSingleNode('answer/correctanswer');
-        if(!answerNode) {
-            this.error('part.jme.answer missing');
-        }
-        tryGetAttribute(settings,xml,'answer/correctanswer','simplification','answerSimplificationString');
-        settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
-        //get checking type, accuracy, checking range
-        var parametersPath = 'answer';
-        tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
-        tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
-        //max length and min length
-        tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
-        var messageNode = xml.selectSingleNode('answer/maxlength/message');
-        if(messageNode)
-        {
-            settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-            if($(settings.maxLengthMessage).text() == '')
-                settings.maxLengthMessage = R('part.jme.answer too long');
-        }
-        tryGetAttribute(settings,xml,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC']);
-        var messageNode = xml.selectSingleNode('answer/minlength/message');
-        if(messageNode)
-        {
-            settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-            if($(settings.minLengthMessage).text() == '')
-                settings.minLengthMessage = R('part.jme.answer too short');
-        }
-        //get list of 'must have' strings
-        var mustHaveNode = xml.selectSingleNode('answer/musthave');
-        if(mustHaveNode)
-        {
-            var mustHaves = mustHaveNode.selectNodes('string');
-            for(var i=0; i<mustHaves.length; i++)
-            {
-                settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
-            }
-            //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
-            tryGetAttribute(settings,xml,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
-            //warning message to display when a must-have is missing
-            var messageNode = mustHaveNode.selectSingleNode('message');
-            if(messageNode)
-                settings.mustHaveMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-        }
-        //get list of 'not allowed' strings
-        var notAllowedNode = xml.selectSingleNode('answer/notallowed');
-        if(notAllowedNode)
-        {
-            var notAlloweds = notAllowedNode.selectNodes('string');
-            for(var i=0; i<notAlloweds.length; i++)
-            {
-                settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
-            }
-            //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
-            var messageNode = notAllowedNode.selectSingleNode('message');
-            if(messageNode)
-                settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-        }
-        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
-        var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
-        if(expectedVariableNamesNode)
-        {
-            var nameNodes = expectedVariableNamesNode.selectNodes('string');
-            for(var i=0; i<nameNodes.length; i++)
-                settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
-        }
+        var settingNodes = xml.selectNodes('settings/setting');
+        settingNodes.forEach(function(settingNode) {
+            var name = settingNode.getAttribute('name');
+            var value = settingNode.getAttribute('value');
+            raw_settings[name] = JSON.parse(value);
+        });
     },
     loadFromJSON: function(data) {
-        var settings = this.settings;
+        var definition = this.getDefinition();
         var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
-        tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
-        tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
-        tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
-        tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
-        tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
-        tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+        var raw_settings = this.raw_settings;
+        definition.settings.forEach(function(sdef) {
+            tryLoad(data.settings,sdef.name,raw_settings);
+        });
+    },
+    marking_parameters: function(studentAnswer) {
+        var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        o.input_options = jme.wrapValue(this.input_options());
+        return o;
     },
     resume: function() {
         if(!this.store) {
@@ -14738,125 +14670,164 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {
-        this.stagedAnswer = '';
-        this.getCorrectAnswer(this.getScope());
+        var p = this;
+        var settings = this.settings;
+        var raw_settings = this.raw_settings;
+        var scope = this.getScope();
+        this.definition.settings.forEach(function(s) {
+            var name = s.name;
+            var value = raw_settings[name];
+            if(!p.setting_evaluators[s.input_type]) {
+                p.error('part.custom.unrecognised input type',{input_type:s.input_type});
+            }
+            try {
+                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+            } catch(e) {
+                p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
+            }
+        });
+        var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
+        var raw_input_options = this.definition.input_options;
+        ['correctAnswer','hint'].forEach(function(option) {
+            if(raw_input_options[option]===undefined) {
+                p.error('part.custom.input option missing',{option:option});
+            }
+        })
+        function evaluate_input_option(option) {
+            if(typeof(option)=='string') {
+                return jme.unwrapValue(settings_scope.evaluate(option));
+            } else {
+                if(option.static) {
+                    return option.value;
+                } else {
+                    return jme.unwrapValue(settings_scope.evaluate(option.value));
+                }
+            }
+        }
+        for(var option in raw_input_options) {
+            try {
+                p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
+            } catch(e) {
+                p.error('part.custom.error evaluating input option',{option:option,error:e.message});
+            }
+        }
+        try {
+            this.getCorrectAnswer(this.getScope());
+        } catch(e) {
+            this.error(e.message);
+        }
         if(Numbas.display) {
-            this.display = new Numbas.display.JMEPartDisplay(this);
+            this.display = new Numbas.display.CustomPartDisplay(this);
         }
     },
-    /** Student's last submitted answer
-     * @type {String}
-     */
-    studentAnswer: '',
-    /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
-     */
-    markingScript: Numbas.marking_scripts.jme,
-    /** Properties set when the part is generated.
-     *
-     * Extends {@link Numbas.parts.Part#settings}
-     * @property {JME} correctAnswerString - the definition of the correct answer, without variables substituted into it.
-     * @property {String} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-     * @property {String} answerSimplificationString - string from the XML defining which answer simplification rules to use
-     * @property {Array.<String>} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
-     * @property {String} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
-     * @property {Number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
-     * @property {Number} failureRate - comparison failures allowed before we decide answers are different
-     * @property {Number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
-     * @property {Number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
-     * @property {Number} vsetRangePoints - number of points to compare answers on
-     * @property {Number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-     * @property {Number} maxLengthPC - partial credit if the student's answer is too long
-     * @property {String} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
-     * @property {Number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-     * @property {Number} minLengthPC - partial credit if the student's answer is too short
-     * @property {String} minLengthMessage - message to add to the marking feedback if the student's answer is too short
-     * @property {Array.<String>} mustHave - strings which must be present in the student's answer
-     * @property {Number} mustHavePC - partial credit to award if any must-have string is missing
-     * @property {String} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
-     * @property {Boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
-     * @property {Array.<String>} notAllowed - strings which must not be present in the student's answer
-     * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
-     * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
-     * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
-     */
-    settings:
-    {
-        correctAnswerString: '',
-        correctAnswer: '',
-        answerSimplificationString: '',
-        answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
-        checkingType: 'RelDiff',
-        checkingAccuracy: 0,
-        failureRate: 1,
-        vsetRangeStart: 0,
-        vsetRangeEnd: 1,
-        vsetRangePoints: 1,
-        maxLength: 0,
-        maxLengthPC: 0,
-        maxLengthMessage: 'Your answer is too long',
-        minLength: 0,
-        minLengthPC: 0,
-        minLengthMessage: 'Your answer is too short',
-        mustHave: [],
-        mustHavePC: 0,
-        mustHaveMessage: '',
-        mustHaveShowStrings: false,
-        notAllowed: [],
-        notAllowedPC: 0,
-        notAllowedMessage: '',
-        notAllowedShowStrings: false
-    },
-    /** The name of the input widget this part uses, if any.
-     * @returns {String}
-     */
-    input_widget: function() {
-        return 'jme';
-    },
-    /** Options for this part's input widget
-     * @returns {Object}
-     */
-    input_options: function() {
-        return {
-            showPreview: this.settings.showPreview,
-            returnString: true
-        };
-    },
-    /** Compute the correct answer, based on the given scope
-     */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
-        var expr = jme.subvars(settings.correctAnswerString,scope);
-        settings.correctAnswer = jme.display.simplifyExpression(
-            expr,
-            settings.answerSimplification,
-            scope
-        );
-        if(settings.correctAnswer == '' && this.marks>0) {
-            this.error('part.jme.answer missing');
-        }
-        this.markingScope = new jme.Scope(this.getScope());
-        this.markingScope.variables = {};
+        this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
     },
-    /** Save a copy of the student's answer as entered on the page, for use in marking.
-     */
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
-     * @abstract
-     * @returns {Numbas.jme.token}
-     */
+    input_widget: function() {
+        return this.definition.input_widget;
+    },
+    input_options: function() {
+        return this.resolved_input_options;
+    },
     rawStudentAnswerAsJME: function() {
-        return new Numbas.jme.types.TString(this.studentAnswer);
+        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
+    },
+    student_answer_jme_types: {
+        'string': function(answer) {
+            return new types.TString(answer);
+        },
+        'number': function(answer) {
+            return new types.TNum(answer);
+        },
+        'jme': function(answer) {
+            return new types.TExpression(answer);
+        },
+        'matrix': function(answer,options) {
+            if(options.parseCells) {
+                return new types.TMatrix(answer);
+            } else {
+                return jme.wrapValue(answer);
+            }
+        },
+        'radios': function(answer) {
+            return new types.TNum(answer);
+        },
+        'checkboxes': function(answer) {
+            return new types.TList(answer.map(function(ticked){ return new types.TBool(ticked) }));
+        },
+        'dropdown': function(answer) {
+            return new types.TNum(answer);
+        }
+    },
+    setting_evaluators: {
+        'string': function(def, value) {
+            var scope = this.getScope();
+            if(def.subvars) {
+                value = jme.subvars(value, scope, true);
+            }
+            return new jme.types.TString(value);
+        },
+        'mathematical_expression': function(def, value) {
+            var scope = this.getScope();
+            if(!value.trim()) {
+                throw(new Numbas.Error("part.custom.empty setting"));
+            }
+            if(def.subvars) {
+                value = jme.subvars(value, scope);
+            }
+            var result = new jme.types.TExpression(value);
+        },
+        'checkbox': function(def, value) {
+            return new jme.types.TBool(value);
+        },
+        'dropdown': function(def, value) {
+            return new jme.types.TString(value);
+        },
+        'code': function(def, value) {
+            var scope = this.getScope();
+            if(!value.trim()) {
+                throw(new Numbas.Error('part.custom.empty setting'));
+            }
+            if(def.evaluate) {
+                return scope.evaluate(value);
+            } else {
+                return new jme.types.TString(value);
+            }
+        },
+        'percent': function(def, value) {
+            return new jme.types.TNum(value/100);
+        },
+        'html': function(def, value) {
+            var scope = this.getScope();
+            if(def.subvars) {
+                value = jme.contentsubvars(value, scope);
+            }
+            return new jme.types.TString(value);
+        },
+        'list_of_strings': function(def, value) {
+            var scope = this.getScope();
+            return new jme.types.TList(value.map(function(s){
+                if(def.subvars) {
+                    s = jme.subvars(s, scope);
+                }
+                return new jme.types.TString(s)
+            }));
+        },
+        'choose_several': function(def, value) {
+            return new jme.wrapValue(value);
+        }
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
+    CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
 });
-Numbas.partConstructors['jme'] = util.extend(Part,JMEPart);
+CustomPart = Numbas.parts.CustomPart = util.extend(Part,CustomPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15598,53 +15569,111 @@ Copyright 2011-15 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-/** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part'],function() {
+/** @file The {@link Numbas.parts.JMEPart} object */
+Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var types = Numbas.jme.types;
+var nicePartName = util.nicePartName;
 var Part = Numbas.parts.Part;
-/** Custom part - a part type defined in {@link Numbas.custom_part_types}
+/** Judged Mathematical Expression
+ *
+ * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
  * @constructor
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, loading) {
-    this.raw_settings = {};
-    this.resolved_input_options = {};
+var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
+{
+    var settings = this.settings;
+    util.copyinto(JMEPart.prototype.settings,settings);
+    settings.mustHave = [];
+    settings.notAllowed = [];
+    settings.expectedVariableNames = [];
 }
-CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
-    is_custom_part_type: true,
-    getDefinition: function() {
-        this.definition = Numbas.custom_part_types[this.type];
-        this.setMarkingScript(this.definition.marking_script);
-        return this.definition;
-    },
+JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
+{
     loadFromXML: function(xml) {
-        var p = this;
-        var raw_settings = this.raw_settings;
-        this.getDefinition();
+        var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        var settingNodes = xml.selectNodes('settings/setting');
-        settingNodes.forEach(function(settingNode) {
-            var name = settingNode.getAttribute('name');
-            var value = settingNode.getAttribute('value');
-            raw_settings[name] = JSON.parse(value);
-        });
+        //parse correct answer from XML
+        answerNode = xml.selectSingleNode('answer/correctanswer');
+        if(!answerNode) {
+            this.error('part.jme.answer missing');
+        }
+        tryGetAttribute(settings,xml,'answer/correctanswer','simplification','answerSimplificationString');
+        settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
+        //get checking type, accuracy, checking range
+        var parametersPath = 'answer';
+        tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
+        tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
+        //max length and min length
+        tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
+        var messageNode = xml.selectSingleNode('answer/maxlength/message');
+        if(messageNode)
+        {
+            settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            if($(settings.maxLengthMessage).text() == '')
+                settings.maxLengthMessage = R('part.jme.answer too long');
+        }
+        tryGetAttribute(settings,xml,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC']);
+        var messageNode = xml.selectSingleNode('answer/minlength/message');
+        if(messageNode)
+        {
+            settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            if($(settings.minLengthMessage).text() == '')
+                settings.minLengthMessage = R('part.jme.answer too short');
+        }
+        //get list of 'must have' strings
+        var mustHaveNode = xml.selectSingleNode('answer/musthave');
+        if(mustHaveNode)
+        {
+            var mustHaves = mustHaveNode.selectNodes('string');
+            for(var i=0; i<mustHaves.length; i++)
+            {
+                settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
+            }
+            //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
+            tryGetAttribute(settings,xml,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
+            //warning message to display when a must-have is missing
+            var messageNode = mustHaveNode.selectSingleNode('message');
+            if(messageNode)
+                settings.mustHaveMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+        }
+        //get list of 'not allowed' strings
+        var notAllowedNode = xml.selectSingleNode('answer/notallowed');
+        if(notAllowedNode)
+        {
+            var notAlloweds = notAllowedNode.selectNodes('string');
+            for(var i=0; i<notAlloweds.length; i++)
+            {
+                settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
+            }
+            //partial credit for failing not-allowed test
+            tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
+            var messageNode = notAllowedNode.selectSingleNode('message');
+            if(messageNode)
+                settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+        }
+        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
+        var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
+        if(expectedVariableNamesNode)
+        {
+            var nameNodes = expectedVariableNamesNode.selectNodes('string');
+            for(var i=0; i<nameNodes.length; i++)
+                settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
+        }
     },
     loadFromJSON: function(data) {
-        var definition = this.getDefinition();
+        var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
-        var raw_settings = this.raw_settings;
-        definition.settings.forEach(function(sdef) {
-            tryLoad(data.settings,sdef.name,raw_settings);
-        });
-    },
-    marking_parameters: function(studentAnswer) {
-        var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
-        o.input_options = jme.wrapValue(this.input_options());
-        return o;
+        tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
+        tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
+        tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
+        tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
+        tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+        tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
     },
     resume: function() {
         if(!this.store) {
@@ -15654,559 +15683,106 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {
-        var p = this;
-        var settings = this.settings;
-        var raw_settings = this.raw_settings;
-        var scope = this.getScope();
-        this.definition.settings.forEach(function(s) {
-            var name = s.name;
-            var value = raw_settings[name];
-            if(!p.setting_evaluators[s.input_type]) {
-                p.error('part.custom.unrecognised input type',{input_type:s.input_type});
-            }
-            try {
-                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
-            } catch(e) {
-                p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
-            }
-        });
-        var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
-        var raw_input_options = this.definition.input_options;
-        ['correctAnswer','hint'].forEach(function(option) {
-            if(raw_input_options[option]===undefined) {
-                p.error('part.custom.input option missing',{option:option});
-            }
-        })
-        function evaluate_input_option(option) {
-            if(typeof(option)=='string') {
-                return jme.unwrapValue(settings_scope.evaluate(option));
-            } else {
-                if(option.static) {
-                    return option.value;
-                } else {
-                    return jme.unwrapValue(settings_scope.evaluate(option.value));
-                }
-            }
-        }
-        for(var option in raw_input_options) {
-            try {
-                p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
-            } catch(e) {
-                p.error('part.custom.error evaluating input option',{option:option,error:e.message});
-            }
-        }
-        try {
-            this.getCorrectAnswer(this.getScope());
-        } catch(e) {
-            this.error(e.message);
-        }
-        if(Numbas.display) {
-            this.display = new Numbas.display.CustomPartDisplay(this);
-        }
-    },
-    getCorrectAnswer: function(scope) {
-        var settings = this.settings;
-        this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
-    },
-    setStudentAnswer: function() {
-        this.studentAnswer = this.stagedAnswer;
-    },
-    input_widget: function() {
-        return this.definition.input_widget;
-    },
-    input_options: function() {
-        return this.resolved_input_options;
-    },
-    rawStudentAnswerAsJME: function() {
-        return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
-    },
-    student_answer_jme_types: {
-        'string': function(answer) {
-            return new types.TString(answer);
-        },
-        'number': function(answer) {
-            return new types.TNum(answer);
-        },
-        'jme': function(answer) {
-            return new types.TExpression(answer);
-        },
-        'matrix': function(answer,options) {
-            if(options.parseCells) {
-                return new types.TMatrix(answer);
-            } else {
-                return jme.wrapValue(answer);
-            }
-        },
-        'radios': function(answer) {
-            return new types.TNum(answer);
-        },
-        'checkboxes': function(answer) {
-            return new types.TList(answer.map(function(ticked){ return new types.TBool(ticked) }));
-        },
-        'dropdown': function(answer) {
-            return new types.TNum(answer);
-        }
-    },
-    setting_evaluators: {
-        'string': function(def, value) {
-            var scope = this.getScope();
-            if(def.subvars) {
-                value = jme.subvars(value, scope, true);
-            }
-            return new jme.types.TString(value);
-        },
-        'mathematical_expression': function(def, value) {
-            var scope = this.getScope();
-            if(!value.trim()) {
-                throw(new Numbas.Error("part.custom.empty setting"));
-            }
-            if(def.subvars) {
-                value = jme.subvars(value, scope);
-            }
-            var result = new jme.types.TExpression(value);
-        },
-        'checkbox': function(def, value) {
-            return new jme.types.TBool(value);
-        },
-        'dropdown': function(def, value) {
-            return new jme.types.TString(value);
-        },
-        'code': function(def, value) {
-            var scope = this.getScope();
-            if(!value.trim()) {
-                throw(new Numbas.Error('part.custom.empty setting'));
-            }
-            if(def.evaluate) {
-                return scope.evaluate(value);
-            } else {
-                return new jme.types.TString(value);
-            }
-        },
-        'percent': function(def, value) {
-            return new jme.types.TNum(value/100);
-        },
-        'html': function(def, value) {
-            var scope = this.getScope();
-            if(def.subvars) {
-                value = jme.contentsubvars(value, scope);
-            }
-            return new jme.types.TString(value);
-        },
-        'list_of_strings': function(def, value) {
-            var scope = this.getScope();
-            return new jme.types.TList(value.map(function(s){
-                if(def.subvars) {
-                    s = jme.subvars(s, scope);
-                }
-                return new jme.types.TString(s)
-            }));
-        },
-        'choose_several': function(def, value) {
-            return new jme.wrapValue(value);
-        }
-    }
-};
-['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
-});
-CustomPart = Numbas.parts.CustomPart = util.extend(Part,CustomPart);
-});
-
-/*
-Copyright 2011-15 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/extension',['base','util','part'],function() {
-var util = Numbas.util;
-var Part = Numbas.parts.Part;
-/** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
- * @constructor
- * @memberof Numbas.parts
- * @augments Numbas.parts.Part
- */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart)
-{
-}
-ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
-    loadFromXML: function() {},
-    loadFromJSON: function() {},
-    finaliseLoad: function() {
-        if(Numbas.display) {
-    this.display = new Numbas.display.ExtensionPartDisplay(this);
-        }
-    },
-    validate: function() {
-        return false;
-    },
-    hasStagedAnswer: function() {
-        return true;
-    },
-    doesMarking: true,
-    mark: function() {
-        this.markingComment(R('part.extension.not implemented',{name:'mark'}));
-    },
-    /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
-     * @ returns {object}
-     */
-    createSuspendData: function() {
-        return {};
-    },
-    /** Get the suspend data created in a previous session for this part, if it exists.
-     * @ param {object} data
-     */
-    loadSuspendData: function(data) {
-        if(!this.store) {
-            return;
-        }
-        var pobj = this.store.loadExtensionPart(this);
-        if(pobj) {
-            return pobj.extension_data;
-        }
-    }
-};
-['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
-});
-Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
-});
-/*
-Copyright 2011-15 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file The {@link Numbas.parts.MatrixEntryPart} object */
-Numbas.queueScript('parts/matrixentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
-var util = Numbas.util;
-var jme = Numbas.jme;
-var math = Numbas.math;
-var Part = Numbas.parts.Part;
-/** Matrix entry part - student enters a matrix of numbers
- * @constructor
- * @memberof Numbas.parts
- * @augments Numbas.parts.Part
- */
-var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
-    var settings = this.settings;
-    util.copyinto(MatrixEntryPart.prototype.settings,settings);
-}
-MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
-{
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
-        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
-        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
-        }
-    },
-    loadFromJSON: function(data) {
-        var settings = this.settings;
-        var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
-        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precision', 'precisionPC', 'precisionMessage', 'strictPrecision']);
-    },
-    resume: function() {
-        if(!this.store) {
-            return;
-        }
-        var pobj = this.store.loadPart(this);
-        if(pobj.studentAnswer!==undefined) {
-            this.stagedAnswer = pobj.studentAnswer.matrix;
-            this.stagedAnswer.rows = pobj.studentAnswer.rows;
-            this.stagedAnswer.columns = pobj.studentAnswer.columns;
-        }
-    },
-    finaliseLoad: function() {
-        var settings = this.settings;
-        var scope = this.getScope();
-        var numRows = jme.subvars(settings.numRows, scope);
-        settings.numRows = scope.evaluate(numRows).value;
-        var numColumns = jme.subvars(settings.numColumns, scope);
-        settings.numColumns = scope.evaluate(numColumns).value;
-        var tolerance = jme.subvars(settings.tolerance, scope);
-        settings.tolerance = scope.evaluate(tolerance).value;
-        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
-        if(settings.precisionType!='none') {
-            settings.allowFractions = false;
-        }
-        this.studentAnswer = [];
-        for(var i=0;i<this.settings.numRows;i++) {
-            var row = [];
-            for(var j=0;j<this.settings.numColumns;j++) {
-                row.push('');
-            }
-            this.studentAnswer.push(row);
-        }
-        this.getCorrectAnswer(scope);
-        if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
-            var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
-            var answerSize = settings.numRows+'×'+settings.numColumns;
-            throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
-        }
-        if(Numbas.display) {
-            this.display = new Numbas.display.MatrixEntryPartDisplay(this);
-        }
-    },
-    /** The student's last submitted answer */
-    studentAnswer: '',
-    /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
-     */
-    markingScript: Numbas.marking_scripts.matrixentry,
-    /** Properties set when part is generated
-     * Extends {@link Numbas.parts.Part#settings}
-     * @property {matrix} correctAnswer - the correct answer to the part
-     * @property {JME} numRows - default number of rows in the student's answer
-     * @property {JME} numColumns - default number of columns in the student's answer
-     * @property {Boolean} allowResize - allow the student to change the dimensions of their answer?
-     * @property {JME} tolerance - allowed margin of error in each cell (if student's answer is within +/- `tolerance` of the correct answer (after rounding to , mark it as correct
-     * @property {Boolean} markPerCell - should the student gain marks for each correct cell (true), or only if they get every cell right (false)?
-     * @property {Boolean} allowFractions - can the student enter a fraction as their answer for a cell?
-     * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-     * @property {Number} precision - how many decimal places or significant figures to require
-     * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-     * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
-     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
-     */
-    settings: {
-        correctAnswer: null,
-        correctAnswerFractions: false,
-        numRows: '3',
-        numColumns: '3',
-        allowResize: true,
-        tolerance: '0',
-        markPerCell: false,
-        allowFractions: false,
-        precisionType: 'none',    //'none', 'dp' or 'sigfig'
-        precisionString: '0',
-        precision: 0,
-        precisionPC: 0,
-        precisionMessage: R('You have not given your answer to the correct precision.'),
-        strictPrecision: true
-    },
-    /** The name of the input widget this part uses, if any.
-     * @returns {String}
-     */
-    input_widget: function() {
-        return 'matrix';
-    },
-    /** Options for this part's input widget
-     * @returns {Object}
-     */
-    input_options: function() {
-        return {
-            allowFractions: this.settings.allowFractions,
-            allowedNotationStyles: ['plain','en','si-en'],
-            allowResize: this.settings.allowResize,
-            numRows: this.settings.numRows,
-            numColumns: this.settings.numColumns,
-            parseCells: false
-        };
-    },
-    /** Compute the correct answer, based on the given scope
-     */
-    getCorrectAnswer: function(scope) {
-        var settings = this.settings;
-        var correctAnswer = jme.subvars(settings.correctAnswerString,scope);
-        correctAnswer = jme.evaluate(correctAnswer,scope);
-        if(correctAnswer && correctAnswer.type=='matrix') {
-            settings.correctAnswer = correctAnswer.value;
-        } else if(correctAnswer && correctAnswer.type=='vector') {
-            settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
-        } else {
-            this.error('part.setting not present',{property:'correct answer'});
-        }
-        settings.precision = jme.subvars(settings.precisionString, scope);
-        settings.precision = jme.evaluate(settings.precision,scope).value;
-        switch(settings.precisionType) {
-        case 'dp':
-            settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
-            break;
-        case 'sigfig':
-            settings.correctAnswer = Numbas.matrixmath.siground(settings.correctAnswer,settings.precision);
-            break;
-        }
-    },
-    /** Save a copy of the student's answer as entered on the page, for use in marking.
-     */
-    setStudentAnswer: function() {
-        if(this.stagedAnswer !== undefined) {
-            this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
-            this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
-        } else {
-            this.studentAnswerRows = 0;
-            this.studentAnswerColumns = 0;
-        }
-            this.studentAnswer = this.stagedAnswer;
-    },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the marking script
-     * @abstract
-     * @returns {Numbas.jme.token}
-     */
-    rawStudentAnswerAsJME: function() {
-        return jme.wrapValue(this.studentAnswer);
-    },
-    /** Get the student's answer as a matrix
-     * @returns {matrix}
-     */
-    studentAnswerAsMatrix: function() {
-        var rows = this.studentAnswerRows;
-        var columns = this.studentAnswerColumns;
-        var studentMatrix = [];
-        for(var i=0;i<rows;i++) {
-            var row = [];
-            for(var j=0;j<columns;j++) {
-                var cell = this.studentAnswer[i][j];
-                var n = util.parseNumber(cell,this.settings.allowFractions);
-                if(isNaN(n)) {
-                    return null;
-                } else {
-                    row.push(n);
-                }
-            }
-            studentMatrix.push(row);
-        }
-        studentMatrix.rows = rows;
-        studentMatrix.columns = columns;
-        return studentMatrix;
-    }
-};
-['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
-});
-Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
-});
-
-/*
-Copyright 2011-15 Newcastle University
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-   http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-/** @file The {@link Numbas.parts.PatternMatchPart} object */
-Numbas.queueScript('parts/patternmatch',['base','jme','jme-variables','util','part','marking_scripts'],function() {
-var util = Numbas.util;
-var jme = Numbas.jme;
-var math = Numbas.math;
-var Part = Numbas.parts.Part;
-/** Text-entry part - student's answer must match the given regular expression
- * @constructor
- * @memberof Numbas.parts
- * @augments Numbas.parts.Part
- */
-var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading) {
-    var settings = this.settings;
-    util.copyinto(PatternMatchPart.prototype.settings,settings);
-}
-PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
-        tryGetAttribute(settings,xml,'correctanswer',['mode'],['matchMode']);
-        var displayAnswerNode = xml.selectSingleNode('displayanswer');
-        if(!displayAnswerNode)
-            this.error('part.patternmatch.display answer missing');
-        settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
-        tryGetAttribute(settings,xml,'case',['sensitive','partialCredit'],'caseSensitive');
-    },
-    loadFromJSON: function(data) {
-        var settings = this.settings;
-        var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
-        tryLoad(data, ['caseSensitive', 'partialCredit'], settings);
-    },
-    finaliseLoad: function() {
+        this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
         if(Numbas.display) {
-            this.display = new Numbas.display.PatternMatchPartDisplay(this);
+            this.display = new Numbas.display.JMEPartDisplay(this);
         }
     },
-    resume: function() {
-        if(!this.store) {
-            return;
-        }
-        var pobj = this.store.loadPart(this);
-        this.stagedAnswer = pobj.studentAnswer;
-    },
-    /** The student's last submitted answer
+    /** Student's last submitted answer
      * @type {String}
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
      * @type {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.patternmatch,
+    markingScript: Numbas.marking_scripts.jme,
     /** Properties set when the part is generated.
+     *
      * Extends {@link Numbas.parts.Part#settings}
-     * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.
-     * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
-     * @property {String} displayAnswerString - the definition of the display answer, without variables substituted in.
-     * @property {String} displayAnswer - a representative correct answer to display when answers are revealed
-     * @property {Boolean} caseSensitive - does case matter?
-     * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
-     * @property {String} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
+     * @property {JME} correctAnswerString - the definition of the correct answer, without variables substituted into it.
+     * @property {String} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
+     * @property {String} answerSimplificationString - string from the XML defining which answer simplification rules to use
+     * @property {Array.<String>} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
+     * @property {String} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
+     * @property {Number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
+     * @property {Number} failureRate - comparison failures allowed before we decide answers are different
+     * @property {Number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
+     * @property {Number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
+     * @property {Number} vsetRangePoints - number of points to compare answers on
+     * @property {Number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+     * @property {Number} maxLengthPC - partial credit if the student's answer is too long
+     * @property {String} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
+     * @property {Number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
+     * @property {Number} minLengthPC - partial credit if the student's answer is too short
+     * @property {String} minLengthMessage - message to add to the marking feedback if the student's answer is too short
+     * @property {Array.<String>} mustHave - strings which must be present in the student's answer
+     * @property {Number} mustHavePC - partial credit to award if any must-have string is missing
+     * @property {String} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
+     * @property {Boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
+     * @property {Array.<String>} notAllowed - strings which must not be present in the student's answer
+     * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
+     * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
+     * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
      */
-    settings: {
-    correctAnswerString: '.*',
-    correctAnswer: /.*/,
-    displayAnswerString: '',
-    displayAnswer: '',
-    caseSensitive: false,
-    partialCredit: 0,
-    matchMode: 'regex'
+    settings:
+    {
+        correctAnswerString: '',
+        correctAnswer: '',
+        answerSimplificationString: '',
+        answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
+        checkingType: 'RelDiff',
+        checkingAccuracy: 0,
+        failureRate: 1,
+        vsetRangeStart: 0,
+        vsetRangeEnd: 1,
+        vsetRangePoints: 1,
+        maxLength: 0,
+        maxLengthPC: 0,
+        maxLengthMessage: 'Your answer is too long',
+        minLength: 0,
+        minLengthPC: 0,
+        minLengthMessage: 'Your answer is too short',
+        mustHave: [],
+        mustHavePC: 0,
+        mustHaveMessage: '',
+        mustHaveShowStrings: false,
+        notAllowed: [],
+        notAllowedPC: 0,
+        notAllowedMessage: '',
+        notAllowedShowStrings: false
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
      */
     input_widget: function() {
-        return 'string';
+        return 'jme';
     },
     /** Options for this part's input widget
      * @returns {Object}
      */
     input_options: function() {
         return {
-            allowEmpty: false
-        }
+            showPreview: this.settings.showPreview,
+            returnString: true
+        };
     },
     /** Compute the correct answer, based on the given scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        settings.correctAnswer = jme.subvars(settings.correctAnswerString, scope, true);
-        switch(this.settings.matchMode) {
-            case 'regex':
-                settings.correctAnswer = '^'+settings.correctAnswer+'$';
-                break;
+        settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
+        var expr = jme.subvars(settings.correctAnswerString,scope);
+        settings.correctAnswer = jme.display.simplifyExpression(
+            expr,
+            settings.answerSimplification,
+            scope
+        );
+        if(settings.correctAnswer == '' && this.marks>0) {
+            this.error('part.jme.answer missing');
         }
-        settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+        this.markingScope = new jme.Scope(this.getScope());
+        this.markingScope.variables = {};
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -16219,10 +15795,436 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
-    },
+    }
 };
-['finaliseLoad','resume','loadFromXML','loadFromJSON'].forEach(function(method) {
-    PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
+['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+    JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
 });
-Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
+Numbas.partConstructors['jme'] = util.extend(Part,JMEPart);
+});
+/*
+Copyright 2011-15 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file The {@link Numbas.parts.} object */
+Numbas.queueScript('parts/information',['base','jme','jme-variables','util','part'],function() {
+var util = Numbas.util;
+var jme = Numbas.jme;
+var math = Numbas.math;
+var Part = Numbas.parts.Part;
+/** Information only part - no input, no marking, just display some content to the student.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, loading)
+{
+}
+InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
+    loadFromXML: function() {
+    },
+    loadFromJSON: function() {
+    },
+    finaliseLoad: function() {
+        this.answered = true;
+        this.isDirty = false;
+        if(Numbas.display) {
+            this.display = new Numbas.display.InformationPartDisplay(this);
+        }
+    },
+    /** This part is always valid
+     * @returns {Boolean} true
+     */
+    validate: function() {
+        this.answered = true;
+        return true;
+    },
+    /** This part is never dirty
+     */
+    setDirty: function() {
+        this.isDirty = false;
+    },
+    hasStagedAnswer: function() {
+        return true;
+    },
+    doesMarking: false
+};
+['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+    InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
+});
+Numbas.partConstructors['information'] = util.extend(Part,InformationPart);
+});
+/*
+Copyright 2011-15 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file The {@link Numbas.parts.GapFillPart} object */
+Numbas.queueScript('parts/gapfill',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+var util = Numbas.util;
+var jme = Numbas.jme;
+var math = Numbas.math;
+var Part = Numbas.parts.Part;
+/** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
+{
+}
+GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
+{
+    loadFromXML: function(xml) {
+        var gapXML = xml.selectNodes('gaps/part');
+        this.marks = 0;
+        for( var i=0 ; i<gapXML.length; i++ ) {
+            var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this, this.store);
+            this.addGap(gap,i);
+        }
+    },
+    loadFromJSON: function(data) {
+        var p = this;
+        if('gaps' in data) {
+            data.gaps.forEach(function(gd,i) {
+                var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p, p.store);
+                p.addGap(gap, i)
+            });
+        }
+    },
+    finaliseLoad: function() {
+        if(Numbas.display) {
+            this.display = new Numbas.display.GapFillPartDisplay(this);
+        }
+    },
+    /** Add a gap to this part
+     * @param {Numbas.parts.Part} gap
+     * @param {Number} index - the position of the gap
+     */
+    addGap: function(gap, index) {
+        gap.isGap = true;
+        this.marks += gap.marks;
+        this.gaps.splice(index,0,gap);
+    },
+    resume: function() {
+        var p = this;
+        this.gaps.forEach(function(g){
+            g.resume();
+            p.answered = p.answered || g.answered;
+        });
+    },
+    /** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
+     */
+    stagedAnswer: 'something',
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.gapfill,
+    /** Reveal the answers to all of the child gaps
+     * Extends {@link Numbas.parts.Part.revealAnswer}
+     */
+    revealAnswer: function(dontStore)
+    {
+        for(var i=0; i<this.gaps.length; i++)
+            this.gaps[i].revealAnswer(dontStore);
+    },
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+     * @abstract
+     * @returns {Numbas.jme.token}
+     */
+    rawStudentAnswerAsJME: function() {
+        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
+    },
+    storeAnswer: function(answer) {
+        this.gaps.forEach(function(g,i) {
+            g.storeAnswer(answer[i]);
+        })
+    },
+    setStudentAnswer: function() {
+        this.studentAnswer = this.gaps.map(function(g) {
+            g.setStudentAnswer();
+            return g.studentAnswer;
+        });
+    },
+    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+     * @abstract
+     * @returns {Numbas.jme.token}
+     */
+    studentAnswerAsJME: function() {
+        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
+    },
+    /** Mark this part - add up the scores from each of the child gaps.
+     */
+    mark_old: function()
+    {
+        this.credit=0;
+        if(this.marks>0)
+        {
+            for(var i=0; i<this.gaps.length; i++)
+            {
+                var gap = this.gaps[i];
+            gap.submit();
+                this.credit += gap.credit*gap.marks;
+                if(this.gaps.length>1)
+                    this.markingComment(R('part.gapfill.feedback header',{index:i+1}));
+                for(var j=0;j<gap.markingFeedback.length;j++)
+                {
+                    var action = util.copyobj(gap.markingFeedback[j]);
+                    action.gap = i;
+                    this.markingFeedback.push(action);
+                }
+            }
+            this.credit/=this.marks;
+        }
+        //go through all gaps, and if any one fails to validate then
+        //whole part fails to validate
+        var success = true;
+        for(var i=0; i<this.gaps.length; i++) {
+            success = success && this.gaps[i].answered;
+        }
+        this.answered = success;
+    }
+};
+['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
+    GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
+});
+['revealAnswer'].forEach(function(method) {
+    GapFillPart.prototype[method] = util.extend(GapFillPart.prototype[method], Part.prototype[method]);
+});
+Numbas.partConstructors['gapfill'] = util.extend(Part,GapFillPart);
+});
+/*
+Copyright 2011-15 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file The {@link Numbas.parts.NumberEntryPart} object */
+Numbas.queueScript('parts/numberentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+var util = Numbas.util;
+var jme = Numbas.jme;
+var math = Numbas.math;
+var Part = Numbas.parts.Part;
+/** Number entry part - student's answer must be within given range, and written to required precision.
+ * @constructor
+ * @memberof Numbas.parts
+ * @augments Numbas.parts.Part
+ */
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
+{
+    var settings = this.settings;
+    util.copyinto(NumberEntryPart.prototype.settings,settings);
+}
+NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
+{
+    loadFromXML: function(xml) {
+        var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+        tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
+        var answerNode = xml.selectSingleNode('answer');
+        var notationStyles = answerNode.getAttribute('notationstyles');
+        if(notationStyles) {
+            settings.notationStyles = notationStyles.split(',');
+        }
+        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
+        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
+        var messageNode = xml.selectSingleNode('answer/precision/message');
+        if(messageNode) {
+            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+        }
+    },
+    loadFromJSON: function(data) {
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
+        tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
+        tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
+        tryLoad(data, ['notationStyles'], settings);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+    },
+    finaliseLoad: function() {
+        var settings = this.settings;
+        if(settings.precisionType!='none') {
+            settings.allowFractions = false;
+        }
+        try {
+            this.getCorrectAnswer(this.getScope());
+        } catch(e) {
+            this.error(e.message);
+        }
+        this.stagedAnswer = '';
+        if(Numbas.display) {
+            this.display = new Numbas.display.NumberEntryPartDisplay(this);
+        }
+    },
+    resume: function() {
+        if(!this.store) {
+            return;
+        }
+        var pobj = this.store.loadPart(this);
+        this.stagedAnswer = pobj.studentAnswer+'';
+    },
+    /** The student's last submitted answer */
+    studentAnswer: '',
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     * @type {Numbas.marking.MarkingScript}
+     */
+    markingScript: Numbas.marking_scripts.numberentry,
+    /** Properties set when the part is generated
+     * Extends {@link Numbas.parts.Part#settings}
+     * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
+     * @property {Number} minvalue - minimum value marked correct
+     * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
+     * @property {Number} maxvalue - maximum value marked correct
+     * @property {Number} correctAnswerFraction - display the correct answer as a fraction?
+     * @property {Boolean} allowFractions - can the student enter a fraction as their answer?
+     * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
+     * @property {Number} displayAnswer - representative correct answer to display when revealing answers
+     * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
+     * @property {Number} precisionString - definition of precision setting, before variables are substituted in
+     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
+     * @property {Number} precision - how many decimal places or significant figures to require
+     * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
+     * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
+     * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
+     * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+     */
+    settings:
+    {
+        minvalueString: '0',
+        maxvalueString: '0',
+        minvalue: 0,
+        maxvalue: 0,
+        correctAnswerFraction: false,
+        allowFractions: false,
+        notationStyles: ['en','si-en'],
+        displayAnswer: 0,
+        precisionType: 'none',
+        precisionString: '0',
+        strictPrecision: false,
+        precision: 0,
+        precisionPC: 0,
+        mustBeReduced: false,
+        mustBeReducedPC: 0,
+        precisionMessage: R('You have not given your answer to the correct precision.'),
+        showPrecisionHint: true
+    },
+    /** The name of the input widget this part uses, if any.
+     * @returns {String}
+     */
+    input_widget: function() {
+        return 'number';
+    },
+    /** Options for this part's input widget
+     * @returns {Object}
+     */
+    input_options: function() {
+        return {
+            allowFractions: this.settings.allowFractions,
+            allowedNotationStyles: this.settings.notationStyles
+        };
+    },
+    /** Compute the correct answer, based on the given scope
+     */
+    getCorrectAnswer: function(scope) {
+        var settings = this.settings;
+        var precision = jme.subvars(settings.precisionString, scope);
+        settings.precision = scope.evaluate(precision).value;
+        if(settings.precisionType=='sigfig' && settings.precision<=0) {
+            throw(new Numbas.Error('part.numberentry.zero sig fig'));
+        }
+        if(settings.precisionType=='dp' && settings.precision<0) {
+            throw(new Numbas.Error('part.numberentry.negative decimal places'));
+        }
+        var minvalue = jme.subvars(settings.minvalueString,scope);
+        minvalue = scope.evaluate(minvalue);
+        if(minvalue && minvalue.type=='number') {
+            minvalue = minvalue.value;
+        } else {
+            throw(new Numbas.Error('part.setting not present',{property:R('minimum value')}));
+        }
+        var maxvalue = jme.subvars(settings.maxvalueString,scope);
+        maxvalue = scope.evaluate(maxvalue);
+        if(maxvalue && maxvalue.type=='number') {
+            maxvalue = maxvalue.value;
+        } else {
+            throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
+        }
+        var displayAnswer = (minvalue + maxvalue)/2;
+        if(settings.correctAnswerFraction) {
+            var diff = Math.abs(maxvalue-minvalue)/2;
+            var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
+            settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
+        } else {
+            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+        }
+        switch(settings.precisionType) {
+        case 'dp':
+            minvalue = math.precround(minvalue,settings.precision);
+            maxvalue = math.precround(maxvalue,settings.precision);
+            break;
+        case 'sigfig':
+            minvalue = math.siground(minvalue,settings.precision);
+            maxvalue = math.siground(maxvalue,settings.precision);
+            break;
+        }
+        var fudge = 0.00000000001;
+        settings.minvalue = minvalue - fudge;
+        settings.maxvalue = maxvalue + fudge;
+    },
+    /** Tidy up the student's answer - at the moment, just remove space.
+     * You could override this to do more substantial filtering of the student's answer.
+     * @param {String} answer
+     * @returns {String}
+     */
+    cleanAnswer: function(answer) {
+        answer = answer.toString().trim();
+        return answer;
+    },
+    /** Save a copy of the student's answer as entered on the page, for use in marking.
+     */
+    setStudentAnswer: function() {
+        this.studentAnswer = this.cleanAnswer(this.stagedAnswer);
+    },
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+     * @abstract
+     * @returns {Numbas.jme.token}
+     */
+    rawStudentAnswerAsJME: function() {
+        return new Numbas.jme.types.TString(this.studentAnswer);
+    },
+    /** Get the student's answer as a floating point number
+     * @returns {Number}
+     */
+    studentAnswerAsFloat: function() {
+        return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
+    }
+};
+['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
+    NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
+});
+Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
 });
