@@ -1040,6 +1040,8 @@
 					assert.equal(simplifyExpression('e*x',['all']),'e*x','e*x doesn\t omit the *');
 					assert.equal(simplifyExpression('1*pi/4',['all']),'pi/4','1*pi/4 cancels the 1');
 					assert.equal(simplifyExpression('2*pi/4',['all']),'pi/2','2*pi/4 cancels the integer factor');
+					assert.equal(simplifyExpression('15*pi/12',['all']),'(5 pi)/4','15*pi/12 cancels the integer factor');
+					assert.equal(simplifyExpression('21*pi/12',['all']),'(7 pi)/4','21*pi/12 cancels the integer factor');
 					assert.equal(simplifyExpression('2*pi*x/4',['all']),'(pi*x)/2','2*pi*x/4 cancels the integer factor');
 					assert.equal(simplifyExpression('x/(2 pi^2)',['all']),'x/(2 pi^2)','x/(2 pi^2) brackets the multiple of pi');
 					assert.equal(simplifyExpression('2*x/(4*pi^2)',['all']),'x/(2 pi^2)','2*x/(4*pi^2) cancels the integer factor');
@@ -1059,6 +1061,9 @@
                     assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 2*x^3 - 13*x^2 - 26x - 24','Large product with a negative term expanded and collected');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+2x+1)','all'),'(x^2 + 4x + 1)(x^2 + 2x + 1)','cancelFactors on polynomials differing only by coefficients');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
+					
+					
+					
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
