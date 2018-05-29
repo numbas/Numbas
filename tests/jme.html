@@ -1051,6 +1051,11 @@
 					assert.equal(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 					assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
                     assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+					
+					assert.equal(simplifyExpression('cos(0.5pi)',['all']),'0','cos(0.5pi) evaluated');
+					assert.equal(simplifyExpression('cos(pi/2)',['all']),'0','cos(pi/2) evaluated');
+					assert.equal(simplifyExpression('cos(1.5pi)',['all']),'0','cos(1.5pi) evaluated');
+					assert.equal(simplifyExpression('cos(3pi/2)',['all']),'0','cos(3pi/2) evaluated');
 
                     assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
