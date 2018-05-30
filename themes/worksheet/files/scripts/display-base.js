@@ -89,28 +89,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     typeset: function(selector,callback)
     {
-        try
-        {
-            if(!selector)
-                selector = $('body');
-            $(selector).each(function(i,elem) {
-                display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
-            });
-            if(callback)
-                display.MathJaxQueue.Push(callback);
-        }
-        catch(e)
-        {
-            if(MathJax===undefined && !display.failedMathJax)
-            {
-                display.failedMathJax = true;
-                display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
-            }
-            else
-            {
-                Numbas.showError(e);
-            }
-        };
     },
     /** The Numbas exam has failed so much it can't continue - show an error message and the error
      * @param {Error} e
@@ -144,7 +122,8 @@ WorksheetDisplay.prototype = {
         var w = this;
 
         this.exams([]);
-        document.getElementById('examList').innerHTML = '';
+        var examList = document.getElementById('examList');
+        examList.innerHTML = '';
 
         var offset = parseInt(this.offset());
         var numExams = parseInt(this.numExams());
@@ -156,6 +135,19 @@ WorksheetDisplay.prototype = {
             if(n<numExams-1) {
                 e.exam.signals.on('question variables generated', function() {
                     make(n+1);
+                });
+            } else {
+                Promise.all(w.exams().map(function(ge){ return ge.exam.signals.getCallback('HTML attached').promise })).then(function() {
+                    try {
+                        MathJax.Hub.Queue(['Typeset',MathJax.Hub,'examList']);
+                    } catch(e) {
+                        if(MathJax===undefined && !display.failedMathJax) {
+                            display.failedMathJax = true;
+                            display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+                        } else {
+                            Numbas.showError(e);
+                        }
+                    }
                 });
             }
         }
@@ -180,8 +172,8 @@ function GeneratedExam(offset) {
     job(exam.init,exam);
     this.html = document.getElementById('examTemplate').cloneNode(true);
     this.html.removeAttribute('id');
-    Knockout.applyBindings(ge,this.html);
     document.getElementById('examList').appendChild(this.html);
+    Knockout.applyBindings(ge,this.html);
     exam.signals.on('question list initialised', function() {
         ge.progressText('Done');
         exam.questionList.forEach(function(q) {
@@ -190,9 +182,13 @@ function GeneratedExam(offset) {
                 li.innerHTML = '<h3 class="question-number">'+(q.display.displayName())+'</h3>';
                 li.appendChild(q.display.html[0])
                 ge.html.querySelector('.questionList').appendChild(li);
+                q.signals.trigger('HTML appended');
             });
         });
-        Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated')})).then(function() {
+        Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('HTML appended').promise})).then(function() {
+            exam.signals.trigger('HTML attached');
+        });
+        Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated').promise})).then(function() {
             exam.signals.trigger('question variables generated');
         });
     });
