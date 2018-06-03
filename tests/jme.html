@@ -1085,7 +1085,10 @@
 					assert.equal(simplifyExpression('tanh(-x)',['oddEven']),'-tanh(x)','minus sign pulled out from tanh');
 					assert.equal(simplifyExpression('(-x)^4',['oddEven']),'x^4','minus sign pulled out from (-x)^4');
 					
-					
+					assert.equal(simplifyExpression('2x+2y',['all','commonFactors']),'2(x + y)','pull out common integer factor');
+					assert.equal(simplifyExpression('2.5x+2.5y',['all','commonFactors']),'2.5(x + y)','pull out common decimal factor');
+					assert.equal(simplifyExpression('(2-3i)x+(2-3i)y',['all','commonFactors']),'(2 - 3i)(x + y)','pull out common complex factor');
+					assert.equal(simplifyExpression('2x+2y+2z',['all','commonFactors']),'2(x + y + z)','pull out common integer factor, three terms');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');

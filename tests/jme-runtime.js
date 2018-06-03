@@ -5359,15 +5359,19 @@ var trigSurds = [
 	['tan(?;n/?;m)',['n isa "number"','m isa "number"','isint(4*(n/m)/pi)','!(isint(2*(n/m)/pi))'],'eval(tan(n/m))'] 
 ]
 var oddEven = [
-		['sin(-?;x)',[],'-sin(x)'],
-		['cos(-?;x)',[],'cos(x)'],
-		['tan(-?;x)',[],'-tan(x)'],
-		['sinh(-?;x)',[],'-sinh(x)'],
-		['cosh(-?;x)',[],'cosh(x)'],
-		['tanh(-?;x)',[],'-tanh(x)'],
-		['(-?;x)^(?;n)',['n isa "number"',"isint(n/2)"],'x^n'],
-		['(-?;x)^(?;n)',['n isa "number"',"isint((n-1)/2)"],'-x^n']
-	]
+	['sin(-?;x)',[],'-sin(x)'],
+	['cos(-?;x)',[],'cos(x)'],
+	['tan(-?;x)',[],'-tan(x)'],
+	['sinh(-?;x)',[],'-sinh(x)'],
+	['cosh(-?;x)',[],'cosh(x)'],
+	['tanh(-?;x)',[],'-tanh(x)'],
+	['(-?;x)^(?;n)',['n isa "number"',"isint(n/2)"],'x^n'],
+	['(-?;x)^(?;n)',['n isa "number"',"isint((n-1)/2)"],'-x^n']
+]
+var commonFactors = [
+	['?;n*(?;x)+?;n*(?;y)',['n isa "number"'],'n*(x+y)']
+]
+
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
  * @returns {Numbas.jme.rules.Ruleset}
@@ -5385,7 +5389,7 @@ var compileRules = jme.rules.compileRules = function(rules)
 }
 var all=[];
 var compiledSimplificationRules = {};
-var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven'];
+var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven','commonFactors'];
 for(var x in simplificationRules)
 {
     compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
@@ -5397,6 +5401,7 @@ compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules
 compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
 compiledSimplificationRules['trigsurds'] = compileRules(trigSurds);
 compiledSimplificationRules['oddeven'] = compileRules(oddEven);
+compiledSimplificationRules['commonfactors'] = compileRules(commonFactors);
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
