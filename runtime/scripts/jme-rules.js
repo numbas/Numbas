@@ -745,6 +745,27 @@ var expandBracketsRules = [
     ['(?;x-?;y)*?;z',[],'x*z-y*z'],
     ['?;x*(?;y-?;z)',[],'x*y-x*z']
 ]
+// other new rules 
+var trigSurds = [
+	['sin(?;n)',['n isa "number"','isint(3*n/pi)','!(isint(n/pi))'],'eval(sin(n)*2/sqrt(3))*sqrt(3)/2'],
+	['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(3*(n/m)/pi)','!(isint((n/m)/pi))'],'eval(sin(n/m)*2/sqrt(3))*sqrt(3)/2'],
+	['cos(?;n)',['n isa "number"','isint(3*n/pi)','!(isint(n/pi))'],'eval(cos(n)*2)/2'],
+	['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(3*(n/m)/pi)','!(isint((n/m)/pi))'],'eval(cos(n/m)*2)/2'],
+	['tan(?;n)',['n isa "number"','isint(3*n/pi)','!(isint(n/pi))'],'eval(tan(n)/sqrt(3))*sqrt(3)'],
+	['tan(?;n/?;m)',['n isa "number"','m isa "number"','isint(3*(n/m)/pi)','!(isint((n/m)/pi))'],'eval(tan(n/m)/sqrt(3))*sqrt(3)'],
+	['sin(?;n)',['n isa "number"','isint(6*n/pi)','!(isint(3*n/pi))','!(isint(2*n/pi))'],'eval(sin(n)*2)/2'],
+	['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(6*(n/m)/pi)','!(isint(3*(n/m)/pi))','!(isint(2*(n/m)/pi))'],'eval(sin(n/m)*2)/2'],
+	['cos(?;n)',['n isa "number"','isint(6*n/pi)','!(isint(3*n/pi))','!(isint(2*n/pi))'],'eval(cos(n)*2/sqrt(3))*sqrt(3)/2'],
+	['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(6*(n/m)/pi)','!(isint(3*(n/m)/pi))','!(isint(2*(n/m)/pi))'],'eval(cos(n/m)*2/sqrt(3))*sqrt(3)/2'],
+	['tan(?;n)',['n isa "number"','isint(6*n/pi)','!(isint(3*n/pi))','!(isint(2*n/pi))'],'eval(tan(n)*sqrt(3))/sqrt(3)'],
+	['tan(?;n/?;m)',['n isa "number"','m isa "number"','isint(6*(n/m)/pi)','!(isint(3*(n/m)/pi))','!(isint(2*(n/m)/pi))'],'eval(tan(n/m)*sqrt(3))/sqrt(3)'],
+	['sin(?;n)',['n isa "number"','isint(4*n/pi)','!(isint(2*n/pi))'],'eval(sin(n)*sqrt(2))/sqrt(2)'],
+	['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(4*(n/m)/pi)','!(isint(2*(n/m)/pi))'],'eval(sin(n/m)*sqrt(2))/sqrt(2)'],
+	['cos(?;n)',['n isa "number"','isint(4*n/pi)','!(isint(2*n/pi))'],'eval(cos(n)*sqrt(2))/sqrt(2)'],
+	['cos(?;n/?;m)',['n isa "number"','m isa "number"','isint(4*(n/m)/pi)','!(isint(2*(n/m)/pi))'],'eval(cos(n/m)*sqrt(2))/sqrt(2)'],
+	['tan(?;n)',['n isa "number"','isint(4*n/pi)','!(isint(2*n/pi))'],'eval(tan(n))'],
+	['tan(?;n/?;m)',['n isa "number"','m isa "number"','isint(4*(n/m)/pi)','!(isint(2*(n/m)/pi))'],'eval(tan(n/m))'] 
+]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
  * @returns {Numbas.jme.rules.Ruleset}
@@ -762,7 +783,7 @@ var compileRules = jme.rules.compileRules = function(rules)
 }
 var all=[];
 var compiledSimplificationRules = {};
-var notAll = ['canonicalOrder','expandBrackets'];
+var notAll = ['canonicalOrder','expandBrackets','trigSurds'];
 for(var x in simplificationRules)
 {
     compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
@@ -772,6 +793,7 @@ for(var x in simplificationRules)
 }
 compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
 compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
+compiledSimplificationRules['trigsurds'] = compileRules(trigSurds);
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });

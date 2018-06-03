@@ -1068,6 +1068,9 @@
 					assert.equal(simplifyExpression('sin(pi/2)',['all']),'1','sin(pi/2) evaluated');
 					assert.equal(simplifyExpression('sin(1.5pi)',['all']),'-1','sin(1.5pi) evaluated');
 					assert.equal(simplifyExpression('sin(3pi/2)',['all']),'-1','sin(3pi/2) evaluated');
+					
+					assert.equal(simplifyExpression('cos(0.25pi)',['all','trigSurds']),'1/sqrt(2)','cos(0.25pi) evaluated');
+					assert.equal(simplifyExpression('sin(5pi/6)',['all','trigSurds']),'1/2','sin(5pi/6) evaluated');
 
                     assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
