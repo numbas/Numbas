@@ -5179,7 +5179,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['0-?;x',[],'-x']
     ],
     zeroPower: [
-        ['?;x^0',[],'1']
+        ['?;x^0',['!(x=0)'],'1']
     ],
     noLeadingMinus: [
         ['-?;x+?;y',[],'y-x'],                                            //don't start with a unary minus
@@ -5210,7 +5210,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;n/?;m',['n isa "complex"','m isa "complex"','re(n)=0','re(m)=0'],'eval(n/i)/eval(m/i)']            // cancel i when numerator and denominator are both purely imaginary
     ],
     zeroBase: [
-        ['0^?;x',[],'0']
+        ['0^?;x',['!(x=0)'],'0']
     ],
     constantsFirst: [
         ['?;x*?;n',['n isa "number"','!(x isa "number")','n<>i'],'n*x'],
@@ -5241,7 +5241,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['sin^(?;n)(?;x)',[],'sin(x)^n']
     ],
     otherNumbers: [
-        ['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
+        ['?;n^?;m',['n isa "number"','m isa "number"','!((n=0) and (m=0))'],'eval(n^m)']
     ],
     cancelTerms: [
         // x+y or rest+x+y

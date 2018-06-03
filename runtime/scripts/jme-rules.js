@@ -649,7 +649,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['sin^(?;n)(?;x)',[],'sin(x)^n']
     ],
     otherNumbers: [
-        ['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
+        ['?;n^?;m',['n isa "number"','m isa "number"','!((n=0) and (m=0))'],'eval(n^m)']
     ],
     cancelTerms: [
         // x+y or rest+x+y

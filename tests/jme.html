@@ -1052,6 +1052,14 @@
 					assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
                     assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
 					
+					assert.equal(simplifyExpression('5^0',['zeroPower']),'1','5^0 simplified by zeroPower');
+					assert.equal(simplifyExpression('x^0',['zeroPower']),'1','x^0 simplified');
+					assert.equal(simplifyExpression('0^5',['zeroBase']),'0','0^5 simplified by zeroBase');
+					assert.equal(simplifyExpression('0^x',['zeroBase']),'0','0^x simplified');
+					assert.equal(simplifyExpression('5^0',['otherNumbers']),'1','5^0 simplified by otherNumbers');
+					assert.equal(simplifyExpression('0^5',['otherNumbers']),'0','0^5 simplified by otherNumbers');
+					assert.equal(simplifyExpression('0^0',['all']),'0^0','0^0 not simplified');
+					
 					assert.equal(simplifyExpression('cos(0.5pi)',['all']),'0','cos(0.5pi) evaluated');
 					assert.equal(simplifyExpression('cos(pi/2)',['all']),'0','cos(pi/2) evaluated');
 					assert.equal(simplifyExpression('cos(1.5pi)',['all']),'0','cos(1.5pi) evaluated');
