@@ -779,6 +779,12 @@ var oddEvenRules = [
 var commonFactorsRules = [
 	['?;n*(?;x)+?;n*(?;y)',['n isa "number"'],'n*(x+y)']
 ]
+var calcErrorRules = [
+	['?;x',['x isa "number"','x>-0.0000000001','x<0'],'0'],
+	['?;x',['x isa "number"','x<0.0000000001','x>0'],'0'],
+	['?;x',['x isa "number"','x>0.9999999999','x<1'],'1'],
+	['?;x',['x isa "number"','x<1.0000000001','x>1'],'1'],
+]
 
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
@@ -797,7 +803,7 @@ var compileRules = jme.rules.compileRules = function(rules)
 }
 var all=[];
 var compiledSimplificationRules = {};
-var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven','commonFactors'];
+var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven','commonFactors','calcError'];
 for(var x in simplificationRules)
 {
     compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
@@ -810,6 +816,7 @@ compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules
 compiledSimplificationRules['trigsurds'] = compileRules(trigSurdsRules);
 compiledSimplificationRules['oddeven'] = compileRules(oddEvenRules);
 compiledSimplificationRules['commonfactors'] = compileRules(commonFactorsRules);
+compiledSimplificationRules['calcerror'] = compileRules(calcErrorRules);
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });

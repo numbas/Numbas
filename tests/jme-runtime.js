@@ -5338,7 +5338,7 @@ var expandBracketsRules = [
     ['?;x*(?;y-?;z)',[],'x*y-x*z']
 ]
 // other new rules 
-var trigSurds = [
+var trigSurdsRules = [
 	['sin(?;n)',['n isa "number"','isint(3*n/pi)','!(isint(n/pi))'],'eval(sin(n)*2/sqrt(3))*sqrt(3)/2'],
 	['sin(?;n/?;m)',['n isa "number"','m isa "number"','isint(3*(n/m)/pi)','!(isint((n/m)/pi))'],'eval(sin(n/m)*2/sqrt(3))*sqrt(3)/2'],
 	['cos(?;n)',['n isa "number"','isint(3*n/pi)','!(isint(n/pi))'],'eval(cos(n)*2)/2'],
@@ -5358,7 +5358,7 @@ var trigSurds = [
 	['tan(?;n)',['n isa "number"','isint(4*n/pi)','!(isint(2*n/pi))'],'eval(tan(n))'],
 	['tan(?;n/?;m)',['n isa "number"','m isa "number"','isint(4*(n/m)/pi)','!(isint(2*(n/m)/pi))'],'eval(tan(n/m))'] 
 ]
-var oddEven = [
+var oddEvenRules = [
 	['sin(-?;x)',[],'-sin(x)'],
 	['cos(-?;x)',[],'cos(x)'],
 	['tan(-?;x)',[],'-tan(x)'],
@@ -5368,8 +5368,14 @@ var oddEven = [
 	['(-?;x)^(?;n)',['n isa "number"',"isint(n/2)"],'x^n'],
 	['(-?;x)^(?;n)',['n isa "number"',"isint((n-1)/2)"],'-x^n']
 ]
-var commonFactors = [
+var commonFactorsRules = [
 	['?;n*(?;x)+?;n*(?;y)',['n isa "number"'],'n*(x+y)']
+]
+var calcErrorRules = [
+	['?;x',['x isa "number"','x>-0.0000000001','x<0'],'0'],
+	['?;x',['x isa "number"','x<0.0000000001','x>0'],'0'],
+	['?;x',['x isa "number"','x>0.9999999999','x<1'],'1'],
+	['?;x',['x isa "number"','x<1.0000000001','x>1'],'1'],
 ]
 
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
@@ -5389,7 +5395,7 @@ var compileRules = jme.rules.compileRules = function(rules)
 }
 var all=[];
 var compiledSimplificationRules = {};
-var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven','commonFactors'];
+var notAll = ['canonicalOrder','expandBrackets','trigSurds','oddEven','commonFactors','calcError'];
 for(var x in simplificationRules)
 {
     compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
@@ -5399,9 +5405,10 @@ for(var x in simplificationRules)
 }
 compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
 compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
-compiledSimplificationRules['trigsurds'] = compileRules(trigSurds);
-compiledSimplificationRules['oddeven'] = compileRules(oddEven);
-compiledSimplificationRules['commonfactors'] = compileRules(commonFactors);
+compiledSimplificationRules['trigsurds'] = compileRules(trigSurdsRules);
+compiledSimplificationRules['oddeven'] = compileRules(oddEvenRules);
+compiledSimplificationRules['commonfactors'] = compileRules(commonFactorsRules);
+compiledSimplificationRules['calcerror'] = compileRules(calcErrorRules);
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
