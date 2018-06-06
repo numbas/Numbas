@@ -726,7 +726,7 @@ scorm.partTypeStorage = {
         load: function(part, data) { return data.answer || ''; }
     },
     'matrix': {
-        interaction_type: function(part) {return 'long-fill-in';},
+        interaction_type: function(part) {return 'fill-in';},
         correct_answer: function(part) {
             return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
         },
@@ -745,7 +745,7 @@ scorm.partTypeStorage = {
         }
     },
     'patternmatch': {
-        interaction_type: function(part) {return 'long-fill-in';},
+        interaction_type: function(part) {return 'fill-in';},
         correct_answer: function(part) {
             return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
         },
@@ -754,7 +754,7 @@ scorm.partTypeStorage = {
         load: function(part, data) { return data.answer || ''; }
     },
     'jme': {
-        interaction_type: function(part) {return 'long-fill-in';},
+        interaction_type: function(part) {return 'fill-in';},
         correct_answer: function(part) {
             return '{case_matters=false}'+part.settings.correctAnswer;
         },
@@ -822,13 +822,13 @@ scorm.inputWidgetStorage = {
         load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
-        interaction_type: function(part) { return 'long-fill-in'; },
+        interaction_type: function(part) { return 'fill-in'; },
         correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer); },
         student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer); },
         load: function(part, data) { return Numbas.jme.compile(data.answer); }
     },
     'matrix': {
-        interaction_type: function(part) { return 'long-fill-in'; },
+        interaction_type: function(part) { return 'fill-in'; },
         correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
         student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
         load: function(part, data) {
