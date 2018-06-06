@@ -728,7 +728,7 @@ scorm.partTypeStorage = {
     'matrix': {
         interaction_type: function(part) {return 'long-fill-in';},
         correct_answer: function(part) {
-            return JSON.stringify(part.settings.correctAnswer);
+            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
         },
         student_answer: function(part) {
             return JSON.stringify({
@@ -747,7 +747,7 @@ scorm.partTypeStorage = {
     'patternmatch': {
         interaction_type: function(part) {return 'long-fill-in';},
         correct_answer: function(part) {
-            return '{case_matters='+part.settings.caseSensitive+'}{order_matters=false}'+part.settings.correctAnswer;
+            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
         },
         student_answer: function(part) { return part.studentAnswer; },
         suspend_data: function() {},
@@ -756,7 +756,7 @@ scorm.partTypeStorage = {
     'jme': {
         interaction_type: function(part) {return 'long-fill-in';},
         correct_answer: function(part) {
-            return '{case_matters=false}{order_matters=false}'+part.settings.correctAnswer;
+            return '{case_matters=false}'+part.settings.correctAnswer;
         },
         student_answer: function(part) { return part.studentAnswer; },
         suspend_data: function() {},
