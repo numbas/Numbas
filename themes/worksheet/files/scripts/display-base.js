@@ -172,24 +172,26 @@ function GeneratedExam(offset) {
     job(exam.init,exam);
     this.html = document.getElementById('examTemplate').cloneNode(true);
     this.html.removeAttribute('id');
+    Knockout.applyBindings(this,this.html);
     document.getElementById('examList').appendChild(this.html);
-    Knockout.applyBindings(ge,this.html);
     exam.signals.on('question list initialised', function() {
         ge.progressText('Done');
         exam.questionList.forEach(function(q) {
+            q.display.init();
             q.signals.on('HTMLAttached',function() {
                 var li = document.createElement('li');
                 li.innerHTML = '<h3 class="question-number">'+(q.display.displayName())+'</h3>';
                 li.appendChild(q.display.html[0])
                 ge.html.querySelector('.questionList').appendChild(li);
+                exam.display.applyQuestionBindings(q);
                 q.signals.trigger('HTML appended');
             });
         });
-        Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('HTML appended').promise})).then(function() {
-            exam.signals.trigger('HTML attached');
-        });
         Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated').promise})).then(function() {
             exam.signals.trigger('question variables generated');
+        });
+        Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('HTML appended').promise})).then(function() {
+            exam.signals.trigger('HTML attached');
         });
     });
 }
