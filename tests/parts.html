@@ -137,6 +137,14 @@
                     var res = mark_part(p,'');
                     assert.notOk(res.valid,'"" invalid');
                 });
+                QUnit.test('Answer that can\'t be evaluated', function(assert) {
+                    var data = {"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x^2+x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[],"musthave":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"didn't use ("},"notallowed":{"strings":["^"],"showStrings":false,"partialCredit":0,"message":"did use ^"}};
+                    var p = createPartFromJSON(data);
+                    var res = mark_part(p,'x(x+1)');
+                    assert.notOk(res.valid,"x(x+1) not valid");
+                    var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Operation <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Operation <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"}];
+                    assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
+                });
 
                 QUnit.module('Pattern match');
                 QUnit.test('Answer is "hi+"', function(assert) {
@@ -224,8 +232,22 @@
                     var scope = p.getScope();
                     scope.question = {getPart: function(path){ return p.gaps.filter(function(p){return p.path==path})[0]; }};
                     var res = mark_part(p,['x+2']);
-                    console.log(p.gaps[0].studentAnswer);
                     assert.equal(res.credit,1,'"x+2" correct');
+                });
+                QUnit.test('One JME gap with string restrictions', function(assert) {
+                    var done = assert.async();
+                    var data = {"name":"string restriction in gapfill JME part","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>x^2+x</p>\n<p>[[0]]</p>","gaps":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x^2+x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[],"musthave":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"didn't use ("},"notallowed":{"strings":["^"],"showStrings":false,"partialCredit":0,"message":"did use ^"}}]},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]};
+                    var q = Numbas.createQuestionFromJSON(data);
+                    q.generateVariables();
+                    var promise = q.signals.on('ready',function() {
+                        var p = q.getPart('p0');
+                        var res = mark_part(p,['x^2+x']);
+                        assert.ok(res.valid,"x^2+x is valid");
+                        assert.equal(res.credit,0,"x^2+x is incorrect");
+                        var res2 = mark_part(p,['x*(x+1)']);
+                        assert.equal(res2.credit,1,"x*(x+1) is correct");
+                        done();
+                    });
                 });
 
                 QUnit.module('Question');

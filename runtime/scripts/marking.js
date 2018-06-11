@@ -196,7 +196,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             return jme.wrapValue({
                 credit: part.credit,
                 marks: part.marks,
-                feedback: part.markingFeedback,
+                feedback: part.finalised_result.states,
                 answered: part.answered
             });
         }

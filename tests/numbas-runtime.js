@@ -6426,6 +6426,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             this.functions[fn.name].push(fn);
             delete this._resolved_functions[fn.name];
         }
+        this.deleted.functions[fn.name] = false;
     },
     /** Mark the given variable name as deleted from the scope.
      * @param {String} name
@@ -6462,7 +6463,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.token} value
      */
     setVariable: function(name, value) {
-        this.variables[name.toLowerCase()] = value;
+        name = name.toLowerCase();
+        this.variables[name] = value;
+        this.deleted.variables[name] = false;
     },
     /** Get all definitions of the given function name.
      * @param {String} name
@@ -6495,6 +6498,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     setRuleset: function(name, rules) {
         this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
+        this.deleted.rulesets[name.toLowerCase()] = false;
     },
     /** Collect together all items from the given collection
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
@@ -6570,7 +6574,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         if(variables) {
             scope = new Scope([this]);
             for(var name in variables) {
-                scope.variables[name] = jme.wrapValue(variables[name]);
+                scope.setVariable(name,jme.wrapValue(variables[name]));
             }
         }
         //if a string is given instead of an expression tree, compile it to a tree
@@ -8450,10 +8454,10 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 function mapOverList(lambda,names,list,scope) {
     var olist = list.map(function(v) {
         if(typeof(names)=='string') {
-            scope.variables[names] = v;
+            scope.setVariable(names,v);
         } else {
             names.forEach(function(name,i) {
-                scope.variables[name] = v.value[i];
+                scope.setVariable(name,v.value[i]);
             });
         }
         return scope.evaluate(lambda);
@@ -8474,7 +8478,7 @@ jme.mapFunctions = {
     },
     'matrix': function(lambda,name,matrix,scope) {
         return new TMatrix(matrixmath.map(matrix,function(n) {
-            scope.variables[name] = new TNum(n);
+            scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
             if(o.type!='number') {
                 throw(new Numbas.Error("jme.map.matrix map returned non number"))
@@ -8484,7 +8488,7 @@ jme.mapFunctions = {
     },
     'vector': function(lambda,name,vector,scope) {
         return new TVector(vectormath.map(vector,function(n) {
-            scope.variables[name] = new TNum(n);
+            scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
             if(o.type!='number') {
                 throw(new Numbas.Error("jme.map.vector map returned non number"))
@@ -8550,7 +8554,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
         scope = new Scope(scope);
         var name = args[1].tok.name;
         var value = list.filter(function(v) {
-            scope.variables[name] = v;
+            scope.setVariable(name,v);
             return jme.evaluate(lambda,scope).value;
         });
         return new TList(value);
@@ -10604,7 +10608,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             scope = new jme.Scope(scope);
             for(var j=0;j<args.length;j++)
             {
-                scope.variables[fn.paramNames[j]] = args[j];
+                scope.setVariable(fn.paramNames[j],args[j]);
             }
             return jme.evaluate(this.tree,scope);
         }
@@ -10753,11 +10757,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
         }
         try {
-            scope.variables[name] = jme.evaluate(v.tree,scope);
+            var value = jme.evaluate(v.tree,scope);
+            scope.setVariable(name,value);
         } catch(e) {
             throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
         }
-        return scope.variables[name];
+        return value;
     },
     /** Evaluate dictionary of variables
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
@@ -11198,6 +11203,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
     this.markingFeedback = [];
+    this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
 }
@@ -11405,6 +11411,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Array.<Numbas.parts.feedbackmessage>}
      */
     markingFeedback: [],
+    /** The result of the last marking run
+     * @type {Numbas.marking.finalised_state}
+     */
+    finalised_result: {valid: false, credit: 0, states: []},
     /** Warnings shown next to the student's answer
      * @type {Array.<String>}
      */
@@ -11657,6 +11667,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
+        this.finalised_result = [];
         this.submitting = true;
         if(this.stepsShown)
         {
@@ -11688,6 +11699,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         try {
                             var scope = this.errorCarriedForwardScope();
                         } catch(e) {
+                            console.log(e);
                             if(!result) {
                                 this.giveWarning(e.originalMessage);
                                 this.answered = false;
@@ -11705,6 +11717,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     }
                     this.setWarnings(result.warnings);
                     this.markingFeedback = result.markingFeedback;
+                    this.finalised_result = result.finalised_result;
                     this.credit = result.credit;
                     this.answered = result.answered;
                 } catch(e) {
@@ -11766,7 +11779,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** @typedef {Object} Numbas.parts.marking_results
      * A dictionary representing the results of marking a student's answer.
      * @property {Array.<String>} warnings - Warning messages.
-     * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages.
+     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
+     * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
      * @property {Number} credit - Proportion of the available marks to award to the student.
      * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
@@ -11778,15 +11792,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markAgainstScope: function(scope,feedback) {
         this.setWarnings(feedback.warnings.slice());
         this.markingFeedback = feedback.markingFeedback.slice();
+        var finalised_result = {states: [], valid: false, credit: 0};
         try {
-        this.getCorrectAnswer(scope);
-        this.mark();
+            this.getCorrectAnswer(scope);
+            finalised_result = this.mark();
         } catch(e) {
             this.giveWarning(e.message);
         }
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
+            finalised_result: finalised_result,
             credit: this.credit,
             answered: this.answered
         }
@@ -12021,8 +12037,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var oCredit = this.credit
         this.credit *= factor;
         this.markingFeedback.push({
-            op: 'mult_credit',
-            credit: this.credit - oCredit,
+            op: 'multiply_credit',
+            factor: factor,
             message: message
         });
     },
@@ -12418,7 +12434,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             throw(new Numbas.Error('question.loaded name mismatch'));
         }
         for(var x in qobj.variables) {
-            q.scope.variables[x] = qobj.variables[x];
+            q.scope.setVariable(x,qobj.variables[x]);
         }
         q.signals.trigger('variablesSet');
         q.signals.on('partsGenerated', function() {
@@ -13072,7 +13088,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             return jme.wrapValue({
                 credit: part.credit,
                 marks: part.marks,
-                feedback: part.markingFeedback,
+                feedback: part.finalised_result.states,
                 answered: part.answered
             });
         }

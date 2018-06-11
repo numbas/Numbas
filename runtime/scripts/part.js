@@ -133,6 +133,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
     this.markingFeedback = [];
+    this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
 }
@@ -340,6 +341,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Array.<Numbas.parts.feedbackmessage>}
      */
     markingFeedback: [],
+    /** The result of the last marking run
+     * @type {Numbas.marking.finalised_state}
+     */
+    finalised_result: {valid: false, credit: 0, states: []},
     /** Warnings shown next to the student's answer
      * @type {Array.<String>}
      */
@@ -592,6 +597,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
+        this.finalised_result = [];
         this.submitting = true;
         if(this.stepsShown)
         {
@@ -641,6 +647,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     }
                     this.setWarnings(result.warnings);
                     this.markingFeedback = result.markingFeedback;
+                    this.finalised_result = result.finalised_result;
                     this.credit = result.credit;
                     this.answered = result.answered;
                 } catch(e) {
@@ -702,7 +709,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** @typedef {Object} Numbas.parts.marking_results
      * A dictionary representing the results of marking a student's answer.
      * @property {Array.<String>} warnings - Warning messages.
-     * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages.
+     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
+     * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
      * @property {Number} credit - Proportion of the available marks to award to the student.
      * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
@@ -714,15 +722,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markAgainstScope: function(scope,feedback) {
         this.setWarnings(feedback.warnings.slice());
         this.markingFeedback = feedback.markingFeedback.slice();
+        var finalised_result = {states: [], valid: false, credit: 0};
         try {
-        this.getCorrectAnswer(scope);
-        this.mark();
+            this.getCorrectAnswer(scope);
+            finalised_result = this.mark();
         } catch(e) {
             this.giveWarning(e.message);
         }
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
+            finalised_result: finalised_result,
             credit: this.credit,
             answered: this.answered
         }
@@ -957,8 +967,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var oCredit = this.credit
         this.credit *= factor;
         this.markingFeedback.push({
-            op: 'mult_credit',
-            credit: this.credit - oCredit,
+            op: 'multiply_credit',
+            factor: factor,
             message: message
         });
     },
