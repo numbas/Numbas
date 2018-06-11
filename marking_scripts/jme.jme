@@ -79,15 +79,23 @@ vset (The sets of variable values to test against):
 
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
     map(
-        resultsEqual(eval(studentexpr,vars),eval(correctexpr,vars),settings["checkingType"],settings["checkingAccuracy"]),
+        try(
+            resultsEqual(eval(studentexpr,vars),eval(correctexpr,vars),settings["checkingType"],settings["checkingAccuracy"]),
+            message,
+            warn(translate("part.jme.answer invalid",["message":message]));
+            fail(translate("part.jme.answer invalid",["message":message]));
+            false
+        ),
         vars,
         vset
     )
 
 numFails (The number of times the student's answer and the expected answer disagree): 
+    apply(agree);
     len(filter(not x,x,agree))
 
 numericallyCorrect (Is the student's answer numerically correct?):
+    apply(numFails);
     if(numFails<settings["failureRate"],
         correct(translate("part.jme.marking.correct"))
     ,
