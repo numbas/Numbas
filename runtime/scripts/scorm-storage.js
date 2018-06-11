@@ -521,7 +521,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             return;
         //update total exam score and so on
         this.set('score.raw',exam.score);
-        this.set('score.scaled',exam.score/exam.mark || 0);
+        this.set('score.scaled',(exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
     },
     /** Save details about a question - save score and success status
      * @param {Numbas.Question} question
