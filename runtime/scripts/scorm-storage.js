@@ -536,7 +536,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var index = this.questionIndices[id];
         var prepath = 'objectives.'+index+'.';
         this.set(prepath+'score.raw',question.score);
-        this.set(prepath+'score.scaled',question.score/question.marks || 0);
+        this.set(prepath+'score.scaled',(question.marks > 0 ? question.score/question.marks : 0) || 0);
         this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
         this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
     },
