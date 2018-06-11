@@ -758,7 +758,7 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 function mapOverList(lambda,names,list,scope) {
     var olist = list.map(function(v) {
         if(typeof(names)=='string') {
-            scope.setVariables(names,v);
+            scope.setVariable(names,v);
         } else {
             names.forEach(function(name,i) {
                 scope.setVariable(name,v.value[i]);
