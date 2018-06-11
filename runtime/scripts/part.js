@@ -623,6 +623,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         try {
                             var scope = this.errorCarriedForwardScope();
                         } catch(e) {
+                            console.log(e);
                             if(!result) {
                                 this.giveWarning(e.originalMessage);
                                 this.answered = false;

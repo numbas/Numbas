@@ -758,10 +758,10 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 function mapOverList(lambda,names,list,scope) {
     var olist = list.map(function(v) {
         if(typeof(names)=='string') {
-            scope.variables[names] = v;
+            scope.setVariables(names,v);
         } else {
             names.forEach(function(name,i) {
-                scope.variables[name] = v.value[i];
+                scope.setVariable(name,v.value[i]);
             });
         }
         return scope.evaluate(lambda);
@@ -782,7 +782,7 @@ jme.mapFunctions = {
     },
     'matrix': function(lambda,name,matrix,scope) {
         return new TMatrix(matrixmath.map(matrix,function(n) {
-            scope.variables[name] = new TNum(n);
+            scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
             if(o.type!='number') {
                 throw(new Numbas.Error("jme.map.matrix map returned non number"))
@@ -792,7 +792,7 @@ jme.mapFunctions = {
     },
     'vector': function(lambda,name,vector,scope) {
         return new TVector(vectormath.map(vector,function(n) {
-            scope.variables[name] = new TNum(n);
+            scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
             if(o.type!='number') {
                 throw(new Numbas.Error("jme.map.vector map returned non number"))
@@ -858,7 +858,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
         scope = new Scope(scope);
         var name = args[1].tok.name;
         var value = list.filter(function(v) {
-            scope.variables[name] = v;
+            scope.setVariable(name,v);
             return jme.evaluate(lambda,scope).value;
         });
         return new TList(value);

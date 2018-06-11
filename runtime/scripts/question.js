@@ -320,7 +320,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             throw(new Numbas.Error('question.loaded name mismatch'));
         }
         for(var x in qobj.variables) {
-            q.scope.variables[x] = qobj.variables[x];
+            q.scope.setVariable(x,qobj.variables[x]);
         }
         q.signals.trigger('variablesSet');
         q.signals.on('partsGenerated', function() {

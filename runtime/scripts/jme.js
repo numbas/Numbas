@@ -1058,6 +1058,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             this.functions[fn.name].push(fn);
             delete this._resolved_functions[fn.name];
         }
+        this.deleted.functions[fn.name] = false;
     },
     /** Mark the given variable name as deleted from the scope.
      * @param {String} name
@@ -1094,7 +1095,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.token} value
      */
     setVariable: function(name, value) {
-        this.variables[name.toLowerCase()] = value;
+        name = name.toLowerCase();
+        this.variables[name] = value;
+        this.deleted.variables[name] = false;
     },
     /** Get all definitions of the given function name.
      * @param {String} name
@@ -1127,6 +1130,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     setRuleset: function(name, rules) {
         this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
+        this.deleted.rulesets[name.toLowerCase()] = false;
     },
     /** Collect together all items from the given collection
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
@@ -1202,7 +1206,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         if(variables) {
             scope = new Scope([this]);
             for(var name in variables) {
-                scope.variables[name] = jme.wrapValue(variables[name]);
+                scope.setVariable(name,jme.wrapValue(variables[name]));
             }
         }
         //if a string is given instead of an expression tree, compile it to a tree

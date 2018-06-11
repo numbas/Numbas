@@ -50,7 +50,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             scope = new jme.Scope(scope);
             for(var j=0;j<args.length;j++)
             {
-                scope.variables[fn.paramNames[j]] = args[j];
+                scope.setVariable(fn.paramNames[j],args[j]);
             }
             return jme.evaluate(this.tree,scope);
         }
@@ -199,11 +199,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
         }
         try {
-            scope.variables[name] = jme.evaluate(v.tree,scope);
+            var value = jme.evaluate(v.tree,scope);
+            scope.setVariable(name,value);
         } catch(e) {
             throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
         }
-        return scope.variables[name];
+        return value;
     },
     /** Evaluate dictionary of variables
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
