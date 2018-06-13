@@ -200,6 +200,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['marks'],this);
+        this.marks = parseFloat(this.marks);
         tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
@@ -300,6 +301,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             question: this.question,
             part: this
         };
+        if(name=='mark') {
+            // hack on a finalised_state for old marking scripts
+            script = 'var res = (function() {'+script+'}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
+        }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
         }
@@ -629,7 +634,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         try {
                             var scope = this.errorCarriedForwardScope();
                         } catch(e) {
-                            console.log(e);
                             if(!result) {
                                 this.giveWarning(e.originalMessage);
                                 this.answered = false;
@@ -979,7 +983,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markingComment: function(message)
     {
         this.markingFeedback.push({
-            op: 'comment',
+            op: 'feedback',
             message: message
         });
     },

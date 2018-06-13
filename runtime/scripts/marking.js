@@ -54,6 +54,33 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         CONCAT: 'concat'
     }
 
+    var feedback = Numbas.marking.feedback = {
+        set_credit: function(credit,reason,message) {
+            return {op: FeedbackOps.SET_CREDIT, credit: credit, reason: reason, message: message}
+        },
+        add_credit: function(credit,message) {
+            return {op: FeedbackOps.ADD_CREDIT, credit: credit, message: message};
+        },
+        sub_credit: function(credit,message) {
+            return {op: FeedbackOps.SUB_CREDIT, credit: credit, message: message};
+        },
+        multiply_credit: function(factor,message) {
+            return {op: FeedbackOps.MULTIPLY_CREDIT, factor: factor, message: message}
+        },
+        end: function(invalid) {
+            return {op: FeedbackOps.END, invalid: invalid || false}
+        },
+        warning: function(message) {
+            return {op: FeedbackOps.WARNING, message: message}
+        },
+        feedback: function(message) {
+            return {op: FeedbackOps.FEEDBACK, message: message}
+        },
+        concat: function(messages, scale) {
+            return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
+        }
+    }
+
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -76,37 +103,37 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
+            state: [feedback.set_credit(1, 'correct', R('part.marking.correct'))]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
+            state: [feedback.set_credit(1, 'correct', message)]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
+            state: [feedback.set_credit(0, 'incorrect', R('part.marking.incorrect'))]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
+            state: [feedback.set_credit(0, 'incorrect', message)]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:FeedbackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
+            state = feedback.set_credit(1, 'correct', correctMessage || R('part.marking.correct'));
         } else {
-            state = [{op:FeedbackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
+            state = feedback.set_credit(0, 'incorrect', incorrectMessage || R('part.marking.incorrect'));
         }
         return {
             return: condition,
-            state: state
+            state: [state]
         };
     }
     state_functions.push(state_fn('correctif',[TBool],TBool,correctif));
@@ -114,52 +141,52 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.SET_CREDIT, credit:n, message: message}]
+            state: [feedback.set_credit(n, undefined, message)]
         }
     }));
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.MULTIPLY_CREDIT, factor: n, message: message}]
+            state: [feedback.multiply_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.ADD_CREDIT, credit:n, message: message}]
+            state: [feedback.add_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.SUB_CREDIT, credit:n, message: message}]
+            state: [feedback.sub_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('end',[],TBool,function() {
         return {
             return: true,
-            state: [{op:FeedbackOps.END}]
+            state: [feedback.end()]
         }
     }));
     state_functions.push(state_fn('fail',[TString],TString,function(message) {
         return {
             return: message,
             state: [
-                {op:FeedbackOps.SET_CREDIT, credit:0, message:message, reason: 'invalid'},
-                {op:FeedbackOps.END, invalid:true}
+                feedback.set_credit(0, 'invalid', message),
+                feedback.end(true)
             ]
         };
     }));
     state_functions.push(state_fn('warn',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{op:"warning", message: message}]
+            state: [feedback.warning(message)]
         }
     }));
     state_functions.push(state_fn('feedback',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{op:"feedback", message: message}]
+            state: [feedback.feedback(message)]
         }
     }));
     state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
@@ -250,10 +277,10 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             });
         }
     }));
-    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(feedback, scale) {
+    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(messages, scale) {
         return {
-            return: feedback,
-            state: {op: FeedbackOps.CONCAT, messages: feedback, scale: scale}
+            return: messages,
+            state: [feedback.concat(messages, scale)]
         }
     }));
 
