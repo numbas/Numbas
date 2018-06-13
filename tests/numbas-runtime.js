@@ -10876,7 +10876,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i<ancestors.length;i++) {
-                if(dependants[name].contains(ancestors[i])) {
+                var ancestor = ancestors[i].toLowerCase()
+                if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
                 }
