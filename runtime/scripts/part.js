@@ -639,6 +639,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         var result_replacement = this.markAgainstScope(scope,existing_feedback);
                         if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                             result = result_replacement;
+                            result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
                             result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                         }
                     }
