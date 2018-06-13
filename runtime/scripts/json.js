@@ -26,6 +26,9 @@ var json = Numbas.json = {
                 if(target_attr in target && typeof target[target_attr] == 'string') {
                     value += '';
                 }
+                if(target_attr in target && typeof target[target_attr] == 'number') {
+                    value = parseFloat(value);
+                }
                 target[target_attr] = value;
             }
         }
