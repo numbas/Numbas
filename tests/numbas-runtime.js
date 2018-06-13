@@ -12044,6 +12044,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.credit *= factor;
         this.markingFeedback.push({
             op: 'multiply_credit',
+            credit: this.credit - oCredit,
             factor: factor,
             message: message
         });
@@ -13616,7 +13617,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 } else {
                     var n = Numbas.util.parseNumber(input,this.allowFractions,this.allowedNotationStyles);
-                    return {valid:true, value: n, originalValue: input};
+                    return {valid:true, value: n};
                 }
             },this);
             this.subscriptions = [

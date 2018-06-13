@@ -973,6 +973,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.credit *= factor;
         this.markingFeedback.push({
             op: 'multiply_credit',
+            credit: this.credit - oCredit,
             factor: factor,
             message: message
         });
