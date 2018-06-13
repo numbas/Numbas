@@ -126,7 +126,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @returns {String}
      */
     input_widget: function() {
-        return 'number';
+        return 'string';
     },
     /** Options for this part's input widget
      * @returns {Object}
