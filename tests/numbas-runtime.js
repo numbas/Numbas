@@ -7677,6 +7677,8 @@ var compareTrees = jme.compareTrees = function(a,b) {
                 }
             }
             break;
+        case 'expression':
+            return jme.compareTrees(a.tok.tree, b.tok.tree);
         case 'number':
             var na = a.tok.value;
             var nb = b.tok.value;
@@ -8643,12 +8645,18 @@ newBuiltin('sort',[TList],TList, null, {
         var list = args[0];
         var newlist = new TList(list.vars);
         newlist.value = list.value.slice().sort(function(a,b){
-            if(math.gt(a.value,b.value))
-                return 1;
-            else if(math.lt(a.value,b.value))
-                return -1;
-            else
-                return 0;
+            if(a.type!=b.type) {
+                return jme.compareTrees({tok:a},{tok:b});
+            } else {
+                switch(a.type) {
+                    case 'number':
+                    case 'string':
+                    case 'boolean':
+                        return a.value>b.value;
+                    default:
+                        return jme.compareTrees({tok:a},{tok:b});
+                }
+            }
         });
         return newlist;
     }

@@ -2309,6 +2309,8 @@ var compareTrees = jme.compareTrees = function(a,b) {
                 }
             }
             break;
+        case 'expression':
+            return jme.compareTrees(a.tok.tree, b.tok.tree);
         case 'number':
             var na = a.tok.value;
             var nb = b.tok.value;
