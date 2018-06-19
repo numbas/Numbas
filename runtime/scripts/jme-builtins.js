@@ -946,20 +946,7 @@ newBuiltin('sort',[TList],TList, null, {
     {
         var list = args[0];
         var newlist = new TList(list.vars);
-        newlist.value = list.value.slice().sort(function(a,b){
-            if(a.type!=b.type) {
-                return jme.compareTrees({tok:a},{tok:b});
-            } else {
-                switch(a.type) {
-                    case 'number':
-                    case 'string':
-                    case 'boolean':
-                        return a.value>b.value;
-                    default:
-                        return jme.compareTrees({tok:a},{tok:b});
-                }
-            }
-        });
+        newlist.value = list.value.slice().sort(jme.sortTokens);
         return newlist;
     }
 });
@@ -967,13 +954,8 @@ newBuiltin('sort_destinations',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
         var newlist = new TList(list.vars);
-        var sorted = list.value.map(function(v,i){ return {value:v.value,i:i} }).sort(function(a,b){
-            if(math.gt(a.value,b.value))
-                return 1;
-            else if(math.lt(a.value,b.value))
-                return -1;
-            else
-                return 0;
+        var sorted = list.value.map(function(v,i){ return {tok:v,i:i} }).sort(function(a,b){
+            return jme.compareTokens(a.tok,b.tok);
         });
         var inverse = [];
         for(var i=0;i<sorted.length;i++) {

@@ -2250,6 +2250,29 @@ var varsUsed = jme.varsUsed = function(tree) {
             return [];
     }
 };
+
+/** Compare two tokens, for the purposes of sorting.
+ * Uses JavaScript comparison for numbers, strings and booleans, and {@link Numbas.jme.compareTrees} for everything else, or when types differ.
+ *
+ * @param {Numbas.jme.token} a
+ * @param {Numbas.jme.token} b
+ * @returns {Number} -1 if `a &lt; b`, 1 if `a > b`, else 0.
+ */
+var compareTokens = jme.compareTokens = function(a,b) {
+    if(a.type!=b.type) {
+        return jme.compareTrees({tok:a},{tok:b});
+    } else {
+        switch(a.type) {
+            case 'number':
+            case 'string':
+            case 'boolean':
+                return a.value>b.value ? 1 : a.value&lt;b.value ? -1 : 0;
+            default:
+                return jme.compareTrees({tok:a},{tok:b});
+        }
+    }
+}
+
 /** Compare two trees.
  *
  * * Compare lists of variables lexically using {@link Numbas.jme.varsUsed}; longest goes first if one is a prefix of the other
