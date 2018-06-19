@@ -1,8 +1,15 @@
-interpreted_answers (The interpreted answers for each gap, in the original order):
+marked_original_order (Mark the gaps in the original order, mainly to establish if every gap has a valid answer):
     map(
-        mark_part(gap["path"],studentAnswer)["values"]["interpreted_answer"],
+        mark_part(gap["path"],studentAnswer),
         [gap,studentAnswer],
         zip(gaps,studentAnswer)
+    )
+
+interpreted_answers (The interpreted answers for each gap, in the original order):
+    map(
+        res["values"]["interpreted_answer"],
+        res,
+        marked_original_order
     )
 
 answers (The student's answers to each gap):
@@ -30,13 +37,15 @@ gap_feedback (Feedback on each of the gaps):
     zip(gap_order,studentAnswer,list(1..len(gaps)))
   )
 
-any_invalid (Are the answers to any of the gaps invalid?):
-  len(filter(not gap["answered"],gap,gap_feedback))>0
+all_valid (Are the answers to all of the gaps valid?):
+  all(map(res["valid"],res,marked_original_order))
 
 mark:
+  assert(all_valid or not settings["sortAnswers"], fail(translate("question.can not submit")));
+  apply(all_valid);
   apply(answers);
   apply(gap_feedback);
-  assert(not any_invalid,fail(""))
+  assert(all_valid or settings["sortAnswers"], fail(""))
 
 interpreted_answer:
   answers
