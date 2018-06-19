@@ -218,10 +218,13 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     }
 
     function submit_part(part,answer) {
+        var originalAnswer = part.stagedAnswer;
         if(answer!==undefined) {
             part.stagedAnswer = answer;
         }
         part.submit();
+        part.stagedAnswer = originalAnswer;
+        part.setStudentAnswer();
         return jme.wrapValue({
             credit: part.credit,
             marks: part.marks,
