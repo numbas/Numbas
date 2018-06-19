@@ -1,13 +1,20 @@
+interpreted_answers (The interpreted answers for each gap, in the original order):
+    map(
+        mark_part(gap["path"],studentAnswer)["values"]["interpreted_answer"],
+        [gap,studentAnswer],
+        zip(gaps,studentAnswer)
+    )
+
 answers (The student's answers to each gap):
     if(settings["sortAnswers"],
-        sort(studentAnswer)
+        sort(interpreted_answers)
     ,
-        studentAnswer
+        interpreted_answers
     )
 
 gap_order:
     if(settings["sortAnswers"],
-        sort_destinations(studentAnswer)
+        sort_destinations(interpreted_answers)
     ,
         list(0..len(gaps)01)
     )
