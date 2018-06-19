@@ -86,6 +86,33 @@
         CONCAT: 'concat'
     }
 
+    var feedback = Numbas.marking.feedback = {
+        set_credit: function(credit,reason,message) {
+            return {op: FeedbackOps.SET_CREDIT, credit: credit, reason: reason, message: message}
+        },
+        add_credit: function(credit,message) {
+            return {op: FeedbackOps.ADD_CREDIT, credit: credit, message: message};
+        },
+        sub_credit: function(credit,message) {
+            return {op: FeedbackOps.SUB_CREDIT, credit: credit, message: message};
+        },
+        multiply_credit: function(factor,message) {
+            return {op: FeedbackOps.MULTIPLY_CREDIT, factor: factor, message: message}
+        },
+        end: function(invalid) {
+            return {op: FeedbackOps.END, invalid: invalid || false}
+        },
+        warning: function(message) {
+            return {op: FeedbackOps.WARNING, message: message}
+        },
+        feedback: function(message) {
+            return {op: FeedbackOps.FEEDBACK, message: message}
+        },
+        concat: function(messages, scale) {
+            return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
+        }
+    }
+
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -108,37 +135,37 @@
     state_functions.push(state_fn('correct',[],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:R('part.marking.correct')}]
+            state: [feedback.set_credit(1, 'correct', R('part.marking.correct'))]
         };
     }));
     state_functions.push(state_fn('correct',[TString],TBool,function(message) {
         return {
             return: true,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'correct', credit:1, message:message}]
+            state: [feedback.set_credit(1, 'correct', message)]
         };
     }));
     state_functions.push(state_fn('incorrect',[],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:R('part.marking.incorrect')}]
+            state: [feedback.set_credit(0, 'incorrect', R('part.marking.incorrect'))]
         };
     }));
     state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
         return {
             return: false,
-            state: [{op:FeedbackOps.SET_CREDIT, reason: 'incorrect', credit:0, message:message}]
+            state: [feedback.set_credit(0, 'incorrect', message)]
         };
     }));
     correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
-            state = [{op:FeedbackOps.SET_CREDIT, credit:1, reason: 'correct', message: correctMessage || R('part.marking.correct')}];
+            state = feedback.set_credit(1, 'correct', correctMessage || R('part.marking.correct'));
         } else {
-            state = [{op:FeedbackOps.SET_CREDIT, credit:0, reason: 'incorrect', message: incorrectMessage || R('part.marking.incorrect')}];
+            state = feedback.set_credit(0, 'incorrect', incorrectMessage || R('part.marking.incorrect'));
         }
         return {
             return: condition,
-            state: state
+            state: [state]
         };
     }
     state_functions.push(state_fn('correctif',[TBool],TBool,correctif));
@@ -146,52 +173,52 @@
     state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.SET_CREDIT, credit:n, message: message}]
+            state: [feedback.set_credit(n, undefined, message)]
         }
     }));
     state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.MULTIPLY_CREDIT, factor: n, message: message}]
+            state: [feedback.multiply_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.ADD_CREDIT, credit:n, message: message}]
+            state: [feedback.add_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
-            state: [{op:FeedbackOps.SUB_CREDIT, credit:n, message: message}]
+            state: [feedback.sub_credit(n, message)]
         }
     }));
     state_functions.push(state_fn('end',[],TBool,function() {
         return {
             return: true,
-            state: [{op:FeedbackOps.END}]
+            state: [feedback.end()]
         }
     }));
     state_functions.push(state_fn('fail',[TString],TString,function(message) {
         return {
             return: message,
             state: [
-                {op:FeedbackOps.SET_CREDIT, credit:0, message:message, reason: 'invalid'},
-                {op:FeedbackOps.END, invalid:true}
+                feedback.set_credit(0, 'invalid', message),
+                feedback.end(true)
             ]
         };
     }));
     state_functions.push(state_fn('warn',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{op:"warning", message: message}]
+            state: [feedback.warning(message)]
         }
     }));
     state_functions.push(state_fn('feedback',[TString],TString,function(message) {
         return {
             return: message,
-            state: [{op:"feedback", message: message}]
+            state: [feedback.feedback(message)]
         }
     }));
     state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
@@ -221,18 +248,37 @@
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
         return tree;
     }
+
+    function submit_part(part,answer) {
+        var originalAnswer = part.stagedAnswer;
+        if(answer!==undefined) {
+            part.stagedAnswer = answer;
+        }
+        part.submit();
+        part.stagedAnswer = originalAnswer;
+        part.setStudentAnswer();
+        return jme.wrapValue({
+            credit: part.credit,
+            marks: part.marks,
+            feedback: part.finalised_result.states,
+            answered: part.answered
+        });
+    }
+
     state_functions.push(new jme.funcObj('submit_part',[TString],TDict,null,{
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
-            part.submit();
-            return jme.wrapValue({
-                credit: part.credit,
-                marks: part.marks,
-                feedback: part.markingFeedback,
-                answered: part.answered
-            });
+            return submit_part(part);
         }
     }));
+    state_functions.push(new jme.funcObj('submit_part',[TString,'?'],TDict,null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            var answer = jme.unwrapValue(args[1]);
+            return submit_part(part,answer);
+        }
+    }));
+
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
@@ -282,10 +328,10 @@
             });
         }
     }));
-    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(feedback, scale) {
+    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(messages, scale) {
         return {
-            return: feedback,
-            state: {op: FeedbackOps.CONCAT, messages: feedback, scale: scale}
+            return: messages,
+            state: [feedback.concat(messages, scale)]
         }
     }));
 
@@ -1711,6 +1757,8 @@
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#errorCarriedForwardScope"><a href="Numbas.parts.CustomPart.html#errorCarriedForwardScope">Numbas.parts.CustomPart#errorCarriedForwardScope</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#finalised_result"><a href="Numbas.parts.CustomPart.html#finalised_result">Numbas.parts.CustomPart#finalised_result</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#finaliseLoad"><a href="Numbas.parts.CustomPart.html#finaliseLoad">Numbas.parts.CustomPart#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#gaps"><a href="Numbas.parts.CustomPart.html#gaps">Numbas.parts.CustomPart#gaps</a></li>
@@ -1840,6 +1888,8 @@
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#error"><a href="Numbas.parts.ExtensionPart.html#error">Numbas.parts.ExtensionPart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#errorCarriedForwardScope"><a href="Numbas.parts.ExtensionPart.html#errorCarriedForwardScope">Numbas.parts.ExtensionPart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#finalised_result"><a href="Numbas.parts.ExtensionPart.html#finalised_result">Numbas.parts.ExtensionPart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#finaliseLoad"><a href="Numbas.parts.ExtensionPart.html#finaliseLoad">Numbas.parts.ExtensionPart#finaliseLoad</a></li>
 		
@@ -1974,6 +2024,8 @@
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#error"><a href="Numbas.parts.GapFillPart.html#error">Numbas.parts.GapFillPart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#errorCarriedForwardScope"><a href="Numbas.parts.GapFillPart.html#errorCarriedForwardScope">Numbas.parts.GapFillPart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#finalised_result"><a href="Numbas.parts.GapFillPart.html#finalised_result">Numbas.parts.GapFillPart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#finaliseLoad"><a href="Numbas.parts.GapFillPart.html#finaliseLoad">Numbas.parts.GapFillPart#finaliseLoad</a></li>
 		
@@ -2111,6 +2163,8 @@
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#errorCarriedForwardScope"><a href="Numbas.parts.InformationPart.html#errorCarriedForwardScope">Numbas.parts.InformationPart#errorCarriedForwardScope</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#finalised_result"><a href="Numbas.parts.InformationPart.html#finalised_result">Numbas.parts.InformationPart#finalised_result</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#finaliseLoad"><a href="Numbas.parts.InformationPart.html#finaliseLoad">Numbas.parts.InformationPart#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#gaps"><a href="Numbas.parts.InformationPart.html#gaps">Numbas.parts.InformationPart#gaps</a></li>
@@ -2238,6 +2292,8 @@
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#error"><a href="Numbas.parts.JMEPart.html#error">Numbas.parts.JMEPart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#errorCarriedForwardScope"><a href="Numbas.parts.JMEPart.html#errorCarriedForwardScope">Numbas.parts.JMEPart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#finalised_result"><a href="Numbas.parts.JMEPart.html#finalised_result">Numbas.parts.JMEPart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#finaliseLoad"><a href="Numbas.parts.JMEPart.html#finaliseLoad">Numbas.parts.JMEPart#finaliseLoad</a></li>
 		
@@ -2368,6 +2424,8 @@
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#error"><a href="Numbas.parts.MatrixEntryPart.html#error">Numbas.parts.MatrixEntryPart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#errorCarriedForwardScope"><a href="Numbas.parts.MatrixEntryPart.html#errorCarriedForwardScope">Numbas.parts.MatrixEntryPart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#finalised_result"><a href="Numbas.parts.MatrixEntryPart.html#finalised_result">Numbas.parts.MatrixEntryPart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#finaliseLoad"><a href="Numbas.parts.MatrixEntryPart.html#finaliseLoad">Numbas.parts.MatrixEntryPart#finaliseLoad</a></li>
 		
@@ -2502,6 +2560,8 @@
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#error"><a href="Numbas.parts.MultipleResponsePart.html#error">Numbas.parts.MultipleResponsePart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#errorCarriedForwardScope"><a href="Numbas.parts.MultipleResponsePart.html#errorCarriedForwardScope">Numbas.parts.MultipleResponsePart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#finalised_result"><a href="Numbas.parts.MultipleResponsePart.html#finalised_result">Numbas.parts.MultipleResponsePart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#finaliseLoad"><a href="Numbas.parts.MultipleResponsePart.html#finaliseLoad">Numbas.parts.MultipleResponsePart#finaliseLoad</a></li>
 		
@@ -2643,6 +2703,8 @@
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#errorCarriedForwardScope"><a href="Numbas.parts.NumberEntryPart.html#errorCarriedForwardScope">Numbas.parts.NumberEntryPart#errorCarriedForwardScope</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#finalised_result"><a href="Numbas.parts.NumberEntryPart.html#finalised_result">Numbas.parts.NumberEntryPart#finalised_result</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#finaliseLoad"><a href="Numbas.parts.NumberEntryPart.html#finaliseLoad">Numbas.parts.NumberEntryPart#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#gaps"><a href="Numbas.parts.NumberEntryPart.html#gaps">Numbas.parts.NumberEntryPart#gaps</a></li>
@@ -2775,6 +2837,8 @@
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#errorCarriedForwardScope"><a href="Numbas.parts.Part.html#errorCarriedForwardScope">Numbas.parts.Part#errorCarriedForwardScope</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#finalised_result"><a href="Numbas.parts.Part.html#finalised_result">Numbas.parts.Part#finalised_result</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#finaliseLoad"><a href="Numbas.parts.Part.html#finaliseLoad">Numbas.parts.Part#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#gaps"><a href="Numbas.parts.Part.html#gaps">Numbas.parts.Part#gaps</a></li>
@@ -2904,6 +2968,8 @@
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#error"><a href="Numbas.parts.PatternMatchPart.html#error">Numbas.parts.PatternMatchPart#error</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#errorCarriedForwardScope"><a href="Numbas.parts.PatternMatchPart.html#errorCarriedForwardScope">Numbas.parts.PatternMatchPart#errorCarriedForwardScope</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#finalised_result"><a href="Numbas.parts.PatternMatchPart.html#finalised_result">Numbas.parts.PatternMatchPart#finalised_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#finaliseLoad"><a href="Numbas.parts.PatternMatchPart.html#finaliseLoad">Numbas.parts.PatternMatchPart#finaliseLoad</a></li>
 		
