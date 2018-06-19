@@ -804,6 +804,14 @@
                     assert.equal(evaluate("some([false,true])").value,true,"some([false,true])");
                     assert.equal(evaluate("some([true,true])").value,true,"some([true,true])");
                     assert.equal(evaluate("some([false,false])").value,false,"some([false,false])");
+
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([1,2,3])")),[1,2,3],"sort([1,2,3])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([2,1,3])")),[1,2,3],"sort([2,1,3])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([expression('5'),expression('3')])")).map(function(t){return t.tok.value}),[3,5],"sort([expression('5'),expression('3')])");
+
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([1,2,3])")),[0,1,2],"sort_destinations([1,2,3])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([2,1,3])")),[1,0,2],"sort_destinations([2,1,3])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([expression('5'),expression('3')])")),[1,0],"sort_destinations([expression('5'),expression('3')])");
                 });
 
                 QUnit.test('Dictionaries',function(assert) {

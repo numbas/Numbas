@@ -8667,7 +8667,7 @@ newBuiltin('sort',[TList],TList, null, {
     {
         var list = args[0];
         var newlist = new TList(list.vars);
-        newlist.value = list.value.slice().sort(jme.sortTokens);
+        newlist.value = list.value.slice().sort(jme.compareTokens);
         return newlist;
     }
 });
