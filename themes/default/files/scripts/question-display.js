@@ -40,7 +40,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         this.visited = Knockout.observable(q.visited);
 
-        this.isCurrentquestion = ko.computed(function() {
+        this.isCurrentQuestion = ko.computed(function() {
             return exam.display.currentQuestionNumber()==q.number;
         },this);
 
