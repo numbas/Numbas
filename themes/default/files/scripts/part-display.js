@@ -152,6 +152,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          */
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
+        if(p.parentPart && p.parentPart.type=='gapfill' && p.parentPart.settings.sortAnswers) {
+            feedback_settings.showFeedbackIcon = false;
+            feedback_settings.showAnswerState = false;
+        }
         this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
         /** Show the marks feedback?
          * @member {observable|Boolean} showMarks

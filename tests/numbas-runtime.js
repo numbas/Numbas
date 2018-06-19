@@ -8653,6 +8653,28 @@ newBuiltin('sort',[TList],TList, null, {
         return newlist;
     }
 });
+newBuiltin('sort_destinations',[TList],TList,null, {
+    evaluate: function(args,scope) {
+        var list = args[0];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.map(function(v,i){ return {value:v.value,i:i} }).sort(function(a,b){
+            if(math.gt(a.value,b.value))
+                return 1;
+            else if(math.lt(a.value,b.value))
+                return -1;
+            else
+                return 0;
+        });
+        var inverse = [];
+        for(var i=0;i<sorted.length;i++) {
+            inverse[sorted[i].i] = i;
+        }
+        newlist.value = inverse.map(function(n) {
+            return new TNum(n);
+        });
+        return newlist;
+    }
+});
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
@@ -13113,18 +13135,34 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
         return tree;
     }
+
+    function submit_part(part,answer) {
+        if(answer!==undefined) {
+            part.stagedAnswer = answer;
+        }
+        part.submit();
+        return jme.wrapValue({
+            credit: part.credit,
+            marks: part.marks,
+            feedback: part.finalised_result.states,
+            answered: part.answered
+        });
+    }
+
     state_functions.push(new jme.funcObj('submit_part',[TString],TDict,null,{
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
-            part.submit();
-            return jme.wrapValue({
-                credit: part.credit,
-                marks: part.marks,
-                feedback: part.finalised_result.states,
-                answered: part.answered
-            });
+            return submit_part(part);
         }
     }));
+    state_functions.push(new jme.funcObj('submit_part',[TString,'?'],TDict,null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            var answer = jme.unwrapValue(args[1]);
+            return submit_part(part,answer);
+        }
+    }));
+
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
@@ -14484,12 +14522,25 @@ var Part = Numbas.parts.Part;
  */
 var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
 {
+    util.copyinto(GapFillPart.prototype.settings,this.settings);
 }
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 {
+    /** Properties set when the part is generated.
+     *
+     * Extends {@link Numbas.parts.Part#settings}
+     * @property {Boolean} sortAnswers - Should the student's answers to the gaps be put in ascending order before marking?
+     */
+    settings: {
+        sortAnswers: false
+    },
+
     loadFromXML: function(xml) {
         var gapXML = xml.selectNodes('gaps/part');
+        var settings = this.settings;
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
+        tryGetAttribute(settings,xml,'marking',['sortanswers'],['sortAnswers']);
         for( var i=0 ; i<gapXML.length; i++ ) {
             var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this, this.store);
             this.addGap(gap,i);
@@ -14497,6 +14548,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     },
     loadFromJSON: function(data) {
         var p = this;
+        var settings = this.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        tryLoad(data,['sortAnswers'],settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd,i) {
                 var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p, p.store);
@@ -14605,6 +14659,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 });
 Numbas.partConstructors['gapfill'] = util.extend(Part,GapFillPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15817,6 +15872,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 value = jme.subvars(value, scope);
             }
             var result = new jme.types.TExpression(value);
+            return result;
         },
         'checkbox': function(def, value) {
             return new jme.types.TBool(value);

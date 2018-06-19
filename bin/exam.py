@@ -1155,6 +1155,8 @@ class ExtensionPart(Part):
 class GapFillPart(Part):
     kind = 'gapfill'
 
+    sortAnswers = False
+
     def __init__(self,prompt=''):
         Part.__init__(self,0,prompt)
         
@@ -1167,6 +1169,7 @@ class GapFillPart(Part):
             gaps = data['gaps']
             for gap in gaps:
                 self.gaps.append(builder.part(gap))
+        tryLoad(data, ['sortAnswers'],self)
     
     def toxml(self):
         self.marks = 0
@@ -1180,6 +1183,7 @@ class GapFillPart(Part):
             return '<gapfill reference="%s" />' % d
 
         self.prompt = re.sub(r"\[\[(\d+?)\]\]",replace_gapfill,self.prompt)
+
         part = super(GapFillPart,self).toxml()
         self.prompt = prompt
 
@@ -1188,6 +1192,12 @@ class GapFillPart(Part):
 
         for gap in self.gaps:
             gaps.append(gap.toxml())
+
+        marking = etree.Element('marking')
+        marking.attrib = {
+            'sortanswers': strcons_fix(self.sortAnswers),
+        }
+        part.append(marking)
 
         return part
 

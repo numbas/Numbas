@@ -250,6 +250,31 @@
                     });
                 });
 
+                QUnit.test('Sort answers', function(assert) {
+                    var done = assert.async();
+                    var q = Numbas.createQuestionFromJSON({
+                        name: 'q',
+                        parts: [
+                            {type: 'gapfill', gaps: [{type:'numberentry', minValue: '1', maxValue: '1'},{type:'numberentry', minValue: '2', maxValue: '2'}]},
+                            {type: 'gapfill', sortAnswers: true, gaps: [{type:'numberentry', minValue: '1', maxValue: '1'},{type:'numberentry', minValue: '2', maxValue: '2'}]}
+                        ]
+                    });
+                    q.generateVariables();
+                    q.signals.on('ready',function() {
+                        var p = q.getPart('p0');
+                        var res = mark_part(p,['1','2']);
+                        assert.equal(res.credit,1,"1,2 correct without sortAnswers");
+                        var res = mark_part(p,['2','1']);
+                        assert.equal(res.credit,0,"2,1 incorrect without sortAnswers");
+                        var p = q.getPart('p1');
+                        var res = mark_part(p,['1','2']);
+                        assert.equal(res.credit,1,"1,2 correct with sortAnswers");
+                        var res = mark_part(p,['2','1']);
+                        assert.equal(res.credit,1,"2,1 correct with sortAnswers");
+                        done();
+                    });
+                });
+
                 QUnit.module('Custom marking script');
                 QUnit.test('Mark constants of integration',function(assert) {
                     var done = assert.async();

@@ -8653,6 +8653,28 @@ newBuiltin('sort',[TList],TList, null, {
         return newlist;
     }
 });
+newBuiltin('sort_destinations',[TList],TList,null, {
+    evaluate: function(args,scope) {
+        var list = args[0];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.map(function(v,i){ return {value:v.value,i:i} }).sort(function(a,b){
+            if(math.gt(a.value,b.value))
+                return 1;
+            else if(math.lt(a.value,b.value))
+                return -1;
+            else
+                return 0;
+        });
+        var inverse = [];
+        for(var i=0;i<sorted.length;i++) {
+            inverse[sorted[i].i] = i;
+        }
+        newlist.value = inverse.map(function(n) {
+            return new TNum(n);
+        });
+        return newlist;
+    }
+});
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];

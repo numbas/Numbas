@@ -216,18 +216,34 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
         return tree;
     }
+
+    function submit_part(part,answer) {
+        if(answer!==undefined) {
+            part.stagedAnswer = answer;
+        }
+        part.submit();
+        return jme.wrapValue({
+            credit: part.credit,
+            marks: part.marks,
+            feedback: part.finalised_result.states,
+            answered: part.answered
+        });
+    }
+
     state_functions.push(new jme.funcObj('submit_part',[TString],TDict,null,{
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
-            part.submit();
-            return jme.wrapValue({
-                credit: part.credit,
-                marks: part.marks,
-                feedback: part.finalised_result.states,
-                answered: part.answered
-            });
+            return submit_part(part);
         }
     }));
+    state_functions.push(new jme.funcObj('submit_part',[TString,'?'],TDict,null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            var answer = jme.unwrapValue(args[1]);
+            return submit_part(part,answer);
+        }
+    }));
+
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
