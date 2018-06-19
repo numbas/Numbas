@@ -176,6 +176,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 value = jme.subvars(value, scope);
             }
             var result = new jme.types.TExpression(value);
+            return result;
         },
         'checkbox': function(def, value) {
             return new jme.types.TBool(value);
