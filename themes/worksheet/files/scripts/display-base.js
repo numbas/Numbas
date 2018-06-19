@@ -185,6 +185,7 @@ function GeneratedExam(offset) {
                 ge.html.querySelector('.questionList').appendChild(li);
                 exam.display.applyQuestionBindings(q);
                 q.signals.trigger('HTML appended');
+                q.display.adviceDisplayed(true);
             });
         });
         Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated').promise})).then(function() {

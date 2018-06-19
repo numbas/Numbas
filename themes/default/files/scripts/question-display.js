@@ -39,6 +39,11 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.visited = Knockout.observable(q.visited);
+
+        this.isCurrentquestion = ko.computed(function() {
+            return exam.display.currentQuestionNumber()==q.number;
+        },this);
+
         /** Is this question visible in the list?
          * @member {observable|Boolean} visible
          * @memberof Numbas.display.QuestionDisplay
