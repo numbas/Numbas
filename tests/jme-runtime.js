@@ -7858,18 +7858,6 @@ newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 newBuiltin('list',[TRange],TList,function(range) {
     return math.rangeToList(range).map(function(n){return new TNum(n)});
 });
-newBuiltin('dict',[TList],TDict,null, {
-    evaluate: function(args,scope) {
-        var value = {};
-        if(args.length>0) {
-            var items = scope.evaluate(args[0]).value;
-            items.forEach(function(item) {
-                value[item.value[0].value] = item.value[1];
-            });
-        }
-        return new TDict(value);
-    }
-});
 newBuiltin('dict',['*keypair'],TDict,null,{
     evaluate: function(args,scope) {
         if(args.length==0) {
@@ -7880,11 +7868,17 @@ newBuiltin('dict',['*keypair'],TDict,null,{
             args.forEach(function(kp) {
                 value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
             });
-        } else {
+        } else if(args.length==1) {
             var list = scope.evaluate(args[0]);
-            list.value.forEach(function(pair) {
-                value[pair.value[0].value] = pair.value[1];
+            var items = list.value;
+            if(list.type!='list' || !items.every(function(item) {return item.type=='list' && item.value.length==2 && item.value[0].type=='string';})) {
+                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'dict'}));
+            }
+            items.forEach(function(item) {
+                value[item.value[0].value] = item.value[1];
             });
+        } else {
+            throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'dict'}));
         }
         return new TDict(value);
     }
