@@ -82,6 +82,7 @@
 
 				QUnit.test('findvars',function(assert) {
 					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
+					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('map(x,x,x)')),['x'],'Can reassign vars used in map but they\'re still found by findvars');
 				});
 
                 QUnit.test('util',function(assert) {

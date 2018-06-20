@@ -815,17 +815,17 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
     }
 });
 jme.findvarsOps.map = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
+    var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
         }
     } else {
-        boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
     }
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
@@ -859,17 +859,17 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
     }
 });
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
+    var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
         }
     } else {
-        boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
     }
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
