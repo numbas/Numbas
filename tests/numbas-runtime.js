@@ -11773,7 +11773,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question && this.question.updateScore();
         if(this.answered)
         {
-            if(!(this.parentPart && this.parentPart.type=='gapfill'))
+            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon)
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );

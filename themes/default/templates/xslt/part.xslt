@@ -80,7 +80,7 @@
                 <div class="feedbackMessages" data-bind="css: {{'out-of-date': isDirty}}, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>
                     </ol>
                 </div>
                 <div class="partFeedback" data-bind="visible: showFeedbackBox">

@@ -232,7 +232,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     });
     var state = Knockout.computed(function() {
         var revealed = obj.revealed(), score = obj.score(), marks = obj.marks(), credit = obj.credit();
-        if( obj.doesMarking() && (revealed || (settings.showAnswerState && answered())) ) {
+        if( obj.doesMarking() && settings.showFeedbackIcon && (revealed || (settings.showAnswerState && answered())) ) {
             if(credit<=0) {
                 return 'wrong';
             } else if(credit==1) {

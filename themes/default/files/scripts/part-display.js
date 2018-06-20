@@ -146,17 +146,22 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showCorrectAnswer = Knockout.computed(function() {
             return p.settings.showCorrectAnswer && pd.revealed();
         });
-        /** Display of this parts's current score / answered status
-         * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
-         * @memberof Numbas.display.PartDisplay
-         */
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
         if(p.parentPart && p.parentPart.type=='gapfill' && p.parentPart.settings.sortAnswers) {
             feedback_settings.showFeedbackIcon = false;
             feedback_settings.showAnswerState = false;
         }
+        /** Display of this parts's current score / answered status
+         * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
+         * @memberof Numbas.display.PartDisplay
+         */
         this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
+        /** Should feedback icons be shown for this part?
+         * @member {observable|Boolean} showFeedbackIcon
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showFeedbackIcon = ko.observable(feedback_settings.showFeedbackIcon);
         /** Show the marks feedback?
          * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay
