@@ -28,6 +28,30 @@ denominator (The numerator of the student's answer, or 0 if not a fraction):
 cancelled (Is the student's answer a cancelled fraction?):
     gcd(numerator,denominator)=1
 
+cleanedStudentAnswer:
+    cleannumber(studentAnswer, settings["notationStyles"])
+
+studentPrecision:
+    switch(
+        settings["precisionType"]="dp", max(settings["precision"],countDP(cleanedStudentAnswer)),
+        settings["precisionType"]="sigfig", max(settings["precision"],countsigfigs(cleanedStudentAnswer)),
+        0
+    )
+
+minvalue:
+    switch(
+        settings["precisionType"]="dp", precround(settings["minvalue"],studentPrecision),
+        settings["precisionType"]="sigfig", siground(settings["minvalue"],studentPrecision),
+        settings["minvalue"]
+    )
+
+maxvalue:
+    switch(
+        settings["precisionType"]="dp", precround(settings["maxvalue"],studentPrecision),
+        settings["precisionType"]="sigfig", siground(settings["maxvalue"],studentPrecision),
+        settings["maxvalue"]
+    )
+
 validNumber (Is the student's answer a valid number?):
     if(isNaN(studentNumber),
         warn(translate("part.numberentry.answer invalid"));
@@ -37,7 +61,7 @@ validNumber (Is the student's answer a valid number?):
     )
 
 numberInRange (Is the student's number in the allowed range?):
-    if(studentNumber>=settings["minvalue"] and studentNumber<=settings["maxvalue"],
+    if(studentNumber>=minvalue and studentNumber<=maxvalue,
         correct()
     ,
         incorrect();

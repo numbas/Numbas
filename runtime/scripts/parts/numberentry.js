@@ -171,16 +171,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
-        switch(settings.precisionType) {
-        case 'dp':
-            minvalue = math.precround(minvalue,settings.precision);
-            maxvalue = math.precround(maxvalue,settings.precision);
-            break;
-        case 'sigfig':
-            minvalue = math.siground(minvalue,settings.precision);
-            maxvalue = math.siground(maxvalue,settings.precision);
-            break;
-        }
         var fudge = 0.00000000001;
         settings.minvalue = minvalue - fudge;
         settings.maxvalue = maxvalue + fudge;
