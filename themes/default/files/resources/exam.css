@@ -114,6 +114,11 @@ img, object[type*="image"] {
 .question-nav {
 	display: none;
 }
+.question-nav .marks {
+    display: inline;
+    vertical-align: middle;
+    font-weight: bold;
+}
 .navbar-btn {
     white-space: normal;
 }
@@ -254,17 +259,6 @@ input.jme {
 	overflow-x: hidden;
 }
 
-.marks {
-	display: inline;
-	vertical-align: middle;
-}
-.marks .score {
-	font-weight: bold;
-}
-.marks .feedback-icon {
-	margin-left: 0.5em;
-}
-
 .feedback-icon {
 	font-size: 1.2em;
 	display: inline-block;
@@ -344,28 +338,37 @@ input.jme {
     padding: 10px 15px; /* copied from the nav > li > a style in bootstrap */
 }
 
+#questionList .questionSelector > a {
+    padding: 0.5em 0.3em;
+}
+
+.questionSelector .info {
+    display: flex;
+}
+
 .questionSelector .feedback-icon {
-	float: right;
 	padding: 0;
-	font-size: 1.5em;
+    flex-basis: 1.25em;
 }
-
-.questionSelector .marks {
-	float: right;
-}
-
-.questionSelector .dirty-message {
+.questionSelector .score {
+    flex-grow: 1;
     text-align: right;
-	float: right;
+}
+.questionSelector .marks {
+}
+
+
+.questionSelector .dirty-message,
+.questionSelector .answered-state
+{
+    text-align: right;
+    font-size: 0.8em;
 }
 .questionSelector .dirty-message .warning-icon {
 	font-size: 18px;
 	margin: 0 0 0 0.3em;
 }
 
-.questionSelector .score {
-	float: right;
-}
 
 .questionList {
 	max-height: 20em;
@@ -496,6 +499,10 @@ table {
 	clear: both;
 }
 
+.part .feedback-icon {
+    margin-left: 0.5em;
+}
+
 .correct-answer {
 	vertical-align: bottom;
 	margin-left: 1em;
@@ -620,11 +627,11 @@ table {
     margin: 0;
 }
 
-.part .feedbackMessages.out-of-date .out-of-date-message {
+.part.dirty .feedbackMessages .out-of-date-message {
     font-size: 0.9em;
     font-style: italic;
 }
-.part .feedbackMessages.out-of-date .feedbackMessage {
+.part.dirty .feedbackMessages .feedbackMessage {
     opacity: 0.3;
 }
 
@@ -654,6 +661,9 @@ table {
 }
 
 .part .marks {
+    text-align: right;
+}
+.part .marks .score {
 	font-weight: bold;
 }
 
