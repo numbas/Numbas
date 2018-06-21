@@ -229,7 +229,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var scoreDisplay = '';
     var newScore = Knockout.observable(false);
     var answered = Knockout.computed(function() {
-        return (obj.answered() || obj.credit()>0);
+        return obj.answered();
     });
     var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
     var anyAnswered = Knockout.computed(function() {
@@ -240,6 +240,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         }
     });
     var partiallyAnswered = Knockout.computed(function() {
+        console.log(obj);
         return anyAnswered() && !answered();
     },this);
     var state = Knockout.computed(function() {
