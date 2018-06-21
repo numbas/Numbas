@@ -692,6 +692,15 @@ input[type=text], input[type=number] {
 }
 
 @media print {
+    #standalone-warning {
+        display: none;
+    }
+    .question .parts {
+        margin-left: 1.2em;
+    }
+    .answered-state {
+        display: none;
+    }
 	.print-only {
 		display: inherit;
 	}

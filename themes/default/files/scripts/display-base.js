@@ -240,7 +240,6 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         }
     });
     var partiallyAnswered = Knockout.computed(function() {
-        console.log(obj);
         return anyAnswered() && !answered();
     },this);
     var state = Knockout.computed(function() {
