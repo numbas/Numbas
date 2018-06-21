@@ -277,9 +277,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     start: Date(),
     /** Time the exam finished
-     * @type Date
+     * @type null|Date
      */
-    stop: Date(),
+    stop: null,
     /* Display object for this exam
      * @type Numbas.display.ExamDisplay
      */
@@ -316,7 +316,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             });
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
+            if(suspendData.stop) {
+                this.stop = suspendData.stop
+            }
             if(this.settings.allowPause) {
+                this.timeSpent = suspendData.timeSpent;
                 this.timeRemaining = this.settings.duration - (suspendData.duration-suspendData.timeRemaining);
             }
             else {

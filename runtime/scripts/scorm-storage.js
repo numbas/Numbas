@@ -239,9 +239,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var eobj =
         {
             timeRemaining: exam.timeRemaining || 0,
+            timeSpent: exam.timeSpent || 0,
             duration: exam.settings.duration || 0,
             questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
-            start: exam.start
+            start: exam.start-0,
+            stop: exam.stop ? exam.stop-0 : null
         };
         eobj.questions = [];
         for(var i=0;i<exam.settings.numQuestions;i++)
@@ -345,9 +347,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var score = parseInt(this.get('score.raw'),10);
         return {
             timeRemaining: eobj.timeRemaining || 0,
+            timeSpent: eobj.timeSpent || 0,
             duration: eobj.duration || 0 ,
             questionSubsets: eobj.questionSubsets,
             start: eobj.start,
+            stop: eobj.stop,
             score: score,
             currentQuestion: currentQuestion
         };
@@ -455,6 +459,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     end: function()
     {
         this.setSessionTime();
+        this.setSuspendData();
         this.set('success_status',this.exam.passed ? 'passed' : 'failed');
         this.set('completion_status','completed');
         pipwerks.SCORM.quit();
