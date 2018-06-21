@@ -12673,14 +12673,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     calculateScore: function()
     {
         var tmpScore=0;
-        var answered = true;
         for(var i=0; i<this.parts.length; i++)
         {
             tmpScore += this.parts[i].score;
-            answered = answered && this.parts[i].answered;
         }
-        this.answered = answered;
         this.score = tmpScore;
+        this.answered = this.validate();
     },
     /** Submit every part in the question */
     submit: function()
@@ -12700,8 +12698,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //display message about success or failure
         if(! this.answered ) {
             if(this.display) {
-            Numbas.display.showAlert(R('question.can not submit'));
-        this.display.scrollToError();
+                Numbas.display.showAlert(R('question.can not submit'));
+                this.display.scrollToError();
             }
         }
         this.updateScore();

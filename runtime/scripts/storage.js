@@ -26,7 +26,7 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {String} name - The name of the question ({@link Numbas.Question#name})
  * @property {Number} score - The student's score for this question ({@link Numbas.Question#score})
  * @property {Boolean} visited - Has the student visited this question yet? ({@link Numbas.Question#visited})
- * @property {Boolean} answered - Has the student answered this part? ({@link Numbas.Question#answered})
+ * @property {Boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
  * @property {Boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
  * @property {Boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
  * @property {Object.<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
