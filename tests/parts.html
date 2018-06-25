@@ -53,6 +53,15 @@
                     return cells;
                 }
 
+                function contains_note(res, note) {
+                    var match = res.states.find(function(s){
+                        return Object.entries(note).every(function(d) {
+                            return s[d[0]] == d[1];
+                        });
+                    });
+                    return match!==undefined;
+                }
+
                 QUnit.module('Part')
                 QUnit.test('Set marks', function(assert) {
                     var p = createPartFromJSON({type:'numberentry', marks: 3, minValue: '1', maxValue: '2'});
@@ -121,6 +130,40 @@
                     var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', strictPrecision: true});
                     var res = mark_part(p,'0.1');
                     assert.equal(res.credit,0,'"0.1" incorrect');
+                });
+                QUnit.test('Answer is 1.22, to 1 dp, strict', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.22', maxValue: '1.22', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var res = mark_part(p,'1.20');
+                    assert.equal(res.credit,0,'"1.20" incorrect');
+                    var res = mark_part(p,'1.22');
+                    assert.equal(res.credit,0.5,'"1.22" correct but penalty');
+                    assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+                    var res = mark_part(p,'1.2');
+                    assert.equal(res.credit,1,'"1.2" correct');
+                });
+                QUnit.test('Answer is 1.27, to 1 dp, strict', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var res = mark_part(p,'1.27');
+                    assert.equal(res.credit,0.5,'"1.27" correct but penalty');
+                    assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+                    var res = mark_part(p,'1.3');
+                    assert.equal(res.credit,1,'"1.3" correct');
+                });
+                QUnit.test('Answer is 1.27, to 2 sf, strict', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var res = mark_part(p,'1.27');
+                    assert.equal(res.credit,0.5,'"1.27" correct but penalty');
+                    assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+                    var res = mark_part(p,'1.3');
+                    assert.equal(res.credit,1,'"1.3" correct');
+                });
+                QUnit.test('Answer is 12700, to 2 sf, strict', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', minValue: '12700', maxValue: '12700', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var res = mark_part(p,'12700');
+                    assert.equal(res.credit,0.5,'"12700" correct but penalty');
+                    assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+                    var res = mark_part(p,'13000');
+                    assert.equal(res.credit,1,'"13000" correct');
                 });
 
                 QUnit.module('JME')
@@ -286,7 +329,6 @@
                         var res = mark_part(p,['e^(3x)+e^(2x)']);
                         assert.ok(res.valid,"e^(3x)+e^(2x) is valid");
                         assert.equal(res.credit,0.5,"e^(3x)+e^(2x) is partially correct");
-                        console.log(res);
                         done();
                     });
                 });
