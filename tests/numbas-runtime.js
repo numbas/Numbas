@@ -16030,7 +16030,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
-        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precision', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+        settings.precisionPC /= 100;
     },
     resume: function() {
         if(!this.store) {
@@ -16145,14 +16146,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
         settings.precision = jme.evaluate(settings.precision,scope).value;
-        switch(settings.precisionType) {
-        case 'dp':
-            settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
-            break;
-        case 'sigfig':
-            settings.correctAnswer = Numbas.matrixmath.siground(settings.correctAnswer,settings.precision);
-            break;
-        }
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
