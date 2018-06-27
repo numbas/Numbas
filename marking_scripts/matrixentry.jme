@@ -12,7 +12,11 @@ cell_indexes (The index of each cell in the student's answer):
     product(list(0..rows-1), list(0..cols-1))
 
 studentNumbers:
-    map(map(parseNumber(c, "en"), c, row), row, studentAnswer)
+    if(settings["allowFractions"],
+        map(map(parseNumber_or_fraction(c, "en"), c, row), row, studentAnswer)
+    ,
+        map(map(parseNumber(c, "en"), c, row), row, studentAnswer)
+    )
 
 studentMatrix (The student's answer, with each cell parsed to numbers): 
     matrix(studentNumbers)
