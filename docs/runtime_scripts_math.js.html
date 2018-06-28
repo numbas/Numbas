@@ -1390,6 +1390,19 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return b;
     },
+    /** Are `a` and `b` coprime? If either of `a` or `b` is not an integer, return `false`.
+     * Equivalent to `gcd(a,b) = 1`.
+     * @param {Number} a
+     * @param {Number} b
+     * @see Numbas.math.gcd
+     * @returns {Boolean}
+     */
+    coprime: function(a,b) {
+        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b)) {
+            return true;
+        }
+        return math.gcd(a,b) == 1;
+    },
     /** Lowest common multiple (LCM) of `a` and `b`.
      * @param {Number} a
      * @param {Number} b
@@ -2359,6 +2372,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
@@ -3042,6 +3057,8 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

@@ -75,7 +75,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
-        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precision', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+        settings.precisionPC /= 100;
     },
     resume: function() {
         if(!this.store) {
@@ -190,14 +191,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
         settings.precision = jme.evaluate(settings.precision,scope).value;
-        switch(settings.precisionType) {
-        case 'dp':
-            settings.correctAnswer = Numbas.matrixmath.precround(settings.correctAnswer,settings.precision);
-            break;
-        case 'sigfig':
-            settings.correctAnswer = Numbas.matrixmath.siground(settings.correctAnswer,settings.precision);
-            break;
-        }
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -473,6 +466,8 @@ Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
@@ -1157,6 +1152,8 @@ Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

@@ -244,6 +244,7 @@ $.textMetrics = function(el) {
  * @property {observable.&lt;Boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
  * @property {observable.&lt;Numbas.display.feedback_state>} state - The current state of the item, to be shown to the student.
  * @property {observable.&lt;Boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
+ * @property {observable.&lt;String>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
  * @property {observable.&lt;String>} message - Text summarising the state of the item.
  * @property {observable.&lt;String>} iconClass - CSS class for the feedback icon.
  * @property {observable.&lt;Object>} iconAttr - A dictionary of attributes for the feedback icon.
@@ -260,11 +261,22 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var scoreDisplay = '';
     var newScore = Knockout.observable(false);
     var answered = Knockout.computed(function() {
-        return !obj.isDirty() &amp;&amp; (obj.answered() || obj.credit()>0);
+        return obj.answered();
     });
+    var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
+    var anyAnswered = Knockout.computed(function() {
+        if(obj.anyAnswered===undefined) {
+            return answered();
+        } else {
+            return obj.anyAnswered();
+        }
+    });
+    var partiallyAnswered = Knockout.computed(function() {
+        return anyAnswered() &amp;&amp; !answered();
+    },this);
     var state = Knockout.computed(function() {
         var revealed = obj.revealed(), score = obj.score(), marks = obj.marks(), credit = obj.credit();
-        if( obj.doesMarking() &amp;&amp; (revealed || (settings.showAnswerState &amp;&amp; answered())) ) {
+        if( obj.doesMarking() &amp;&amp; showFeedbackIcon &amp;&amp; (revealed || (settings.showAnswerState &amp;&amp; anyAnswered())) ) {
             if(credit&lt;=0) {
                 return 'wrong';
             } else if(credit==1) {
@@ -289,29 +301,43 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         }),
         state: state,
         answered: answered,
+        answeredString: Knockout.computed(function() {
+            if(obj.marks()==0 || !(obj.revealed() || settings.showActualMark || settings.showTotalMark)) {
+                return '';
+            }
+            var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
+            return R('question.score feedback.'+key);
+        },this),
         message: Knockout.computed(function() {
             var revealed = obj.revealed(), score = obj.score(), marks = obj.marks();
             var scoreobj = {
                 marks: marks,
                 score: score,
                 marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
-                scoreString: niceNumber(score)+' '+R('mark',{count:score})
+                scoreString: niceNumber(score)+' '+R('mark',{count:score}),
             };
-            if(revealed &amp;&amp; !answered()) {
-                return R('question.score feedback.unanswered');
-            } else if(answered() &amp;&amp; obj.doesMarking() &amp;&amp; marks>0) {
-                var str = 'question.score feedback.answered'
-                            + (revealed || settings.showTotalMark ? ' total' : '')
-                            + (revealed || settings.showActualMark ? ' actual' : '')
-                return R(str,scoreobj);
-            } else if(revealed || settings.showTotalMark) {
-                return R('question.score feedback.unanswered total',scoreobj);
+            if(marks==0) {
+                return R('question.score feedback.not marked');
             }
-            else
-                return '';
+            if(!revealed) {
+                if(settings.showActualMark) {
+                    if(settings.showTotalMark) {
+                        return R('question.score feedback.score total actual',scoreobj);
+                    } else {
+                        return R('question.score feedback.score actual',scoreobj);
+                    }
+                } else if(settings.showTotalMark) {
+                    return R('question.score feedback.score total',scoreobj);
+                } else {
+                    var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
+                    return R('question.score feedback.'+key);
+                }
+            } else {
+                return R('question.score feedback.score total actual',scoreobj);
+            }
         }),
         iconClass: Knockout.computed(function() {
-            if (!settings.showFeedbackIcon) {
+            if (!showFeedbackIcon) {
                 return 'invisible';
             }
             switch(state()) {
@@ -330,7 +356,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         })
     }
 };
-});</code></pre>
+});
+</code></pre>
         </article>
     </section>
 
@@ -555,6 +582,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
@@ -1239,6 +1268,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

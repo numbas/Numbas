@@ -58,7 +58,7 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {String} name - The name of the question ({@link Numbas.Question#name})
  * @property {Number} score - The student's score for this question ({@link Numbas.Question#score})
  * @property {Boolean} visited - Has the student visited this question yet? ({@link Numbas.Question#visited})
- * @property {Boolean} answered - Has the student answered this part? ({@link Numbas.Question#answered})
+ * @property {Boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
  * @property {Boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
  * @property {Boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
  * @property {Object.&lt;JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
@@ -205,7 +205,8 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     stepsHidden: function(part) {}
 };
-});</code></pre>
+});
+</code></pre>
         </article>
     </section>
 
@@ -430,6 +431,8 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
@@ -1114,6 +1117,8 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

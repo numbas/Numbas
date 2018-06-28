@@ -159,6 +159,8 @@
 					
 						<li class="name"><a href="Numbas.math.html#.conjugate">conjugate</a></li>
 					
+						<li class="name"><a href="Numbas.math.html#.coprime">coprime</a></li>
+					
 						<li class="name"><a href="Numbas.math.html#.cos">cos</a></li>
 					
 						<li class="name"><a href="Numbas.math.html#.cosec">cosec</a></li>
@@ -374,7 +376,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1497">runtime/scripts/math.js, line 1497</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1510">runtime/scripts/math.js, line 1510</a>
     </li></ul></dd>
     
 
@@ -3252,6 +3254,204 @@
 		<div class="item function">
 	
 
+    <h4 class="name" id=".coprime"><span class="type-signature">(static) </span>coprime<span class="signature">(a, b)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Are <code>a</code> and <code>b</code> coprime? If either of <code>a</code> or <code>b</code> is not an integer, return <code>false</code>.
+Equivalent to <code>gcd(a,b) = 1</code>.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>a</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>b</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1368">runtime/scripts/math.js, line 1368</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.math.html#.gcd">Numbas.math.gcd</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
     <h4 class="name" id=".cos"><span class="type-signature">(static) </span>cos<span class="signature">(x)</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
@@ -4970,7 +5170,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1398">runtime/scripts/math.js, line 1398</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1411">runtime/scripts/math.js, line 1411</a>
     </li></ul></dd>
     
 
@@ -6416,7 +6616,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1503">runtime/scripts/math.js, line 1503</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1516">runtime/scripts/math.js, line 1516</a>
     </li></ul></dd>
     
 
@@ -8153,7 +8353,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1367">runtime/scripts/math.js, line 1367</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1380">runtime/scripts/math.js, line 1380</a>
     </li></ul></dd>
     
 
@@ -12532,7 +12732,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1449">runtime/scripts/math.js, line 1449</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1462">runtime/scripts/math.js, line 1462</a>
     </li></ul></dd>
     
 
@@ -12722,7 +12922,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1411">runtime/scripts/math.js, line 1411</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1424">runtime/scripts/math.js, line 1424</a>
     </li></ul></dd>
     
 
@@ -12889,7 +13089,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1421">runtime/scripts/math.js, line 1421</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1434">runtime/scripts/math.js, line 1434</a>
     </li></ul></dd>
     
 
@@ -13104,7 +13304,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1463">runtime/scripts/math.js, line 1463</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1476">runtime/scripts/math.js, line 1476</a>
     </li></ul></dd>
     
 
@@ -15382,7 +15582,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1527">runtime/scripts/math.js, line 1527</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1540">runtime/scripts/math.js, line 1540</a>
     </li></ul></dd>
     
 
@@ -16901,6 +17101,8 @@ For example, '1.23e-5' is returned as '0.0000123'</p>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
@@ -17584,6 +17786,8 @@ For example, '1.23e-5' is returned as '0.0000123'</p>
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

@@ -203,16 +203,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
-        switch(settings.precisionType) {
-        case 'dp':
-            minvalue = math.precround(minvalue,settings.precision);
-            maxvalue = math.precround(maxvalue,settings.precision);
-            break;
-        case 'sigfig':
-            minvalue = math.siground(minvalue,settings.precision);
-            maxvalue = math.siground(maxvalue,settings.precision);
-            break;
-        }
         var fudge = 0.00000000001;
         settings.minvalue = minvalue - fudge;
         settings.maxvalue = maxvalue + fudge;
@@ -475,6 +465,8 @@ Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
@@ -1159,6 +1151,8 @@ Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

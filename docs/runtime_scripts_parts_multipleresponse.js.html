@@ -82,6 +82,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //work out marks available
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
+        if(this.type=='1_n_2') {
+            settings.maxMarksEnabled = false;
+        }
         if(settings.maxMarksEnabled) {
             tryGetAttribute(this,xml,'marking/maxmarks','value','marks');
         } else {
@@ -89,6 +92,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //get minimum marks setting
         tryGetAttribute(settings,xml,'marking/minmarks','enabled','minMarksEnabled');
+        if(this.type=='1_n_2') {
+            settings.minMarksEnabled = false;
+        }
         if(settings.minMarksEnabled) {
             tryGetAttribute(settings,xml,'marking/minmarks','value','minimumMarks');
         }
@@ -984,6 +990,8 @@ Numbas.partConstructors['m_n_x'] = util.extend(Part,MultipleResponsePart);
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
@@ -1667,6 +1675,8 @@ Numbas.partConstructors['m_n_x'] = util.extend(Part,MultipleResponsePart);
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

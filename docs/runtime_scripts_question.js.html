@@ -557,14 +557,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     calculateScore: function()
     {
         var tmpScore=0;
-        var answered = true;
         for(var i=0; i&lt;this.parts.length; i++)
         {
             tmpScore += this.parts[i].score;
-            answered = answered &amp;&amp; this.parts[i].answered;
         }
-        this.answered = answered;
         this.score = tmpScore;
+        this.answered = this.validate();
     },
     /** Submit every part in the question */
     submit: function()
@@ -584,8 +582,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //display message about success or failure
         if(! this.answered ) {
             if(this.display) {
-            Numbas.display.showAlert(R('question.can not submit'));
-        this.display.scrollToError();
+                Numbas.display.showAlert(R('question.can not submit'));
+                this.display.scrollToError();
             }
         }
         this.updateScore();
@@ -847,6 +845,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.showCorrectAnswer">Numbas.display.PartDisplay.showCorrectAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
@@ -1531,6 +1531,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		

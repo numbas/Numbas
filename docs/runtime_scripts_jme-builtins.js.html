@@ -169,18 +169,6 @@ newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
 newBuiltin('list',[TRange],TList,function(range) {
     return math.rangeToList(range).map(function(n){return new TNum(n)});
 });
-newBuiltin('dict',[TList],TDict,null, {
-    evaluate: function(args,scope) {
-        var value = {};
-        if(args.length>0) {
-            var items = scope.evaluate(args[0]).value;
-            items.forEach(function(item) {
-                value[item.value[0].value] = item.value[1];
-            });
-        }
-        return new TDict(value);
-    }
-});
 newBuiltin('dict',['*keypair'],TDict,null,{
     evaluate: function(args,scope) {
         if(args.length==0) {
@@ -191,11 +179,17 @@ newBuiltin('dict',['*keypair'],TDict,null,{
             args.forEach(function(kp) {
                 value[kp.tok.key] = jme.evaluate(kp.args[0],scope);
             });
-        } else {
+        } else if(args.length==1) {
             var list = scope.evaluate(args[0]);
-            list.value.forEach(function(pair) {
-                value[pair.value[0].value] = pair.value[1];
+            var items = list.value;
+            if(list.type!='list' || !items.every(function(item) {return item.type=='list' &amp;&amp; item.value.length==2 &amp;&amp; item.value[0].type=='string';})) {
+                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'dict'}));
+            }
+            items.forEach(function(item) {
+                value[item.value[0].value] = item.value[1];
             });
+        } else {
+            throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'dict'}));
         }
         return new TDict(value);
     }
@@ -528,6 +522,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take 
         b = b/math.pow(Math.PI,math.piDegree(b));
         return math.gcf(a,b);
 } );
+newBuiltin('coprime',[TNum,TNum], TBool, math.coprime);
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm );
 newBuiltin('lcm', [TList], TNum, function(l){
         if(l.length==0) {
@@ -726,7 +721,18 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var size = list.vars;
         var start = util.wrapListIndex(range[0],size);
         var end = util.wrapListIndex(range[1]),size;
-        var value = list.value.slice(start,end);
+        var step = range[2];
+        var value;
+        if(step!=1) {
+            value = [];
+            for(var i=start;i&lt;end;i += step) {
+                if(i%1==0) {
+                    value.push(list.value[i]);
+                }
+            }
+        } else {
+            value = list.value.slice(start,end);
+        }
         return new TList(value);
     }
 });
@@ -853,17 +859,17 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
     }
 });
 jme.findvarsOps.map = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
+    var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i&lt;names.length;i++) {
-            boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
         }
     } else {
-        boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
     }
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
@@ -897,17 +903,17 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
     }
 });
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
+    var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i&lt;names.length;i++) {
-            boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
         }
     } else {
-        boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
     }
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
@@ -1670,6 +1676,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackBox"><a href="Numbas.display.PartDisplay.html#.showFeedbackBox">Numbas.display.PartDisplay.showFeedbackBox</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackIcon"><a href="Numbas.display.PartDisplay.html#.showFeedbackIcon">Numbas.display.PartDisplay.showFeedbackIcon</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showFeedbackMessages"><a href="Numbas.display.PartDisplay.html#.showFeedbackMessages">Numbas.display.PartDisplay.showFeedbackMessages</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.showMarks"><a href="Numbas.display.PartDisplay.html#.showMarks">Numbas.display.PartDisplay.showMarks</a></li>
@@ -2353,6 +2361,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.coprime"><a href="Numbas.math.html#.coprime">Numbas.math.coprime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.cos"><a href="Numbas.math.html#.cos">Numbas.math.cos</a></li>
 		
