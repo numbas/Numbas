@@ -50,6 +50,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //work out marks available
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
+        if(this.type=='1_n_2') {
+            settings.maxMarksEnabled = false;
+        }
         if(settings.maxMarksEnabled) {
             tryGetAttribute(this,xml,'marking/maxmarks','value','marks');
         } else {
@@ -57,6 +60,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //get minimum marks setting
         tryGetAttribute(settings,xml,'marking/minmarks','enabled','minMarksEnabled');
+        if(this.type=='1_n_2') {
+            settings.minMarksEnabled = false;
+        }
         if(settings.minMarksEnabled) {
             tryGetAttribute(settings,xml,'marking/minmarks','value','minimumMarks');
         }
