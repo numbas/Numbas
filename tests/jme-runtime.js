@@ -3840,6 +3840,19 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return b;
     },
+    /** Are `a` and `b` coprime? If either of `a` or `b` is not an integer, return `false`.
+     * Equivalent to `gcd(a,b) = 1`.
+     * @param {Number} a
+     * @param {Number} b
+     * @see Numbas.math.gcd
+     * @returns {Boolean}
+     */
+    coprime: function(a,b) {
+        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b)) {
+            return true;
+        }
+        return math.gcd(a,b) == 1;
+    },
     /** Lowest common multiple (LCM) of `a` and `b`.
      * @param {Number} a
      * @param {Number} b
@@ -8211,6 +8224,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take 
         b = b/math.pow(Math.PI,math.piDegree(b));
         return math.gcf(a,b);
 } );
+newBuiltin('coprime',[TNum,TNum], TBool, math.coprime);
 newBuiltin('lcm', [TNum,TNum], TNum, math.lcm );
 newBuiltin('lcm', [TList], TNum, function(l){
         if(l.length==0) {

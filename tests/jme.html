@@ -547,6 +547,14 @@
 					closeEqual(assert, evaluate('gcd(60,-18)').value,6,'gcd(60,-18)');
 					raisesNumbasError(assert, function(){ evaluate('gcd(2i,4)') },'math.gcf.complex',"can't take gcf of complex numbers: gcf(2i,4)");
 
+					closeEqual(assert, evaluate('coprime(2,3)').value,true,'coprime(2,3)');
+					closeEqual(assert, evaluate('coprime(2,-3)').value,true,'coprime(2,-3)');
+					closeEqual(assert, evaluate('coprime(2,i)').value,true,'coprime(2,i)');
+					closeEqual(assert, evaluate('coprime(2,4)').value,false,'coprime(2,4)');
+					closeEqual(assert, evaluate('coprime(2,-4)').value,false,'coprime(2,-4)');
+					closeEqual(assert, evaluate('coprime(1,3)').value,true,'coprime(1,3)');
+					closeEqual(assert, evaluate('coprime(1,1)').value,true,'coprime(1,1)');
+
 					closeEqual(assert, evaluate('lcm(3,7)').value,21,'lcm(3,7)');
 					closeEqual(assert, evaluate('lcm(4,6)').value,12,'lcm(4,12)');
 					closeEqual(assert, evaluate('lcm(-10,35)').value,70,'lcm(-10,35)');
