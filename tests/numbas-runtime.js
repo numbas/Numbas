@@ -8423,7 +8423,18 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var size = list.vars;
         var start = util.wrapListIndex(range[0],size);
         var end = util.wrapListIndex(range[1]),size;
-        var value = list.value.slice(start,end);
+        var step = range[2];
+        var value;
+        if(step!=1) {
+            value = [];
+            for(var i=start;i<end;i += step) {
+                if(i%1==0) {
+                    value.push(list.value[i]);
+                }
+            }
+        } else {
+            value = list.value.slice(start,end);
+        }
         return new TList(value);
     }
 });

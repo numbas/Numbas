@@ -796,6 +796,7 @@
 					deepCloseEqual(assert, evaluate('["a","b","c"] except "a"').value.map(getValue),['b','c'],'["a","b","c"] except "a"');
 					deepCloseEqual(assert, evaluate('["a","b","c"] except ["a","c","f"]').value.map(getValue),['b'],'["a","b","c"] except ["a","c","f"]');
                     deepCloseEqual(assert, evaluate('["a","b","c","d","e"][0..2]').value.map(getValue),['a','b'],'["a","b","c","d","e"][0..2]');
+                    deepCloseEqual(assert, evaluate('["a","b","c","d","e"][0..5#2]').value.map(getValue),['a','c','e'],'["a","b","c","d","e"][0..5#2]');
 
                     assert.equal(evaluate("all([])").value,true,"all([])");
                     assert.equal(evaluate("all([true])").value,true,"all([true])");
