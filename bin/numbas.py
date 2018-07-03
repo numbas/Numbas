@@ -229,7 +229,7 @@ class NumbasCompiler(object):
         template = """Numbas.queueScript('marking_scripts',['marking'],function() {{
             Numbas.raw_marking_scripts = {scripts};
             Numbas.marking_scripts = {{}};
-            for(var x in Numbas.marking_scripts) {{
+            for(var x in Numbas.raw_marking_scripts) {{
                 Numbas.marking_scripts[x] = new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts[x]);
             }}
         }});
