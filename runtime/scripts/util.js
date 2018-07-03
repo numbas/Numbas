@@ -310,14 +310,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Number|String} n
      * @param {Boolean} allowFractions
      * @param {String|Array.<String>} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return false.
      * @see Numbas.util.cleanNumber
      * @returns {Boolean}
      */
-    isNumber: function(n,allowFractions,styles) {
+    isNumber: function(n,allowFractions,styles,strictStyle) {
         if(n===undefined || n===null) {
             return false;
         }
-        n = util.cleanNumber(n,styles);
+        n = util.cleanNumber(n,styles,strictStyle);
         if(!isNaN(n)) {
             return true;
         }
@@ -403,14 +404,17 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {String} s - the string potentially representing a number.
      * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
+     * @returns {String}
      *
      * @see Numbas.util.numberNotationStyles
      */
-    cleanNumber: function(s,styles) {
+    cleanNumber: function(s,styles,strictStyle) {
         s = s.toString().trim();
         var match_neg = /^(-)?(.*)/.exec(s);
         var minus = match_neg[1] || '';
         s = match_neg[2];
+        var matched = false;
         if(styles!==undefined) {
             if(typeof styles=='string') {
                 styles = [styles];
@@ -423,6 +427,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 var re = style.re;
                 var m;
                 if(re && (m=re.exec(s))) {
+                    matched = true;
                     var integer = m[1].replace(/\D/g,'');
                     if(m[2]) {
                         var decimal = m[2].replace(/\D/g,'');
@@ -434,20 +439,24 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 }
             }
         }
+        if(strictStyle && !matched) {
+            return 'NaN';
+        }
         return minus+s;
     },
     /** Parse a number - either parseFloat, or parse a fraction.
      * @param {String} s
      * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed?
      * @param {String|String[]} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
      * @see Numbas.util.cleanNumber
      * @returns {Number}
      */
-    parseNumber: function(s,allowFractions,styles) {
-        s = util.cleanNumber(s,styles);
+    parseNumber: function(s,allowFractions,styles,strictStyle) {
+        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
         var m;
-        if(util.isFloat(s)) {
-            return parseFloat(s);
+        if(util.isFloat(cleaned_s)) {
+            return parseFloat(cleaned_s);
         } else if(s.toLowerCase()=='infinity') {
             return Infinity;
         } else if(s.toLowerCase()=='-infinity') {
@@ -945,7 +954,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
  */
 var numberNotationStyles = util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
-    'plain-en': {
+    'plain': {
         re: /^([0-9]+)(\x2E[0-9]+)?$/,
         format: function(integer,decimal) {
             if(decimal) {

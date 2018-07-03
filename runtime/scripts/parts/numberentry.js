@@ -110,7 +110,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         maxvalue: 0,
         correctAnswerFraction: false,
         allowFractions: false,
-        notationStyles: ['en','si-en'],
+        notationStyles: ['plain','en','si-en'],
         displayAnswer: 0,
         precisionType: 'none',
         precisionString: '0',

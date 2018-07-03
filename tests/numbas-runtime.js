@@ -542,14 +542,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Number|String} n
      * @param {Boolean} allowFractions
      * @param {String|Array.<String>} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return false.
      * @see Numbas.util.cleanNumber
      * @returns {Boolean}
      */
-    isNumber: function(n,allowFractions,styles) {
+    isNumber: function(n,allowFractions,styles,strictStyle) {
         if(n===undefined || n===null) {
             return false;
         }
-        n = util.cleanNumber(n,styles);
+        n = util.cleanNumber(n,styles,strictStyle);
         if(!isNaN(n)) {
             return true;
         }
@@ -635,14 +636,17 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {String} s - the string potentially representing a number.
      * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
+     * @returns {String}
      *
      * @see Numbas.util.numberNotationStyles
      */
-    cleanNumber: function(s,styles) {
+    cleanNumber: function(s,styles,strictStyle) {
         s = s.toString().trim();
         var match_neg = /^(-)?(.*)/.exec(s);
         var minus = match_neg[1] || '';
         s = match_neg[2];
+        var matched = false;
         if(styles!==undefined) {
             if(typeof styles=='string') {
                 styles = [styles];
@@ -655,6 +659,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 var re = style.re;
                 var m;
                 if(re && (m=re.exec(s))) {
+                    matched = true;
                     var integer = m[1].replace(/\D/g,'');
                     if(m[2]) {
                         var decimal = m[2].replace(/\D/g,'');
@@ -666,20 +671,24 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 }
             }
         }
+        if(strictStyle && !matched) {
+            return 'NaN';
+        }
         return minus+s;
     },
     /** Parse a number - either parseFloat, or parse a fraction.
      * @param {String} s
      * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed?
      * @param {String|String[]} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
      * @see Numbas.util.cleanNumber
      * @returns {Number}
      */
-    parseNumber: function(s,allowFractions,styles) {
-        s = util.cleanNumber(s,styles);
+    parseNumber: function(s,allowFractions,styles,strictStyle) {
+        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
         var m;
-        if(util.isFloat(s)) {
-            return parseFloat(s);
+        if(util.isFloat(cleaned_s)) {
+            return parseFloat(cleaned_s);
         } else if(s.toLowerCase()=='infinity') {
             return Infinity;
         } else if(s.toLowerCase()=='-infinity') {
@@ -1177,7 +1186,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
  */
 var numberNotationStyles = util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
-    'plain-en': {
+    'plain': {
         re: /^([0-9]+)(\x2E[0-9]+)?$/,
         format: function(integer,decimal) {
             if(decimal) {
@@ -2480,6 +2489,7 @@ var toObject = function (o) {
 };
 });
 });
+
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -8195,10 +8205,10 @@ newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNum
 newBuiltin('sigformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p, style:style});}, {latex: true} );
 newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return math.niceNumber(n,{style:style});});
 newBuiltin('string', [TNum], TString, math.niceNumber);
-newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style);});
-newBuiltin('parsenumber', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,false,styles);}, {unwrapValues: true});
-newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style);});
-newBuiltin('parsenumber_or_fraction', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,true,styles);}, {unwrapValues: true});
+newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style,true);});
+newBuiltin('parsenumber', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,false,styles,true);}, {unwrapValues: true});
+newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
+newBuiltin('parsenumber_or_fraction', [TString,TList], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
@@ -14427,7 +14437,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         maxvalue: 0,
         correctAnswerFraction: false,
         allowFractions: false,
-        notationStyles: ['en','si-en'],
+        notationStyles: ['plain','en','si-en'],
         displayAnswer: 0,
         precisionType: 'none',
         precisionString: '0',
@@ -14512,12 +14522,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
-    },
-    /** Get the student's answer as a floating point number
-     * @returns {Number}
-     */
-    studentAnswerAsFloat: function() {
-        return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
     }
 };
 ['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
@@ -16202,30 +16206,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return jme.wrapValue(this.studentAnswer);
-    },
-    /** Get the student's answer as a matrix
-     * @returns {matrix}
-     */
-    studentAnswerAsMatrix: function() {
-        var rows = this.studentAnswerRows;
-        var columns = this.studentAnswerColumns;
-        var studentMatrix = [];
-        for(var i=0;i<rows;i++) {
-            var row = [];
-            for(var j=0;j<columns;j++) {
-                var cell = this.studentAnswer[i][j];
-                var n = util.parseNumber(cell,this.settings.allowFractions);
-                if(isNaN(n)) {
-                    return null;
-                } else {
-                    row.push(n);
-                }
-            }
-            studentMatrix.push(row);
-        }
-        studentMatrix.rows = rows;
-        studentMatrix.columns = columns;
-        return studentMatrix;
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

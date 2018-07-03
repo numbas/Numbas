@@ -40,11 +40,11 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                 if(dp>0)
                     p.giveWarning(R('part.numberentry.answer not integer'));
             }
-            if(!util.isNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles)) {
+            if(!util.isNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true)) {
                 p.giveWarning(R('part.numberentry.answer not integer or decimal'));
                 return '';
             }
-            var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles);
+            var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true);
             return n+'';
         },this);
         /** Show a LaTeX rendering of the answer?
