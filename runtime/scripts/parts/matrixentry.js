@@ -178,30 +178,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return jme.wrapValue(this.studentAnswer);
-    },
-    /** Get the student's answer as a matrix
-     * @returns {matrix}
-     */
-    studentAnswerAsMatrix: function() {
-        var rows = this.studentAnswerRows;
-        var columns = this.studentAnswerColumns;
-        var studentMatrix = [];
-        for(var i=0;i<rows;i++) {
-            var row = [];
-            for(var j=0;j<columns;j++) {
-                var cell = this.studentAnswer[i][j];
-                var n = util.parseNumber(cell,this.settings.allowFractions);
-                if(isNaN(n)) {
-                    return null;
-                } else {
-                    row.push(n);
-                }
-            }
-            studentMatrix.push(row);
-        }
-        studentMatrix.rows = rows;
-        studentMatrix.columns = columns;
-        return studentMatrix;
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

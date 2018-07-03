@@ -195,12 +195,6 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
-    },
-    /** Get the student's answer as a floating point number
-     * @returns {Number}
-     */
-    studentAnswerAsFloat: function() {
-        return util.parseNumber(this.studentAnswer,this.settings.allowFractions,this.settings.notationStyles);
     }
 };
 ['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
