@@ -33,6 +33,17 @@ body.worksheet .partheader {
 body.worksheet .question .parts {
     margin-left: 0;
 }
+body.worksheet .question .questionMarks {
+    float:right;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+body.worksheet .question .questionMarks .marks:before {
+  content: "[";
+}
+body.worksheet .question .questionMarks .marks:after {
+  content: "]";
+}
 body.worksheet .statement, body.worksheet .advice {
     margin: 1em 0;
     padding-top: 0.2em;

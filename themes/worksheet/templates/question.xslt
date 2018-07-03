@@ -22,6 +22,9 @@ Copyright 2011-16 Newcastle University
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
+            <div class="questionMarks">
+              <span class="marks" data-bind="html: scoreFeedback.message"></span>
+            </div>
         </div>
     </xsl:template>
     <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
