@@ -7,8 +7,12 @@ numTicks (How many options did the student tick?):
 
 wrongNumber:
   assert(numTicks >= settings["minAnswers"] and (settings["maxAnswers"]=0 or numTicks<=settings["maxAnswers"]),
-    incorrect(translate("part.mcq.wrong number of choices"));
-    end()
+    if(settings["warningType"]="prevent",
+        fail(translate("part.mcq.wrong number of choices"))
+    ,
+        incorrect(translate("part.mcq.wrong number of choices"));
+        end()
+    )
   )
 
 tick_indexes (Indexes of choice/answer pairs):
