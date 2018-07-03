@@ -13376,6 +13376,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
      *  @property {Numbas.marking.MarkingNote[]} notes
      */
     var MarkingScript = marking.MarkingScript = function(source, base) {
+        this.source = source;
         try {
             var notes = source.split(/\n(\s*\n)+/);
             var ntodo = {};
@@ -13402,6 +13403,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         this.notes = todo;
     }
     MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+
+        /** The source code of the script
+         * @type {String}
+         */
+        source: '',
 
         /** Evaluate all of this script's notes in the given scope.
          *

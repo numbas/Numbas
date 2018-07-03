@@ -459,6 +459,7 @@
      *  @property {Numbas.marking.MarkingNote[]} notes
      */
     var MarkingScript = marking.MarkingScript = function(source, base) {
+        this.source = source;
         try {
             var notes = source.split(/\n(\s*\n)+/);
             var ntodo = {};
@@ -485,6 +486,11 @@
         this.notes = todo;
     }
     MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+
+        /** The source code of the script
+         * @type {String}
+         */
+        source: '',
 
         /** Evaluate all of this script's notes in the given scope.
          *
@@ -1484,6 +1490,8 @@
 			<li class="search-result" data-longname="Numbas.marking.MarkingScript"><a href="Numbas.marking.MarkingScript.html">Numbas.marking.MarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.MarkingScript#evaluate"><a href="Numbas.marking.MarkingScript.html#evaluate">Numbas.marking.MarkingScript#evaluate</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.MarkingScript#source"><a href="Numbas.marking.MarkingScript.html#source">Numbas.marking.MarkingScript#source</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.note_definition"><a href="Numbas.marking.html#.note_definition">Numbas.marking.note_definition</a></li>
 		
