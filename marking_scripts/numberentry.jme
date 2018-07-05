@@ -5,6 +5,9 @@ studentNumber (The student's answer, parsed as a number):
         parseNumber(studentAnswer,settings["notationStyles"])
     )
 
+isInteger (Is the student's answer an integer?):
+    countDP(studentAnswer)=0
+
 isFraction (Is the student's answer a fraction?):
     "/" in studentAnswer
 
@@ -15,9 +18,6 @@ numerator (The numerator of the student's answer, or 0 if not a fraction):
         0
     )
 
-isInteger (Is the student's answer an integer?):
-    countDP(studentAnswer)=0
-
 denominator (The numerator of the student's answer, or 0 if not a fraction):
     if(isFraction,
         parseNumber(split(studentAnswer,"/")[1],settings["notationStyles"])
@@ -26,7 +26,12 @@ denominator (The numerator of the student's answer, or 0 if not a fraction):
     )
 
 cancelled (Is the student's answer a cancelled fraction?):
-    gcd(numerator,denominator)=1
+    assert(isFraction and gcd(numerator,denominator)=1,
+        assert(not settings["mustBeReduced"],
+            multiply_credit(settings["mustBeReducedPC"],translate("part.numberentry.answer not reduced"))
+        );
+        false
+    )
 
 cleanedStudentAnswer:
     cleannumber(studentAnswer, settings["notationStyles"])

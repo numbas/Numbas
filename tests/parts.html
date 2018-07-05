@@ -105,10 +105,20 @@
                     assert.equal(res.credit,0,'"1/3": No credit awarded');
                     assert.notOk(res.valid,'"1/3": Not valid');
                 });
-                QUnit.test('Answer is 1/3, fractions not allowed', function(assert) {
+                QUnit.test('Answer is 1/3, fractions allowed', function(assert) {
                     var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', allowFractions: true});
                     var res = mark_part(p,'1/3');
                     assert.equal(res.credit,1,'"1/3" correct');
+                });
+                QUnit.test('Answer is 1/3, fraction must be reduced', function(assert) {
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', allowFractions: true, mustBeReduced: true, mustBeReducedPC: 0.5});
+                    console.log(p.settings);
+                    var res = mark_part(p,'1/3');
+                    assert.equal(res.credit,1,'"1/3" correct');
+                    var res = mark_part(p,'2/6');
+                    console.log(res);
+                    assert.equal(res.credit,0.5,'"2/6" gets penalty');
+                    assert.ok(contains_note(res,{note:'cancelled',factor:0.5,op:'multiply_credit'}));
                 });
                 QUnit.test('Answer is 1/3, to 2 dp', function(assert) {
                     var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precision: '2', precisionType: 'dp'});
