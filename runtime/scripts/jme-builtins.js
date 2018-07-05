@@ -117,6 +117,7 @@ newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
+newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {

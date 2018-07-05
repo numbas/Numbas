@@ -4506,6 +4506,21 @@ var matrixmath = Numbas.matrixmath = {
         }
         return out;
     },
+
+    /** Sum of every cell
+     * @param {matrix}
+     * @returns {Number}
+     */
+    sum_cells: function(m) {
+        var t = 0;
+        m.forEach(function(row) {
+            row.forEach(function(cell) {
+                t += cell;
+            });
+        });
+        return t;
+    },
+
     /** Apply given function to each element
      * @param {matrix}
      * @param {function}
@@ -7861,6 +7876,7 @@ newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
+newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {

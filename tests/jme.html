@@ -750,6 +750,7 @@
 					closeEqual(assert, evaluate('det(matrix([2,4],[3,5]))').value,-2,'det(matrix([2,4],[3,5]))');
 					raisesNumbasError(assert, function(){ evaluate('det(matrix([2,4,6],[3,5,7]))') },'matrixmath.abs.non-square','error on non-square matrix: det(matrix([2,4,6],[3,5,7]))');
 					raisesNumbasError(assert, function(){ evaluate('det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))') },'matrixmath.abs.too big',"can't work out determinants of big matrices: det(matrix([1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]))");
+                    closeEqual(assert, evaluate('sum_cells(matrix([1,2],[3,4]))').value, 10, 'sum_cells(matrix([1,2],[3,4]))');
 					deepCloseEqual(assert, evaluate('transpose(vector(1,2,3))').value,[[1,2,3]],'transpose(vector(1,2,3))');
 					deepCloseEqual(assert, evaluate('transpose(matrix([1,2,3]))').value,[[1],[2],[3]],'transpose(matrix([1,2,3]))');
 					deepCloseEqual(assert, evaluate('transpose(matrix([1],[2],[3]))').value,[[1,2,3]],'transpose(matrix([1],[2],[3]))');

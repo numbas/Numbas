@@ -2014,6 +2014,21 @@ var matrixmath = Numbas.matrixmath = {
         }
         return out;
     },
+
+    /** Sum of every cell
+     * @param {matrix}
+     * @returns {Number}
+     */
+    sum_cells: function(m) {
+        var t = 0;
+        m.forEach(function(row) {
+            row.forEach(function(cell) {
+                t += cell;
+            });
+        });
+        return t;
+    },
+
     /** Apply given function to each element
      * @param {matrix}
      * @param {function}
