@@ -127,7 +127,17 @@ function Exam(store)
     this.display = new Numbas.display.ExamDisplay(this);
 }
 Numbas.Exam = Exam;
+
+/** The question list has been initialised - every question is loaded and ready to use.
+ * @event Numbas.Exam#question list initialised
+ */
+
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
+    /** Signals produced while loading this exam.
+     * @type {Numbas.schedule.SignalBox} 
+     * */
+    signals: undefined,
+
     /** Storage engine
      * @type {Numbas.storage.BlankStorage}
      */
@@ -357,6 +367,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * If loading, need to restore randomised variables instead of generating anew
      *
      * @param {Boolean} lo
+     * @fires Numbas.Exam#event:question list initialised
+     * @listens Numbas.Question#event:ready
+     * @listens Numbas.Question#event:HTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -598,6 +611,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Regenerate the current question
+     * @listens Numbas.Question#event:ready
+     * @listens Numbas.Question#event:HTMLAttached
      */
     regenQuestion: function()
     {
@@ -616,7 +631,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         q.signals.on(['ready','HTMLAttached'], function() {
             e.currentQuestion.display.init();
             e.display.showQuestion();
-    e.display.endRegen();
+            e.display.endRegen();
         });
     },
     /**

@@ -118,10 +118,34 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         schedule.calls = schedule.calls.concat(schedule.lifts.pop());
     },
 };
+
+/** Coordinates Promises corresponding to different stages in the loading process.
+ * @constructor
+ * @memberof Numbas.schedule
+ */
 var SignalBox = schedule.SignalBox = function() {
     this.callbacks = {};
 }
-SignalBox.prototype = {
+SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
+    /** @typedef Numbas.schedule.callback
+     * @type {Object}
+     * @property {Promise} Promise
+     * @property {function} resolve - the promise's `resolve` function
+     * @property {function} reject - the promise's `reject` function
+     * @property {Boolean} resolved - has the promise been resolved?
+     */
+
+    /** Dictionary of registered callbacks.
+     * @type {Object.<Numbas.schedule.callback>}
+     * @private
+     */
+    callbacks: {},
+
+    /** Get a callback object for the event with the hiven name.
+     * If the callback hasn't been accessed before, it's created.
+     * @param {String} name
+     * @returns {Numbas.schedule.callback}
+     */
     getCallback: function(name) {
         if(this.callbacks[name]) {
             return this.callbacks[name];
@@ -136,6 +160,12 @@ SignalBox.prototype = {
         });
         return deferred;
     },
+
+    /** Once the given event(s) have resolved, run the given callback function. Returns a Promise, so can be used without a callback.
+     * @param {String|Array.<String>} events - the name of an event, or a list of event names
+     * @param {function} [fn] - a callback function to run
+     * @returns {Promise} Resolves when all of the events have resolved, or rejects if the signal box is in an error state.
+     */
     on: function(events, fn) {
         var sb = this;
         if(sb.error) {
@@ -173,6 +203,10 @@ SignalBox.prototype = {
         }
         return promise;
     },
+
+    /** Notify the signal box that the event with the given name has happened.
+     * @param {String} name
+     */
     trigger: function(name) {
         var callback = this.getCallback(name);
         if(this.error) {

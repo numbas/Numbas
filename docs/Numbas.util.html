@@ -275,7 +275,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L946">runtime/scripts/util.js, line 946</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L955">runtime/scripts/util.js, line 955</a>
     </li></ul></dd>
     
 
@@ -346,7 +346,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L375">runtime/scripts/util.js, line 375</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L376">runtime/scripts/util.js, line 376</a>
     </li></ul></dd>
     
 
@@ -712,7 +712,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L618">runtime/scripts/util.js, line 618</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L627">runtime/scripts/util.js, line 627</a>
     </li></ul></dd>
     
 
@@ -736,7 +736,7 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id=".cleanNumber"><span class="type-signature">(static) </span>cleanNumber<span class="signature">(s, styles)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".cleanNumber"><span class="type-signature">(static) </span>cleanNumber<span class="signature">(s, styles, strictStyle)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
@@ -827,6 +827,29 @@ Remove space, and then try to identify a notation style.</p>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>strictStyle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -842,6 +865,35 @@ Remove space, and then try to identify a notation style.</p>
 
 
 
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -878,7 +930,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L409">runtime/scripts/util.js, line 409</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L412">runtime/scripts/util.js, line 412</a>
     </li></ul></dd>
     
 
@@ -1046,7 +1098,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L802">runtime/scripts/util.js, line 802</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L811">runtime/scripts/util.js, line 811</a>
     </li></ul></dd>
     
 
@@ -1207,7 +1259,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L832">runtime/scripts/util.js, line 832</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L841">runtime/scripts/util.js, line 841</a>
     </li></ul></dd>
     
 
@@ -1595,7 +1647,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1034">runtime/scripts/util.js, line 1034</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1043">runtime/scripts/util.js, line 1043</a>
     </li></ul></dd>
     
 
@@ -2335,7 +2387,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L542">runtime/scripts/util.js, line 542</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L551">runtime/scripts/util.js, line 551</a>
     </li></ul></dd>
     
 
@@ -2866,7 +2918,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L691">runtime/scripts/util.js, line 691</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L700">runtime/scripts/util.js, line 700</a>
     </li></ul></dd>
     
 
@@ -3657,7 +3709,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L516">runtime/scripts/util.js, line 516</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L525">runtime/scripts/util.js, line 525</a>
     </li></ul></dd>
     
 
@@ -3824,7 +3876,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L529">runtime/scripts/util.js, line 529</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L538">runtime/scripts/util.js, line 538</a>
     </li></ul></dd>
     
 
@@ -3914,7 +3966,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L725">runtime/scripts/util.js, line 725</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L734">runtime/scripts/util.js, line 734</a>
     </li></ul></dd>
     
 
@@ -4081,7 +4133,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L347">runtime/scripts/util.js, line 347</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L348">runtime/scripts/util.js, line 348</a>
     </li></ul></dd>
     
 
@@ -4749,7 +4801,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L358">runtime/scripts/util.js, line 358</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L359">runtime/scripts/util.js, line 359</a>
     </li></ul></dd>
     
 
@@ -4773,7 +4825,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
 		<div class="item function">
 	
 
-    <h4 class="name" id=".isNumber"><span class="type-signature">(static) </span>isNumber<span class="signature">(n, allowFractions, styles)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".isNumber"><span class="type-signature">(static) </span>isNumber<span class="signature">(n, allowFractions, styles, strictStyle)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
@@ -4889,6 +4941,29 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>strictStyle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return false.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -4969,7 +5044,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L316">runtime/scripts/util.js, line 316</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L317">runtime/scripts/util.js, line 317</a>
     </li></ul></dd>
     
 
@@ -5144,7 +5219,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L904">runtime/scripts/util.js, line 904</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L913">runtime/scripts/util.js, line 913</a>
     </li></ul></dd>
     
 
@@ -5357,7 +5432,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L490">runtime/scripts/util.js, line 490</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L499">runtime/scripts/util.js, line 499</a>
     </li></ul></dd>
     
 
@@ -5721,7 +5796,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L925">runtime/scripts/util.js, line 925</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L934">runtime/scripts/util.js, line 934</a>
     </li></ul></dd>
     
 
@@ -5888,7 +5963,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L367">runtime/scripts/util.js, line 367</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L368">runtime/scripts/util.js, line 368</a>
     </li></ul></dd>
     
 
@@ -6055,7 +6130,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L471">runtime/scripts/util.js, line 471</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L480">runtime/scripts/util.js, line 480</a>
     </li></ul></dd>
     
 
@@ -6086,7 +6161,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".parseNumber"><span class="type-signature">(static) </span>parseNumber<span class="signature">(s, allowFractions, styles)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id=".parseNumber"><span class="type-signature">(static) </span>parseNumber<span class="signature">(s, allowFractions, styles, strictStyle)</span><span class="type-signature"> &rarr; {Number}</span></h4>
 
     
 
@@ -6198,6 +6273,29 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>strictStyle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -6278,7 +6376,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L446">runtime/scripts/util.js, line 446</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L455">runtime/scripts/util.js, line 455</a>
     </li></ul></dd>
     
 
@@ -6447,7 +6545,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L862">runtime/scripts/util.js, line 862</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L871">runtime/scripts/util.js, line 871</a>
     </li></ul></dd>
     
 
@@ -6661,7 +6759,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L606">runtime/scripts/util.js, line 606</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L615">runtime/scripts/util.js, line 615</a>
     </li></ul></dd>
     
 
@@ -6828,7 +6926,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L741">runtime/scripts/util.js, line 741</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L750">runtime/scripts/util.js, line 750</a>
     </li></ul></dd>
     
 
@@ -7041,7 +7139,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L503">runtime/scripts/util.js, line 503</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L512">runtime/scripts/util.js, line 512</a>
     </li></ul></dd>
     
 
@@ -7211,7 +7309,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L705">runtime/scripts/util.js, line 705</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L714">runtime/scripts/util.js, line 714</a>
     </li></ul></dd>
     
 
@@ -7434,7 +7532,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L630">runtime/scripts/util.js, line 630</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L639">runtime/scripts/util.js, line 639</a>
     </li></ul></dd>
     
 
@@ -7663,7 +7761,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L382">runtime/scripts/util.js, line 382</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L383">runtime/scripts/util.js, line 383</a>
     </li></ul></dd>
     
 
@@ -7837,7 +7935,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L594">runtime/scripts/util.js, line 594</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L603">runtime/scripts/util.js, line 603</a>
     </li></ul></dd>
     
 
@@ -8027,7 +8125,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L337">runtime/scripts/util.js, line 337</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L338">runtime/scripts/util.js, line 338</a>
     </li></ul></dd>
     
 
@@ -8194,7 +8292,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L781">runtime/scripts/util.js, line 781</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L790">runtime/scripts/util.js, line 790</a>
     </li></ul></dd>
     
 
@@ -8571,6 +8669,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.Exam#endTiming"><a href="Numbas.Exam.html#endTiming">Numbas.Exam#endTiming</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Exam#event:question list initialised"><a href="Numbas.Exam.html#event:questionlistinitialised">Numbas.Exam#event:question list initialised</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#init"><a href="Numbas.Exam.html#init">Numbas.Exam#init</a></li>
@@ -8610,6 +8710,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.Exam#settings"><a href="Numbas.Exam.html#settings">Numbas.Exam#settings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#showInfoPage"><a href="Numbas.Exam.html#showInfoPage">Numbas.Exam#showInfoPage</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#signals"><a href="Numbas.Exam.html#signals">Numbas.Exam#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#start"><a href="Numbas.Exam.html#start">Numbas.Exam#start</a></li>
 		
@@ -9310,6 +9412,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.matrixmath.siground"><a href="Numbas.matrixmath.html#.siground">Numbas.matrixmath.siground</a></li>
 		
 			<li class="search-result" data-longname="Numbas.matrixmath.sub"><a href="Numbas.matrixmath.html#.sub">Numbas.matrixmath.sub</a></li>
+		
+			<li class="search-result" data-longname="Numbas.matrixmath.sum_cells"><a href="Numbas.matrixmath.html#.sum_cells">Numbas.matrixmath.sum_cells</a></li>
 		
 			<li class="search-result" data-longname="Numbas.matrixmath.transpose"><a href="Numbas.matrixmath.html#.transpose">Numbas.matrixmath.transpose</a></li>
 		
@@ -10107,8 +10211,6 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#studentAnswerAsJME"><a href="Numbas.parts.MatrixEntryPart.html#studentAnswerAsJME">Numbas.parts.MatrixEntryPart#studentAnswerAsJME</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#studentAnswerAsMatrix"><a href="Numbas.parts.MatrixEntryPart.html#studentAnswerAsMatrix">Numbas.parts.MatrixEntryPart#studentAnswerAsMatrix</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#subCredit"><a href="Numbas.parts.MatrixEntryPart.html#subCredit">Numbas.parts.MatrixEntryPart#subCredit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#submit"><a href="Numbas.parts.MatrixEntryPart.html#submit">Numbas.parts.MatrixEntryPart#submit</a></li>
@@ -10382,8 +10484,6 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#storeAnswer"><a href="Numbas.parts.NumberEntryPart.html#storeAnswer">Numbas.parts.NumberEntryPart#storeAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswer"><a href="Numbas.parts.NumberEntryPart.html#studentAnswer">Numbas.parts.NumberEntryPart#studentAnswer</a></li>
-		
-			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswerAsFloat"><a href="Numbas.parts.NumberEntryPart.html#studentAnswerAsFloat">Numbas.parts.NumberEntryPart#studentAnswerAsFloat</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswerAsJME"><a href="Numbas.parts.NumberEntryPart.html#studentAnswerAsJME">Numbas.parts.NumberEntryPart#studentAnswerAsJME</a></li>
 		
@@ -10691,6 +10791,34 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.Question#display"><a href="Numbas.Question.html#display">Numbas.Question#display</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#event:functionsLoaded"><a href="Numbas.Question.html#event:functionsLoaded">Numbas.Question#event:functionsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:functionsMade"><a href="Numbas.Question.html#event:functionsMade">Numbas.Question#event:functionsMade</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:generateVariables"><a href="Numbas.Question.html#event:generateVariables">Numbas.Question#event:generateVariables</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:HTMLAttached"><a href="Numbas.Question.html#event:HTMLAttached">Numbas.Question#event:HTMLAttached</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:partsGenerated"><a href="Numbas.Question.html#event:partsGenerated">Numbas.Question#event:partsGenerated</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:partsResumed"><a href="Numbas.Question.html#event:partsResumed">Numbas.Question#event:partsResumed</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:preambleLoaded"><a href="Numbas.Question.html#event:preambleLoaded">Numbas.Question#event:preambleLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:preambleRun"><a href="Numbas.Question.html#event:preambleRun">Numbas.Question#event:preambleRun</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:ready"><a href="Numbas.Question.html#event:ready">Numbas.Question#event:ready</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:rulesetsLoaded"><a href="Numbas.Question.html#event:rulesetsLoaded">Numbas.Question#event:rulesetsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:rulesetsMade"><a href="Numbas.Question.html#event:rulesetsMade">Numbas.Question#event:rulesetsMade</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variableDefinitionsLoaded"><a href="Numbas.Question.html#event:variableDefinitionsLoaded">Numbas.Question#event:variableDefinitionsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variablesGenerated"><a href="Numbas.Question.html#event:variablesGenerated">Numbas.Question#event:variablesGenerated</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variablesSet"><a href="Numbas.Question.html#event:variablesSet">Numbas.Question#event:variablesSet</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
@@ -10733,6 +10861,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#store"><a href="Numbas.Question.html#store">Numbas.Question#store</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#submit"><a href="Numbas.Question.html#submit">Numbas.Question#submit</a></li>
@@ -10759,6 +10889,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.schedule.add"><a href="Numbas.schedule.html#.add">Numbas.schedule.add</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.callback"><a href="Numbas.schedule.html#.callback">Numbas.schedule.callback</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.calls"><a href="Numbas.schedule.html#.calls">Numbas.schedule.calls</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.completed"><a href="Numbas.schedule.html#.completed">Numbas.schedule.completed</a></li>
@@ -10776,6 +10908,14 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.schedule.lifts"><a href="Numbas.schedule.html#.lifts">Numbas.schedule.lifts</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.pop"><a href="Numbas.schedule.html#.pop">Numbas.schedule.pop</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox"><a href="Numbas.schedule.SignalBox.html">Numbas.schedule.SignalBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
@@ -11229,7 +11369,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

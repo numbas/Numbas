@@ -127,14 +127,77 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.parts = [];
     q.partDictionary = {};
 }
+
+/** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
+ * @event Numbas.Question#preambleLoaded
+ * @see Numbas.Question#event:preambleRun
+ */
+/** The question preamble has been run.
+ * @event Numbas.Question#preambleRun
+ */
+/** The question's function definitions have been loaded, but the corresponding {@link Numbas.jme.funcObj} objects have not been added to the scope yet.
+ * @event Numbas.Question#functionsLoaded
+ * @see Numbas.Question#event:functionsMade
+ */
+/** The question's functions have been made and added to the question's scope.
+ * @event Numbas.Question#functionsMade
+ */
+/** The question's ruleset  definitions have been loaded, but the {@link Numbas.jme.rules.Ruleset} objects have not been added to the scope yet.
+ * @event Numbas.Question#rulesetsLoaded
+ * @see Numbas.Question#event:rulesetsMade
+ */
+/** The question's rulesets have been made and added to the question's scope.
+ * @event Numbas.Question#rulesetsMade
+ */
+/** Trigger this when you're ready to evaluate the question's variables. In an exam context, the {@link Numbas.Exam} object triggers this event.
+ * If the question has been created standalone, this event must be triggered in order for the question to finish loading.
+ * @event Numbas.Question#generateVariables
+ */
+/** The variable definitions have been loaded, but their values have not been generated yet.
+ * @event Numbas.Question#variableDefinitionsLoaded
+ * @see Numbas.Question#event:variablesSet
+ * @see Numbas.Question#event:variablesGenerated
+ */
+/** The parts of the question have been generated.
+ * If resuming an attempt, the parts have not yet been restored to the saved state.
+ * @event Numbas.Question#partsGenerated
+ * @see Numbas.Question#event:partsResumed
+ */
+/** Triggered when resuming a saved attempt: the question's parts have been restored to the saved state.
+ * @event Numbas.Question#partsResumed
+ */
+/** The variables have been evaluated, but {@link Numbas.Question.unwrappedVariables} has not been set yet.
+ * @event Numbas.Question#variablesSet
+ */
+/** The variables have been generated and added to the scope, and are ready to use.
+ * @event Numbas.Question#variablesGenerated
+ */
+/** The question is fully loaded and ready to use.
+ * @event Numbas.Question#ready
+ */
+/** The question's HTML has been generated and attached to the page.
+ * @event Numbas.Question#HTMLAttached
+ */
+
 Question.prototype = /** @lends Numbas.Question.prototype */
 {
+    /** Signals produced while loading this question.
+     * @type {Numbas.schedule.SignalBox} 
+     * */
+    signals: undefined,
+
     /** Storage engine
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
     /** Load the question's settings from an XML &lt;question> node
      * @param {Element} xml
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#event:variablesGenerated
      */
     loadFromXML: function(xml) {
         var q = this;
@@ -199,6 +262,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Load the question's settings from a JSON object
      * @param {Object} data
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#event:variablesGenerated
      */
     loadFromJSON: function(data) {
         var q = this;
@@ -274,6 +343,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.marks += part.marks;
     },
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
+     * @fires Numbas.Question#functionsMade
+     * @fires Numbas.Question#rulesetsMade
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#variablesGenerated
+     * @fires Numbas.Question#ready
+     * @listens Numbas.Question#event:preambleLoaded
+     * @listens Numbas.Question#event:functionsLoaded
+     * @listens Numbas.Question#event:rulesetsLoaded
+     * @listens Numbas.Question#event:generateVariables
+     * @listens Numbas.Question#event:functionsMade
+     * @listens Numbas.Question#event:rulesetsMade
+     * @listens Numbas.Question#event:variableDefinitionsLoaded
+     * @listens Numbas.Question#event:variablesSet
+     * @listens Numbas.Question#event:variablesGenerated
+     * @listens Numbas.Question#event:partsGenerated
+     * @listens Numbas.Question#event:ready
+     * @listens Numbas.Question#event:HTMLAttached
      */
     finaliseLoad: function() {
         var q = this;
@@ -340,6 +426,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.signals.trigger('generateVariables');
     },
     /** Load saved data about this question from storage
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#partsResumed
+     * @listens Numbas.Question#event:partsGenerated
+     * @listens Numbas.Question#event:ready
      */
     resume: function() {
         if(!this.store) {
@@ -459,7 +549,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     leave: function() {
     this.display &amp;&amp; this.display.leave();
     },
-    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
+    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. 
+     * @fires Numbas.Question#preambleRun
+     */
     runPreamble: function() {
         with({
             question: this
@@ -607,6 +699,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Add a callback function to run when the question's HTML is attached to the page
      *
      * @param {function} fn
+     * @deprecated Use {@link Numbas.Question#signals} instead.
+     * @listens Numbas.Question#event:HTMLAttached
      */
     onHTMLAttached: function(fn) {
         this.signals.on('HTMLAttached',fn);
@@ -614,6 +708,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
      *
      * @param {function} fn
+     * @deprecated Use {@link Numbas.Question#signals} instead.
+     * @listens Numbas.Question#event:variablesGenerated
      */
     onVariablesGenerated: function(fn) {
         this.signals.on('variablesGenerated',fn);
@@ -974,6 +1070,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 			<li class="search-result" data-longname="Numbas.Exam#endTiming"><a href="Numbas.Exam.html#endTiming">Numbas.Exam#endTiming</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Exam#event:question list initialised"><a href="Numbas.Exam.html#event:questionlistinitialised">Numbas.Exam#event:question list initialised</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#init"><a href="Numbas.Exam.html#init">Numbas.Exam#init</a></li>
@@ -1013,6 +1111,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.Exam#settings"><a href="Numbas.Exam.html#settings">Numbas.Exam#settings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#showInfoPage"><a href="Numbas.Exam.html#showInfoPage">Numbas.Exam#showInfoPage</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#signals"><a href="Numbas.Exam.html#signals">Numbas.Exam#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#start"><a href="Numbas.Exam.html#start">Numbas.Exam#start</a></li>
 		
@@ -1713,6 +1813,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.matrixmath.siground"><a href="Numbas.matrixmath.html#.siground">Numbas.matrixmath.siground</a></li>
 		
 			<li class="search-result" data-longname="Numbas.matrixmath.sub"><a href="Numbas.matrixmath.html#.sub">Numbas.matrixmath.sub</a></li>
+		
+			<li class="search-result" data-longname="Numbas.matrixmath.sum_cells"><a href="Numbas.matrixmath.html#.sum_cells">Numbas.matrixmath.sum_cells</a></li>
 		
 			<li class="search-result" data-longname="Numbas.matrixmath.transpose"><a href="Numbas.matrixmath.html#.transpose">Numbas.matrixmath.transpose</a></li>
 		
@@ -2510,8 +2612,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#studentAnswerAsJME"><a href="Numbas.parts.MatrixEntryPart.html#studentAnswerAsJME">Numbas.parts.MatrixEntryPart#studentAnswerAsJME</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#studentAnswerAsMatrix"><a href="Numbas.parts.MatrixEntryPart.html#studentAnswerAsMatrix">Numbas.parts.MatrixEntryPart#studentAnswerAsMatrix</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#subCredit"><a href="Numbas.parts.MatrixEntryPart.html#subCredit">Numbas.parts.MatrixEntryPart#subCredit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#submit"><a href="Numbas.parts.MatrixEntryPart.html#submit">Numbas.parts.MatrixEntryPart#submit</a></li>
@@ -2785,8 +2885,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#storeAnswer"><a href="Numbas.parts.NumberEntryPart.html#storeAnswer">Numbas.parts.NumberEntryPart#storeAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswer"><a href="Numbas.parts.NumberEntryPart.html#studentAnswer">Numbas.parts.NumberEntryPart#studentAnswer</a></li>
-		
-			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswerAsFloat"><a href="Numbas.parts.NumberEntryPart.html#studentAnswerAsFloat">Numbas.parts.NumberEntryPart#studentAnswerAsFloat</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#studentAnswerAsJME"><a href="Numbas.parts.NumberEntryPart.html#studentAnswerAsJME">Numbas.parts.NumberEntryPart#studentAnswerAsJME</a></li>
 		
@@ -3094,6 +3192,34 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 			<li class="search-result" data-longname="Numbas.Question#display"><a href="Numbas.Question.html#display">Numbas.Question#display</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#event:functionsLoaded"><a href="Numbas.Question.html#event:functionsLoaded">Numbas.Question#event:functionsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:functionsMade"><a href="Numbas.Question.html#event:functionsMade">Numbas.Question#event:functionsMade</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:generateVariables"><a href="Numbas.Question.html#event:generateVariables">Numbas.Question#event:generateVariables</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:HTMLAttached"><a href="Numbas.Question.html#event:HTMLAttached">Numbas.Question#event:HTMLAttached</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:partsGenerated"><a href="Numbas.Question.html#event:partsGenerated">Numbas.Question#event:partsGenerated</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:partsResumed"><a href="Numbas.Question.html#event:partsResumed">Numbas.Question#event:partsResumed</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:preambleLoaded"><a href="Numbas.Question.html#event:preambleLoaded">Numbas.Question#event:preambleLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:preambleRun"><a href="Numbas.Question.html#event:preambleRun">Numbas.Question#event:preambleRun</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:ready"><a href="Numbas.Question.html#event:ready">Numbas.Question#event:ready</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:rulesetsLoaded"><a href="Numbas.Question.html#event:rulesetsLoaded">Numbas.Question#event:rulesetsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:rulesetsMade"><a href="Numbas.Question.html#event:rulesetsMade">Numbas.Question#event:rulesetsMade</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variableDefinitionsLoaded"><a href="Numbas.Question.html#event:variableDefinitionsLoaded">Numbas.Question#event:variableDefinitionsLoaded</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variablesGenerated"><a href="Numbas.Question.html#event:variablesGenerated">Numbas.Question#event:variablesGenerated</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#event:variablesSet"><a href="Numbas.Question.html#event:variablesSet">Numbas.Question#event:variablesSet</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
@@ -3136,6 +3262,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#store"><a href="Numbas.Question.html#store">Numbas.Question#store</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#submit"><a href="Numbas.Question.html#submit">Numbas.Question#submit</a></li>
@@ -3162,6 +3290,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 			<li class="search-result" data-longname="Numbas.schedule.add"><a href="Numbas.schedule.html#.add">Numbas.schedule.add</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.callback"><a href="Numbas.schedule.html#.callback">Numbas.schedule.callback</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.calls"><a href="Numbas.schedule.html#.calls">Numbas.schedule.calls</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.completed"><a href="Numbas.schedule.html#.completed">Numbas.schedule.completed</a></li>
@@ -3179,6 +3309,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 			<li class="search-result" data-longname="Numbas.schedule.lifts"><a href="Numbas.schedule.html#.lifts">Numbas.schedule.lifts</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.pop"><a href="Numbas.schedule.html#.pop">Numbas.schedule.pop</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox"><a href="Numbas.schedule.SignalBox.html">Numbas.schedule.SignalBox</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
@@ -3632,7 +3770,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

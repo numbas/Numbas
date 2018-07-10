@@ -95,14 +95,77 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.parts = [];
     q.partDictionary = {};
 }
+
+/** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
+ * @event Numbas.Question#preambleLoaded
+ * @see Numbas.Question#event:preambleRun
+ */
+/** The question preamble has been run.
+ * @event Numbas.Question#preambleRun
+ */
+/** The question's function definitions have been loaded, but the corresponding {@link Numbas.jme.funcObj} objects have not been added to the scope yet.
+ * @event Numbas.Question#functionsLoaded
+ * @see Numbas.Question#event:functionsMade
+ */
+/** The question's functions have been made and added to the question's scope.
+ * @event Numbas.Question#functionsMade
+ */
+/** The question's ruleset  definitions have been loaded, but the {@link Numbas.jme.rules.Ruleset} objects have not been added to the scope yet.
+ * @event Numbas.Question#rulesetsLoaded
+ * @see Numbas.Question#event:rulesetsMade
+ */
+/** The question's rulesets have been made and added to the question's scope.
+ * @event Numbas.Question#rulesetsMade
+ */
+/** Trigger this when you're ready to evaluate the question's variables. In an exam context, the {@link Numbas.Exam} object triggers this event.
+ * If the question has been created standalone, this event must be triggered in order for the question to finish loading.
+ * @event Numbas.Question#generateVariables
+ */
+/** The variable definitions have been loaded, but their values have not been generated yet.
+ * @event Numbas.Question#variableDefinitionsLoaded
+ * @see Numbas.Question#event:variablesSet
+ * @see Numbas.Question#event:variablesGenerated
+ */
+/** The parts of the question have been generated.
+ * If resuming an attempt, the parts have not yet been restored to the saved state.
+ * @event Numbas.Question#partsGenerated
+ * @see Numbas.Question#event:partsResumed
+ */
+/** Triggered when resuming a saved attempt: the question's parts have been restored to the saved state.
+ * @event Numbas.Question#partsResumed
+ */
+/** The variables have been evaluated, but {@link Numbas.Question.unwrappedVariables} has not been set yet.
+ * @event Numbas.Question#variablesSet
+ */
+/** The variables have been generated and added to the scope, and are ready to use.
+ * @event Numbas.Question#variablesGenerated
+ */
+/** The question is fully loaded and ready to use.
+ * @event Numbas.Question#ready
+ */
+/** The question's HTML has been generated and attached to the page.
+ * @event Numbas.Question#HTMLAttached
+ */
+
 Question.prototype = /** @lends Numbas.Question.prototype */
 {
+    /** Signals produced while loading this question.
+     * @type {Numbas.schedule.SignalBox} 
+     * */
+    signals: undefined,
+
     /** Storage engine
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
     /** Load the question's settings from an XML <question> node
      * @param {Element} xml
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#event:variablesGenerated
      */
     loadFromXML: function(xml) {
         var q = this;
@@ -167,6 +230,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Load the question's settings from a JSON object
      * @param {Object} data
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#event:variablesGenerated
      */
     loadFromJSON: function(data) {
         var q = this;
@@ -242,6 +311,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.marks += part.marks;
     },
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
+     * @fires Numbas.Question#functionsMade
+     * @fires Numbas.Question#rulesetsMade
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#variablesGenerated
+     * @fires Numbas.Question#ready
+     * @listens Numbas.Question#event:preambleLoaded
+     * @listens Numbas.Question#event:functionsLoaded
+     * @listens Numbas.Question#event:rulesetsLoaded
+     * @listens Numbas.Question#event:generateVariables
+     * @listens Numbas.Question#event:functionsMade
+     * @listens Numbas.Question#event:rulesetsMade
+     * @listens Numbas.Question#event:variableDefinitionsLoaded
+     * @listens Numbas.Question#event:variablesSet
+     * @listens Numbas.Question#event:variablesGenerated
+     * @listens Numbas.Question#event:partsGenerated
+     * @listens Numbas.Question#event:ready
+     * @listens Numbas.Question#event:HTMLAttached
      */
     finaliseLoad: function() {
         var q = this;
@@ -308,6 +394,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.signals.trigger('generateVariables');
     },
     /** Load saved data about this question from storage
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#partsResumed
+     * @listens Numbas.Question#event:partsGenerated
+     * @listens Numbas.Question#event:ready
      */
     resume: function() {
         if(!this.store) {
@@ -427,7 +517,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     leave: function() {
     this.display && this.display.leave();
     },
-    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. */
+    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. 
+     * @fires Numbas.Question#preambleRun
+     */
     runPreamble: function() {
         with({
             question: this
@@ -575,6 +667,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Add a callback function to run when the question's HTML is attached to the page
      *
      * @param {function} fn
+     * @deprecated Use {@link Numbas.Question#signals} instead.
+     * @listens Numbas.Question#event:HTMLAttached
      */
     onHTMLAttached: function(fn) {
         this.signals.on('HTMLAttached',fn);
@@ -582,6 +676,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
      *
      * @param {function} fn
+     * @deprecated Use {@link Numbas.Question#signals} instead.
+     * @listens Numbas.Question#event:variablesGenerated
      */
     onVariablesGenerated: function(fn) {
         this.signals.on('variablesGenerated',fn);

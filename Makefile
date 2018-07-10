@@ -7,7 +7,7 @@ update_tests: jme runtime marking_scripts
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js i18next/i18next.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js  schedule.js  marking.js json.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js schedule.js  marking.js json.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
