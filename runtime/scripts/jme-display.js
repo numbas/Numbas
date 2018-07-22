@@ -274,7 +274,7 @@ var texOps = jme.display.texOps = {
         }
         else if(thing.args[0].tok.type=='number' && thing.args[0].tok.value.complex) {
             var value = thing.args[0].tok.value;
-            return settings.texNumber({complex:true,re:-value.re,im:-value.im});
+            return settings.texNumber({complex:true,re:-value.re,im:-value.im}, settings);
         }
         return '-'+tex;
     }),
@@ -354,7 +354,7 @@ var texOps = jme.display.texOps = {
         var a = thing.args[0];
         var b = thing.args[1];
         if(b.tok.type=='number' && b.tok.value.complex && b.tok.value.re!=0) {
-            var texb = settings.texNumber(math.complex(b.tok.value.re,-b.tok.value.im));
+            var texb = settings.texNumber(math.complex(b.tok.value.re,-b.tok.value.im), settings);
             return texArgs[0]+' - '+texb;
         }
         else{
@@ -558,14 +558,15 @@ var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
  * @private
  *
  * @param {Number} n
+ * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
-var texRationalNumber = jme.display.texRationalNumber = function(n)
+var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
 {
     if(n.complex)
     {
-        var re = texRationalNumber(n.re);
-        var im = texRationalNumber(n.im)+' i';
+        var re = texRationalNumber(n.re, settings);
+        var im = texRationalNumber(n.im, settings)+' i';
         if(n.im==0)
             return re;
         else if(n.re==0)
@@ -613,8 +614,16 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
         var f = math.rationalApproximation(Math.abs(n));
         if(f[1]==1)
             out = Math.abs(f[0]).toString();
-        else
-            out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+        else{
+            if(settings.mixedfractions && f[0] > f[1]) {
+                var mixedInteger = math.trunc(n);
+                var properNumerator = math.mod(f[0], f[1]);
+                out = mixedInteger+'\\frac{'+properNumerator+'}{'+f[1]+'}';
+            }
+            else {
+                out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+            }
+        }
         if(n<0)
             out='-'+out;
         switch(piD)
@@ -639,14 +648,15 @@ var texRationalNumber = jme.display.texRationalNumber = function(n)
  * @private
  *
  * @param {Number} n
+ * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
-function texRealNumber(n)
+function texRealNumber(n, settings)
 {
     if(n.complex)
     {
-        var re = texRealNumber(n.re);
-        var im = texRealNumber(n.im)+' i';
+        var re = texRealNumber(n.re, settings);
+        var im = texRealNumber(n.im, settings)+' i';
         if(n.im==0)
             return re;
         else if(n.re==0)
@@ -728,7 +738,7 @@ function texVector(v,settings)
         elements = v.args.map(function(x){return texify(x,settings)});
     } else {
         var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
-        elements = v.map(function(x){return texNumber(x)});
+        elements = v.map(function(x){return texNumber(x, settings)});
     }
     if(settings.rowvector)
         out = elements.join(' , ');
@@ -766,7 +776,7 @@ function texMatrix(m,settings,parens)
     {
         var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
         var rows = m.map(function(x){
-            return x.map(function(y){ return texNumber(y) });
+            return x.map(function(y){ return texNumber(y, settings) });
         });
     }
     if(rows.length==1) {
@@ -889,7 +899,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\text{nothing}';
     },
     'number': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value);
+        return settings.texNumber(tok.value, settings);
     },
     'string': function(thing,tok,texArgs,settings) {
         if(tok.latex)

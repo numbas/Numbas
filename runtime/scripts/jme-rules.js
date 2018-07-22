@@ -429,7 +429,8 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommut
 var displayFlags = jme.rules.displayFlags = {
     fractionnumbers: undefined,
     rowvector: undefined,
-    alwaystimes: undefined
+    alwaystimes: undefined,
+    mixedfractions: undefined
 };
 /** Flags used in JME simplification rulesets
  * @type Object.<Boolean>
