@@ -663,7 +663,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         q.signals.on(['ready','HTMLAttached'], function() {
             e.currentQuestion.display.init();
             e.display.showQuestion();
-    e.display.endRegen();
+            e.display.endRegen();
         });
     },
     /**
