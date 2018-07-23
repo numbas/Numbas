@@ -612,13 +612,13 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
             return mantissa+' \\times 10^{'+exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
-        if(f[1]==1)
+        if(f[1]==1) {
             out = Math.abs(f[0]).toString();
-        else{
+        } else {
             if(settings.mixedfractions && f[0] > f[1]) {
-                var mixedInteger = math.trunc(n);
                 var properNumerator = math.mod(f[0], f[1]);
-                out = mixedInteger+'\\frac{'+properNumerator+'}{'+f[1]+'}';
+                var mixedInteger = (f[0]-properNumerator)/f[1];
+                out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
             }
             else {
                 out = '\\frac{'+f[0]+'}{'+f[1]+'}';

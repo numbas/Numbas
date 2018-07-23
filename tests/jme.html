@@ -1125,6 +1125,17 @@
 					});
 				});
 
+                QUnit.test('texify', function(assert) {
+                    function mixedfrac(expr) {
+                        return Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate(expr)},{mixedfractions:true,fractionnumbers:true});
+                    }
+                    assert.equal(mixedfrac('1/2'),'\\frac{1}{2}','1/2');
+                    assert.equal(mixedfrac('3/2'),'1 \\frac{1}{2}','3/2');
+                    assert.equal(mixedfrac('-76/11'),'-6 \\frac{10}{11}','-76/11');
+                    assert.equal(mixedfrac('1234567/123'),'10037 \\frac{16}{123}','1234567/123');
+                    assert.equal(mixedfrac('3i/2'),'1 \\frac{1}{2} i','3i/2');
+                });
+
 				QUnit.test('expression to LaTeX', function(assert) {
 					function exprToLaTeX(expr,rules) {
 						return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
