@@ -473,6 +473,10 @@ newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs
 newBuiltin('isnan',[TNum],TBool,function(n) {
     return isNaN(n);
 });
+newBuiltin('matchnumber',[TString,TList],TList,function(s,styles) {
+    var result = util.matchNotationStyle(s,styles,true);
+    return [new TString(result.matched), new TNum(util.parseNumber(result.cleaned,false,['plain'],true))];
+},{unwrapValues:true});
 newBuiltin('cleannumber',[TString,TList],TString,util.cleanNumber,{unwrapValues:true});
 newBuiltin('isbool',[TString],TBool,util.isBool);
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations );
@@ -1297,7 +1301,11 @@ newBuiltin('try',['?',TName,'?'],'?',null, {
 });
 Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
-    return [];
+    var try_boundvars = boundvars.slice();
+    try_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    vars = jme.findvars(tree.args[0],boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
+    return vars;
 }
 newBuiltin('exec',[TOp,TList],TExpression,null, {
     evaluate: function(args, scope) {

@@ -629,24 +629,27 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return s;
         }
     },
-    /** Clean a string potentially representing a number.
-     * Remove space, and then try to identify a notation style.
-     *
-     * If `styles` is given, `s` will be tested against the given styles. If it matches, the string will be rewritten using the matched integer and decimal parts, with punctuation removed and the decimal point changed to a dot.
+
+    /** Try to match a string representing a number in any of the given styles at the start of the given string, and return both the matched text and a JavaScript number literal equivalent.
      *
      * @param {String} s - the string potentially representing a number.
      * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
-     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
-     * @returns {String}
+     * @param {Boolean} [strictStyle] - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
+     * @param {Boolean} [mustMatchAll] - if true, then the string must contain only the matched number.
+     * @returns {[String,String]|null}
      *
      * @see Numbas.util.numberNotationStyles
      */
-    cleanNumber: function(s,styles,strictStyle) {
-        s = s.toString().trim();
-        var match_neg = /^(-)?(.*)/.exec(s);
+    matchNotationStyle: function(s,styles,strictStyle,mustMatchAll) {
+        var pos = 0;
+        s = s.toString();
+        var match_neg = /^\s*(-)?\s*/.exec(s);
         var minus = match_neg[1] || '';
-        s = match_neg[2];
+        pos += match_neg[0].length;
+
         var matched = false;
+        var cleaned = s;
+        var bestpos = pos;
         if(styles!==undefined) {
             if(typeof styles=='string') {
                 styles = [styles];
@@ -658,23 +661,49 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 }
                 var re = style.re;
                 var m;
-                if(re && (m=re.exec(s))) {
+                if(re && (m=re.exec(s.slice(pos))) && (!mustMatchAll || s.slice(pos+m[0].length).trim()=='')) {
                     matched = true;
                     var integer = m[1].replace(/\D/g,'');
+                    var mcleaned;
                     if(m[2]) {
                         var decimal = m[2].replace(/\D/g,'');
-                        s = integer+'.'+decimal
+                        mcleaned = minus + integer + '.' + decimal
                     } else {
-                        s = integer;
+                        mcleaned = minus + integer;
                     }
-                    break;
+                    var mpos = pos + m[0].length;
+                    if(mpos > bestpos) {
+                        bestpos = mpos;
+                        cleaned = mcleaned;
+                    }
                 }
             }
         }
+        pos = bestpos;
         if(strictStyle && !matched) {
-            return 'NaN';
+            cleaned = 'NaN';
         }
-        return minus+s;
+        return {
+            matched: matched ? s.slice(0,pos) : '',
+            cleaned: cleaned
+        }
+    },
+
+    /** Clean a string potentially representing a number.
+     * Remove space, and then try to identify a notation style.
+     *
+     * If `styles` is given, `s` will be tested against the given styles. If it matches, the string will be rewritten using the matched integer and decimal parts, with punctuation removed and the decimal point changed to a dot.
+     *
+     * @param {String} s - the string potentially representing a number.
+     * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
+     * @param {Boolean} [strictStyle] - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
+     * @returns {String}
+     *
+     * @see Numbas.util.numberNotationStyles
+     */
+    cleanNumber: function(s,styles,strictStyle) {
+        var result = util.matchNotationStyle(s,styles,strictStyle,true);
+        return result.cleaned;
     },
     /** Parse a number - either parseFloat, or parse a fraction.
      * @param {String} s
@@ -1187,7 +1216,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 var numberNotationStyles = util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
     'plain': {
-        re: /^([0-9]+)(\x2E[0-9]+)?$/,
+        re: /^([0-9]+)(\x2E[0-9]+)?/,
         format: function(integer,decimal) {
             if(decimal) {
                 return integer+'.'+decimal;
@@ -1198,27 +1227,27 @@ var numberNotationStyles = util.numberNotationStyles = {
     },
     // English style - commas separate thousands, dot for decimal point
     'en': {
-        re: /^(\d{1,3}(?:,\d{3})*)(\x2E\d+)?$/,
+        re: /^(\d{1,3}(?:,\d{3})*)(\x2E\d+)?/,
         format: util.standardNumberFormatter(',','.')
     },
     // English SI style - spaces separate thousands, dot for decimal point
     'si-en': {
-        re: /^(\d{1,3}(?: +\d{3})*)(\x2E(?:\d{3} )*\d{1,3})?$/,
+        re: /^(\d{1,3}(?: +\d{3})*)(\x2E(?:\d{3} )*\d{1,3})?/,
         format: util.standardNumberFormatter(' ','.',true)
     },
     // French SI style - spaces separate thousands, comma for decimal point
     'si-fr': {
-        re: /^(\d{1,3}(?: +\d{3})*)(,(?:\d{3} )*\d{1,3})?$/,
+        re: /^(\d{1,3}(?: +\d{3})*)(,(?:\d{3} )*\d{1,3})?/,
         format: util.standardNumberFormatter(' ',',',true)
     },
     // Continental European style - dots separate thousands, comma for decimal point
     'eu': {
-        re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?$/,
+        re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?/,
         format: util.standardNumberFormatter('.',',')
     },
     // Plain French style - no thousands separator, comma for decimal point
     'plain-eu': {
-        re: /^([0-9]+)(,[0-9]+)?$/,
+        re: /^([0-9]+)(,[0-9]+)?/,
         format: function(integer,decimal) {
             if(decimal) {
                 return integer+','+decimal;
@@ -1229,12 +1258,12 @@ var numberNotationStyles = util.numberNotationStyles = {
     },
     // Swiss style - apostrophes separate thousands, dot for decimal point
     'ch': {
-        re: /^(\d{1,3}(?:'\d{3})*)(\x2E\d+)?$/,
+        re: /^(\d{1,3}(?:'\d{3})*)(\x2E\d+)?/,
         format: util.standardNumberFormatter('\'','.')
     },
     // Indian style - commas separate groups, dot for decimal point. The rightmost group is three digits, other groups are two digits.
     'in': {
-        re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?$/,
+        re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?/,
         format: function(integer,decimal) {
             integer = integer+'';
             if(integer.length>3) {
@@ -8233,6 +8262,10 @@ newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs
 newBuiltin('isnan',[TNum],TBool,function(n) {
     return isNaN(n);
 });
+newBuiltin('matchnumber',[TString,TList],TList,function(s,styles) {
+    var result = util.matchNotationStyle(s,styles,true);
+    return [new TString(result.matched), new TNum(util.parseNumber(result.cleaned,false,['plain'],true))];
+},{unwrapValues:true});
 newBuiltin('cleannumber',[TString,TList],TString,util.cleanNumber,{unwrapValues:true});
 newBuiltin('isbool',[TString],TBool,util.isBool);
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations );
@@ -9057,7 +9090,11 @@ newBuiltin('try',['?',TName,'?'],'?',null, {
 });
 Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
-    return [];
+    var try_boundvars = boundvars.slice();
+    try_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    vars = jme.findvars(tree.args[0],boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
+    return vars;
 }
 newBuiltin('exec',[TOp,TList],TExpression,null, {
     evaluate: function(args, scope) {
