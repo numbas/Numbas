@@ -16,7 +16,9 @@ A publicly-available editor, requiring no set-up, is available at [numbas.mathce
 
 If you decide to run your own installation, install the compiler's dependencies with `pip install -r requirements.txt`.
 
-### Development
+This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
+
+### Contributing to Numbas
 
 Numbas is open source, and we welcome contributions of any sort. Bug reports or feature suggestions can be added to [the GitHub issue tracker](https://github.com/numbas/Numbas/issues), or emailed to numbas@ncl.ac.uk. 
 
@@ -24,14 +26,19 @@ See [our page on contributing to Numbas](http://www.numbas.org.uk/contributing-t
 
 We keep a list of tasks specifically for new contributors, under the [good-first-issue label](https://github.com/numbas/Numbas/labels/good%20first%20issue). There's [a corresponding list in the editor repository](https://github.com/numbas/editor/labels/good%20first%20issue), too. These tasks should be fairly straightforward to implement without much knowledge of how all the code fits together.
 
-This repository is just one part of the Numbas ecosystem. See [the numbas organisation](http://github.com/numbas) for the other pieces, including the web-based editor, extensions, and VLE integrations.
+### Development
 
-The Makefile in this repository collects together scripts to run the unit tests. 
+This tool runs on the command line: run `python bin/numbas.py` to see the options. You can give it the name of a `.exam` file or pipe one in.
+
+When making changes to the JavaScript runtime, it's a good idea to run the unit tests in the `tests` directory. Start a local web server with `python -m http.server` and go to http://localhost:8000/tests. The file `jme.html` contains tests to do with the JME system, and `parts.html` contains tests to do with the part marking algorithms. 
+
+If you make a change, please try to add unit tests to confirm that Numbas behaves as expected.
+
+The Makefile in this repository collects together scripts to run the unit tests, and builds the API documentation. Linux and Mac OS have built-in support Makefiles, but Windows doesn't. On Windows, [cygwin](https://www.cygwin.com/) provides `make`.
 
 API documentation for developers is at [numbas.github.io/Numbas](https://numbas.github.io/Numbas).
 This is generated using [JSDoc](http://usejsdoc.org), with [a custom template](http://github.com/numbas/numbas-jsdoc-template).
 Run `make docs` to rebuild the API documentation into `../numbas-docs`.
-
 
 ### Copyright
 
