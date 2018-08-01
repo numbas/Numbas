@@ -2219,24 +2219,41 @@ var varsUsed = jme.varsUsed = function(tree) {
     }
 };
 
+/** Use JS comparison operators to compare the `value` property of both tokens.
+ * Used when the token wraps a JS built-in type, such as string, number or boolean.
+ * @see @Numbas.jme.tokenComparisons
+ */
+var compareTokensByValue = jme.compareTokensByValue = function(a,b) {
+    return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
+}
+
+/** Functions to compare two tokens of the same type.
+ * Returns -1 if a<b, 0 if a=b, and 1 if a>b
+ * @see Numbas.jme.compareTokens
+ */
+var tokenComparisons = Numbas.jme.tokenComparisons = {
+    'number': compareTokensByValue,
+    'string': compareTokensByValue,
+    'boolean': compareTokensByValue
+}
+
 /** Compare two tokens, for the purposes of sorting.
  * Uses JavaScript comparison for numbers, strings and booleans, and {@link Numbas.jme.compareTrees} for everything else, or when types differ.
  *
  * @param {Numbas.jme.token} a
  * @param {Numbas.jme.token} b
+ * @see Numbas.jme.tokenComparisons
  * @returns {Number} -1 if `a < b`, 1 if `a > b`, else 0.
  */
 var compareTokens = jme.compareTokens = function(a,b) {
     if(a.type!=b.type) {
         return jme.compareTrees({tok:a},{tok:b});
     } else {
-        switch(a.type) {
-            case 'number':
-            case 'string':
-            case 'boolean':
-                return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
-            default:
-                return jme.compareTrees({tok:a},{tok:b});
+        var compare = tokenComparisons[a.type];
+        if(compare) {
+            return compare(a,b);
+        } else {
+            return jme.compareTrees({tok:a},{tok:b});
         }
     }
 }

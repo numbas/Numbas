@@ -133,6 +133,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Generic equality test on {@link Numbas.jme.token}s
      * @param {Numbas.jme.token} a
      * @param {Numbas.jme.token} b
+     * @see Numbas.util.equalityTests
      * @returns {Boolean}
      */
     eq: function(a,b) {
@@ -144,6 +145,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             throw(new Numbas.Error('util.equality not defined for type',{type:a.type}));
         }
     },
+
+    /** Functions to decide if two tokens of the same type are equal.
+     * Dictionary mapping token type name to function.
+     * @see Numbas.util.eq
+     */
     equalityTests: {
         'nothing': function(a,b) {
             return true;
