@@ -112,6 +112,8 @@
 					<h4>Members</h4>
 					<ul>
 					
+						<li class="name"><a href="Numbas.util.html#.equalityTests">equalityTests</a></li>
+					
 						<li class="name"><a href="Numbas.util.html#.numberNotationStyles">numberNotationStyles</a></li>
 					
 						<li class="name"><a href="Numbas.util.html#.re_fraction">re_fraction</a></li>
@@ -181,6 +183,8 @@
 					
 						<li class="name"><a href="Numbas.util.html#.lpad">lpad</a></li>
 					
+						<li class="name"><a href="Numbas.util.html#.matchNotationStyle">matchNotationStyle</a></li>
+					
 						<li class="name"><a href="Numbas.util.html#.neq">neq</a></li>
 					
 						<li class="name"><a href="Numbas.util.html#.nicePartName">nicePartName</a></li>
@@ -225,6 +229,78 @@
     
 		<div class="subsection">
         <h3 class="subsection-title">Members</h3>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".equalityTests"><span class="type-signature">(static) </span>equalityTests<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Functions to decide if two tokens of the same type are equal.
+Dictionary mapping token type name to function.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L153">runtime/scripts/util.js, line 153</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.util.html#.eq">Numbas.util.eq</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
 
         
             
@@ -275,7 +351,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L955">runtime/scripts/util.js, line 955</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L990">runtime/scripts/util.js, line 990</a>
     </li></ul></dd>
     
 
@@ -346,7 +422,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L376">runtime/scripts/util.js, line 376</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L382">runtime/scripts/util.js, line 382</a>
     </li></ul></dd>
     
 
@@ -545,7 +621,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L209">runtime/scripts/util.js, line 209</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L215">runtime/scripts/util.js, line 215</a>
     </li></ul></dd>
     
 
@@ -712,7 +788,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L627">runtime/scripts/util.js, line 627</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L662">runtime/scripts/util.js, line 662</a>
     </li></ul></dd>
     
 
@@ -736,7 +812,7 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id=".cleanNumber"><span class="type-signature">(static) </span>cleanNumber<span class="signature">(s, styles, strictStyle)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id=".cleanNumber"><span class="type-signature">(static) </span>cleanNumber<span class="signature">(s, styles, strictStyle<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
@@ -769,6 +845,8 @@ Remove space, and then try to identify a notation style.</p>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -793,6 +871,14 @@ Remove space, and then try to identify a notation style.</p>
             
             </td>
 
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -820,6 +906,14 @@ Remove space, and then try to identify a notation style.</p>
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -842,6 +936,16 @@ Remove space, and then try to identify a notation style.</p>
             
             </td>
 
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
             
 
             
@@ -930,7 +1034,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L412">runtime/scripts/util.js, line 412</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L478">runtime/scripts/util.js, line 478</a>
     </li></ul></dd>
     
 
@@ -1098,7 +1202,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L811">runtime/scripts/util.js, line 811</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L846">runtime/scripts/util.js, line 846</a>
     </li></ul></dd>
     
 
@@ -1259,7 +1363,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L841">runtime/scripts/util.js, line 841</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L876">runtime/scripts/util.js, line 876</a>
     </li></ul></dd>
     
 
@@ -1449,7 +1553,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L275">runtime/scripts/util.js, line 275</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L281">runtime/scripts/util.js, line 281</a>
     </li></ul></dd>
     
 
@@ -1647,7 +1751,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1043">runtime/scripts/util.js, line 1043</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1078">runtime/scripts/util.js, line 1078</a>
     </li></ul></dd>
     
 
@@ -2387,7 +2491,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L551">runtime/scripts/util.js, line 551</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L586">runtime/scripts/util.js, line 586</a>
     </li></ul></dd>
     
 
@@ -2554,7 +2658,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L251">runtime/scripts/util.js, line 251</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L257">runtime/scripts/util.js, line 257</a>
     </li></ul></dd>
     
 
@@ -2751,12 +2855,19 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L138">runtime/scripts/util.js, line 138</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L139">runtime/scripts/util.js, line 139</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.util.html#.equalityTests">Numbas.util.equalityTests</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -2918,7 +3029,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L700">runtime/scripts/util.js, line 700</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L735">runtime/scripts/util.js, line 735</a>
     </li></ul></dd>
     
 
@@ -3108,7 +3219,7 @@ This function clones the array elements as well, so there should be no side-effe
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L237">runtime/scripts/util.js, line 237</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L243">runtime/scripts/util.js, line 243</a>
     </li></ul></dd>
     
 
@@ -3709,7 +3820,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L525">runtime/scripts/util.js, line 525</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L560">runtime/scripts/util.js, line 560</a>
     </li></ul></dd>
     
 
@@ -3876,7 +3987,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L538">runtime/scripts/util.js, line 538</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L573">runtime/scripts/util.js, line 573</a>
     </li></ul></dd>
     
 
@@ -3966,7 +4077,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L734">runtime/scripts/util.js, line 734</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L769">runtime/scripts/util.js, line 769</a>
     </li></ul></dd>
     
 
@@ -4133,7 +4244,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L348">runtime/scripts/util.js, line 348</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L354">runtime/scripts/util.js, line 354</a>
     </li></ul></dd>
     
 
@@ -4300,7 +4411,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L295">runtime/scripts/util.js, line 295</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L301">runtime/scripts/util.js, line 301</a>
     </li></ul></dd>
     
 
@@ -4467,7 +4578,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L303">runtime/scripts/util.js, line 303</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L309">runtime/scripts/util.js, line 309</a>
     </li></ul></dd>
     
 
@@ -4634,7 +4745,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L287">runtime/scripts/util.js, line 287</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L293">runtime/scripts/util.js, line 293</a>
     </li></ul></dd>
     
 
@@ -4801,7 +4912,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L359">runtime/scripts/util.js, line 359</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L365">runtime/scripts/util.js, line 365</a>
     </li></ul></dd>
     
 
@@ -5044,7 +5155,7 @@ Object.assign doesn't behave the same way - it copies over <code>undefined</code
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L317">runtime/scripts/util.js, line 317</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L323">runtime/scripts/util.js, line 323</a>
     </li></ul></dd>
     
 
@@ -5219,7 +5330,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L913">runtime/scripts/util.js, line 913</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L948">runtime/scripts/util.js, line 948</a>
     </li></ul></dd>
     
 
@@ -5432,12 +5543,303 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L499">runtime/scripts/util.js, line 499</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L534">runtime/scripts/util.js, line 534</a>
     </li></ul></dd>
     
 
     
 
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id=".matchNotationStyle"><span class="type-signature">(static) </span>matchNotationStyle<span class="signature">(s, styles, strictStyle<span class="signature-attributes">opt</span>, mustMatchAll<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Object|null}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Try to match a string representing a number in any of the given styles at the start of the given string, and return both the matched text and a JavaScript number literal equivalent.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>s</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>the string potentially representing a number.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>styles</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+|
+
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>styles of notation to allow, e.g. <code>['en','si-en']</code></p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>strictStyle</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mustMatchAll</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if true, then the string must contain only the matched number.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+|
+
+<span class="param-type">null</span>
+
+
+
+</td>
+<td class="description">
+
+    <ul>
+<li><code>{matched, cleaned}</code> or <code>null</code></li>
+</ul>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L417">runtime/scripts/util.js, line 417</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.util.html#.numberNotationStyles">Numbas.util.numberNotationStyles</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -5622,7 +6024,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L185">runtime/scripts/util.js, line 185</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L191">runtime/scripts/util.js, line 191</a>
     </li></ul></dd>
     
 
@@ -5796,7 +6198,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L934">runtime/scripts/util.js, line 934</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L969">runtime/scripts/util.js, line 969</a>
     </li></ul></dd>
     
 
@@ -5963,7 +6365,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L368">runtime/scripts/util.js, line 368</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L374">runtime/scripts/util.js, line 374</a>
     </li></ul></dd>
     
 
@@ -6130,7 +6532,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L480">runtime/scripts/util.js, line 480</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L515">runtime/scripts/util.js, line 515</a>
     </li></ul></dd>
     
 
@@ -6376,7 +6778,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L455">runtime/scripts/util.js, line 455</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L490">runtime/scripts/util.js, line 490</a>
     </li></ul></dd>
     
 
@@ -6545,7 +6947,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L871">runtime/scripts/util.js, line 871</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L906">runtime/scripts/util.js, line 906</a>
     </li></ul></dd>
     
 
@@ -6759,7 +7161,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L615">runtime/scripts/util.js, line 615</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L650">runtime/scripts/util.js, line 650</a>
     </li></ul></dd>
     
 
@@ -6926,7 +7328,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L750">runtime/scripts/util.js, line 750</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L785">runtime/scripts/util.js, line 785</a>
     </li></ul></dd>
     
 
@@ -7139,7 +7541,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L512">runtime/scripts/util.js, line 512</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L547">runtime/scripts/util.js, line 547</a>
     </li></ul></dd>
     
 
@@ -7309,7 +7711,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L714">runtime/scripts/util.js, line 714</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L749">runtime/scripts/util.js, line 749</a>
     </li></ul></dd>
     
 
@@ -7532,7 +7934,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L639">runtime/scripts/util.js, line 639</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L674">runtime/scripts/util.js, line 674</a>
     </li></ul></dd>
     
 
@@ -7761,7 +8163,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L383">runtime/scripts/util.js, line 383</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L389">runtime/scripts/util.js, line 389</a>
     </li></ul></dd>
     
 
@@ -7935,7 +8337,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L603">runtime/scripts/util.js, line 603</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L638">runtime/scripts/util.js, line 638</a>
     </li></ul></dd>
     
 
@@ -8125,7 +8527,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L338">runtime/scripts/util.js, line 338</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L344">runtime/scripts/util.js, line 344</a>
     </li></ul></dd>
     
 
@@ -8292,7 +8694,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L790">runtime/scripts/util.js, line 790</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L825">runtime/scripts/util.js, line 825</a>
     </li></ul></dd>
     
 
@@ -8753,6 +9155,12 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.jme"><a href="Numbas.jme.html">Numbas.jme</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.addBinaryOperator"><a href="Numbas.jme.html#.addBinaryOperator">Numbas.jme.addBinaryOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.addPostfixOperator"><a href="Numbas.jme.html#.addPostfixOperator">Numbas.jme.addPostfixOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.addPrefixOperator"><a href="Numbas.jme.html#.addPrefixOperator">Numbas.jme.addPrefixOperator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.arity"><a href="Numbas.jme.html#.arity">Numbas.jme.arity</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
@@ -8923,11 +9331,15 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.opSynonyms"><a href="Numbas.jme.html#.opSynonyms">Numbas.jme.opSynonyms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#compile"><a href="Numbas.jme.Parser.html#compile">Numbas.jme.Parser#compile</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#option_defaults"><a href="Numbas.jme.Parser.html#option_defaults">Numbas.jme.Parser#option_defaults</a></li>
 		
@@ -9010,6 +9422,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.jme.Scope#setVariable"><a href="Numbas.jme.Scope.html#setVariable">Numbas.jme.Scope#setVariable</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.setOperatorProperties"><a href="Numbas.jme.html#.setOperatorProperties">Numbas.jme.setOperatorProperties</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.shunt"><a href="Numbas.jme.html#.shunt">Numbas.jme.shunt</a></li>
 		
@@ -11145,6 +11559,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 		
 			<li class="search-result" data-longname="Numbas.util.eq"><a href="Numbas.util.html#.eq">Numbas.util.eq</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.equalityTests"><a href="Numbas.util.html#.equalityTests">Numbas.util.equalityTests</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.escapeHTML"><a href="Numbas.util.html#.escapeHTML">Numbas.util.escapeHTML</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.except"><a href="Numbas.util.html#.except">Numbas.util.except</a></li>
@@ -11174,6 +11590,8 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
 			<li class="search-result" data-longname="Numbas.util.letterOrdinal"><a href="Numbas.util.html#.letterOrdinal">Numbas.util.letterOrdinal</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.lpad"><a href="Numbas.util.html#.lpad">Numbas.util.lpad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.matchNotationStyle"><a href="Numbas.util.html#.matchNotationStyle">Numbas.util.matchNotationStyle</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.neq"><a href="Numbas.util.html#.neq">Numbas.util.neq</a></li>
 		

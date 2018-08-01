@@ -642,7 +642,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
      * @param {Boolean} [strictStyle] - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
      * @param {Boolean} [mustMatchAll] - if true, then the string must contain only the matched number.
-     * @returns {[String,String]|null}
+     * @returns {Object|null} - `{matched, cleaned}` or `null`
      *
      * @see Numbas.util.numberNotationStyles
      */
@@ -5519,6 +5519,73 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return parser.compile(expr);
     },
 
+    /** Options for a JME operator
+     * @typedef {Object} Numbas.jme.operatorOptions
+     * @property {Array.<String>} synonyms - synonyms for this operator. See {@link Numbas.jme.opSynonyms}.
+     * @property {Number} precedence - an operator with lower precedence is evaluated before one with high precedence. Only makes sense for binary operators. See {@link Numbas.jme.precedence}.
+     * @property {Boolean} commutative - Is this operator commutative? Only makes sense for binary operators.
+     * @property {Boolean} rightAssociative - Is this operator right-associative? Only makes sense for unary operators.
+     */
+
+    /** Set properties for a given operator.
+     * @param {String} name - the name of the operator
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    setOperatorProperties: function(name,options) {
+        if(!options) {
+            return;
+        }
+        if('precedence' in options) {
+            precedence[name] = options.precedence;
+        }
+        if('synonyms' in options) {
+            options.synonyms.forEach(function(synonym) {
+                if(!opSynonyms[synonym]) {
+                    opSynonyms[synonym] = name;
+                }
+            });
+        }
+        if(options.rightAssociative) {
+            rightAssociative[name] = true;
+        }
+        if(options.commutative) {
+            commutative[name] = true;
+        }
+    },
+
+    /** Add a binary operator to the parser
+     * @param {String} name
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addBinaryOperator: function(name,options) {
+        jme.Parser.prototype.ops.push(name);
+        jme.setOperatorProperties(name,options);
+    },
+
+    /** Add a prefix operator to the parser
+     * @param {String} name
+     * @param {String} alt - the "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPrefixOperator: function(name,alt,options) {
+        jme.Parser.prototype.ops.push(name);
+        prefixForm[name] = alt || name;
+        arity[name] = 1;
+        jme.setOperatorProperties(name,options);
+    },
+
+    /** Add a postfix operator to the parser
+     * @param {String} name
+     * @param {String} alt - the "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPostfixOperator: function(name,alt,options) {
+        jme.Parser.prototype.ops.push(name);
+        postfixForm[name] = alt || name;
+        arity[name] = 1;
+        jme.setOperatorProperties(name,options);
+    },
+
     /** Wrapper around {@link Numbas.jme.Parser#tokenise}
      * @param {JME} expr
      * @see Numbas.jme.Parser#tokenise
@@ -6083,6 +6150,12 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         closeMissingBrackets: false,
         addMissingArguments: false
     },
+
+    /** Binary operations
+     * @type {Array.<String>}
+     */
+    ops: ['not','and','or','xor','implies','isa','except','in','divides'],
+
     /** Regular expressions to match tokens 
      * @type {Object.<RegExp>}
      */
@@ -6090,7 +6163,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
-        re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(not|and|or|xor|implies|isa|except|in|divides)([^a-zA-Z0-9_']|$)))/i,
+        re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(__ANY_OP__)([^a-zA-Z0-9_']|$)))/i,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*(?:\n|$)/,
@@ -6112,6 +6185,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         pos += olen - expr.length;
         var tokens = [];
         var i = 0;
+        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',this.ops.join('|')));
         while( expr.length ) {
             olen = expr.length;
             expr = expr.replace(this.re.re_strip_whitespace, '');    //get rid of whitespace
@@ -6133,7 +6207,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else if (result = expr.match(this.re.re_bool)) {
                 token = new TBool(util.parseBool(result[0]));
                 result[0] = result[1];
-            } else if (result = expr.match(this.re.re_op)) {
+            } else if (result = expr.match(re_op)) {
                 if(result[2])        //if word-ish operator
                     result[0] = result[2];
                 token = result[0];
@@ -7150,7 +7224,7 @@ var prefixForm = {
 var postfixForm = {
     '!': 'fact'
 }
-/** Operator precedence
+/** Operator precedence - operators with lower precedence are evaluated first
  * @enum {Number}
  * @memberof Numbas.jme
  * @readonly
@@ -7226,10 +7300,7 @@ var rightAssociative = {
     '+u': true,
     '-u': true
 }
-function leftAssociative(op)
-{
-    // check for left-associativity because that is the case when you do something more
-    // exponentiation is only right-associative operation at the moment
+function leftAssociative(op) {
     return !(op in rightAssociative);
 };
 /** Operations which commute.

@@ -410,7 +410,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String|String[]} styles - styles of notation to allow, e.g. `['en','si-en']`
      * @param {Boolean} [strictStyle] - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return 'NaN'.
      * @param {Boolean} [mustMatchAll] - if true, then the string must contain only the matched number.
-     * @returns {[String,String]|null}
+     * @returns {Object|null} - `{matched, cleaned}` or `null`
      *
      * @see Numbas.util.numberNotationStyles
      */
