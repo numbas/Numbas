@@ -12,7 +12,6 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
             elem = elem.parentElement;
         }
         var context_description = contexts.join(' ');
-        console.log(contexts);
         throw(new Numbas.Error(context_description ? 'mathjax.error with context' : 'mathjax.error',{context: context_description, message:message[2].message}));
     });
     MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
