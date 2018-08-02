@@ -246,7 +246,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var anyAnswered = false;
             for(var i=0;i<q.parts.length;i++)
             {
-                anyAnswered = anyAnswered || q.parts[i].answered;
+                anyAnswered = anyAnswered || (q.parts[i].doesMarking && q.parts[i].answered);
             }
             this.anyAnswered(anyAnswered);
         },
