@@ -180,7 +180,6 @@ function GeneratedExam(offset) {
             q.display.init();
             q.signals.on('HTMLAttached',function() {
                 var li = document.createElement('li');
-                li.innerHTML = '<h3 class="question-number">'+(q.display.displayName())+'</h3>';
                 li.appendChild(q.display.html[0])
                 ge.html.querySelector('.questionList').appendChild(li);
                 exam.display.applyQuestionBindings(q);

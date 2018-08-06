@@ -18,7 +18,7 @@ Copyright 2011-16 Newcastle University
         <div class="question clearfix" data-bind="with: question">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
-                <h3 data-bind="text: displayName" class="print-only"></h3>
+                <h3 data-bind="text: displayName"></h3>
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
