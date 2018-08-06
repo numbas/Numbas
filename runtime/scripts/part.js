@@ -181,6 +181,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             // extend the base marking algorithm if asked to do so
             var extend_base = markingScript.extend;
             this.setMarkingScript(markingScriptString,extend_base);
+        } else {
+            this.markingScript = this.baseMarkingScript();
         }
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
