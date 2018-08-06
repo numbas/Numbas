@@ -9515,7 +9515,7 @@ function infixTex(code)
 {
     return function(thing,texArgs)
     {
-        var arity = jme.builtinScope.getFunction(thing.tok.name)[0].intype.length;
+        var arity = thing.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
             return code+texArgs[0];
@@ -10271,7 +10271,9 @@ var typeToTeX = jme.display.typeToTeX = {
         return texArgs.join(' ');
     },
     op: function(thing,tok,texArgs,settings) {
-        return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
+        var name = tok.name.toLowerCase();
+        var fn = name in texOps ? texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
+        return fn(thing,texArgs,settings);
     },
     'function': function(thing,tok,texArgs,settings) {
         var lowerName = tok.name.toLowerCase();

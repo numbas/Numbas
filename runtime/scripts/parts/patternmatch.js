@@ -61,9 +61,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.patternmatch,
+    baseMarkingScript: function() { return Numbas.marking_scripts.patternmatch; },
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}
      * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.

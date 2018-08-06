@@ -434,9 +434,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     ticks: [],
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.multipleresponse,
+    baseMarkingScript: function() { return Numbas.marking_scripts.multipleresponse; },
     /** Number of choices - used by `m_n_x` parts
      * @type {Number}
      */

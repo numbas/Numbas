@@ -84,9 +84,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     stagedAnswer: 'something',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.gapfill,
+    baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
     /** Reveal the answers to all of the child gaps
      * Extends {@link Numbas.parts.Part.revealAnswer}
      */
