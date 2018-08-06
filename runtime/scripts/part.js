@@ -540,7 +540,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 else
                 {
                     var change = this.score - oScore;
-                    this.markingComment(R('part.marking.steps change',{count:change}));
+                    if(this.submitting) {
+                        this.markingComment(R('part.marking.steps change',{count:change}));
+                    }
                 }
             }
         }
@@ -604,6 +606,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = [];
         this.finalised_result = [];
         this.submitting = true;
+        if(this.parentPart && !this.parentPart.submitting) {
+            this.parentPart.setDirty(true);
+        }
         if(this.stepsShown)
         {
             var stepsMax = this.marks - this.settings.stepsPenalty;
@@ -675,11 +680,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question && this.question.updateScore();
         if(this.answered)
         {
-            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon)
+            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon) {
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );
-                this.display && this.display.showScore(this.answered);
+            }
+            this.display && this.display.showScore(this.answered);
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;
