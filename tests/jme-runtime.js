@@ -556,13 +556,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(n===undefined || n===null) {
             return false;
         }
+        if(allowFractions && util.re_fraction.test(n)) {
+            return true;
+        }
         n = util.cleanNumber(n,styles,strictStyle);
         if(!isNaN(n)) {
             return true;
         }
         if(/-?infinity/i.test(n)) {
-            return true;
-        } else if(allowFractions && util.re_fraction.test(n)) {
             return true;
         } else {
             return false;
