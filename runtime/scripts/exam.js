@@ -117,7 +117,7 @@ function Exam(store)
         this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
     }
     // question groups
-    tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames']);
+    tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);
     var groupNodes = this.xml.selectNodes('question_groups/question_group');
     this.question_groups = [];
     for(var i=0;i<groupNodes.length;i++) {
@@ -134,7 +134,7 @@ Numbas.Exam = Exam;
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Signals produced while loading this exam.
-     * @type {Numbas.schedule.SignalBox} 
+     * @type {Numbas.schedule.SignalBox}
      * */
     signals: undefined,
 
@@ -162,6 +162,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {Boolean} showAnswerState - tell student if answer is correct/wrong/partial?
      * @property {Boolean} allowRevealAnswer - allow 'reveal answer' button?
      * @property {Boolean} showQuestionGroupNames - show the names of question groups?
+     * @property {Boolean} shuffleQuestionGroups - shuffule the arrangement of question groups?
      * @memberof Numbas.Exam.prototype
      * @instance
      */
@@ -185,6 +186,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         showAnswerState: false,
         allowRevealAnswer: false,
         showQuestionGroupNames: false,
+        shuffleQuestionGroups: false,
         showStudentName: true
     },
     /** Base node of exam XML
@@ -359,6 +361,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.settings.numQuestions = numQuestions;
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
+        }
+        if(this.settings.shuffleQuestionGroups) {
+            this.question_groups = Numbas.math.deal() // Is it not necessary to know the number of question groups?
         }
     },
     /**
