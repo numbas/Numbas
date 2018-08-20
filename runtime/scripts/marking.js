@@ -197,9 +197,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
         if(args[0].tok.type=='name') {
             var name = args[0].tok.name.toLowerCase();
+            var p = scope;
+            while(p && p.state===undefined) {
+                p = p.parent;
+            }
+            var state = p.states[name];
             return {
                 return: new TNothing(),
-                state: scope.states[name] || []
+                state: state || []
             };
         } else {
             var feedback = scope.evaluate(args[0]);
@@ -319,7 +324,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
      *  @property {Object.<Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
-        this.new_state = true;
+        this.nesting_depth = 0;
         this.state = [];
         this.states = {};
         this.state_valid = {};
@@ -331,20 +336,18 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     }
     StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ { 
         evaluate: function(expr, variables) {
-            var is_top = this.state===undefined || this.new_state;
-            this.new_state = false;
+            var is_top = this.state===undefined || this.nesting_depth==0;
+            this.nesting_depth += 1;
             var old_state = is_top ? [] : (this.state || []);
             this.state = [];
             try {
                 var v = jme.Scope.prototype.evaluate.apply(this,[expr, variables]);
             } catch(e) {
-                this.new_state = true;
+                this.nesting_depth -= 1;
                 throw(e);
             }
+            this.nesting_depth -= 1;
             this.state = old_state.concat(this.state);
-            if(is_top) {
-                this.new_state = true;
-            }
             return v;
         }
     }

@@ -80,6 +80,13 @@
                     assert.equal(p.markingFeedback[0].message,'Top marks!', 'Feedback message is "Top marks!" as set in script');
                 });
 
+                QUnit.module('Stateful scope');
+                QUnit.test('nested calls in a stateful scope retain scope', function(assert) {
+                    var scope = new Numbas.marking.StatefulScope(Numbas.jme.builtinScope);
+                    scope.evaluate('feedback("Hi");try(correctif(x),y,1);2');
+                    assert.equal(scope.state.length,1,"Feedback message is not lost when try evaluates the catch clause");
+                });
+
                 QUnit.module('Number entry');
                 QUnit.test('Answer is 1', function(assert) {
                     var p = createPartFromJSON({type:'numberentry', marks: 1, minValue: '1', maxValue: '1'});
