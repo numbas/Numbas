@@ -23,8 +23,9 @@ jme.rules = {};
  * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
  * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
  */
-var Rule = jme.rules.Rule = function(pattern,conditions,result)
+var Rule = jme.rules.Rule = function(pattern,conditions,result,name)
 {
+    this.name = name;
     this.patternString = pattern;
     this.tree = jme.compile(pattern,{},true);
     this.resultString = result;
@@ -671,6 +672,8 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;n*?;x-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
         ['-?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-1-n)*x'],
         ['-?;x-?;y',['canonical_compare(x,y)=0'],'-2*x'],
+        ['-(?;n*?;x)-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(-n-m)*x'],
+        ['-(?;n*?;x)-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-n-1)*x'],
         ['?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(1-n)*x'],
         ['?;x-?;y',['canonical_compare(x,y)=0'],'0*x'],
         // rest-x-y or rest-x+y
@@ -748,14 +751,14 @@ var expandBracketsRules = [
  * @param {Array} rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
-var compileRules = jme.rules.compileRules = function(rules)
+var compileRules = jme.rules.compileRules = function(rules,name)
 {
     for(var i=0;i<rules.length;i++)
     {
         var pattern = rules[i][0];
         var conditions = rules[i][1];
         var result = rules[i][2];
-        rules[i] = new Rule(pattern,conditions,result);
+        rules[i] = new Rule(pattern,conditions,result,name);
     }
     return new Ruleset(rules,{});
 }
@@ -764,7 +767,7 @@ var compiledSimplificationRules = {};
 var notAll = ['canonicalOrder','expandBrackets'];
 for(var x in simplificationRules)
 {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
     if(!notAll.contains(x)) {
     all = all.concat(compiledSimplificationRules[x].rules);
     }

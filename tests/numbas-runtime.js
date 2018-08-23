@@ -4688,8 +4688,9 @@ jme.rules = {};
  * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
  * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
  */
-var Rule = jme.rules.Rule = function(pattern,conditions,result)
+var Rule = jme.rules.Rule = function(pattern,conditions,result,name)
 {
+    this.name = name;
     this.patternString = pattern;
     this.tree = jme.compile(pattern,{},true);
     this.resultString = result;
@@ -5336,6 +5337,8 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;n*?;x-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
         ['-?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-1-n)*x'],
         ['-?;x-?;y',['canonical_compare(x,y)=0'],'-2*x'],
+        ['-(?;n*?;x)-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(-n-m)*x'],
+        ['-(?;n*?;x)-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-n-1)*x'],
         ['?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(1-n)*x'],
         ['?;x-?;y',['canonical_compare(x,y)=0'],'0*x'],
         // rest-x-y or rest-x+y
@@ -5413,14 +5416,14 @@ var expandBracketsRules = [
  * @param {Array} rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
-var compileRules = jme.rules.compileRules = function(rules)
+var compileRules = jme.rules.compileRules = function(rules,name)
 {
     for(var i=0;i<rules.length;i++)
     {
         var pattern = rules[i][0];
         var conditions = rules[i][1];
         var result = rules[i][2];
-        rules[i] = new Rule(pattern,conditions,result);
+        rules[i] = new Rule(pattern,conditions,result,name);
     }
     return new Ruleset(rules,{});
 }
@@ -5429,7 +5432,7 @@ var compiledSimplificationRules = {};
 var notAll = ['canonicalOrder','expandBrackets'];
 for(var x in simplificationRules)
 {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
     if(!notAll.contains(x)) {
     all = all.concat(compiledSimplificationRules[x].rules);
     }
@@ -6117,10 +6120,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             coefficient = {tok:new TNum(1)};
         }
         if(tree.tok.type=='name') {
-            return {base:tree, degree:1, coefficient: coefficient};
+            return {base:tree, degree:{tok:new TNum(1)}, coefficient: coefficient};
         }
         if(jme.isOp(tree.tok,'^') && tree.args[0].tok.type=='name' && unwrapUnaryMinus(tree.args[1]).tok.type=='number') {
-            return {base:tree.args[0], degree:tree.args[1].tok.value, coefficient: coefficient};
+            return {base:tree.args[0], degree:tree.args[1], coefficient: coefficient};
         }
         return false;
     }
@@ -7820,7 +7823,8 @@ var compareTrees = jme.compareTrees = function(a,b) {
     if(isma && ismb && !(a.tok.type=='name' && b.tok.type=='name')) {
         var d = jme.compareTrees(ma.base,mb.base);
         if(d==0) {
-            return ma.degree<mb.degree ? 1 : ma.degree>mb.degree ? -1 : compareTrees(ma.coefficient,mb.coefficient);
+            var dd = jme.compareTrees(mb.degree,ma.degree);
+            return dd!=0 ? dd : compareTrees(ma.coefficient,mb.coefficient);
         } else {
             return d;
         }
@@ -9515,7 +9519,7 @@ function infixTex(code)
 {
     return function(thing,texArgs)
     {
-        var arity = jme.builtinScope.getFunction(thing.tok.name)[0].intype.length;
+        var arity = thing.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
             return code+texArgs[0];
@@ -10271,7 +10275,9 @@ var typeToTeX = jme.display.typeToTeX = {
         return texArgs.join(' ');
     },
     op: function(thing,tok,texArgs,settings) {
-        return texOps[tok.name.toLowerCase()](thing,texArgs,settings);
+        var name = tok.name.toLowerCase();
+        var fn = name in texOps ? texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
+        return fn(thing,texArgs,settings);
     },
     'function': function(thing,tok,texArgs,settings) {
         var lowerName = tok.name.toLowerCase();
@@ -11831,7 +11837,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 else
                 {
                     var change = this.score - oScore;
-                    this.markingComment(R('part.marking.steps change',{count:change}));
+                    if(this.submitting) {
+                        this.markingComment(R('part.marking.steps change',{count:change}));
+                    }
                 }
             }
         }
@@ -11895,6 +11903,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = [];
         this.finalised_result = [];
         this.submitting = true;
+        if(this.parentPart && !this.parentPart.submitting) {
+            this.parentPart.setDirty(true);
+        }
         if(this.stepsShown)
         {
             var stepsMax = this.marks - this.settings.stepsPenalty;
@@ -11966,11 +11977,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question && this.question.updateScore();
         if(this.answered)
         {
-            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon)
+            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon) {
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );
-                this.display && this.display.showScore(this.answered);
+            }
+            this.display && this.display.showScore(this.answered);
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;
