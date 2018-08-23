@@ -91,9 +91,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     /** The student's last submitted answer */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.matrixentry,
+    baseMarkingScript: function() { return Numbas.marking_scripts.matrixentry; },
     /** Properties set when part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {matrix} correctAnswer - the correct answer to the part

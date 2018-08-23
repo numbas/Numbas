@@ -80,9 +80,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     /** The student's last submitted answer */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.numberentry,
+    baseMarkingScript: function() { return Numbas.marking_scripts.numberentry; },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {Number} minvalueString - definition of minimum value, before variables are substituted in

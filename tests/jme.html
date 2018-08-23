@@ -1030,11 +1030,15 @@
                             }
                         });
                     }
-                    assert.deepEqual(Numbas.util.parseNumber('123456',false,['si-fr'],false),123456,'123 456 with strictStyle=false');
+                    assert.deepEqual(Numbas.util.parseNumber('123456',false,['si-fr'],false),123456,'123456 with strictStyle=false');
                     assert.deepEqual(Numbas.util.parseNumber('123456',false,['si-fr'],true),NaN,'123 456 with strictStyle=true');
                     assert.deepEqual(Numbas.util.parseNumber('1/2',true,['si-fr'],true),0.5,'1/2 with allowFractions and strictStyle=true');
                     assert.deepEqual(Numbas.util.parseNumber('infinity',false,['si-fr'],true),Infinity,'infinity with strictStyle=true');
                     assert.deepEqual(Numbas.util.parseNumber('-infinity',false,['si-fr'],true),-Infinity,'infinity with strictStyle=true');
+
+                    assert.equal(Numbas.util.isNumber('3/4',true,['en'],true),true,'isNumber on fraction with strictStyle');
+                    assert.equal(Numbas.util.isNumber('3,000',false,['en','en-si'],true),true,'isNumber on 3,000');
+                    assert.equal(Numbas.util.isNumber('3,000',false,['en-si'],true),false,'isNumber on 3,000 with only en-si');
                 });
 
 				QUnit.test('subvars',function(assert) {

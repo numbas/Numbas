@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part'],function() {
+Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part','marking'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
@@ -30,8 +30,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     is_custom_part_type: true,
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
-        this.setMarkingScript(this.definition.marking_script);
         return this.definition;
+    },
+    baseMarkingScript: function() {
+        var definition = this.getDefinition();
+        return new Numbas.marking.MarkingScript(definition.marking_script);
     },
     loadFromXML: function(xml) {
         var p = this;

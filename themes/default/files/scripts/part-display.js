@@ -123,7 +123,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showSubmitPart = Knockout.computed(function() {
-            return !this.revealed();
+            return this.doesMarking() && !this.revealed();
         },this);
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage

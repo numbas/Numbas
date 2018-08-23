@@ -556,13 +556,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(n===undefined || n===null) {
             return false;
         }
+        if(allowFractions && util.re_fraction.test(n)) {
+            return true;
+        }
         n = util.cleanNumber(n,styles,strictStyle);
         if(!isNaN(n)) {
             return true;
         }
         if(/-?infinity/i.test(n)) {
-            return true;
-        } else if(allowFractions && util.re_fraction.test(n)) {
             return true;
         } else {
             return false;
@@ -4002,8 +4003,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     rationalApproximation: function(n,accuracy)
     {
-        if(accuracy===undefined)
+        if(accuracy===undefined) {
             accuracy = 15;
+        }
+        if(accuracy>30) {
+            accuracy = 30;
+        }
         accuracy = Math.exp(-accuracy);
         var on = n;
         var e = Math.floor(n);
@@ -4011,7 +4016,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return [n,1];
         var l = 0;
         var frac = [];
-        while(Math.abs(on-e)>accuracy)
+        while(l<100 && Math.abs(on-e)>accuracy)
         {
             l+=1;
             var i = Math.floor(n);
@@ -11478,6 +11483,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             // extend the base marking algorithm if asked to do so
             var extend_base = markingScript.extend;
             this.setMarkingScript(markingScriptString,extend_base);
+        } else {
+            this.markingScript = this.baseMarkingScript();
         }
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
@@ -11515,6 +11522,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         if(marking.customMarkingAlgorithm) {
             this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
+        } else {
+            this.markingScript = this.baseMarkingScript();
         }
         if('scripts' in data) {
             for(var name in data.scripts) {
@@ -11570,13 +11579,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         this.settings.errorCarriedForwardReplacements.push(vr);
     },
+    /** The base marking script for this part.
+     * @abstract
+     * @returns {Numbas.marking.MarkingScript}
+     */
+    baseMarkingScript: function() {},
     /** Set this part's JME marking script
      * @param {String} markingScriptString
      * @param {Boolean} extend_base - Does this script extend the built-in script?
      */
     setMarkingScript: function(markingScriptString, extend_base) {
         var p = this;
-        var oldMarkingScript = this.markingScript;
+        var oldMarkingScript = this.baseMarkingScript();
         var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
@@ -14046,6 +14060,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                 for(var x in sb.callbacks) {
                     sb.callbacks[x].reject(e);
                 }
+                return Promise.reject(e);
             });
         }
         return promise;
@@ -14264,9 +14279,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
         if(args[0].tok.type=='name') {
             var name = args[0].tok.name.toLowerCase();
+            var p = scope;
+            while(p && p.state===undefined) {
+                p = p.parent;
+            }
+            var state = p.states[name];
             return {
                 return: new TNothing(),
-                state: scope.states[name] || []
+                state: state || []
             };
         } else {
             var feedback = scope.evaluate(args[0]);
@@ -14386,7 +14406,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
      *  @property {Object.<Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
-        this.new_state = true;
+        this.nesting_depth = 0;
         this.state = [];
         this.states = {};
         this.state_valid = {};
@@ -14398,20 +14418,18 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     }
     StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ { 
         evaluate: function(expr, variables) {
-            var is_top = this.state===undefined || this.new_state;
-            this.new_state = false;
+            var is_top = this.state===undefined || this.nesting_depth==0;
+            this.nesting_depth += 1;
             var old_state = is_top ? [] : (this.state || []);
             this.state = [];
             try {
                 var v = jme.Scope.prototype.evaluate.apply(this,[expr, variables]);
             } catch(e) {
-                this.new_state = true;
+                this.nesting_depth -= 1;
                 throw(e);
             }
+            this.nesting_depth -= 1;
             this.state = old_state.concat(this.state);
-            if(is_top) {
-                this.new_state = true;
-            }
             return v;
         }
     }
@@ -15515,9 +15533,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     /** The student's last submitted answer */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.numberentry,
+    baseMarkingScript: function() { return Numbas.marking_scripts.numberentry; },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
@@ -15724,9 +15742,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     stagedAnswer: 'something',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.gapfill,
+    baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
     /** Reveal the answers to all of the child gaps
      * Extends {@link Numbas.parts.Part.revealAnswer}
      */
@@ -15998,9 +16016,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.jme,
+    baseMarkingScript: function() { return Numbas.marking_scripts.jme; },
     /** Properties set when the part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}
@@ -16106,6 +16124,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 });
 Numbas.partConstructors['jme'] = util.extend(Part,JMEPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16542,9 +16561,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     ticks: [],
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.multipleresponse,
+    baseMarkingScript: function() { return Numbas.marking_scripts.multipleresponse; },
     /** Number of choices - used by `m_n_x` parts
      * @type {Number}
      */
@@ -16854,7 +16873,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part'],function() {
+Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part','marking'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
@@ -16873,8 +16892,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     is_custom_part_type: true,
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
-        this.setMarkingScript(this.definition.marking_script);
         return this.definition;
+    },
+    baseMarkingScript: function() {
+        var definition = this.getDefinition();
+        return new Numbas.marking.MarkingScript(definition.marking_script);
     },
     loadFromXML: function(xml) {
         var p = this;
@@ -17227,9 +17249,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     /** The student's last submitted answer */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.matrixentry,
+    baseMarkingScript: function() { return Numbas.marking_scripts.matrixentry; },
     /** Properties set when part is generated
      * Extends {@link Numbas.parts.Part#settings}
      * @property {matrix} correctAnswer - the correct answer to the part
@@ -17385,9 +17407,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
-     * @type {Numbas.marking.MarkingScript}
+     * @returns {Numbas.marking.MarkingScript}
      */
-    markingScript: Numbas.marking_scripts.patternmatch,
+    baseMarkingScript: function() { return Numbas.marking_scripts.patternmatch; },
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}
      * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.
@@ -17451,3 +17473,4 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
 });
 Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
 });
+

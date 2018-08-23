@@ -181,6 +181,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             // extend the base marking algorithm if asked to do so
             var extend_base = markingScript.extend;
             this.setMarkingScript(markingScriptString,extend_base);
+        } else {
+            this.markingScript = this.baseMarkingScript();
         }
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
@@ -218,6 +220,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         if(marking.customMarkingAlgorithm) {
             this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
+        } else {
+            this.markingScript = this.baseMarkingScript();
         }
         if('scripts' in data) {
             for(var name in data.scripts) {
@@ -273,13 +277,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         this.settings.errorCarriedForwardReplacements.push(vr);
     },
+    /** The base marking script for this part.
+     * @abstract
+     * @returns {Numbas.marking.MarkingScript}
+     */
+    baseMarkingScript: function() {},
     /** Set this part's JME marking script
      * @param {String} markingScriptString
      * @param {Boolean} extend_base - Does this script extend the built-in script?
      */
     setMarkingScript: function(markingScriptString, extend_base) {
         var p = this;
-        var oldMarkingScript = this.markingScript;
+        var oldMarkingScript = this.baseMarkingScript();
         var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
