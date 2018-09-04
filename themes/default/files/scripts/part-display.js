@@ -291,8 +291,11 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 {
                     var action = this.part.markingFeedback[i];
                     var change = action.credit*maxMarks;
-                    if(action.gap!=undefined)
+                    var credit_change = action.credit;
+                    if(action.gap!=undefined) {
                         change *= this.part.gaps[action.gap].marks/this.part.marks;
+                        credit_change *= this.part.marks>0 ? this.part.gaps[action.gap].marks/this.part.marks : 1/this.part.gaps.length;
+                    }
                     t += change;
                     var message = action.message || '';
                     if(util.isNonemptyHTML(message))
@@ -303,7 +306,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                         else if(change<0)
                             message+='\n\n'+R('feedback.taken away',{count:marks});
                     }
-                    var change_desc = change>0 ? 'positive' : change<0 ? 'negative' : 'neutral';
+                    var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
                     switch(action.reason) {
                         case 'correct':
                             change_desc = 'positive';
