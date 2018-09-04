@@ -47,7 +47,8 @@ forbiddenStringsPenalty:
           if(len(settings["notAllowed"])=1, 'part.jme.not-allowed one', 'part.jme.not-allowed several'),
           ["strings":map(translate('part.jme.not-allowed bits',["string":str]),str,forbiddenStrings)]
         );
-        multiply_credit(settings["notAllowedPC"],settings["notAllowedMessage"])
+        multiply_credit(settings["notAllowedPC"],settings["notAllowedMessage"]);
+        warn(settings["notAllowedMessage"])
     )
 
 requiredStrings:
@@ -59,7 +60,8 @@ requiredStringsPenalty:
           if(len(settings["mustHave"])=1, 'part.jme.must-have one', 'part.jme.must-have several'),
           ["strings":map(translate('part.jme.must-have bits',["string":str]),str,forbiddenStrings)]
         );
-        multiply_credit(settings["mustHavePC"],settings["mustHaveMessage"])
+        multiply_credit(settings["mustHavePC"],settings["mustHaveMessage"]);
+        warn(settings["mustHaveMessage"])
     )
 
 correctExpr (The correct answer, parsed): 
