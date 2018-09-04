@@ -1100,6 +1100,9 @@
                     assert.equal(m,false,"don't sub variables from the scope when checking simplification rule conditions");
 
                     assert.equal(Numbas.jme.display.simplifyExpression('4x+2','all',s),'4x + 2','x is defined in the scope as a number');
+
+                    assert.equal(simplifyExpression('3x^(-5)+6x^4','all'),'3*x^(-5) + 6*x^4','canonical_compare compares negative powers properly');
+                    assert.equal(simplifyExpression('-6x - 20x','all'),'-26x','collect two negatives together');
 				});
 
 				QUnit.test('texName', function(assert) {

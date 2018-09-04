@@ -652,7 +652,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
     /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
      * @param {Numbas.jme.tree}
-     * @returns {Object} the degree of the monomial
+     * @returns {Object} the base, degree and coefficient of the monomial, as trees.
      */
     isMonomial: function(tree) {
         function unwrapUnaryMinus(tree) {
@@ -675,10 +675,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             coefficient = {tok:new TNum(1)};
         }
         if(tree.tok.type=='name') {
-            return {base:tree, degree:1, coefficient: coefficient};
+            return {base:tree, degree:{tok:new TNum(1)}, coefficient: coefficient};
         }
         if(jme.isOp(tree.tok,'^') && tree.args[0].tok.type=='name' && unwrapUnaryMinus(tree.args[1]).tok.type=='number') {
-            return {base:tree.args[0], degree:tree.args[1].tok.value, coefficient: coefficient};
+            return {base:tree.args[0], degree:tree.args[1], coefficient: coefficient};
         }
         return false;
     }
@@ -2378,7 +2378,8 @@ var compareTrees = jme.compareTrees = function(a,b) {
     if(isma && ismb && !(a.tok.type=='name' && b.tok.type=='name')) {
         var d = jme.compareTrees(ma.base,mb.base);
         if(d==0) {
-            return ma.degree<mb.degree ? 1 : ma.degree>mb.degree ? -1 : compareTrees(ma.coefficient,mb.coefficient);
+            var dd = jme.compareTrees(mb.degree,ma.degree);
+            return dd!=0 ? dd : compareTrees(ma.coefficient,mb.coefficient);
         } else {
             return d;
         }
