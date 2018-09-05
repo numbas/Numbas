@@ -73,8 +73,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {Numbas.jme.tree}
      */
     compile: function(expr) {
-        var parser = new jme.Parser();
-        return parser.compile(expr);
+        return jme.standardParser.compile(expr);
     },
 
     /** Options for a JME operator
@@ -85,39 +84,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @property {Boolean} rightAssociative - Is this operator right-associative? Only makes sense for unary operators.
      */
 
-    /** Set properties for a given operator.
-     * @param {String} name - the name of the operator
-     * @param {Numbas.jme.operatorOptions} options
-     */
-    setOperatorProperties: function(name,options) {
-        if(!options) {
-            return;
-        }
-        if('precedence' in options) {
-            precedence[name] = options.precedence;
-        }
-        if('synonyms' in options) {
-            options.synonyms.forEach(function(synonym) {
-                if(!opSynonyms[synonym]) {
-                    opSynonyms[synonym] = name;
-                }
-            });
-        }
-        if(options.rightAssociative) {
-            rightAssociative[name] = true;
-        }
-        if(options.commutative) {
-            commutative[name] = true;
-        }
-    },
-
-    /** Add a binary operator to the parser
+    /** Add a binary operator to the standard parser
      * @param {String} name
      * @param {Numbas.jme.operatorOptions} options
      */
     addBinaryOperator: function(name,options) {
-        jme.Parser.prototype.ops.push(name);
-        jme.setOperatorProperties(name,options);
+        jme.standardParser.addBinaryOperator(name,options);
     },
 
     /** Add a prefix operator to the parser
@@ -126,10 +98,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {Numbas.jme.operatorOptions} options
      */
     addPrefixOperator: function(name,alt,options) {
-        jme.Parser.prototype.ops.push(name);
-        prefixForm[name] = alt || name;
-        arity[name] = 1;
-        jme.setOperatorProperties(name,options);
+        jme.standardParser.addPrefixOperator(name,alt,options);
     },
 
     /** Add a postfix operator to the parser
@@ -138,11 +107,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {Numbas.jme.operatorOptions} options
      */
     addPostfixOperator: function(name,alt,options) {
-        jme.Parser.prototype.ops.push(name);
-        postfixForm[name] = alt || name;
-        arity[name] = 1;
-        jme.setOperatorProperties(name,options);
+        jme.standardParser.addPostfixOperator(name,alt,options);
     },
+
 
     /** Wrapper around {@link Numbas.jme.Parser#tokenise}
      * @param {JME} expr
@@ -150,8 +117,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {Numbas.jme.token[]}
      */
     tokenise: function(expr) {
-        var parser = new jme.Parser();
-        return parser.tokenise(expr);
+        return jme.standardParser.tokenise(expr);
     },
 
     /** Wrapper around {@link Numbas.jme.Parser#shunt}
@@ -160,8 +126,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {Numbas.jme.tree}
      */
     shunt: function(tokens) {
-        var parser = new jme.Parser();
-        return parser.shunt(expr);
+        return jme.standardParser.shunt(expr);
     },
 
     /** Unescape a string - backslashes escape special characters
@@ -699,6 +664,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
  */
 var Parser = jme.Parser = function(options) {
     this.options = util.extend_object({}, this.option_defaults, options);
+    this.ops = this.ops.slice();
+    this.re = util.extend_object({},this.re);
+    this.tokeniser_types = this.tokeniser_types.slice();
+    this.constants = util.extend_object({}, jme.constants);
+    this.prefixForm = util.extend_object({}, jme.prefixForm);
+    this.postfixForm = util.extend_object({}, jme.postfixForm);
+    this.arity = util.extend_object({}, jme.arity);
+    this.precedence = util.extend_object({}, jme.precedence);
+    this.commutative = util.extend_object({}, jme.commutative);
+    this.funcSynonyms = util.extend_object({}, jme.funcSynonyms);
+    this.opSynonyms = util.extend_object({}, jme.opSynonyms);
+    this.rightAssociative = util.extend_object({}, jme.rightAssociative);
 }
 jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Default options for new parsers
@@ -721,12 +698,226 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
-        re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(__ANY_OP__)([^a-zA-Z0-9_']|$)))/i,
+        re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(__ANY_OP__)([^a-zA-Z0-9_']|$))|`([^`]+)`)/i,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*(?:\n|$)/,
         re_keypair: /^:/
     },
+
+    /** Set properties for a given operator.
+     * @param {String} name - the name of the operator
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    setOperatorProperties: function(name,options) {
+        if(!options) {
+            return;
+        }
+        if('precedence' in options) {
+            this.precedence[name] = options.precedence;
+        }
+        if('synonyms' in options) {
+            options.synonyms.forEach(function(synonym) {
+                if(opSynonyms[synonym]===undefined) {
+                    this.opSynonyms[synonym] = name;
+                }
+            });
+        }
+        if(options.rightAssociative) {
+            this.rightAssociative[name] = true;
+        }
+        if(options.commutative) {
+            this.commutative[name] = true;
+        }
+    },
+
+    /** Add an operator to the parser
+     * @param {String} name
+     * @see Numbas.jme.Parser#addBinaryOperator
+     * @see Numbas.jme.Parser#addPrefixOperator
+     * @see Numbas.jme.Parser#addPostfixOperator
+     */
+    addOperator: function(name) {
+        if(this.ops.contains(name)) {
+            return;
+        }
+        this.ops.push(name);
+    },
+
+    /** Add a binary operator to the parser
+     * @param {String} name
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addBinaryOperator: function(name,options) {
+        this.addOperator(name);
+        this.setOperatorProperties(name,options);
+    },
+
+    /** Add a prefix operator to the parser
+     * @param {String} name
+     * @param {String} alt - the "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPrefixOperator: function(name,alt,options) {
+        this.addOperator(name);
+        alt = alt || name;
+        this.prefixForm[name] = alt;
+        this.arity[alt] = 1;
+        this.setOperatorProperties(alt,options);
+    },
+
+    /** Add a postfix operator to the parser
+     * @param {String} name
+     * @param {String} alt - the "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPostfixOperator: function(name,alt,options) {
+        this.addOperator(name);
+        alt = alt || name;
+        this.postfixForm[name] = alt;
+        this.arity[alt] = 1;
+        this.setOperatorProperties(alt,options);
+    },
+
+    op: function(name,postfix,prefix) {
+        var arity = 2;
+        if(this.arity[name]!==undefined) {
+            arity = this.arity[name];
+        }
+        var commutative = arity>1 && this.commutative[name] || false;
+
+        return new TOp(name,postfix,prefix,arity,commutative);
+    },
+
+    /** Descriptions of kinds of token that the tokeniser can match.
+     * `re` is a regular expression matching the token
+     * `parse` is a function which takes a RegEx match object, the tokens produced up to this point, the input expression, and the current position in the expression.
+     * It should return an object `{tokens, start, end}`.
+     */
+    tokeniser_types: [
+        {
+            re: 're_strip_whitespace',
+            parse: function(result,tokens,expr,pos) {
+                return {tokens: [], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_comment',
+            parse: function(result,tokens,expr,pos) {
+                var olen = expr.length - pos;
+                var trimmed_expr = expr.slice(pos+result[0].length).replace(this.re.re_strip_whitespace);
+                return {tokens: [], start: pos, end: result[0].length + (olen - trimmed_expr.length)};
+            }
+        },
+        {
+            re: 're_number',
+            parse: function(result,tokens,expr,pos) {
+                var token = new TNum(result[0]);
+                var new_tokens = [token];
+                if(tokens.length>0) {
+                    var prev = tokens[tokens.length-1];
+                    if(prev.type==')' || prev.type=='name') {    //right bracket followed by a number is interpreted as multiplying contents of brackets by number
+                        new_tokens.splice(0,0,this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_bool',
+            parse: function(result,tokens,expr,pos) {
+                var token = new TBool(util.parseBool(result[0]));
+                return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_op',
+            parse: function(result,tokens,expr,pos) {
+                var matched_name = result[2] || result[0];
+                var name = matched_name;
+                var nt;
+                var postfix = false;
+                var prefix = false;
+                if(name in this.opSynonyms) {
+                    name = this.opSynonyms[name];
+                }
+                if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
+                    if(name in this.prefixForm) {
+                        name = this.prefixForm[name];
+                        prefix = true;
+                    }
+                } else {
+                    if(name in this.postfixForm) {
+                        name = this.postfixForm[name];
+                        postfix = true;
+                    }
+                }
+                var token = this.op(name,postfix,prefix);
+                return {tokens: [token], start: pos, end: pos+matched_name.length};
+            }
+        },
+        {
+            re: 're_name',
+            parse: function(result,tokens,expr,pos) {
+                var name = result[2];
+                var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
+                var token;
+                if(!annotation) {
+                    var lname = name.toLowerCase();
+                    // fill in constants here to avoid having more 'variables' than necessary
+                    if(lname in this.constants) {
+                        token = new TNum(this.constants[lname]);
+                    } else {
+                        token = new TName(name);
+                    }
+                } else {
+                    token = new TName(name,annotation);
+                }
+                var new_tokens = [token];
+                if(tokens.length>0) {
+                    var prev = tokens[tokens.length-1];
+                    if(prev.type=='number' || prev.type=='name' || prev.type==')') {    //number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
+                        new_tokens.splice(0,0,this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_punctuation',
+            parse: function(result,tokens,expr,pos) {
+                var new_tokens = [new TPunc(result[0])];
+                if(result[0]=='(' && tokens.length>0) {
+                    var prev = tokens[tokens.length-1];
+                    if(prev.type=='number' || prev.type==')') {    //number or right bracket followed by left parenthesis is also interpreted to mean multiplication
+                        new_tokens.splice(0,0,this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_string',
+            parse: function(result,tokens,expr,pos) {
+                var str = result[2];
+                var token = new TString(jme.unescape(str));
+                return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_keypair',
+            parse: function(result,tokens,expr,pos) {
+                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
+                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
+                }
+                var token = new TKeyPair(tokens.pop().value);
+                return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        }
+    ],
+
+
+
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
      * @param {JME} expr
      * @returns {Array.<Numbas.jme.token>}
@@ -736,106 +927,211 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(!expr)
             return [];
         expr += '';
-        var oexpr = expr;
         var pos = 0;
-        var olen = expr.length;
-        expr = expr.replace(this.re.re_strip_whitespace, '');    //get rid of whitespace
-        pos += olen - expr.length;
         var tokens = [];
-        var i = 0;
-        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',this.ops.join('|')));
-        while( expr.length ) {
-            olen = expr.length;
-            expr = expr.replace(this.re.re_strip_whitespace, '');    //get rid of whitespace
-            pos += olen-expr.length;
-            var token_pos= pos;
-            var result;
-            var token;
-            while(result=expr.match(this.re.re_comment)) {
-                olen = expr.length;
-                expr=expr.slice(result[0].length).replace(this.re.re_strip_whitespace,'');
-                pos += olen-expr.length;
+        var ops = this.ops.sort().reverse().map(function(op) {
+            return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+        });
+        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',ops.join('|')));
+        while( pos<expr.length ) {
+            var got = false;
+            for(var i=0;i<this.tokeniser_types.length;i++) {
+                var tt = this.tokeniser_types[i];
+                var regex = tt.re=='re_op' ? re_op : this.re[tt.re];
+                var m = expr.slice(pos).match(regex);
+                if(m) {
+                    var result = tt.parse.apply(this,[m,tokens,expr,pos]);
+                    result.tokens.forEach(function(t) {
+                        t.pos = result.start;
+                    });
+                    pos = result.end;
+                    tokens = tokens.concat(result.tokens);
+                    got = true;
+                    break;
+                }
             }
-            if(result = expr.match(this.re.re_number)) {
-                token = new TNum(result[0]);
-                if(tokens.length>0 && (tokens[tokens.length-1].type==')' || tokens[tokens.length-1].type=='name'))    //right bracket followed by a number is interpreted as multiplying contents of brackets by number
-                {
-                    tokens.push(new TOp('*'));
-                }
-            } else if (result = expr.match(this.re.re_bool)) {
-                token = new TBool(util.parseBool(result[0]));
-                result[0] = result[1];
-            } else if (result = expr.match(re_op)) {
-                if(result[2])        //if word-ish operator
-                    result[0] = result[2];
-                token = result[0];
-                //work out if operation is being used prefix or postfix
-                var nt;
-                var postfix = false;
-                var prefix = false;
-                if(token in opSynonyms) {
-                    token = opSynonyms[token];
-                }
-                if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' )
-                {
-                    if(token in prefixForm) {
-                        token = prefixForm[token];
-                        prefix = true;
+            if(!got && pos<expr.length) {
+                var nearby = expr.slice(Math.max(0,pos), pos+5);
+                throw(new Numbas.Error('jme.tokenise.invalid near',{expression: expr, position: pos, nearby: nearby}));
+            }
+        }
+        return tokens;
+    },
+
+    shunt_type_actions: {
+        'number': function(tok) { this.addoutput(tok); },
+        'string': function(tok) { this.addoutput(tok); },
+        'boolean': function(tok) { this.addoutput(tok); },
+        'name': function(tok) {
+            var i = this.i;
+            // if followed by an open bracket, this is a function application
+            if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
+                    if(this.funcSynonyms[tok.name]) {
+                        tok.name = this.funcSynonyms[tok.name];
                     }
-                }
-                else
-                {
-                    if(token in postfixForm) {
-                        token = postfixForm[token];
-                        postfix = true;
-                    }
-                }
-                token=new TOp(token,postfix,prefix);
-            } else if (result = expr.match(this.re.re_name)) {
-                var name = result[2];
-                var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
-                if(!annotation) {
-                    var lname = name.toLowerCase();
-                    // fill in constants here to avoid having more 'variables' than necessary
-                    if(lname in jme.constants) {
-                        token = new TNum(jme.constants[lname]);
-                    } else {
-                        token = new TName(name);
-                    }
-                } else {
-                    token = new TName(name,annotation);
-                }
-                if(tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type=='name' || tokens[tokens.length-1].type==')')) {    //number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
-                    tokens.push(new TOp('*'));
-                }
-            } else if (result = expr.match(this.re.re_punctuation)) {
-                if(result[0]=='(' && tokens.length>0 && (tokens[tokens.length-1].type=='number' || tokens[tokens.length-1].type==')')) {    //number or right bracket followed by left parenthesis is also interpreted to mean multiplication
-                    tokens.push(new TOp('*'));
-                }
-                token = new TPunc(result[0]);
-            } else if (result = expr.match(this.re.re_string)) {
-                var str = result[2];
-                token = new TString(jme.unescape(str));
-            } else if(result = expr.match(this.re.re_keypair)) {
-                if(tokens.length==0 || tokens[tokens.length-1].type!='string') {
-                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
-                }
-                token = new TKeyPair(tokens.pop().value);
-            } else if(expr.length) {
-                //invalid character or not able to match a token
-                var position = oexpr.length - expr.length;
-                var nearby = oexpr.slice(Math.max(0,position), position+5);
-                throw(new Numbas.Error('jme.tokenise.invalid near',{expression:oexpr, position: position, nearby: nearby}));
+                    this.stack.push(new TFunc(tok.name,tok.annotation));
+                    this.numvars.push(0);
+                    this.olength.push(this.output.length);
             } else {
+                //this is a variable otherwise
+                this.addoutput(tok);
+            }
+        },
+        ',': function(tok) {
+            //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
+            while( this.stack.length && this.stack[this.stack.length-1].type != "(" && this.stack[this.stack.length-1].type != '[') {
+                this.addoutput(this.stack.pop())
+            }
+            this.numvars[this.numvars.length-1]++;
+            if( ! this.stack.length ) {
+                throw(new Numbas.Error('jme.shunt.no left bracket in function'));
+            }
+        },
+        'op': function(tok) {
+            if(!tok.prefix) {
+                var o1 = this.precedence[tok.name];
+                //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
+                function should_pop() {
+                    if(this.stack.length==0) {
+                        return false;
+                    }
+                    var prev = this.stack[this.stack.length-1];
+                    if(prev.type=="op" && ((o1 > this.precedence[prev.name]) || (!this.rightAssociative[tok.name] && o1 == this.precedence[prev.name]))) {
+                        return true;
+                    }
+                    if(prev.type=='keypair' && prev.pairmode=='match') {
+                        return true;
+                    }
+                    return false;
+                }
+                while(should_pop.apply(this)) {
+                    this.addoutput(this.stack.pop());
+                }
+            }
+            this.stack.push(tok);
+        },
+        '[': function(tok) {
+            var i = this.i;
+            var tokens = this.tokens;
+            if(i==0 || tokens[i-1].type=='(' || tokens[i-1].type=='[' || tokens[i-1].type==',' || tokens[i-1].type=='op' || tokens[i-1].type=='keypair') {
+                this.listmode.push('new');
+            }
+            else {
+                this.listmode.push('index');
+            }
+            this.stack.push(tok);
+            this.numvars.push(0);
+            this.olength.push(this.output.length);
+        },
+        ']': function(tok) {
+            while( this.stack.length && this.stack[this.stack.length-1].type != "[" ) {
+                this.addoutput(this.stack.pop());
+            }
+            if( ! this.stack.length ) {
+                throw(new Numbas.Error('jme.shunt.no left square bracket'));
+            } else {
+                this.stack.pop();    //get rid of left bracket
+            }
+            //work out size of list
+            var n = this.numvars.pop();
+            var l = this.olength.pop();
+            if(this.output.length>l) {
+                n++;
+            }
+            switch(this.listmode.pop()) {
+            case 'new':
+                this.addoutput(new TList(n))
+                break;
+            case 'index':
+                var f = new TFunc('listval');
+                f.vars = 2;
+                this.addoutput(f);
                 break;
             }
-            expr=expr.slice(result[0].length);    //chop found token off the expression
-            pos += result[0].length;
-            token.pos = token_pos;
-            tokens.push(token);
+        },
+        '(': function(tok) {
+            this.stack.push(tok);
+        },
+        ')': function(tok) {
+            while( this.stack.length && this.stack[this.stack.length-1].type != "(" ) {
+                this.addoutput(this.stack.pop());
+            }
+            if( ! this.stack.length ) {
+                throw(new Numbas.Error('jme.shunt.no left bracket'));
+            } else {
+                this.stack.pop();    //get rid of left bracket
+                //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
+                if( this.stack.length && this.stack[this.stack.length-1].type=="function")
+                {
+                    //work out arity of function
+                    var n = this.numvars.pop();
+                    var l = this.olength.pop();
+                    if(this.output.length>l)
+                        n++;
+                    var f = this.stack.pop();
+                    f.vars = n;
+                    this.addoutput(f);
+                }
+            }
+        },
+        'keypair': function(tok) {
+            var pairmode = null;
+            for(var i=this.stack.length-1;i>=0;i--) {
+                if(this.stack[i].type=='[') {
+                    pairmode = 'dict';
+                    break;
+                } else if(jme.isOp(this.stack[i],';')) {
+                    pairmode = 'match';
+                    break;
+                } else if(this.stack[i].type=='(') {
+                    break;
+                }
+            }
+            if(pairmode===null) {
+                throw(new Numbas.Error('jme.shunt.keypair in wrong place'));
+            }
+            tok.pairmode = pairmode;
+            this.stack.push(tok);
         }
-        return(tokens);
     },
+
+    addoutput: function(tok) {
+        if(tok.vars!==undefined) {
+            if(this.output.length<tok.vars) {
+                if(!this.options.addMissingArguments) {
+                    throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
+                } else {
+                    for(var i=this.output.length;i<tok.vars;i++) {
+                        var tvar = new types.TName('?');
+                        tvar.added_missing = true;
+                        this.output.push({tok:tvar});
+                    }
+                }
+            }
+            var thing = {
+                tok: tok,
+                args: this.output.splice(this.output.length-tok.vars,tok.vars)
+            };
+            if(tok.type=='list') {
+                var mode = null;
+                for(var i=0;i<thing.args.length;i++) {
+                    var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
+                    if(i>0 && argmode!=mode) {
+                        throw(new Numbas.Error('jme.shunt.list mixed argument types',{mode: mode, argmode: argmode}));
+                    }
+                    mode = argmode;
+                }
+                if(mode=='dictionary') {
+                    thing.tok = new TDict();
+                }
+            }
+            this.output.push(thing);
+        }
+        else {
+            this.output.push({tok:tok});
+        }
+    },
+
     /** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm (wikipedia has a good description)
      * @param {Array.<Numbas.jme.token>} tokens
      * @returns {Numbas.jme.tree}
@@ -844,189 +1140,47 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     shunt: function(tokens) {
         var parser = this;
-        var output = [];
-        var stack = [];
-        var numvars=[],olength=[],listmode=[];
-        function addoutput(tok) {
-            if(tok.vars!==undefined) {
-                if(output.length<tok.vars) {
-                    if(!parser.options.addMissingArguments) {
-                        throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
-                    } else {
-                        for(var i=output.length;i<tok.vars;i++) {
-                            var tvar = new types.TName('?');
-                            tvar.added_missing = true;
-                            output.push({tok:tvar});
-                        }
-                    }
-                }
-                var thing = {
-                    tok: tok,
-                    args: output.splice(output.length-tok.vars,tok.vars)
-                };
-                if(tok.type=='list') {
-                    var mode = null;
-                    for(var i=0;i<thing.args.length;i++) {
-                        var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
-                        if(i>0 && argmode!=mode) {
-                            throw(new Numbas.Error('jme.shunt.list mixed argument types',{mode: mode, argmode: argmode}));
-                        }
-                        mode = argmode;
-                    }
-                    if(mode=='dictionary') {
-                        thing.tok = new TDict();
-                    }
-                }
-                output.push(thing);
-            }
-            else {
-                output.push({tok:tok});
-            }
-        }
-        var type_actions = {
-            'number': addoutput,
-            'string': addoutput,
-            'boolean': addoutput,
-            'name': function(tok) {
-                // if followed by an open bracket, this is a function application
-                if( i<tokens.length-1 && tokens[i+1].type=="(") {
-                        if(funcSynonyms[tok.name]) {
-                            tok.name=funcSynonyms[tok.name];
-                        }
-                        stack.push(new TFunc(tok.name,tok.annotation));
-                        numvars.push(0);
-                        olength.push(output.length);
-                } else {
-                    //this is a variable otherwise
-                    addoutput(tok);
-                }
-            },
-            ',': function(tok) {
-                //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
-                while( stack.length && stack[stack.length-1].type != "(" && stack[stack.length-1].type != '[') {
-                    addoutput(stack.pop())
-                }
-                numvars[numvars.length-1]++;
-                if( ! stack.length ) {
-                    throw(new Numbas.Error('jme.shunt.no left bracket in function'));
-                }
-            },
-            'op': function(tok) {
-                if(!tok.prefix) {
-                    var o1 = precedence[tok.name];
-                    //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
-                    while(
-                            stack.length &&
-                            stack[stack.length-1].type=="op" &&
-                            (
-                             (o1 > precedence[stack[stack.length-1].name]) ||
-                             (
-                              leftAssociative(tok.name) &&
-                              o1 == precedence[stack[stack.length-1].name]
-                             )
-                            )
-                    ) {
-                        addoutput(stack.pop());
-                    }
-                }
-                stack.push(tok);
-            },
-            '[': function(tok) {
-                if(i==0 || tokens[i-1].type=='(' || tokens[i-1].type=='[' || tokens[i-1].type==',' || tokens[i-1].type=='op' || tokens[i-1].type=='keypair') {
-                    listmode.push('new');
-                }
-                else {
-                    listmode.push('index');
-                }
-                stack.push(tok);
-                numvars.push(0);
-                olength.push(output.length);
-            },
-            ']': function(tok) {
-                while( stack.length && stack[stack.length-1].type != "[" ) {
-                    addoutput(stack.pop());
-                }
-                if( ! stack.length ) {
-                    throw(new Numbas.Error('jme.shunt.no left square bracket'));
-                } else {
-                    stack.pop();    //get rid of left bracket
-                }
-                //work out size of list
-                var n = numvars.pop();
-                var l = olength.pop();
-                if(output.length>l) {
-                    n++;
-                }
-                switch(listmode.pop()) {
-                case 'new':
-                    addoutput(new TList(n))
-                    break;
-                case 'index':
-                    var f = new TFunc('listval');
-                    f.vars = 2;
-                    addoutput(f);
-                    break;
-                }
-            },
-            '(': function(tok) {
-                stack.push(tok);
-            },
-            ')': function(tok) {
-                while( stack.length && stack[stack.length-1].type != "(" ) {
-                    addoutput(stack.pop());
-                }
-                if( ! stack.length ) {
-                    throw(new Numbas.Error('jme.shunt.no left bracket'));
-                } else {
-                    stack.pop();    //get rid of left bracket
-                    //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-                    if( stack.length && stack[stack.length-1].type=="function")
-                    {
-                        //work out arity of function
-                        var n = numvars.pop();
-                        var l = olength.pop();
-                        if(output.length>l)
-                            n++;
-                        var f = stack.pop();
-                        f.vars = n;
-                        addoutput(f);
-                    }
-                }
-            },
-            'keypair': function(tok) {
-                stack.push(tok);
-            }
-        };
+
+        this.tokens = tokens;
+        this.output = [];
+        this.stack = [];
+        this.numvars = [];
+        this.olength = [];
+        this.listmode = [];
+
+
+        var type_actions = this.shunt_type_actions;
+
         function shunt_token(tok) {
             if(tok.type in type_actions) {
-                type_actions[tok.type](tok);
+                type_actions[tok.type].apply(parser,[tok]);
             }
         }
-        for(var i = 0;i < tokens.length; i++ ) {
-            var tok = tokens[i];
+        for(this.i = 0; this.i < tokens.length; this.i++ ) {
+            var tok = tokens[this.i];
             shunt_token(tok);
         }
         //pop all remaining ops on stack into output
-        while(stack.length) {
-            var x = stack[stack.length-1];
+        while(this.stack.length) {
+            var x = this.stack[this.stack.length-1];
             if(x.type=="(") {
                 if(!this.options.closeMissingBrackets) {
                     throw(new Numbas.Error('jme.shunt.no right bracket'));
                 } else {
-                    type_actions[')']();
+                    type_actions[')'].apply(this);
                 }
             } else {
-                stack.pop();
-                addoutput(x);
+                this.stack.pop();
+                this.addoutput(x);
             }
         }
-        if(listmode.length>0) {
+        if(this.listmode.length>0) {
             throw(new Numbas.Error('jme.shunt.no right square bracket'));
         }
-        if(output.length>1) {
+        if(this.output.length>1) {
             throw(new Numbas.Error('jme.shunt.missing operator'));
         }
-        return(output[0]);
+        return this.output[0];
     },
 
     /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt})
@@ -1048,7 +1202,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(tree===null) {
             return;
         }
-        return(tree);
+        return tree;
     },
 }
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
@@ -1350,8 +1504,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return scope.getFunction(op)[0].evaluate(tree.args,scope);
             }
             else {
+                var eargs = [];
                 for(var i=0;i<tree.args.length;i++) {
-                    tree.args[i] = scope.evaluate(tree.args[i],null,noSubstitution);
+                    eargs.push(scope.evaluate(tree.args[i],null,noSubstitution));
                 }
                 var matchedFunction;
                 var fns = scope.getFunction(op);
@@ -1373,18 +1528,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 for(var j=0;j<fns.length; j++)
                 {
                     var fn = fns[j];
-                    if(fn.typecheck(tree.args))
+                    if(fn.typecheck(eargs))
                     {
                         matchedFunction = fn;
                         break;
                     }
                 }
                 if(matchedFunction)
-                    return matchedFunction.evaluate(tree.args,scope);
+                    return matchedFunction.evaluate(eargs,scope);
                 else {
-                    for(var i=0;i<=tree.args.length;i++) {
-                        if(tree.args[i] && tree.args[i].unboundName) {
-                            throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:tree.args[i].name}));
+                    for(var i=0;i<=eargs.length;i++) {
+                        if(eargs[i] && eargs[i].unboundName) {
+                            throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:eargs[i].name}));
                         }
                     }
                     throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op}));
@@ -1722,15 +1877,13 @@ TFunc.prototype.vars = 0;
  * @param {Boolean} postfix
  * @param {Boolean} prefix
  */
-var TOp = types.TOp = types.op = function(op,postfix,prefix)
+var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative)
 {
-    var arity = 2;
-    if(jme.arity[op]!==undefined)
-        arity = jme.arity[op];
     this.name = op;
     this.postfix = postfix || false;
     this.prefix = prefix || false;
-    this.vars = arity;
+    this.vars = arity || 2;
+    this.commutative = commutative || false;
 }
 TOp.prototype.type = 'op';
 /** Punctuation token
@@ -1753,6 +1906,7 @@ var TExpression = types.TExpression = types.expression = function(tree) {
 TExpression.prototype = {
     type: 'expression'
 }
+
 /** Arities of built-in operations
  * @readonly
  * @memberof Numbas.jme
@@ -1769,17 +1923,18 @@ var arity = jme.arity = {
  * @memberof Numbas.jme
  * @enum {String}
  */
-var prefixForm = {
+var prefixForm = jme.prefixForm = {
     '+': '+u',
     '-': '-u',
-    '!': 'not'
+    '!': 'not',
+    'not': 'not'
 }
 /** Some names represent different operations when used as prefix. This dictionary translates them.
  * @readonly
  * @memberof Numbas.jme
  * @enum {String}
  */
-var postfixForm = {
+var postfixForm = jme.postfixForm = {
     '!': 'fact'
 }
 /** Operator precedence - operators with lower precedence are evaluated first
@@ -1853,14 +2008,15 @@ var funcSynonyms = jme.funcSynonyms = {
  * @memberof Numbas.jme
  */
 var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe'];
-var rightAssociative = {
+
+/** Operations which are right-associative
+ * @memberof Numbas.jme
+ */
+var rightAssociative = jme.rightAssociative = {
     '^': true,
     '+u': true,
     '-u': true
 }
-function leftAssociative(op) {
-    return !(op in rightAssociative);
-};
 /** Operations which commute.
  * @enum {Boolean}
  * @memberof Numbas.jme
@@ -1873,6 +2029,11 @@ var commutative = jme.commutative =
     'and': true,
     '=': true
 };
+
+
+jme.standardParser = new jme.Parser();
+
+
 /** A function which checks whether a {@link Numbas.jme.funcObj} can be applied to the given arguments.
  * @callback Numbas.jme.typecheck_fn
  * @param {Array.<Numbas.jme.token>} variables

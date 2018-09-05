@@ -19,7 +19,7 @@ jme.rules = {};
  * @property {JME} patternString - the JME string defining the pattern to match
  * @property {JME} resultString - the JME string defining the result of the rule
  * @property {JME} conditionStrings - JME strings defining the conditions
- * @property {Numbas.jme.tree} tree - `patternString` compiled to a syntax tree
+ * @property {Numbas.jme.tree} patternTree - `patternString` compiled to a syntax tree
  * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
  * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
  */
@@ -27,7 +27,7 @@ var Rule = jme.rules.Rule = function(pattern,conditions,result,name)
 {
     this.name = name;
     this.patternString = pattern;
-    this.tree = jme.compile(pattern,{},true);
+    this.patternTree = patternParser.compile(pattern,{},true);
     this.resultString = result;
     this.result = jme.compile(result,{},true);
     this.conditionStrings = conditions.slice();
@@ -47,7 +47,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     match: function(exprTree,scope)
     {
         //see if expression matches rule
-        var match = matchTree(this.tree,exprTree);
+        var match = matchTree(this.patternTree,exprTree);
         if(match==false)
             return false;
         //if expression matches rule, then match is a dictionary of matched variables
@@ -57,9 +57,15 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
         else
             return false;
     },
+
+    /** Find all matches for the rule, anywhere within the given expression.
+     * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+     * @param {Numbas.jme.Scope} scope - used when checking conditions
+     * @returns {Array.<Numbas.jme.rules.jme_pattern_match>}
+     */
     matchAll: function(exprTree,scope) {
         var r = this;
-        var matches = matchAllTree(this.tree,exprTree);
+        var matches = matchAllTree(this.patternTree,exprTree);
         return matches.filter(function(match) {
             return r.matchConditions(match,scope);
         });
@@ -93,7 +99,11 @@ var endTermNames = {
     'm_nothing':true,
     'm_number': true
 }
-function isEndTerm(term) {
+/** Is the given term an "end term" - a pattern that should be matched last
+ * @param {Numbas.jme.tree} term
+ * @returns Boolean
+ */
+var isEndTerm = jme.rules.isEndTerm = function(term) {
     while(term.tok.type=='function' && /^m_(?:all|pm|not|commute)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
         term = term.args[0];
     }
@@ -110,10 +120,12 @@ function isEndTerm(term) {
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
  * @param {Numbas.jme.tree} tree
  * @param {String} op
- * @param {String[]} names
- * @returns {Object} - {terms: a list of subtrees, termnames: the match names set in each term}
+ * @param {String[]} names - a list of match names set for this tree
+ * @param {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
+ * @param {Boolean} commutative - should the operator be considered as commutative? If yes, "end terms" will be shifted to the end of the returned list. See {@link Numbas.jme.rules.isEndTerm}.
+ * @returns {Object} - {terms: a list of subtrees, termnames: a list giving the match names set in each term}
  */
-var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,names) {
+var getTerms = Numbas.jme.rules.getTerms = function(tree,op,names,associative,commutative) {
     if(names===undefined) {
         names = [];
     }
@@ -135,11 +147,11 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
             argnames.push(arg.args[1].tok.name);
             arg = arg.args[0];
         }
-        if(jme.isOp(arg.tok,op) || (op=='+' && jme.isOp(arg.tok,'-'))) {
-            var sub = getCommutingTerms(arg,op,argnames);
+        if(associative && (jme.isOp(arg.tok,op) || (op=='+' && jme.isOp(arg.tok,'-')))) {
+            var sub = getTerms(arg,op,argnames,associative,commutative);
             terms = terms.concat(sub.terms);
             termnames = termnames.concat(sub.termnames);
-        } else if(jme.isName(arg.tok,'?') || isEndTerm(arg)) {
+        } else if(commutative && (jme.isName(arg.tok,'?') || isEndTerm(arg))) {
             rest.push(arg);
             restnames.push(argnames);
         } else {
@@ -164,249 +176,338 @@ var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,na
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
- * @param {Boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
+ * @param {matchTree_options} options - options specifying the behaviour of the matching algorithm
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
-    if(doCommute===undefined) {
-        doCommute = false;
+var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
+    if(options===undefined) {
+        options = {
+            doCommute: false
+        };
     }
     if(!exprTree)
         return false;
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     if(jme.isOp(ruleTok,';')) {
-        if(ruleTree.args[1].tok.type!='name') {
+        var nameTok = ruleTree.args[1].tok;
+        if(!(nameTok.type=='name' || nameTok.type=='keypair')) {
             throw(new Numbas.Error('jme.matchTree.group name not a name'));
         }
-        var name = ruleTree.args[1].tok.name;
-        var m = matchTree(ruleTree.args[0],exprTree,doCommute);
+        var name, value;
+        if(nameTok.type=='name') {
+            name = nameTok.name;
+            value = exprTree;
+        } else if(nameTok.type=='keypair') {
+            name = nameTok.key;
+            value = ruleTree.args[1].args[0];
+        }
+        var m = matchTree(ruleTree.args[0],exprTree,options);
         if(m) {
-            m[name] = exprTree;
+            m[name] = value;
             return m;
         } else {
             return false;
         }
     }
-    if(ruleTok.type=='name')
-    {
-        switch(ruleTok.name) {
-            case '?':
-            case '??':
-                return {};
-            case 'm_number':
-                return exprTok.type=='number' ? {} : false;
-        }
+    var m_special = 
+        (ruleTok.type=='name' && matchSpecialName(ruleTree,exprTree)) || 
+        (ruleTok.type=='function' && matchSpecialFunction(ruleTree,exprTree,options)) || 
+        (ruleTok.type=='op' && matchSpecialOp(ruleTree,exprTree,options))
+    ;
+    if(m_special) {
+        return m_special;
     }
-    if(ruleTok.type=='function') {
-        switch(ruleTok.name) {
-            case 'm_any':
-                for(var i=0;i<ruleTree.args.length;i++) {
-                    var m;
-                    if(m=matchTree(ruleTree.args[i],exprTree,doCommute)) {
-                        return m;
-                    }
-                }
+
+    switch(ruleTok.type) {
+        case 'function':
+        case 'op':
+            return matchFunctionOrOp(ruleTree,exprTree,options);
+        default:
+            if(ruleTok.type!=exprTok.type) {
                 return false;
-            case 'm_all':
-                return matchTree(ruleTree.args[0],exprTree,doCommute);
-            case 'm_pm':
-                if(jme.isOp(exprTok,'-u')) {
-                    return matchTree({tok: new jme.types.TOp('-u'),args: [ruleTree.args[0]]},exprTree,doCommute);
-                } else {
-                    return matchTree(ruleTree.args[0],exprTree,doCommute);
-                }
-            case 'm_not':
-                if(!matchTree(ruleTree.args[0],exprTree,doCommute)) {
-                    return {};
-                } else {
-                    return false;
-                }
-            case 'm_and':
-                var d = {};
-                for(var i=0;i<ruleTree.args.length;i++) {
-                    var m = matchTree(ruleTree.args[i],exprTree,doCommute);
-                    if(m) {
-                        for(var name in m) {
-                            d[name] = m[name];
+            }
+            return util.eq(ruleTok,exprTok) ? {} : false;
+    }
+}
+
+function matchSpecialName(ruleTree,exprTree) {
+    if(ruleTree.tok.type!='name') {
+        return false;
+    }
+    switch(ruleTree.tok.name) {
+        case '?':
+        case '??':
+            return {};
+        case 'm_number':
+            return exprTree.tok.type=='number' ? {} : false;
+        case 'm_nothing':
+            return false;
+        default:
+            if(exprTree.tok.type!='name') {
+                return false;
+            }
+            var same = ruleTree.tok.name.toLowerCase()==exprTree.tok.name.toLowerCase();
+            return same ? {} : false;
+    }
+}
+
+function matchSpecialFunction(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(ruleTok.type!='function') {
+        return false;
+    }
+    switch(ruleTok.name) {
+        case 'm_any':
+            return matchAny(ruleTree.args,exprTree,options);
+        case 'm_all':
+            return matchTree(ruleTree.args[0],exprTree,options);
+        case 'm_pm':
+            return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
+        case 'm_not':
+            return matchNot(ruleTree.args[0],exprTree,options);
+        case 'm_and':
+            return matchAnd(ruleTree.args,exprTree,options);
+        case 'm_uses':
+            var names = ruleTree.args.map(function(t){ return t.tok.name; });
+            return matchUses(names,exprTree);
+        case 'm_commute':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object(options,{doCommute:true}));
+        case 'm_nocommute':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object(options,{doCommute:true}));
+        case 'm_type':
+            var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
+            return matchType(wantedType,exprTree);
+        default:
+            return false;
+    }
+}
+function matchSpecialOp(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(ruleTok.type!='op') {
+        return false;
+    }
+    switch(ruleTok.name) {
+        case '`|':
+            return matchAny(ruleTree.args,exprTree,options);
+        case '`+-':
+            return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
+        case '`!':
+            return matchNot(ruleTree.args[0],exprTree,options);
+        case '`&':
+            return matchAnd(ruleTree.args,exprTree,options);
+        case '`where':
+            return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+        default:
+            return false;
+    }
+    return false;
+}
+
+function matchWhere(pattern,condition,exprTree,options) {
+    var scope = Numbas.jme.builtinScope; // TODO - pass a scope down
+    scope = new Numbas.jme.Scope(scope);
+
+    var m = matchTree(pattern,exprTree,options);
+    if(!m) {
+        return false;
+    }
+
+    condition = Numbas.util.copyobj(condition,true);
+    condition = jme.substituteTree(condition,new jme.Scope([{variables:m}]));
+    try {
+        var result = scope.evaluate(condition,null,true);
+        if(result.type=='boolean' && result.value==false) {
+            return false;
+        }
+    } catch(e) {
+        return false;
+    }
+    return m;
+}
+
+function matchFunctionOrOp(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    var d = {};
+    if(options.doCommute && ruleTok.commutative) {
+        var commutingOp = ruleTok.name=='?' ? exprTok.name : ruleTok.name;
+        var ruleTerms = getTerms(ruleTree,commutingOp,[],true,true);
+        var exprTerms = getTerms(exprTree,commutingOp,[],true,true);
+        var rest = [];
+        var namedTerms = {};
+        var matchedRules = [];
+        var termMatches = [];
+        for(var i=0; i<exprTerms.terms.length; i++) {
+            var m = null;
+            var matched = false;
+            for(var j=0; j<ruleTerms.terms.length; j++) {
+                var ruleTerm = ruleTerms.terms[j];
+                m = matchTree(ruleTerm,exprTerms.terms[i],options);
+                if((!matchedRules[j] || ruleTerm.tok.name=='m_all') && m) {
+                    matched = true;
+                    matchedRules[j] = true;
+                    for(var name in m) {
+                        if(!namedTerms[name]) {
+                            namedTerms[name] = [];
                         }
-                    } else {
-                        return false;
+                        namedTerms[name].push(m[name]);
                     }
-                }
-                return d;
-            case 'm_uses':
-                var vars = jme.findvars(exprTree);
-                for(var i=0;i<ruleTree.args.length;i++) {
-                    var name = ruleTree.args[i].tok.name;
-                    if(!vars.contains(name)) {
-                        return false;
-                    }
-                }
-                return {};
-            case 'm_commute':
-                return matchTree(ruleTree.args[0],exprTree,true);
-            case 'm_type':
-                var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
-                if(exprTok.type==wantedType) {
-                    return {};
-                } else {
-                    return false;
-                }
-        }
-    }
-    if(jme.isName(ruleTok,'m_nothing')) {
-        return false;
-    } else if(jme.isName(ruleTok,'m_number')) {
-        if(exprTok.type=='number') {
-            return {};
-        } else {
-            return false;
-        }
-    }
-    if(ruleTok.type!='op' && ruleTok.type != exprTok.type)
-    {
-        return false;
-    }
-    switch(ruleTok.type)
-    {
-    case 'number':
-        if( !math.eq(ruleTok.value,exprTok.value) ) {
-            return false;
-        } else {
-            return {};
-        }
-    case 'string':
-    case 'boolean':
-    case 'special':
-    case 'range':
-        if(ruleTok.value != exprTok.value) {
-            return false;
-        } else {
-            return {};
-        }
-    case 'function':
-    case 'op':
-        var d = {};
-        if(doCommute && jme.commutative[ruleTok.name]) {
-            var commutingOp = ruleTok.name;
-            var ruleTerms = getCommutingTerms(ruleTree,commutingOp);
-            var exprTerms = getCommutingTerms(exprTree,commutingOp);
-            var rest = [];
-            var namedTerms = {};
-            var matchedRules = [];
-            var termMatches = [];
-            for(var i=0; i<exprTerms.terms.length; i++) {
-                var m = null;
-                var matched = false;
-                for(var j=0; j<ruleTerms.terms.length; j++) {
-                    var ruleTerm = ruleTerms.terms[j];
-                    m = matchTree(ruleTerm,exprTerms.terms[i],doCommute);
-                    if((!matchedRules[j] || ruleTerm.tok.name=='m_all') && m) {
-                        matched = true;
-                        matchedRules[j] = true;
-                        for(var name in m) {
+                    var names = ruleTerms.termnames[j];
+                    if(names) {
+                        for(var k=0;k<names.length;k++) {
+                            var name = names[k];
                             if(!namedTerms[name]) {
                                 namedTerms[name] = [];
                             }
-                            namedTerms[name].push(m[name]);
+                            namedTerms[name].push(exprTerms.terms[i]);
                         }
-                        var names = ruleTerms.termnames[j];
-                        if(names) {
-                            for(var k=0;k<names.length;k++) {
-                                var name = names[k];
-                                if(!namedTerms[name]) {
-                                    namedTerms[name] = [];
-                                }
-                                namedTerms[name].push(exprTerms.terms[i]);
-                            }
-                        }
+                    }
+                    break;
+                }
+            }
+            if(!matched) {
+                return false;
+            }
+        }
+        for(var i=0;i<ruleTerms.terms.length;i++) {
+            var term = ruleTerms.terms[i];
+            if(!isEndTerm(term) && !matchedRules[i]) {
+                return false;
+            }
+        }
+        for(var name in namedTerms) {
+            var terms = namedTerms[name];
+            var sub = terms[0];
+            for(var i=1;i<terms.length;i++) {
+                var op = new jme.types.TOp(commutingOp);
+                sub = {tok: op, args: [sub,terms[i]]};
+            }
+            d[name] = sub;
+        }
+        return d;
+    } else {
+        if(ruleTok.type!=exprTok.type || (ruleTok.name!='?' && ruleTok.name!=exprTok.name)) {
+            return false;
+        }
+        var i = 0;
+        var j = 0;
+        for(var i=0;i<ruleTree.args.length;i++)
+        {
+            if(jme.isFunction(ruleTree.args[i].tok,'m_all')) {
+                while(j<exprTree.args.length) {
+                    var m = matchTree(ruleTree.args[i],exprTree.args[i],options);
+                    if(!m) {
                         break;
                     }
-                }
-                if(!matched) {
-                    return false;
-                }
-            }
-            for(var i=0;i<ruleTerms.terms.length;i++) {
-                var term = ruleTerms.terms[i];
-                if(!isEndTerm(term) && !matchedRules[i]) {
-                    return false;
-                }
-            }
-            for(var name in namedTerms) {
-                var terms = namedTerms[name];
-                var sub = terms[0];
-                for(var i=1;i<terms.length;i++) {
-                    var op = new jme.types.TOp(commutingOp);
-                    sub = {tok: op, args: [sub,terms[i]]};
-                }
-                d[name] = sub;
-            }
-            return d;
-        } else {
-            if(ruleTok.type!=exprTok.type || ruleTok.name!=exprTok.name) {
-                return false;
-            }
-            var i = 0;
-            var j = 0;
-            for(var i=0;i<ruleTree.args.length;i++)
-            {
-                if(jme.isFunction(ruleTree.args[i].tok,'m_all')) {
-                    while(j<exprTree.args.length) {
-                        var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
-                        if(!m) {
-                            break;
-                        }
-                        for(var x in m) {
-                            d[x]=m[x];
-                        }
-                        j += 1;
+                    for(var x in m) {
+                        d[x]=m[x];
                     }
-                } else if(jme.isName(ruleTree.args[i].tok,'m_nothing')) {
-                    continue;
+                    j += 1;
+                }
+            } else if(jme.isName(ruleTree.args[i].tok,'m_nothing')) {
+                continue;
+            } else {
+                var m = matchTree(ruleTree.args[i],exprTree.args[j],options);
+                if(m===false) {
+                    return false;
                 } else {
-                    var m = matchTree(ruleTree.args[i],exprTree.args[j],doCommute);
-                    if(m===false) {
-                        return false;
-                    } else {
-                        for(var x in m) {
-                            d[x]=m[x];
-                        }
-                        j += 1;
+                    for(var x in m) {
+                        d[x]=m[x];
                     }
+                    j += 1;
                 }
             }
-            // if not all terms in the rule have been matched, the rule doesn't match
-            if(j<i) {
-                return false;
-            }
-            return d
         }
-    case 'name':
-        if(ruleTok.name.toLowerCase()==exprTok.name.toLowerCase()) {
-            return {};
+        // if not all terms in the rule have been matched, the rule doesn't match
+        if(j<i) {
+            return false;
+        }
+        return d
+    }
+}
+
+function matchAny(patterns,exprTree,options) {
+    for(var i=0;i<patterns.length;i++) {
+        var m = matchTree(patterns[i],exprTree,options);
+        if(m) {
+            return m;
+        }
+    }
+}
+
+function matchPrefixPlusMinus(ruleTree,exprTree,options) {
+    var minusTree = {tok: new jme.types.TOp('-u'), args: [ruleTree]};
+    return matchTree(ruleTree,exprTree,options) || matchTree(minusTree,exprTree,options);
+}
+
+function matchNot(ruleTree,exprTree,options) {
+    if(!matchTree(ruleTree,exprTree,options)) {
+        return {};
+    } else {
+        return false;
+    }
+}
+
+function matchUses(names,exprTree) {
+    var vars = jme.findvars(exprTree);
+    for(var i=0;i<names.length;i++) {
+        if(!vars.contains(names[i])) {
+            return false;
+        }
+    }
+    return {};
+}
+
+function matchType(wantedType,exprTree) {
+    if(exprTree.tok.type==wantedType) {
+        return {};
+    } else {
+        return false;
+    }
+}
+
+function matchAnd(patterns,exprTree,options) {
+    var d = {};
+    for(var i=0;i<patterns.length;i++) {
+        var m = matchTree(patterns[i],exprTree,options);
+        if(m) {
+            for(var name in m) {
+                d[name] = m[name];
+            }
         } else {
             return false;
         }
-    default:
-        return {};
     }
+    return d;
 }
-var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute) {
+
+var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) {
     var matches = [];
-    var m = matchTree(ruleTree,exprTree,doCommute);
+    var m = matchTree(ruleTree,exprTree,options);
     if(m) {
         matches = [m];
     }
     if(exprTree.args) {
         exprTree.args.forEach(function(arg) {
-            var submatches = matchAllTree(ruleTree,arg,doCommute);
+            var submatches = matchAllTree(ruleTree,arg,options);
             matches = matches.concat(submatches);
         });
     }
     return matches;
 }
+
+var patternParser = jme.rules.patternParser = new jme.Parser();
+patternParser.addPrefixOperator('`!');
+patternParser.addPrefixOperator('`+-','`+-u');
+patternParser.addBinaryOperator('`+-', {precedence: 1000000});
+patternParser.addBinaryOperator('`|', {precedence: 1000000});
+patternParser.addBinaryOperator('`&',{precedence: 100000});
+patternParser.addBinaryOperator('`where', {precedence: 1000000});
+
+
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
  *
  * @memberof Numbas.jme.rules
@@ -414,14 +515,14 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
  *
  * @param {JME} pattern
  * @param {JME} expr
- * @param {Boolean} doCommute
+ * @param {matchTree_options} options
  *
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommute) {
-    pattern = jme.compile(pattern);
+var matchExpression = jme.rules.matchExpression = function(pattern,expr,options) {
+    pattern = patternParser.compile(pattern);
     expr = jme.compile(expr);
-    return matchTree(pattern,expr,doCommute);
+    return matchTree(pattern,expr,options);
 }
 /** Flags used to control the behaviour of JME display functions.
  * Values are `undefined` so they can be overridden
@@ -596,7 +697,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0',[],'0']
     ],
     collectNumbers: [
-        ['-?;x-?;y',['x isa "number"','y isa "number"'],'-(x+y)'],                                        //collect minuses
+        ['-?;n-?;m',['n isa "number"','m isa "number"'],'-(n+m)'],                                        //collect minuses
         ['?;n+?;m',['n isa "number"','m isa "number"'],'eval(n+m)'],    //add numbers
         ['?;n-?;m',['n isa "number"','m isa "number"'],'eval(n-m)'],    //subtract numbers
         ['?;n+?;x',['n isa "number"','!(x isa "number")'],'x+n'],        //add numbers last

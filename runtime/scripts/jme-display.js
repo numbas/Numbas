@@ -1280,7 +1280,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     keypair: function(tree,tok,bits,settings) {
         var key = typeToJME['string'](null,{value:tok.key},[],settings);
-        return key+': '+bits[0];
+        var arg = bits[0];
+        if(tree.args[0].tok.type=='op') {
+            arg = '( '+arg+' )';
+        }
+        return key+': '+arg;
     },
     dict: function(tree,tok,bits,settings) {
         if(!bits)
@@ -1462,7 +1466,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 /** For backwards compatibility, copy references from some Numbas.jme.rules members to Numbas.jme.display.
  *  These used to belong to Numbas.jme.display, but were moved into a separate file.
  */
-['Rule','getCommutingTerms','matchTree','matchExpression','simplificationRules','compileRules'].forEach(function(name) {
+['Rule','getTerms','matchTree','matchExpression','simplificationRules','compileRules'].forEach(function(name) {
     jme.display[name] = jme.rules[name];
 });
 });

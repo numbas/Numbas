@@ -782,6 +782,7 @@ function mapOverList(lambda,names,list,scope) {
 /** Functions for 'map', by the type of the thing being mapped over.
  * Functions take a JME expression lambda, a name or list of names to map, a value to map over, and a scope to evaluate against.
  * @memberof Numbas.jme
+ * @name mapFunctions
  * @enum {function}
  */
 jme.mapFunctions = {
