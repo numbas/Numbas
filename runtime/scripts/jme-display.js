@@ -1374,12 +1374,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         case 'fact':
             op = '!';
-            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name')) {
-                bits[0] = '('+bits[0]+')';
-            }
             break;
         }
         if(l==1) {
+            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name' || jme.isOp(tree.args[0].tok,'*'))) {
+                bits[0] = '('+bits[0]+')';
+            }
             return tok.postfix ? bits[0]+op : op+bits[0];
         } else {
             return bits[0]+op+bits[1];

@@ -165,7 +165,7 @@
                     one.originalValue = '1';
                     one.pos = 0;
 					deepCloseEqual(assert, tokenise('1        '),[one],'1       (whitespace at end of expression)');
-					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[tokWithPos(new types.TName('a'),0),tokWithPos(new types.TOp('+',false,false,2,true),9),tokWithPos(new types.TName('b'),11)],'a &nbsp; + b (html-escaped space)');
+					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[tokWithPos(new types.TName('a'),0),tokWithPos(new types.TOp('+',false,false,2,true,true),9),tokWithPos(new types.TName('b'),11)],'a &nbsp; + b (html-escaped space)');
 				});
 
 				QUnit.test('Operators', function(assert) {
@@ -174,10 +174,10 @@
 					deepCloseEqual(assert, tokenise('<='),[tokWithPos(new types.TOp('<='),0)],'<=');
 					deepCloseEqual(assert, tokenise('>='),[tokWithPos(new types.TOp('>='),0)],'>=');
 					deepCloseEqual(assert, tokenise('<>'),[tokWithPos(new types.TOp('<>'),0)],'<>');
-					deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and',false,false,2,true),0)],'&&');
-					deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or'),0)],'||');
+					deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'&&');
+					deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'||');
 					deepCloseEqual(assert, tokenise('|'),[tokWithPos(new types.TOp('|'),0)],'|');
-					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*',false,false,2,true),0)],'*');
+					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*',false,false,2,true,true),0)],'*');
 					deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true,1),0)],'+');
 					deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true,1),0)],'-');
 					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/'),0)],'/');
@@ -187,8 +187,8 @@
 					deepCloseEqual(assert, tokenise('='),[tokWithPos(new types.TOp('=',false,false,2,true),0)],'=');
 					deepCloseEqual(assert, tokenise('!'),[tokWithPos(new types.TOp('not',false,true,1),0)],'!');
 					deepCloseEqual(assert, tokenise('not'),[tokWithPos(new types.TOp('not',false,true,1),0)],'not');
-					deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and',false,false,2,true),0)],'and');
-					deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or'),0)],'or');
+					deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'and');
+					deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'or');
 					deepCloseEqual(assert, tokenise('isa'),[tokWithPos(new types.TOp('isa'),0)],'isa');
 					deepCloseEqual(assert, tokenise('except'),[tokWithPos(new types.TOp('except'),0)],'except');
 				});
@@ -933,13 +933,27 @@
                     function matchExpression(rule,expr,commute) {
                         return Numbas.jme.rules.matchExpression(rule,expr,{doCommute: commute, scope:Numbas.jme.builtinScope});
                     }
+                    function show_match(m) {
+                        console.log(m);
+                        Object.entries(m).forEach(function(e) {
+                            console.log(e[0]+': '+Numbas.jme.display.treeToJME(e[1]));
+                        });
+                    }
                     assert.ok(matchExpression('?','x'));
-                    var rule = 'm_pm(m_number);n + m_pm(m_number);m';
+                    var rule = '(`+-m_number;n);sn + (`+-m_number;m);sm';
                     var res = matchExpression(rule,'-2+3',true);
-                    console.log(res);
+                    show_match(res);
                     var res = matchExpression(rule,'-2-3',true);
-                    console.log(res);
+                    show_match(res);
                     var res = matchExpression(rule,'2-3',true);
+                    show_match(res);
+                    
+                    var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
+                    assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
+
+                    var coefficient_pattern = '((`+-(x;c1:1 `| m_number;c1*x));s1 + (`+-(x;c2:1 `| m_number;c2*x));s2 + ?`*;rest) `where s1*s2=1';
+                    console.log("ARG");
+                    var res = matchExpression(coefficient_pattern,'x+2x');
                     console.log(res);
                 });
 

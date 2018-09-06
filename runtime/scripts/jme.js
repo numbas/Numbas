@@ -673,6 +673,7 @@ var Parser = jme.Parser = function(options) {
     this.arity = util.extend_object({}, jme.arity);
     this.precedence = util.extend_object({}, jme.precedence);
     this.commutative = util.extend_object({}, jme.commutative);
+    this.associative = util.extend_object({}, jme.associative);
     this.funcSynonyms = util.extend_object({}, jme.funcSynonyms);
     this.opSynonyms = util.extend_object({}, jme.opSynonyms);
     this.rightAssociative = util.extend_object({}, jme.rightAssociative);
@@ -698,7 +699,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
-        re_op: /^(\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|(?:(__ANY_OP__)([^a-zA-Z0-9_']|$))|`([^`]+)`)/i,
+        re_op: /^(?:\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&;÷×∈∧∨⟹≠≥≤]|__OTHER_OPS__)/i,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*(?:\n|$)/,
@@ -785,8 +786,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             arity = this.arity[name];
         }
         var commutative = arity>1 && this.commutative[name] || false;
+        var associative = arity>1 && this.associative[name] || false;
 
-        return new TOp(name,postfix,prefix,arity,commutative);
+        return new TOp(name,postfix,prefix,arity,commutative,associative);
     },
 
     /** Descriptions of kinds of token that the tokeniser can match.
@@ -833,7 +835,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
-                var matched_name = result[2] || result[0];
+                var matched_name = result[0];
                 var name = matched_name;
                 var nt;
                 var postfix = false;
@@ -929,10 +931,23 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
-        var ops = this.ops.sort().reverse().map(function(op) {
-            return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-        });
-        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',ops.join('|')));
+        function clean_ops(ops) {
+            return ops.sort().reverse().map(function(op) {
+                return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+            });
+        };
+        var word_ops = clean_ops(this.ops.filter(function(o){return o.match(/[a-zA-Z0-9_']$/); }));
+        var other_ops = clean_ops(this.ops.filter(function(o){return !o.match(/[a-zA-Z0-9_']$/); }));
+        var re_op_source = this.re.re_op.source;
+        var any_op = '';
+        if(word_ops.length) {
+            any_op += '|(?:'+word_ops.join('|')+')(?![a-zA-Z0-9_\'])';
+        }
+        if(other_ops.length) {
+            any_op += '|(?:'+other_ops.join('|')+')';
+        }
+        re_op_source = re_op_source.replace('|__OTHER_OPS__', any_op ? any_op : '');
+        var re_op = new RegExp(re_op_source,'i');
         while( pos<expr.length ) {
             var got = false;
             for(var i=0;i<this.tokeniser_types.length;i++) {
@@ -1877,13 +1892,14 @@ TFunc.prototype.vars = 0;
  * @param {Boolean} postfix
  * @param {Boolean} prefix
  */
-var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative)
+var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative,associative)
 {
     this.name = op;
     this.postfix = postfix || false;
     this.prefix = prefix || false;
     this.vars = arity || 2;
     this.commutative = commutative || false;
+    this.associative = associative || false;
 }
 TOp.prototype.type = 'op';
 /** Punctuation token
@@ -2027,7 +2043,22 @@ var commutative = jme.commutative =
     '*': true,
     '+': true,
     'and': true,
-    '=': true
+    '=': true,
+    'xor': true
+};
+
+/** Operations which are associative, i.e. (a∘b)∘c = a∘(b∘c).
+ * @enum {Boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+var associative = jme.associative =
+{
+    '*': true,
+    '+': true,
+    'and': true,
+    'or': true,
+    'xor': true
 };
 
 
