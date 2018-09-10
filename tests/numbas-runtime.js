@@ -4802,7 +4802,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,commutat
         tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],{tok: new jme.types.TOp('-u'), args: [tree.args[1]]}]};
     }
     if(!tree.args || tree.tok.name!=op) {
-        return {terms: [tree], termnames: names.slice()};
+        return [{term: tree, names: [], quantifier: '1', occurrences: 0}];
     }
     var terms = [];
     var rest = [];
@@ -4891,6 +4891,8 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             return matchFunction(ruleTree,exprTree,options);
         case 'op':
             return matchOp(ruleTree,exprTree,options);
+        case 'list':
+            return matchList(ruleTree,exprTree,options);
         default:
             if(ruleTok.type!=exprTok.type) {
                 return false;
@@ -4937,10 +4939,49 @@ function matchSpecialFunction(ruleTree,exprTree,options) {
         case 'm_type':
             var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
             return matchType(wantedType,exprTree);
+        case 'm_func':
+            return matchGenericFunction(ruleTree,exprTree,options);
+        case 'm_op':
+            return matchGenericOp(ruleTree,exprTree,options);
         default:
             return false;
     }
 }
+
+function matchGenericFunction(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='function') {
+        return false;
+    }
+    var nameRule = ruleTree.args[0];
+    var argsRule = ruleTree.args[1];
+    var exprNameTree = {tok: new jme.types.TString(exprTree.tok.name)};
+    var argsTree = {tok: new jme.types.TList(), args: exprTree.args};
+    var m_name = matchTree(nameRule, exprNameTree, options);
+    var m_args = matchTree(argsRule, argsTree, options);
+    if(m_name && m_args) {
+        return mergeMatches([m_name,m_args]);
+    } else {
+        return false;
+    }
+}
+
+function matchGenericOp(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='op') {
+        return false;
+    }
+    var nameRule = ruleTree.args[0];
+    var argsRule = ruleTree.args[1];
+    var exprNameTree = {tok: new jme.types.TString(exprTree.tok.name)};
+    var argsTree = {tok: new jme.types.TList(), args: exprTree.args};
+    var m_name = matchTree(nameRule, exprNameTree, options);
+    var m_args = matchTree(argsRule, argsTree, options);
+    if(m_name && m_args) {
+        return mergeMatches([m_name,m_args]);
+    } else {
+        return false;
+    }
+}
+
 function matchSpecialOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5011,6 +5052,34 @@ function matchOp(ruleTree,exprTree,options) {
         }
         return matchNonAssociativeOp(ruleTree,exprTree,options);
     }
+}
+
+function matchList(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='list') {
+        return false;
+    }
+    function getElements(list) {
+        if(list.args) {
+            return list.args;
+        } else {
+            return list.tok.value.map(function(e) { return {tok: e}; });
+        }
+    }
+    var ruleElements = getElements(ruleTree);
+    var exprElements = getElements(exprTree);
+    // TODO - pay attention to quantifiers to allow for different lengths of list
+    if(ruleElements.length!=exprElements.length) {
+        return false;
+    }
+    var matches = [];
+    for(var i=0;i<ruleElements.length;i++) {
+        var m = matchTree(ruleElements[i],exprElements[i],options);
+        if(!m) {
+            return false;
+        }
+        matches.push(m);
+    }
+    return mergeMatches(matches);
 }
 
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
@@ -5290,18 +5359,16 @@ function matchType(wantedType,exprTree) {
 }
 
 function matchAnd(patterns,exprTree,options) {
-    var d = {};
+    var matches = [];
     for(var i=0;i<patterns.length;i++) {
         var m = matchTree(patterns[i],exprTree,options);
         if(m) {
-            for(var name in m) {
-                d[name] = m[name];
-            }
+            matches.push(m);
         } else {
             return false;
         }
     }
-    return d;
+    return mergeMatches(matches);
 }
 
 var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) {
@@ -5317,6 +5384,12 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) 
         });
     }
     return matches;
+}
+
+function mergeMatches(matches) {
+    var ms = matches.slice();
+    ms.splice(0,0,{});
+    return util.extend_object.apply(this,ms);
 }
 
 var patternParser = jme.rules.patternParser = new jme.Parser();

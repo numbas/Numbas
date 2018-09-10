@@ -1,25 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
-	<title>Pattern-matching algebraic expressions</title>
-		<!-- numbas stuff -->
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/numbas.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-rules.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-builtins.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jme-display.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/math.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/util.js" charset="utf-8"></script>
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/localisation.js" charset="utf-8"></script>
+    	<title>Pattern-matching algebraic expressions</title>
 
-		<!-- R.js - localisation -->
-		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/i18next/i18next.js"></script>
-		<script charset="UTF-8" type="text/javascript" src="locales.js"></script>
+        <meta charset="utf-8">
+
+		<!-- numbas stuff -->
+		<script charset="UTF-8" type="text/javascript" src="jme-runtime.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="locales.js" charset="utf-8"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
-
-		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.0.0.js"></script>
+		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/knockout/knockout.js"></script>
 
 		<style type="text/css">
 			body {
@@ -85,19 +77,25 @@
 			<div>
 				<label>
 					<span class="label-text">Pattern:</span>
-					<input type="text" data-bind="value: pattern, valueUpdate: 'afterkeydown'"/>
+					<input type="text" data-bind="textInput: pattern"/>
 				</label>
 			</div>
 			<div>
 				<label>
 					<span class="label-text">Expression to test:</span>
-					<input type="text" data-bind="value: expression, valueUpdate: 'afterkeydown'"/>
+					<input type="text" data-bind="textInput: expression"/>
 				</label>
 			</div>
 			<div>
 				<label>
 					<span class="label-text">Use commutativity?</span>
-					<input type="checkbox" data-bind="checked: doCommute"/>
+					<input type="checkbox" data-bind="checked: commutative"/>
+				</label>
+			</div>
+			<div>
+				<label>
+					<span class="label-text">Use associativity?</span>
+					<input type="checkbox" data-bind="checked: associative"/>
 				</label>
 			</div>
 		</form>
@@ -161,20 +159,22 @@
 		</div>
 
 		<script type="text/javascript">
-			Numbas.queueScript('base',[],function() {});
-			Numbas.queueScript('go',['jme','localisation'],function() {
+			Numbas.queueScript('base',[],function() {
+            });
+			Numbas.queueScript('go',['jme','localisation','knockout'],function() {
 				function ViewModel() {
 					var vm = this;
 					this.pattern = ko.observable('');
 					this.expression = ko.observable('');
-					this.doCommute = ko.observable(true);
+					this.commutative = ko.observable(true);
+					this.associative = ko.observable(true);
 					this.error = ko.observable('');
 
 					var simplifyRuleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.rulesets);
 
 					this.matches = ko.computed(function() {
 						try {
-							var pattern = Numbas.jme.compile(this.pattern());
+							var pattern = Numbas.jme.rules.patternParser.compile(this.pattern());
 						} catch(e) {
 							this.error('Invalid pattern');
 							return null;
@@ -186,7 +186,7 @@
 							return null;
 						}
 						try {
-							var match = Numbas.jme.display.matchTree(pattern,expression,this.doCommute());
+                            var match = Numbas.jme.display.matchTree(pattern,expression,{commutative: this.commutative(), associative: this.associative(), scope: Numbas.jme.builtinScope});
 							if(match) {
 								var out = [];
 								for(var name in match) {
@@ -209,15 +209,6 @@
 							return null;
 						}
 					},this).extend({throttle:100});
-
-					if(localStorage) {
-						this.pattern(localStorage.pattern || '');
-						this.expression(localStorage.expression || '');
-						ko.computed(function() {
-							localStorage.pattern = this.pattern();
-							localStorage.expression = this.expression();
-						},this);
-					}
 
 					this.examples = [
 						{
