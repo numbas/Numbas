@@ -132,7 +132,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,commutat
         tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],{tok: new jme.types.TOp('-u'), args: [tree.args[1]]}]};
     }
     if(!tree.args || tree.tok.name!=op) {
-        return {terms: [tree], termnames: names.slice()};
+        return [{term: tree, names: [], quantifier: '1', occurrences: 0}];
     }
     var terms = [];
     var rest = [];
