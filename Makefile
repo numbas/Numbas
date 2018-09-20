@@ -98,3 +98,7 @@ docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 	$(created)
 
 docs: docs/index.html
+
+eslint: $(ALL_SOURCES)
+	eslint $^
+
