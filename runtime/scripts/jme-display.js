@@ -100,6 +100,12 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
     {
+        console.log(`--- simplify ${jme.display.treeToJME(exprTree)}`);
+        var out = ruleset.simplify(exprTree,scope);
+        console.log(`--- produced ${jme.display.treeToJME(out)}`);
+        window.out = out;
+        return out;
+
         if(!exprTree) {
             throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
         }
@@ -115,25 +121,18 @@ jme.display = /** @lends Numbas.jme.display */ {
         while( applied )
         {
             //the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
-            if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')
-            {
+            if(exprTree.tok.type=='function' && exprTree.tok.name=='eval') {
                 exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
-            }
-            else
-            {
-                if(exprTree.args)    //if this token is an operation with arguments, try to simplify the arguments first
-                {
-                    for(var i=0;i<exprTree.args.length;i++)
-                    {
+            } else {
+                if(exprTree.args) {    //if this token is an operation with arguments, try to simplify the arguments first
+                    for(var i=0;i<exprTree.args.length;i++) {
                         exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
                     }
                 }
                 applied = false;
-                for( var i=0; i<rules.length;i++)    //check each rule
-                {
+                for(var i=0; i<rules.length; i++) {
                     var match;
-                    if(match = rules[i].match(exprTree,scope))    //if rule can be applied, apply it!
-                    {
+                    if(match = rules[i].match(exprTree,scope)) {
                         exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
                         applied = true;
                         depth += 1;
@@ -1326,8 +1325,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_type = args[i].tok.type;
             var arg_value = args[i].tok.value;
             var pd;
-            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact')
-            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true // if this kind of op as an argument to the parent op always gets brackets
+            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact');
+            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true; // if this kind of op as an argument to the parent op always gets brackets
             bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
             bracketArg = bracketArg || (arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp);  // put brackets around multiples of pi
             bracketArg = bracketArg || (arg_type=='number' && bracketNumberOp && bits[i].indexOf('/')>=0); // put brackets around fractions when necessary
@@ -1377,9 +1376,6 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         }
         if(l==1) {
-            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name' || jme.isOp(tree.args[0].tok,'*'))) {
-                bits[0] = '('+bits[0]+')';
-            }
             return tok.postfix ? bits[0]+op : op+bits[0];
         } else {
             return bits[0]+op+bits[1];
@@ -1461,7 +1457,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
-    '=': [{},{}]
+    '=': [{},{}],
+    'fact': [{'+': true, '-': true}]
 };
 /** For backwards compatibility, copy references from some Numbas.jme.rules members to Numbas.jme.display.
  *  These used to belong to Numbas.jme.display, but were moved into a separate file.

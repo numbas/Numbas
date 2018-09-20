@@ -346,6 +346,27 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         else
             return 0;
     },
+    /** Is `n` positive? (Real, and greater than 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    positive: function(n) {
+        return !n.complex && math.gt(n,0);
+    },
+    /** Is `n` negative? (Real, and less than 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    negative: function(n) {
+        return math.lt(math.re(n),0);
+    },
+    /** Is `n` nonnegative? (Real, and greater than or equal to 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    nonnegative: function(n) {
+        return !math.negative(n);
+    },
     /** Is `a` less than `b`?
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
      * @param {Number} a

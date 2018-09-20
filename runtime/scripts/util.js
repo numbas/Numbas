@@ -151,35 +151,68 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.eq
      */
     equalityTests: {
+        'boolean': function(a,b) {
+            return a.value==b.value;
+        },
+        'dict': function(a,b) {
+            var seen = {};
+            for(var x in a.value) {
+                seen[x] = true;
+                if(!util.eq(a.value[x],b.value[x])) {
+                    return false;
+                }
+            }
+            for(var x in a.value) {
+                if(seen[x]) {
+                    continue;
+                }
+                if(!util.eq(a.value[x],b.value[x])) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        'expression': function(a,b) {
+            return jme.treesSame(a.tree,b.tree);
+        },
+        'function': function(a,b) {
+            return a.name==b.name;
+        },
+        'html': function(a,b) {
+            return a.value[0] && b.value[0] && a.value[0].outerHTML == b.value[0].outerHTML;
+        },
+        'keypair': function(a,b) {
+            return a.key==b.key;
+        },
+        'list': function(a,b) {
+            return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+        },
+        'matrix': function(a,b) {
+            return Numbas.matrixmath.eq(a.value,b.value);
+        },
+        'name': function(a,b) {
+            return a.name.toLowerCase() == b.name.toLowerCase();
+        },
         'nothing': function(a,b) {
             return true;
         },
         'number': function(a,b) {
             return Numbas.math.eq(a.value,b.value);
         },
-        'vector': function(a,b) {
-            return Numbas.vectormath.eq(a.value,b.value);
-        },
-        'matrix': function(a,b) {
-            return Numbas.matrixmath.eq(a.value,b.value);
-        },
-        'list': function(a,b) {
-            return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
-        },
-        'set': function(a,b) {
-            return Numbas.setmath.eq(a.value,b.value);
+        'op': function(a,b) {
+            return a.name==b.name;
         },
         'range': function(a,b) {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
-        'name': function(a,b) {
-            return a.name.toLowerCase() == b.name.toLowerCase();
+        'set': function(a,b) {
+            return Numbas.setmath.eq(a.value,b.value);
         },
         'string': function(a,b) {
             return a.value==b.value;
         },
-        'boolean': function(a,b) {
-            return a.value==b.value;
+        'vector': function(a,b) {
+            return Numbas.vectormath.eq(a.value,b.value);
         }
     },
     /** Generic inequality test on {@link Numbas.jme.token}s

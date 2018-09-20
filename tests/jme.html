@@ -952,8 +952,30 @@
                     assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
 
                     var coefficient_pattern = '((`+-(x;c1:1 `| m_number;c1*x));s1 + (`+-(x;c2:1 `| m_number;c2*x));s2 + ?`*;rest) `where s1*s2=1';
-                    console.log("ARG");
                     var res = matchExpression(coefficient_pattern,'x+2x');
+                    console.log(res);
+
+                    var Rule = Numbas.jme.rules.Rule;
+                    var Ruleset = Numbas.jme.rules.Ruleset;
+                    var ruledefs = [
+                        ['m_number;x `where x<0','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
+                        ['+(?;x)','x'],                    //get rid of unary plus
+                        ['?;x+(-?;y)','x-y'],            //plus minus = minus
+                        ['?;x+(`+- m_number;y);s `where y<0','x+eval(-s*y)'],
+                        ['?;x-(-?;y)','x+y'],            //minus minus = plus
+                        ['-(-?;x)','x'],                //unary minus minus = plus
+                        ['-m_number;x `where x isa "complex" and re(x)<0','eval(-x)'],
+                        ['(`+- m_number);x + m_number;y `where y isa "complex" and re(y)=0','eval(x+y)'],
+                        ['(-?;x)/?;y','-(x/y)'],            //take negation to left of fraction
+                        ['?;x/(-?;y)','-(x/y)'],
+                        ['(-?;x)*?;y `where not (x isa "complex")','-(x*y)'],            //take negation to left of multiplication
+                        ['?;x*(-?;y) `where not (y isa "complex")','-(x*y)'],
+                        ['m_number;n*i','eval(n*i)'],            //always collect multiplication by i
+                    ];
+                    var rs = new Ruleset(ruledefs.map(function(d){ return new Rule(d[0],d[1],'basic'); }));
+                    var res = rs.simplify(Numbas.jme.compile('(x+(-2))/(-3)'),{scope:Numbas.jme.builtinScope, commutative: true, associative: true});
+                    console.log(res);
+                    var res = rs.simplify(Numbas.jme.compile('-7/(4-5i)'),{scope:Numbas.jme.builtinScope, commutative: true, associative: true});
                     console.log(res);
                 });
 
@@ -1083,9 +1105,9 @@
 					assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
 					assert.equal(simplifyExpression('(1-i)+(-2+2i)',''),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
 					assert.equal(simplifyExpression('(1-i)-(-2+2i)',''),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
-					assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
-					assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
-					assert.equal(simplifyExpression('x+(-10+2)','basic,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
+					assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*10^25');
+					assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
+					assert.equal(simplifyExpression('x+(-10+2)','all,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
 					assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
 					assert.equal(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
 					assert.equal(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
@@ -1094,7 +1116,7 @@
 					assert.equal(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
 
 					assert.equal(simplifyExpression('3!',[]),'3!','3!');
-					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','3!');
+					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','(3+1)! is bracketed');
 
 					assert.equal(simplifyExpression('pi*x',['all']),'pi*x','pi*x doesn\t omit the *');
 					assert.equal(simplifyExpression('e*x',['all']),'e*x','e*x doesn\t omit the *');
@@ -1132,6 +1154,7 @@
 
                     assert.equal(simplifyExpression('3x^(-5)+6x^4','all'),'3*x^(-5) + 6*x^4','canonical_compare compares negative powers properly');
                     assert.equal(simplifyExpression('-6x - 20x','all'),'-26x','collect two negatives together');
+          return;
 				});
 
 				QUnit.test('texName', function(assert) {

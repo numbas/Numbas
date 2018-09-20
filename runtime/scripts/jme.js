@@ -2521,6 +2521,28 @@ var compareTokens = jme.compareTokens = function(a,b) {
     }
 }
 
+/** Are the two given trees exactly the same?
+ * @param {Numbas.jme.tree} a
+ * @param {Numbas.jme.tree} b
+ * @returns {Boolean}
+ */
+var treesSame = jme.treesSame = function(a,b) {
+    if(a.tok.type!=b.tok.type) {
+        return false;
+    }
+    if(a.args || b.args) {
+        if(!(a.args && b.args && a.args.length==b.args.length)) {
+            return false;
+        }
+        for(var i=0; i<a.args.length;i++) {
+            if(!treesSame(a.args[i],b.args[i])) {
+                return false;
+            }
+        }
+    }
+    return util.eq(a.tok,b.tok);
+}
+
 /** Compare two trees.
  *
  * * Compare lists of variables lexically using {@link Numbas.jme.varsUsed}; longest goes first if one is a prefix of the other
