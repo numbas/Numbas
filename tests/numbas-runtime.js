@@ -6102,7 +6102,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
     /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
      * @param {Numbas.jme.tree}
-     * @returns {Object} the degree of the monomial
+     * @returns {Object} the base, degree and coefficient of the monomial, as trees.
      */
     isMonomial: function(tree) {
         function unwrapUnaryMinus(tree) {
@@ -11393,9 +11393,6 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
-        if(part.customConstructor) {
-            part.customConstructor.apply(part);
-        }
         return part;
     }
     else {
@@ -11536,6 +11533,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     finaliseLoad: function() {
         this.applyScripts();
+        if(this.customConstructor) {
+            this.customConstructor.apply(this);
+        }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
         }
@@ -11991,7 +11991,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question && this.question.updateScore();
         if(this.answered)
         {
-            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon) {
+            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon && this.marks!=0) {
                 this.markingComment(
                     R('part.marking.total score',{count:this.score})
                 );

@@ -6102,7 +6102,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
     /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
      * @param {Numbas.jme.tree}
-     * @returns {Object} the degree of the monomial
+     * @returns {Object} the base, degree and coefficient of the monomial, as trees.
      */
     isMonomial: function(tree) {
         function unwrapUnaryMinus(tree) {

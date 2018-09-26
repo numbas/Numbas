@@ -91,9 +91,6 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
-        if(part.customConstructor) {
-            part.customConstructor.apply(part);
-        }
         return part;
     }
     else {
@@ -234,6 +231,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     finaliseLoad: function() {
         this.applyScripts();
+        if(this.customConstructor) {
+            this.customConstructor.apply(this);
+        }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
         }
