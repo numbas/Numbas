@@ -107,15 +107,25 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @param {Numbas.jme.tree} tree - tree to find terms in
  * @param {String} op - the name of the operator whose terms are to be found.
  * @param {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
- * @param {String[]} [names] - a list of match names set for this tree by a parent, used when called recursively.
+ * @param {String[]} [existing_names] - a list of match names set for this tree by a parent, used when called recursively.
  * @returns {Array.<Numbas.jme.rules.term>}
  */
-var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,names) {
-    if(names===undefined) {
-        names = [];
+var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,existing_names) {
+    if(existing_names===undefined) {
+        existing_names = [];
     }
     if(op=='+' && jme.isOp(tree.tok,'-')) {
-        tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],{tok: new jme.types.TOp('-u'), args: [tree.args[1]]}]};
+        /** Insert a unary minus in this tree.
+         * If it's a product, the minus applies to the leftmost factor.
+         */
+        function insertUnaryMinus(tree) {
+            if(jme.isOp(tree.tok,'*')) {
+                return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
+            } else {
+                return {tok: new jme.types.TOp('-u'), args: [tree]};
+            }
+        }
+        tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
     }
     var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
     var terms = [];
@@ -123,7 +133,8 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,names) {
     for(var i=0; i<args.length;i++) {
         var arg = args[i];
         var oarg = arg;
-        var argnames = names.slice();
+        var names = existing_names.slice();
+        var equalnames = [];
         var quantifier = '1';
         var defaultValue = null;
         if(jme.isName(arg,'m_nothing')) {
@@ -138,7 +149,10 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,names) {
         };
         while(true) {
             if(jme.isOp(arg.tok,';')) {
-                argnames.push(arg.args[1]);
+                names.push(arg.args[1]);
+            } else if(jme.isOp(arg.tok,';=')) {
+                names.push(arg.args[1]);
+                equalnames.push(arg.args[1]);
             } else if(jme.isOp(arg.tok,'`?') || jme.isOp(arg.tok,'`*') || jme.isOp(arg.tok,'`+')) {
                 quantifier = quantifier_combo[quantifier][arg.tok.name];
             } else if(jme.isOp(arg.tok,'`:')) {
@@ -151,9 +165,19 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,names) {
             }
             arg = arg.args[0];
         }
+        function find_equal_names(tree) {
+            if(jme.isOp(tree.tok,';=')) {
+                equalnames.push(tree.args[1]);
+            }
+            if(tree.args) {
+                tree.args.forEach(find_equal_names);
+            }
+        }
+        find_equal_names(arg);
         var item = {
             term: arg, 
-            names: argnames, 
+            names: names, 
+            equalnames: equalnames,
             quantifier: quantifier, 
             min: quantifier_limits[quantifier][0], 
             max: quantifier_limits[quantifier][1],
@@ -161,7 +185,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,associative,names) {
             occurrences: 0
         };
         if(associative && (jme.isOp(arg.tok,op) || (op=='+' && jme.isOp(arg.tok,'-')))) {
-            var sub = getTerms(arg,op,associative,argnames);
+            var sub = getTerms(arg,op,associative,names);
             if(quantifier!='1') {
                 sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][quantifier]; });
             }
@@ -504,24 +528,66 @@ function matchOp(ruleTree,exprTree,options) {
     var exprTerms = getTerms(exprTree,op,associating);
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
+
     function term_ok(exprTerm,ruleTerm,ic,pc) {
         if(matches[ic][pc]===undefined) {
-            matches[ic][pc] = matchTree(ruleTerm.term,exprTerm.term,options);
+            var m = matchTree(ruleTerm.term,exprTerm.term,options);
+            var equalnames = {};
+            ruleTerm.equalnames.forEach(function(nameTree) {
+                var name = nameTree.tok.name;
+                var t = m[name] || resolveName(ruleTerm,nameTree,exprTerm.term).value;
+                equalnames[name] = t;
+            });
+            matches[ic][pc] = {
+                match: m,
+                equalnames: equalnames
+            }
         }
         //console.log('check '+Numbas.jme.display.treeToJME(exprTerm.term)+' against '+Numbas.jme.display.treeToJME(ruleTerm.term)+': '+(matches[ic][pc] ? 'Y' : 'N'));
-        return matches[ic][pc]!==false; 
+        return matches[ic][pc].match!==false; 
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,term_ok,{commutative: commuting, allowOtherTerms: options.allowOtherTerms});
+    function constraint_ok(assignment,ic,pc) {
+        console.log('constraint check at ',assignment,ic,pc);
+        var m = matches[ic][pc];
+        var equalnames = ruleTerms[pc].equalnames;
+        var ok = assignment.every(function(p,i) {
+            if(p<0 || p>=ruleTerms.length) {
+                return true;
+            }
+            var m2 = matches[i][p];
+            return equalnames.every(function(nameTree) {
+                var name = nameTree.tok.name;
+                return m2.equalnames[name]===undefined || jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
+            });
+        });
+        console.log(ok ? 'ok' : 'nope');
+        return ok;
+    }
+
+    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: options.allowOtherTerms});
     if(assignment===false) {
         return false;
     }
 
     var namedTerms = {};
 
-    function nameTerm(name,term) {
+    var identified_names = {};
+    ruleTerms.forEach(function(ruleTerm) {
+        ruleTerm.equalnames.forEach(function(nameTree) {
+            var name = nameTree.tok.name;
+            identified_names[name] = true;
+        });
+    });
+    function nameTerm(name,term,allowReservedName) {
+        if(!allowReservedName && name.match(/^_/)) {
+            return;
+        }
         if(!namedTerms[name]) {
             namedTerms[name] = [];
+        }
+        if(identified_names[name] && namedTerms[name].length) {
+            return;
         }
         namedTerms[name].push(term);
     }
@@ -531,10 +597,8 @@ function matchOp(ruleTree,exprTree,options) {
      */
     function matchTerm(ruleTerm,exprTree){ 
         ruleTerm.names.forEach(function(name) {
-            if(name!='_match') {
-                var o = resolveName(ruleTerm,name,exprTree);
-                nameTerm(o.name,o.value);
-            }
+            var o = resolveName(ruleTerm,name,exprTree);
+            nameTerm(o.name,o.value);
         });
     }
 
@@ -543,11 +607,9 @@ function matchOp(ruleTree,exprTree,options) {
 
         if(is.length) {
             is.forEach(function(i) {
-                var match = matches[i][j];
+                var match = matches[i][j].match;
                 for(var name in match) {
-                    if(name!='_match') {
-                        nameTerm(name,match[name]);
-                    }
+                    nameTerm(name,match[name]);
                 }
                 matchTerm(ruleTerm,exprTerms[i].term);
             });
@@ -556,12 +618,12 @@ function matchOp(ruleTree,exprTree,options) {
         }
     });
     assignment.ignored_start_terms.forEach(function(i) {
-        nameTerm('_rest',exprTerms[i].term);
-        nameTerm('_rest_start',exprTerms[i].term);
+        nameTerm('_rest',exprTerms[i].term,true);
+        nameTerm('_rest_start',exprTerms[i].term,true);
     });
     assignment.ignored_end_terms.forEach(function(i) {
-        nameTerm('_rest',exprTerms[i].term);
-        nameTerm('_rest_end',exprTerms[i].term);
+        nameTerm('_rest',exprTerms[i].term,true);
+        nameTerm('_rest_end',exprTerms[i].term,true);
     });
 
     // collate the named groups
@@ -588,7 +650,7 @@ function matchOp(ruleTree,exprTree,options) {
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Numbas.jme.rules.jme_pattern_match}
  */
-function match_sequence(pattern,input,checkFn,options) {
+function match_sequence(pattern,input,options) {
     var capture = [];
     var start = 0;
     var done = false;
@@ -613,25 +675,35 @@ function match_sequence(pattern,input,checkFn,options) {
     function enough(p) {
         return count(p)>=pattern[p].min;
     }
+    function increment_start() {
+        debug('increment start position');
+        start += 1;
+        ic = start;
+        pc = 0;
+    }
     function backtrack() {
+        debug('backtrack');
         if(options.allowOtherTerms && ic==start && capture.length==start && start<input.length-1) {
             capture.push(-1);
-            start += 1;
-            ic = start;
-            pc = 0;
+            increment_start();
             return true;
         } 
         
         ic -= 1;
-        debug('backtrack');
-        while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length || count(capture[ic])<=pattern[capture[ic]].min)) {
+        while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length)) {
             ic -= 1;
         }
         debug('backtracked to '+ic);
 
         if(ic<start) {
-            failed = true;
-            return false;
+            if(start<input.length-1) {
+                capture = [];
+                increment_start();
+                return true;
+            } else {
+                failed = true;
+                return false;
+            }
         }
         pc = capture[ic]+1;
         capture = capture.slice(0,ic);
@@ -640,7 +712,7 @@ function match_sequence(pattern,input,checkFn,options) {
     function advance_input() {
         ic += 1;
         if(options.commutative) {
-            pc = 0;
+            pc = start;
         }
     }
     var steps = 0;
@@ -673,7 +745,8 @@ function match_sequence(pattern,input,checkFn,options) {
             } else {
                 backtrack();
             }
-        } else if(checkFn(input[ic],pattern[pc],ic,pc)) {
+        } else if(options.checkFn(input[ic],pattern[pc],ic,pc) && options.constraintFn(capture,ic,pc)) {
+            debug('capture '+ic+' at '+pc);
             capture.push(pc);
             advance_input();
         } else if(options.commutative || enough(pc)) {
@@ -884,6 +957,8 @@ patternParser.addPostfixOperator('`+','`+',{precedence: 0.5}); // at least one t
 patternParser.addPrefixOperator('`!','`!',{precedence: 0.5});  // not 
 patternParser.addPrefixOperator('`+-','`+-u',{precedence: 0.5});  // unary plus or minus
 
+patternParser.addBinaryOperator(';', {precedence: 0});
+patternParser.addBinaryOperator(';=', {precedence: 0});
 patternParser.addBinaryOperator('`+-', {precedence: 1000000});  // plus or minus
 patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
 patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
@@ -1101,7 +1176,7 @@ var simplificationRules = jme.rules.simplificationRules = {
     collectNumbers: [
         ['(`+- m_number);n1 + (`+- m_number)`+;n2','acg','eval(n1+n2)'],
         ['m_number;n * m_number;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! m_number);x * real:m_number;n','acg','n*x']            //shift numbers to left hand side
+        ['(`! m_number)`+;x * real:m_number;n','acg','n*x']            //shift numbers to left hand side
     ],
     simplifyFractions: [
         ['(m_number;n * (?`* `: 1);top) / (m_number;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
@@ -1135,48 +1210,10 @@ var simplificationRules = jme.rules.simplificationRules = {
     otherNumbers: [
         ['m_number;n ^ m_number;m','','eval(n^m)']
     ],
-    /*
     cancelTerms: [
-        // x+y or rest+x+y
-        ['(?;rest+?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)*x'],
-        ['(?;rest+?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
-        ['(?;rest+?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
-        ['(?;rest+?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+2*x'],
-        ['?;n*?;x+?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)*x'],
-        ['?;n*?;x+?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
-        ['-?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
-        ['-?;x+?;y',['canonical_compare(x,y)=0'],'0*x'],
-        ['?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
-        ['?;x+?;y',['canonical_compare(x,y)=0'],'2*x'],
-        // x-y or rest+x-y
-        ['(?;rest+?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)*x'],
-        ['(?;rest+?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-1)*x'],
-        ['(?;rest+?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest+?;x) - ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
-        ['?;n*?;x-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)*x'],
-        ['?;n*?;x-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
-        ['-?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-1-n)*x'],
-        ['-?;x-?;y',['canonical_compare(x,y)=0'],'-2*x'],
-        ['-(?;n*?;x)-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(-n-m)*x'],
-        ['-(?;n*?;x)-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-n-1)*x'],
-        ['?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(1-n)*x'],
-        ['?;x-?;y',['canonical_compare(x,y)=0'],'0*x'],
-        // rest-x-y or rest-x+y
-        ['(?;rest-?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)*x'],
-        ['(?;rest-?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest-?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest-?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)*x'],
-        ['(?;rest-?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+1)*x'],
-        ['(?;rest-?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(1+n)*x'],
-        ['(?;rest-?;x) - ?;y',['canonical_compare(x,y)=0'],'rest-2*x'],
-        ['(?;rest-?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
-        ['(?;rest+?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)/x'],
-        ['(?;n)/(?;x)+(?;m)/(?;y)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)/x'],
-        ['(?;rest+?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)/x'],
-        ['?;n/?;x-?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)/x'],
-        ['(?;rest-?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)/x'],
-        ['(?;rest-?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)/x']
+        ['(`+- m_number`? `: 1);n * ?`+;x + (`+- m_number`? `: 1);m * ?`+;y `where canonical_compare(x,y)=0','acg','eval(n+m)*x']
     ],
+    /*
     cancelFactors: [
         // x*y or rest*x*y
         ['(?;rest*(?;x)^(?;n)) * (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^(n+m)'],
