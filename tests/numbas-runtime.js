@@ -5267,25 +5267,28 @@ function matchOp(ruleTree,exprTree,options) {
                 equalnames: equalnames
             }
         }
-        //console.log('check '+Numbas.jme.display.treeToJME(exprTerm.term)+' against '+Numbas.jme.display.treeToJME(ruleTerm.term)+': '+(matches[ic][pc] ? 'Y' : 'N'));
         return matches[ic][pc].match!==false; 
     }
 
     function constraint_ok(assignment,ic,pc) {
-        console.log('constraint check at ',assignment,ic,pc);
         var m = matches[ic][pc];
         var equalnames = ruleTerms[pc].equalnames;
+        if(!equalnames.length) {
+            return true;
+        }
         var ok = assignment.every(function(p,i) {
-            if(p<0 || p>=ruleTerms.length) {
+            if(p<0 || p==pc || p>=ruleTerms.length) {
                 return true;
             }
             var m2 = matches[i][p];
             return equalnames.every(function(nameTree) {
                 var name = nameTree.tok.name;
+                if(m2.equalnames[name]===undefined) {
+                    return true;
+                }
                 return m2.equalnames[name]===undefined || jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
             });
         });
-        console.log(ok ? 'ok' : 'nope');
         return ok;
     }
 
@@ -5300,7 +5303,7 @@ function matchOp(ruleTree,exprTree,options) {
     ruleTerms.forEach(function(ruleTerm) {
         ruleTerm.equalnames.forEach(function(nameTree) {
             var name = nameTree.tok.name;
-            identified_names[name] = true;
+            identified_names[name] = (identified_names[name] || 0) + 1;
         });
     });
     function nameTerm(name,term,allowReservedName) {
@@ -5310,7 +5313,7 @@ function matchOp(ruleTree,exprTree,options) {
         if(!namedTerms[name]) {
             namedTerms[name] = [];
         }
-        if(identified_names[name] && namedTerms[name].length) {
+        if(identified_names[name]>1 && namedTerms[name].length) {
             return;
         }
         namedTerms[name].push(term);
