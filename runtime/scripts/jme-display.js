@@ -100,9 +100,9 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
     {
-        console.log(`--- simplify ${jme.display.treeToJME(exprTree)}`);
+        //console.log(`--- simplify ${jme.display.treeToJME(exprTree)}`);
         var out = ruleset.simplify(exprTree,scope);
-        console.log(`--- produced ${jme.display.treeToJME(out)}`);
+        //console.log(`--- produced ${jme.display.treeToJME(out)}`);
         window.out = out;
         return out;
 

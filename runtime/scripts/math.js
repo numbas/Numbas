@@ -421,22 +421,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Boolean}
      */
     eq: function(a,b) {
-        if(isNaN(a)) {
-            return isNaN(b);
-        }
-        if(a.complex)
-        {
-            if(b.complex)
-                return (a.re==b.re && a.im==b.im);
-            else
-                return (a.re==b && a.im==0);
-        }
-        else
-        {
-            if(b.complex)
-                return (a==b.re && b.im==0);
-            else
+        if(a.complex) {
+            if(b.complex) {
+                return math.eq(a.re,b.re) && math.eq(a.im,b.im);
+            } else {
+                return math.eq(a.re,b) && math.eq(a.im,0);
+            }
+        } else {
+            if(b.complex) {
+                return math.eq(a,b.re) && math.eq(b.im,0);
+            } else {
+                if(isNaN(a)) {
+                    return isNaN(b);
+                }
                 return a==b;
+            }
         }
     },
     /** Greatest of two numbers - wraps `Math.max`

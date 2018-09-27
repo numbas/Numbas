@@ -2593,7 +2593,12 @@ var compareTrees = jme.compareTrees = function(a,b) {
         var d = jme.compareTrees(ma.base,mb.base);
         if(d==0) {
             var dd = jme.compareTrees(mb.degree,ma.degree);
-            return dd!=0 ? dd : compareTrees(ma.coefficient,mb.coefficient);
+            if(dd!=0) {
+                return dd;
+            } else {
+                var dc = compareTrees(ma.coefficient,mb.coefficient);
+                return dc!=0 ? dc : sign_a==sign_b ? 0 : sign_a ? 1 : -1;
+            }
         } else {
             return d;
         }

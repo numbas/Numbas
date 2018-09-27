@@ -106,6 +106,12 @@
             </div>
             <div>
                 <label>
+                    <span class="label-text">Strict addition?</span>
+                    <input type="checkbox" data-bind="checked: strictPlus"/>
+                </label>
+            </div>
+            <div>
+                <label>
                     <span class="label-text">Allow other terms?</span>
                     <input type="checkbox" data-bind="checked: allowOtherTerms"/>
                 </label>
@@ -198,6 +204,7 @@
                     this.resultChanged = ko.observable(false);
                     this.commutative = ko.observable(true);
                     this.associative = ko.observable(true);
+                    this.strictPlus = ko.observable(false);
                     this.allowOtherTerms = ko.observable(true);
                     this.replaceAll = ko.observable(false);
                     this.error = ko.observable('');
@@ -226,15 +233,19 @@
                             return null;
                         }
                         try {
-                            var options = {commutative: this.commutative(), associative: this.associative(), allowOtherTerms: this.allowOtherTerms(), scope: Numbas.jme.builtinScope};
+                            var options = {commutative: this.commutative(), associative: this.associative(), strictPlus: this.strictPlus(), allowOtherTerms: this.allowOtherTerms(), scope: Numbas.jme.builtinScope};
                             var match = Numbas.jme.display.matchTree(pattern,expression,options);
                             if(match) {
                                 var out = [];
                                 for(var name in match) {
-                                    out.push({
-                                        name: name,
-                                        expression: Numbas.jme.display.treeToJME(match[name])
-                                    });
+                                    if(name.match(/^__.*__$/)) {
+                                        out.push({name: name, expression: match[name]})
+                                    } else {
+                                        out.push({
+                                            name: name,
+                                            expression: Numbas.jme.display.treeToJME(match[name])
+                                        });
+                                    }
                                 }
                                 this.error('');
                                 out.sort(function(a,b){return a.name>b.name});
