@@ -3099,6 +3099,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** Settings for {@link Numbas.math.niceNumber}
      * @typedef Numbas.math.niceNumber_settings
      * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
+     * @property {Number} precision - number of decimal places or significant figures to show.
      * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
      */
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
@@ -4770,7 +4771,7 @@ var Rule = jme.rules.Rule = function(pattern,result,options,name) {
     if(typeof(options)=='string') {
         options = parse_options(options);
     }
-    this.options = options;
+    this.options = options || {};
     this.resultString = result;
     this.result = jme.compile(result);
 }
@@ -4783,6 +4784,13 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
         if(!options) {
             return this.options;
         } else {
+            return {
+                commutative: options.commutative===undefined ? this.options.commutative : options.commutative,
+                associative: options.associative===undefined ? this.options.associative : options.associative,
+                allowOtherTerms: options.allowOtherTerms===undefined ? this.options.allowOtherTerms : options.allowOtherTerms,
+                strictPlus: options.strictPlus===undefined ? this.options.strictPlus : options.strictPlus,
+                scope: options.scope===undefined ? this.options.scope : options.scope
+            };
             return Numbas.util.extend_object({},this.options,options);
         }
     },
@@ -4842,11 +4850,39 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @param {String[]} [existing_names] - a list of match names set for this tree by a parent, used when called recursively.
  * @returns {Array.<Numbas.jme.rules.term>}
  */
-var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_names) {
-    options = options || {};
-    if(existing_names===undefined) {
-        existing_names = [];
+var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_names,calculate_minimum) {
+    /** Add the list of existing names passed in at the start to each term
+     * @param {Array.<Numbas.jme.rules.term>} items
+     * @returns {Array.<Numbas.jme.rules.term>}
+     */
+    function add_existing_names(items) {
+        return existing_names.length==0 ? items : items.map(function(item) {
+            return {
+                term: item.term, 
+                names: existing_names.concat(item.names),
+                equalnames: item.equalnames, 
+                quantifier: item.quantifier, 
+                min: item.min, 
+                max: item.max,
+                defaultValue: item.defaultValue,
+                occurrences: 0
+            };
+        });
     }
+
+    var intree = tree;
+    if(intree.terms === undefined) {
+        intree.terms = {};
+    }
+    if(intree.terms[op] === undefined) {
+        intree.terms[op] = {};
+    }
+    var option_signature = options.associative*2 + (options.strictPlus);
+
+    if(intree.terms[op][option_signature]) {
+        return add_existing_names(intree.terms[op][option_signature]);
+    }
+
 
     /** Insert a unary minus in this tree.
      * If it's a product, the minus applies to the leftmost factor.
@@ -4855,7 +4891,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
         if(jme.isOp(tree.tok,'*')) {
             return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
         } else {
-            return {tok: new jme.types.TOp('-u'), args: [tree]};
+            return {tok: new jme.types.TOp('-u',false,true,1,false,false), args: [tree]};
         }
     }
 
@@ -4864,15 +4900,15 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
     }
 
     if(!options.strictPlus && op=='+' && jme.isOp(tree.tok,'-')) {
-        tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
+        tree = {tok: new jme.types.TOp('+',false,false,2,true,true), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
     }
     var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
     var terms = [];
-    var rest = [];
+
     for(var i=0; i<args.length;i++) {
         var arg = args[i];
         var oarg = arg;
-        var names = existing_names.slice();
+        var names = [];
         var equalnames = [];
         var quantifier = '1';
         var defaultValue = null;
@@ -4886,15 +4922,16 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
             '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
             '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
         };
-        while(true) {
-            if(jme.isOp(arg.tok,';')) {
+        while(arg.tok.type=='op') {
+            var argop = arg.tok.name;
+            if(argop==';') {
                 names.push(arg.args[1]);
-            } else if(jme.isOp(arg.tok,';=')) {
+            } else if(argop==';=') {
                 names.push(arg.args[1]);
                 equalnames.push(arg.args[1]);
-            } else if(jme.isOp(arg.tok,'`?') || jme.isOp(arg.tok,'`*') || jme.isOp(arg.tok,'`+')) {
+            } else if(argop=='`?' || argop=='`*' || argop=='`+') {
                 quantifier = quantifier_combo[quantifier][arg.tok.name];
-            } else if(jme.isOp(arg.tok,'`:')) {
+            } else if(argop=='`:') {
                 quantifier = quantifier_combo[quantifier][arg.tok.name];
                 if(defaultValue===null) {
                     defaultValue = arg.args[1];
@@ -4914,17 +4951,17 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
         }
         find_equal_names(arg);
         var item = {
-            term: arg, 
-            names: names, 
+            term: arg,
+            names: names,
             equalnames: equalnames,
-            quantifier: quantifier, 
-            min: quantifier_limits[quantifier][0], 
+            quantifier: quantifier,
+            min: quantifier_limits[quantifier][0],
             max: quantifier_limits[quantifier][1],
             defaultValue: defaultValue,
             occurrences: 0
         };
         if(options.associative && (jme.isOp(arg.tok,op) || (!options.strictPlus && op=='+' && jme.isOp(arg.tok,'-')))) {
-            var sub = getTerms(arg,op,options,names);
+            var sub = getTerms(arg,op,options,existing_names.length==0 ? names : existing_names.concat(names),false);
             if(quantifier!='1') {
                 sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][quantifier]; });
             }
@@ -4933,13 +4970,19 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
             terms.push(item);
         }
     }
-    if(rest.length) {
-        terms = terms.concat(rest);
+
+    if(calculate_minimum) {
+        terms.min_total = 0;
+        terms.forEach(function(t) {
+            terms.min_total += t.min;
+        });
     }
-    return terms;
+
+    intree.terms[op][option_signature] = terms;
+    return add_existing_names(terms);
 }
 
-/** The `_match` name in a stores the whole tree that matched the pattern.
+/** The `_match` name in a match object stores the whole tree that matched the pattern.
  * This function makes sure that `_match` is set, setting it to the given tree if it's missing.
  * @param {Numbas.jme.rules.jme_pattern_match} m
  * @param {Numbas.jme.tree} exprTree
@@ -4985,16 +5028,10 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             m[o.name] = o.value;
             return m;
         }
-        var m_special = 
-            (ruleTok.type=='name' && matchSpecialName(ruleTree,exprTree)) || 
-            (ruleTok.type=='function' && matchSpecialFunction(ruleTree,exprTree,options)) || 
-            (ruleTok.type=='op' && matchSpecialOp(ruleTree,exprTree,options))
-        ;
-        if(m_special) {
-            return m_special;
-        }
 
         switch(ruleTok.type) {
+            case 'name':
+                return matchName(ruleTree,exprTree,options);
             case 'function':
                 return matchFunction(ruleTree,exprTree,options);
             case 'op':
@@ -5039,7 +5076,7 @@ var number_conditions = jme.rules.number_conditions = {
     }
 }
 
-function matchSpecialName(ruleTree,exprTree) {
+function matchName(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     if(ruleTok.type!='name') {
@@ -5074,7 +5111,7 @@ function matchSpecialName(ruleTree,exprTree) {
     }
 }
 
-function matchSpecialFunction(ruleTree,exprTree,options) {
+function matchFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     if(ruleTok.type!='function') {
@@ -5104,7 +5141,7 @@ function matchSpecialFunction(ruleTree,exprTree,options) {
         case 'm_op':
             return matchGenericOp(ruleTree,exprTree,options);
         default:
-            return false;
+            return matchOrdinaryFunction(ruleTree,exprTree,options);
     }
 }
 
@@ -5142,7 +5179,7 @@ function matchGenericOp(ruleTree,exprTree,options) {
     }
 }
 
-function matchSpecialOp(ruleTree,exprTree,options) {
+function matchOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     if(ruleTok.type!='op') {
@@ -5166,7 +5203,7 @@ function matchSpecialOp(ruleTree,exprTree,options) {
         case '`where':
             return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
         default:
-            return false;
+            return matchOrdinaryOp(ruleTree,exprTree,options);
     }
     return false;
 }
@@ -5192,7 +5229,7 @@ function matchWhere(pattern,condition,exprTree,options) {
     return m;
 }
 
-function matchFunction(ruleTree,exprTree,options) {
+function matchOrdinaryFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     if(exprTok.type!='function' || (ruleTok.name!='?' && ruleTok.name!=exprTok.name)) {
@@ -5254,15 +5291,18 @@ function resolveName(ruleTree,nameTree,value) {
     return {name: name, value: value};
 }
 
-function matchOp(ruleTree,exprTree,options) {
+function matchOrdinaryOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
     var op = ruleTok.name;
     var commuting = options.commutative && ruleTok.commutative;
     var associating = options.associative && ruleTok.associative;
     var term_options = {associative: associating, strictPlus: options.strictPlus};
-    var ruleTerms = getTerms(ruleTree,op,term_options);
-    var exprTerms = getTerms(exprTree,op,term_options);
+    var ruleTerms = getTerms(ruleTree,op,term_options,[],true);
+    var exprTerms = getTerms(exprTree,op,term_options,[],false);
+    if(exprTerms.length<ruleTerms.min_total) {
+        return false;
+    }
 
     if(!associating) {
         if(!jme.isOp(exprTok,op) && ruleTerms.length==1) {
@@ -5305,9 +5345,6 @@ function matchOp(ruleTree,exprTree,options) {
                 if(m2.equalnames[name]===undefined) {
                     return true;
                 }
-                //console.log('check constraint',assignment,ic,pc);
-                //console.log(Numbas.jme.display.treeToJME(m.equalnames[name]));
-                //console.log(Numbas.jme.display.treeToJME(m2.equalnames[name]));
                 return jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
             });
         });
@@ -5407,14 +5444,6 @@ function match_sequence(pattern,input,options) {
     var failed = false;
     var pc = 0;
     var ic = 0;
-    function debug(s) {
-        if(window.debugging) {
-            //console.log(s);
-        }
-    }
-    function show() {
-        //debug(`start: ${start}, ic: ${ic}, pc: ${pc}, capture: ${capture.join(' ')}`);
-    }
 
     function count(p) { // count the number of times we matched term p
         return capture.filter(function(x){return x==p}).length;
@@ -5467,7 +5496,7 @@ function match_sequence(pattern,input,options) {
     }
     var steps = 0;
     while(!done && !failed) {
-        show();
+        //show();
         steps += 1;
         while(pc<pattern.length && consumed(pc)) { // if have consumed this term fully, move on
             //debug('term '+pc+' consumed, move on');
@@ -5536,6 +5565,7 @@ function matchAny(patterns,exprTree,options) {
             return m;
         }
     }
+    return false;
 }
 
 function matchDefault(ruleTree, defaultValue, exprTree, options) {
@@ -5741,6 +5771,8 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
     var default_options = {
         commutative: false,
         associative: true,
+        allowOtherTerms: true,
+        strictPlus: false,
         scope: Numbas.jme.builtinScope
     };
     options = util.extend_object({},default_options,options);
@@ -5807,17 +5839,12 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
             changed = false;
             for(var i=0;i<this.rules.length;i++) {
                 var result = this.rules[i].replace(exprTree,{scope: scope});
-                //this.rules[i].name=='basic' && console.log(`consider ${this.rules[i].name}: ${this.rules[i].patternString} on ${Numbas.jme.display.treeToJME(exprTree)}`);
                 if(result.changed) {
-                    //console.log(`applied ${this.rules[i].name}: ${this.rules[i].patternString}, converting ${Numbas.jme.display.treeToJME(exprTree)} to ${Numbas.jme.display.treeToJME(result.expression)}`);
-                    //console.log(exprTree);
-                    //console.log(result.expression);
                     changed = true;
                     exprTree = result.expression;
                     depth += 1;
                     if(depth > 100) {
                         var str = Numbas.jme.display.treeToJME(exprTree);
-                        //console.log(str);
                         throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                     }
                     break;
@@ -10226,6 +10253,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     },
     /** Simplify a syntax tree according to the given ruleset
      *
+     * @see Numbas.jme.rules.Ruleset#simplify
      * @param {Numbas.jme.tree} exprTree
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
@@ -10234,60 +10262,11 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
-    {
-        //console.log(`--- simplify ${jme.display.treeToJME(exprTree)}`);
-        var out = ruleset.simplify(exprTree,scope);
-        //console.log(`--- produced ${jme.display.treeToJME(out)}`);
-        window.out = out;
-        return out;
-
-        if(!exprTree) {
-            throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
-        }
-        if(!scope)
-            throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
-        scope = Numbas.util.copyobj(scope);
-        scope.variables = {};    //remove variables from the scope so they don't accidentally get substituted in
-        var applied = true;
-        var rules = ruleset.rules;
-        var depth = 0;
-        var seen = [];
-        // apply rules until nothing can be done
-        while( applied )
-        {
-            //the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
-            if(exprTree.tok.type=='function' && exprTree.tok.name=='eval') {
-                exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
-            } else {
-                if(exprTree.args) {    //if this token is an operation with arguments, try to simplify the arguments first
-                    for(var i=0;i<exprTree.args.length;i++) {
-                        exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
-                    }
-                }
-                applied = false;
-                for(var i=0; i<rules.length; i++) {
-                    var match;
-                    if(match = rules[i].match(exprTree,scope)) {
-                        exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
-                        applied = true;
-                        depth += 1;
-                        if(depth > 100) {
-                            var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.contains(str)) {
-                                throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
-                            }
-                            seen.push(str);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return exprTree
+    simplifyTree: function(exprTree,ruleset,scope,allowUnbound) {
+        return ruleset.simplify(exprTree,scope);
     }
 };
-/// all private methods below here
+
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
     var tok = thing.args[i].tok;
@@ -11380,7 +11359,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     name: function(tree,tok,bits,settings) {
-        return tok.name;
+        if(tok.annotation) {
+            return tok.annotation.join(':')+':'+tok.name;
+        } else {
+            return tok.name;
+        }
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';
@@ -11496,12 +11479,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             op = ' - ';
             break;
-        case 'and':
-        case 'or':
-        case 'isa':
-        case 'except':
         case '+':
-        case 'in':
             op=' '+op+' ';
             break;
         case 'not':
@@ -11510,6 +11488,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         case 'fact':
             op = '!';
             break;
+        default:
+            if(op.length>1 && tok.vars==2) {
+                op = ' '+op+' ';
+            }
         }
         if(l==1) {
             return tok.postfix ? bits[0]+op : op+bits[0];

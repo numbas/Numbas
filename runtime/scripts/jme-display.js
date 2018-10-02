@@ -90,6 +90,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     },
     /** Simplify a syntax tree according to the given ruleset
      *
+     * @see Numbas.jme.rules.Ruleset#simplify
      * @param {Numbas.jme.tree} exprTree
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
@@ -98,60 +99,11 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
-    {
-        //console.log(`--- simplify ${jme.display.treeToJME(exprTree)}`);
-        var out = ruleset.simplify(exprTree,scope);
-        //console.log(`--- produced ${jme.display.treeToJME(out)}`);
-        window.out = out;
-        return out;
-
-        if(!exprTree) {
-            throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
-        }
-        if(!scope)
-            throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
-        scope = Numbas.util.copyobj(scope);
-        scope.variables = {};    //remove variables from the scope so they don't accidentally get substituted in
-        var applied = true;
-        var rules = ruleset.rules;
-        var depth = 0;
-        var seen = [];
-        // apply rules until nothing can be done
-        while( applied )
-        {
-            //the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
-            if(exprTree.tok.type=='function' && exprTree.tok.name=='eval') {
-                exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
-            } else {
-                if(exprTree.args) {    //if this token is an operation with arguments, try to simplify the arguments first
-                    for(var i=0;i<exprTree.args.length;i++) {
-                        exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
-                    }
-                }
-                applied = false;
-                for(var i=0; i<rules.length; i++) {
-                    var match;
-                    if(match = rules[i].match(exprTree,scope)) {
-                        exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
-                        applied = true;
-                        depth += 1;
-                        if(depth > 100) {
-                            var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.contains(str)) {
-                                throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
-                            }
-                            seen.push(str);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return exprTree
+    simplifyTree: function(exprTree,ruleset,scope,allowUnbound) {
+        return ruleset.simplify(exprTree,scope);
     }
 };
-/// all private methods below here
+
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
     var tok = thing.args[i].tok;
@@ -1244,7 +1196,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     name: function(tree,tok,bits,settings) {
-        return tok.name;
+        if(tok.annotation) {
+            return tok.annotation.join(':')+':'+tok.name;
+        } else {
+            return tok.name;
+        }
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';
@@ -1360,12 +1316,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             op = ' - ';
             break;
-        case 'and':
-        case 'or':
-        case 'isa':
-        case 'except':
         case '+':
-        case 'in':
             op=' '+op+' ';
             break;
         case 'not':
@@ -1374,6 +1325,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         case 'fact':
             op = '!';
             break;
+        default:
+            if(op.length>1 && tok.vars==2) {
+                op = ' '+op+' ';
+            }
         }
         if(l==1) {
             return tok.postfix ? bits[0]+op : op+bits[0];

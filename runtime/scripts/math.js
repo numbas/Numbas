@@ -538,6 +538,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** Settings for {@link Numbas.math.niceNumber}
      * @typedef Numbas.math.niceNumber_settings
      * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
+     * @property {Number} precision - number of decimal places or significant figures to show.
      * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
      */
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed

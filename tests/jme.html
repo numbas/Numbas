@@ -933,20 +933,8 @@
                     function matchExpression(rule,expr,commute) {
                         return Numbas.jme.rules.matchExpression(rule,expr,{doCommute: commute, scope:Numbas.jme.builtinScope});
                     }
-                    function show_match(m) {
-                        console.log(m);
-                        Object.entries(m).forEach(function(e) {
-                            console.log(e[0]+': '+Numbas.jme.display.treeToJME(e[1]));
-                        });
-                    }
                     assert.ok(matchExpression('?','x'));
                     var rule = '(`+-m_number;n);sn + (`+-m_number;m);sm';
-                    var res = matchExpression(rule,'-2+3',true);
-                    show_match(res);
-                    var res = matchExpression(rule,'-2-3',true);
-                    show_match(res);
-                    var res = matchExpression(rule,'2-3',true);
-                    show_match(res);
                     
                     var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
                     assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
@@ -972,10 +960,10 @@
                         ['?;x*(-?;y) `where not (y isa "complex")','-(x*y)'],
                         ['m_number;n*i','eval(n*i)'],            //always collect multiplication by i
                     ];
-                    var rs = new Ruleset(ruledefs.map(function(d){ return new Rule(d[0],d[1],'basic'); }));
-                    var res = rs.simplify(Numbas.jme.compile('(x+(-2))/(-3)'),{scope:Numbas.jme.builtinScope, commutative: true, associative: true});
+                    var rs = new Ruleset(ruledefs.map(function(d){ return new Rule(d[0],d[1],'acg','basic'); }));
+                    var res = rs.simplify(Numbas.jme.compile('(x+(-2))/(-3)'),Numbas.jme.builtinScope);
                     console.log(res);
-                    var res = rs.simplify(Numbas.jme.compile('-7/(4-5i)'),{scope:Numbas.jme.builtinScope, commutative: true, associative: true});
+                    var res = rs.simplify(Numbas.jme.compile('-7/(4-5i)'),Numbas.jme.builtinScope);
                     console.log(res);
                 });
 
@@ -1096,10 +1084,11 @@
 					assert.ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
 				});
 
-				QUnit.test('tree to JME', function(assert) {
-					function simplifyExpression(expr,rules) {
-						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
-					}
+                QUnit.test('tree to JME',function(assert) {
+          
+                    function simplifyExpression(expr,rules) {
+                        return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
+                    }
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
 					assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
@@ -1108,16 +1097,14 @@
 					assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*10^25');
 					assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
 					assert.equal(simplifyExpression('x+(-10+2)','all,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
-					assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
+					assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)',"4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.");
 					assert.equal(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
-					assert.equal(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
+					assert.equal(simplifyExpression('pi*i',['all']),'pi*i',"pi*i - don\'t lose multiplication symbol.");
 					assert.equal(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
-					assert.equal(simplifyExpression('-3x-4',['all']),'-3x - 4','-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers');
+					assert.equal(simplifyExpression('-3x-4',['all']),'-3x - 4',"-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers");
 					assert.equal(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
-
 					assert.equal(simplifyExpression('3!',[]),'3!','3!');
 					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','(3+1)! is bracketed');
-
 					assert.equal(simplifyExpression('pi*x',['all']),'pi*x','pi*x doesn\t omit the *');
 					assert.equal(simplifyExpression('e*x',['all']),'e*x','e*x doesn\t omit the *');
 					assert.equal(simplifyExpression('1*pi/4',['all']),'pi/4','1*pi/4 cancels the 1');
@@ -1131,32 +1118,24 @@
 					assert.equal(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 					assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
                     assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
-
                     assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
-
                     assert.equal(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
-
                     assert.equal(simplifyExpression('(x+2)(x+3)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^2 + 5x + 6','Small product expanded and collected');
                     assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
                     assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+2x+1)','all'),'(x^2 + 4x + 1)(x^2 + 2x + 1)','cancelFactors on polynomials differing only by coefficients');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
-
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
-
                     var r = new Numbas.jme.rules.Rule('m_number;m*?;n','eval(m*n)');
                     var s = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
                     var m = r.match(Numbas.jme.compile('x*2'),s);
                     assert.equal(m,false,"don't sub variables from the scope when checking simplification rule conditions");
-
                     assert.equal(Numbas.jme.display.simplifyExpression('4x+2','all',s),'4x + 2','x is defined in the scope as a number');
-
                     assert.equal(simplifyExpression('3x^(-5)+6x^4',['all']),'3*x^(-5) + 6*x^4','canonical_compare compares negative powers properly');
                     assert.equal(simplifyExpression('-6x - 20x',['all']),'-26x','collect two negatives together');
-          return;
-				});
+                });
 
 				QUnit.test('texName', function(assert) {
 					var names = [
