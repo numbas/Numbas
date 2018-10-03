@@ -19,10 +19,14 @@ var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
 /** Custom part - a part type defined in {@link Numbas.custom_part_types}
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, loading) {
+var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, store) {
     this.raw_settings = {};
     this.resolved_input_options = {};
 }
@@ -92,6 +96,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.input option missing',{option:option});
             }
         })
+        /** Get the value of an input option by evaluating its definition.
+         * @param {String|Object} option
+         * @returns {*}
+         */
         function evaluate_input_option(option) {
             if(typeof(option)=='string') {
                 return jme.unwrapValue(settings_scope.evaluate(option));

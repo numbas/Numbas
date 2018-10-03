@@ -11871,6 +11871,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     variableDependants: function(todo,ancestors) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
+        /** Find the names of the variables this variable depends on
+         * @param {String} name - the name of the variable to consider
+         * @param {Array.<String>} path - the chain of variables that have led to the one being considered, used to detect circular references
+         * @returns {Array.<String>} - the names of the variables this one depends on
+         */
         function findDependants(name,path) {
             path = path || [];
             // stop at circular references
@@ -11920,10 +11925,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * Ignores iframes and elements with the attribute `nosubvars`.
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
+     * @see DOMcontentsubber
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
-        return subber.subvars(element);
+        subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
      * @param {String} str - the contents of the text node
@@ -11934,8 +11940,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str,'{','}');
-        if(bits.length==1)
+        if(bits.length==1) {
             return [doc.createTextNode(str)];
+        }
+        /** Get HTML content for a given JME token
+         * @param {Numbas.jme.token} token
+         * @returns {Element|String}
+         */
         function doToken(token) {
             switch(token.type){
             case 'html':
@@ -11974,42 +11985,19 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
-                d = importNode(doc,d,true);
+                d = doc.importNode(d,true);
                 out[i] = $(d).contents();
             }
         }
         return out;
     }
 };
-// cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
-// because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way
-function importNode(doc,node,allChildren) {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var CDATA_SECTION_NODE = 4;
-    var COMMENT_NODE = 8;
-    switch (node.nodeType) {
-        case ELEMENT_NODE:
-            var newNode = doc.createElement(node.nodeName);
-            var il;
-            /* does the node have any attributes to add? */
-            if (node.attributes && (il=node.attributes.length) > 0) {
-                for (var i = 0; i < il; i++)
-                    newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i].nodeName));
-            }
-            /* are we going after children too, and does the node have any? */
-            if (allChildren && node.childNodes && (il=node.childNodes.length) > 0) {
-                for (var i = 0; i<il; i++)
-                    newNode.appendChild(importNode(doc,node.childNodes[i], allChildren));
-            }
-            return newNode;
-        case TEXT_NODE:
-        case CDATA_SECTION_NODE:
-            return doc.createTextNode(node.nodeValue);
-        case COMMENT_NODE:
-            return doc.createComment(node.nodeValue);
-    }
-};
+
+/** An object which substitutes JME values into HTML.
+ * JME expressions found inside text nodes are evaluated with respect to the given scope.
+ * @param {Numbas.jme.Scope} scope
+ * @constructor
+ */
 function DOMcontentsubber(scope) {
     this.scope = scope;
     this.re_end = undefined;
@@ -12035,6 +12023,8 @@ DOMcontentsubber.prototype = {
         } else if(element.hasAttribute('nosubvars')) {
             return element;
         } else if($.nodeName(element,'object')) {
+            /** Substitute content into the object's root element
+             */
             function go() {
                 jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
             }
@@ -12203,10 +12193,10 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
- * @param {Element} xml
  * @param {Numbas.parts.partpath} [path='p0']
- * @param {Numbas.Question} Question
+ * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -12528,7 +12518,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
-     * @returns {Numbas.Error}
+     * @throws {Numbas.Error}
      */
     error: function(message) {
         message = R.apply(this,arguments);
@@ -12560,20 +12550,34 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     break;
                 default:
                     var originalScript = this[name];
+                    /** Create a function which runs `script` (instead of the built-in script)
+                     * @param {Function} script
+                     * @returns {Function}
+                     */
                     function instead(script) {
                         return function() {
                             return script.apply(part,arguments);
                         }
                     }
+                    /** Create a function which runs `script` before `originalScript`
+                     * @param {Function} script
+                     * @param {Function} originalScript
+                     * @returns {Function}
+                     */
                     function before(script,originalScript) {
                         return function() {
                             script.apply(part,arguments);
-                            return originalScript.apply(this,arguments);
+                            return originalScript.apply(part,arguments);
                         }
                     }
+                    /** Create a function which runs `script` after `originalScript`
+                     * @param {Function} script
+                     * @param {Function} originalScript
+                     * @returns {Function}
+                     */
                     function after(script,originalScript) {
                         return function() {
-                            originalScript.apply(this,arguments);
+                            originalScript.apply(part,arguments);
                             return script.apply(part,arguments);
                         }
                     }
@@ -13188,11 +13192,11 @@ var math = Numbas.math;
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope, store) {
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromXML(xml);
         q.finaliseLoad();
     } catch(e) {
@@ -13208,11 +13212,11 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope, store) {
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
@@ -14217,7 +14221,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * If loading, need to restore randomised variables instead of generating anew
      *
-     * @param {Boolean} lo
+     * @param {Boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:HTMLAttached
@@ -14405,19 +14409,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(i==currentQuestion.number)
             return;
         var exam = this;
-        function go()
-        {
+        /** Change the question
+         */
+        function go() {
             exam.changeQuestion(i);
             exam.display.showQuestion();
         }
         if(currentQuestion.leavingDirtyQuestion()) {
-        }
-        else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0)
-        {
+        } else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
             go();
-        }
-        else
-        {
+        } else {
             var eventObj = this.settings.navigationEvents.onleave;
             switch( eventObj.action )
             {
@@ -14519,6 +14520,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}
+     * @param {Boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
      */
     end: function(save)
     {
@@ -14563,7 +14565,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     }
 };
 /** Represents what should happen when a particular timing or navigation event happens
- * @param Element eventNode - XML to load settings from
+ * @param {Element} eventNode - XML to load settings from
  * @constructor
  * @memberof Numbas
  */
@@ -14614,6 +14616,8 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
 /** Represents a group of questions
  *
  * @constructor
+ * @param {Numbas.Exam} exam
+ * @param {Element} groupNode - the XML defining the group.
  * @property {Numbas.Exam} exam - the exam this group belongs to
  * @property {Element} xml
  * @property {Array.<Number>} questionSubset - the indices of the picked questions, in the order they should appear to the student
@@ -14960,6 +14964,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
     }
 
+    /** Create a JME function which modifies the state.
+     * @param {String} name
+     * @param {Array.<function|String>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+     * @param {Function} outtype - The constructor for the output value of the function
+     * @param {Function} fn - a function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
+     * @see Numbas.marking.StatefulScope
+     * @returns {Numbas.jme.funcObj}
+     */
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -15101,6 +15113,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return tree;
     }
 
+    /** Submit the given answer to the given part
+     * @param {Numbas.parts.Part} part
+     * @param {*} answer
+     * @returns {Numbas.jme.token} - a dictinoary with keys "credit", "marks", "feedback", "answered".
+     */
     function submit_part(part,answer) {
         var originalAnswer = part.stagedAnswer;
         if(answer!==undefined) {
@@ -15345,7 +15362,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {Object.<Numbas.jme.token>} - Extra variables defined in the scope
+         * @param {Object.<Numbas.jme.token>} variables - Extra variables defined in the scope
          *
          * @returns {Numbas.marking.marking_script_result}
          */
@@ -15534,6 +15551,7 @@ var json = Numbas.json = {
     /** Try to load an attribute with the given name from `source`. The given name and its lower-case equivalent are tried.
      * @param {Object} source
      * @param {String} attr
+     * @returns {*}
      */
     tryGet: function(source, attr) {
         if(attr in source) {
@@ -15604,6 +15622,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
             var init = ko.unwrap(this.answerJSON);
+            /** Clean up a number, to be set as the value for the input widget.
+             * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
+             * `undefined` produces an empty string
+             * @param {Number} n
+             * @returns {String}
+             */
             function cleanNumber(n) {
                 if(n===undefined) {
                     return '';
@@ -15661,6 +15685,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.returnString = this.options.returnString || false;
             this.disable = params.disable;
             var init = ko.unwrap(this.answerJSON);
+            /** Clean a supplied expression, to be used as the value for the input widget.
+             * If it's a string, leave it alone.
+             * If it's a {@link Numbas.jme.tree}, run it through {@link Numbas.jme.display.treeToJME}.
+             * @param {String|Numbas.jme.tree} expr
+             * @returns {String}
+             */
             function cleanExpression(expr) {
                 if(typeof(expr)=='string') {
                     return expr;
@@ -15865,17 +15895,26 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.value = ko.observableArray([]);
             var v = params.value();
+            /** Produce the output value for the widget
+             */
             function make_result() {
                 var v = vm.value().map(function(row,i){
                     return row().map(function(cell,j){return cell.cell()})
                 })
                 vm.result(v);
             };
+            /** Make a new cell
+             * @param {Number|String} c - the value of the cell
+             * @returns {Object} - `cell` is an observable holding the cell's value.
+             */
             function make_cell(c) {
                 var cell = {cell: ko.observable(c)};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
+            /** Overwrite the value of the widget with the given matrix
+             * @param {matrix} v
+             */
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);
@@ -16268,10 +16307,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Number entry part - student's answer must be within given range, and written to required precision.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store)
 {
     var settings = this.settings;
     util.copyinto(NumberEntryPart.prototype.settings,settings);
@@ -16388,6 +16431,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -16473,11 +16517,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
-{
+var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart, store) {
     util.copyinto(GapFillPart.prototype.settings,this.settings);
 }
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
@@ -16543,7 +16590,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
     /** Reveal the answers to all of the child gaps
-     * Extends {@link Numbas.parts.Part.revealAnswer}
+     * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+     * @extends Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -16636,11 +16684,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Information only part - no input, no marking, just display some content to the student.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, loading)
-{
+var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, store) {
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
     loadFromXML: function() {
@@ -16676,6 +16727,7 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
 });
 Numbas.partConstructors['information'] = util.extend(Part,InformationPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -16699,6 +16751,10 @@ var Part = Numbas.parts.Part;
  *
  * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
@@ -16887,6 +16943,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -16948,10 +17005,14 @@ var Part = Numbas.parts.Part;
  * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
  *
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @augments Numbas.parts.Part
  * @memberof Numbas.parts
  */
-var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart)
+var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store)
 {
     var p = this;
     var settings = this.settings;
@@ -17016,6 +17077,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var def;
+        /** Load the definition of the choice or answer labels.
+         * @param {JME} def
+         * @param {Numbas.jme.Scope} scope
+         * @param {Element} topNode - parent element of the list of labels
+         * @param {String} nodeName - 'choice' or 'answer'
+         * @returns {Number} - the number of items
+         */
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
             if(values.type!='list') {
@@ -17432,6 +17500,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -17545,7 +17614,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         settings.matrix = matrix;
     },
-    /** Store the student's choices */
+    /** Store the student's choices 
+     * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
+     * */
     storeTick: function(answer)
     {
         this.setDirty(true);
@@ -17678,10 +17749,14 @@ var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
 /** Custom part - a part type defined in {@link Numbas.custom_part_types}
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, loading) {
+var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, store) {
     this.raw_settings = {};
     this.resolved_input_options = {};
 }
@@ -17751,6 +17826,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.input option missing',{option:option});
             }
         })
+        /** Get the value of an input option by evaluating its definition.
+         * @param {String|Object} option
+         * @returns {*}
+         */
         function evaluate_input_option(option) {
             if(typeof(option)=='string') {
                 return jme.unwrapValue(settings_scope.evaluate(option));
@@ -17905,11 +17984,15 @@ var util = Numbas.util;
 var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
  * @constructor
+ * @param {Element} xml
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart)
-{
+var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, store) {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     loadFromXML: function() {},
@@ -17930,15 +18013,15 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         this.markingComment(R('part.extension.not implemented',{name:'mark'}));
     },
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
-     * @ returns {object}
+     * @returns {Object}
      */
     createSuspendData: function() {
         return {};
     },
     /** Get the suspend data created in a previous session for this part, if it exists.
-     * @ param {object} data
+     * @returns {Object}
      */
-    loadSuspendData: function(data) {
+    loadSuspendData: function() {
         if(!this.store) {
             return;
         }
@@ -17953,6 +18036,7 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
 });
 Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
 });
+
 /*
 Copyright 2011-15 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -17973,10 +18057,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Matrix entry part - student enters a matrix of numbers
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
+var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(MatrixEntryPart.prototype.settings,settings);
 }
@@ -18100,6 +18188,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -18161,10 +18250,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Text-entry part - student's answer must match the given regular expression
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading) {
+var PatternMatchPart = Numbas.parts.PatternMatchPart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(PatternMatchPart.prototype.settings,settings);
 }
@@ -18241,6 +18334,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         }
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

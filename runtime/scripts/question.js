@@ -24,11 +24,11 @@ var math = Numbas.math;
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope, store) {
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromXML(xml);
         q.finaliseLoad();
     } catch(e) {
@@ -44,11 +44,11 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope, store) {
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {

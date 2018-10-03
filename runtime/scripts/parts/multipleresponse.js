@@ -24,10 +24,14 @@ var Part = Numbas.parts.Part;
  * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
  *
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @augments Numbas.parts.Part
  * @memberof Numbas.parts
  */
-var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart)
+var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store)
 {
     var p = this;
     var settings = this.settings;
@@ -92,6 +96,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var def;
+        /** Load the definition of the choice or answer labels.
+         * @param {JME} def
+         * @param {Numbas.jme.Scope} scope
+         * @param {Element} topNode - parent element of the list of labels
+         * @param {String} nodeName - 'choice' or 'answer'
+         * @returns {Number} - the number of items
+         */
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
             if(values.type!='list') {
@@ -508,6 +519,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -621,7 +633,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         settings.matrix = matrix;
     },
-    /** Store the student's choices */
+    /** Store the student's choices 
+     * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
+     * */
     storeTick: function(answer)
     {
         this.setDirty(true);

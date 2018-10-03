@@ -16,11 +16,15 @@ var util = Numbas.util;
 var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
  * @constructor
+ * @param {Element} xml
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart)
-{
+var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, store) {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     loadFromXML: function() {},
@@ -41,15 +45,15 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         this.markingComment(R('part.extension.not implemented',{name:'mark'}));
     },
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
-     * @ returns {object}
+     * @returns {Object}
      */
     createSuspendData: function() {
         return {};
     },
     /** Get the suspend data created in a previous session for this part, if it exists.
-     * @ param {object} data
+     * @returns {Object}
      */
-    loadSuspendData: function(data) {
+    loadSuspendData: function() {
         if(!this.store) {
             return;
         }

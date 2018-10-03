@@ -18,10 +18,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Number entry part - student's answer must be within given range, and written to required precision.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store)
 {
     var settings = this.settings;
     util.copyinto(NumberEntryPart.prototype.settings,settings);
@@ -138,6 +142,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

@@ -11871,6 +11871,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     variableDependants: function(todo,ancestors) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
+        /** Find the names of the variables this variable depends on
+         * @param {String} name - the name of the variable to consider
+         * @param {Array.<String>} path - the chain of variables that have led to the one being considered, used to detect circular references
+         * @returns {Array.<String>} - the names of the variables this one depends on
+         */
         function findDependants(name,path) {
             path = path || [];
             // stop at circular references
@@ -11920,10 +11925,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * Ignores iframes and elements with the attribute `nosubvars`.
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
+     * @see DOMcontentsubber
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
-        return subber.subvars(element);
+        subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
      * @param {String} str - the contents of the text node
@@ -11934,8 +11940,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str,'{','}');
-        if(bits.length==1)
+        if(bits.length==1) {
             return [doc.createTextNode(str)];
+        }
+        /** Get HTML content for a given JME token
+         * @param {Numbas.jme.token} token
+         * @returns {Element|String}
+         */
         function doToken(token) {
             switch(token.type){
             case 'html':
@@ -11974,42 +11985,19 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
-                d = importNode(doc,d,true);
+                d = doc.importNode(d,true);
                 out[i] = $(d).contents();
             }
         }
         return out;
     }
 };
-// cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
-// because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way
-function importNode(doc,node,allChildren) {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var CDATA_SECTION_NODE = 4;
-    var COMMENT_NODE = 8;
-    switch (node.nodeType) {
-        case ELEMENT_NODE:
-            var newNode = doc.createElement(node.nodeName);
-            var il;
-            /* does the node have any attributes to add? */
-            if (node.attributes && (il=node.attributes.length) > 0) {
-                for (var i = 0; i < il; i++)
-                    newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i].nodeName));
-            }
-            /* are we going after children too, and does the node have any? */
-            if (allChildren && node.childNodes && (il=node.childNodes.length) > 0) {
-                for (var i = 0; i<il; i++)
-                    newNode.appendChild(importNode(doc,node.childNodes[i], allChildren));
-            }
-            return newNode;
-        case TEXT_NODE:
-        case CDATA_SECTION_NODE:
-            return doc.createTextNode(node.nodeValue);
-        case COMMENT_NODE:
-            return doc.createComment(node.nodeValue);
-    }
-};
+
+/** An object which substitutes JME values into HTML.
+ * JME expressions found inside text nodes are evaluated with respect to the given scope.
+ * @param {Numbas.jme.Scope} scope
+ * @constructor
+ */
 function DOMcontentsubber(scope) {
     this.scope = scope;
     this.re_end = undefined;
@@ -12035,6 +12023,8 @@ DOMcontentsubber.prototype = {
         } else if(element.hasAttribute('nosubvars')) {
             return element;
         } else if($.nodeName(element,'object')) {
+            /** Substitute content into the object's root element
+             */
             function go() {
                 jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
             }

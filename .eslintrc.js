@@ -14,6 +14,8 @@ module.exports = {
             "error",
             {
                 "requireReturnDescription": false, 
+                "requireParamDescription": false,
+                "requireReturn": false,
             }
         ],
         "require-jsdoc": [

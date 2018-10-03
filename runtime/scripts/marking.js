@@ -81,6 +81,14 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
     }
 
+    /** Create a JME function which modifies the state.
+     * @param {String} name
+     * @param {Array.<function|String>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+     * @param {Function} outtype - The constructor for the output value of the function
+     * @param {Function} fn - a function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
+     * @see Numbas.marking.StatefulScope
+     * @returns {Numbas.jme.funcObj}
+     */
     function state_fn(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
@@ -222,6 +230,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         return tree;
     }
 
+    /** Submit the given answer to the given part
+     * @param {Numbas.parts.Part} part
+     * @param {*} answer
+     * @returns {Numbas.jme.token} - a dictinoary with keys "credit", "marks", "feedback", "answered".
+     */
     function submit_part(part,answer) {
         var originalAnswer = part.stagedAnswer;
         if(answer!==undefined) {
@@ -466,7 +479,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {Object.<Numbas.jme.token>} - Extra variables defined in the scope
+         * @param {Object.<Numbas.jme.token>} variables - Extra variables defined in the scope
          *
          * @returns {Numbas.marking.marking_script_result}
          */

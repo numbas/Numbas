@@ -366,7 +366,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * If loading, need to restore randomised variables instead of generating anew
      *
-     * @param {Boolean} lo
+     * @param {Boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:HTMLAttached
@@ -554,19 +554,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(i==currentQuestion.number)
             return;
         var exam = this;
-        function go()
-        {
+        /** Change the question
+         */
+        function go() {
             exam.changeQuestion(i);
             exam.display.showQuestion();
         }
         if(currentQuestion.leavingDirtyQuestion()) {
-        }
-        else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0)
-        {
+        } else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
             go();
-        }
-        else
-        {
+        } else {
             var eventObj = this.settings.navigationEvents.onleave;
             switch( eventObj.action )
             {
@@ -668,6 +665,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}
+     * @param {Boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
      */
     end: function(save)
     {
@@ -712,7 +710,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     }
 };
 /** Represents what should happen when a particular timing or navigation event happens
- * @param Element eventNode - XML to load settings from
+ * @param {Element} eventNode - XML to load settings from
  * @constructor
  * @memberof Numbas
  */
@@ -763,6 +761,8 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
 /** Represents a group of questions
  *
  * @constructor
+ * @param {Numbas.Exam} exam
+ * @param {Element} groupNode - the XML defining the group.
  * @property {Numbas.Exam} exam - the exam this group belongs to
  * @property {Element} xml
  * @property {Array.<Number>} questionSubset - the indices of the picked questions, in the order they should appear to the student

@@ -57,6 +57,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
             var init = ko.unwrap(this.answerJSON);
+            /** Clean up a number, to be set as the value for the input widget.
+             * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
+             * `undefined` produces an empty string
+             * @param {Number} n
+             * @returns {String}
+             */
             function cleanNumber(n) {
                 if(n===undefined) {
                     return '';
@@ -114,6 +120,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.returnString = this.options.returnString || false;
             this.disable = params.disable;
             var init = ko.unwrap(this.answerJSON);
+            /** Clean a supplied expression, to be used as the value for the input widget.
+             * If it's a string, leave it alone.
+             * If it's a {@link Numbas.jme.tree}, run it through {@link Numbas.jme.display.treeToJME}.
+             * @param {String|Numbas.jme.tree} expr
+             * @returns {String}
+             */
             function cleanExpression(expr) {
                 if(typeof(expr)=='string') {
                     return expr;
@@ -318,17 +330,26 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.value = ko.observableArray([]);
             var v = params.value();
+            /** Produce the output value for the widget
+             */
             function make_result() {
                 var v = vm.value().map(function(row,i){
                     return row().map(function(cell,j){return cell.cell()})
                 })
                 vm.result(v);
             };
+            /** Make a new cell
+             * @param {Number|String} c - the value of the cell
+             * @returns {Object} - `cell` is an observable holding the cell's value.
+             */
             function make_cell(c) {
                 var cell = {cell: ko.observable(c)};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
+            /** Overwrite the value of the widget with the given matrix
+             * @param {matrix} v
+             */
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);

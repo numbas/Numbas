@@ -36,6 +36,7 @@ var json = Numbas.json = {
     /** Try to load an attribute with the given name from `source`. The given name and its lower-case equivalent are tried.
      * @param {Object} source
      * @param {String} attr
+     * @returns {*}
      */
     tryGet: function(source, attr) {
         if(attr in source) {
