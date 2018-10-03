@@ -587,7 +587,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.isDirty = dirty;
         if(this.display) {
             this.display && this.display.isDirty(dirty);
-            if(dirty && this.parentPart && !this.isStep) {
+            if(dirty && this.parentPart && !this.isStep && !this.parentPart.submitting) {
                 this.parentPart.setDirty(true);
             }
             this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
