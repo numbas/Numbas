@@ -4,7 +4,7 @@ studentExpr (The student's answer, parsed):
         fail(translate("part.marking.nothing entered"))
     );
     try(
-        simplify(parse(studentAnswer),[])
+        simplify(parse(studentAnswer),'basic')
     , message,
         warn(translate("part.jme.answer invalid",["message":message]));
         fail(translate("part.jme.answer invalid",["message":message]))

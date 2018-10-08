@@ -433,7 +433,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
             q.signals.trigger('partsResumed');
         });
-        q.signals.on('ready',function() {
+        q.signals.on('partsResumed',function() {
             q.adviceDisplayed = qobj.adviceDisplayed;
             q.answered = qobj.answered;
             q.revealed = qobj.revealed;
@@ -566,10 +566,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.parts[i].revealAnswer(dontStore);
         }
         if(this.display) {
-        //display revealed answers
-    this.display.end();
+            //display revealed answers
+            this.display.end();
             this.display.revealAnswer();
-    this.display.showScore();
+            this.display.showScore();
         }
         if(this.store && !dontStore) {
             this.store.answerRevealed(this);

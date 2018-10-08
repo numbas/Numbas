@@ -91,9 +91,6 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
-        if(part.customConstructor) {
-            part.customConstructor.apply(part);
-        }
         return part;
     }
     else {
@@ -234,6 +231,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     finaliseLoad: function() {
         this.applyScripts();
+        if(this.customConstructor) {
+            this.customConstructor.apply(this);
+        }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
         }
@@ -312,7 +312,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function() {'+script+'}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
+            script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
@@ -601,7 +601,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.isDirty = dirty;
         if(this.display) {
             this.display && this.display.isDirty(dirty);
-            if(dirty && this.parentPart && !this.isStep) {
+            if(dirty && this.parentPart && !this.isStep && !this.parentPart.submitting) {
                 this.parentPart.setDirty(true);
             }
             this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
