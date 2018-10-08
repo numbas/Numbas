@@ -45,6 +45,16 @@ var TOp = Numbas.jme.types.TOp;
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 builtinScope.setVariable('nothing',new types.TNothing);
 var funcs = {};
+
+/** Add a function to the built-in scope.
+ * @see Numbas.jme.builtinScope
+ * @param {String} name
+ * @param {Array.<function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {function} outcons - The constructor for the output value of the function
+ * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
+ * @param {Numbas.jme.funcObj_options} options
+ * @returns {Numbas.jme.funcObj}
+ */
 function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
@@ -619,6 +629,14 @@ newBuiltin('repeat',['?',TNum],TList, null, {
         return new TList(value);
     }
 });
+/** Evaluate the given expressions until the list of conditions is satisfied
+ * @param {Array.<String>} names - names for each expression
+ * @param {Array.<Numbas.jme.tree>} definitions - definition of each expression
+ * @param {Array.<Numbas.jme.tree>} conditions - expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
+ * @param {Numbas.jme.Scope} scope - the scope in which to evaluate everything
+ * @param {Number} [maxRuns=100] - the maximum number of times to try to generate a set of values
+ * @returns {Object.<Numbas.jme.token>} - a dictionary mapping names to their generated values.
+ */
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
         if(definitions.length!=names.length) {
@@ -766,6 +784,13 @@ jme.findvarsOps.isset = function(tree,boundvars,scope) {
 jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
 }
+/** Map the given expression, considered as a lambda, over the given list.
+ * @param {Numbas.jme.tree} lambda
+ * @param {String|Array.<String>} names - either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
+ * @param {Numbas.jme.types.TList} list - the list to map over.
+ * @param {Numbas.jme.Scope} scope - the scope in which to evaluate
+ * @returns {Numbas.jme.types.TList}
+ */
 function mapOverList(lambda,names,list,scope) {
     var olist = list.map(function(v) {
         if(typeof(names)=='string') {
@@ -894,6 +919,10 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
     tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
     return tree;
 }
+/** Is the given token the value `true`?
+ * @param {Numbas.jme.token} item
+ * @returns {Boolean}
+ */
 function tok_is_true(item){return item.type=='boolean' && item.value}
 newBuiltin('all',[TList],TBool,function(list) {
     return list.every(tok_is_true);

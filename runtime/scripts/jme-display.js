@@ -104,6 +104,12 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** Would texify put brackets around a given argument of an operator?
+ * @param {Numbas.jme.tree} thing
+ * @param {Number} i - the index of the argument
+ * @param {Numbas.jme.display.texify_settings} settings
+ * @returns {Boolean}
+ */
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
     var tok = thing.args[i].tok;
@@ -195,11 +201,8 @@ function funcTex(code)
  * @memberof Numbas.jme.display
  */
 var texOps = jme.display.texOps = {
-    /** range definition. Should never really be seen */
     '#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
-    /** logical negation */
     'not': infixTex('\\neg '),
-    /** unary addition */
     '+u': function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' ) {
@@ -210,7 +213,6 @@ var texOps = jme.display.texOps = {
         }
         return '+'+tex;
     },
-    /** unary minus */
     '-u': (function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' )
@@ -229,7 +231,6 @@ var texOps = jme.display.texOps = {
         }
         return '-'+tex;
     }),
-    /** exponentiation */
     '^': (function(thing,texArgs,settings) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
@@ -492,7 +493,7 @@ var texOps = jme.display.texOps = {
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
@@ -784,6 +785,10 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
 {
     longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
     var oname = name;
+    /** Apply annotations to the given name
+     * @param {TeX} name
+     * @returns {TeX}
+     */
     function applyAnnotations(name) {
         if(!annotations) {
             return name;
@@ -919,6 +924,10 @@ var typeToTeX = jme.display.typeToTeX = {
             return texOps[lowerName](thing,texArgs,settings);
         }
         else {
+            /** long operators get wrapped in `\operatorname`
+             * @param {String} name
+             * @returns {TeX}
+             */
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
@@ -933,7 +942,10 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     }
 }
-/** Take a nested application of a single op, e.g. ((1*2)*3)*4, and flatten it so that the tree has one op two or more arguments
+/** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
+ * @param {Numbas.jme.tree} tree
+ * @param {String} op
+ * @returns {Array.<Numbas.jme.tree>}
  */
 function flatten(tree,op) {
     if(!jme.isOp(tree.tok,op)) {
@@ -994,7 +1006,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {

@@ -30,7 +30,7 @@ var math = Numbas.math;
 /** A JME expression.
  * @typedef JME
  * @type {String}
- * @see {@link http://numbas-editor.readthedocs.io/en/latest/jme-reference.html}
+ * @see {@link https://docs.numbas.org.uk/en/latest/jme-reference.html}
  */
 
 /** @typedef Numbas.jme.tree
@@ -1006,6 +1006,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(!tok.prefix) {
                 var o1 = this.precedence[tok.name];
                 //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
+                
+                /** Should the next token on the stack be popped off?
+                 * @returns {Boolean}
+                 */
                 function should_pop() {
                     if(this.stack.length==0) {
                         return false;
@@ -1166,6 +1170,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
         var type_actions = this.shunt_type_actions;
 
+        /** Shunt the given token onto the output
+         * @param {Numbas.jme.token} tok
+         * @see Numbas.jme.Parser.shunt_type_actions
+         */
         function shunt_token(tok) {
             if(tok.type in type_actions) {
                 type_actions[tok.type].apply(parser,[tok]);
@@ -1379,7 +1387,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
      * @returns {Object} a dictionary of names to values
      */
-    collect: function(collection,name) {
+    collect: function(collection) {
         var scope = this;
         var deleted = {};
         var out = {};
@@ -1416,6 +1424,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var scope = this;
         var out = {}
         var name;
+        /** Merge the given list of functions with any existing functions under that name
+         * @param {String} name
+         * @param {Array.<Numbas.jme.funcObj>} fns
+         */
         function add(name,fns) {
             if(!out[name]) {
                 out[name] = [];
@@ -1585,7 +1597,7 @@ TNothing.prototype.type = 'nothing';
  * @augments Numbas.jme.token
  * @property {Number} value
  * @property {String|Number|complex} originalValue - the value used to construct the token - either a string, a number, or a complex number object
- * @property type "number"
+ * @property {String} type - "number"
  * @constructor
  * @param {Number} num
  */
@@ -1612,11 +1624,6 @@ var TNum = types.TNum = types.number = function(num)
     this.value = num.complex ? num : parseFloat(num);
 }
 TNum.prototype.type = 'number';
-TNum.doc = {
-    name: 'number',
-    usage: ['0','1','0.234','i','e','pi'],
-    description: "@i@, @e@, @infinity@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm, $\\infty$ and $\\pi$, respectively."
-};
 /** String type.
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -1632,16 +1639,11 @@ var TString = types.TString = types.string = function(s)
     this.value = s;
 }
 TString.prototype.type = 'string';
-TString.doc = {
-    name: 'string',
-    usage: ['\'hello\'','"hello"'],
-    description: "Use strings to create non-mathematical text."
-};
 /** Boolean type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Boolean} value
- * @property type "boolean"
+ * @property {String} type - "boolean"
  * @constructor
  * @param {Boolean} b
  */
@@ -1650,16 +1652,11 @@ var TBool = types.TBool = types.boolean = function(b)
     this.value = b;
 }
 TBool.prototype.type = 'boolean';
-TBool.doc = {
-    name: 'boolean',
-    usage: ['true','false'],
-    description: "Booleans represent either truth or falsity. The logical operations @and@, @or@ and @xor@ operate on and return booleans."
-}
 /** HTML DOM element
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Element} value
- * @property type "html"
+ * @property {String} type - "html"
  * @constructor
  * @param {Element} html
  */
@@ -1676,17 +1673,12 @@ var THTML = types.THTML = types.html = function(html) {
     }
 }
 THTML.prototype.type = 'html';
-THTML.doc = {
-    name: 'html',
-    usage: ['html(\'<div>things</div>\')'],
-    description: "An HTML DOM node."
-}
 /** List of elements of any data type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Number} vars - Length of list
  * @property {Array.<Numbas.jme.token>} value - Values (may not be filled in if the list was created empty)
- * @property type "html"
+ * @property {String} type - "html"
  * @constructor
  * @param {Number|Array.<Numbas.jme.token>} value - Either the size of the list, or an array of values
  */
@@ -1706,11 +1698,6 @@ var TList = types.TList = types.list = function(value)
     }
 }
 TList.prototype.type = 'list';
-TList.doc = {
-    name: 'list',
-    usage: ['[0,1,2,3]','[a,b,c]','[true,false,false]'],
-    description: "A list of elements of any data type."
-};
 /** Key-value pair assignment
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -1729,7 +1716,7 @@ TKeyPair.prototype = {
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Object.<Numbas.jme.token>} value - Map strings to tokens. Undefined until this token is evaluated.
- * @property type "dict"
+ * @property {String} type - "dict"
  * @constructor
  * @param {Object.<Numbas.jme.token>} value
  */
@@ -1743,7 +1730,7 @@ TDict.prototype = {
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Array.<Numbas.jme.token>} value - Array of elements. Constructor assumes all elements are distinct
- * @property type "set"
+ * @property {String} type - "set"
  * @constructor
  * @param {Array.<Numbas.jme.token>} value
  */
@@ -1755,7 +1742,7 @@ TSet.prototype.type = 'set';
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Array.<Number>} value - Array of components
- * @property type "vector"
+ * @property {String} type - "vector"
  * @constructor
  * @param {Array.<Number>} value
  */
@@ -1764,16 +1751,11 @@ var TVector = types.TVector = types.vector = function(value)
     this.value = value;
 }
 TVector.prototype.type = 'vector';
-TVector.doc = {
-    name: 'vector',
-    usage: ['vector(1,2)','vector([1,2,3,4])'],
-    description: 'The components of a vector must be numbers.\n\n When combining vectors of different dimensions, the smaller vector is padded with zeros to make up the difference.'
-}
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {matrix} value - Array of rows (which are arrays of numbers)
- * @property type "matrix"
+ * @property {String} type - "matrix"
  * @constructor
  * @param {matrix} value
  */
@@ -1790,11 +1772,6 @@ var TMatrix = types.TMatrix = types.matrix = function(value)
     }
 }
 TMatrix.prototype.type = 'matrix';
-TMatrix.doc = {
-    name: 'matrix',
-    usage: ['matrix([1,2,3],[4,5,6])','matrix(row1,row2)'],
-    description: "Matrices are constructed from lists of numbers, representing the rows.\n\n When combining matrices of different dimensions, the smaller matrix is padded with zeros to make up the difference."
-}
 /** A range of numerical values - either discrete or continuous
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -1803,7 +1780,7 @@ TMatrix.doc = {
  * @property {Number} start - the lower bound of the range
  * @property {Number} end - the upper bound of the range
  * @property {Number} step - the difference between elements in the range
- * @property type "range"
+ * @property {String} type - "range"
  * @constructor
  * @param {Array.<Number>} range - `[start,end,step]`
  */
@@ -1819,18 +1796,13 @@ var TRange = types.TRange = types.range = function(range)
     }
 }
 TRange.prototype.type = 'range';
-TRange.doc = {
-    name: 'range',
-    usage: ['1..3','1..3#0.1','1..3#0'],
-    description: 'A range @a..b#c@ represents the set of numbers $\\{a+nc | 0 \\leq n \\leq \\frac{b-a}{c} \\}$. If the step size is zero, then the range is the continuous interval $\[a,b\]$.'
-}
 /** Variable name token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {String} name
  * @property {String} value - Same as `name`
  * @property {Array.<String>} annotation - List of annotations (used to modify display)
- * @property type "name"
+ * @property {String} type - "name"
  * @constructor
  * @param {String} name
  * @param {Array.<String>} annotation
@@ -1842,35 +1814,16 @@ var TName = types.TName = types.name = function(name,annotation)
     this.annotation = annotation;
 }
 TName.prototype.type = 'name';
-TName.doc = {
-    name: 'name',
-    usage: ['x','X','x1','longName','dot:x','vec:x'],
-    description: 'A variable or function name. Names are case-insensitive, so @x@ represents the same thing as @X@. \
-\n\n\
-@e@, @i@ and @pi@ are reserved names representing mathematical constants. They are rewritten by the interpreter to their respective numerical values before evaluation. \
-\n\n\
-Names can be given _annotations_ to change how they are displayed. The following annotations are built-in:\
-\n\n\
-* @verb@ - does nothing, but names like @i@, @pi@ and @e@ are not interpreted as the famous mathematical constants.\n\
-* @op@ - denote the name as the name of an operator -- wraps the name in the LaTeX @\\operatorname@ command when displayed\n\
-* @v@ or @vector@ - denote the name as representing a vector -- the name is displayed in boldface\n\
-* @unit@ - denote the name as representing a unit vector -- places a hat above the name when displayed\n\
-* @dot@ - places a dot above the name when displayed, for example when representing a derivative\n\
-* @m@ or @matrix@ - denote the name as representing a matrix -- displayed using a non-italic font\
-\n\n\
-Any other annotation is taken to be a LaTeX command. For example, a name @vec:x@ is rendered in LaTeX as <code>\\vec{x}</code>, which places an arrow above the name.\
-    '
-};
 /** JME function token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {String} name
  * @property {Array.<String>} annotation - List of annotations (used to modify display)
  * @property {Number} vars - Arity of the function
- * @property type "function"
+ * @property {String} type - "function"
  * @constructor
  * @param {String} name
- * @param {Array.<String>} annotation
+ * @param {Array.<String>} [annotation] - any annotations for the function's name
  */
 var TFunc = types.TFunc = types['function'] = function(name,annotation)
 {
@@ -1886,11 +1839,16 @@ TFunc.prototype.vars = 0;
  * @property {Number} vars - Arity of the operation
  * @property {Boolean} postfix
  * @property {Boolean} prefix
- * @properrty type "op"
+ * @property {Boolean} commutative
+ * @property {Boolean} associative
+ * @property {String} type - "op"
  * @constructor
  * @param {String} op - Name of the operation
  * @param {Boolean} postfix
  * @param {Boolean} prefix
+ * @param {Number} arity - the number of parameters the operation takes
+ * @param {Boolean} commutative
+ * @param {Boolean} associative
  */
 var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative,associative)
 {
@@ -2214,7 +2172,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
         }
         return result;
     }
-    this.doc = options.doc;
     /** Does this function behave randomly?
      * @name random
      * @member {Boolean}
@@ -2222,6 +2179,13 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      */
     this.random = options.random;
 }
+/** Randoly generate values for each of the given names between `min` and `max`
+ * @param {Array.<String>} varnames
+ * @param {Number} min
+ * @param {Number} max
+ * @param {Number} times - number of values to produce for each name
+ * @returns {Array.<Object>} - list of dictionaries mapping names to their values
+ */
 function randoms(varnames,min,max,times)
 {
     times *= varnames.length;
@@ -2237,6 +2201,11 @@ function randoms(varnames,min,max,times)
     }
     return rs;
 }
+/** Does every name in `array1` occur in `array2`?
+ * @param {Array.<String>} array1
+ * @param {Array.<String>} array2
+ * @returns {Boolean}
+ */
 function varnamesAgree(array1, array2) {
     var name;
     for(var i=0; i<array1.length; i++) {
@@ -2259,14 +2228,24 @@ function varnamesAgree(array1, array2) {
  */
 var checkingFunctions = jme.checkingFunctions =
 {
-    /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance` */
+    /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance`
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     absdiff: function(r1,r2,tolerance)
     {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
     },
-    /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance` */
+    /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     reldiff: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
@@ -2277,14 +2256,24 @@ var checkingFunctions = jme.checkingFunctions =
             return math.leq(Math.abs(math.sub(r1,r2)), tolerance);
         }
     },
-    /** Round both values to `tolerance` decimal places, and fail if unequal. */
+    /** Round both values to `tolerance` decimal places, and fail if unequal.
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     dp: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
     },
-    /** Round both values to `tolerance` significant figures, and fail if unequal. */
+    /** Round both values to `tolerance` significant figures, and fail if unequal. 
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     sigfig: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
@@ -2485,6 +2474,9 @@ var varsUsed = jme.varsUsed = function(tree) {
 /** Use JS comparison operators to compare the `value` property of both tokens.
  * Used when the token wraps a JS built-in type, such as string, number or boolean.
  * @see @Numbas.jme.tokenComparisons
+ * @param {Numbas.jme.token} a
+ * @param {Numbas.jme.token} b
+ * @returns {Boolean}
  */
 var compareTokensByValue = jme.compareTokensByValue = function(a,b) {
     return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
@@ -2617,6 +2609,10 @@ var compareTrees = jme.compareTrees = function(a,b) {
     switch(a.tok.type) {
         case 'op':
         case 'function':
+            /** Is the given tree of the form `?^?`, `?*(?^?)` or `?/(?^?)`
+             * @param {Numbas.jme.tree} t
+             * @returns {Boolean}
+             */
             function is_pow(t) {
                 return t.tok.name=='^' || (t.tok.name=='*' && t.args[1].tok.name=='^') || (t.tok.name=='/' && t.args[1].tok.name=='^');
             }
