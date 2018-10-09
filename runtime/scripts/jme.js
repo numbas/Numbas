@@ -229,12 +229,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @see Numbas.jme.shunt
      * @returns {Numbas.jme.tree[]}
      */
-    compileList: function(expr,scope) {
+    compileList: function(expr) {
         expr+='';    //make sure expression is a string and not a number or anything like that
         if(!expr.trim().length)
             return null;
         //typecheck
-        scope = new Scope(scope);
         //tokenise expression
         var tokens = jme.tokenise(expr);
         var bits = [];
@@ -437,6 +436,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {String} str
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} [display=false] - Is this string going to be displayed to the user? If so, avoid unnecessary brackets and quotes.
+     * @returns {String}
      */
     subvars: function(str, scope,display)
     {
@@ -542,27 +542,30 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             }
         }
     },
-    /** Is a token a TOp?
+    /** Is a token an operator with the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} op
      *
      * @returns {Boolean}
      */
     isOp: function(tok,op) {
         return tok.type=='op' && tok.name==op;
     },
-    /** Is a token a TName?
+    /** Is a token the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} name
      *
      * @returns {Boolean}
      */
     isName: function(tok,name) {
         return tok.type=='name' && tok.name==name;
     },
-    /** Is a token a TFunction?
+    /** Is a token a function with the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} name
      *
      * @returns {Boolean}
      */
@@ -616,10 +619,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     },
 
     /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
-     * @param {Numbas.jme.tree}
+     * @param {Numbas.jme.tree} tree
      * @returns {Object} the base, degree and coefficient of the monomial, as trees.
      */
     isMonomial: function(tree) {
+        /** Remove unary minuses from the top of the tree
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}
+         */
         function unwrapUnaryMinus(tree) {
             while(jme.isOp(tree.tok,'-u')) {
                 tree = tree.args[0];
@@ -931,6 +938,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
+        /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
+         * @param {Array.<String>} ops
+         * @returns {Array.<String>} ops
+         */
         function clean_ops(ops) {
             return ops.sort().reverse().map(function(op) {
                 return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
@@ -2021,6 +2032,7 @@ var associative = jme.associative =
 
 
 jme.standardParser = new jme.Parser();
+jme.standardParser.addBinaryOperator(';',{precedence:0});
 
 
 /** A function which checks whether a {@link Numbas.jme.funcObj} can be applied to the given arguments.
@@ -2047,8 +2059,8 @@ var funcObjAcc = 0;    //accumulator for ids for funcObjs, so they can be sorted
  * @memberof Numbas.jme
  * @constructor
  * @param {String} name
- * @param {Array.<function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
- * @param {function} outcons - The constructor for the output value of the function
+ * @param {Array.<Function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {Function} outcons - The constructor for the output value of the function
  * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
  * @param {Numbas.jme.funcObj_options} options
  *
@@ -2382,7 +2394,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
  * @method
  * @param {Numbas.jme.token} r1
  * @param {Numbas.jme.token} r2
- * @param {function} checkingFunction - one of {@link Numbas.jme.checkingFunctions}
+ * @param {Function} checkingFunction - one of {@link Numbas.jme.checkingFunctions}
  * @param {Number} checkingAccuracy
  * @returns {Boolean}
  */

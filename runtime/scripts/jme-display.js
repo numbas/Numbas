@@ -153,7 +153,7 @@ function texifyOpArg(thing,texArgs,i)
  * @private
  *
  * @param {TeX} code - the TeX command for the operator
- * @returns {function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
+ * @returns {Function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
  */
 function infixTex(code)
 {
@@ -175,7 +175,7 @@ function infixTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which returns the appropriate (constant) TeX code
+ * @returns {Function} - a function which returns the appropriate (constant) TeX code
  */
 function nullaryTex(code)
 {
@@ -186,7 +186,7 @@ function nullaryTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which converts a syntax tree to the appropriate TeX
+ * @returns {Function} - a function which converts a syntax tree to the appropriate TeX
  */
 function funcTex(code)
 {
@@ -778,7 +778,7 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  *
  * @param {String} name
  * @param {Array.<String>} [annotations]
- * @param {function} [longNameMacro=texttt] - function which returns TeX for a long name
+ * @param {Function} [longNameMacro=texttt] - function which returns TeX for a long name
  * @returns {TeX}
  */
 var texName = jme.display.texName = function(name,annotations,longNameMacro)

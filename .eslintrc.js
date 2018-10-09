@@ -16,6 +16,13 @@ module.exports = {
                 "requireReturnDescription": false, 
                 "requireParamDescription": false,
                 "requireReturn": false,
+                "preferType": {
+                    "object": "Object",
+                    "function": "Function",
+                    "number": "Number",
+                    "boolean": "Boolean",
+                    "string": "String"
+                }
             }
         ],
         "require-jsdoc": [

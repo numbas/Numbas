@@ -76,7 +76,7 @@ var scriptreqs = {};
  * @property {Boolean} executed - Has the script been run?
  * @property {Array.<String>} backdeps - Scripts which depend on this one (need this one to run first)
  * @property {Array.<String>} fdeps - Scripts which this one depends on (it must run after them)
- * @property {function} callback - The function to run when all this script's dependencies have run (this is the script itself)
+ * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
 function RequireScript(file)
 {
@@ -111,7 +111,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
  * Each script should be wrapped in this function
  * @param {String} file - Name of the script
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
- * @param {function} callback - A function wrapping up this file's code
+ * @param {Function} callback - A function wrapping up this file's code
  */
 Numbas.queueScript = function(file, deps, callback)
 {
@@ -139,10 +139,9 @@ Numbas.tryInit = function()
     }
     //put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
     var stack = [];
-    var ind = 0;
-    function get_ind() {
-        return 'margin-left: '+ind+'em';
-    }
+    /** Try to run the given requirement
+     * @param {RequireScript} req
+     */
     function tryRun(req) {
         if(req.loaded && !req.executed) {
             var go = true;
@@ -159,11 +158,9 @@ Numbas.tryInit = function()
                     req.callback({exports:window});
                 }
                 req.executed=true;
-                ind++;
                 for(var j=0;j<req.backdeps.length;j++) {
                     tryRun(scriptreqs[req.backdeps[j]]);
                 }
-                ind--;
             }
         }
     }
@@ -182,7 +179,7 @@ Numbas.tryInit = function()
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
- * @param {function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
+ * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');

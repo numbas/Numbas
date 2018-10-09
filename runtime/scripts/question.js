@@ -666,7 +666,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Add a callback function to run when the question's HTML is attached to the page
      *
-     * @param {function} fn
+     * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
      * @listens Numbas.Question#event:HTMLAttached
      */
@@ -675,7 +675,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
      *
-     * @param {function} fn
+     * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
      * @listens Numbas.Question#event:variablesGenerated
      */

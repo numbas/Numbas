@@ -659,7 +659,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return Math.floor(n*(Math.random()%1));
     },
     /** Get a  random shuffling of the numbers `[0..n-1]`
-     * @param {Number} n
+     * @param {Number} N
      * @returns {Array.<Number>}
      */
     deal: function(N)
@@ -710,7 +710,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return arr;
     },
     /** Round `a` to `b` decimal places. Real and imaginary parts of complex numbers are rounded independently.
-     * @param {Number} n
+     * @param {Number} a
      * @param {Number} b
      * @returns {Number}
      * @throws {Numbas.Error} "math.precround.complex" if b is complex
@@ -757,7 +757,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
      * For example, '1.23e-5' is returned as '0.0000123'
      * @param {String} str
-     * @returns String
+     * @returns {String}
      */
     unscientific: function(str) {
         var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
@@ -786,7 +786,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return minus + out;
     },
     /** Round `a` to `b` significant figures. Real and imaginary parts of complex numbers are rounded independently.
-     * @param {Number} n
+     * @param {Number} a
      * @param {Number} b
      * @returns {Number}
      * @throws {Numbas.Error} "math.precround.complex" if b is complex
@@ -1231,7 +1231,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Get a random real number between `min` and `max` (inclusive)
      * @param {Number} min
-     * @param {Number] max
+     * @param {Number} max
      * @returns {Number}
      * @see Numbas.math.random
      * @see Numbas.math.choose
@@ -1277,6 +1277,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
     /** Choose one item from an array, at random
      * @param {Array} selection
+     * @returns {*}
      * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
      * @see Numbas.math.randomrange
      */
@@ -1308,6 +1309,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** `nCk` - number of ways of picking `k` unordered elements from `n`.
      * @param {Number} n
      * @param {Number} k
+     * @returns {Number}
      * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
      */
     combinations: function(n,k) {
@@ -1329,6 +1331,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** `nPk` - number of ways of picking `k` ordered elements from `n`.
      * @param {Number} n
      * @param {Number} k
+     * @returns {Number}
      * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
      */
     permutations: function(n,k) {
@@ -1787,24 +1790,24 @@ var vectormath = Numbas.vectormath = {
         return out;
     },
     /** Apply given function to each element
-     * @param {vector}
-     * @param {function}
+     * @param {vector} v
+     * @param {Function} fn
      * @returns {vector}
      */
     map: function(v,fn) {
         return v.map(fn);
     },
     /** Round each element to given number of decimal places
-     * @param {vector}
-     * @param {Number} - number of decimal places
+     * @param {vector} v
+     * @param {Number} dp - number of decimal places
      * @returns {vector}
      */
     precround: function(v,dp) {
         return vectormath.map(v,function(n){return math.precround(n,dp);});
     },
     /** Round each element to given number of significant figures
-     * @param {vector}
-     * @param {Number} - number of decimal places
+     * @param {vector} v
+     * @param {Number} sf - number of decimal places
      * @returns {vector}
      */
     siground: function(v,sf) {
@@ -1843,7 +1846,10 @@ var vectormath = Numbas.vectormath = {
  * @namespace Numbas.matrixmath
  */
 var matrixmath = Numbas.matrixmath = {
-    /** Negate a matrix - negate each of its elements */
+    /** Negate a matrix - negate each of its elements 
+     * @param {matrix} m
+     * @returns {matrix}
+     */
     negate: function(m) {
         var matrix = [];
         for(var i=0;i<m.rows;i++) {
@@ -2021,7 +2027,7 @@ var matrixmath = Numbas.matrixmath = {
         return out;
     },
     /** Matrix transpose
-     * @param {matrix}
+     * @param {matrix} m
      * @returns {matrix}
      */
     transpose: function(m) {
@@ -2041,7 +2047,7 @@ var matrixmath = Numbas.matrixmath = {
     },
 
     /** Sum of every cell
-     * @param {matrix}
+     * @param {matrix} m
      * @returns {Number}
      */
     sum_cells: function(m) {
@@ -2055,8 +2061,8 @@ var matrixmath = Numbas.matrixmath = {
     },
 
     /** Apply given function to each element
-     * @param {matrix}
-     * @param {function}
+     * @param {matrix} m
+     * @param {Function} fn
      * @returns {matrix}
      */
     map: function(m,fn) {
@@ -2068,16 +2074,16 @@ var matrixmath = Numbas.matrixmath = {
         return out;
     },
     /** Round each element to given number of decimal places
-     * @param {matrix}
-     * @param {Number} - number of decimal places
+     * @param {matrix} m
+     * @param {Number} dp - number of decimal places
      * @returns {matrix}
      */
     precround: function(m,dp) {
         return matrixmath.map(m,function(n){return math.precround(n,dp);});
     },
     /** Round each element to given number of significant figures
-     * @param {matrix}
-     * @param {Number} - number of decimal places
+     * @param {matrix} m
+     * @param {Number} sf - number of decimal places
      * @returns {matrix}
      */
     siground: function(m,sf) {
@@ -2095,7 +2101,7 @@ var matrixmath = Numbas.matrixmath = {
 var setmath = Numbas.setmath = {
     /** Does the set contain the given element?
      * @param {set} set
-     * @param element
+     * @param {*} element
      * @returns {Boolean}
      */
     contains: function(set,element) {

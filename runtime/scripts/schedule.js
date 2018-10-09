@@ -51,11 +51,11 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         schedule.halt_error = error;
     },
     /** @typedef {Object} Numbas.schedule.task_object
-     * @property {function} task - The function to execute.
-     * @property {function} error - A callback, used if an error is raised.
+     * @property {Function} task - The function to execute.
+     * @property {Function} error - A callback, used if an error is raised.
      */
     /** Add a task to the queue
-     * @param {function|Numbas.schedule.task_object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
+     * @param {Function|Numbas.schedule.task_object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
      * @param {Object} that - what `this` should be when the function is called
      */
     add: function(fn,that)
@@ -163,7 +163,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 
     /** Once the given event(s) have resolved, run the given callback function. Returns a Promise, so can be used without a callback.
      * @param {String|Array.<String>} events - the name of an event, or a list of event names
-     * @param {function} [fn] - a callback function to run
+     * @param {Function} [fn] - a callback function to run
      * @returns {Promise} Resolves when all of the events have resolved, or rejects if the signal box is in an error state.
      */
     on: function(events, fn) {

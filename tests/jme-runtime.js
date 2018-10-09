@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/i18next/i18next.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
+// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -78,7 +78,7 @@ var scriptreqs = {};
  * @property {Boolean} executed - Has the script been run?
  * @property {Array.<String>} backdeps - Scripts which depend on this one (need this one to run first)
  * @property {Array.<String>} fdeps - Scripts which this one depends on (it must run after them)
- * @property {function} callback - The function to run when all this script's dependencies have run (this is the script itself)
+ * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
 function RequireScript(file)
 {
@@ -113,7 +113,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
  * Each script should be wrapped in this function
  * @param {String} file - Name of the script
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
- * @param {function} callback - A function wrapping up this file's code
+ * @param {Function} callback - A function wrapping up this file's code
  */
 Numbas.queueScript = function(file, deps, callback)
 {
@@ -141,10 +141,9 @@ Numbas.tryInit = function()
     }
     //put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
     var stack = [];
-    var ind = 0;
-    function get_ind() {
-        return 'margin-left: '+ind+'em';
-    }
+    /** Try to run the given requirement
+     * @param {RequireScript} req
+     */
     function tryRun(req) {
         if(req.loaded && !req.executed) {
             var go = true;
@@ -161,11 +160,9 @@ Numbas.tryInit = function()
                     req.callback({exports:window});
                 }
                 req.executed=true;
-                ind++;
                 for(var j=0;j<req.backdeps.length;j++) {
                     tryRun(scriptreqs[req.backdeps[j]]);
                 }
-                ind--;
             }
         }
     }
@@ -184,7 +181,7 @@ Numbas.tryInit = function()
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
- * @param {function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
+ * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
@@ -212,6 +209,7 @@ Numbas.checkAllScriptsLoaded = function() {
     }
 }
 })();
+
 Numbas.queueScript('localisation',['i18next','localisation-resources'],function() {
     i18next.init({
         lng: Numbas.locale.preferred_locale,
@@ -243,15 +241,16 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','math'],function() {
+Numbas.queueScript('util',['base','es5-shim','math'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)
      *
      * B's prototype supercedes A's.
-     * @param {function} a - the constructor for the parent class
-     * @param {function} b - a constructor to be called after `a`'s constructor is done.
-     * @returns {function} a constructor for the derived class
+     * @param {Function} a - the constructor for the parent class
+     * @param {Function} b - a constructor to be called after `a`'s constructor is done.
+     * @param {Boolean} extendMethods - if `true`, the methods of the new type are constructed so that the method from type A is applied, then the method from type B. Nothing is returned.
+     * @returns {Function} a constructor for the derived class
      */
     extend: function(a,b,extendMethods)
     {
@@ -650,7 +649,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String} thousands - the string used to separate powers of 1000
      * @param {String} decimal_mark - the decimal mark character
      * @param {Boolean} separate_decimal=false - should the `thousands` separator be used to separate negative powers of 1000 (that is, groups of 3 digits after the decimal point)?
-     * @returns {function}
+     * @returns {Function}
      */
     standardNumberFormatter: function(thousands, decimal_mark, separate_decimal) {
         return function(integer,decimal) {
@@ -848,6 +847,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Number} n
      * @param {String} prefix - symbol to use in front of currency if abs(n) >= 1
      * @param {String} suffix - symbol to use after currency if abs(n) <= 1
+     * @returns {String}
      */
     currency: function(n,prefix,suffix) {
         if(n<0)
@@ -932,7 +932,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * Strips out nested brackets
      * @example splitbrackets('a{{b}}c','{','}') => ['a','b','c']
-     * @param {String} t - string to split
+     * @param {String} str - string to split
      * @param {String} lb - left bracket string
      * @param {String} rb - right bracket string
      * @returns {Array.<String>} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
@@ -1009,8 +1009,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         ;
     },
     /** Create a comparison function which sorts objects by a particular property
-     * @param {Array.<String>|String} prop - name of the property (or list of names of properties) to sort by
-     * @returns {function}
+     * @param {Array.<String>|String} props - name of the property (or list of names of properties) to sort by
+     * @returns {Function}
      */
     sortBy: function(props) {
         if(typeof props=='string') {
@@ -1031,6 +1031,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Hash a string into a string of digits
      *
      * From {@link http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/}
+     * @param {String} str
+     * @returns {String}
      */
     hashCode: function(str){
         var hash = 0, i, c;
@@ -1108,6 +1110,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** All combinations of r items from given array, without replacement
      * @param {Array} list
      * @param {Number} r
+     * @returns {Array.<Array>}
      */
     combinations: function(list,r) {
         var indexes = [];
@@ -1138,6 +1141,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** All combinations of r items from given array, with replacement
      * @param {Array} list
      * @param {Number} r
+     * @returns {Array.<Array>}
      */
     combinations_with_replacement: function(list,r) {
         var indexes = [];
@@ -1168,6 +1172,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * Inspired by the algorithm in Python's itertools library
      * @param {Array} list - elements to choose and permute
      * @param {Number} r - number of elements to choose
+     * @returns {Array.<Array>}
      */
     permutations: function(list,r) {
         var n = list.length;
@@ -1531,6 +1536,2178 @@ if(!String.prototype.split)
         return cbSplit(this, separator, limit);
     };
 }
+});
+
+/*
+Copyright 2011-14 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Mathematical functions, providing stuff that the built-in `Math` object doesn't, as well as vector and matrix math operations.
+ *
+ * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
+ */
+Numbas.queueScript('math',['base'],function() {
+/** Mathematical functions, providing stuff that the built-in `Math` object doesn't
+ * @namespace Numbas.math */
+/** A complex number.
+ * @typedef complex
+ * @property {Number} re
+ * @property {Number} im
+ */
+/** @typedef range
+ * @desc A range of numbers, separated by a constant interval and between fixed lower and upper bounds.
+ * @type {Array.<Number>}
+ * @property {Number} 0 Minimum value
+ * @property {Number} 1 Maximum value
+ * @property {Number} 2 Step size
+ * @see Numbas.math.defineRange
+ */
+var math = Numbas.math = /** @lends Numbas.math */ {
+    /** Regex to match numbers in scientific notation */
+    re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
+    /** Construct a complex number from real and imaginary parts.
+     *
+     * Elsewhere in this documentation, `{Number}` will refer to either a JavaScript float or a {@link complex} object, interchangeably.
+     * @param {Number} re
+     * @param {Number} im
+     * @returns {complex}
+     */
+    complex: function(re,im)
+    {
+        if(!im)
+            return re;
+        else
+            return {re: re, im: im, complex: true,
+            toString: math.complexToString}
+    },
+    /** String version of a complex number
+     * @returns {String}
+     * @method
+     * @memberof! complex
+     */
+    complexToString: function()
+    {
+        return math.niceNumber(this);
+    },
+    /** Negate a number.
+     * @param {Number} n
+     * @returns {Number}
+     */
+    negate: function(n)
+    {
+        if(n.complex)
+            return math.complex(-n.re,-n.im);
+        else
+            return -n;
+    },
+    /** Complex conjugate
+     * @param {Number} n
+     * @returns {Number}
+     */
+    conjugate: function(n)
+    {
+        if(n.complex)
+            return math.complex(n.re,-n.im);
+        else
+            return n;
+    },
+    /** Add two numbers
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    add: function(a,b)
+    {
+        if(a.complex)
+        {
+            if(b.complex)
+                return math.complex(a.re+b.re, a.im + b.im);
+            else
+                return math.complex(a.re+b, a.im);
+        }
+        else
+        {
+            if(b.complex)
+                return math.complex(a + b.re, b.im);
+            else
+                return a+b;
+        }
+    },
+    /** Subtract one number from another
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    sub: function(a,b)
+    {
+        if(a.complex)
+        {
+            if(b.complex)
+                return math.complex(a.re-b.re, a.im - b.im);
+            else
+                return math.complex(a.re-b, a.im);
+        }
+        else
+        {
+            if(b.complex)
+                return math.complex(a - b.re, -b.im);
+            else
+                return a-b;
+        }
+    },
+    /** Multiply two numbers
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    mul: function(a,b)
+    {
+        if(a.complex)
+        {
+            if(b.complex)
+                return math.complex(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+            else
+                return math.complex(a.re*b, a.im*b);
+        }
+        else
+        {
+            if(b.complex)
+                return math.complex(a*b.re, a*b.im);
+            else
+                return a*b;
+        }
+    },
+    /** Divide one number by another
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    div: function(a,b)
+    {
+        if(a.complex)
+        {
+            if(b.complex)
+            {
+                var q = b.re*b.re + b.im*b.im;
+                return math.complex((a.re*b.re + a.im*b.im)/q, (a.im*b.re - a.re*b.im)/q);
+            }
+            else
+                return math.complex(a.re/b, a.im/b);
+        }
+        else
+        {
+            if(b.complex)
+            {
+                var q = b.re*b.re + b.im*b.im;
+                return math.complex(a*b.re/q, -a*b.im/q);
+            }
+            else
+                return a/b;
+        }
+    },
+    /** Exponentiate a number
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    pow: function(a,b)
+    {
+        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100)
+        {
+            if(b<0)
+                return math.div(1,math.pow(a,-b));
+            if(b==0)
+                return 1;
+            var coeffs = math.binomialCoefficients(b);
+            var re = 0;
+            var im = 0;
+            var sign = 1;
+            for(var i=0;i<b;i+=2) {
+                re += coeffs[i]*Math.pow(a.re,b-i)*Math.pow(a.im,i)*sign;
+                im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
+                sign = -sign;
+            }
+            if(b%2==0)
+                re += Math.pow(a.im,b)*sign;
+            return math.complex(re,im);
+        }
+        if(a.complex || b.complex || (a<0 && math.fract(b)!=0))
+        {
+            if(!a.complex)
+                a = {re: a, im: 0, complex: true};
+            if(!b.complex)
+                b = {re: b, im: 0, complex: true};
+            var ss = a.re*a.re + a.im*a.im;
+            var arg1 = math.arg(a);
+            var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
+            var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
+            return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
+        }
+        else
+        {
+            return Math.pow(a,b);
+        }
+    },
+    /** Calculate the Nth row of Pascal's triangle
+     * @param {Number} n
+     * @returns {Array.<Number>}
+     */
+    binomialCoefficients: function(n) {
+        var b = [1];
+        var f = 1;
+        for(var i=1;i<=n;i++) {
+            b.push( f*=(n+1-i)/i );
+        }
+        return b;
+    },
+    /** a mod b. Always returns a positive number
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    mod: function(a,b) {
+        if(b==Infinity) {
+            return a;
+        }
+        b = math.abs(b);
+        return ((a%b)+b)%b;
+    },
+    /** Calculate the `b`-th root of `a`
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    root: function(a,b)
+    {
+        return math.pow(a,div(1,b));
+    },
+    /** Square root
+     * @param {Number} n
+     * @returns {Number}
+     */
+    sqrt: function(n)
+    {
+        if(n.complex)
+        {
+            var r = math.abs(n);
+            return math.complex( Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
+        }
+        else if(n<0)
+            return math.complex(0,Math.sqrt(-n));
+        else
+            return Math.sqrt(n)
+    },
+    /** Natural logarithm (base `e`)
+     * @param {Number} n
+     * @returns {Number}
+     */
+    log: function(n)
+    {
+        if(n.complex)
+        {
+            var mag = math.abs(n);
+            var arg = math.arg(n);
+            return math.complex(Math.log(mag), arg);
+        }
+        else if(n<0)
+            return math.complex(Math.log(-n),Math.PI);
+        else
+            return Math.log(n);
+    },
+    /** Calculate `e^n`
+     * @param {Number} n
+     * @returns {Number}
+     */
+    exp: function(n)
+    {
+        if(n.complex)
+        {
+            return math.complex( Math.exp(n.re) * Math.cos(n.im), Math.exp(n.re) * Math.sin(n.im) );
+        }
+        else
+            return Math.exp(n);
+    },
+    /** Magnitude of a number - absolute value of a real; modulus of a complex number.
+     * @param {Number} n
+     * @returns {Number}
+     */
+    abs: function(n)
+    {
+        if(n.complex)
+        {
+            if(n.re==0)
+                return Math.abs(n.im);
+            else if(n.im==0)
+                return Math.abs(n.re);
+            else
+                return Math.sqrt(n.re*n.re + n.im*n.im)
+        }
+        else
+            return Math.abs(n);
+    },
+    /** Argument of a (complex) number
+     * @param {Number} n
+     * @returns {Number}
+     */
+    arg: function(n)
+    {
+        if(n.complex)
+            return Math.atan2(n.im,n.re);
+        else
+            return Math.atan2(0,n);
+    },
+    /** Real part of a number
+     * @param {Number} n
+     * @returns {Number}
+     */
+    re: function(n)
+    {
+        if(n.complex)
+            return n.re;
+        else
+            return n;
+    },
+    /** Imaginary part of a number
+     * @param {Number} n
+     * @returns {Number}
+     */
+    im: function(n)
+    {
+        if(n.complex)
+            return n.im;
+        else
+            return 0;
+    },
+    /** Is `n` positive? (Real, and greater than 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    positive: function(n) {
+        return !n.complex && math.gt(n,0);
+    },
+    /** Is `n` negative? (Real, and less than 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    negative: function(n) {
+        return math.lt(math.re(n),0);
+    },
+    /** Is `n` nonnegative? (Real, and greater than or equal to 0)
+     * @param {Number} n
+     * @returns {Boolean}
+     */
+    nonnegative: function(n) {
+        return !math.negative(n);
+    },
+    /** Is `a` less than `b`?
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    lt: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return a<b;
+    },
+    /** Is `a` greater than `b`?
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    gt: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return a>b;
+    },
+    /** Is `a` less than or equal to `b`?
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    leq: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return a<=b;
+    },
+    /** Is `a` greater than or equal to `b`?
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    geq: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return a>=b;
+    },
+    /** Is `a` equal to `b`?
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    eq: function(a,b) {
+        if(a.complex) {
+            if(b.complex) {
+                return math.eq(a.re,b.re) && math.eq(a.im,b.im);
+            } else {
+                return math.eq(a.re,b) && math.eq(a.im,0);
+            }
+        } else {
+            if(b.complex) {
+                return math.eq(a,b.re) && math.eq(b.im,0);
+            } else {
+                if(isNaN(a)) {
+                    return isNaN(b);
+                }
+                return a==b;
+            }
+        }
+    },
+    /** Greatest of two numbers - wraps `Math.max`
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    max: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return Math.max(a,b);
+    },
+    /** Greatest of a list of numbers
+     * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
+     * @param {Array} numbers
+     * @returns {Number}
+     */
+    listmax: function(numbers) {
+        if(numbers.length==0) {
+            return;
+        }
+        var best = numbers[0];
+        for(var i=1;i<numbers.length;i++) {
+            best = math.max(best,numbers[i]);
+        }
+        return best;
+    },
+    /** Least of two numbers - wraps `Math.min`
+     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    min: function(a,b)
+    {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.order complex numbers'));
+        return Math.min(a,b);
+    },
+    /** Least of a list of numbers
+     * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
+     * @param {Array} numbers
+     * @returns {Number}
+     */
+    listmin: function(numbers) {
+        if(numbers.length==0) {
+            return;
+        }
+        var best = numbers[0];
+        for(var i=1;i<numbers.length;i++) {
+            best = math.min(best,numbers[i]);
+        }
+        return best;
+    },
+    /** Are `a` and `b` unequal?
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     * @see Numbas.math.eq
+     */
+    neq: function(a,b)
+    {
+        return !math.eq(a,b);
+    },
+    /** If `n` can be written in the form `a*pi^n`, return the biggest possible `n`, otherwise return `0`.
+     * @param {Number} n
+     * @returns {Number}
+     */
+    piDegree: function(n)
+    {
+        n=Math.abs(n);
+        if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
+            return 0;
+        var degree,a;
+        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && Math.abs(a-math.round(a))>0.00000001; degree++) {}
+        return( a>=1 ? degree : 0 );
+    },
+    /** Add the given number of zero digits to a string representation of a number.
+     * @param {String} n - a string representation of a number
+     * @param {Number} digits - the number of digits to add
+     * @returns {String}
+     */
+    addDigits: function(n,digits) {
+        n = n+'';
+        var m = n.match(/^(-?\d+(?:\.\d+)?)(e[\-+]?\d+)$/);
+        if(m) {
+            return math.addDigits(m[1],digits)+m[2];
+        } else {
+            if(n.indexOf('.')==-1) {
+                n += '.';
+            }
+            for(var i=0;i<digits;i++) {
+                n += '0';
+            }
+            return n;
+        }
+    },
+    /** Settings for {@link Numbas.math.niceNumber}
+     * @typedef Numbas.math.niceNumber_settings
+     * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
+     * @property {Number} precision - number of decimal places or significant figures to show.
+     * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
+     */
+    /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
+     * @param {Number} n
+     * @param {Numbas.math.niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+     * @see Numbas.util.numberNotationStyles
+     * @returns {String}
+     */
+    niceNumber: function(n,options)
+    {
+        options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
+        if(n.complex)
+        {
+            var re = math.niceNumber(n.re,options);
+            var im = math.niceNumber(n.im,options);
+            if(math.precround(n.im,10)==0)
+                return re+'';
+            else if(math.precround(n.re,10)==0)
+            {
+                if(n.im==1)
+                    return 'i';
+                else if(n.im==-1)
+                    return '-i';
+                else
+                    return im+'*i';
+            }
+            else if(n.im<0)
+            {
+                if(n.im==-1)
+                    return re+' - i';
+                else
+                    return re+im+'*i';
+            }
+            else
+            {
+                if(n.im==1)
+                    return re+' + '+'i';
+                else
+                    return re+' + '+im+'*i';
+            }
+        }
+        else
+        {
+            if(n==Infinity) {
+                return 'infinity';
+            } else if(n==-Infinity) {
+                return '-infinity';
+            }
+            var piD = 0;
+            if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
+                n /= Math.pow(Math.PI,piD);
+            var out;
+            switch(options.precisionType) {
+            case 'sigfig':
+                var precision = options.precision;
+                out = math.siground(n,precision)+'';
+                var sigFigs = math.countSigFigs(out,true);
+                if(sigFigs<precision) {
+                    out = math.addDigits(out,precision-sigFigs);
+                }
+                break;
+            case 'dp':
+                var precision = options.precision;
+                out = math.precround(n,precision)+'';
+                var dp = math.countDP(out);
+                if(dp<precision) {
+                    out = math.addDigits(out,precision-dp);
+                }
+                break;
+            default:
+                var a = Math.abs(n);
+                if(a<1e-15) {
+                    out = '0';
+                } else if(Math.abs(n)<1e-8) {
+                    out = n+'';
+                } else {
+                    out = math.precround(n,10)+'';
+                }
+            }
+            out = math.unscientific(out);
+            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                var match_neg = /^(-)?(.*)/.exec(out);
+                var minus = match_neg[1] || '';
+                var bits = match_neg[2].split('.');
+                var integer = bits[0];
+                var decimal = bits[1];
+                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            }
+            switch(piD)
+            {
+            case 0:
+                return out;
+            case 1:
+                if(n==1)
+                    return 'pi';
+                else if(n==-1)
+                    return '-pi';
+                else
+                    return out+'*pi';
+            default:
+                if(n==1)
+                    return 'pi^'+piD;
+                else if(n==-1)
+                    return '-pi^'+piD;
+                else
+                    return out+'*pi'+piD;
+            }
+        }
+    },
+    /** Get a random number in range `[0..n-1]`
+     * @param {Number} n
+     * @returns {Number}
+     */
+    randomint: function(n) {
+        return Math.floor(n*(Math.random()%1));
+    },
+    /** Get a  random shuffling of the numbers `[0..n-1]`
+     * @param {Number} N
+     * @returns {Array.<Number>}
+     */
+    deal: function(N)
+    {
+        var J, K, Q = new Array(N);
+        for (J=0 ; J<N ; J++)
+            { K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J; }
+        return Q;
+    },
+    /** Randomly shuffle a list. Returns a new list - the original is unmodified.
+     * @param {Array} list
+     * @returns {Array}
+     */
+    shuffle: function(list) {
+        var l = list.length;
+        var permutation = math.deal(l);
+        var list2 = new Array(l);
+        for(var i=0;i<l;i++) {
+            list2[i]=(list[permutation[i]]);
+        }
+        return list2;
+    },
+    /** Calculate the inverse of a shuffling
+     * @param {Array.<Number>} l
+     * @returns {Array.<Number>} l
+     * @see Numbas.math.deal
+     */
+    inverse: function(l)
+    {
+        arr = new Array(l.length);
+        for(var i=0;i<l.length;i++)
+        {
+            arr[l[i]]=i;
+        }
+        return arr;
+    },
+    /* Just the numbers from 1 to `n` (inclusive) in an array!
+     * @param {Number} n
+     * @returns {Array.<Number>}
+     */
+    range: function(n)
+    {
+        var arr=new Array(n);
+        for(var i=0;i<n;i++)
+        {
+            arr[i]=i;
+        }
+        return arr;
+    },
+    /** Round `a` to `b` decimal places. Real and imaginary parts of complex numbers are rounded independently.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.precround.complex" if b is complex
+     */
+    precround: function(a,b) {
+        if(b.complex)
+            throw(new Numbas.Error('math.precround.complex'));
+        if(a.complex)
+            return math.complex(math.precround(a.re,b),math.precround(a.im,b));
+        else
+        {
+            var be = Math.pow(10,b);
+            var fracPart = a % 1;
+            var intPart = a - fracPart;
+            //test to allow a bit of leeway to account for floating point errors
+            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
+            var v = fracPart*be*10 % 1;
+            var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
+            // multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
+            fracPart *= be;
+            if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
+                fracPart += 1;
+            }
+            var rounded_fracPart = Math.round(fracPart);
+            // if the fractional part has rounded up to a whole number, just add sgn(fracPart) to the integer part
+            if(rounded_fracPart==be || rounded_fracPart==-be) {
+                return intPart+math.sign(fracPart);
+            }
+            // get the fractional part as a string of decimal digits
+            var fracPartString = Math.round(Math.abs(fracPart))+'';
+            while(fracPartString.length<b) {
+                fracPartString = '0'+fracPartString;
+            }
+            // construct the rounded number as a string, then convert it to a JS float
+            var out = parseFloat(intPart+'.'+fracPartString);
+            // make sure a negative number remains negative
+            if(intPart==0 && a<0) {
+                return -out;
+            } else {
+                return out;
+            }
+        }
+    },
+    /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
+     * For example, '1.23e-5' is returned as '0.0000123'
+     * @param {String} str
+     * @returns {String}
+     */
+    unscientific: function(str) {
+        var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
+        if(!m) {
+            return str;
+        }
+        var minus = m[1] || '';
+        var digits = m[2]+(m[3] || '');
+        var pow = parseInt(m[4]);
+        var l = digits.length;
+        var out;
+        if(pow>=l-1) {
+            out = digits;
+            for(var i=l-1;i<pow;i++) {
+                out += '0';
+            }
+        } else if(pow<0) {
+            out = digits;
+            for(var i=1;i<-pow;i++) {
+                out = '0'+out;
+            }
+            out = '0.'+out;
+        } else {
+            out = digits.slice(0,pow+1) + '.' + digits.slice(pow+1);
+        }
+        return minus + out;
+    },
+    /** Round `a` to `b` significant figures. Real and imaginary parts of complex numbers are rounded independently.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.precround.complex" if b is complex
+     */
+    siground: function(a,b) {
+        if(b.complex)
+            throw(new Numbas.Error('math.siground.complex'));
+        if(a.complex)
+            return math.complex(math.siground(a.re,b),math.siground(a.im,b));
+        else
+        {
+            var s = math.sign(a);
+            if(a==0) { return 0; }
+            if(a==Infinity || a==-Infinity) { return a; }
+            b = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+            //test to allow a bit of leeway to account for floating point errors
+            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
+            var v = a*b*10 % 1;
+            var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+            if(d==4 && 1-v<1e-9) {
+                return Math.round(a*b+1)/b;
+            }
+            else if(d==-5 && v>-1e-9 && v<0) {
+                return Math.round(a*b+1)/b;
+            }
+            return Math.round(a*b)/b;
+        }
+    },
+    /** Count the number of decimal places used in the string representation of a number.
+     * @param {Number|String} n
+     * @returns {Number}
+     */
+    countDP: function(n) {
+        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([\-+])?(\d+))?$/);
+        if(!m)
+            return 0;
+        else {
+            var dp = m[1] ? m[1].length : 0;
+            if(m[2] && m[2]=='-') {
+                dp += parseInt(m[3]);
+            }
+            return dp;
+        }
+    },
+    /** Calculate the significant figures precision of a number.
+     * @param {Number|String} n
+     * @param {Boolean} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
+     * @returns {Number}
+     */
+    countSigFigs: function(n,max) {
+        n += '';
+        var m;
+        if(max) {
+            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+        } else {
+            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+        }
+        if(!m)
+            return 0;
+        var sigFigs = m[1] || m[2] || m[3] || m[4] || m[5] || m[6];
+        return sigFigs.replace('.','').length;
+    },
+    /** Is n given to the desired precision?
+     * @param {Number|String} n
+     * @param {String} precisionType - either 'dp' or 'sigfig'
+     * @param {Number} precision - number of desired digits of precision
+     * @param {Boolean} strictPrecision - must trailing zeros be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
+     * @returns {Boolean}
+     */
+    toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
+        if(precisionType=='none') {
+            return true;
+        }
+        n += '';
+        var precisionOK = false;
+        var counters = {'dp': math.countDP, 'sigfig': math.countSigFigs};
+        var counter = counters[precisionType];
+        var digits = counter(n);
+        if(strictPrecision)
+            precisionOK = digits == precision;
+        else
+            precisionOK = digits <= precision;
+        if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
+            var trailingZeroes = n.match(/0*$/)[0].length;
+            if(digits + trailingZeroes >= precision) {
+                precisionOK = true;
+            }
+        }
+        return precisionOK;
+    },
+    /** Is a within +/- tolerance of b?
+     * @param {Number} a
+     * @param {Number} b
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
+    withinTolerance: function(a,b,tolerance) {
+        if(tolerance==0) {
+            return math.eq(a,b);
+        } else {
+            var upper = math.add(b,tolerance);
+            var lower = math.sub(b,tolerance);
+            return math.geq(a,lower) && math.leq(a,upper);
+        }
+    },
+    /** Factorial, or Gamma(n+1) if n is not a positive integer.
+     * @param {Number} n
+     * @returns {Number}
+     */
+    factorial: function(n)
+    {
+        if( Numbas.util.isInt(n) && n>=0 )
+        {
+            if(n<=1) {
+                return 1;
+            }else{
+                var j=1;
+                for(var i=2;i<=n;i++)
+                {
+                    j*=i;
+                }
+                return j;
+            }
+        }
+        else    //gamma function extends factorial to non-ints and negative numbers
+        {
+            return math.gamma(math.add(n,1));
+        }
+    },
+    /** Lanczos approximation to the gamma function
+     *
+     * http://en.wikipedia.org/wiki/Lanczos_approximation#Simple_implementation
+     * @param {Number} n
+     * @returns {Number}
+     */
+    gamma: function(n)
+    {
+        var g = 7;
+        var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+        var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI, im = math.complex(0,1);
+        if((n.complex && n.re<0.5) || (!n.complex && n<0.5))
+        {
+            return div(pi,mul(sin(mul(pi,n)),math.gamma(sub(1,n))));
+        }
+        else
+        {
+            n = sub(n,1);            //n -= 1
+            var x = p[0];
+            for(var i=1;i<g+2;i++)
+            {
+                x = add(x, div(p[i],add(n,i)));    // x += p[i]/(n+i)
+            }
+            var t = add(n,add(g,0.5));        // t = n+g+0.5
+            return mul(sqrt(2*pi),mul(pow(t,add(n,0.5)),mul(exp(neg(t)),x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
+        }
+    },
+    /** Base-10 logarithm
+     * @param {Number} n
+     * @returns {Number}
+     */
+    log10: function(n)
+    {
+        return mul(math.log(n),Math.LOG10E);
+    },
+    /** Arbitrary base logarithm
+     * @param {Number} n
+     * @param {Number} b
+     * @returns {Number} log(n)/log(b)
+     */
+    log_base: function(n,b)
+    {
+        return div(math.log(n),math.log(b));
+    },
+    /** Convert from degrees to radians
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.degrees
+     */
+    radians: function(x) {
+        return mul(x,Math.PI/180);
+    },
+    /** Convert from radians to degrees
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.radians
+     */
+    degrees: function(x) {
+        return mul(x,180/Math.PI);
+    },
+    /** Cosine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    cos: function(x) {
+        if(x.complex)
+        {
+            return math.complex(Math.cos(x.re)*math.cosh(x.im), -Math.sin(x.re)*math.sinh(x.im));
+        }
+        else
+            return Math.cos(x);
+    },
+    /** Sine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    sin: function(x) {
+        if(x.complex)
+        {
+            return math.complex(Math.sin(x.re)*math.cosh(x.im), Math.cos(x.re)*math.sinh(x.im));
+        }
+        else
+            return Math.sin(x);
+    },
+    /** Tangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    tan: function(x) {
+        if(x.complex)
+            return div(math.sin(x),math.cos(x));
+        else
+            return Math.tan(x);
+    },
+    /** Cosecant
+     * @param {Number} x
+     * @returns {Number}
+     */
+    cosec: function(x) {
+        return div(1,math.sin(x));
+    },
+    /** Secant
+     * @param {Number} x
+     * @returns {Number}
+     */
+    sec: function(x) {
+        return div(1,math.cos(x));
+    },
+    /** Cotangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    cot: function(x) {
+        return div(1,math.tan(x));
+    },
+    /** Inverse sine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arcsin: function(x) {
+        if(x.complex || math.abs(x)>1)
+        {
+            var i = math.complex(0,1), ni = math.complex(0,-1);
+            var ex = add(mul(x,i),math.sqrt(sub(1,mul(x,x)))); //ix+sqrt(1-x^2)
+            return mul(ni,math.log(ex));
+        }
+        else
+            return Math.asin(x);
+    },
+    /** Inverse cosine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arccos: function(x) {
+        if(x.complex || math.abs(x)>1)
+        {
+            var i = math.complex(0,1), ni = math.complex(0,-1);
+            var ex = add(x, math.sqrt( sub(mul(x,x),1) ) );    //x+sqrt(x^2-1)
+            var result = mul(ni,math.log(ex));
+            if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
+                result = math.negate(result);
+            return result;
+        }
+        else
+            return Math.acos(x);
+    },
+    /** Inverse tangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arctan: function(x) {
+        if(x.complex)
+        {
+            var i = math.complex(0,1);
+            var ex = div(add(i,x),sub(i,x));
+            return mul(math.complex(0,0.5), math.log(ex));
+        }
+        else
+            return Math.atan(x);
+    },
+    /** Hyperbolic sine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    sinh: function(x) {
+        if(x.complex)
+            return div(sub(math.exp(x), math.exp(math.negate(x))),2);
+        else
+            return (Math.exp(x)-Math.exp(-x))/2;
+    },
+    /** Hyperbolic cosine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    cosh: function(x) {
+        if(x.complex)
+            return div(add(math.exp(x), math.exp(math.negate(x))),2);
+        else
+            return (Math.exp(x)+Math.exp(-x))/2
+    },
+    /** Hyperbolic tangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    tanh: function(x) {
+        return div(math.sinh(x),math.cosh(x));
+    },
+    /** Hyperbolic cosecant
+     * @param {Number} x
+     * @returns {Number}
+     */
+    cosech: function(x) {
+        return div(1,math.sinh(x));
+    },
+    /** Hyperbolic secant
+     * @param {Number} x
+     * @returns {Number}
+     */
+    sech: function(x) {
+        return div(1,math.cosh(x));
+    },
+    /** Hyperbolic tangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    coth: function(x) {
+        return div(1,math.tanh(x));
+    },
+    /** Inverse hyperbolic sine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arcsinh: function(x) {
+        if(x.complex)
+            return math.log(add(x, math.sqrt(add(mul(x,x),1))));
+        else
+            return Math.log(x + Math.sqrt(x*x+1));
+    },
+    /** Inverse hyperbolic cosine
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arccosh: function (x) {
+        if(x.complex)
+            return math.log(add(x, math.sqrt(sub(mul(x,x),1))));
+        else
+            return Math.log(x + Math.sqrt(x*x-1));
+    },
+    /** Inverse hyperbolic tangent
+     * @param {Number} x
+     * @returns {Number}
+     */
+    arctanh: function (x) {
+        if(x.complex)
+            return div(math.log(div(add(1,x),sub(1,x))),2);
+        else
+            return 0.5 * Math.log((1+x)/(1-x));
+    },
+    /** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.round
+     * @see Numbas.math.floor
+     */
+    ceil: function(x) {
+        if(x.complex)
+            return math.complex(math.ceil(x.re),math.ceil(x.im));
+        else
+            return Math.ceil(x);
+    },
+    /** Round down to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.ceil
+     * @see Numbas.math.round
+     */
+    floor: function(x) {
+        if(x.complex)
+            return math.complex(math.floor(x.re),math.floor(x.im));
+        else
+            return Math.floor(x);
+    },
+    /** Round to the nearest integer; fractional part >= 0.5 rounds up. For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.ceil
+     * @see Numbas.math.floor
+     */
+    round: function(x) {
+        if(x.complex)
+            return math.complex(Math.round(x.re),Math.round(x.im));
+        else
+            return Math.round(x);
+    },
+    /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.fract
+     */
+    trunc: function(x) {
+        if(x.complex)
+            return math.complex(math.trunc(x.re),math.trunc(x.im));
+        if(x>0) {
+            return Math.floor(x);
+        }else{
+            return Math.ceil(x);
+        }
+    },
+    /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @returns {Number}
+     * @see Numbas.math.trunc
+     */
+    fract: function(x) {
+        if(x.complex)
+            return math.complex(math.fract(x.re),math.fract(x.im));
+        return x-math.trunc(x);
+    },
+    /** Sign of a number - +1, 0, or -1. For complex numbers, gives the sign of the real and imaginary parts separately.
+     * @param {Number} x
+     * @returns {Number}
+     */
+    sign: function(x) {
+        if(x.complex)
+            return math.complex(math.sign(x.re),math.sign(x.im));
+        if(x==0) {
+            return 0;
+        }else if (x>0) {
+            return 1;
+        }else {
+            return -1;
+        }
+    },
+    /** Get a random real number between `min` and `max` (inclusive)
+     * @param {Number} min
+     * @param {Number} max
+     * @returns {Number}
+     * @see Numbas.math.random
+     * @see Numbas.math.choose
+     */
+    randomrange: function(min,max)
+    {
+        return Math.random()*(max-min)+min;
+    },
+    /** Get a random number in the specified range.
+     *
+     * Returns a random choice from `min` to `max` at `step`-sized intervals
+     *
+     * If all the values in the range are appended to the list, eg `[min,max,step,v1,v2,v3,...]`, just pick randomly from the values.
+     *
+     * @param {range} range - `[min,max,step]`
+     * @returns {Number}
+     * @see Numbas.math.randomrange
+     */
+    random: function(range)
+    {
+        if(range[2]==0) {
+            return math.randomrange(range[0],range[1]);
+        } else {
+            var num_steps = math.rangeSize(range);
+            var n = Math.floor(math.randomrange(0,num_steps));
+            return range[0]+n*range[2];
+        }
+    },
+    /** Remove all the values in the list `exclude` from the list `range`
+     * @param {Array.<Number>} range
+     * @param {Array.<Number>} exclude
+     * @returns {Array.<Number>}
+     */
+    except: function(range,exclude) {
+        range = range.filter(function(r) {
+            for(var i=0;i<exclude.length;i++) {
+                if(math.eq(r,exclude[i]))
+                    return false;
+            }
+            return true;
+        });
+        return range;
+    },
+    /** Choose one item from an array, at random
+     * @param {Array} selection
+     * @returns {*}
+     * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
+     * @see Numbas.math.randomrange
+     */
+    choose: function(selection)
+    {
+        if(selection.length==0)
+            throw(new Numbas.Error('math.choose.empty selection'));
+        var n = Math.floor(math.randomrange(0,selection.length));
+        return selection[n];
+    },
+    /* Product of the numbers in the range `[a..b]`, i.e. $frac{a!}{b!}$.
+     *
+     * from http://dreaminginjavascript.wordpress.com/2008/11/08/combinations-and-permutations-in-javascript/
+     *
+     * (public domain)
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     */
+    productRange: function(a,b) {
+        if(a>b)
+            return 1;
+        var product=a,i=a;
+        while (i++<b) {
+            product*=i;
+        }
+        return product;
+    },
+    /** `nCk` - number of ways of picking `k` unordered elements from `n`.
+     * @param {Number} n
+     * @param {Number} k
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
+     */
+    combinations: function(n,k) {
+        if(n.complex || k.complex) {
+            throw(new Numbas.Error('math.combinations.complex'));
+        }
+        if(n<0) {
+            throw(new Numbas.Error('math.combinations.n less than zero'));
+        }
+        if(k<0) {
+            throw(new Numbas.Error('math.combinations.k less than zero'));
+        }
+        if(n<k) {
+            throw(new Numbas.Error('math.combinations.n less than k'));
+        }
+        k=Math.max(k,n-k);
+        return math.productRange(k+1,n)/math.productRange(1,n-k);
+    },
+    /** `nPk` - number of ways of picking `k` ordered elements from `n`.
+     * @param {Number} n
+     * @param {Number} k
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
+     */
+    permutations: function(n,k) {
+        if(n.complex || k.complex) {
+            throw(new Numbas.Error('math.permutations.complex'));
+        }
+        if(n<0) {
+            throw(new Numbas.Error('math.permutations.n less than zero'));
+        }
+        if(k<0) {
+            throw(new Numbas.Error('math.permutations.k less than zero'));
+        }
+        if(n<k) {
+            throw(new Numbas.Error('math.permutations.n less than k'));
+        }
+        return math.productRange(n-k+1,n);
+    },
+    /** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Boolean}
+     */
+    divides: function(a,b) {
+        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b))
+            return false;
+        return (b % a) == 0;
+    },
+    /** Greatest common factor (GCF), or greatest common divisor (GCD), of `a` and `b`.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
+     */
+    gcd: function(a,b) {
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.gcf.complex'));
+        if(Math.floor(a)!=a || Math.floor(b)!=b)
+            return 1;
+        a = Math.floor(Math.abs(a));
+        b = Math.floor(Math.abs(b));
+        var c=0;
+        if(a<b) { c=a; a=b; b=c; }
+        if(b==0){return 1;}
+        while(a % b != 0) {
+            c=b;
+            b=a % b;
+            a=c;
+        }
+        return b;
+    },
+    /** Are `a` and `b` coprime? If either of `a` or `b` is not an integer, return `false`.
+     * Equivalent to `gcd(a,b) = 1`.
+     * @param {Number} a
+     * @param {Number} b
+     * @see Numbas.math.gcd
+     * @returns {Boolean}
+     */
+    coprime: function(a,b) {
+        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b)) {
+            return true;
+        }
+        return math.gcd(a,b) == 1;
+    },
+    /** Lowest common multiple (LCM) of `a` and `b`.
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {Number}
+     * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
+     */
+    lcm: function(a,b) {
+        if(arguments.length==0) {
+            return 1;
+        } else if(arguments.length==1) {
+            return a;
+        }
+        if(a.complex || b.complex)
+            throw(new Numbas.Error('math.lcm.complex'));
+        if(arguments.length>2) {
+            a = Math.floor(Math.abs(a));
+            for(var i=1;i<arguments.length;i++) {
+                if(arguments[i].complex) {
+                    throw(new Numbas.Error('math.lcm.complex'));
+                }
+                b = Math.floor(Math.abs(arguments[i]));
+                a = a*b/math.gcf(a,b);
+            }
+            return a;
+        }
+        a = Math.floor(Math.abs(a));
+        b = Math.floor(Math.abs(b));
+        var c = math.gcf(a,b);
+        return a*b/c;
+    },
+    /** Write the range of integers `[a..b]` as an array of the form `[min,max,step]`, for use with {@link Numbas.math.random}. If either number is complex, only the real part is used.
+     *
+     * @param {Number} a
+     * @param {Number} b
+     * @returns {range}
+     * @see Numbas.math.random
+     */
+    defineRange: function(a,b)
+    {
+        if(a.complex)
+            a=a.re;
+        if(b.complex)
+            b=b.re;
+        return [a,b,1];
+    },
+    /** Change the step size of a range created with {@link Numbas.math.defineRange}
+     * @param {range} range
+     * @param {Number} step
+     * @returns {range}
+     */
+    rangeSteps: function(range,step)
+    {
+        if(step.complex)
+            step = step.re;
+        return [range[0],range[1],step];
+    },
+    /** Convert a range to a list - enumerate all the elements of the range
+     * @param {range} range
+     * @returns {Number[]}
+     */
+    rangeToList: function(range) {
+        var start = range[0];
+        var end = range[1];
+        var step_size = range[2];
+        var out = [];
+        var n = 0;
+        var t = start;
+        if(step_size==0) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if((end-start)*step_size < 0) {
+            return [];
+        }
+        if(start==end) {
+            return [start];
+        }
+        while(start<end ? t<=end : t>=end)
+        {
+            out.push(t)
+            n += 1;
+            t = start + n*step_size;
+        }
+        return out;
+    },
+    /** Calculate the number of elements in a range
+     * @param {range} range
+     * @returns {Number}
+     */
+    rangeSize: function(range) {
+        var diff = range[1]-range[0];
+        var num_steps = Math.floor(diff/range[2])+1;
+        num_steps += (range[0]+num_steps*range[2] == range[1] ? 1 : 0);
+        return num_steps;
+    },
+    /** Get a rational approximation to a real number by the continued fractions method.
+     *
+     * If `accuracy` is given, the returned answer will be within `Math.exp(-accuracy)` of the original number
+     *
+     * @param {Number} n
+     * @param {Number} [accuracy]
+     * @returns {Array.<Number>} - [numerator,denominator]
+     */
+    rationalApproximation: function(n,accuracy)
+    {
+        if(accuracy===undefined) {
+            accuracy = 15;
+        }
+        if(accuracy>30) {
+            accuracy = 30;
+        }
+        accuracy = Math.exp(-accuracy);
+        var on = n;
+        var e = Math.floor(n);
+        if(e==n)
+            return [n,1];
+        var l = 0;
+        var frac = [];
+        while(l<100 && Math.abs(on-e)>accuracy)
+        {
+            l+=1;
+            var i = Math.floor(n);
+            frac.push(i);
+            n = 1/(n-i);
+            var e = Infinity;
+            for(var j=l-1;j>=0;j--)
+            {
+                e = frac[j]+1/e;
+            }
+        }
+        if(l==0) {
+            return [e,1];
+        }
+        var f = [1,0];
+        for(j=l-1;j>=0;j--)
+        {
+            f = [frac[j]*f[0]+f[1],f[0]];
+        }
+        return f;
+    },
+    /** The first 1000 primes */
+    primes: [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571,3581,3583,3593,3607,3613,3617,3623,3631,3637,3643,3659,3671,3673,3677,3691,3697,3701,3709,3719,3727,3733,3739,3761,3767,3769,3779,3793,3797,3803,3821,3823,3833,3847,3851,3853,3863,3877,3881,3889,3907,3911,3917,3919,3923,3929,3931,3943,3947,3967,3989,4001,4003,4007,4013,4019,4021,4027,4049,4051,4057,4073,4079,4091,4093,4099,4111,4127,4129,4133,4139,4153,4157,4159,4177,4201,4211,4217,4219,4229,4231,4241,4243,4253,4259,4261,4271,4273,4283,4289,4297,4327,4337,4339,4349,4357,4363,4373,4391,4397,4409,4421,4423,4441,4447,4451,4457,4463,4481,4483,4493,4507,4513,4517,4519,4523,4547,4549,4561,4567,4583,4591,4597,4603,4621,4637,4639,4643,4649,4651,4657,4663,4673,4679,4691,4703,4721,4723,4729,4733,4751,4759,4783,4787,4789,4793,4799,4801,4813,4817,4831,4861,4871,4877,4889,4903,4909,4919,4931,4933,4937,4943,4951,4957,4967,4969,4973,4987,4993,4999,5003,5009,5011,5021,5023,5039,5051,5059,5077,5081,5087,5099,5101,5107,5113,5119,5147,5153,5167,5171,5179,5189,5197,5209,5227,5231,5233,5237,5261,5273,5279,5281,5297,5303,5309,5323,5333,5347,5351,5381,5387,5393,5399,5407,5413,5417,5419,5431,5437,5441,5443,5449,5471,5477,5479,5483,5501,5503,5507,5519,5521,5527,5531,5557,5563,5569,5573,5581,5591,5623,5639,5641,5647,5651,5653,5657,5659,5669,5683,5689,5693,5701,5711,5717,5737,5741,5743,5749,5779,5783,5791,5801,5807,5813,5821,5827,5839,5843,5849,5851,5857,5861,5867,5869,5879,5881,5897,5903,5923,5927,5939,5953,5981,5987,6007,6011,6029,6037,6043,6047,6053,6067,6073,6079,6089,6091,6101,6113,6121,6131,6133,6143,6151,6163,6173,6197,6199,6203,6211,6217,6221,6229,6247,6257,6263,6269,6271,6277,6287,6299,6301,6311,6317,6323,6329,6337,6343,6353,6359,6361,6367,6373,6379,6389,6397,6421,6427,6449,6451,6469,6473,6481,6491,6521,6529,6547,6551,6553,6563,6569,6571,6577,6581,6599,6607,6619,6637,6653,6659,6661,6673,6679,6689,6691,6701,6703,6709,6719,6733,6737,6761,6763,6779,6781,6791,6793,6803,6823,6827,6829,6833,6841,6857,6863,6869,6871,6883,6899,6907,6911,6917,6947,6949,6959,6961,6967,6971,6977,6983,6991,6997,7001,7013,7019,7027,7039,7043,7057,7069,7079,7103,7109,7121,7127,7129,7151,7159,7177,7187,7193,72077211,7213,7219,7229,7237,7243,7247,7253,7283,7297,7307,7309,7321,7331,7333,7349,7351,7369,7393,7411,7417,7433,7451,7457,7459,7477,7481,7487,7489,7499,7507,7517,7523,7529,7537,7541,7547,7549,7559,7561,7573,7577,7583,7589,7591,7603,7607,7621,7639,7643,7649,7669,7673,7681,7687,7691,7699,7703,7717,7723,7727,7741,7753,7757,7759,7789,7793,7817,7823,7829,7841,7853,7867,7873,7877,7879,7883,7901,7907,7919],
+    /** Factorise n. When n=2^(a1)*3^(a2)*5^(a3)*..., this returns the powers [a1,a2,a3,...]
+     *
+     * @param {Number} n
+     * @returns {Array.<Number>} - exponents of the prime factors of n
+     */
+    factorise: function(n) {
+        if(n<=0) {
+            return [];
+        }
+        var factors = [];
+        for(var i=0;i<math.primes.length;i++) {
+            var acc = 0;
+            var p = math.primes[i];
+            while(n%p==0) {
+                acc += 1;
+                n /= p;
+            }
+            factors.push(acc);
+            if(n==1) {
+                break;
+            }
+        }
+        return factors;
+    },
+    /** Sum the elements in the given list
+     *
+     * @param {Array.<Number>} list
+     * @returns {Number}
+     */
+    sum: function(list) {
+        var total = 0;
+        var l = list.length;
+        if(l==0) {
+            return 0;
+        }
+        for(var i=0;i<l;i++) {
+            total = math.add(total,list[i]);
+        }
+        return total;
+    }
+};
+math.gcf = math.gcd;
+var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
+/** A list of a vector's components.
+ * @typedef vector
+ *  @type {Array.<Number>}
+ */
+/** Vector operations.
+ *
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of vectors don't line up exactly
+ * @namespace Numbas.vectormath
+ */
+var vectormath = Numbas.vectormath = {
+    /** Negate a vector - negate each of its components
+     * @param {vector} v
+     * @returns {vector}
+     */
+    negate: function(v) {
+        return v.map(function(x) { return negate(x); });
+    },
+    /** Add two vectors
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {vector}
+     */
+    add: function(a,b) {
+        if(b.length>a.length)
+        {
+            var c = b;
+            b = a;
+            a = c;
+        }
+        return a.map(function(x,i){ return add(x,b[i]||0) });
+    },
+    /** Subtract one vector from another
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {vector}
+     */
+    sub: function(a,b) {
+        if(b.length>a.length)
+        {
+            return b.map(function(x,i){ return sub(a[i]||0,x) });
+        }
+        else
+        {
+            return a.map(function(x,i){ return sub(x,b[i]||0) });
+        }
+    },
+    /** Multiply by a scalar
+     * @param {Number} k
+     * @param {vector} v
+     * @returns {vector}
+     */
+    mul: function(k,v) {
+        return v.map(function(x){ return mul(k,x) });
+    },
+    /** Divide by a scalar
+     * @param {vector} v
+     * @param {Number} k
+     * @returns {vector}
+     */
+    div: function(v,k) {
+        return v.map(function(x){ return div(x,k); });
+    },
+    /** Vector dot product - each argument can be a vector, or a matrix with one row or one column, which is converted to a vector.
+     * @param {vector|matrix} a
+     * @param {vector|matrix} b
+     * @returns {Number}
+     * @throws {Numbas.Error} "vectormaths.dot.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+     */
+    dot: function(a,b) {
+        //check if A is a matrix object. If it's the right shape, we can use it anyway
+        if('rows' in a)
+        {
+            if(a.rows==1)
+                a = a[0];
+            else if(a.columns==1)
+                a = a.map(function(x){return x[0]});
+            else
+                throw(new Numbas.Error('vectormath.dot.matrix too big'));
+        }
+        //Same check for B
+        if('rows' in b)
+        {
+            if(b.rows==1)
+                b = b[0];
+            else if(b.columns==1)
+                b = b.map(function(x){return x[0]});
+            else
+                throw(new Numbas.Error('vectormath.dot.matrix too big'));
+        }
+        if(b.length>a.length)
+        {
+            var c = b;
+            b = a;
+            a = c;
+        }
+        return a.reduce(function(s,x,i){ return add(s,mul(x,b[i]||0)) },0);
+    },
+    /** Vector cross product - each argument can be a vector, or a matrix with one row, which is converted to a vector.
+     *
+     * @param {vector|matrix} a
+     * @param {vector|matrix} b
+     * @returns {vector}
+     *
+     * @throws {Numbas.Error} "vectormaths.cross.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
+     * @throws {Numbas.Error} "vectormath.cross.not 3d" if either of the vectors is not 3D.
+     */
+    cross: function(a,b) {
+        //check if A is a matrix object. If it's the right shape, we can use it anyway
+        if('rows' in a)
+        {
+            if(a.rows==1)
+                a = a[0];
+            else if(a.columns==1)
+                a = a.map(function(x){return x[0]});
+            else
+                throw(new Numbas.Error('vectormath.cross.matrix too big'));
+        }
+        //Same check for B
+        if('rows' in b)
+        {
+            if(b.rows==1)
+                b = b[0];
+            else if(b.columns==1)
+                b = b.map(function(x){return x[0]});
+            else
+                throw(new Numbas.Error('vectormath.cross.matrix too big'));
+        }
+        if(a.length!=3 || b.length!=3)
+            throw(new Numbas.Error('vectormath.cross.not 3d'));
+        return [
+                sub( mul(a[1],b[2]), mul(a[2],b[1]) ),
+                sub( mul(a[2],b[0]), mul(a[0],b[2]) ),
+                sub( mul(a[0],b[1]), mul(a[1],b[0]) )
+                ];
+    },
+    /** Length of a vector, squared
+     * @param {vector} a
+     * @returns {Number}
+     */
+    abs_squared: function(a) {
+        return a.reduce(function(s,x){ return s + mul(x,x); },0);
+    },
+    /** Length of a vector
+     * @param {vector} a
+     * @returns {Number}
+     */
+    abs: function(a) {
+        return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
+    },
+    /** Angle between vectors a and b, in radians, or 0 if either vector has length 0.
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {Number}
+     */
+    angle: function(a,b) {
+        var dot = vectormath.dot(a,b);
+        var da = vectormath.abs_squared(a);
+        var db = vectormath.abs_squared(b);
+        if(da*db==0) {
+            return 0;
+        }
+        var d = Math.sqrt(da*db);
+        return math.arccos(dot/d);
+    },
+    /** Are two vectors equal? True if each pair of corresponding components is equal.
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {Boolean}
+     */
+    eq: function(a,b) {
+        if(b.length>a.length)
+        {
+            var c = b;
+            b = a;
+            a = c;
+        }
+        return a.reduce(function(s,x,i){return s && eq(x,b[i]||0)},true);
+    },
+    /** Are two vectors unequal?
+     * @param {vector} a
+     * @param {vector} b
+     * @returns {Boolean}
+     * @see Numbas.vectormath.eq
+     */
+    neq: function(a,b) {
+        return !vectormath.eq(a,b);
+    },
+    /** Multiply a vector on the left by a matrix
+     * @param {matrix} m
+     * @param {vector} v
+     * @returns {vector}
+     */
+    matrixmul: function(m,v) {
+        return m.map(function(row){
+            return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
+        });
+    },
+    /** Multiply a vector on the right by a matrix.
+     * The vector is considered as a column vector.
+     * @param {vector} v
+     * @param {matrix} m
+     * @returns {vector}
+     */
+    vectormatrixmul: function(v,m) {
+        var out = [];
+        for(var i=0;i<m.columns;i++) {
+            out.push(v.reduce(function(s,x,j){ var c = j<m.rows ? (m[j][i]||0) : 0; return add(s,mul(x,c)); },0));
+        }
+        return out;
+    },
+    /** Apply given function to each element
+     * @param {vector} v
+     * @param {Function} fn
+     * @returns {vector}
+     */
+    map: function(v,fn) {
+        return v.map(fn);
+    },
+    /** Round each element to given number of decimal places
+     * @param {vector} v
+     * @param {Number} dp - number of decimal places
+     * @returns {vector}
+     */
+    precround: function(v,dp) {
+        return vectormath.map(v,function(n){return math.precround(n,dp);});
+    },
+    /** Round each element to given number of significant figures
+     * @param {vector} v
+     * @param {Number} sf - number of decimal places
+     * @returns {vector}
+     */
+    siground: function(v,sf) {
+        return vectormath.map(v,function(n){return math.siground(n,sf);});
+    },
+    /** Transpose of a vector
+     * @param {vector} v
+     * @returns {matrix}
+     */
+    transpose: function(v) {
+        var matrix = [v.slice()];
+        matrix.rows = 1;
+        matrix.columns = v.length;
+        return matrix;
+    },
+    /** Convert a vector to a 1-column matrix
+     * @param {vector} v
+     * @returns {matrix}
+     */
+    toMatrix: function(v) {
+        var m = v.map(function(n){return [n]});
+        m.rows = m.length;
+        m.columns = 1;
+        return m;
+    }
+}
+/** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
+ * @typedef matrix
+ * @type {Array.<Array.<Number>>}
+ * @property {Number} rows - The number of rows in the matrix
+ * @property {Number} columns - The number of columns in the matrix
+ */
+/** Matrix operations.
+ *
+ * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of matrices don't line up exactly
+ * @namespace Numbas.matrixmath
+ */
+var matrixmath = Numbas.matrixmath = {
+    /** Negate a matrix - negate each of its elements 
+     * @param {matrix} m
+     * @returns {matrix}
+     */
+    negate: function(m) {
+        var matrix = [];
+        for(var i=0;i<m.rows;i++) {
+            matrix.push(m[i].map(function(x){ return negate(x) }));
+        }
+        matrix.rows = m.rows;
+        matrix.columns = m.columns;
+        return matrix;
+    },
+    /** Add two matrices.
+     *
+     * @param {matrix} a
+     * @param {matrix} b
+     * @returns {matrix}
+     */
+    add: function(a,b) {
+        var rows = Math.max(a.rows,b.rows);
+        var columns = Math.max(a.columns,b.columns);
+        var matrix = [];
+        for(var i=0;i<rows;i++)
+        {
+            var row = [];
+            matrix.push(row);
+            for(var j=0;j<columns;j++)
+            {
+                row[j] = add(a[i][j]||0,b[i][j]||0);
+            }
+        }
+        matrix.rows = rows;
+        matrix.columns = columns;
+        return matrix;
+    },
+    /** Subtract one matrix from another
+     *
+     * @param {matrix} a
+     * @param {matrix} b
+     * @returns {matrix}
+     */
+    sub: function(a,b) {
+        var rows = Math.max(a.rows,b.rows);
+        var columns = Math.max(a.columns,b.columns);
+        var matrix = [];
+        for(var i=0;i<rows;i++)
+        {
+            var row = [];
+            matrix.push(row);
+            for(var j=0;j<columns;j++)
+            {
+                row[j] = sub(a[i][j]||0,b[i][j]||0);
+            }
+        }
+        matrix.rows = rows;
+        matrix.columns = columns;
+        return matrix;
+    },
+    /** Matrix determinant. Only works up to 3x3 matrices.
+     * @param {matrix} m
+     * @returns {Number}
+     * @throws {Numbas.Error} "matrixmath.abs.too big" if the matrix has more than 3 rows.
+     */
+    abs: function(m) {
+        if(m.rows!=m.columns)
+            throw(new Numbas.Error('matrixmath.abs.non-square'));
+        //abstraction failure!
+        switch(m.rows)
+        {
+        case 1:
+            return m[0][0];
+        case 2:
+            return sub( mul(m[0][0],m[1][1]), mul(m[0][1],m[1][0]) );
+        case 3:
+            return add( sub(
+                            mul(m[0][0],sub(mul(m[1][1],m[2][2]),mul(m[1][2],m[2][1]))),
+                            mul(m[0][1],sub(mul(m[1][0],m[2][2]),mul(m[1][2],m[2][0])))
+                        ),
+                        mul(m[0][2],sub(mul(m[1][0],m[2][1]),mul(m[1][1],m[2][0])))
+                    );
+        default:
+            throw(new Numbas.Error('matrixmath.abs.too big'));
+        }
+    },
+    /** Multiply a matrix by a scalar
+     * @param {Number} k
+     * @param {matrix} m
+     * @returns {matrix}
+     */
+    scalarmul: function(k,m) {
+        var out = m.map(function(row){ return row.map(function(x){ return mul(k,x); }); });
+        out.rows = m.rows;
+        out.columns = m.columns;
+        return out;
+    },
+    /** Divide a matrix by a scalar
+     * @param {matrix} m
+     * @param {Number} k
+     * @returns {matrix}
+     */
+    scalardiv: function(m,k) {
+        var out = m.map(function(row){ return row.map(function(x){ return div(x,k); }); });
+        out.rows = m.rows;
+        out.columns = m.columns;
+        return out;
+    },
+    /** Multiply two matrices
+     * @param {matrix} a
+     * @param {matrix} b
+     * @returns {matrix}
+     * @throws {Numbas.Error} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
+     */
+    mul: function(a,b) {
+        if(a.columns!=b.rows)
+            throw(new Numbas.Error('matrixmath.mul.different sizes'));
+        var out = [];
+        out.rows = a.rows;
+        out.columns = b.columns;
+        for(var i=0;i<a.rows;i++)
+        {
+            var row = [];
+            out.push(row);
+            for(var j=0;j<b.columns;j++)
+            {
+                var s = 0;
+                for(var k=0;k<a.columns;k++)
+                {
+                    s = add(s,mul(a[i][k],b[k][j]));
+                }
+                row.push(s);
+            }
+        }
+        return out;
+    },
+    /** Are two matrices equal? True if each pair of corresponding elements is equal.
+     * @param {matrix} a
+     * @param {matrix} b
+     * @returns {Boolean}
+     */
+    eq: function(a,b) {
+        var rows = Math.max(a.rows,b.rows);
+        var columns = Math.max(a.columns,b.columns);
+        for(var i=0;i<rows;i++)
+        {
+            var rowA = a[i] || [];
+            var rowB = b[i] || [];
+            for(var j=0;j<columns;j++)
+            {
+                if(!eq(rowA[j]||0,rowB[j]||0))
+                    return false;
+            }
+        }
+        return true;
+    },
+    /** Are two matrices unequal?
+     * @param {matrix} a
+     * @param {matrix} b
+     * @returns {Boolean}
+     * @see Numbas.matrixmath.eq
+     */
+    neq: function(a,b) {
+        return !matrixmath.eq(a,b);
+    },
+    /** Make an `NxN` identity matrix.
+     * @param {Number} n
+     * @returns {matrix}
+     */
+    id: function(n) {
+        var out = [];
+        out.rows = out.columns = n;
+        for(var i=0;i<n;i++)
+        {
+            var row = [];
+            out.push(row);
+            for(var j=0;j<n;j++)
+                row.push(j==i ? 1 : 0);
+        }
+        return out;
+    },
+    /** Matrix transpose
+     * @param {matrix} m
+     * @returns {matrix}
+     */
+    transpose: function(m) {
+        var out = [];
+        out.rows = m.columns;
+        out.columns = m.rows;
+        for(var i=0;i<m.columns;i++)
+        {
+            var row = [];
+            out.push(row);
+            for(var j=0;j<m.rows;j++)
+            {
+                row.push(m[j][i]||0);
+            }
+        }
+        return out;
+    },
+
+    /** Sum of every cell
+     * @param {matrix} m
+     * @returns {Number}
+     */
+    sum_cells: function(m) {
+        var t = 0;
+        m.forEach(function(row) {
+            row.forEach(function(cell) {
+                t += cell;
+            });
+        });
+        return t;
+    },
+
+    /** Apply given function to each element
+     * @param {matrix} m
+     * @param {Function} fn
+     * @returns {matrix}
+     */
+    map: function(m,fn) {
+        var out = m.map(function(row){
+            return row.map(fn);
+        });
+        out.rows = m.rows;
+        out.columns = m.columns;
+        return out;
+    },
+    /** Round each element to given number of decimal places
+     * @param {matrix} m
+     * @param {Number} dp - number of decimal places
+     * @returns {matrix}
+     */
+    precround: function(m,dp) {
+        return matrixmath.map(m,function(n){return math.precround(n,dp);});
+    },
+    /** Round each element to given number of significant figures
+     * @param {matrix} m
+     * @param {Number} sf - number of decimal places
+     * @returns {matrix}
+     */
+    siground: function(m,sf) {
+        return matrixmath.map(m,function(n){return math.siground(n,sf);});
+    }
+}
+/** A set of objects: no item occurs more than once.
+ * @typedef set
+ * @type Array
+ */
+/** Set operations.
+ *
+ * @namespace Numbas.setmath
+ */
+var setmath = Numbas.setmath = {
+    /** Does the set contain the given element?
+     * @param {set} set
+     * @param {*} element
+     * @returns {Boolean}
+     */
+    contains: function(set,element) {
+        for(var i=0,l=set.length;i<l;i++) {
+            if(Numbas.util.eq(set[i],element)) {
+                return true;
+            }
+        }
+    },
+    /** Union of two sets
+     * @param {set} a
+     * @param {set} b
+     * @returns {set}
+     */
+    union: function(a,b) {
+        var out = a.slice();
+        for(var i=0,l=b.length;i<l;i++) {
+            if(!setmath.contains(a,b[i])) {
+                out.push(b[i]);
+            }
+        }
+        return out;
+    },
+    /** Intersection of two sets
+     * @param {set} a
+     * @param {set} b
+     * @returns {set}
+     */
+    intersection: function(a,b) {
+        return a.filter(function(v) {
+            return setmath.contains(b,v);
+        });
+    },
+    /** Are two sets equal? Yes if a,b and (a intersect b) all have the same length
+     * @param {set} a
+     * @param {set} b
+     * @returns {Boolean}
+     */
+    eq: function(a,b) {
+        return a.length==b.length && setmath.intersection(a,b).length==a.length;
+    },
+    /** Set minus - remove b's elements from a
+     * @param {set} a
+     * @param {set} b
+     * @returns {set}
+     */
+    minus: function(a,b) {
+        return a.filter(function(v){ return !setmath.contains(b,v); });
+    },
+    /** Size of a set
+     * @param {set} set
+     * @returns {Number}
+     */
+    size: function(set) {
+        return set.length;
+    }
+}
+});
+
+Numbas.queueScript('i18next',[],function(module) {
+        var exports = {};
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.i18next=e()}(this,function(){"use strict";function t(t){return null==t?"":""+t}function e(t,e,n){t.forEach(function(t){e[t]&&(n[t]=e[t])})}function n(t,e,n){function o(t){return t&&t.indexOf("###")>-1?t.replace(/###/g,"."):t}function r(){return!t||"string"==typeof t}for(var i="string"!=typeof e?[].concat(e):e.split(".");i.length>1;){if(r())return{};var a=o(i.shift());!t[a]&&n&&(t[a]=new n),t=t[a]}return r()?{}:{obj:t,k:o(i.shift())}}function o(t,e,o){var r=n(t,e,Object),i=r.obj,a=r.k;i[a]=o}function r(t,e,o,r){var i=n(t,e,Object),a=i.obj,s=i.k;a[s]=a[s]||[],r&&(a[s]=a[s].concat(o)),r||a[s].push(o)}function i(t,e){var o=n(t,e),r=o.obj,i=o.k;if(r)return r[i]}function a(t,e,n){for(var o in e)o in t?"string"==typeof t[o]||t[o]instanceof String||"string"==typeof e[o]||e[o]instanceof String?n&&(t[o]=e[o]):a(t[o],e[o],n):t[o]=e[o];return t}function s(t){return t.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")}function l(t){return"string"==typeof t?t.replace(/[&<>"'\/]/g,function(t){return E[t]}):t}function u(t){return t.interpolation={unescapeSuffix:"HTML"},t.interpolation.prefix=t.interpolationPrefix||"__",t.interpolation.suffix=t.interpolationSuffix||"__",t.interpolation.escapeValue=t.escapeInterpolation||!1,t.interpolation.nestingPrefix=t.reusePrefix||"$t(",t.interpolation.nestingSuffix=t.reuseSuffix||")",t}function c(t){return t.resStore&&(t.resources=t.resStore),t.ns&&t.ns.defaultNs?(t.defaultNS=t.ns.defaultNs,t.ns=t.ns.namespaces):t.defaultNS=t.ns||"translation",t.fallbackToDefaultNS&&t.defaultNS&&(t.fallbackNS=t.defaultNS),t.saveMissing=t.sendMissing,t.saveMissingTo=t.sendMissingTo||"current",t.returnNull=!t.fallbackOnNull,t.returnEmptyString=!t.fallbackOnEmpty,t.returnObjects=t.returnObjectTrees,t.joinArrays="\n",t.returnedObjectHandler=t.objectTreeKeyHandler,t.parseMissingKeyHandler=t.parseMissingKey,t.appendNamespaceToMissingKey=!0,t.nsSeparator=t.nsseparator||":",t.keySeparator=t.keyseparator||".","sprintf"===t.shortcutFunction&&(t.overloadTranslationOptionHandler=function(t){for(var e=[],n=1;n<t.length;n++)e.push(t[n]);return{postProcess:"sprintf",sprintf:e}}),t.whitelist=t.lngWhitelist,t.preload=t.preload,"current"===t.load&&(t.load="currentOnly"),"unspecific"===t.load&&(t.load="languageOnly"),t.backend=t.backend||{},t.backend.loadPath=t.resGetPath||"locales/__lng__/__ns__.json",t.backend.addPath=t.resPostPath||"locales/add/__lng__/__ns__",t.backend.allowMultiLoading=t.dynamicLoad,t.cache=t.cache||{},t.cache.prefix="res_",t.cache.expirationTime=6048e5,t.cache.enabled=t.useLocalStorage,t=u(t),t.defaultVariables&&(t.interpolation.defaultVariables=t.defaultVariables),t}function p(t){return t=u(t),t.joinArrays="\n",t}function f(t){return(t.interpolationPrefix||t.interpolationSuffix||void 0!==t.escapeInterpolation)&&(t=u(t)),t.nsSeparator=t.nsseparator,t.keySeparator=t.keyseparator,t.returnObjects=t.returnObjectTrees,t}function g(t){t.lng=function(){return C.deprecate("i18next.lng() can be replaced by i18next.language for detected language or i18next.languages for languages ordered by translation lookup."),t.services.languageUtils.toResolveHierarchy(t.language)[0]},t.preload=function(e,n){C.deprecate("i18next.preload() can be replaced with i18next.loadLanguages()"),t.loadLanguages(e,n)},t.setLng=function(e,n,o){return C.deprecate("i18next.setLng() can be replaced with i18next.changeLanguage() or i18next.getFixedT() to get a translation function with fixed language or namespace."),"function"==typeof n&&(o=n,n={}),n||(n={}),n.fixLng===!0&&o?o(null,t.getFixedT(e)):t.changeLanguage(e,o)},t.addPostProcessor=function(e,n){C.deprecate("i18next.addPostProcessor() can be replaced by i18next.use({ type: 'postProcessor', name: 'name', process: fc })"),t.use({type:"postProcessor",name:e,process:n})}}function h(t){return t.charAt(0).toUpperCase()+t.slice(1)}function d(){var t={};return H.forEach(function(e){e.lngs.forEach(function(n){t[n]={numbers:e.nr,plurals:U[e.fc]}})}),t}function y(t,e){for(var n=t.indexOf(e);n!==-1;)t.splice(n,1),n=t.indexOf(e)}function v(){return{debug:!1,initImmediate:!0,ns:["translation"],defaultNS:["translation"],fallbackLng:["dev"],fallbackNS:!1,whitelist:!1,nonExplicitWhitelist:!1,load:"all",preload:!1,simplifyPluralSuffix:!0,keySeparator:".",nsSeparator:":",pluralSeparator:"_",contextSeparator:"_",saveMissing:!1,saveMissingTo:"fallback",missingKeyHandler:!1,postProcess:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:function(){},parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,appendNamespaceToCIMode:!1,overloadTranslationOptionHandler:function(t){return{defaultValue:t[1]}},interpolation:{escapeValue:!0,format:function(t,e,n){return t},prefix:"{{",suffix:"}}",formatSeparator:",",unescapePrefix:"-",nestingPrefix:"$t(",nestingSuffix:")",defaultVariables:void 0}}}function b(t){return"string"==typeof t.ns&&(t.ns=[t.ns]),"string"==typeof t.fallbackLng&&(t.fallbackLng=[t.fallbackLng]),"string"==typeof t.fallbackNS&&(t.fallbackNS=[t.fallbackNS]),t.whitelist&&t.whitelist.indexOf("cimode")<0&&t.whitelist.push("cimode"),t}function m(){}var x="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},S=function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")},k=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var o in n)Object.prototype.hasOwnProperty.call(n,o)&&(t[o]=n[o])}return t},w=function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)},O=function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e},L=function(){function t(t,e){var n=[],o=!0,r=!1,i=void 0;try{for(var a,s=t[Symbol.iterator]();!(o=(a=s.next()).done)&&(n.push(a.value),!e||n.length!==e);o=!0);}catch(t){r=!0,i=t}finally{try{!o&&s.return&&s.return()}finally{if(r)throw i}}return n}return function(e,n){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,n);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),j=function(t){if(Array.isArray(t)){for(var e=0,n=Array(t.length);e<t.length;e++)n[e]=t[e];return n}return Array.from(t)},N={type:"logger",log:function(t){this.output("log",t)},warn:function(t){this.output("warn",t)},error:function(t){this.output("error",t)},output:function(t,e){var n;console&&console[t]&&(n=console)[t].apply(n,j(e))}},P=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.init(e,n)}return t.prototype.init=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this.prefix=e.prefix||"i18next:",this.logger=t||N,this.options=e,this.debug=e.debug},t.prototype.setDebug=function(t){this.debug=t},t.prototype.log=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"log","",!0)},t.prototype.warn=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","",!0)},t.prototype.error=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"error","")},t.prototype.deprecate=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","WARNING DEPRECATED: ",!0)},t.prototype.forward=function(t,e,n,o){return o&&!this.debug?null:("string"==typeof t[0]&&(t[0]=""+n+this.prefix+" "+t[0]),this.logger[e](t))},t.prototype.create=function(e){return new t(this.logger,k({prefix:this.prefix+":"+e+":"},this.options))},t}(),C=new P,R=function(){function t(){S(this,t),this.observers={}}return t.prototype.on=function(t,e){var n=this;t.split(" ").forEach(function(t){n.observers[t]=n.observers[t]||[],n.observers[t].push(e)})},t.prototype.off=function(t,e){var n=this;this.observers[t]&&this.observers[t].forEach(function(){if(e){var o=n.observers[t].indexOf(e);o>-1&&n.observers[t].splice(o,1)}else delete n.observers[t]})},t.prototype.emit=function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];if(this.observers[t]){var r=[].concat(this.observers[t]);r.forEach(function(t){t.apply(void 0,n)})}if(this.observers["*"]){var i=[].concat(this.observers["*"]);i.forEach(function(e){var o;e.apply(e,(o=[t]).concat.apply(o,n))})}},t}(),E={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;"},A=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{ns:["translation"],defaultNS:"translation"};S(this,e);var r=O(this,t.call(this));return r.data=n,r.options=o,r}return w(e,t),e.prototype.addNamespaces=function(t){this.options.ns.indexOf(t)<0&&this.options.ns.push(t)},e.prototype.removeNamespaces=function(t){var e=this.options.ns.indexOf(t);e>-1&&this.options.ns.splice(e,1)},e.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{},r=o.keySeparator||this.options.keySeparator;void 0===r&&(r=".");var a=[t,e];return n&&"string"!=typeof n&&(a=a.concat(n)),n&&"string"==typeof n&&(a=a.concat(r?n.split(r):n)),t.indexOf(".")>-1&&(a=t.split(".")),i(this.data,a)},e.prototype.addResource=function(t,e,n,r){var i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{silent:!1},a=this.options.keySeparator;void 0===a&&(a=".");var s=[t,e];n&&(s=s.concat(a?n.split(a):n)),t.indexOf(".")>-1&&(s=t.split("."),r=e,e=s[1]),this.addNamespaces(e),o(this.data,s,r),i.silent||this.emit("added",t,e,n,r)},e.prototype.addResources=function(t,e,n){for(var o in n)"string"==typeof n[o]&&this.addResource(t,e,o,n[o],{silent:!0});this.emit("added",t,e,n)},e.prototype.addResourceBundle=function(t,e,n,r,s){var l=[t,e];t.indexOf(".")>-1&&(l=t.split("."),r=n,n=e,e=l[1]),this.addNamespaces(e);var u=i(this.data,l)||{};r?a(u,n,s):u=k({},u,n),o(this.data,l,u),this.emit("added",t,e,n)},e.prototype.removeResourceBundle=function(t,e){this.hasResourceBundle(t,e)&&delete this.data[t][e],this.removeNamespaces(e),this.emit("removed",t,e)},e.prototype.hasResourceBundle=function(t,e){return void 0!==this.getResource(t,e)},e.prototype.getResourceBundle=function(t,e){return e||(e=this.options.defaultNS),"v1"===this.options.compatibilityAPI?k({},this.getResource(t,e)):this.getResource(t,e)},e.prototype.toJSON=function(){return this.data},e}(R),T={processors:{},addPostProcessor:function(t){this.processors[t.name]=t},handle:function(t,e,n,o,r){var i=this;return t.forEach(function(t){i.processors[t]&&(e=i.processors[t].process(e,n,o,r))}),e}},M=function(t){function n(o){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,n);var i=O(this,t.call(this));return e(["resourceStore","languageUtils","pluralResolver","interpolator","backendConnector"],o,i),i.options=r,i.logger=C.create("translator"),i}return w(n,t),n.prototype.changeLanguage=function(t){t&&(this.language=t)},n.prototype.exists=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{interpolation:{}};return"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0!==this.resolve(t,e)},n.prototype.extractFromKey=function(t,e){var n=e.nsSeparator||this.options.nsSeparator;void 0===n&&(n=":");var o=e.keySeparator||this.options.keySeparator||".",r=e.ns||this.options.defaultNS;if(n&&t.indexOf(n)>-1){var i=t.split(n);(n!==o||n===o&&this.options.ns.indexOf(i[0])>-1)&&(r=i.shift()),t=i.join(o)}return"string"==typeof r&&(r=[r]),{key:t,namespaces:r}},n.prototype.translate=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("object"!==("undefined"==typeof e?"undefined":x(e))?e=this.options.overloadTranslationOptionHandler(arguments):"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0===t||null===t||""===t)return"";"number"==typeof t&&(t=String(t)),"string"==typeof t&&(t=[t]);var n=e.keySeparator||this.options.keySeparator||".",o=this.extractFromKey(t[t.length-1],e),r=o.key,i=o.namespaces,a=i[i.length-1],s=e.lng||this.language,l=e.appendNamespaceToCIMode||this.options.appendNamespaceToCIMode;if(s&&"cimode"===s.toLowerCase()){if(l){var u=e.nsSeparator||this.options.nsSeparator;return a+u+r}return r}var c=this.resolve(t,e),p=Object.prototype.toString.apply(c),g=["[object Number]","[object Function]","[object RegExp]"],h=void 0!==e.joinArrays?e.joinArrays:this.options.joinArrays;if(c&&"string"!=typeof c&&g.indexOf(p)<0&&(!h||"[object Array]"!==p)){if(!e.returnObjects&&!this.options.returnObjects)return this.logger.warn("accessing an object - but returnObjects options is not enabled!"),this.options.returnedObjectHandler?this.options.returnedObjectHandler(r,c,e):"key '"+r+" ("+this.language+")' returned an object instead of string.";if(e.keySeparator||this.options.keySeparator){var d="[object Array]"===p?[]:{};for(var y in c)Object.prototype.hasOwnProperty.call(c,y)&&(d[y]=this.translate(""+r+n+y,k({},e,{joinArrays:!1,ns:i})));c=d}}else if(h&&"[object Array]"===p)c=c.join(h),c&&(c=this.extendTranslation(c,r,e));else{var v=!1,b=!1;if(this.isValidLookup(c)||void 0===e.defaultValue||(v=!0,c=e.defaultValue),this.isValidLookup(c)||(b=!0,c=r),b||v){this.logger.log("missingKey",s,a,r,c);var m=[],S=this.languageUtils.getFallbackCodes(this.options.fallbackLng,e.lng||this.language);if("fallback"===this.options.saveMissingTo&&S&&S[0])for(var w=0;w<S.length;w++)m.push(S[w]);else"all"===this.options.saveMissingTo?m=this.languageUtils.toResolveHierarchy(e.lng||this.language):m.push(e.lng||this.language);this.options.saveMissing&&(this.options.missingKeyHandler?this.options.missingKeyHandler(m,a,r,c):this.backendConnector&&this.backendConnector.saveMissing&&this.backendConnector.saveMissing(m,a,r,c)),this.emit("missingKey",m,a,r,c)}c=this.extendTranslation(c,r,e),b&&c===r&&this.options.appendNamespaceToMissingKey&&(c=a+":"+r),b&&this.options.parseMissingKeyHandler&&(c=this.options.parseMissingKeyHandler(c))}return c},n.prototype.extendTranslation=function(t,e,n){var o=this;n.interpolation&&this.interpolator.init(k({},n,{interpolation:k({},this.options.interpolation,n.interpolation)}));var r=n.replace&&"string"!=typeof n.replace?n.replace:n;this.options.interpolation.defaultVariables&&(r=k({},this.options.interpolation.defaultVariables,r)),t=this.interpolator.interpolate(t,r,n.lng||this.language),n.nest!==!1&&(t=this.interpolator.nest(t,function(){return o.translate.apply(o,arguments)},n)),n.interpolation&&this.interpolator.reset();var i=n.postProcess||this.options.postProcess,a="string"==typeof i?[i]:i;return void 0!==t&&a&&a.length&&n.applyPostProcessor!==!1&&(t=T.handle(a,t,e,n,this)),t},n.prototype.resolve=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=void 0;return"string"==typeof t&&(t=[t]),t.forEach(function(t){if(!e.isValidLookup(o)){var r=e.extractFromKey(t,n),i=r.key,a=r.namespaces;e.options.fallbackNS&&(a=a.concat(e.options.fallbackNS));var s=void 0!==n.count&&"string"!=typeof n.count,l=void 0!==n.context&&"string"==typeof n.context&&""!==n.context,u=n.lngs?n.lngs:e.languageUtils.toResolveHierarchy(n.lng||e.language);a.forEach(function(t){e.isValidLookup(o)||u.forEach(function(r){if(!e.isValidLookup(o)){var a=i,u=[a],c=void 0;s&&(c=e.pluralResolver.getSuffix(r,n.count)),s&&l&&u.push(a+c),l&&u.push(a+=""+e.options.contextSeparator+n.context),s&&u.push(a+=c);for(var p=void 0;p=u.pop();)e.isValidLookup(o)||(o=e.getResource(r,t,p,n))}})})}}),o},n.prototype.isValidLookup=function(t){return!(void 0===t||!this.options.returnNull&&null===t||!this.options.returnEmptyString&&""===t)},n.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};return this.resourceStore.getResource(t,e,n,o)},n}(R),_=function(){function t(e){S(this,t),this.options=e,this.whitelist=this.options.whitelist||!1,this.logger=C.create("languageUtils")}return t.prototype.getScriptPartFromCode=function(t){if(!t||t.indexOf("-")<0)return null;var e=t.split("-");return 2===e.length?null:(e.pop(),this.formatLanguageCode(e.join("-")))},t.prototype.getLanguagePartFromCode=function(t){if(!t||t.indexOf("-")<0)return t;var e=t.split("-");return this.formatLanguageCode(e[0])},t.prototype.formatLanguageCode=function(t){if("string"==typeof t&&t.indexOf("-")>-1){var e=["hans","hant","latn","cyrl","cans","mong","arab"],n=t.split("-");return this.options.lowerCaseLng?n=n.map(function(t){return t.toLowerCase()}):2===n.length?(n[0]=n[0].toLowerCase(),n[1]=n[1].toUpperCase(),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase()))):3===n.length&&(n[0]=n[0].toLowerCase(),2===n[1].length&&(n[1]=n[1].toUpperCase()),"sgn"!==n[0]&&2===n[2].length&&(n[2]=n[2].toUpperCase()),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase())),e.indexOf(n[2].toLowerCase())>-1&&(n[2]=h(n[2].toLowerCase()))),n.join("-")}return this.options.cleanCode||this.options.lowerCaseLng?t.toLowerCase():t},t.prototype.isWhitelisted=function(t){return("languageOnly"===this.options.load||this.options.nonExplicitWhitelist)&&(t=this.getLanguagePartFromCode(t)),!this.whitelist||!this.whitelist.length||this.whitelist.indexOf(t)>-1},t.prototype.getFallbackCodes=function(t,e){if(!t)return[];if("string"==typeof t&&(t=[t]),"[object Array]"===Object.prototype.toString.apply(t))return t;if(!e)return t.default||[];var n=t[e];return n||(n=t[this.getScriptPartFromCode(e)]),n||(n=t[this.formatLanguageCode(e)]),n||(n=t.default),n||[]},t.prototype.toResolveHierarchy=function(t,e){var n=this,o=this.getFallbackCodes(e||this.options.fallbackLng||[],t),r=[],i=function(t){t&&(n.isWhitelisted(t)?r.push(t):n.logger.warn("rejecting non-whitelisted language code: "+t))};return"string"==typeof t&&t.indexOf("-")>-1?("languageOnly"!==this.options.load&&i(this.formatLanguageCode(t)),"languageOnly"!==this.options.load&&"currentOnly"!==this.options.load&&i(this.getScriptPartFromCode(t)),"currentOnly"!==this.options.load&&i(this.getLanguagePartFromCode(t))):"string"==typeof t&&i(this.formatLanguageCode(t)),o.forEach(function(t){r.indexOf(t)<0&&i(n.formatLanguageCode(t))}),r},t}(),H=[{lngs:["ach","ak","am","arn","br","fil","gun","ln","mfe","mg","mi","oc","tg","ti","tr","uz","wa"],nr:[1,2],fc:1},{lngs:["af","an","ast","az","bg","bn","ca","da","de","dev","el","en","eo","es","es_ar","et","eu","fi","fo","fur","fy","gl","gu","ha","he","hi","hu","hy","ia","it","kn","ku","lb","mai","ml","mn","mr","nah","nap","nb","ne","nl","nn","no","nso","pa","pap","pms","ps","pt","pt_br","rm","sco","se","si","so","son","sq","sv","sw","ta","te","tk","ur","yo"],nr:[1,2],fc:2},{lngs:["ay","bo","cgg","fa","id","ja","jbo","ka","kk","km","ko","ky","lo","ms","sah","su","th","tt","ug","vi","wo","zh"],nr:[1],fc:3},{lngs:["be","bs","dz","hr","ru","sr","uk"],nr:[1,2,5],fc:4},{lngs:["ar"],nr:[0,1,2,3,11,100],fc:5},{lngs:["cs","sk"],nr:[1,2,5],fc:6},{lngs:["csb","pl"],nr:[1,2,5],fc:7},{lngs:["cy"],nr:[1,2,3,8],fc:8},{lngs:["fr"],nr:[1,2],fc:9},{lngs:["ga"],nr:[1,2,3,7,11],fc:10},{lngs:["gd"],nr:[1,2,3,20],fc:11},{lngs:["is"],nr:[1,2],fc:12},{lngs:["jv"],nr:[0,1],fc:13},{lngs:["kw"],nr:[1,2,3,4],fc:14},{lngs:["lt"],nr:[1,2,10],fc:15},{lngs:["lv"],nr:[1,2,0],fc:16},{lngs:["mk"],nr:[1,2],fc:17},{lngs:["mnk"],nr:[0,1,2],fc:18},{lngs:["mt"],nr:[1,2,11,20],fc:19},{lngs:["or"],nr:[2,1],fc:2},{lngs:["ro"],nr:[1,2,20],fc:20},{lngs:["sl"],nr:[5,1,2,3],fc:21}],U={1:function(t){return Number(t>1)},2:function(t){return Number(1!=t)},3:function(t){return 0},4:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},5:function(t){return Number(0===t?0:1==t?1:2==t?2:t%100>=3&&t%100<=10?3:t%100>=11?4:5)},6:function(t){return Number(1==t?0:t>=2&&t<=4?1:2)},7:function(t){return Number(1==t?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},8:function(t){return Number(1==t?0:2==t?1:8!=t&&11!=t?2:3)},9:function(t){return Number(t>=2)},10:function(t){return Number(1==t?0:2==t?1:t<7?2:t<11?3:4)},11:function(t){return Number(1==t||11==t?0:2==t||12==t?1:t>2&&t<20?2:3)},12:function(t){return Number(t%10!=1||t%100==11)},13:function(t){return Number(0!==t)},14:function(t){return Number(1==t?0:2==t?1:3==t?2:3)},15:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&(t%100<10||t%100>=20)?1:2)},16:function(t){return Number(t%10==1&&t%100!=11?0:0!==t?1:2)},17:function(t){return Number(1==t||t%10==1?0:1)},18:function(t){return Number(0==t?0:1==t?1:2)},19:function(t){return Number(1==t?0:0===t||t%100>1&&t%100<11?1:t%100>10&&t%100<20?2:3)},20:function(t){return Number(1==t?0:0===t||t%100>0&&t%100<20?1:2)},21:function(t){return Number(t%100==1?1:t%100==2?2:t%100==3||t%100==4?3:0)}},V=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.languageUtils=e,this.options=n,this.logger=C.create("pluralResolver"),this.rules=d()}return t.prototype.addRule=function(t,e){this.rules[t]=e},t.prototype.getRule=function(t){return this.rules[this.languageUtils.getLanguagePartFromCode(t)]},t.prototype.needsPlural=function(t){var e=this.getRule(t);return e&&e.numbers.length>1},t.prototype.getSuffix=function(t,e){var n=this,o=this.getRule(t);if(o){if(1===o.numbers.length)return"";var r=o.noAbs?o.plurals(e):o.plurals(Math.abs(e)),i=o.numbers[r];this.options.simplifyPluralSuffix&&2===o.numbers.length&&1===o.numbers[0]&&(2===i?i="plural":1===i&&(i=""));var a=function(){return n.options.prepend&&i.toString()?n.options.prepend+i.toString():i.toString()};return"v1"===this.options.compatibilityJSON?1===i?"":"number"==typeof i?"_plural_"+i.toString():a():"v2"===this.options.compatibilityJSON||2===o.numbers.length&&1===o.numbers[0]?a():2===o.numbers.length&&1===o.numbers[0]?a():this.options.prepend&&r.toString()?this.options.prepend+r.toString():r.toString()}return this.logger.warn("no plural rule found for: "+t),""},t}(),I=function(){function e(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};S(this,e),this.logger=C.create("interpolator"),this.init(t,!0)}return e.prototype.init=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=arguments[1];e&&(this.options=t,this.format=t.interpolation&&t.interpolation.format||function(t){return t},this.escape=t.interpolation&&t.interpolation.escape||l),t.interpolation||(t.interpolation={escapeValue:!0});var n=t.interpolation;this.escapeValue=void 0===n.escapeValue||n.escapeValue,this.prefix=n.prefix?s(n.prefix):n.prefixEscaped||"{{",this.suffix=n.suffix?s(n.suffix):n.suffixEscaped||"}}",this.formatSeparator=n.formatSeparator?n.formatSeparator:n.formatSeparator||",",this.unescapePrefix=n.unescapeSuffix?"":n.unescapePrefix||"-",this.unescapeSuffix=this.unescapePrefix?"":n.unescapeSuffix||"",this.nestingPrefix=n.nestingPrefix?s(n.nestingPrefix):n.nestingPrefixEscaped||s("$t("),this.nestingSuffix=n.nestingSuffix?s(n.nestingSuffix):n.nestingSuffixEscaped||s(")"),this.resetRegExp()},e.prototype.reset=function(){this.options&&this.init(this.options)},e.prototype.resetRegExp=function(){var t=this.prefix+"(.+?)"+this.suffix;this.regexp=new RegExp(t,"g");var e=""+this.prefix+this.unescapePrefix+"(.+?)"+this.unescapeSuffix+this.suffix;this.regexpUnescape=new RegExp(e,"g");var n=this.nestingPrefix+"(.+?)"+this.nestingSuffix;this.nestingRegexp=new RegExp(n,"g")},e.prototype.interpolate=function(e,n,o){function r(t){return t.replace(/\$/g,"$$$$")}var a=this,s=void 0,l=void 0,u=function(t){if(t.indexOf(a.formatSeparator)<0)return i(n,t);var e=t.split(a.formatSeparator),r=e.shift().trim(),s=e.join(a.formatSeparator).trim();return a.format(i(n,r),s,o)};for(this.resetRegExp();s=this.regexpUnescape.exec(e);)l=u(s[1].trim()),e=e.replace(s[0],l),this.regexpUnescape.lastIndex=0;for(;s=this.regexp.exec(e);)l=u(s[1].trim()),"string"!=typeof l&&(l=t(l)),l||(this.logger.warn("missed to pass in variable "+s[1]+" for interpolating "+e),l=""),l=r(this.escapeValue?this.escape(l):l),e=e.replace(s[0],l),this.regexp.lastIndex=0;return e},e.prototype.nest=function(e,n){function o(t){if(t.indexOf(",")<0)return t;var e=t.split(",");t=e.shift();var n=e.join(",");n=this.interpolate(n,s),n=n.replace(/'/g,'"');try{s=JSON.parse(n)}catch(e){this.logger.error("failed parsing options string in nesting for key "+t,e)}return t}var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},i=void 0,a=void 0,s=k({},r);for(s.applyPostProcessor=!1;i=this.nestingRegexp.exec(e);){if(a=n(o.call(this,i[1].trim()),s),a&&i[0]===e&&"string"!=typeof a)return a;"string"!=typeof a&&(a=t(a)),a||(this.logger.warn("missed to resolve "+i[1]+" for nesting "+e),a=""),e=e.replace(i[0],a),this.regexp.lastIndex=0}return e},e}(),F=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.backend=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("backendConnector"),a.state={},a.queue=[],a.backend&&a.backend.init&&a.backend.init(r,i.backend,i),a}return w(e,t),e.prototype.queueLoad=function(t,e,n){var o=this,r=[],i=[],a=[],s=[];return t.forEach(function(t){var n=!0;e.forEach(function(e){var a=t+"|"+e;o.store.hasResourceBundle(t,e)?o.state[a]=2:o.state[a]<0||(1===o.state[a]?i.indexOf(a)<0&&i.push(a):(o.state[a]=1,n=!1,i.indexOf(a)<0&&i.push(a),r.indexOf(a)<0&&r.push(a),s.indexOf(e)<0&&s.push(e)))}),n||a.push(t)}),(r.length||i.length)&&this.queue.push({pending:i,loaded:{},errors:[],callback:n}),{toLoad:r,pending:i,toLoadLanguages:a,toLoadNamespaces:s}},e.prototype.loaded=function(t,e,n){var o=this,i=t.split("|"),a=L(i,2),s=a[0],l=a[1];e&&this.emit("failedLoading",s,l,e),n&&this.store.addResourceBundle(s,l,n),this.state[t]=e?-1:2,this.queue.forEach(function(n){r(n.loaded,[s],l),y(n.pending,t),e&&n.errors.push(e),0!==n.pending.length||n.done||(o.emit("loaded",n.loaded),n.done=!0,n.errors.length?n.callback(n.errors):n.callback())}),this.queue=this.queue.filter(function(t){return!t.done})},e.prototype.read=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:0,r=this,i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:250,a=arguments[5];return t.length?this.backend[n](t,e,function(s,l){return s&&l&&o<5?void setTimeout(function(){r.read.call(r,t,e,n,o+1,2*i,a)},i):void a(s,l)}):a(null,{})},e.prototype.load=function(t,e,n){var o=this;if(!this.backend)return this.logger.warn("No backend was added via i18next.use. Will not load resources."),n&&n();var r=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]);var a=this.queueLoad(t,e,n);return a.toLoad.length?void(r.allowMultiLoading&&this.backend.readMulti?this.read(a.toLoadLanguages,a.toLoadNamespaces,"readMulti",null,null,function(t,e){t&&o.logger.warn("loading namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading failed",t),!t&&e&&o.logger.log("successfully loaded namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading",e),a.toLoad.forEach(function(n){var r=n.split("|"),a=L(r,2),s=a[0],l=a[1],u=i(e,[s,l]);if(u)o.loaded(n,t,u);else{var c="loading namespace "+l+" for language "+s+" via multiloading failed";o.loaded(n,c),o.logger.error(c)}})}):a.toLoad.forEach(function(t){o.loadOne(t)})):(a.pending.length||n(),null)},e.prototype.reload=function(t,e){var n=this;this.backend||this.logger.warn("No backend was added via i18next.use. Will not load resources.");var o=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]),o.allowMultiLoading&&this.backend.readMulti?this.read(t,e,"readMulti",null,null,function(o,r){o&&n.logger.warn("reloading namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading failed",o),!o&&r&&n.logger.log("successfully reloaded namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading",r),t.forEach(function(t){e.forEach(function(e){var a=i(r,[t,e]);if(a)n.loaded(t+"|"+e,o,a);else{var s="reloading namespace "+e+" for language "+t+" via multiloading failed";n.loaded(t+"|"+e,s),n.logger.error(s)}})})}):t.forEach(function(t){e.forEach(function(e){n.loadOne(t+"|"+e,"re")})})},e.prototype.loadOne=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"",o=t.split("|"),r=L(o,2),i=r[0],a=r[1];this.read(i,a,"read",null,null,function(o,r){o&&e.logger.warn(n+"loading namespace "+a+" for language "+i+" failed",o),!o&&r&&e.logger.log(n+"loaded namespace "+a+" for language "+i,r),e.loaded(t,o,r)})},e.prototype.saveMissing=function(t,e,n,o){this.backend&&this.backend.create&&this.backend.create(t,e,n,o),t&&t[0]&&this.store.addResource(t[0],e,n,o)},e}(R),D=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.cache=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("cacheConnector"),a.cache&&a.cache.init&&a.cache.init(r,i.cache,i),a}return w(e,t),e.prototype.load=function(t,e,n){var o=this;if(!this.cache)return n&&n();var r=k({},this.cache.options,this.options.cache),i="string"==typeof t?this.services.languageUtils.toResolveHierarchy(t):t;r.enabled?this.cache.load(i,function(t,e){if(t&&o.logger.error("loading languages "+i.join(", ")+" from cache failed",t),e)for(var r in e)if(Object.prototype.hasOwnProperty.call(e,r))for(var a in e[r])if(Object.prototype.hasOwnProperty.call(e[r],a)&&"i18nStamp"!==a){var s=e[r][a];s&&o.store.addResourceBundle(r,a,s)}n&&n()}):n&&n()},e.prototype.save=function(){this.cache&&this.options.cache&&this.options.cache.enabled&&this.cache.save(this.store.data)},e}(R),K=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments[1];S(this,e);var r=O(this,t.call(this));if(r.options=b(n),r.services={},r.logger=C,r.modules={external:[]},o&&!r.isInitialized&&!n.isClone){var i;if(!r.options.initImmediate)return i=r.init(n,o),O(r,i);setTimeout(function(){r.init(n,o)},0)}return r}return w(e,t),e.prototype.init=function(t,e){function n(t){return t?"function"==typeof t?new t:t:null}var o=this;if("function"==typeof t&&(e=t,t={}),t||(t={}),"v1"===t.compatibilityAPI?this.options=k({},v(),b(c(t)),{}):"v1"===t.compatibilityJSON?this.options=k({},v(),b(p(t)),{}):this.options=k({},v(),this.options,b(t)),this.format=this.options.interpolation.format,e||(e=m),!this.options.isClone){this.modules.logger?C.init(n(this.modules.logger),this.options):C.init(null,this.options);var r=new _(this.options);this.store=new A(this.options.resources,this.options);var i=this.services;i.logger=C,i.resourceStore=this.store,i.resourceStore.on("added removed",function(t,e){i.cacheConnector.save()}),i.languageUtils=r,i.pluralResolver=new V(r,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON,simplifyPluralSuffix:this.options.simplifyPluralSuffix}),i.interpolator=new I(this.options),i.backendConnector=new F(n(this.modules.backend),i.resourceStore,i,this.options),i.backendConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),i.backendConnector.on("loaded",function(t){i.cacheConnector.save()}),i.cacheConnector=new D(n(this.modules.cache),i.resourceStore,i,this.options),i.cacheConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.languageDetector&&(i.languageDetector=n(this.modules.languageDetector),i.languageDetector.init(i,this.options.detection,this.options)),this.translator=new M(this.services,this.options),
+this.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.external.forEach(function(t){t.init&&t.init(o)})}var a=["getResource","addResource","addResources","addResourceBundle","removeResourceBundle","hasResourceBundle","getResourceBundle"];a.forEach(function(t){o[t]=function(){var e;return(e=o.store)[t].apply(e,arguments)}}),"v1"===this.options.compatibilityAPI&&g(this);var s=function(){o.changeLanguage(o.options.lng,function(t,n){o.isInitialized=!0,o.logger.log("initialized",o.options),o.emit("initialized",o.options),e(t,n)})};return this.options.resources||!this.options.initImmediate?s():setTimeout(s,0),this},e.prototype.loadResources=function(){var t=this,e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:m;if(this.options.resources)e(null);else{if(this.language&&"cimode"===this.language.toLowerCase())return e();var n=[],o=function(e){if(e){var o=t.services.languageUtils.toResolveHierarchy(e);o.forEach(function(t){n.indexOf(t)<0&&n.push(t)})}};if(this.language)o(this.language);else{var r=this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);r.forEach(function(t){return o(t)})}this.options.preload&&this.options.preload.forEach(function(t){return o(t)}),this.services.cacheConnector.load(n,this.options.ns,function(){t.services.backendConnector.load(n,t.options.ns,e)})}},e.prototype.reloadResources=function(t,e){t||(t=this.languages),e||(e=this.options.ns),this.services.backendConnector.reload(t,e)},e.prototype.use=function(t){return"backend"===t.type&&(this.modules.backend=t),"cache"===t.type&&(this.modules.cache=t),("logger"===t.type||t.log&&t.warn&&t.error)&&(this.modules.logger=t),"languageDetector"===t.type&&(this.modules.languageDetector=t),"postProcessor"===t.type&&T.addPostProcessor(t),"3rdParty"===t.type&&this.modules.external.push(t),this},e.prototype.changeLanguage=function(t,e){var n=this,o=function(t,o){o&&(n.emit("languageChanged",o),n.logger.log("languageChanged",o)),e&&e(t,function(){return n.t.apply(n,arguments)})},r=function(t){t&&(n.language=t,n.languages=n.services.languageUtils.toResolveHierarchy(t),n.translator.changeLanguage(t),n.services.languageDetector&&n.services.languageDetector.cacheUserLanguage(t)),n.loadResources(function(e){o(e,t)})};t||!this.services.languageDetector||this.services.languageDetector.async?!t&&this.services.languageDetector&&this.services.languageDetector.async?this.services.languageDetector.detect(r):r(t):r(this.services.languageDetector.detect())},e.prototype.getFixedT=function(t,e){var n=this,o=function t(e){var o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=k({},o);return r.lng=r.lng||t.lng,r.lngs=r.lngs||t.lngs,r.ns=r.ns||t.ns,n.t(e,r)};return"string"==typeof t?o.lng=t:o.lngs=t,o.ns=e,o},e.prototype.t=function(){var t;return this.translator&&(t=this.translator).translate.apply(t,arguments)},e.prototype.exists=function(){var t;return this.translator&&(t=this.translator).exists.apply(t,arguments)},e.prototype.setDefaultNamespace=function(t){this.options.defaultNS=t},e.prototype.loadNamespaces=function(t,e){var n=this;return this.options.ns?("string"==typeof t&&(t=[t]),t.forEach(function(t){n.options.ns.indexOf(t)<0&&n.options.ns.push(t)}),void this.loadResources(e)):e&&e()},e.prototype.loadLanguages=function(t,e){"string"==typeof t&&(t=[t]);var n=this.options.preload||[],o=t.filter(function(t){return n.indexOf(t)<0});return o.length?(this.options.preload=n.concat(o),void this.loadResources(e)):e()},e.prototype.dir=function(t){if(t||(t=this.languages&&this.languages.length>0?this.languages[0]:this.language),!t)return"rtl";var e=["ar","shu","sqr","ssh","xaa","yhd","yud","aao","abh","abv","acm","acq","acw","acx","acy","adf","ads","aeb","aec","afb","ajp","apc","apd","arb","arq","ars","ary","arz","auz","avl","ayh","ayl","ayn","ayp","bbz","pga","he","iw","ps","pbt","pbu","pst","prp","prd","ur","ydd","yds","yih","ji","yi","hbo","men","xmn","fa","jpr","peo","pes","prs","dv","sam"];return e.indexOf(this.services.languageUtils.getLanguagePartFromCode(t))>=0?"rtl":"ltr"},e.prototype.createInstance=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=arguments[1];return new e(t,n)},e.prototype.cloneInstance=function(){var t=this,n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:m,r=k({},this.options,n,{isClone:!0}),i=new e(r,o),a=["store","services","language"];return a.forEach(function(e){i[e]=t[e]}),i.translator=new M(i.services,i.options),i.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];i.emit.apply(i,[t].concat(n))}),i.init(r,o),i},e}(R),q=new K;return q})
+    window['i18next'] = module.exports;
+});
+Numbas.queueScript('es5-shim',[],function() {
 // es5-shim.min.js 24/09/2012
 //
 // -- kriskowal Kris Kowal Copyright (C) 2009-2011 MIT License
@@ -2559,2169 +4736,6 @@ var toObject = function (o) {
 });
 });
 
-/*
-Copyright 2011-14 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file Mathematical functions, providing stuff that the built-in `Math` object doesn't, as well as vector and matrix math operations.
- *
- * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
- */
-Numbas.queueScript('math',['base'],function() {
-/** Mathematical functions, providing stuff that the built-in `Math` object doesn't
- * @namespace Numbas.math */
-/** A complex number.
- * @typedef complex
- * @property {Number} re
- * @property {Number} im
- */
-/** @typedef range
- * @desc A range of numbers, separated by a constant interval and between fixed lower and upper bounds.
- * @type {Array.<Number>}
- * @property {Number} 0 Minimum value
- * @property {Number} 1 Maximum value
- * @property {Number} 2 Step size
- * @see Numbas.math.defineRange
- */
-var math = Numbas.math = /** @lends Numbas.math */ {
-    /** Regex to match numbers in scientific notation */
-    re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
-    /** Construct a complex number from real and imaginary parts.
-     *
-     * Elsewhere in this documentation, `{Number}` will refer to either a JavaScript float or a {@link complex} object, interchangeably.
-     * @param {Number} re
-     * @param {Number} im
-     * @returns {complex}
-     */
-    complex: function(re,im)
-    {
-        if(!im)
-            return re;
-        else
-            return {re: re, im: im, complex: true,
-            toString: math.complexToString}
-    },
-    /** String version of a complex number
-     * @returns {String}
-     * @method
-     * @memberof! complex
-     */
-    complexToString: function()
-    {
-        return math.niceNumber(this);
-    },
-    /** Negate a number.
-     * @param {Number} n
-     * @returns {Number}
-     */
-    negate: function(n)
-    {
-        if(n.complex)
-            return math.complex(-n.re,-n.im);
-        else
-            return -n;
-    },
-    /** Complex conjugate
-     * @param {Number} n
-     * @returns {Number}
-     */
-    conjugate: function(n)
-    {
-        if(n.complex)
-            return math.complex(n.re,-n.im);
-        else
-            return n;
-    },
-    /** Add two numbers
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    add: function(a,b)
-    {
-        if(a.complex)
-        {
-            if(b.complex)
-                return math.complex(a.re+b.re, a.im + b.im);
-            else
-                return math.complex(a.re+b, a.im);
-        }
-        else
-        {
-            if(b.complex)
-                return math.complex(a + b.re, b.im);
-            else
-                return a+b;
-        }
-    },
-    /** Subtract one number from another
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    sub: function(a,b)
-    {
-        if(a.complex)
-        {
-            if(b.complex)
-                return math.complex(a.re-b.re, a.im - b.im);
-            else
-                return math.complex(a.re-b, a.im);
-        }
-        else
-        {
-            if(b.complex)
-                return math.complex(a - b.re, -b.im);
-            else
-                return a-b;
-        }
-    },
-    /** Multiply two numbers
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    mul: function(a,b)
-    {
-        if(a.complex)
-        {
-            if(b.complex)
-                return math.complex(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
-            else
-                return math.complex(a.re*b, a.im*b);
-        }
-        else
-        {
-            if(b.complex)
-                return math.complex(a*b.re, a*b.im);
-            else
-                return a*b;
-        }
-    },
-    /** Divide one number by another
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    div: function(a,b)
-    {
-        if(a.complex)
-        {
-            if(b.complex)
-            {
-                var q = b.re*b.re + b.im*b.im;
-                return math.complex((a.re*b.re + a.im*b.im)/q, (a.im*b.re - a.re*b.im)/q);
-            }
-            else
-                return math.complex(a.re/b, a.im/b);
-        }
-        else
-        {
-            if(b.complex)
-            {
-                var q = b.re*b.re + b.im*b.im;
-                return math.complex(a*b.re/q, -a*b.im/q);
-            }
-            else
-                return a/b;
-        }
-    },
-    /** Exponentiate a number
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    pow: function(a,b)
-    {
-        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100)
-        {
-            if(b<0)
-                return math.div(1,math.pow(a,-b));
-            if(b==0)
-                return 1;
-            var coeffs = math.binomialCoefficients(b);
-            var re = 0;
-            var im = 0;
-            var sign = 1;
-            for(var i=0;i<b;i+=2) {
-                re += coeffs[i]*Math.pow(a.re,b-i)*Math.pow(a.im,i)*sign;
-                im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
-                sign = -sign;
-            }
-            if(b%2==0)
-                re += Math.pow(a.im,b)*sign;
-            return math.complex(re,im);
-        }
-        if(a.complex || b.complex || (a<0 && math.fract(b)!=0))
-        {
-            if(!a.complex)
-                a = {re: a, im: 0, complex: true};
-            if(!b.complex)
-                b = {re: b, im: 0, complex: true};
-            var ss = a.re*a.re + a.im*a.im;
-            var arg1 = math.arg(a);
-            var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
-            var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
-            return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-        }
-        else
-        {
-            return Math.pow(a,b);
-        }
-    },
-    /** Calculate the Nth row of Pascal's triangle
-     * @param {Number} n
-     * @returns {Array.<Number>}
-     */
-    binomialCoefficients: function(n) {
-        var b = [1];
-        var f = 1;
-        for(var i=1;i<=n;i++) {
-            b.push( f*=(n+1-i)/i );
-        }
-        return b;
-    },
-    /** a mod b. Always returns a positive number
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    mod: function(a,b) {
-        if(b==Infinity) {
-            return a;
-        }
-        b = math.abs(b);
-        return ((a%b)+b)%b;
-    },
-    /** Calculate the `b`-th root of `a`
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    root: function(a,b)
-    {
-        return math.pow(a,div(1,b));
-    },
-    /** Square root
-     * @param {Number} n
-     * @returns {Number}
-     */
-    sqrt: function(n)
-    {
-        if(n.complex)
-        {
-            var r = math.abs(n);
-            return math.complex( Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
-        }
-        else if(n<0)
-            return math.complex(0,Math.sqrt(-n));
-        else
-            return Math.sqrt(n)
-    },
-    /** Natural logarithm (base `e`)
-     * @param {Number} n
-     * @returns {Number}
-     */
-    log: function(n)
-    {
-        if(n.complex)
-        {
-            var mag = math.abs(n);
-            var arg = math.arg(n);
-            return math.complex(Math.log(mag), arg);
-        }
-        else if(n<0)
-            return math.complex(Math.log(-n),Math.PI);
-        else
-            return Math.log(n);
-    },
-    /** Calculate `e^n`
-     * @param {Number} n
-     * @returns {Number}
-     */
-    exp: function(n)
-    {
-        if(n.complex)
-        {
-            return math.complex( Math.exp(n.re) * Math.cos(n.im), Math.exp(n.re) * Math.sin(n.im) );
-        }
-        else
-            return Math.exp(n);
-    },
-    /** Magnitude of a number - absolute value of a real; modulus of a complex number.
-     * @param {Number} n
-     * @returns {Number}
-     */
-    abs: function(n)
-    {
-        if(n.complex)
-        {
-            if(n.re==0)
-                return Math.abs(n.im);
-            else if(n.im==0)
-                return Math.abs(n.re);
-            else
-                return Math.sqrt(n.re*n.re + n.im*n.im)
-        }
-        else
-            return Math.abs(n);
-    },
-    /** Argument of a (complex) number
-     * @param {Number} n
-     * @returns {Number}
-     */
-    arg: function(n)
-    {
-        if(n.complex)
-            return Math.atan2(n.im,n.re);
-        else
-            return Math.atan2(0,n);
-    },
-    /** Real part of a number
-     * @param {Number} n
-     * @returns {Number}
-     */
-    re: function(n)
-    {
-        if(n.complex)
-            return n.re;
-        else
-            return n;
-    },
-    /** Imaginary part of a number
-     * @param {Number} n
-     * @returns {Number}
-     */
-    im: function(n)
-    {
-        if(n.complex)
-            return n.im;
-        else
-            return 0;
-    },
-    /** Is `n` positive? (Real, and greater than 0)
-     * @param {Number} n
-     * @returns {Boolean}
-     */
-    positive: function(n) {
-        return !n.complex && math.gt(n,0);
-    },
-    /** Is `n` negative? (Real, and less than 0)
-     * @param {Number} n
-     * @returns {Boolean}
-     */
-    negative: function(n) {
-        return math.lt(math.re(n),0);
-    },
-    /** Is `n` nonnegative? (Real, and greater than or equal to 0)
-     * @param {Number} n
-     * @returns {Boolean}
-     */
-    nonnegative: function(n) {
-        return !math.negative(n);
-    },
-    /** Is `a` less than `b`?
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    lt: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return a<b;
-    },
-    /** Is `a` greater than `b`?
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    gt: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return a>b;
-    },
-    /** Is `a` less than or equal to `b`?
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    leq: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return a<=b;
-    },
-    /** Is `a` greater than or equal to `b`?
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    geq: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return a>=b;
-    },
-    /** Is `a` equal to `b`?
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    eq: function(a,b) {
-        if(a.complex) {
-            if(b.complex) {
-                return math.eq(a.re,b.re) && math.eq(a.im,b.im);
-            } else {
-                return math.eq(a.re,b) && math.eq(a.im,0);
-            }
-        } else {
-            if(b.complex) {
-                return math.eq(a,b.re) && math.eq(b.im,0);
-            } else {
-                if(isNaN(a)) {
-                    return isNaN(b);
-                }
-                return a==b;
-            }
-        }
-    },
-    /** Greatest of two numbers - wraps `Math.max`
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    max: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return Math.max(a,b);
-    },
-    /** Greatest of a list of numbers
-     * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
-     * @param {Array} numbers
-     * @returns {Number}
-     */
-    listmax: function(numbers) {
-        if(numbers.length==0) {
-            return;
-        }
-        var best = numbers[0];
-        for(var i=1;i<numbers.length;i++) {
-            best = math.max(best,numbers[i]);
-        }
-        return best;
-    },
-    /** Least of two numbers - wraps `Math.min`
-     * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    min: function(a,b)
-    {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.order complex numbers'));
-        return Math.min(a,b);
-    },
-    /** Least of a list of numbers
-     * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
-     * @param {Array} numbers
-     * @returns {Number}
-     */
-    listmin: function(numbers) {
-        if(numbers.length==0) {
-            return;
-        }
-        var best = numbers[0];
-        for(var i=1;i<numbers.length;i++) {
-            best = math.min(best,numbers[i]);
-        }
-        return best;
-    },
-    /** Are `a` and `b` unequal?
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     * @see Numbas.math.eq
-     */
-    neq: function(a,b)
-    {
-        return !math.eq(a,b);
-    },
-    /** If `n` can be written in the form `a*pi^n`, return the biggest possible `n`, otherwise return `0`.
-     * @param {Number} n
-     * @returns {Number}
-     */
-    piDegree: function(n)
-    {
-        n=Math.abs(n);
-        if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
-            return 0;
-        var degree,a;
-        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && Math.abs(a-math.round(a))>0.00000001; degree++) {}
-        return( a>=1 ? degree : 0 );
-    },
-    /** Add the given number of zero digits to a string representation of a number.
-     * @param {String} n - a string representation of a number
-     * @param {Number} digits - the number of digits to add
-     * @returns {String}
-     */
-    addDigits: function(n,digits) {
-        n = n+'';
-        var m = n.match(/^(-?\d+(?:\.\d+)?)(e[\-+]?\d+)$/);
-        if(m) {
-            return math.addDigits(m[1],digits)+m[2];
-        } else {
-            if(n.indexOf('.')==-1) {
-                n += '.';
-            }
-            for(var i=0;i<digits;i++) {
-                n += '0';
-            }
-            return n;
-        }
-    },
-    /** Settings for {@link Numbas.math.niceNumber}
-     * @typedef Numbas.math.niceNumber_settings
-     * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
-     * @property {Number} precision - number of decimal places or significant figures to show.
-     * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
-     */
-    /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
-     * @param {Number} n
-     * @param {Numbas.math.niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
-     * @see Numbas.util.numberNotationStyles
-     * @returns {String}
-     */
-    niceNumber: function(n,options)
-    {
-        options = options || {};
-        if(n===undefined) {
-            throw(new Numbas.Error('math.niceNumber.undefined'));
-        }
-        if(n.complex)
-        {
-            var re = math.niceNumber(n.re,options);
-            var im = math.niceNumber(n.im,options);
-            if(math.precround(n.im,10)==0)
-                return re+'';
-            else if(math.precround(n.re,10)==0)
-            {
-                if(n.im==1)
-                    return 'i';
-                else if(n.im==-1)
-                    return '-i';
-                else
-                    return im+'*i';
-            }
-            else if(n.im<0)
-            {
-                if(n.im==-1)
-                    return re+' - i';
-                else
-                    return re+im+'*i';
-            }
-            else
-            {
-                if(n.im==1)
-                    return re+' + '+'i';
-                else
-                    return re+' + '+im+'*i';
-            }
-        }
-        else
-        {
-            if(n==Infinity) {
-                return 'infinity';
-            } else if(n==-Infinity) {
-                return '-infinity';
-            }
-            var piD = 0;
-            if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
-                n /= Math.pow(Math.PI,piD);
-            var out;
-            switch(options.precisionType) {
-            case 'sigfig':
-                var precision = options.precision;
-                out = math.siground(n,precision)+'';
-                var sigFigs = math.countSigFigs(out,true);
-                if(sigFigs<precision) {
-                    out = math.addDigits(out,precision-sigFigs);
-                }
-                break;
-            case 'dp':
-                var precision = options.precision;
-                out = math.precround(n,precision)+'';
-                var dp = math.countDP(out);
-                if(dp<precision) {
-                    out = math.addDigits(out,precision-dp);
-                }
-                break;
-            default:
-                var a = Math.abs(n);
-                if(a<1e-15) {
-                    out = '0';
-                } else if(Math.abs(n)<1e-8) {
-                    out = n+'';
-                } else {
-                    out = math.precround(n,10)+'';
-                }
-            }
-            out = math.unscientific(out);
-            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
-            }
-            switch(piD)
-            {
-            case 0:
-                return out;
-            case 1:
-                if(n==1)
-                    return 'pi';
-                else if(n==-1)
-                    return '-pi';
-                else
-                    return out+'*pi';
-            default:
-                if(n==1)
-                    return 'pi^'+piD;
-                else if(n==-1)
-                    return '-pi^'+piD;
-                else
-                    return out+'*pi'+piD;
-            }
-        }
-    },
-    /** Get a random number in range `[0..n-1]`
-     * @param {Number} n
-     * @returns {Number}
-     */
-    randomint: function(n) {
-        return Math.floor(n*(Math.random()%1));
-    },
-    /** Get a  random shuffling of the numbers `[0..n-1]`
-     * @param {Number} n
-     * @returns {Array.<Number>}
-     */
-    deal: function(N)
-    {
-        var J, K, Q = new Array(N);
-        for (J=0 ; J<N ; J++)
-            { K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J; }
-        return Q;
-    },
-    /** Randomly shuffle a list. Returns a new list - the original is unmodified.
-     * @param {Array} list
-     * @returns {Array}
-     */
-    shuffle: function(list) {
-        var l = list.length;
-        var permutation = math.deal(l);
-        var list2 = new Array(l);
-        for(var i=0;i<l;i++) {
-            list2[i]=(list[permutation[i]]);
-        }
-        return list2;
-    },
-    /** Calculate the inverse of a shuffling
-     * @param {Array.<Number>} l
-     * @returns {Array.<Number>} l
-     * @see Numbas.math.deal
-     */
-    inverse: function(l)
-    {
-        arr = new Array(l.length);
-        for(var i=0;i<l.length;i++)
-        {
-            arr[l[i]]=i;
-        }
-        return arr;
-    },
-    /* Just the numbers from 1 to `n` (inclusive) in an array!
-     * @param {Number} n
-     * @returns {Array.<Number>}
-     */
-    range: function(n)
-    {
-        var arr=new Array(n);
-        for(var i=0;i<n;i++)
-        {
-            arr[i]=i;
-        }
-        return arr;
-    },
-    /** Round `a` to `b` decimal places. Real and imaginary parts of complex numbers are rounded independently.
-     * @param {Number} n
-     * @param {Number} b
-     * @returns {Number}
-     * @throws {Numbas.Error} "math.precround.complex" if b is complex
-     */
-    precround: function(a,b) {
-        if(b.complex)
-            throw(new Numbas.Error('math.precround.complex'));
-        if(a.complex)
-            return math.complex(math.precround(a.re,b),math.precround(a.im,b));
-        else
-        {
-            var be = Math.pow(10,b);
-            var fracPart = a % 1;
-            var intPart = a - fracPart;
-            //test to allow a bit of leeway to account for floating point errors
-            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = fracPart*be*10 % 1;
-            var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
-            // multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
-            fracPart *= be;
-            if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
-                fracPart += 1;
-            }
-            var rounded_fracPart = Math.round(fracPart);
-            // if the fractional part has rounded up to a whole number, just add sgn(fracPart) to the integer part
-            if(rounded_fracPart==be || rounded_fracPart==-be) {
-                return intPart+math.sign(fracPart);
-            }
-            // get the fractional part as a string of decimal digits
-            var fracPartString = Math.round(Math.abs(fracPart))+'';
-            while(fracPartString.length<b) {
-                fracPartString = '0'+fracPartString;
-            }
-            // construct the rounded number as a string, then convert it to a JS float
-            var out = parseFloat(intPart+'.'+fracPartString);
-            // make sure a negative number remains negative
-            if(intPart==0 && a<0) {
-                return -out;
-            } else {
-                return out;
-            }
-        }
-    },
-    /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
-     * For example, '1.23e-5' is returned as '0.0000123'
-     * @param {String} str
-     * @returns String
-     */
-    unscientific: function(str) {
-        var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
-        if(!m) {
-            return str;
-        }
-        var minus = m[1] || '';
-        var digits = m[2]+(m[3] || '');
-        var pow = parseInt(m[4]);
-        var l = digits.length;
-        var out;
-        if(pow>=l-1) {
-            out = digits;
-            for(var i=l-1;i<pow;i++) {
-                out += '0';
-            }
-        } else if(pow<0) {
-            out = digits;
-            for(var i=1;i<-pow;i++) {
-                out = '0'+out;
-            }
-            out = '0.'+out;
-        } else {
-            out = digits.slice(0,pow+1) + '.' + digits.slice(pow+1);
-        }
-        return minus + out;
-    },
-    /** Round `a` to `b` significant figures. Real and imaginary parts of complex numbers are rounded independently.
-     * @param {Number} n
-     * @param {Number} b
-     * @returns {Number}
-     * @throws {Numbas.Error} "math.precround.complex" if b is complex
-     */
-    siground: function(a,b) {
-        if(b.complex)
-            throw(new Numbas.Error('math.siground.complex'));
-        if(a.complex)
-            return math.complex(math.siground(a.re,b),math.siground(a.im,b));
-        else
-        {
-            var s = math.sign(a);
-            if(a==0) { return 0; }
-            if(a==Infinity || a==-Infinity) { return a; }
-            b = Math.pow(10, b-Math.ceil(math.log10(s*a)));
-            //test to allow a bit of leeway to account for floating point errors
-            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*b*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
-            if(d==4 && 1-v<1e-9) {
-                return Math.round(a*b+1)/b;
-            }
-            else if(d==-5 && v>-1e-9 && v<0) {
-                return Math.round(a*b+1)/b;
-            }
-            return Math.round(a*b)/b;
-        }
-    },
-    /** Count the number of decimal places used in the string representation of a number.
-     * @param {Number|String} n
-     * @returns {Number}
-     */
-    countDP: function(n) {
-        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([\-+])?(\d+))?$/);
-        if(!m)
-            return 0;
-        else {
-            var dp = m[1] ? m[1].length : 0;
-            if(m[2] && m[2]=='-') {
-                dp += parseInt(m[3]);
-            }
-            return dp;
-        }
-    },
-    /** Calculate the significant figures precision of a number.
-     * @param {Number|String} n
-     * @param {Boolean} [max] - be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
-     * @returns {Number}
-     */
-    countSigFigs: function(n,max) {
-        n += '';
-        var m;
-        if(max) {
-            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
-        } else {
-            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
-        }
-        if(!m)
-            return 0;
-        var sigFigs = m[1] || m[2] || m[3] || m[4] || m[5] || m[6];
-        return sigFigs.replace('.','').length;
-    },
-    /** Is n given to the desired precision?
-     * @param {Number|String} n
-     * @param {String} precisionType - either 'dp' or 'sigfig'
-     * @param {Number} precision - number of desired digits of precision
-     * @param {Boolean} strictPrecision - must trailing zeros be used to get to the desired precision (true), or is it allowed to give fewer digits in that case (false)?
-     * @returns {Boolean}
-     */
-    toGivenPrecision: function(n,precisionType,precision,strictPrecision) {
-        if(precisionType=='none') {
-            return true;
-        }
-        n += '';
-        var precisionOK = false;
-        var counters = {'dp': math.countDP, 'sigfig': math.countSigFigs};
-        var counter = counters[precisionType];
-        var digits = counter(n);
-        if(strictPrecision)
-            precisionOK = digits == precision;
-        else
-            precisionOK = digits <= precision;
-        if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
-            var trailingZeroes = n.match(/0*$/)[0].length;
-            if(digits + trailingZeroes >= precision) {
-                precisionOK = true;
-            }
-        }
-        return precisionOK;
-    },
-    /** Is a within +/- tolerance of b?
-     * @param {Number} a
-     * @param {Number} b
-     * @param {Number} tolerance
-     * @returns {Boolean}
-     */
-    withinTolerance: function(a,b,tolerance) {
-        if(tolerance==0) {
-            return math.eq(a,b);
-        } else {
-            var upper = math.add(b,tolerance);
-            var lower = math.sub(b,tolerance);
-            return math.geq(a,lower) && math.leq(a,upper);
-        }
-    },
-    /** Factorial, or Gamma(n+1) if n is not a positive integer.
-     * @param {Number} n
-     * @returns {Number}
-     */
-    factorial: function(n)
-    {
-        if( Numbas.util.isInt(n) && n>=0 )
-        {
-            if(n<=1) {
-                return 1;
-            }else{
-                var j=1;
-                for(var i=2;i<=n;i++)
-                {
-                    j*=i;
-                }
-                return j;
-            }
-        }
-        else    //gamma function extends factorial to non-ints and negative numbers
-        {
-            return math.gamma(math.add(n,1));
-        }
-    },
-    /** Lanczos approximation to the gamma function
-     *
-     * http://en.wikipedia.org/wiki/Lanczos_approximation#Simple_implementation
-     * @param {Number} n
-     * @returns {Number}
-     */
-    gamma: function(n)
-    {
-        var g = 7;
-        var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
-        var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI, im = math.complex(0,1);
-        if((n.complex && n.re<0.5) || (!n.complex && n<0.5))
-        {
-            return div(pi,mul(sin(mul(pi,n)),math.gamma(sub(1,n))));
-        }
-        else
-        {
-            n = sub(n,1);            //n -= 1
-            var x = p[0];
-            for(var i=1;i<g+2;i++)
-            {
-                x = add(x, div(p[i],add(n,i)));    // x += p[i]/(n+i)
-            }
-            var t = add(n,add(g,0.5));        // t = n+g+0.5
-            return mul(sqrt(2*pi),mul(pow(t,add(n,0.5)),mul(exp(neg(t)),x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
-        }
-    },
-    /** Base-10 logarithm
-     * @param {Number} n
-     * @returns {Number}
-     */
-    log10: function(n)
-    {
-        return mul(math.log(n),Math.LOG10E);
-    },
-    /** Arbitrary base logarithm
-     * @param {Number} n
-     * @param {Number} b
-     * @returns {Number} log(n)/log(b)
-     */
-    log_base: function(n,b)
-    {
-        return div(math.log(n),math.log(b));
-    },
-    /** Convert from degrees to radians
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.degrees
-     */
-    radians: function(x) {
-        return mul(x,Math.PI/180);
-    },
-    /** Convert from radians to degrees
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.radians
-     */
-    degrees: function(x) {
-        return mul(x,180/Math.PI);
-    },
-    /** Cosine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    cos: function(x) {
-        if(x.complex)
-        {
-            return math.complex(Math.cos(x.re)*math.cosh(x.im), -Math.sin(x.re)*math.sinh(x.im));
-        }
-        else
-            return Math.cos(x);
-    },
-    /** Sine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    sin: function(x) {
-        if(x.complex)
-        {
-            return math.complex(Math.sin(x.re)*math.cosh(x.im), Math.cos(x.re)*math.sinh(x.im));
-        }
-        else
-            return Math.sin(x);
-    },
-    /** Tangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    tan: function(x) {
-        if(x.complex)
-            return div(math.sin(x),math.cos(x));
-        else
-            return Math.tan(x);
-    },
-    /** Cosecant
-     * @param {Number} x
-     * @returns {Number}
-     */
-    cosec: function(x) {
-        return div(1,math.sin(x));
-    },
-    /** Secant
-     * @param {Number} x
-     * @returns {Number}
-     */
-    sec: function(x) {
-        return div(1,math.cos(x));
-    },
-    /** Cotangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    cot: function(x) {
-        return div(1,math.tan(x));
-    },
-    /** Inverse sine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arcsin: function(x) {
-        if(x.complex || math.abs(x)>1)
-        {
-            var i = math.complex(0,1), ni = math.complex(0,-1);
-            var ex = add(mul(x,i),math.sqrt(sub(1,mul(x,x)))); //ix+sqrt(1-x^2)
-            return mul(ni,math.log(ex));
-        }
-        else
-            return Math.asin(x);
-    },
-    /** Inverse cosine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arccos: function(x) {
-        if(x.complex || math.abs(x)>1)
-        {
-            var i = math.complex(0,1), ni = math.complex(0,-1);
-            var ex = add(x, math.sqrt( sub(mul(x,x),1) ) );    //x+sqrt(x^2-1)
-            var result = mul(ni,math.log(ex));
-            if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
-                result = math.negate(result);
-            return result;
-        }
-        else
-            return Math.acos(x);
-    },
-    /** Inverse tangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arctan: function(x) {
-        if(x.complex)
-        {
-            var i = math.complex(0,1);
-            var ex = div(add(i,x),sub(i,x));
-            return mul(math.complex(0,0.5), math.log(ex));
-        }
-        else
-            return Math.atan(x);
-    },
-    /** Hyperbolic sine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    sinh: function(x) {
-        if(x.complex)
-            return div(sub(math.exp(x), math.exp(math.negate(x))),2);
-        else
-            return (Math.exp(x)-Math.exp(-x))/2;
-    },
-    /** Hyperbolic cosine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    cosh: function(x) {
-        if(x.complex)
-            return div(add(math.exp(x), math.exp(math.negate(x))),2);
-        else
-            return (Math.exp(x)+Math.exp(-x))/2
-    },
-    /** Hyperbolic tangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    tanh: function(x) {
-        return div(math.sinh(x),math.cosh(x));
-    },
-    /** Hyperbolic cosecant
-     * @param {Number} x
-     * @returns {Number}
-     */
-    cosech: function(x) {
-        return div(1,math.sinh(x));
-    },
-    /** Hyperbolic secant
-     * @param {Number} x
-     * @returns {Number}
-     */
-    sech: function(x) {
-        return div(1,math.cosh(x));
-    },
-    /** Hyperbolic tangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    coth: function(x) {
-        return div(1,math.tanh(x));
-    },
-    /** Inverse hyperbolic sine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arcsinh: function(x) {
-        if(x.complex)
-            return math.log(add(x, math.sqrt(add(mul(x,x),1))));
-        else
-            return Math.log(x + Math.sqrt(x*x+1));
-    },
-    /** Inverse hyperbolic cosine
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arccosh: function (x) {
-        if(x.complex)
-            return math.log(add(x, math.sqrt(sub(mul(x,x),1))));
-        else
-            return Math.log(x + Math.sqrt(x*x-1));
-    },
-    /** Inverse hyperbolic tangent
-     * @param {Number} x
-     * @returns {Number}
-     */
-    arctanh: function (x) {
-        if(x.complex)
-            return div(math.log(div(add(1,x),sub(1,x))),2);
-        else
-            return 0.5 * Math.log((1+x)/(1-x));
-    },
-    /** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.round
-     * @see Numbas.math.floor
-     */
-    ceil: function(x) {
-        if(x.complex)
-            return math.complex(math.ceil(x.re),math.ceil(x.im));
-        else
-            return Math.ceil(x);
-    },
-    /** Round down to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.ceil
-     * @see Numbas.math.round
-     */
-    floor: function(x) {
-        if(x.complex)
-            return math.complex(math.floor(x.re),math.floor(x.im));
-        else
-            return Math.floor(x);
-    },
-    /** Round to the nearest integer; fractional part >= 0.5 rounds up. For complex numbers, real and imaginary parts are rounded independently.
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.ceil
-     * @see Numbas.math.floor
-     */
-    round: function(x) {
-        if(x.complex)
-            return math.complex(Math.round(x.re),Math.round(x.im));
-        else
-            return Math.round(x);
-    },
-    /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.fract
-     */
-    trunc: function(x) {
-        if(x.complex)
-            return math.complex(math.trunc(x.re),math.trunc(x.im));
-        if(x>0) {
-            return Math.floor(x);
-        }else{
-            return Math.ceil(x);
-        }
-    },
-    /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
-     * @param {Number} x
-     * @returns {Number}
-     * @see Numbas.math.trunc
-     */
-    fract: function(x) {
-        if(x.complex)
-            return math.complex(math.fract(x.re),math.fract(x.im));
-        return x-math.trunc(x);
-    },
-    /** Sign of a number - +1, 0, or -1. For complex numbers, gives the sign of the real and imaginary parts separately.
-     * @param {Number} x
-     * @returns {Number}
-     */
-    sign: function(x) {
-        if(x.complex)
-            return math.complex(math.sign(x.re),math.sign(x.im));
-        if(x==0) {
-            return 0;
-        }else if (x>0) {
-            return 1;
-        }else {
-            return -1;
-        }
-    },
-    /** Get a random real number between `min` and `max` (inclusive)
-     * @param {Number} min
-     * @param {Number] max
-     * @returns {Number}
-     * @see Numbas.math.random
-     * @see Numbas.math.choose
-     */
-    randomrange: function(min,max)
-    {
-        return Math.random()*(max-min)+min;
-    },
-    /** Get a random number in the specified range.
-     *
-     * Returns a random choice from `min` to `max` at `step`-sized intervals
-     *
-     * If all the values in the range are appended to the list, eg `[min,max,step,v1,v2,v3,...]`, just pick randomly from the values.
-     *
-     * @param {range} range - `[min,max,step]`
-     * @returns {Number}
-     * @see Numbas.math.randomrange
-     */
-    random: function(range)
-    {
-        if(range[2]==0) {
-            return math.randomrange(range[0],range[1]);
-        } else {
-            var num_steps = math.rangeSize(range);
-            var n = Math.floor(math.randomrange(0,num_steps));
-            return range[0]+n*range[2];
-        }
-    },
-    /** Remove all the values in the list `exclude` from the list `range`
-     * @param {Array.<Number>} range
-     * @param {Array.<Number>} exclude
-     * @returns {Array.<Number>}
-     */
-    except: function(range,exclude) {
-        range = range.filter(function(r) {
-            for(var i=0;i<exclude.length;i++) {
-                if(math.eq(r,exclude[i]))
-                    return false;
-            }
-            return true;
-        });
-        return range;
-    },
-    /** Choose one item from an array, at random
-     * @param {Array} selection
-     * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
-     * @see Numbas.math.randomrange
-     */
-    choose: function(selection)
-    {
-        if(selection.length==0)
-            throw(new Numbas.Error('math.choose.empty selection'));
-        var n = Math.floor(math.randomrange(0,selection.length));
-        return selection[n];
-    },
-    /* Product of the numbers in the range `[a..b]`, i.e. $frac{a!}{b!}$.
-     *
-     * from http://dreaminginjavascript.wordpress.com/2008/11/08/combinations-and-permutations-in-javascript/
-     *
-     * (public domain)
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     */
-    productRange: function(a,b) {
-        if(a>b)
-            return 1;
-        var product=a,i=a;
-        while (i++<b) {
-            product*=i;
-        }
-        return product;
-    },
-    /** `nCk` - number of ways of picking `k` unordered elements from `n`.
-     * @param {Number} n
-     * @param {Number} k
-     * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
-     */
-    combinations: function(n,k) {
-        if(n.complex || k.complex) {
-            throw(new Numbas.Error('math.combinations.complex'));
-        }
-        if(n<0) {
-            throw(new Numbas.Error('math.combinations.n less than zero'));
-        }
-        if(k<0) {
-            throw(new Numbas.Error('math.combinations.k less than zero'));
-        }
-        if(n<k) {
-            throw(new Numbas.Error('math.combinations.n less than k'));
-        }
-        k=Math.max(k,n-k);
-        return math.productRange(k+1,n)/math.productRange(1,n-k);
-    },
-    /** `nPk` - number of ways of picking `k` ordered elements from `n`.
-     * @param {Number} n
-     * @param {Number} k
-     * @throws {Numbas.Error} "math.combinations.complex" if either of `n` or `k` is complex.
-     */
-    permutations: function(n,k) {
-        if(n.complex || k.complex) {
-            throw(new Numbas.Error('math.permutations.complex'));
-        }
-        if(n<0) {
-            throw(new Numbas.Error('math.permutations.n less than zero'));
-        }
-        if(k<0) {
-            throw(new Numbas.Error('math.permutations.k less than zero'));
-        }
-        if(n<k) {
-            throw(new Numbas.Error('math.permutations.n less than k'));
-        }
-        return math.productRange(n-k+1,n);
-    },
-    /** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Boolean}
-     */
-    divides: function(a,b) {
-        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b))
-            return false;
-        return (b % a) == 0;
-    },
-    /** Greatest common factor (GCF), or greatest common divisor (GCD), of `a` and `b`.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
-     */
-    gcd: function(a,b) {
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.gcf.complex'));
-        if(Math.floor(a)!=a || Math.floor(b)!=b)
-            return 1;
-        a = Math.floor(Math.abs(a));
-        b = Math.floor(Math.abs(b));
-        var c=0;
-        if(a<b) { c=a; a=b; b=c; }
-        if(b==0){return 1;}
-        while(a % b != 0) {
-            c=b;
-            b=a % b;
-            a=c;
-        }
-        return b;
-    },
-    /** Are `a` and `b` coprime? If either of `a` or `b` is not an integer, return `false`.
-     * Equivalent to `gcd(a,b) = 1`.
-     * @param {Number} a
-     * @param {Number} b
-     * @see Numbas.math.gcd
-     * @returns {Boolean}
-     */
-    coprime: function(a,b) {
-        if(a.complex || b.complex || !Numbas.util.isInt(a) || !Numbas.util.isInt(b)) {
-            return true;
-        }
-        return math.gcd(a,b) == 1;
-    },
-    /** Lowest common multiple (LCM) of `a` and `b`.
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {Number}
-     * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
-     */
-    lcm: function(a,b) {
-        if(arguments.length==0) {
-            return 1;
-        } else if(arguments.length==1) {
-            return a;
-        }
-        if(a.complex || b.complex)
-            throw(new Numbas.Error('math.lcm.complex'));
-        if(arguments.length>2) {
-            a = Math.floor(Math.abs(a));
-            for(var i=1;i<arguments.length;i++) {
-                if(arguments[i].complex) {
-                    throw(new Numbas.Error('math.lcm.complex'));
-                }
-                b = Math.floor(Math.abs(arguments[i]));
-                a = a*b/math.gcf(a,b);
-            }
-            return a;
-        }
-        a = Math.floor(Math.abs(a));
-        b = Math.floor(Math.abs(b));
-        var c = math.gcf(a,b);
-        return a*b/c;
-    },
-    /** Write the range of integers `[a..b]` as an array of the form `[min,max,step]`, for use with {@link Numbas.math.random}. If either number is complex, only the real part is used.
-     *
-     * @param {Number} a
-     * @param {Number} b
-     * @returns {range}
-     * @see Numbas.math.random
-     */
-    defineRange: function(a,b)
-    {
-        if(a.complex)
-            a=a.re;
-        if(b.complex)
-            b=b.re;
-        return [a,b,1];
-    },
-    /** Change the step size of a range created with {@link Numbas.math.defineRange}
-     * @param {range} range
-     * @param {Number} step
-     * @returns {range}
-     */
-    rangeSteps: function(range,step)
-    {
-        if(step.complex)
-            step = step.re;
-        return [range[0],range[1],step];
-    },
-    /** Convert a range to a list - enumerate all the elements of the range
-     * @param {range} range
-     * @returns {Number[]}
-     */
-    rangeToList: function(range) {
-        var start = range[0];
-        var end = range[1];
-        var step_size = range[2];
-        var out = [];
-        var n = 0;
-        var t = start;
-        if(step_size==0) {
-            throw(new Numbas.Error('math.rangeToList.zero step size'));
-        }
-        if((end-start)*step_size < 0) {
-            return [];
-        }
-        if(start==end) {
-            return [start];
-        }
-        while(start<end ? t<=end : t>=end)
-        {
-            out.push(t)
-            n += 1;
-            t = start + n*step_size;
-        }
-        return out;
-    },
-    /** Calculate the number of elements in a range
-     * @param {range} range
-     * @returns {Number}
-     */
-    rangeSize: function(range) {
-        var diff = range[1]-range[0];
-        var num_steps = Math.floor(diff/range[2])+1;
-        num_steps += (range[0]+num_steps*range[2] == range[1] ? 1 : 0);
-        return num_steps;
-    },
-    /** Get a rational approximation to a real number by the continued fractions method.
-     *
-     * If `accuracy` is given, the returned answer will be within `Math.exp(-accuracy)` of the original number
-     *
-     * @param {Number} n
-     * @param {Number} [accuracy]
-     * @returns {Array.<Number>} - [numerator,denominator]
-     */
-    rationalApproximation: function(n,accuracy)
-    {
-        if(accuracy===undefined) {
-            accuracy = 15;
-        }
-        if(accuracy>30) {
-            accuracy = 30;
-        }
-        accuracy = Math.exp(-accuracy);
-        var on = n;
-        var e = Math.floor(n);
-        if(e==n)
-            return [n,1];
-        var l = 0;
-        var frac = [];
-        while(l<100 && Math.abs(on-e)>accuracy)
-        {
-            l+=1;
-            var i = Math.floor(n);
-            frac.push(i);
-            n = 1/(n-i);
-            var e = Infinity;
-            for(var j=l-1;j>=0;j--)
-            {
-                e = frac[j]+1/e;
-            }
-        }
-        if(l==0) {
-            return [e,1];
-        }
-        var f = [1,0];
-        for(j=l-1;j>=0;j--)
-        {
-            f = [frac[j]*f[0]+f[1],f[0]];
-        }
-        return f;
-    },
-    /** The first 1000 primes */
-    primes: [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571,3581,3583,3593,3607,3613,3617,3623,3631,3637,3643,3659,3671,3673,3677,3691,3697,3701,3709,3719,3727,3733,3739,3761,3767,3769,3779,3793,3797,3803,3821,3823,3833,3847,3851,3853,3863,3877,3881,3889,3907,3911,3917,3919,3923,3929,3931,3943,3947,3967,3989,4001,4003,4007,4013,4019,4021,4027,4049,4051,4057,4073,4079,4091,4093,4099,4111,4127,4129,4133,4139,4153,4157,4159,4177,4201,4211,4217,4219,4229,4231,4241,4243,4253,4259,4261,4271,4273,4283,4289,4297,4327,4337,4339,4349,4357,4363,4373,4391,4397,4409,4421,4423,4441,4447,4451,4457,4463,4481,4483,4493,4507,4513,4517,4519,4523,4547,4549,4561,4567,4583,4591,4597,4603,4621,4637,4639,4643,4649,4651,4657,4663,4673,4679,4691,4703,4721,4723,4729,4733,4751,4759,4783,4787,4789,4793,4799,4801,4813,4817,4831,4861,4871,4877,4889,4903,4909,4919,4931,4933,4937,4943,4951,4957,4967,4969,4973,4987,4993,4999,5003,5009,5011,5021,5023,5039,5051,5059,5077,5081,5087,5099,5101,5107,5113,5119,5147,5153,5167,5171,5179,5189,5197,5209,5227,5231,5233,5237,5261,5273,5279,5281,5297,5303,5309,5323,5333,5347,5351,5381,5387,5393,5399,5407,5413,5417,5419,5431,5437,5441,5443,5449,5471,5477,5479,5483,5501,5503,5507,5519,5521,5527,5531,5557,5563,5569,5573,5581,5591,5623,5639,5641,5647,5651,5653,5657,5659,5669,5683,5689,5693,5701,5711,5717,5737,5741,5743,5749,5779,5783,5791,5801,5807,5813,5821,5827,5839,5843,5849,5851,5857,5861,5867,5869,5879,5881,5897,5903,5923,5927,5939,5953,5981,5987,6007,6011,6029,6037,6043,6047,6053,6067,6073,6079,6089,6091,6101,6113,6121,6131,6133,6143,6151,6163,6173,6197,6199,6203,6211,6217,6221,6229,6247,6257,6263,6269,6271,6277,6287,6299,6301,6311,6317,6323,6329,6337,6343,6353,6359,6361,6367,6373,6379,6389,6397,6421,6427,6449,6451,6469,6473,6481,6491,6521,6529,6547,6551,6553,6563,6569,6571,6577,6581,6599,6607,6619,6637,6653,6659,6661,6673,6679,6689,6691,6701,6703,6709,6719,6733,6737,6761,6763,6779,6781,6791,6793,6803,6823,6827,6829,6833,6841,6857,6863,6869,6871,6883,6899,6907,6911,6917,6947,6949,6959,6961,6967,6971,6977,6983,6991,6997,7001,7013,7019,7027,7039,7043,7057,7069,7079,7103,7109,7121,7127,7129,7151,7159,7177,7187,7193,72077211,7213,7219,7229,7237,7243,7247,7253,7283,7297,7307,7309,7321,7331,7333,7349,7351,7369,7393,7411,7417,7433,7451,7457,7459,7477,7481,7487,7489,7499,7507,7517,7523,7529,7537,7541,7547,7549,7559,7561,7573,7577,7583,7589,7591,7603,7607,7621,7639,7643,7649,7669,7673,7681,7687,7691,7699,7703,7717,7723,7727,7741,7753,7757,7759,7789,7793,7817,7823,7829,7841,7853,7867,7873,7877,7879,7883,7901,7907,7919],
-    /** Factorise n. When n=2^(a1)*3^(a2)*5^(a3)*..., this returns the powers [a1,a2,a3,...]
-     *
-     * @param {Number} n
-     * @returns {Array.<Number>} - exponents of the prime factors of n
-     */
-    factorise: function(n) {
-        if(n<=0) {
-            return [];
-        }
-        var factors = [];
-        for(var i=0;i<math.primes.length;i++) {
-            var acc = 0;
-            var p = math.primes[i];
-            while(n%p==0) {
-                acc += 1;
-                n /= p;
-            }
-            factors.push(acc);
-            if(n==1) {
-                break;
-            }
-        }
-        return factors;
-    },
-    /** Sum the elements in the given list
-     *
-     * @param {Array.<Number>} list
-     * @returns {Number}
-     */
-    sum: function(list) {
-        var total = 0;
-        var l = list.length;
-        if(l==0) {
-            return 0;
-        }
-        for(var i=0;i<l;i++) {
-            total = math.add(total,list[i]);
-        }
-        return total;
-    }
-};
-math.gcf = math.gcd;
-var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
-/** A list of a vector's components.
- * @typedef vector
- *  @type {Array.<Number>}
- */
-/** Vector operations.
- *
- * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of vectors don't line up exactly
- * @namespace Numbas.vectormath
- */
-var vectormath = Numbas.vectormath = {
-    /** Negate a vector - negate each of its components
-     * @param {vector} v
-     * @returns {vector}
-     */
-    negate: function(v) {
-        return v.map(function(x) { return negate(x); });
-    },
-    /** Add two vectors
-     * @param {vector} a
-     * @param {vector} b
-     * @returns {vector}
-     */
-    add: function(a,b) {
-        if(b.length>a.length)
-        {
-            var c = b;
-            b = a;
-            a = c;
-        }
-        return a.map(function(x,i){ return add(x,b[i]||0) });
-    },
-    /** Subtract one vector from another
-     * @param {vector} a
-     * @param {vector} b
-     * @returns {vector}
-     */
-    sub: function(a,b) {
-        if(b.length>a.length)
-        {
-            return b.map(function(x,i){ return sub(a[i]||0,x) });
-        }
-        else
-        {
-            return a.map(function(x,i){ return sub(x,b[i]||0) });
-        }
-    },
-    /** Multiply by a scalar
-     * @param {Number} k
-     * @param {vector} v
-     * @returns {vector}
-     */
-    mul: function(k,v) {
-        return v.map(function(x){ return mul(k,x) });
-    },
-    /** Divide by a scalar
-     * @param {vector} v
-     * @param {Number} k
-     * @returns {vector}
-     */
-    div: function(v,k) {
-        return v.map(function(x){ return div(x,k); });
-    },
-    /** Vector dot product - each argument can be a vector, or a matrix with one row or one column, which is converted to a vector.
-     * @param {vector|matrix} a
-     * @param {vector|matrix} b
-     * @returns {Number}
-     * @throws {Numbas.Error} "vectormaths.dot.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
-     */
-    dot: function(a,b) {
-        //check if A is a matrix object. If it's the right shape, we can use it anyway
-        if('rows' in a)
-        {
-            if(a.rows==1)
-                a = a[0];
-            else if(a.columns==1)
-                a = a.map(function(x){return x[0]});
-            else
-                throw(new Numbas.Error('vectormath.dot.matrix too big'));
-        }
-        //Same check for B
-        if('rows' in b)
-        {
-            if(b.rows==1)
-                b = b[0];
-            else if(b.columns==1)
-                b = b.map(function(x){return x[0]});
-            else
-                throw(new Numbas.Error('vectormath.dot.matrix too big'));
-        }
-        if(b.length>a.length)
-        {
-            var c = b;
-            b = a;
-            a = c;
-        }
-        return a.reduce(function(s,x,i){ return add(s,mul(x,b[i]||0)) },0);
-    },
-    /** Vector cross product - each argument can be a vector, or a matrix with one row, which is converted to a vector.
-     *
-     * @param {vector|matrix} a
-     * @param {vector|matrix} b
-     * @returns {vector}
-     *
-     * @throws {Numbas.Error} "vectormaths.cross.matrix too big" if either of `a` or `b` is bigger than `1xN` or `Nx1`.
-     * @throws {Numbas.Error} "vectormath.cross.not 3d" if either of the vectors is not 3D.
-     */
-    cross: function(a,b) {
-        //check if A is a matrix object. If it's the right shape, we can use it anyway
-        if('rows' in a)
-        {
-            if(a.rows==1)
-                a = a[0];
-            else if(a.columns==1)
-                a = a.map(function(x){return x[0]});
-            else
-                throw(new Numbas.Error('vectormath.cross.matrix too big'));
-        }
-        //Same check for B
-        if('rows' in b)
-        {
-            if(b.rows==1)
-                b = b[0];
-            else if(b.columns==1)
-                b = b.map(function(x){return x[0]});
-            else
-                throw(new Numbas.Error('vectormath.cross.matrix too big'));
-        }
-        if(a.length!=3 || b.length!=3)
-            throw(new Numbas.Error('vectormath.cross.not 3d'));
-        return [
-                sub( mul(a[1],b[2]), mul(a[2],b[1]) ),
-                sub( mul(a[2],b[0]), mul(a[0],b[2]) ),
-                sub( mul(a[0],b[1]), mul(a[1],b[0]) )
-                ];
-    },
-    /** Length of a vector, squared
-     * @param {vector} a
-     * @returns {Number}
-     */
-    abs_squared: function(a) {
-        return a.reduce(function(s,x){ return s + mul(x,x); },0);
-    },
-    /** Length of a vector
-     * @param {vector} a
-     * @returns {Number}
-     */
-    abs: function(a) {
-        return Math.sqrt( a.reduce(function(s,x){ return s + mul(x,x); },0) );
-    },
-    /** Angle between vectors a and b, in radians, or 0 if either vector has length 0.
-     * @param {vector} a
-     * @param {vector} b
-     * @returns {Number}
-     */
-    angle: function(a,b) {
-        var dot = vectormath.dot(a,b);
-        var da = vectormath.abs_squared(a);
-        var db = vectormath.abs_squared(b);
-        if(da*db==0) {
-            return 0;
-        }
-        var d = Math.sqrt(da*db);
-        return math.arccos(dot/d);
-    },
-    /** Are two vectors equal? True if each pair of corresponding components is equal.
-     * @param {vector} a
-     * @param {vector} b
-     * @returns {Boolean}
-     */
-    eq: function(a,b) {
-        if(b.length>a.length)
-        {
-            var c = b;
-            b = a;
-            a = c;
-        }
-        return a.reduce(function(s,x,i){return s && eq(x,b[i]||0)},true);
-    },
-    /** Are two vectors unequal?
-     * @param {vector} a
-     * @param {vector} b
-     * @returns {Boolean}
-     * @see Numbas.vectormath.eq
-     */
-    neq: function(a,b) {
-        return !vectormath.eq(a,b);
-    },
-    /** Multiply a vector on the left by a matrix
-     * @param {matrix} m
-     * @param {vector} v
-     * @returns {vector}
-     */
-    matrixmul: function(m,v) {
-        return m.map(function(row){
-            return row.reduce(function(s,x,i){ return add(s,mul(x,v[i]||0)); },0);
-        });
-    },
-    /** Multiply a vector on the right by a matrix.
-     * The vector is considered as a column vector.
-     * @param {vector} v
-     * @param {matrix} m
-     * @returns {vector}
-     */
-    vectormatrixmul: function(v,m) {
-        var out = [];
-        for(var i=0;i<m.columns;i++) {
-            out.push(v.reduce(function(s,x,j){ var c = j<m.rows ? (m[j][i]||0) : 0; return add(s,mul(x,c)); },0));
-        }
-        return out;
-    },
-    /** Apply given function to each element
-     * @param {vector}
-     * @param {function}
-     * @returns {vector}
-     */
-    map: function(v,fn) {
-        return v.map(fn);
-    },
-    /** Round each element to given number of decimal places
-     * @param {vector}
-     * @param {Number} - number of decimal places
-     * @returns {vector}
-     */
-    precround: function(v,dp) {
-        return vectormath.map(v,function(n){return math.precround(n,dp);});
-    },
-    /** Round each element to given number of significant figures
-     * @param {vector}
-     * @param {Number} - number of decimal places
-     * @returns {vector}
-     */
-    siground: function(v,sf) {
-        return vectormath.map(v,function(n){return math.siground(n,sf);});
-    },
-    /** Transpose of a vector
-     * @param {vector} v
-     * @returns {matrix}
-     */
-    transpose: function(v) {
-        var matrix = [v.slice()];
-        matrix.rows = 1;
-        matrix.columns = v.length;
-        return matrix;
-    },
-    /** Convert a vector to a 1-column matrix
-     * @param {vector} v
-     * @returns {matrix}
-     */
-    toMatrix: function(v) {
-        var m = v.map(function(n){return [n]});
-        m.rows = m.length;
-        m.columns = 1;
-        return m;
-    }
-}
-/** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
- * @typedef matrix
- * @type {Array.<Array.<Number>>}
- * @property {Number} rows - The number of rows in the matrix
- * @property {Number} columns - The number of columns in the matrix
- */
-/** Matrix operations.
- *
- * These operations are very lax about the dimensions of vectors - they stick zeros in when pairs of matrices don't line up exactly
- * @namespace Numbas.matrixmath
- */
-var matrixmath = Numbas.matrixmath = {
-    /** Negate a matrix - negate each of its elements */
-    negate: function(m) {
-        var matrix = [];
-        for(var i=0;i<m.rows;i++) {
-            matrix.push(m[i].map(function(x){ return negate(x) }));
-        }
-        matrix.rows = m.rows;
-        matrix.columns = m.columns;
-        return matrix;
-    },
-    /** Add two matrices.
-     *
-     * @param {matrix} a
-     * @param {matrix} b
-     * @returns {matrix}
-     */
-    add: function(a,b) {
-        var rows = Math.max(a.rows,b.rows);
-        var columns = Math.max(a.columns,b.columns);
-        var matrix = [];
-        for(var i=0;i<rows;i++)
-        {
-            var row = [];
-            matrix.push(row);
-            for(var j=0;j<columns;j++)
-            {
-                row[j] = add(a[i][j]||0,b[i][j]||0);
-            }
-        }
-        matrix.rows = rows;
-        matrix.columns = columns;
-        return matrix;
-    },
-    /** Subtract one matrix from another
-     *
-     * @param {matrix} a
-     * @param {matrix} b
-     * @returns {matrix}
-     */
-    sub: function(a,b) {
-        var rows = Math.max(a.rows,b.rows);
-        var columns = Math.max(a.columns,b.columns);
-        var matrix = [];
-        for(var i=0;i<rows;i++)
-        {
-            var row = [];
-            matrix.push(row);
-            for(var j=0;j<columns;j++)
-            {
-                row[j] = sub(a[i][j]||0,b[i][j]||0);
-            }
-        }
-        matrix.rows = rows;
-        matrix.columns = columns;
-        return matrix;
-    },
-    /** Matrix determinant. Only works up to 3x3 matrices.
-     * @param {matrix} m
-     * @returns {Number}
-     * @throws {Numbas.Error} "matrixmath.abs.too big" if the matrix has more than 3 rows.
-     */
-    abs: function(m) {
-        if(m.rows!=m.columns)
-            throw(new Numbas.Error('matrixmath.abs.non-square'));
-        //abstraction failure!
-        switch(m.rows)
-        {
-        case 1:
-            return m[0][0];
-        case 2:
-            return sub( mul(m[0][0],m[1][1]), mul(m[0][1],m[1][0]) );
-        case 3:
-            return add( sub(
-                            mul(m[0][0],sub(mul(m[1][1],m[2][2]),mul(m[1][2],m[2][1]))),
-                            mul(m[0][1],sub(mul(m[1][0],m[2][2]),mul(m[1][2],m[2][0])))
-                        ),
-                        mul(m[0][2],sub(mul(m[1][0],m[2][1]),mul(m[1][1],m[2][0])))
-                    );
-        default:
-            throw(new Numbas.Error('matrixmath.abs.too big'));
-        }
-    },
-    /** Multiply a matrix by a scalar
-     * @param {Number} k
-     * @param {matrix} m
-     * @returns {matrix}
-     */
-    scalarmul: function(k,m) {
-        var out = m.map(function(row){ return row.map(function(x){ return mul(k,x); }); });
-        out.rows = m.rows;
-        out.columns = m.columns;
-        return out;
-    },
-    /** Divide a matrix by a scalar
-     * @param {matrix} m
-     * @param {Number} k
-     * @returns {matrix}
-     */
-    scalardiv: function(m,k) {
-        var out = m.map(function(row){ return row.map(function(x){ return div(x,k); }); });
-        out.rows = m.rows;
-        out.columns = m.columns;
-        return out;
-    },
-    /** Multiply two matrices
-     * @param {matrix} a
-     * @param {matrix} b
-     * @returns {matrix}
-     * @throws {Numbas.Error} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
-     */
-    mul: function(a,b) {
-        if(a.columns!=b.rows)
-            throw(new Numbas.Error('matrixmath.mul.different sizes'));
-        var out = [];
-        out.rows = a.rows;
-        out.columns = b.columns;
-        for(var i=0;i<a.rows;i++)
-        {
-            var row = [];
-            out.push(row);
-            for(var j=0;j<b.columns;j++)
-            {
-                var s = 0;
-                for(var k=0;k<a.columns;k++)
-                {
-                    s = add(s,mul(a[i][k],b[k][j]));
-                }
-                row.push(s);
-            }
-        }
-        return out;
-    },
-    /** Are two matrices equal? True if each pair of corresponding elements is equal.
-     * @param {matrix} a
-     * @param {matrix} b
-     * @returns {Boolean}
-     */
-    eq: function(a,b) {
-        var rows = Math.max(a.rows,b.rows);
-        var columns = Math.max(a.columns,b.columns);
-        for(var i=0;i<rows;i++)
-        {
-            var rowA = a[i] || [];
-            var rowB = b[i] || [];
-            for(var j=0;j<columns;j++)
-            {
-                if(!eq(rowA[j]||0,rowB[j]||0))
-                    return false;
-            }
-        }
-        return true;
-    },
-    /** Are two matrices unequal?
-     * @param {matrix} a
-     * @param {matrix} b
-     * @returns {Boolean}
-     * @see Numbas.matrixmath.eq
-     */
-    neq: function(a,b) {
-        return !matrixmath.eq(a,b);
-    },
-    /** Make an `NxN` identity matrix.
-     * @param {Number} n
-     * @returns {matrix}
-     */
-    id: function(n) {
-        var out = [];
-        out.rows = out.columns = n;
-        for(var i=0;i<n;i++)
-        {
-            var row = [];
-            out.push(row);
-            for(var j=0;j<n;j++)
-                row.push(j==i ? 1 : 0);
-        }
-        return out;
-    },
-    /** Matrix transpose
-     * @param {matrix}
-     * @returns {matrix}
-     */
-    transpose: function(m) {
-        var out = [];
-        out.rows = m.columns;
-        out.columns = m.rows;
-        for(var i=0;i<m.columns;i++)
-        {
-            var row = [];
-            out.push(row);
-            for(var j=0;j<m.rows;j++)
-            {
-                row.push(m[j][i]||0);
-            }
-        }
-        return out;
-    },
-
-    /** Sum of every cell
-     * @param {matrix}
-     * @returns {Number}
-     */
-    sum_cells: function(m) {
-        var t = 0;
-        m.forEach(function(row) {
-            row.forEach(function(cell) {
-                t += cell;
-            });
-        });
-        return t;
-    },
-
-    /** Apply given function to each element
-     * @param {matrix}
-     * @param {function}
-     * @returns {matrix}
-     */
-    map: function(m,fn) {
-        var out = m.map(function(row){
-            return row.map(fn);
-        });
-        out.rows = m.rows;
-        out.columns = m.columns;
-        return out;
-    },
-    /** Round each element to given number of decimal places
-     * @param {matrix}
-     * @param {Number} - number of decimal places
-     * @returns {matrix}
-     */
-    precround: function(m,dp) {
-        return matrixmath.map(m,function(n){return math.precround(n,dp);});
-    },
-    /** Round each element to given number of significant figures
-     * @param {matrix}
-     * @param {Number} - number of decimal places
-     * @returns {matrix}
-     */
-    siground: function(m,sf) {
-        return matrixmath.map(m,function(n){return math.siground(n,sf);});
-    }
-}
-/** A set of objects: no item occurs more than once.
- * @typedef set
- * @type Array
- */
-/** Set operations.
- *
- * @namespace Numbas.setmath
- */
-var setmath = Numbas.setmath = {
-    /** Does the set contain the given element?
-     * @param {set} set
-     * @param element
-     * @returns {Boolean}
-     */
-    contains: function(set,element) {
-        for(var i=0,l=set.length;i<l;i++) {
-            if(Numbas.util.eq(set[i],element)) {
-                return true;
-            }
-        }
-    },
-    /** Union of two sets
-     * @param {set} a
-     * @param {set} b
-     * @returns {set}
-     */
-    union: function(a,b) {
-        var out = a.slice();
-        for(var i=0,l=b.length;i<l;i++) {
-            if(!setmath.contains(a,b[i])) {
-                out.push(b[i]);
-            }
-        }
-        return out;
-    },
-    /** Intersection of two sets
-     * @param {set} a
-     * @param {set} b
-     * @returns {set}
-     */
-    intersection: function(a,b) {
-        return a.filter(function(v) {
-            return setmath.contains(b,v);
-        });
-    },
-    /** Are two sets equal? Yes if a,b and (a intersect b) all have the same length
-     * @param {set} a
-     * @param {set} b
-     * @returns {Boolean}
-     */
-    eq: function(a,b) {
-        return a.length==b.length && setmath.intersection(a,b).length==a.length;
-    },
-    /** Set minus - remove b's elements from a
-     * @param {set} a
-     * @param {set} b
-     * @returns {set}
-     */
-    minus: function(a,b) {
-        return a.filter(function(v){ return !setmath.contains(b,v); });
-    },
-    /** Size of a set
-     * @param {set} set
-     * @returns {Number}
-     */
-    size: function(set) {
-        return set.length;
-    }
-}
-});
-
-Numbas.queueScript('i18next',[],function(module) {
-        var exports = {};
-!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):t.i18next=e()}(this,function(){"use strict";function t(t){return null==t?"":""+t}function e(t,e,n){t.forEach(function(t){e[t]&&(n[t]=e[t])})}function n(t,e,n){function o(t){return t&&t.indexOf("###")>-1?t.replace(/###/g,"."):t}function r(){return!t||"string"==typeof t}for(var i="string"!=typeof e?[].concat(e):e.split(".");i.length>1;){if(r())return{};var a=o(i.shift());!t[a]&&n&&(t[a]=new n),t=t[a]}return r()?{}:{obj:t,k:o(i.shift())}}function o(t,e,o){var r=n(t,e,Object),i=r.obj,a=r.k;i[a]=o}function r(t,e,o,r){var i=n(t,e,Object),a=i.obj,s=i.k;a[s]=a[s]||[],r&&(a[s]=a[s].concat(o)),r||a[s].push(o)}function i(t,e){var o=n(t,e),r=o.obj,i=o.k;if(r)return r[i]}function a(t,e,n){for(var o in e)o in t?"string"==typeof t[o]||t[o]instanceof String||"string"==typeof e[o]||e[o]instanceof String?n&&(t[o]=e[o]):a(t[o],e[o],n):t[o]=e[o];return t}function s(t){return t.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&")}function l(t){return"string"==typeof t?t.replace(/[&<>"'\/]/g,function(t){return E[t]}):t}function u(t){return t.interpolation={unescapeSuffix:"HTML"},t.interpolation.prefix=t.interpolationPrefix||"__",t.interpolation.suffix=t.interpolationSuffix||"__",t.interpolation.escapeValue=t.escapeInterpolation||!1,t.interpolation.nestingPrefix=t.reusePrefix||"$t(",t.interpolation.nestingSuffix=t.reuseSuffix||")",t}function c(t){return t.resStore&&(t.resources=t.resStore),t.ns&&t.ns.defaultNs?(t.defaultNS=t.ns.defaultNs,t.ns=t.ns.namespaces):t.defaultNS=t.ns||"translation",t.fallbackToDefaultNS&&t.defaultNS&&(t.fallbackNS=t.defaultNS),t.saveMissing=t.sendMissing,t.saveMissingTo=t.sendMissingTo||"current",t.returnNull=!t.fallbackOnNull,t.returnEmptyString=!t.fallbackOnEmpty,t.returnObjects=t.returnObjectTrees,t.joinArrays="\n",t.returnedObjectHandler=t.objectTreeKeyHandler,t.parseMissingKeyHandler=t.parseMissingKey,t.appendNamespaceToMissingKey=!0,t.nsSeparator=t.nsseparator||":",t.keySeparator=t.keyseparator||".","sprintf"===t.shortcutFunction&&(t.overloadTranslationOptionHandler=function(t){for(var e=[],n=1;n<t.length;n++)e.push(t[n]);return{postProcess:"sprintf",sprintf:e}}),t.whitelist=t.lngWhitelist,t.preload=t.preload,"current"===t.load&&(t.load="currentOnly"),"unspecific"===t.load&&(t.load="languageOnly"),t.backend=t.backend||{},t.backend.loadPath=t.resGetPath||"locales/__lng__/__ns__.json",t.backend.addPath=t.resPostPath||"locales/add/__lng__/__ns__",t.backend.allowMultiLoading=t.dynamicLoad,t.cache=t.cache||{},t.cache.prefix="res_",t.cache.expirationTime=6048e5,t.cache.enabled=t.useLocalStorage,t=u(t),t.defaultVariables&&(t.interpolation.defaultVariables=t.defaultVariables),t}function p(t){return t=u(t),t.joinArrays="\n",t}function f(t){return(t.interpolationPrefix||t.interpolationSuffix||void 0!==t.escapeInterpolation)&&(t=u(t)),t.nsSeparator=t.nsseparator,t.keySeparator=t.keyseparator,t.returnObjects=t.returnObjectTrees,t}function g(t){t.lng=function(){return C.deprecate("i18next.lng() can be replaced by i18next.language for detected language or i18next.languages for languages ordered by translation lookup."),t.services.languageUtils.toResolveHierarchy(t.language)[0]},t.preload=function(e,n){C.deprecate("i18next.preload() can be replaced with i18next.loadLanguages()"),t.loadLanguages(e,n)},t.setLng=function(e,n,o){return C.deprecate("i18next.setLng() can be replaced with i18next.changeLanguage() or i18next.getFixedT() to get a translation function with fixed language or namespace."),"function"==typeof n&&(o=n,n={}),n||(n={}),n.fixLng===!0&&o?o(null,t.getFixedT(e)):t.changeLanguage(e,o)},t.addPostProcessor=function(e,n){C.deprecate("i18next.addPostProcessor() can be replaced by i18next.use({ type: 'postProcessor', name: 'name', process: fc })"),t.use({type:"postProcessor",name:e,process:n})}}function h(t){return t.charAt(0).toUpperCase()+t.slice(1)}function d(){var t={};return H.forEach(function(e){e.lngs.forEach(function(n){t[n]={numbers:e.nr,plurals:U[e.fc]}})}),t}function y(t,e){for(var n=t.indexOf(e);n!==-1;)t.splice(n,1),n=t.indexOf(e)}function v(){return{debug:!1,initImmediate:!0,ns:["translation"],defaultNS:["translation"],fallbackLng:["dev"],fallbackNS:!1,whitelist:!1,nonExplicitWhitelist:!1,load:"all",preload:!1,simplifyPluralSuffix:!0,keySeparator:".",nsSeparator:":",pluralSeparator:"_",contextSeparator:"_",saveMissing:!1,saveMissingTo:"fallback",missingKeyHandler:!1,postProcess:!1,returnNull:!0,returnEmptyString:!0,returnObjects:!1,joinArrays:!1,returnedObjectHandler:function(){},parseMissingKeyHandler:!1,appendNamespaceToMissingKey:!1,appendNamespaceToCIMode:!1,overloadTranslationOptionHandler:function(t){return{defaultValue:t[1]}},interpolation:{escapeValue:!0,format:function(t,e,n){return t},prefix:"{{",suffix:"}}",formatSeparator:",",unescapePrefix:"-",nestingPrefix:"$t(",nestingSuffix:")",defaultVariables:void 0}}}function b(t){return"string"==typeof t.ns&&(t.ns=[t.ns]),"string"==typeof t.fallbackLng&&(t.fallbackLng=[t.fallbackLng]),"string"==typeof t.fallbackNS&&(t.fallbackNS=[t.fallbackNS]),t.whitelist&&t.whitelist.indexOf("cimode")<0&&t.whitelist.push("cimode"),t}function m(){}var x="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},S=function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")},k=Object.assign||function(t){for(var e=1;e<arguments.length;e++){var n=arguments[e];for(var o in n)Object.prototype.hasOwnProperty.call(n,o)&&(t[o]=n[o])}return t},w=function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function, not "+typeof e);t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,enumerable:!1,writable:!0,configurable:!0}}),e&&(Object.setPrototypeOf?Object.setPrototypeOf(t,e):t.__proto__=e)},O=function(t,e){if(!t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!e||"object"!=typeof e&&"function"!=typeof e?t:e},L=function(){function t(t,e){var n=[],o=!0,r=!1,i=void 0;try{for(var a,s=t[Symbol.iterator]();!(o=(a=s.next()).done)&&(n.push(a.value),!e||n.length!==e);o=!0);}catch(t){r=!0,i=t}finally{try{!o&&s.return&&s.return()}finally{if(r)throw i}}return n}return function(e,n){if(Array.isArray(e))return e;if(Symbol.iterator in Object(e))return t(e,n);throw new TypeError("Invalid attempt to destructure non-iterable instance")}}(),j=function(t){if(Array.isArray(t)){for(var e=0,n=Array(t.length);e<t.length;e++)n[e]=t[e];return n}return Array.from(t)},N={type:"logger",log:function(t){this.output("log",t)},warn:function(t){this.output("warn",t)},error:function(t){this.output("error",t)},output:function(t,e){var n;console&&console[t]&&(n=console)[t].apply(n,j(e))}},P=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.init(e,n)}return t.prototype.init=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};this.prefix=e.prefix||"i18next:",this.logger=t||N,this.options=e,this.debug=e.debug},t.prototype.setDebug=function(t){this.debug=t},t.prototype.log=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"log","",!0)},t.prototype.warn=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","",!0)},t.prototype.error=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"error","")},t.prototype.deprecate=function(){for(var t=arguments.length,e=Array(t),n=0;n<t;n++)e[n]=arguments[n];return this.forward(e,"warn","WARNING DEPRECATED: ",!0)},t.prototype.forward=function(t,e,n,o){return o&&!this.debug?null:("string"==typeof t[0]&&(t[0]=""+n+this.prefix+" "+t[0]),this.logger[e](t))},t.prototype.create=function(e){return new t(this.logger,k({prefix:this.prefix+":"+e+":"},this.options))},t}(),C=new P,R=function(){function t(){S(this,t),this.observers={}}return t.prototype.on=function(t,e){var n=this;t.split(" ").forEach(function(t){n.observers[t]=n.observers[t]||[],n.observers[t].push(e)})},t.prototype.off=function(t,e){var n=this;this.observers[t]&&this.observers[t].forEach(function(){if(e){var o=n.observers[t].indexOf(e);o>-1&&n.observers[t].splice(o,1)}else delete n.observers[t]})},t.prototype.emit=function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];if(this.observers[t]){var r=[].concat(this.observers[t]);r.forEach(function(t){t.apply(void 0,n)})}if(this.observers["*"]){var i=[].concat(this.observers["*"]);i.forEach(function(e){var o;e.apply(e,(o=[t]).concat.apply(o,n))})}},t}(),E={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;"},A=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{ns:["translation"],defaultNS:"translation"};S(this,e);var r=O(this,t.call(this));return r.data=n,r.options=o,r}return w(e,t),e.prototype.addNamespaces=function(t){this.options.ns.indexOf(t)<0&&this.options.ns.push(t)},e.prototype.removeNamespaces=function(t){var e=this.options.ns.indexOf(t);e>-1&&this.options.ns.splice(e,1)},e.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{},r=o.keySeparator||this.options.keySeparator;void 0===r&&(r=".");var a=[t,e];return n&&"string"!=typeof n&&(a=a.concat(n)),n&&"string"==typeof n&&(a=a.concat(r?n.split(r):n)),t.indexOf(".")>-1&&(a=t.split(".")),i(this.data,a)},e.prototype.addResource=function(t,e,n,r){var i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:{silent:!1},a=this.options.keySeparator;void 0===a&&(a=".");var s=[t,e];n&&(s=s.concat(a?n.split(a):n)),t.indexOf(".")>-1&&(s=t.split("."),r=e,e=s[1]),this.addNamespaces(e),o(this.data,s,r),i.silent||this.emit("added",t,e,n,r)},e.prototype.addResources=function(t,e,n){for(var o in n)"string"==typeof n[o]&&this.addResource(t,e,o,n[o],{silent:!0});this.emit("added",t,e,n)},e.prototype.addResourceBundle=function(t,e,n,r,s){var l=[t,e];t.indexOf(".")>-1&&(l=t.split("."),r=n,n=e,e=l[1]),this.addNamespaces(e);var u=i(this.data,l)||{};r?a(u,n,s):u=k({},u,n),o(this.data,l,u),this.emit("added",t,e,n)},e.prototype.removeResourceBundle=function(t,e){this.hasResourceBundle(t,e)&&delete this.data[t][e],this.removeNamespaces(e),this.emit("removed",t,e)},e.prototype.hasResourceBundle=function(t,e){return void 0!==this.getResource(t,e)},e.prototype.getResourceBundle=function(t,e){return e||(e=this.options.defaultNS),"v1"===this.options.compatibilityAPI?k({},this.getResource(t,e)):this.getResource(t,e)},e.prototype.toJSON=function(){return this.data},e}(R),T={processors:{},addPostProcessor:function(t){this.processors[t.name]=t},handle:function(t,e,n,o,r){var i=this;return t.forEach(function(t){i.processors[t]&&(e=i.processors[t].process(e,n,o,r))}),e}},M=function(t){function n(o){var r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,n);var i=O(this,t.call(this));return e(["resourceStore","languageUtils","pluralResolver","interpolator","backendConnector"],o,i),i.options=r,i.logger=C.create("translator"),i}return w(n,t),n.prototype.changeLanguage=function(t){t&&(this.language=t)},n.prototype.exists=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{interpolation:{}};return"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0!==this.resolve(t,e)},n.prototype.extractFromKey=function(t,e){var n=e.nsSeparator||this.options.nsSeparator;void 0===n&&(n=":");var o=e.keySeparator||this.options.keySeparator||".",r=e.ns||this.options.defaultNS;if(n&&t.indexOf(n)>-1){var i=t.split(n);(n!==o||n===o&&this.options.ns.indexOf(i[0])>-1)&&(r=i.shift()),t=i.join(o)}return"string"==typeof r&&(r=[r]),{key:t,namespaces:r}},n.prototype.translate=function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};if("object"!==("undefined"==typeof e?"undefined":x(e))?e=this.options.overloadTranslationOptionHandler(arguments):"v1"===this.options.compatibilityAPI&&(e=f(e)),void 0===t||null===t||""===t)return"";"number"==typeof t&&(t=String(t)),"string"==typeof t&&(t=[t]);var n=e.keySeparator||this.options.keySeparator||".",o=this.extractFromKey(t[t.length-1],e),r=o.key,i=o.namespaces,a=i[i.length-1],s=e.lng||this.language,l=e.appendNamespaceToCIMode||this.options.appendNamespaceToCIMode;if(s&&"cimode"===s.toLowerCase()){if(l){var u=e.nsSeparator||this.options.nsSeparator;return a+u+r}return r}var c=this.resolve(t,e),p=Object.prototype.toString.apply(c),g=["[object Number]","[object Function]","[object RegExp]"],h=void 0!==e.joinArrays?e.joinArrays:this.options.joinArrays;if(c&&"string"!=typeof c&&g.indexOf(p)<0&&(!h||"[object Array]"!==p)){if(!e.returnObjects&&!this.options.returnObjects)return this.logger.warn("accessing an object - but returnObjects options is not enabled!"),this.options.returnedObjectHandler?this.options.returnedObjectHandler(r,c,e):"key '"+r+" ("+this.language+")' returned an object instead of string.";if(e.keySeparator||this.options.keySeparator){var d="[object Array]"===p?[]:{};for(var y in c)Object.prototype.hasOwnProperty.call(c,y)&&(d[y]=this.translate(""+r+n+y,k({},e,{joinArrays:!1,ns:i})));c=d}}else if(h&&"[object Array]"===p)c=c.join(h),c&&(c=this.extendTranslation(c,r,e));else{var v=!1,b=!1;if(this.isValidLookup(c)||void 0===e.defaultValue||(v=!0,c=e.defaultValue),this.isValidLookup(c)||(b=!0,c=r),b||v){this.logger.log("missingKey",s,a,r,c);var m=[],S=this.languageUtils.getFallbackCodes(this.options.fallbackLng,e.lng||this.language);if("fallback"===this.options.saveMissingTo&&S&&S[0])for(var w=0;w<S.length;w++)m.push(S[w]);else"all"===this.options.saveMissingTo?m=this.languageUtils.toResolveHierarchy(e.lng||this.language):m.push(e.lng||this.language);this.options.saveMissing&&(this.options.missingKeyHandler?this.options.missingKeyHandler(m,a,r,c):this.backendConnector&&this.backendConnector.saveMissing&&this.backendConnector.saveMissing(m,a,r,c)),this.emit("missingKey",m,a,r,c)}c=this.extendTranslation(c,r,e),b&&c===r&&this.options.appendNamespaceToMissingKey&&(c=a+":"+r),b&&this.options.parseMissingKeyHandler&&(c=this.options.parseMissingKeyHandler(c))}return c},n.prototype.extendTranslation=function(t,e,n){var o=this;n.interpolation&&this.interpolator.init(k({},n,{interpolation:k({},this.options.interpolation,n.interpolation)}));var r=n.replace&&"string"!=typeof n.replace?n.replace:n;this.options.interpolation.defaultVariables&&(r=k({},this.options.interpolation.defaultVariables,r)),t=this.interpolator.interpolate(t,r,n.lng||this.language),n.nest!==!1&&(t=this.interpolator.nest(t,function(){return o.translate.apply(o,arguments)},n)),n.interpolation&&this.interpolator.reset();var i=n.postProcess||this.options.postProcess,a="string"==typeof i?[i]:i;return void 0!==t&&a&&a.length&&n.applyPostProcessor!==!1&&(t=T.handle(a,t,e,n,this)),t},n.prototype.resolve=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=void 0;return"string"==typeof t&&(t=[t]),t.forEach(function(t){if(!e.isValidLookup(o)){var r=e.extractFromKey(t,n),i=r.key,a=r.namespaces;e.options.fallbackNS&&(a=a.concat(e.options.fallbackNS));var s=void 0!==n.count&&"string"!=typeof n.count,l=void 0!==n.context&&"string"==typeof n.context&&""!==n.context,u=n.lngs?n.lngs:e.languageUtils.toResolveHierarchy(n.lng||e.language);a.forEach(function(t){e.isValidLookup(o)||u.forEach(function(r){if(!e.isValidLookup(o)){var a=i,u=[a],c=void 0;s&&(c=e.pluralResolver.getSuffix(r,n.count)),s&&l&&u.push(a+c),l&&u.push(a+=""+e.options.contextSeparator+n.context),s&&u.push(a+=c);for(var p=void 0;p=u.pop();)e.isValidLookup(o)||(o=e.getResource(r,t,p,n))}})})}}),o},n.prototype.isValidLookup=function(t){return!(void 0===t||!this.options.returnNull&&null===t||!this.options.returnEmptyString&&""===t)},n.prototype.getResource=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};return this.resourceStore.getResource(t,e,n,o)},n}(R),_=function(){function t(e){S(this,t),this.options=e,this.whitelist=this.options.whitelist||!1,this.logger=C.create("languageUtils")}return t.prototype.getScriptPartFromCode=function(t){if(!t||t.indexOf("-")<0)return null;var e=t.split("-");return 2===e.length?null:(e.pop(),this.formatLanguageCode(e.join("-")))},t.prototype.getLanguagePartFromCode=function(t){if(!t||t.indexOf("-")<0)return t;var e=t.split("-");return this.formatLanguageCode(e[0])},t.prototype.formatLanguageCode=function(t){if("string"==typeof t&&t.indexOf("-")>-1){var e=["hans","hant","latn","cyrl","cans","mong","arab"],n=t.split("-");return this.options.lowerCaseLng?n=n.map(function(t){return t.toLowerCase()}):2===n.length?(n[0]=n[0].toLowerCase(),n[1]=n[1].toUpperCase(),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase()))):3===n.length&&(n[0]=n[0].toLowerCase(),2===n[1].length&&(n[1]=n[1].toUpperCase()),"sgn"!==n[0]&&2===n[2].length&&(n[2]=n[2].toUpperCase()),e.indexOf(n[1].toLowerCase())>-1&&(n[1]=h(n[1].toLowerCase())),e.indexOf(n[2].toLowerCase())>-1&&(n[2]=h(n[2].toLowerCase()))),n.join("-")}return this.options.cleanCode||this.options.lowerCaseLng?t.toLowerCase():t},t.prototype.isWhitelisted=function(t){return("languageOnly"===this.options.load||this.options.nonExplicitWhitelist)&&(t=this.getLanguagePartFromCode(t)),!this.whitelist||!this.whitelist.length||this.whitelist.indexOf(t)>-1},t.prototype.getFallbackCodes=function(t,e){if(!t)return[];if("string"==typeof t&&(t=[t]),"[object Array]"===Object.prototype.toString.apply(t))return t;if(!e)return t.default||[];var n=t[e];return n||(n=t[this.getScriptPartFromCode(e)]),n||(n=t[this.formatLanguageCode(e)]),n||(n=t.default),n||[]},t.prototype.toResolveHierarchy=function(t,e){var n=this,o=this.getFallbackCodes(e||this.options.fallbackLng||[],t),r=[],i=function(t){t&&(n.isWhitelisted(t)?r.push(t):n.logger.warn("rejecting non-whitelisted language code: "+t))};return"string"==typeof t&&t.indexOf("-")>-1?("languageOnly"!==this.options.load&&i(this.formatLanguageCode(t)),"languageOnly"!==this.options.load&&"currentOnly"!==this.options.load&&i(this.getScriptPartFromCode(t)),"currentOnly"!==this.options.load&&i(this.getLanguagePartFromCode(t))):"string"==typeof t&&i(this.formatLanguageCode(t)),o.forEach(function(t){r.indexOf(t)<0&&i(n.formatLanguageCode(t))}),r},t}(),H=[{lngs:["ach","ak","am","arn","br","fil","gun","ln","mfe","mg","mi","oc","tg","ti","tr","uz","wa"],nr:[1,2],fc:1},{lngs:["af","an","ast","az","bg","bn","ca","da","de","dev","el","en","eo","es","es_ar","et","eu","fi","fo","fur","fy","gl","gu","ha","he","hi","hu","hy","ia","it","kn","ku","lb","mai","ml","mn","mr","nah","nap","nb","ne","nl","nn","no","nso","pa","pap","pms","ps","pt","pt_br","rm","sco","se","si","so","son","sq","sv","sw","ta","te","tk","ur","yo"],nr:[1,2],fc:2},{lngs:["ay","bo","cgg","fa","id","ja","jbo","ka","kk","km","ko","ky","lo","ms","sah","su","th","tt","ug","vi","wo","zh"],nr:[1],fc:3},{lngs:["be","bs","dz","hr","ru","sr","uk"],nr:[1,2,5],fc:4},{lngs:["ar"],nr:[0,1,2,3,11,100],fc:5},{lngs:["cs","sk"],nr:[1,2,5],fc:6},{lngs:["csb","pl"],nr:[1,2,5],fc:7},{lngs:["cy"],nr:[1,2,3,8],fc:8},{lngs:["fr"],nr:[1,2],fc:9},{lngs:["ga"],nr:[1,2,3,7,11],fc:10},{lngs:["gd"],nr:[1,2,3,20],fc:11},{lngs:["is"],nr:[1,2],fc:12},{lngs:["jv"],nr:[0,1],fc:13},{lngs:["kw"],nr:[1,2,3,4],fc:14},{lngs:["lt"],nr:[1,2,10],fc:15},{lngs:["lv"],nr:[1,2,0],fc:16},{lngs:["mk"],nr:[1,2],fc:17},{lngs:["mnk"],nr:[0,1,2],fc:18},{lngs:["mt"],nr:[1,2,11,20],fc:19},{lngs:["or"],nr:[2,1],fc:2},{lngs:["ro"],nr:[1,2,20],fc:20},{lngs:["sl"],nr:[5,1,2,3],fc:21}],U={1:function(t){return Number(t>1)},2:function(t){return Number(1!=t)},3:function(t){return 0},4:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},5:function(t){return Number(0===t?0:1==t?1:2==t?2:t%100>=3&&t%100<=10?3:t%100>=11?4:5)},6:function(t){return Number(1==t?0:t>=2&&t<=4?1:2)},7:function(t){return Number(1==t?0:t%10>=2&&t%10<=4&&(t%100<10||t%100>=20)?1:2)},8:function(t){return Number(1==t?0:2==t?1:8!=t&&11!=t?2:3)},9:function(t){return Number(t>=2)},10:function(t){return Number(1==t?0:2==t?1:t<7?2:t<11?3:4)},11:function(t){return Number(1==t||11==t?0:2==t||12==t?1:t>2&&t<20?2:3)},12:function(t){return Number(t%10!=1||t%100==11)},13:function(t){return Number(0!==t)},14:function(t){return Number(1==t?0:2==t?1:3==t?2:3)},15:function(t){return Number(t%10==1&&t%100!=11?0:t%10>=2&&(t%100<10||t%100>=20)?1:2)},16:function(t){return Number(t%10==1&&t%100!=11?0:0!==t?1:2)},17:function(t){return Number(1==t||t%10==1?0:1)},18:function(t){return Number(0==t?0:1==t?1:2)},19:function(t){return Number(1==t?0:0===t||t%100>1&&t%100<11?1:t%100>10&&t%100<20?2:3)},20:function(t){return Number(1==t?0:0===t||t%100>0&&t%100<20?1:2)},21:function(t){return Number(t%100==1?1:t%100==2?2:t%100==3||t%100==4?3:0)}},V=function(){function t(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};S(this,t),this.languageUtils=e,this.options=n,this.logger=C.create("pluralResolver"),this.rules=d()}return t.prototype.addRule=function(t,e){this.rules[t]=e},t.prototype.getRule=function(t){return this.rules[this.languageUtils.getLanguagePartFromCode(t)]},t.prototype.needsPlural=function(t){var e=this.getRule(t);return e&&e.numbers.length>1},t.prototype.getSuffix=function(t,e){var n=this,o=this.getRule(t);if(o){if(1===o.numbers.length)return"";var r=o.noAbs?o.plurals(e):o.plurals(Math.abs(e)),i=o.numbers[r];this.options.simplifyPluralSuffix&&2===o.numbers.length&&1===o.numbers[0]&&(2===i?i="plural":1===i&&(i=""));var a=function(){return n.options.prepend&&i.toString()?n.options.prepend+i.toString():i.toString()};return"v1"===this.options.compatibilityJSON?1===i?"":"number"==typeof i?"_plural_"+i.toString():a():"v2"===this.options.compatibilityJSON||2===o.numbers.length&&1===o.numbers[0]?a():2===o.numbers.length&&1===o.numbers[0]?a():this.options.prepend&&r.toString()?this.options.prepend+r.toString():r.toString()}return this.logger.warn("no plural rule found for: "+t),""},t}(),I=function(){function e(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};S(this,e),this.logger=C.create("interpolator"),this.init(t,!0)}return e.prototype.init=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=arguments[1];e&&(this.options=t,this.format=t.interpolation&&t.interpolation.format||function(t){return t},this.escape=t.interpolation&&t.interpolation.escape||l),t.interpolation||(t.interpolation={escapeValue:!0});var n=t.interpolation;this.escapeValue=void 0===n.escapeValue||n.escapeValue,this.prefix=n.prefix?s(n.prefix):n.prefixEscaped||"{{",this.suffix=n.suffix?s(n.suffix):n.suffixEscaped||"}}",this.formatSeparator=n.formatSeparator?n.formatSeparator:n.formatSeparator||",",this.unescapePrefix=n.unescapeSuffix?"":n.unescapePrefix||"-",this.unescapeSuffix=this.unescapePrefix?"":n.unescapeSuffix||"",this.nestingPrefix=n.nestingPrefix?s(n.nestingPrefix):n.nestingPrefixEscaped||s("$t("),this.nestingSuffix=n.nestingSuffix?s(n.nestingSuffix):n.nestingSuffixEscaped||s(")"),this.resetRegExp()},e.prototype.reset=function(){this.options&&this.init(this.options)},e.prototype.resetRegExp=function(){var t=this.prefix+"(.+?)"+this.suffix;this.regexp=new RegExp(t,"g");var e=""+this.prefix+this.unescapePrefix+"(.+?)"+this.unescapeSuffix+this.suffix;this.regexpUnescape=new RegExp(e,"g");var n=this.nestingPrefix+"(.+?)"+this.nestingSuffix;this.nestingRegexp=new RegExp(n,"g")},e.prototype.interpolate=function(e,n,o){function r(t){return t.replace(/\$/g,"$$$$")}var a=this,s=void 0,l=void 0,u=function(t){if(t.indexOf(a.formatSeparator)<0)return i(n,t);var e=t.split(a.formatSeparator),r=e.shift().trim(),s=e.join(a.formatSeparator).trim();return a.format(i(n,r),s,o)};for(this.resetRegExp();s=this.regexpUnescape.exec(e);)l=u(s[1].trim()),e=e.replace(s[0],l),this.regexpUnescape.lastIndex=0;for(;s=this.regexp.exec(e);)l=u(s[1].trim()),"string"!=typeof l&&(l=t(l)),l||(this.logger.warn("missed to pass in variable "+s[1]+" for interpolating "+e),l=""),l=r(this.escapeValue?this.escape(l):l),e=e.replace(s[0],l),this.regexp.lastIndex=0;return e},e.prototype.nest=function(e,n){function o(t){if(t.indexOf(",")<0)return t;var e=t.split(",");t=e.shift();var n=e.join(",");n=this.interpolate(n,s),n=n.replace(/'/g,'"');try{s=JSON.parse(n)}catch(e){this.logger.error("failed parsing options string in nesting for key "+t,e)}return t}var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{},i=void 0,a=void 0,s=k({},r);for(s.applyPostProcessor=!1;i=this.nestingRegexp.exec(e);){if(a=n(o.call(this,i[1].trim()),s),a&&i[0]===e&&"string"!=typeof a)return a;"string"!=typeof a&&(a=t(a)),a||(this.logger.warn("missed to resolve "+i[1]+" for nesting "+e),a=""),e=e.replace(i[0],a),this.regexp.lastIndex=0}return e},e}(),F=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.backend=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("backendConnector"),a.state={},a.queue=[],a.backend&&a.backend.init&&a.backend.init(r,i.backend,i),a}return w(e,t),e.prototype.queueLoad=function(t,e,n){var o=this,r=[],i=[],a=[],s=[];return t.forEach(function(t){var n=!0;e.forEach(function(e){var a=t+"|"+e;o.store.hasResourceBundle(t,e)?o.state[a]=2:o.state[a]<0||(1===o.state[a]?i.indexOf(a)<0&&i.push(a):(o.state[a]=1,n=!1,i.indexOf(a)<0&&i.push(a),r.indexOf(a)<0&&r.push(a),s.indexOf(e)<0&&s.push(e)))}),n||a.push(t)}),(r.length||i.length)&&this.queue.push({pending:i,loaded:{},errors:[],callback:n}),{toLoad:r,pending:i,toLoadLanguages:a,toLoadNamespaces:s}},e.prototype.loaded=function(t,e,n){var o=this,i=t.split("|"),a=L(i,2),s=a[0],l=a[1];e&&this.emit("failedLoading",s,l,e),n&&this.store.addResourceBundle(s,l,n),this.state[t]=e?-1:2,this.queue.forEach(function(n){r(n.loaded,[s],l),y(n.pending,t),e&&n.errors.push(e),0!==n.pending.length||n.done||(o.emit("loaded",n.loaded),n.done=!0,n.errors.length?n.callback(n.errors):n.callback())}),this.queue=this.queue.filter(function(t){return!t.done})},e.prototype.read=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:0,r=this,i=arguments.length>4&&void 0!==arguments[4]?arguments[4]:250,a=arguments[5];return t.length?this.backend[n](t,e,function(s,l){return s&&l&&o<5?void setTimeout(function(){r.read.call(r,t,e,n,o+1,2*i,a)},i):void a(s,l)}):a(null,{})},e.prototype.load=function(t,e,n){var o=this;if(!this.backend)return this.logger.warn("No backend was added via i18next.use. Will not load resources."),n&&n();var r=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]);var a=this.queueLoad(t,e,n);return a.toLoad.length?void(r.allowMultiLoading&&this.backend.readMulti?this.read(a.toLoadLanguages,a.toLoadNamespaces,"readMulti",null,null,function(t,e){t&&o.logger.warn("loading namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading failed",t),!t&&e&&o.logger.log("successfully loaded namespaces "+a.toLoadNamespaces.join(", ")+" for languages "+a.toLoadLanguages.join(", ")+" via multiloading",e),a.toLoad.forEach(function(n){var r=n.split("|"),a=L(r,2),s=a[0],l=a[1],u=i(e,[s,l]);if(u)o.loaded(n,t,u);else{var c="loading namespace "+l+" for language "+s+" via multiloading failed";o.loaded(n,c),o.logger.error(c)}})}):a.toLoad.forEach(function(t){o.loadOne(t)})):(a.pending.length||n(),null)},e.prototype.reload=function(t,e){var n=this;this.backend||this.logger.warn("No backend was added via i18next.use. Will not load resources.");var o=k({},this.backend.options,this.options.backend);"string"==typeof t&&(t=this.services.languageUtils.toResolveHierarchy(t)),"string"==typeof e&&(e=[e]),o.allowMultiLoading&&this.backend.readMulti?this.read(t,e,"readMulti",null,null,function(o,r){o&&n.logger.warn("reloading namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading failed",o),!o&&r&&n.logger.log("successfully reloaded namespaces "+e.join(", ")+" for languages "+t.join(", ")+" via multiloading",r),t.forEach(function(t){e.forEach(function(e){var a=i(r,[t,e]);if(a)n.loaded(t+"|"+e,o,a);else{var s="reloading namespace "+e+" for language "+t+" via multiloading failed";n.loaded(t+"|"+e,s),n.logger.error(s)}})})}):t.forEach(function(t){e.forEach(function(e){n.loadOne(t+"|"+e,"re")})})},e.prototype.loadOne=function(t){var e=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"",o=t.split("|"),r=L(o,2),i=r[0],a=r[1];this.read(i,a,"read",null,null,function(o,r){o&&e.logger.warn(n+"loading namespace "+a+" for language "+i+" failed",o),!o&&r&&e.logger.log(n+"loaded namespace "+a+" for language "+i,r),e.loaded(t,o,r)})},e.prototype.saveMissing=function(t,e,n,o){this.backend&&this.backend.create&&this.backend.create(t,e,n,o),t&&t[0]&&this.store.addResource(t[0],e,n,o)},e}(R),D=function(t){function e(n,o,r){var i=arguments.length>3&&void 0!==arguments[3]?arguments[3]:{};S(this,e);var a=O(this,t.call(this));return a.cache=n,a.store=o,a.services=r,a.options=i,a.logger=C.create("cacheConnector"),a.cache&&a.cache.init&&a.cache.init(r,i.cache,i),a}return w(e,t),e.prototype.load=function(t,e,n){var o=this;if(!this.cache)return n&&n();var r=k({},this.cache.options,this.options.cache),i="string"==typeof t?this.services.languageUtils.toResolveHierarchy(t):t;r.enabled?this.cache.load(i,function(t,e){if(t&&o.logger.error("loading languages "+i.join(", ")+" from cache failed",t),e)for(var r in e)if(Object.prototype.hasOwnProperty.call(e,r))for(var a in e[r])if(Object.prototype.hasOwnProperty.call(e[r],a)&&"i18nStamp"!==a){var s=e[r][a];s&&o.store.addResourceBundle(r,a,s)}n&&n()}):n&&n()},e.prototype.save=function(){this.cache&&this.options.cache&&this.options.cache.enabled&&this.cache.save(this.store.data)},e}(R),K=function(t){function e(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments[1];S(this,e);var r=O(this,t.call(this));if(r.options=b(n),r.services={},r.logger=C,r.modules={external:[]},o&&!r.isInitialized&&!n.isClone){var i;if(!r.options.initImmediate)return i=r.init(n,o),O(r,i);setTimeout(function(){r.init(n,o)},0)}return r}return w(e,t),e.prototype.init=function(t,e){function n(t){return t?"function"==typeof t?new t:t:null}var o=this;if("function"==typeof t&&(e=t,t={}),t||(t={}),"v1"===t.compatibilityAPI?this.options=k({},v(),b(c(t)),{}):"v1"===t.compatibilityJSON?this.options=k({},v(),b(p(t)),{}):this.options=k({},v(),this.options,b(t)),this.format=this.options.interpolation.format,e||(e=m),!this.options.isClone){this.modules.logger?C.init(n(this.modules.logger),this.options):C.init(null,this.options);var r=new _(this.options);this.store=new A(this.options.resources,this.options);var i=this.services;i.logger=C,i.resourceStore=this.store,i.resourceStore.on("added removed",function(t,e){i.cacheConnector.save()}),i.languageUtils=r,i.pluralResolver=new V(r,{prepend:this.options.pluralSeparator,compatibilityJSON:this.options.compatibilityJSON,simplifyPluralSuffix:this.options.simplifyPluralSuffix}),i.interpolator=new I(this.options),i.backendConnector=new F(n(this.modules.backend),i.resourceStore,i,this.options),i.backendConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),i.backendConnector.on("loaded",function(t){i.cacheConnector.save()}),i.cacheConnector=new D(n(this.modules.cache),i.resourceStore,i,this.options),i.cacheConnector.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.languageDetector&&(i.languageDetector=n(this.modules.languageDetector),i.languageDetector.init(i,this.options.detection,this.options)),this.translator=new M(this.services,this.options),
-this.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),r=1;r<e;r++)n[r-1]=arguments[r];o.emit.apply(o,[t].concat(n))}),this.modules.external.forEach(function(t){t.init&&t.init(o)})}var a=["getResource","addResource","addResources","addResourceBundle","removeResourceBundle","hasResourceBundle","getResourceBundle"];a.forEach(function(t){o[t]=function(){var e;return(e=o.store)[t].apply(e,arguments)}}),"v1"===this.options.compatibilityAPI&&g(this);var s=function(){o.changeLanguage(o.options.lng,function(t,n){o.isInitialized=!0,o.logger.log("initialized",o.options),o.emit("initialized",o.options),e(t,n)})};return this.options.resources||!this.options.initImmediate?s():setTimeout(s,0),this},e.prototype.loadResources=function(){var t=this,e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:m;if(this.options.resources)e(null);else{if(this.language&&"cimode"===this.language.toLowerCase())return e();var n=[],o=function(e){if(e){var o=t.services.languageUtils.toResolveHierarchy(e);o.forEach(function(t){n.indexOf(t)<0&&n.push(t)})}};if(this.language)o(this.language);else{var r=this.services.languageUtils.getFallbackCodes(this.options.fallbackLng);r.forEach(function(t){return o(t)})}this.options.preload&&this.options.preload.forEach(function(t){return o(t)}),this.services.cacheConnector.load(n,this.options.ns,function(){t.services.backendConnector.load(n,t.options.ns,e)})}},e.prototype.reloadResources=function(t,e){t||(t=this.languages),e||(e=this.options.ns),this.services.backendConnector.reload(t,e)},e.prototype.use=function(t){return"backend"===t.type&&(this.modules.backend=t),"cache"===t.type&&(this.modules.cache=t),("logger"===t.type||t.log&&t.warn&&t.error)&&(this.modules.logger=t),"languageDetector"===t.type&&(this.modules.languageDetector=t),"postProcessor"===t.type&&T.addPostProcessor(t),"3rdParty"===t.type&&this.modules.external.push(t),this},e.prototype.changeLanguage=function(t,e){var n=this,o=function(t,o){o&&(n.emit("languageChanged",o),n.logger.log("languageChanged",o)),e&&e(t,function(){return n.t.apply(n,arguments)})},r=function(t){t&&(n.language=t,n.languages=n.services.languageUtils.toResolveHierarchy(t),n.translator.changeLanguage(t),n.services.languageDetector&&n.services.languageDetector.cacheUserLanguage(t)),n.loadResources(function(e){o(e,t)})};t||!this.services.languageDetector||this.services.languageDetector.async?!t&&this.services.languageDetector&&this.services.languageDetector.async?this.services.languageDetector.detect(r):r(t):r(this.services.languageDetector.detect())},e.prototype.getFixedT=function(t,e){var n=this,o=function t(e){var o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=k({},o);return r.lng=r.lng||t.lng,r.lngs=r.lngs||t.lngs,r.ns=r.ns||t.ns,n.t(e,r)};return"string"==typeof t?o.lng=t:o.lngs=t,o.ns=e,o},e.prototype.t=function(){var t;return this.translator&&(t=this.translator).translate.apply(t,arguments)},e.prototype.exists=function(){var t;return this.translator&&(t=this.translator).exists.apply(t,arguments)},e.prototype.setDefaultNamespace=function(t){this.options.defaultNS=t},e.prototype.loadNamespaces=function(t,e){var n=this;return this.options.ns?("string"==typeof t&&(t=[t]),t.forEach(function(t){n.options.ns.indexOf(t)<0&&n.options.ns.push(t)}),void this.loadResources(e)):e&&e()},e.prototype.loadLanguages=function(t,e){"string"==typeof t&&(t=[t]);var n=this.options.preload||[],o=t.filter(function(t){return n.indexOf(t)<0});return o.length?(this.options.preload=n.concat(o),void this.loadResources(e)):e()},e.prototype.dir=function(t){if(t||(t=this.languages&&this.languages.length>0?this.languages[0]:this.language),!t)return"rtl";var e=["ar","shu","sqr","ssh","xaa","yhd","yud","aao","abh","abv","acm","acq","acw","acx","acy","adf","ads","aeb","aec","afb","ajp","apc","apd","arb","arq","ars","ary","arz","auz","avl","ayh","ayl","ayn","ayp","bbz","pga","he","iw","ps","pbt","pbu","pst","prp","prd","ur","ydd","yds","yih","ji","yi","hbo","men","xmn","fa","jpr","peo","pes","prs","dv","sam"];return e.indexOf(this.services.languageUtils.getLanguagePartFromCode(t))>=0?"rtl":"ltr"},e.prototype.createInstance=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=arguments[1];return new e(t,n)},e.prototype.cloneInstance=function(){var t=this,n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:m,r=k({},this.options,n,{isClone:!0}),i=new e(r,o),a=["store","services","language"];return a.forEach(function(e){i[e]=t[e]}),i.translator=new M(i.services,i.options),i.translator.on("*",function(t){for(var e=arguments.length,n=Array(e>1?e-1:0),o=1;o<e;o++)n[o-1]=arguments[o];i.emit.apply(i,[t].concat(n))}),i.init(r,o),i},e}(R),q=new K;return q})
-    window['i18next'] = module.exports;
-});
 Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
 /** @file Code to do with JME pattern-matching rules.
  *
@@ -4848,6 +4862,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @param {String} op - the name of the operator whose terms are to be found.
  * @param {Numbas.jme.rules.getTerms_options} options
  * @param {String[]} [existing_names] - a list of match names set for this tree by a parent, used when called recursively.
+ * @param {Boolean} calculate_minimum - Should the minimum allowed number of occurrences of each term be calculated? This is a pre-process step when getting the terms in a pattern expression.
  * @returns {Array.<Numbas.jme.rules.term>}
  */
 var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_names,calculate_minimum) {
@@ -4886,6 +4901,8 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
 
     /** Insert a unary minus in this tree.
      * If it's a product, the minus applies to the leftmost factor.
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
      */
     function insertUnaryMinus(tree) {
         if(jme.isOp(tree.tok,'*')) {
@@ -4941,6 +4958,11 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
             }
             arg = arg.args[0];
         }
+        /** Find "identified names" - captured subexpressions which must be equal every time the name is captured - inside this tree.
+         * These are the right-hand arguments of the `;=` operator.
+         * Names found are appended to the list `equalnames`.
+         * @param {Numbas.jme.tree} tree
+         */
         function find_equal_names(tree) {
             if(jme.isOp(tree.tok,';=')) {
                 equalnames.push(tree.args[1]);
@@ -5024,7 +5046,7 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             if(!m) {
                 return false;
             }
-            var o = resolveName(ruleTree.args[0],ruleTree.args[1],m._match);
+            var o = resolveName(ruleTree.args[1],m._match);
             m[o.name] = o.value;
             return m;
         }
@@ -5076,6 +5098,14 @@ var number_conditions = jme.rules.number_conditions = {
     }
 }
 
+/** Match a name token. `?` and `??` match any name, `m_number` matches a number, with constraints specified by annotations, `m_nothing` never matches.
+ * Otherwise, the name matches if the expression being considered is exactly the same name, ignoring case.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match. The top token is assumed to be a name.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered.
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @see Numbas.jme.rules.number_conditions
+ */
 function matchName(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5111,6 +5141,13 @@ function matchName(ruleTree,exprTree,options) {
     }
 }
 
+/** Match the application of a function.
+ * Dispatches to one of the special pattern-matching functions, or {@link matchOrdinaryFunction} otherwise.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5145,6 +5182,12 @@ function matchFunction(ruleTree,exprTree,options) {
     }
 }
 
+/** Match the application of any function. The first argument of `ruleTree` is a pattern that the function's name, considered as a string, must satisfy, and the second argument is a pattern that the function's arguments, considered as a list, must satisfy.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchGenericFunction(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='function') {
         return false;
@@ -5162,6 +5205,12 @@ function matchGenericFunction(ruleTree,exprTree,options) {
     }
 }
 
+/** Match the application of any operator. The first argument of `ruleTree` is a pattern that the operator's name, considered as a string, must satisfy, and the second argument is a pattern that the operator's arguments, considered as a list, must satisfy.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchGenericOp(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='op') {
         return false;
@@ -5179,6 +5228,13 @@ function matchGenericOp(ruleTree,exprTree,options) {
     }
 }
 
+/** Match an application of an operator.
+ * Dispatches to one of the special pattern-matching operators, or {@link matchOrdinaryOp} otherwise.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match. It's assumed that the topmost token is an operator.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5208,6 +5264,13 @@ function matchOp(ruleTree,exprTree,options) {
     return false;
 }
 
+/** Match a `where` condition - the expression must match the given pattern, and the condition specified in terms of the matched names must evaluate to `true`.
+ * @param {Numbas.jme.tree} pattern - the pattern to match
+ * @param {Numbas.jme.tree} condition - the condition to evaluate
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchWhere(pattern,condition,exprTree,options) {
     var scope = new Numbas.jme.Scope(options.scope);
 
@@ -5229,6 +5292,13 @@ function matchWhere(pattern,condition,exprTree,options) {
     return m;
 }
 
+/** Match the application of a function.
+ * Matches if the expression is the application of the same function, and all of the arguments match the arguments of the pattern.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchOrdinaryFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5238,10 +5308,20 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
     return matchNonAssociativeOp(ruleTree,exprTree,options);
 }
 
+/** Match the given expression against the given pattern, which is assumed to be a list.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
 function matchList(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='list') {
         return false;
     }
+    /** Get the elements of a list. If it's been evaluated, the elements will be stored as the token's value. Otherwise, they're the arguments of the tree.
+     * @param {Numbas.jme.tree} list
+     * @returns {Array.<Numbas.jme.tree>}
+     */
     function getElements(list) {
         if(list.args) {
             return list.args;
@@ -5276,7 +5356,12 @@ var quantifier_limits = {
     '`+': [1,Infinity]
 };
 
-function resolveName(ruleTree,nameTree,value) {
+/** Resolve the name and value to store when capturing a subexpression.
+ * @param {Numbas.jme.tree} nameTree - right-hand side of the `;` capturing operator. Either a name, or a keypair giving a name and the value to store.
+ * @param {Numbas.jme.tree} value - the value to store, if `nameTree` doesn't override it.
+ * @returns {Object} - `name` is the name to store under, and `value` is the value
+ */
+function resolveName(nameTree,value) {
     var nameTok = nameTree.tok;
     if(!(nameTok.type=='name' || nameTok.type=='keypair')) {
         throw(new Numbas.Error('jme.matchTree.group name not a name'));
@@ -5291,6 +5376,13 @@ function resolveName(ruleTree,nameTree,value) {
     return {name: name, value: value};
 }
 
+/** Match an expression against a pattern which is an application of an operator to one or more terms.
+ * Assuming that the pattern and the expression trees are each a sequence of terms joined by the same operator, find the terms of each, and try to match them up, obeying quantifiers in the pattern.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match, whose top token must be an operator.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Numbas.jme.jme_pattern_match}
+ */
 function matchOrdinaryOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
@@ -5312,13 +5404,21 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
+    /** Does the given input term match the given rule term?
+     * The indices of the input and rule terms are given so the result of the match can be cached
+     * @param {Numbas.jme.rules.term} exprTerm - the input term
+     * @param {Numbas.jme.rules.term} ruleTerm - the term in the pattern which must be matched
+     * @param {Number} ic - the index of the input term 
+     * @param {Number} pc - the index of the rule term
+     * @returns {Boolean}
+     */
     function term_ok(exprTerm,ruleTerm,ic,pc) {
         if(matches[ic][pc]===undefined) {
             var m = matchTree(ruleTerm.term,exprTerm.term,options);
             var equalnames = {};
             ruleTerm.equalnames.forEach(function(nameTree) {
                 var name = nameTree.tok.name;
-                var t = m[name] || resolveName(ruleTerm,nameTree,exprTerm.term).value;
+                var t = m[name] || resolveName(nameTree,exprTerm.term).value;
                 equalnames[name] = t;
             });
             matches[ic][pc] = {
@@ -5329,6 +5429,13 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
         return matches[ic][pc].match!==false; 
     }
 
+    /** Does the given assignment satisfy the constraints of the matching algorithm?
+     * At the moment, the only constraint is that all subexpressions matched with the same name using the `;=` operator must be equal, according to {@link Numbas.jme.compareTrees}.
+     * @param {Object} assignment - the result of {@link Numbas.jme.rules.match_sequence}
+     * @param {Number} ic - the current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
+     * @param {Number} pc - the current index in the list of pattern terms
+     * @returns {Boolean}
+     */
     function constraint_ok(assignment,ic,pc) {
         var m = matches[ic][pc];
         var equalnames = ruleTerms[pc].equalnames;
@@ -5365,6 +5472,11 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
             identified_names[name] = (identified_names[name] || 0) + 1;
         });
     });
+    /** Record that `term` was captured with the given name.
+     * @param {String} name
+     * @param {Numbas.jme.tree} term
+     * @param {Boolean} allowReservedName - if `false`, reserved names such as `_match` and `_rest`, which are introduced by the matching algorithm, will be ignored.
+     */
     function nameTerm(name,term,allowReservedName) {
         if(!allowReservedName && name.match(/^_/)) {
             return;
@@ -5383,7 +5495,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
      */
     function matchTerm(ruleTerm,exprTree){ 
         ruleTerm.names.forEach(function(name) {
-            var o = resolveName(ruleTerm,name,exprTree);
+            var o = resolveName(name,exprTree);
             nameTerm(o.name,o.value);
         });
     }
@@ -5426,18 +5538,25 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     return match;
 }
 
+/** Options for {@link Numbas.jme.rules.match_sequence}.
+ * @type Object
+ * @typedef Numbas.jme.rules.match_sequence_options
+ * @property {Boolean} allowOtherTerms - if `true`, terms that don't match any term in the pattern can be ignored
+ * @property {Boolean} commutative - can the input terms be considered in any order?
+ * @property {Function} constraintFn - function to test if the current set of matches satisfies constraints
+ * @property {Function} checkFn - function to test if an input term matches a given pattern term
+ */
+
 /** Match a sequence of terms against a given pattern sequence of terms.
  * Try to find an assignment of input terms to the pattern, satisfying the quantifier for each term in the pattern.
  * The match is greedy - input terms will match earlier pattern terms in preference to later ones.
- * If `options.commutative` is `true`, terms can match the pattern in any order.
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
  * @param {Array.<Numbas.jme.tree>} input
- * @param {Function} checkFn - function to test if an input term matches a given pattern term
- * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Numbas.jme.rules.jme_pattern_match}
+ * @param {Numbas.jme.rules.match_sequence_options} options
+ * @returns {Object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
-function match_sequence(pattern,input,options) {
+var match_sequence = jme.rules.match_sequence = function(pattern,input,options) {
     var capture = [];
     var start = 0;
     var done = false;
@@ -5445,27 +5564,45 @@ function match_sequence(pattern,input,options) {
     var pc = 0;
     var ic = 0;
 
-    function count(p) { // count the number of times we matched term p
+    /** Count the number of times we have matched pattern term `p` so far.
+     * @param {Number} p - index of the term
+     * @returns {Number}
+     */
+    function count(p) {
         return capture.filter(function(x){return x==p}).length;
     }
-    function consumed(p) { // have we consumed term p as many times as allowed?
+    /** Have we consumed pattern term `p` as many times as allowed?
+     * @param {Number} p
+     * @returns {Boolean}
+     */
+    function consumed(p) {
         return count(p)>=pattern[p].max;
     }
+    /** Have we matched this pattern term at least its minimum number of times?
+     * @param {Number} p - the index of the pattern term
+     * @returns {Boolean}
+     */
     function enough(p) {
         return count(p)>=pattern[p].min;
     }
+    /** Move the start pointer along one.
+     * Terms before the start will be returned in `ignored_start_terms`
+     */
     function increment_start() {
         //debug('increment start position');
         start += 1;
         ic = start;
         pc = 0;
     }
+    /** Backtrack to the last time we made a free choice.
+     * If we're already at the start and `allowOtherTerms` is enabled, advance the start pointer.
+     */
     function backtrack() {
         //debug('backtrack');
         if(options.allowOtherTerms && ic==start && capture.length==start && start<input.length-1) {
             capture.push(-1);
             increment_start();
-            return true;
+            return;
         } 
         
         ic -= 1;
@@ -5478,16 +5615,18 @@ function match_sequence(pattern,input,options) {
             if(start<input.length-1) {
                 capture = [];
                 increment_start();
-                return true;
+                return;
             } else {
                 failed = true;
-                return false;
+                return;
             }
         }
         pc = capture[ic]+1;
         capture = capture.slice(0,ic);
-        return true;
     }
+    /** Move the input pointer along one.
+     * If using commutativity, set the pattern pointer back to the start.
+     */
     function advance_input() {
         ic += 1;
         if(options.commutative) {
@@ -5558,6 +5697,13 @@ function match_sequence(pattern,input,options) {
     return {ignored_start_terms: ignored_start_terms, result: result, ignored_end_terms: ignored_end_terms};
 }
 
+/** Match any of the given patterns.
+ * The first pattern which successfully matches is used.
+ * @param {Array.<Numbas.jme.tree>} patterns
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchAny(patterns,exprTree,options) {
     for(var i=0;i<patterns.length;i++) {
         var m = matchTree(patterns[i],exprTree,options);
@@ -5568,11 +5714,23 @@ function matchAny(patterns,exprTree,options) {
     return false;
 }
 
+/** Perform a match with a default value.
+ * This operation only makes sense when matching a sequence of terms, so just match the pattern.
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} defaultValue - ignored
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchDefault(ruleTree, defaultValue, exprTree, options) {
     var m = matchTree(ruleTree,exprTree,options);
     return m;
 }
 
+/** Bring any unary minus to the top of the tree.
+ * @param {Numbas.jme.tree} tree
+ * @returns {Numbas.jme.tree}
+ */
 function extractLeadingMinus(tree) {
     if(jme.isOp(tree.tok,'*') || jme.isOp(tree.tok,'/')) {
         if(jme.isOp(tree.args[0].tok,'-u')) {
@@ -5590,6 +5748,12 @@ function extractLeadingMinus(tree) {
     }
 }
 
+/** Match `rule`, or `-(rule)`.
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchPrefixPlusMinus(ruleTree,exprTree,options) {
     var originalExpr = exprTree;
     exprTree = extractLeadingMinus(exprTree);
@@ -5605,6 +5769,12 @@ function matchPrefixPlusMinus(ruleTree,exprTree,options) {
     }
 }
 
+/** Match if the expression doesn't match the given pattern
+ * @param {Numbas.jme.tree} ruleTree - the pattern which must not be matched
+ * @param {Numbas.jme.tree} exprTree - the expression to teset
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchNot(ruleTree,exprTree,options) {
     if(!matchTree(ruleTree,exprTree,options)) {
         return preserve_match({},exprTree);
@@ -5613,6 +5783,11 @@ function matchNot(ruleTree,exprTree,options) {
     }
 }
 
+/** Match if the expression uses all of the given names as free variables.
+ * @param {Array.<String>} names
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchUses(names,exprTree) {
     var vars = jme.findvars(exprTree);
     for(var i=0;i<names.length;i++) {
@@ -5623,6 +5798,11 @@ function matchUses(names,exprTree) {
     return {};
 }
 
+/** Match if the top token of the given expression is of the given type.
+ * @param {String} wantedType - the required type
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchType(wantedType,exprTree) {
     if(exprTree.tok.type==wantedType) {
         return {};
@@ -5631,6 +5811,13 @@ function matchType(wantedType,exprTree) {
     }
 }
 
+/** Match all of the given patterns against the given expression. 
+ * Return `false` if any of the patterns don't match.
+ * @param {Array.<Numbas.jme.tree>} patterns
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
 function matchAnd(patterns,exprTree,options) {
     var matches = [];
     for(var i=0;i<patterns.length;i++) {
@@ -5644,6 +5831,12 @@ function matchAnd(patterns,exprTree,options) {
     return mergeMatches(matches);
 }
 
+/** Find all matches for the rule, anywhere within the given expression.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+ * @param {Numbas.jme.matchTree_options} options
+ * @returns {Array.<Numbas.jme.rules.jme_pattern_match>}
+ */
 var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) {
     var matches = [];
     var m = matchTree(ruleTree,exprTree,options);
@@ -5659,6 +5852,11 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) 
     return matches;
 }
 
+/** Merge a list of matches into one match object.
+ * Later matches override earlier ones: if two matches have the same captured name, the later one is used.
+ * @param {Array.<Numbas.jme.rules.jme_pattern_match>} matches
+ * @returns {Numbas.jme.rules.jme_pattern_match}
+ */
 function mergeMatches(matches) {
     var ms = matches.slice();
     ms.splice(0,0,{});
@@ -5666,8 +5864,8 @@ function mergeMatches(matches) {
 }
 
 /** Apply operations specified in the result of a tree transformation: `eval(x)` is replaced with the result of evaluating `x`.
- * @params {Numbas.jme.tree} tree
- * @params {Numbas.jme.matchTree_options} options
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.matchTree_options} options
  * @returns {Numbas.jme.matchTree_options}
  */
 var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,options) {
@@ -5810,7 +6008,8 @@ var Ruleset = jme.rules.Ruleset = function(rules,flags) {
 }
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     /** Test whether flag is set
-     * @memberof Numbas.jme.rules.Ruleset.prototype
+     * @param {String} flag
+     * @returns {Boolean}
      */
     flagSet: function(flag) {
         flag = flag.toLowerCase();
@@ -5825,7 +6024,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.rules.transform
      * @see Numbas.jme.rules.matchTree
-     * @returns Numbas.jme.tree
+     * @returns {Numbas.jme.tree}
      */
     simplify: function(exprTree,scope) {
         var rs = this;
@@ -5855,6 +6054,11 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     }
 }
 var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
+/** Merge two rulesets: combine their lists of rules, and merge their flags. The second rule takes precedence over the first.
+ * @param {Numbas.jme.rules.Ruleset} r1
+ * @param {Numbas.jme.rules.Ruleset} r2
+ * @returns {Numbas.jme.rules.Ruleset}
+ */
 function mergeRulesets(r1,r2) {
     var rules = r1.rules.merge(r2.rules,ruleSort);
     var flags = util.extend_object({},r1.flags,r2.flags);
@@ -5863,7 +6067,7 @@ function mergeRulesets(r1,r2) {
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
  * @param {String|Array.<String|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
  * @param {Object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
- * @returns Numbas.jme.rules.Ruleset
+ * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 {
@@ -6040,6 +6244,7 @@ var expandBracketsRules = [
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @param {Array} rules
+ * @param {String} name - a name for this group of rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var compileRules = jme.rules.compileRules = function(rules,name)
@@ -6101,7 +6306,7 @@ var math = Numbas.math;
 /** A JME expression.
  * @typedef JME
  * @type {String}
- * @see {@link http://numbas-editor.readthedocs.io/en/latest/jme-reference.html}
+ * @see {@link https://docs.numbas.org.uk/en/latest/jme-reference.html}
  */
 
 /** @typedef Numbas.jme.tree
@@ -6300,12 +6505,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @see Numbas.jme.shunt
      * @returns {Numbas.jme.tree[]}
      */
-    compileList: function(expr,scope) {
+    compileList: function(expr) {
         expr+='';    //make sure expression is a string and not a number or anything like that
         if(!expr.trim().length)
             return null;
         //typecheck
-        scope = new Scope(scope);
         //tokenise expression
         var tokens = jme.tokenise(expr);
         var bits = [];
@@ -6508,6 +6712,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {String} str
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} [display=false] - Is this string going to be displayed to the user? If so, avoid unnecessary brackets and quotes.
+     * @returns {String}
      */
     subvars: function(str, scope,display)
     {
@@ -6613,27 +6818,30 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             }
         }
     },
-    /** Is a token a TOp?
+    /** Is a token an operator with the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} op
      *
      * @returns {Boolean}
      */
     isOp: function(tok,op) {
         return tok.type=='op' && tok.name==op;
     },
-    /** Is a token a TName?
+    /** Is a token the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} name
      *
      * @returns {Boolean}
      */
     isName: function(tok,name) {
         return tok.type=='name' && tok.name==name;
     },
-    /** Is a token a TFunction?
+    /** Is a token a function with the given name?
      *
-     * @param {Numbas.jme.token}
+     * @param {Numbas.jme.token} tok
+     * @param {String} name
      *
      * @returns {Boolean}
      */
@@ -6687,10 +6895,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     },
 
     /** Is this a monomial - a single term of the form x^n or m*x^n, where m and n are numbers?
-     * @param {Numbas.jme.tree}
+     * @param {Numbas.jme.tree} tree
      * @returns {Object} the base, degree and coefficient of the monomial, as trees.
      */
     isMonomial: function(tree) {
+        /** Remove unary minuses from the top of the tree
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}
+         */
         function unwrapUnaryMinus(tree) {
             while(jme.isOp(tree.tok,'-u')) {
                 tree = tree.args[0];
@@ -7002,6 +7214,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
+        /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
+         * @param {Array.<String>} ops
+         * @returns {Array.<String>} ops
+         */
         function clean_ops(ops) {
             return ops.sort().reverse().map(function(op) {
                 return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
@@ -7077,6 +7293,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(!tok.prefix) {
                 var o1 = this.precedence[tok.name];
                 //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
+                
+                /** Should the next token on the stack be popped off?
+                 * @returns {Boolean}
+                 */
                 function should_pop() {
                     if(this.stack.length==0) {
                         return false;
@@ -7237,6 +7457,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
         var type_actions = this.shunt_type_actions;
 
+        /** Shunt the given token onto the output
+         * @param {Numbas.jme.token} tok
+         * @see Numbas.jme.Parser.shunt_type_actions
+         */
         function shunt_token(tok) {
             if(tok.type in type_actions) {
                 type_actions[tok.type].apply(parser,[tok]);
@@ -7450,7 +7674,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
      * @returns {Object} a dictionary of names to values
      */
-    collect: function(collection,name) {
+    collect: function(collection) {
         var scope = this;
         var deleted = {};
         var out = {};
@@ -7487,6 +7711,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var scope = this;
         var out = {}
         var name;
+        /** Merge the given list of functions with any existing functions under that name
+         * @param {String} name
+         * @param {Array.<Numbas.jme.funcObj>} fns
+         */
         function add(name,fns) {
             if(!out[name]) {
                 out[name] = [];
@@ -7656,7 +7884,7 @@ TNothing.prototype.type = 'nothing';
  * @augments Numbas.jme.token
  * @property {Number} value
  * @property {String|Number|complex} originalValue - the value used to construct the token - either a string, a number, or a complex number object
- * @property type "number"
+ * @property {String} type - "number"
  * @constructor
  * @param {Number} num
  */
@@ -7683,11 +7911,6 @@ var TNum = types.TNum = types.number = function(num)
     this.value = num.complex ? num : parseFloat(num);
 }
 TNum.prototype.type = 'number';
-TNum.doc = {
-    name: 'number',
-    usage: ['0','1','0.234','i','e','pi'],
-    description: "@i@, @e@, @infinity@ and @pi@ are reserved keywords for the imaginary unit, the base of the natural logarithm, $\\infty$ and $\\pi$, respectively."
-};
 /** String type.
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -7703,16 +7926,11 @@ var TString = types.TString = types.string = function(s)
     this.value = s;
 }
 TString.prototype.type = 'string';
-TString.doc = {
-    name: 'string',
-    usage: ['\'hello\'','"hello"'],
-    description: "Use strings to create non-mathematical text."
-};
 /** Boolean type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Boolean} value
- * @property type "boolean"
+ * @property {String} type - "boolean"
  * @constructor
  * @param {Boolean} b
  */
@@ -7721,16 +7939,11 @@ var TBool = types.TBool = types.boolean = function(b)
     this.value = b;
 }
 TBool.prototype.type = 'boolean';
-TBool.doc = {
-    name: 'boolean',
-    usage: ['true','false'],
-    description: "Booleans represent either truth or falsity. The logical operations @and@, @or@ and @xor@ operate on and return booleans."
-}
 /** HTML DOM element
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Element} value
- * @property type "html"
+ * @property {String} type - "html"
  * @constructor
  * @param {Element} html
  */
@@ -7747,17 +7960,12 @@ var THTML = types.THTML = types.html = function(html) {
     }
 }
 THTML.prototype.type = 'html';
-THTML.doc = {
-    name: 'html',
-    usage: ['html(\'<div>things</div>\')'],
-    description: "An HTML DOM node."
-}
 /** List of elements of any data type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Number} vars - Length of list
  * @property {Array.<Numbas.jme.token>} value - Values (may not be filled in if the list was created empty)
- * @property type "html"
+ * @property {String} type - "html"
  * @constructor
  * @param {Number|Array.<Numbas.jme.token>} value - Either the size of the list, or an array of values
  */
@@ -7777,11 +7985,6 @@ var TList = types.TList = types.list = function(value)
     }
 }
 TList.prototype.type = 'list';
-TList.doc = {
-    name: 'list',
-    usage: ['[0,1,2,3]','[a,b,c]','[true,false,false]'],
-    description: "A list of elements of any data type."
-};
 /** Key-value pair assignment
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -7800,7 +8003,7 @@ TKeyPair.prototype = {
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Object.<Numbas.jme.token>} value - Map strings to tokens. Undefined until this token is evaluated.
- * @property type "dict"
+ * @property {String} type - "dict"
  * @constructor
  * @param {Object.<Numbas.jme.token>} value
  */
@@ -7814,7 +8017,7 @@ TDict.prototype = {
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Array.<Numbas.jme.token>} value - Array of elements. Constructor assumes all elements are distinct
- * @property type "set"
+ * @property {String} type - "set"
  * @constructor
  * @param {Array.<Numbas.jme.token>} value
  */
@@ -7826,7 +8029,7 @@ TSet.prototype.type = 'set';
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Array.<Number>} value - Array of components
- * @property type "vector"
+ * @property {String} type - "vector"
  * @constructor
  * @param {Array.<Number>} value
  */
@@ -7835,16 +8038,11 @@ var TVector = types.TVector = types.vector = function(value)
     this.value = value;
 }
 TVector.prototype.type = 'vector';
-TVector.doc = {
-    name: 'vector',
-    usage: ['vector(1,2)','vector([1,2,3,4])'],
-    description: 'The components of a vector must be numbers.\n\n When combining vectors of different dimensions, the smaller vector is padded with zeros to make up the difference.'
-}
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {matrix} value - Array of rows (which are arrays of numbers)
- * @property type "matrix"
+ * @property {String} type - "matrix"
  * @constructor
  * @param {matrix} value
  */
@@ -7861,11 +8059,6 @@ var TMatrix = types.TMatrix = types.matrix = function(value)
     }
 }
 TMatrix.prototype.type = 'matrix';
-TMatrix.doc = {
-    name: 'matrix',
-    usage: ['matrix([1,2,3],[4,5,6])','matrix(row1,row2)'],
-    description: "Matrices are constructed from lists of numbers, representing the rows.\n\n When combining matrices of different dimensions, the smaller matrix is padded with zeros to make up the difference."
-}
 /** A range of numerical values - either discrete or continuous
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -7874,7 +8067,7 @@ TMatrix.doc = {
  * @property {Number} start - the lower bound of the range
  * @property {Number} end - the upper bound of the range
  * @property {Number} step - the difference between elements in the range
- * @property type "range"
+ * @property {String} type - "range"
  * @constructor
  * @param {Array.<Number>} range - `[start,end,step]`
  */
@@ -7890,18 +8083,13 @@ var TRange = types.TRange = types.range = function(range)
     }
 }
 TRange.prototype.type = 'range';
-TRange.doc = {
-    name: 'range',
-    usage: ['1..3','1..3#0.1','1..3#0'],
-    description: 'A range @a..b#c@ represents the set of numbers $\\{a+nc | 0 \\leq n \\leq \\frac{b-a}{c} \\}$. If the step size is zero, then the range is the continuous interval $\[a,b\]$.'
-}
 /** Variable name token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {String} name
  * @property {String} value - Same as `name`
  * @property {Array.<String>} annotation - List of annotations (used to modify display)
- * @property type "name"
+ * @property {String} type - "name"
  * @constructor
  * @param {String} name
  * @param {Array.<String>} annotation
@@ -7913,35 +8101,16 @@ var TName = types.TName = types.name = function(name,annotation)
     this.annotation = annotation;
 }
 TName.prototype.type = 'name';
-TName.doc = {
-    name: 'name',
-    usage: ['x','X','x1','longName','dot:x','vec:x'],
-    description: 'A variable or function name. Names are case-insensitive, so @x@ represents the same thing as @X@. \
-\n\n\
-@e@, @i@ and @pi@ are reserved names representing mathematical constants. They are rewritten by the interpreter to their respective numerical values before evaluation. \
-\n\n\
-Names can be given _annotations_ to change how they are displayed. The following annotations are built-in:\
-\n\n\
-* @verb@ - does nothing, but names like @i@, @pi@ and @e@ are not interpreted as the famous mathematical constants.\n\
-* @op@ - denote the name as the name of an operator -- wraps the name in the LaTeX @\\operatorname@ command when displayed\n\
-* @v@ or @vector@ - denote the name as representing a vector -- the name is displayed in boldface\n\
-* @unit@ - denote the name as representing a unit vector -- places a hat above the name when displayed\n\
-* @dot@ - places a dot above the name when displayed, for example when representing a derivative\n\
-* @m@ or @matrix@ - denote the name as representing a matrix -- displayed using a non-italic font\
-\n\n\
-Any other annotation is taken to be a LaTeX command. For example, a name @vec:x@ is rendered in LaTeX as <code>\\vec{x}</code>, which places an arrow above the name.\
-    '
-};
 /** JME function token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {String} name
  * @property {Array.<String>} annotation - List of annotations (used to modify display)
  * @property {Number} vars - Arity of the function
- * @property type "function"
+ * @property {String} type - "function"
  * @constructor
  * @param {String} name
- * @param {Array.<String>} annotation
+ * @param {Array.<String>} [annotation] - any annotations for the function's name
  */
 var TFunc = types.TFunc = types['function'] = function(name,annotation)
 {
@@ -7957,11 +8126,16 @@ TFunc.prototype.vars = 0;
  * @property {Number} vars - Arity of the operation
  * @property {Boolean} postfix
  * @property {Boolean} prefix
- * @properrty type "op"
+ * @property {Boolean} commutative
+ * @property {Boolean} associative
+ * @property {String} type - "op"
  * @constructor
  * @param {String} op - Name of the operation
  * @param {Boolean} postfix
  * @param {Boolean} prefix
+ * @param {Number} arity - the number of parameters the operation takes
+ * @param {Boolean} commutative
+ * @param {Boolean} associative
  */
 var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative,associative)
 {
@@ -8134,6 +8308,7 @@ var associative = jme.associative =
 
 
 jme.standardParser = new jme.Parser();
+jme.standardParser.addBinaryOperator(';',{precedence:0});
 
 
 /** A function which checks whether a {@link Numbas.jme.funcObj} can be applied to the given arguments.
@@ -8160,8 +8335,8 @@ var funcObjAcc = 0;    //accumulator for ids for funcObjs, so they can be sorted
  * @memberof Numbas.jme
  * @constructor
  * @param {String} name
- * @param {Array.<function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
- * @param {function} outcons - The constructor for the output value of the function
+ * @param {Array.<Function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {Function} outcons - The constructor for the output value of the function
  * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
  * @param {Numbas.jme.funcObj_options} options
  *
@@ -8285,7 +8460,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
         }
         return result;
     }
-    this.doc = options.doc;
     /** Does this function behave randomly?
      * @name random
      * @member {Boolean}
@@ -8293,6 +8467,13 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      */
     this.random = options.random;
 }
+/** Randoly generate values for each of the given names between `min` and `max`
+ * @param {Array.<String>} varnames
+ * @param {Number} min
+ * @param {Number} max
+ * @param {Number} times - number of values to produce for each name
+ * @returns {Array.<Object>} - list of dictionaries mapping names to their values
+ */
 function randoms(varnames,min,max,times)
 {
     times *= varnames.length;
@@ -8308,6 +8489,11 @@ function randoms(varnames,min,max,times)
     }
     return rs;
 }
+/** Does every name in `array1` occur in `array2`?
+ * @param {Array.<String>} array1
+ * @param {Array.<String>} array2
+ * @returns {Boolean}
+ */
 function varnamesAgree(array1, array2) {
     var name;
     for(var i=0; i<array1.length; i++) {
@@ -8330,14 +8516,24 @@ function varnamesAgree(array1, array2) {
  */
 var checkingFunctions = jme.checkingFunctions =
 {
-    /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance` */
+    /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance`
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     absdiff: function(r1,r2,tolerance)
     {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
     },
-    /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance` */
+    /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     reldiff: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
@@ -8348,14 +8544,24 @@ var checkingFunctions = jme.checkingFunctions =
             return math.leq(Math.abs(math.sub(r1,r2)), tolerance);
         }
     },
-    /** Round both values to `tolerance` decimal places, and fail if unequal. */
+    /** Round both values to `tolerance` decimal places, and fail if unequal.
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     dp: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq( math.precround(r1,tolerance), math.precround(r2,tolerance) );
     },
-    /** Round both values to `tolerance` significant figures, and fail if unequal. */
+    /** Round both values to `tolerance` significant figures, and fail if unequal. 
+     * @param {Number} r1
+     * @param {Number} r2
+     * @param {Number} tolerance
+     * @returns {Boolean}
+     */
     sigfig: function(r1,r2,tolerance) {
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
@@ -8464,7 +8670,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
  * @method
  * @param {Numbas.jme.token} r1
  * @param {Numbas.jme.token} r2
- * @param {function} checkingFunction - one of {@link Numbas.jme.checkingFunctions}
+ * @param {Function} checkingFunction - one of {@link Numbas.jme.checkingFunctions}
  * @param {Number} checkingAccuracy
  * @returns {Boolean}
  */
@@ -8556,6 +8762,9 @@ var varsUsed = jme.varsUsed = function(tree) {
 /** Use JS comparison operators to compare the `value` property of both tokens.
  * Used when the token wraps a JS built-in type, such as string, number or boolean.
  * @see @Numbas.jme.tokenComparisons
+ * @param {Numbas.jme.token} a
+ * @param {Numbas.jme.token} b
+ * @returns {Boolean}
  */
 var compareTokensByValue = jme.compareTokensByValue = function(a,b) {
     return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
@@ -8688,6 +8897,10 @@ var compareTrees = jme.compareTrees = function(a,b) {
     switch(a.tok.type) {
         case 'op':
         case 'function':
+            /** Is the given tree of the form `?^?`, `?*(?^?)` or `?/(?^?)`
+             * @param {Numbas.jme.tree} t
+             * @returns {Boolean}
+             */
             function is_pow(t) {
                 return t.tok.name=='^' || (t.tok.name=='*' && t.args[1].tok.name=='^') || (t.tok.name=='/' && t.args[1].tok.name=='^');
             }
@@ -8777,6 +8990,16 @@ var TOp = Numbas.jme.types.TOp;
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 builtinScope.setVariable('nothing',new types.TNothing);
 var funcs = {};
+
+/** Add a function to the built-in scope.
+ * @see Numbas.jme.builtinScope
+ * @param {String} name
+ * @param {Array.<Function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {Function} outcons - The constructor for the output value of the function
+ * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
+ * @param {Numbas.jme.funcObj_options} options
+ * @returns {Numbas.jme.funcObj}
+ */
 function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
@@ -9351,6 +9574,14 @@ newBuiltin('repeat',['?',TNum],TList, null, {
         return new TList(value);
     }
 });
+/** Evaluate the given expressions until the list of conditions is satisfied
+ * @param {Array.<String>} names - names for each expression
+ * @param {Array.<Numbas.jme.tree>} definitions - definition of each expression
+ * @param {Array.<Numbas.jme.tree>} conditions - expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
+ * @param {Numbas.jme.Scope} scope - the scope in which to evaluate everything
+ * @param {Number} [maxRuns=100] - the maximum number of times to try to generate a set of values
+ * @returns {Object.<Numbas.jme.token>} - a dictionary mapping names to their generated values.
+ */
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
         if(definitions.length!=names.length) {
@@ -9498,6 +9729,13 @@ jme.findvarsOps.isset = function(tree,boundvars,scope) {
 jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
 }
+/** Map the given expression, considered as a lambda, over the given list.
+ * @param {Numbas.jme.tree} lambda
+ * @param {String|Array.<String>} names - either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
+ * @param {Numbas.jme.types.TList} list - the list to map over.
+ * @param {Numbas.jme.Scope} scope - the scope in which to evaluate
+ * @returns {Numbas.jme.types.TList}
+ */
 function mapOverList(lambda,names,list,scope) {
     var olist = list.map(function(v) {
         if(typeof(names)=='string') {
@@ -9626,6 +9864,10 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
     tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
     return tree;
 }
+/** Is the given token the value `true`?
+ * @param {Numbas.jme.token} item
+ * @returns {Boolean}
+ */
 function tok_is_true(item){return item.type=='boolean' && item.value}
 newBuiltin('all',[TList],TBool,function(list) {
     return list.every(tok_is_true);
@@ -10267,6 +10509,12 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** Would texify put brackets around a given argument of an operator?
+ * @param {Numbas.jme.tree} thing
+ * @param {Number} i - the index of the argument
+ * @param {Numbas.jme.display.texify_settings} settings
+ * @returns {Boolean}
+ */
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
     var tok = thing.args[i].tok;
@@ -10310,7 +10558,7 @@ function texifyOpArg(thing,texArgs,i)
  * @private
  *
  * @param {TeX} code - the TeX command for the operator
- * @returns {function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
+ * @returns {Function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
  */
 function infixTex(code)
 {
@@ -10332,7 +10580,7 @@ function infixTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which returns the appropriate (constant) TeX code
+ * @returns {Function} - a function which returns the appropriate (constant) TeX code
  */
 function nullaryTex(code)
 {
@@ -10343,7 +10591,7 @@ function nullaryTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which converts a syntax tree to the appropriate TeX
+ * @returns {Function} - a function which converts a syntax tree to the appropriate TeX
  */
 function funcTex(code)
 {
@@ -10358,11 +10606,8 @@ function funcTex(code)
  * @memberof Numbas.jme.display
  */
 var texOps = jme.display.texOps = {
-    /** range definition. Should never really be seen */
     '#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
-    /** logical negation */
     'not': infixTex('\\neg '),
-    /** unary addition */
     '+u': function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' ) {
@@ -10373,7 +10618,6 @@ var texOps = jme.display.texOps = {
         }
         return '+'+tex;
     },
-    /** unary minus */
     '-u': (function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' )
@@ -10392,7 +10636,6 @@ var texOps = jme.display.texOps = {
         }
         return '-'+tex;
     }),
-    /** exponentiation */
     '^': (function(thing,texArgs,settings) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
@@ -10655,7 +10898,7 @@ var texOps = jme.display.texOps = {
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
@@ -10940,13 +11183,17 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  *
  * @param {String} name
  * @param {Array.<String>} [annotations]
- * @param {function} [longNameMacro=texttt] - function which returns TeX for a long name
+ * @param {Function} [longNameMacro=texttt] - function which returns TeX for a long name
  * @returns {TeX}
  */
 var texName = jme.display.texName = function(name,annotations,longNameMacro)
 {
     longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
     var oname = name;
+    /** Apply annotations to the given name
+     * @param {TeX} name
+     * @returns {TeX}
+     */
     function applyAnnotations(name) {
         if(!annotations) {
             return name;
@@ -11082,6 +11329,10 @@ var typeToTeX = jme.display.typeToTeX = {
             return texOps[lowerName](thing,texArgs,settings);
         }
         else {
+            /** long operators get wrapped in `\operatorname`
+             * @param {String} name
+             * @returns {TeX}
+             */
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
@@ -11096,7 +11347,10 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     }
 }
-/** Take a nested application of a single op, e.g. ((1*2)*3)*4, and flatten it so that the tree has one op two or more arguments
+/** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
+ * @param {Numbas.jme.tree} tree
+ * @param {String} op
+ * @returns {Array.<Numbas.jme.tree>}
  */
 function flatten(tree,op) {
     if(!jme.isOp(tree.tok,op)) {
@@ -11157,7 +11411,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
@@ -11629,7 +11883,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     /** Make a new function, whose definition is written in JME.
      * @param {Object} fn - contains `definition` and `paramNames`.
      * @param {Numbas.jme.Scope} scope
-     * @returns {function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
+     * @returns {Function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
      */
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
@@ -11649,7 +11903,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Object} fn - contains `definition` and `paramNames`.
      * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
+     * @returns {Function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
      */
     makeJavascriptFunction: function(fn,withEnv) {
         var paramNames = fn.paramNames.slice();
@@ -11747,6 +12001,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables still to evaluate
      * @param {Numbas.jme.Scope} scope
      * @param {String[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
+     * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - a function to call when a dependency needs to be computed.
      * @returns {Numbas.jme.token}
      */
     computeVariable: function(name,todo,scope,path,computeFn)
@@ -11798,7 +12053,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
-     * @param {function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
+     * @param {Function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
      * @returns {Object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
      */
     makeVariables: function(todo,scope,condition,computeFn)
