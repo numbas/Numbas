@@ -938,33 +938,6 @@
                     
                     var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
                     assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
-
-                    var coefficient_pattern = '((`+-(x;c1:1 `| m_number;c1*x));s1 + (`+-(x;c2:1 `| m_number;c2*x));s2 + ?`*;rest) `where s1*s2=1';
-                    var res = matchExpression(coefficient_pattern,'x+2x');
-                    console.log(res);
-
-                    var Rule = Numbas.jme.rules.Rule;
-                    var Ruleset = Numbas.jme.rules.Ruleset;
-                    var ruledefs = [
-                        ['m_number;x `where x<0','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
-                        ['+(?;x)','x'],                    //get rid of unary plus
-                        ['?;x+(-?;y)','x-y'],            //plus minus = minus
-                        ['?;x+(`+- m_number;y);s `where y<0','x+eval(-s*y)'],
-                        ['?;x-(-?;y)','x+y'],            //minus minus = plus
-                        ['-(-?;x)','x'],                //unary minus minus = plus
-                        ['-m_number;x `where x isa "complex" and re(x)<0','eval(-x)'],
-                        ['(`+- m_number);x + m_number;y `where y isa "complex" and re(y)=0','eval(x+y)'],
-                        ['(-?;x)/?;y','-(x/y)'],            //take negation to left of fraction
-                        ['?;x/(-?;y)','-(x/y)'],
-                        ['(-?;x)*?;y `where not (x isa "complex")','-(x*y)'],            //take negation to left of multiplication
-                        ['?;x*(-?;y) `where not (y isa "complex")','-(x*y)'],
-                        ['m_number;n*i','eval(n*i)'],            //always collect multiplication by i
-                    ];
-                    var rs = new Ruleset(ruledefs.map(function(d){ return new Rule(d[0],d[1],'acg','basic'); }));
-                    var res = rs.simplify(Numbas.jme.compile('(x+(-2))/(-3)'),Numbas.jme.builtinScope);
-                    console.log(res);
-                    var res = rs.simplify(Numbas.jme.compile('-7/(4-5i)'),Numbas.jme.builtinScope);
-                    console.log(res);
                 });
 
 				QUnit.module('Display');

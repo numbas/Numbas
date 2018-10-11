@@ -709,7 +709,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_op: /^(?:\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&÷×∈∧∨⟹≠≥≤]|__OTHER_OPS__)/i,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
-        re_comment: /^\/\/.*(?:\n|$)/,
+        re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/
     },
 
@@ -813,9 +813,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_comment',
             parse: function(result,tokens,expr,pos) {
-                var olen = expr.length - pos;
-                var trimmed_expr = expr.slice(pos+result[0].length).replace(this.re.re_strip_whitespace);
-                return {tokens: [], start: pos, end: result[0].length + (olen - trimmed_expr.length)};
+                return {tokens: [], start: pos, end: pos+result[0].length};
             }
         },
         {
@@ -2485,6 +2483,9 @@ var varsUsed = jme.varsUsed = function(tree) {
 
 /** Use JS comparison operators to compare the `value` property of both tokens.
  * Used when the token wraps a JS built-in type, such as string, number or boolean.
+ *
+ * @memberof Numbas.jme
+ * @method
  * @see @Numbas.jme.tokenComparisons
  * @param {Numbas.jme.token} a
  * @param {Numbas.jme.token} b
@@ -2507,6 +2508,8 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
 /** Compare two tokens, for the purposes of sorting.
  * Uses JavaScript comparison for numbers, strings and booleans, and {@link Numbas.jme.compareTrees} for everything else, or when types differ.
  *
+ * @memberof Numbas.jme
+ * @method
  * @param {Numbas.jme.token} a
  * @param {Numbas.jme.token} b
  * @see Numbas.jme.tokenComparisons

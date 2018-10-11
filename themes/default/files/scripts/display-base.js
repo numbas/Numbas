@@ -80,10 +80,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             display.modal.ok = display.modal.cancel = function() {};
         })
     },
-    /** Does an input element currently have focus?
-     * @type {Boolean}
-     */
-    inInput: false,
     //alert / confirm boxes
     //
     /** Callback functions for the modals

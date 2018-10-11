@@ -338,7 +338,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * Ignores iframes and elements with the attribute `nosubvars`.
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
-     * @see DOMcontentsubber
+     * @see Numbas.jme.variables.DOMcontentsubber
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
@@ -409,9 +409,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 /** An object which substitutes JME values into HTML.
  * JME expressions found inside text nodes are evaluated with respect to the given scope.
  * @param {Numbas.jme.Scope} scope
+ * @memberof Numbas.jme.variables
  * @constructor
  */
-function DOMcontentsubber(scope) {
+var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
 }
