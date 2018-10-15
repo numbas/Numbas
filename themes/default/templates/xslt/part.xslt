@@ -76,7 +76,9 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback">
-                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
+                <xsl:if test="count(../part) &gt; 1">
+                    <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
+                </xsl:if>
                 <div class="feedbackMessages" data-bind="visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
