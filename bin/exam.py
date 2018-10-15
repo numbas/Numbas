@@ -846,14 +846,14 @@ class PatternMatchPart(Part):
 class NumberEntryPart(Part):
     kind = 'numberentry'
     allowFractions = False
-    notationStyles = ['en','si-en','plain-en']
+    notationStyles = ['en','si-en','plain']
     checkingType = 'range'
     answer = 0
     checkingAccuracy = 0
     minvalue = 0
     maxvalue = 0
     correctAnswerFraction = False
-    correctAnswerStyle = 'plain-en'
+    correctAnswerStyle = 'plain'
     inputStep = 1
 
     mustBeReduced = False
