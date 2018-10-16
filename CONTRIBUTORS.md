@@ -47,4 +47,5 @@
 * [VSN Reddy Janga](https://github.com/janga1997) ([issue #460](https://github.com/numbas/Numbas/issues/460), [issue #461](https://github.com/numbas/Numbas/issues/461))
 * [Pablo Roldan](https://github.com/Roldans) ([issue #521](https://github.com/numbas/Numbas/issues/521))
 * [Mohit Jayanti Gurumukhani](https://github.com/mjguru) ([issue #503](https://github.com/numbas/Numbas/issues/503))
+* [RingoKid](https://github.com/RingoKid) ([issue #576](https://github.com/numbas/Numbas/issues/573))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
