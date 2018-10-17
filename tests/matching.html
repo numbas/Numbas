@@ -271,12 +271,12 @@
                     this.examples = [
                         {
                             description: "Get all x terms",
-                            pattern: "m_all(m_pm(m_all(??)*m_any(x,x^?)));xs+m_all(??);rest",
+                            pattern: "(`+- x^?`?*?`*)`+;xs + ?`*;rest",
                             expression: "C+x-x+2x-2x+(a+1)x+x^2+2x^3+(1+2)x^(n+1)-2"
                         },
                         {
                             description: "Get the coefficient and degree of a term",
-                            pattern: "m_pm(m_all(??);coefficient*m_any(x,x^?;degree))",
+                            pattern: "(`+- ?`* `: 1);coefficient * x^(?`? `: 1);degree",
                             expression: "2*(a+1)x^2*3"
                         },
                         {
@@ -286,17 +286,17 @@
                         },
                         {
                             description: "Check x terms are collected on one side",
-                            pattern: "m_uses(x);xside = m_not(m_uses(x));otherside",
+                            pattern: "m_uses(x);xside = (`! m_uses(x));otherside",
                             expression: "1=cos(x)^2 + sin(x)^2"
                         },
                         {
                             description: "Factorised quadratic",
-                            pattern: "(m_pm(??*x);a+?;b)*(m_pm(??*x);c+?;d)",
+                            pattern: "((`+- x* ?`*);a + `+- ?;b)*((`+- x * ?`*);c + `+-?;d)",
                             expression: "(2x+3)(3-x)"
                         },
                         {
                             description: "Capture multiples of powers of x and y",
-                            pattern: "m_all( m_any( ??x, ??y, ??x^??, ??y^??, m_any(x,x^??)*m_any(y,y^??)*?? ) );terms + m_all(??;rest)",
+                            pattern: "(`+-(y^?`?`+ `| ((x^?`?)`+ * (y^?`?)`*)) * ?`*)`*;terms + (?`*);rest",
                             expression: "2x*y^2+(2*b)*x+x*y*3+3x^2y^3+c+x^3+3y^2+x+y+3"
                         }
                     ]
@@ -304,6 +304,7 @@
                     this.setExample = function(example) {
                         vm.pattern(example.pattern);
                         vm.expression(example.expression);
+                        vm.replacement(example.replacement || '');
                     }
                 }
                 var vm = window.vm = new ViewModel();
