@@ -64,6 +64,10 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @type {Array.<String>}
      */
     messages: [],
+
+    /** Start a new timer
+     * @see {Numbas.timing.timers}
+     */
     start: function()
     {
         timing.timers.push(new Date());
@@ -95,7 +99,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         timing.messages = [];
     },
     /** Stress test a function by running it a lot of times and seeing how long it takes
-     * @param {function} f
+     * @param {Function} f
      * @param {Number} times
      */
     stress: function(f,times)

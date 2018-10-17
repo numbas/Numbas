@@ -54,6 +54,11 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         CONCAT: 'concat'
     }
 
+    /** Constructors for feedback items.
+     * @see Numbas.marking.feedback_item
+     * @memberof Numbas.marking
+     * @type {Object.<Function>}
+     */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit,reason,message) {
             return {op: FeedbackOps.SET_CREDIT, credit: credit, reason: reason, message: message}

@@ -18,6 +18,13 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
     for(var name in Numbas.custom_part_types) {
         Numbas.partConstructors[name] = Numbas.parts.CustomPart;
     };
+
+    /** The current exam
+     * @name exam
+     * @memberof Numbas
+     * @type {Numbas.Exam}
+     */
+
     /**
      * Initialise the exam:
      *

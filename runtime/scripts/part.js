@@ -16,6 +16,13 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
+
+/** Definitions of custom part types
+ * @name custom_part_types
+ * @type {Object}
+ * @memberof Numbas
+ */
+
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
  * @typedef Numbas.parts.partpath
  * @type {String}

@@ -2029,7 +2029,11 @@ var associative = jme.associative =
 };
 
 
-jme.standardParser = new jme.Parser();
+/** A standard parser for JME expressions
+ * @memberof Numbas.jme
+ * @type Numbas.jme.Parser
+ */
+var standardParser = jme.standardParser = new jme.Parser();
 jme.standardParser.addBinaryOperator(';',{precedence:0});
 
 
@@ -2486,7 +2490,7 @@ var varsUsed = jme.varsUsed = function(tree) {
  *
  * @memberof Numbas.jme
  * @method
- * @see @Numbas.jme.tokenComparisons
+ * @see Numbas.jme.tokenComparisons
  * @param {Numbas.jme.token} a
  * @param {Numbas.jme.token} b
  * @returns {Boolean}
@@ -2498,6 +2502,7 @@ var compareTokensByValue = jme.compareTokensByValue = function(a,b) {
 /** Functions to compare two tokens of the same type.
  * Returns -1 if a<b, 0 if a=b, and 1 if a>b
  * @see Numbas.jme.compareTokens
+ * @memberof Numbas.jme
  */
 var tokenComparisons = Numbas.jme.tokenComparisons = {
     'number': compareTokensByValue,
@@ -2529,6 +2534,7 @@ var compareTokens = jme.compareTokens = function(a,b) {
 }
 
 /** Are the two given trees exactly the same?
+ * @memberof Numbas.jme
  * @param {Numbas.jme.tree} a
  * @param {Numbas.jme.tree} b
  * @returns {Boolean}

@@ -207,3 +207,21 @@ Numbas.checkAllScriptsLoaded = function() {
     }
 }
 })();
+
+/** Resources to do with localisation: `preferred_locale` is the code of the locale to use, and `resources` is a dictionary of localisations.
+ * @name locale
+ * @memberof Numbas
+ * @type {Object}
+ */
+
+/** Definitions of marking scripts for the built-in part types
+ * @name raw_marking_scripts
+ * @memberof Numbas
+ * @type {Object.<String>}
+ */
+
+/** Marking scripts for the built-in part types
+ * @name marking_scripts
+ * @memberof Numbas
+ * @type {Object.<Numbas.marking.MarkingScript>}
+ */

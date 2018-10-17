@@ -40,404 +40,1256 @@ var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
 jme.rules = {};
+
+/** Options for {@link Numbas.jme.rules.matchTree}
+ * @typedef Numbas.jme.rules.matchTree_options
+ * @type {Object}
+ * @property {Boolean} commutative - should the commutativity of operations be used? If `false`, terms must appear in the same order as in the pattern.
+ * @property {Boolean} associative - should the associativity of operations be used? If `true`, all terms in nested applications of associative ops are gathered together before comparing.
+ * @property {Boolean} allowOtherTerms - when matching an associative op, if the expression contains terms that don't match any of the pattern, should they be ignored? If `false`, every term in the expression must match a term in the pattern.
+ * @property {Boolean} strictPlus - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
+ * @property {Numbas.jme.Scope} scope - A JME scope in which to evaluate conditions.
+ */
+
+/** Parse a string specifying options for a Rule.
+ * @param {String} str
+ * @returns {Numbas.jme.rules.matchTree_options}
+ * @see Numbas.jme.rules.Rule
+ */
+function parse_options(str) {
+    return {
+        commutative: str.match(/c/),
+        associative: str.match(/a/),
+        allowOtherTerms: str.match(/g/),
+        strictPlus: str.match(/p/)
+    };
+}
+
 /** Simplification rule
  * @memberof Numbas.jme.rules
  * @constructor
  *
  * @param {JME} pattern - expression pattern to match. Variables will match any sub-expression.
- * @param {JME[]} conditions - conditions as JME expressions on the matched variables, which must all evaluate to true for the rule to match.
  * @param {JME} result - expression pattern to rewrite to.
+ * @param {String|Numbas.jme.rules.matchTree_options} options
+ * @param {String} [name] - a human-readable name for the rule
  *
  * @property {JME} patternString - the JME string defining the pattern to match
  * @property {JME} resultString - the JME string defining the result of the rule
+ * @property {Numbas.jme.rules.matchTree_options} options - default options for the match algorithm
  * @property {JME} conditionStrings - JME strings defining the conditions
- * @property {Numbas.jme.tree} tree - `patternString` compiled to a syntax tree
+ * @property {Numbas.jme.tree} patternTree - `patternString` compiled to a syntax tree
  * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
  * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
  */
-var Rule = jme.rules.Rule = function(pattern,conditions,result)
-{
+var Rule = jme.rules.Rule = function(pattern,result,options,name) {
+    this.name = name;
     this.patternString = pattern;
-    this.tree = jme.compile(pattern,{},true);
-    this.resultString = result;
-    this.result = jme.compile(result,{},true);
-    this.conditionStrings = conditions.slice();
-    this.conditions = [];
-    for(var i=0;i&lt;conditions.length;i++)
-    {
-        this.conditions.push(jme.compile(conditions[i],{},true));
+    this.pattern = patternParser.compile(pattern);
+    if(typeof(options)=='string') {
+        options = parse_options(options);
     }
+    this.options = options || {};
+    this.resultString = result;
+    this.result = jme.compile(result);
 }
 Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
+    /** Extend this rule's default options with the given options
+     * @param {Numbas.jme.rules.matchTree_options} options
+     * @returns {Numbas.jme.rules.matchTree_options}
+     */
+    get_options: function(options) {
+        if(!options) {
+            return this.options;
+        } else {
+            return {
+                commutative: options.commutative===undefined ? this.options.commutative : options.commutative,
+                associative: options.associative===undefined ? this.options.associative : options.associative,
+                allowOtherTerms: options.allowOtherTerms===undefined ? this.options.allowOtherTerms : options.allowOtherTerms,
+                strictPlus: options.strictPlus===undefined ? this.options.strictPlus : options.strictPlus,
+                scope: options.scope===undefined ? this.options.scope : options.scope
+            };
+            return Numbas.util.extend_object({},this.options,options);
+        }
+    },
     /** Match a rule on given syntax tree.
      * @memberof Numbas.jme.rules.Rule.prototype
      * @param {Numbas.jme.tree} exprTree - the syntax tree to test
      * @param {Numbas.jme.Scope} scope - used when checking conditions
      * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
+     * @see Numbas.jme.rules.matchTree
      */
-    match: function(exprTree,scope)
-    {
-        //see if expression matches rule
-        var match = matchTree(this.tree,exprTree);
-        if(match==false)
-            return false;
-        //if expression matches rule, then match is a dictionary of matched variables
-        //check matched variables against conditions
-        if(this.matchConditions(match,scope))
-            return match;
-        else
-            return false;
+    match: function(exprTree,scope) {
+        return matchTree(this.pattern,exprTree,this.get_options({scope:scope}));
     },
+
+    /** Find all matches for the rule, anywhere within the given expression.
+     * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+     * @param {Numbas.jme.Scope} scope - used when checking conditions
+     * @returns {Array.&lt;Numbas.jme.rules.jme_pattern_match>}
+     * @see {Numbas.jme.rules.matchAllTree}
+     */
     matchAll: function(exprTree,scope) {
-        var r = this;
-        var matches = matchAllTree(this.tree,exprTree);
-        return matches.filter(function(match) {
-            return r.matchConditions(match,scope);
-        });
+        return matchAllTree(this.pattern,exprTree,this.get_options({scope:scope}));
     },
-    /** Check that a matched pattern satisfies all the rule's conditions
-     * @memberof Numbas.jme.rules.Rule.prototype
-     * @param {Numbas.jme.rules.jme_pattern_match} match
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Boolean}
+
+    /** Transform the given expression if it matches this rule's pattern.
+     * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
+     * @param {Numbas.jme.rules.matchTree_options} options - used when checking conditions
+     * @returns {Numbas.jme.rules.transform_result}
+     * @see Numbas.jme.rules.transform
      */
-    matchConditions: function(match,scope)
-    {
-        scope = new Numbas.jme.Scope(scope);
-        for(var i=0;i&lt;this.conditions.length;i++)
-        {
-            var condition_tree = Numbas.util.copyobj(this.conditions[i],true);
-            condition_tree = jme.substituteTree(condition_tree,new jme.Scope([{variables:match}]));
-            try {
-                var result = scope.evaluate(condition_tree, null, true);
-                if(result.value==false)
-                    return false;
-            } catch(e) {
-                return false;
-            }
-        }
-        return true;
+    replace: function(exprTree,options) {
+        return transform(this.pattern, this.result, exprTree, this.get_options(options));
+    },
+
+    /** Transform all occurences of this rule's pattern in the given expression.
+     * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
+     * @param {Numbas.jme.rules.matchTree_options} options - used when checking conditions
+     * @returns {Numbas.jme.rules.transform_result}
+     * @see Numbas.jme.rules.transform
+     */
+    replaceAll: function(exprTree,options) {
+        return transformAll(this.pattern, this.result, exprTree, this.get_options(options));
     }
 }
-var endTermNames = {
-    '??':true,
-    'm_nothing':true,
-    'm_number': true
-}
-function isEndTerm(term) {
-    while(term.tok.type=='function' &amp;&amp; /^m_(?:all|pm|not|commute)$/.test(term.tok.name) || jme.isOp(term.tok,';')) {
-        term = term.args[0];
-    }
-    if(term.tok.type=='function' &amp;&amp; term.tok.name=='m_any') {
-        for(var i=0;i&lt;term.args.length;i++) {
-            if(isEndTerm(term.args[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-    return term.tok.type=='name' &amp;&amp; endTermNames[term.tok.name];
-}
-/** Given a tree representing a series of terms t1 &lt;op> t2 &lt;op> t3 &lt;op> ..., return the terms as a list.
- * @param {Numbas.jme.tree} tree
- * @param {String} op
- * @param {String[]} names
- * @returns {Object} - {terms: a list of subtrees, termnames: the match names set in each term}
+
+/** Options for {@link Numbas.jme.rules.getTerms}
+ * @typedef Numbas.jme.rules.getTerms_options
+ * @type Object
+ * @property {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
+ * @property {Boolean} strictPlus - if `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  */
-var getCommutingTerms = Numbas.jme.rules.getCommutingTerms = function(tree,op,names) {
-    if(names===undefined) {
-        names = [];
+
+/** Information to do with a term found in an expression by {@link Numbas.jme.rules.getTerms}.
+ * @typedef Numbas.jme.rules.term
+ * @type {Object}
+ * @property {Numbas.jme.tree} term
+ * @property {Array.&lt;String>} names - names captured by this term
+ * @property {Array.&lt;String>} equalnames - identified names captured by this term
+ * @property {String} quantifier - code describing how many times the term can appear, if it's a pattern term
+ * @property {Number} min - the minimum number of times the term must appear
+ * @property {Number} max - the maximum number of times the term can appear
+ * @property {Numbas.jme.tree} defaultValue - a value to use if this term is missing
+ */
+
+/** Given a tree representing a series of terms t1 &lt;op> t2 &lt;op> t3 &lt;op> ..., return the terms as a list.
+ * @memberof Numbas.jme.rules
+ * @param {Numbas.jme.tree} tree - tree to find terms in
+ * @param {String} op - the name of the operator whose terms are to be found.
+ * @param {Numbas.jme.rules.getTerms_options} options
+ * @param {String[]} [existing_names] - a list of match names set for this tree by a parent, used when called recursively.
+ * @param {Boolean} calculate_minimum - Should the minimum allowed number of occurrences of each term be calculated? This is a pre-process step when getting the terms in a pattern expression.
+ * @returns {Array.&lt;Numbas.jme.rules.term>}
+ */
+var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_names,calculate_minimum) {
+    /** Add the list of existing names passed in at the start to each term
+     * @param {Array.&lt;Numbas.jme.rules.term>} items
+     * @returns {Array.&lt;Numbas.jme.rules.term>}
+     */
+    function add_existing_names(items) {
+        return existing_names.length==0 ? items : items.map(function(item) {
+            return {
+                term: item.term, 
+                names: existing_names.concat(item.names),
+                equalnames: item.equalnames, 
+                quantifier: item.quantifier, 
+                min: item.min, 
+                max: item.max,
+                defaultValue: item.defaultValue,
+            };
+        });
     }
-    if(op=='+' &amp;&amp; jme.isOp(tree.tok,'-')) {
-        tree = {tok: new jme.types.TOp('+'), args: [tree.args[0],{tok: new jme.types.TOp('-u'), args: [tree.args[1]]}]};
+
+    var intree = tree;
+    if(intree.terms === undefined) {
+        intree.terms = {};
     }
-    if(!tree.args || tree.tok.name!=op) {
-        return {terms: [tree], termnames: names.slice()};
+    if(intree.terms[op] === undefined) {
+        intree.terms[op] = {};
     }
+    var option_signature = options.associative*2 + (options.strictPlus);
+
+    if(intree.terms[op][option_signature]) {
+        return add_existing_names(intree.terms[op][option_signature]);
+    }
+
+
+    /** Insert a unary minus in this tree.
+     * If it's a product, the minus applies to the leftmost factor.
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
+    function insertUnaryMinus(tree) {
+        if(jme.isOp(tree.tok,'*')) {
+            return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
+        } else {
+            return {tok: new jme.types.TOp('-u',false,true,1,false,false), args: [tree]};
+        }
+    }
+
+    if(jme.isOp(tree.tok,'-u') &amp;&amp; op=='*') {
+        tree = insertUnaryMinus(tree.args[0]);
+    }
+
+    if(!options.strictPlus &amp;&amp; op=='+' &amp;&amp; jme.isOp(tree.tok,'-')) {
+        tree = {tok: new jme.types.TOp('+',false,false,2,true,true), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
+    }
+    var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
     var terms = [];
-    var termnames = [];
-    var rest = [];
-    var restnames = [];
-    for(var i=0; i&lt;tree.args.length;i++) {
-        var arg = tree.args[i];
+
+    for(var i=0; i&lt;args.length;i++) {
+        var arg = args[i];
         var oarg = arg;
-        var argnames = names.slice();
-        while(jme.isOp(arg.tok,';')) {
-            argnames.push(arg.args[1].tok.name);
+        var names = [];
+        var equalnames = [];
+        var quantifier = '1';
+        var defaultValue = null;
+        if(jme.isName(arg,'m_nothing')) {
+            quantifier = '0';
+        }
+        var quantifier_combo = {
+            '0': {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
+            '1': {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
+            '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
+            '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
+            '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
+        };
+        while(arg.tok.type=='op') {
+            var argop = arg.tok.name;
+            if(argop==';') {
+                names.push(arg.args[1]);
+            } else if(argop==';=') {
+                names.push(arg.args[1]);
+                equalnames.push(arg.args[1]);
+            } else if(argop=='`?' || argop=='`*' || argop=='`+') {
+                quantifier = quantifier_combo[quantifier][arg.tok.name];
+            } else if(argop=='`:') {
+                quantifier = quantifier_combo[quantifier][arg.tok.name];
+                if(defaultValue===null) {
+                    defaultValue = arg.args[1];
+                }
+            } else {
+                break;
+            }
             arg = arg.args[0];
         }
-        if(jme.isOp(arg.tok,op) || (op=='+' &amp;&amp; jme.isOp(arg.tok,'-'))) {
-            var sub = getCommutingTerms(arg,op,argnames);
-            terms = terms.concat(sub.terms);
-            termnames = termnames.concat(sub.termnames);
-        } else if(jme.isName(arg.tok,'?') || isEndTerm(arg)) {
-            rest.push(arg);
-            restnames.push(argnames);
+        /** Find "identified names" - captured subexpressions which must be equal every time the name is captured - inside this tree.
+         * These are the right-hand arguments of the `;=` operator.
+         * Names found are appended to the list `equalnames`.
+         * @param {Numbas.jme.tree} tree
+         */
+        function find_equal_names(tree) {
+            if(jme.isOp(tree.tok,';=')) {
+                equalnames.push(tree.args[1]);
+            }
+            if(tree.args) {
+                tree.args.forEach(find_equal_names);
+            }
+        }
+        find_equal_names(arg);
+        var item = {
+            term: arg,
+            names: names,
+            equalnames: equalnames,
+            quantifier: quantifier,
+            min: quantifier_limits[quantifier][0],
+            max: quantifier_limits[quantifier][1],
+            defaultValue: defaultValue,
+            occurrences: 0
+        };
+        if(options.associative &amp;&amp; (jme.isOp(arg.tok,op) || (!options.strictPlus &amp;&amp; op=='+' &amp;&amp; jme.isOp(arg.tok,'-')))) {
+            var sub = getTerms(arg,op,options,existing_names.length==0 ? names : existing_names.concat(names),false);
+            if(quantifier!='1') {
+                sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][quantifier]; });
+            }
+            terms = terms.concat(sub);
         } else {
-            terms.push(arg);
-            termnames.push(argnames);
+            terms.push(item);
         }
     }
-    if(rest.length) {
-        terms = terms.concat(rest);
-        termnames = termnames.concat(restnames);
+
+    if(calculate_minimum) {
+        terms.min_total = 0;
+        terms.forEach(function(t) {
+            terms.min_total += t.min;
+        });
     }
-    return {terms: terms, termnames: termnames};
+
+    intree.terms[op][option_signature] = terms;
+    return add_existing_names(terms);
 }
-/** A dictionary representing the results of a JME pattern match.
+
+/** The `_match` name in a match object stores the whole tree that matched the pattern.
+ * This function makes sure that `_match` is set, setting it to the given tree if it's missing.
+ * @param {Numbas.jme.rules.jme_pattern_match} m
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {Numbas.jme.rules.jme_pattern_match}
+ */
+function preserve_match(m,exprTree) {
+    if(m===false) {
+        return false;
+    }
+    if(m._match===undefined) {
+        m._match = exprTree;
+    }
+    return m;
+}
+
+/** A dictionary representing the results of a successful JME pattern match.
  * Maps variable names to trees.
  * @typedef Numbas.jme.rules.jme_pattern_match
  * @type Object.&lt;Numbas.jme.tree>
  * @see {Numbas.jme.rules#matchTree}
  */
+
 /** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
+ * @method
  * @memberof Numbas.jme.rules
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
- * @param {Boolean} doCommute - take commutativity of operations into account, e.g. terms of a sum can be in any order.
+ * @param {Numbas.jme.rules.matchTree_options} options - options specifying the behaviour of the matching algorithm
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,doCommute) {
-    if(doCommute===undefined) {
-        doCommute = false;
-    }
-    if(!exprTree)
-        return false;
-    var ruleTok = ruleTree.tok;
-    var exprTok = exprTree.tok;
-    if(jme.isOp(ruleTok,';')) {
-        if(ruleTree.args[1].tok.type!='name') {
-            throw(new Numbas.Error('jme.matchTree.group name not a name'));
-        }
-        var name = ruleTree.args[1].tok.name;
-        var m = matchTree(ruleTree.args[0],exprTree,doCommute);
-        if(m) {
-            m[name] = exprTree;
+var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
+    var m = (function() {
+        if(!exprTree)
+            return false;
+        var ruleTok = ruleTree.tok;
+        var exprTok = exprTree.tok;
+        if(jme.isOp(ruleTok,';') || jme.isOp(ruleTok,';=')) {
+            var m = matchTree(ruleTree.args[0],exprTree,options);
+            if(!m) {
+                return false;
+            }
+            var o = resolveName(ruleTree.args[1],m._match);
+            m[o.name] = o.value;
             return m;
-        } else {
-            return false;
         }
-    }
-    if(ruleTok.type=='name')
-    {
-        switch(ruleTok.name) {
-            case '?':
-            case '??':
-                return {};
-            case 'm_number':
-                return exprTok.type=='number' ? {} : false;
-        }
-    }
-    if(ruleTok.type=='function') {
-        switch(ruleTok.name) {
-            case 'm_any':
-                for(var i=0;i&lt;ruleTree.args.length;i++) {
-                    var m;
-                    if(m=matchTree(ruleTree.args[i],exprTree,doCommute)) {
-                        return m;
-                    }
-                }
-                return false;
-            case 'm_all':
-                return matchTree(ruleTree.args[0],exprTree,doCommute);
-            case 'm_pm':
-                if(jme.isOp(exprTok,'-u')) {
-                    return matchTree({tok: new jme.types.TOp('-u'),args: [ruleTree.args[0]]},exprTree,doCommute);
-                } else {
-                    return matchTree(ruleTree.args[0],exprTree,doCommute);
-                }
-            case 'm_not':
-                if(!matchTree(ruleTree.args[0],exprTree,doCommute)) {
-                    return {};
-                } else {
+
+        switch(ruleTok.type) {
+            case 'name':
+                return matchName(ruleTree,exprTree,options);
+            case 'function':
+                return matchFunction(ruleTree,exprTree,options);
+            case 'op':
+                return matchOp(ruleTree,exprTree,options);
+            case 'list':
+                return matchList(ruleTree,exprTree,options);
+            default:
+                if(ruleTok.type!=exprTok.type) {
                     return false;
                 }
-            case 'm_and':
-                var d = {};
-                for(var i=0;i&lt;ruleTree.args.length;i++) {
-                    var m = matchTree(ruleTree.args[i],exprTree,doCommute);
-                    if(m) {
-                        for(var name in m) {
-                            d[name] = m[name];
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-                return d;
-            case 'm_uses':
-                var vars = jme.findvars(exprTree);
-                for(var i=0;i&lt;ruleTree.args.length;i++) {
-                    var name = ruleTree.args[i].tok.name;
-                    if(!vars.contains(name)) {
-                        return false;
-                    }
-                }
-                return {};
-            case 'm_commute':
-                return matchTree(ruleTree.args[0],exprTree,true);
-            case 'm_type':
-                var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
-                if(exprTok.type==wantedType) {
-                    return {};
-                } else {
-                    return false;
-                }
+                return util.eq(ruleTok,exprTok) ? {} : false;
         }
-    }
-    if(jme.isName(ruleTok,'m_nothing')) {
-        return false;
-    } else if(jme.isName(ruleTok,'m_number')) {
-        if(exprTok.type=='number') {
-            return {};
-        } else {
-            return false;
-        }
-    }
-    if(ruleTok.type!='op' &amp;&amp; ruleTok.type != exprTok.type)
-    {
-        return false;
-    }
-    switch(ruleTok.type)
-    {
-    case 'number':
-        if( !math.eq(ruleTok.value,exprTok.value) ) {
-            return false;
-        } else {
-            return {};
-        }
-    case 'string':
-    case 'boolean':
-    case 'special':
-    case 'range':
-        if(ruleTok.value != exprTok.value) {
-            return false;
-        } else {
-            return {};
-        }
-    case 'function':
-    case 'op':
-        var d = {};
-        if(doCommute &amp;&amp; jme.commutative[ruleTok.name]) {
-            var commutingOp = ruleTok.name;
-            var ruleTerms = getCommutingTerms(ruleTree,commutingOp);
-            var exprTerms = getCommutingTerms(exprTree,commutingOp);
-            var rest = [];
-            var namedTerms = {};
-            var matchedRules = [];
-            var termMatches = [];
-            for(var i=0; i&lt;exprTerms.terms.length; i++) {
-                var m = null;
-                var matched = false;
-                for(var j=0; j&lt;ruleTerms.terms.length; j++) {
-                    var ruleTerm = ruleTerms.terms[j];
-                    m = matchTree(ruleTerm,exprTerms.terms[i],doCommute);
-                    if((!matchedRules[j] || ruleTerm.tok.name=='m_all') &amp;&amp; m) {
-                        matched = true;
-                        matchedRules[j] = true;
-                        for(var name in m) {
-                            if(!namedTerms[name]) {
-                                namedTerms[name] = [];
-                            }
-                            namedTerms[name].push(m[name]);
-                        }
-                        var names = ruleTerms.termnames[j];
-                        if(names) {
-                            for(var k=0;k&lt;names.length;k++) {
-                                var name = names[k];
-                                if(!namedTerms[name]) {
-                                    namedTerms[name] = [];
-                                }
-                                namedTerms[name].push(exprTerms.terms[i]);
-                            }
-                        }
-                        break;
-                    }
-                }
-                if(!matched) {
-                    return false;
-                }
-            }
-            for(var i=0;i&lt;ruleTerms.terms.length;i++) {
-                var term = ruleTerms.terms[i];
-                if(!isEndTerm(term) &amp;&amp; !matchedRules[i]) {
-                    return false;
-                }
-            }
-            for(var name in namedTerms) {
-                var terms = namedTerms[name];
-                var sub = terms[0];
-                for(var i=1;i&lt;terms.length;i++) {
-                    var op = new jme.types.TOp(commutingOp);
-                    sub = {tok: op, args: [sub,terms[i]]};
-                }
-                d[name] = sub;
-            }
-            return d;
-        } else {
-            if(ruleTok.type!=exprTok.type || ruleTok.name!=exprTok.name) {
-                return false;
-            }
-            var i = 0;
-            var j = 0;
-            for(var i=0;i&lt;ruleTree.args.length;i++)
-            {
-                if(jme.isFunction(ruleTree.args[i].tok,'m_all')) {
-                    while(j&lt;exprTree.args.length) {
-                        var m = matchTree(ruleTree.args[i],exprTree.args[i],doCommute);
-                        if(!m) {
-                            break;
-                        }
-                        for(var x in m) {
-                            d[x]=m[x];
-                        }
-                        j += 1;
-                    }
-                } else if(jme.isName(ruleTree.args[i].tok,'m_nothing')) {
-                    continue;
-                } else {
-                    var m = matchTree(ruleTree.args[i],exprTree.args[j],doCommute);
-                    if(m===false) {
-                        return false;
-                    } else {
-                        for(var x in m) {
-                            d[x]=m[x];
-                        }
-                        j += 1;
-                    }
-                }
-            }
-            // if not all terms in the rule have been matched, the rule doesn't match
-            if(j&lt;i) {
-                return false;
-            }
-            return d
-        }
-    case 'name':
-        if(ruleTok.name.toLowerCase()==exprTok.name.toLowerCase()) {
-            return {};
-        } else {
-            return false;
-        }
-    default:
-        return {};
+    })();
+    return preserve_match(m,exprTree);
+}
+
+/** Conditions for the `m_number` rule
+ * @enum {Function}
+ * @memberof Numbas.jme.rules
+ */
+var number_conditions = jme.rules.number_conditions = {
+    'complex': function(tok) {
+        return tok.value.complex;
+    },
+    'imaginary': function(tok) {
+        return tok.value.complex &amp;&amp; Numbas.math.re(tok.value)==0;
+    },
+    'real': function(tok) {
+        return Numbas.math.im(tok.value)==0;
+    },
+    'positive': function(tok) {
+        return Numbas.math.positive(tok.value);
+    },
+    'nonnegative': function(tok) {
+        return Numbas.math.nonnegative(tok.value);
+    },
+    'negative': function(tok) {
+        return Numbas.math.negative(tok.value);
+    },
+    'integer': function(tok) {
+        return Numbas.util.isInt(tok.value);
     }
 }
-var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute) {
+
+/** Match a name token. `?` and `??` match any name, `m_number` matches a number, with constraints specified by annotations, `m_nothing` never matches.
+ * Otherwise, the name matches if the expression being considered is exactly the same name, ignoring case.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match. The top token is assumed to be a name.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered.
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @see Numbas.jme.rules.number_conditions
+ */
+function matchName(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(ruleTok.type!='name') {
+        return false;
+    }
+    switch(ruleTok.name) {
+        case '?':
+        case '??':
+            return {};
+        case 'm_number':
+            if(exprTok.type!='number') {
+                return false;
+            }
+            if(ruleTok.annotation!==undefined) {
+                var satisfies = ruleTok.annotation.every(function(condition) {
+                    var test = number_conditions[condition];
+                    return !test || test(exprTok);
+                });
+                if(!satisfies) {
+                    return false;
+                }
+            }
+            return {};
+        case 'm_name':
+            if(exprTok.type!='name') {
+                return false;
+            }
+            return {};
+        case 'm_nothing':
+            return false;
+        default:
+            if(exprTok.type!='name') {
+                return false;
+            }
+            var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
+            return same ? {} : false;
+    }
+}
+
+/** Match the application of a function.
+ * Dispatches to one of the special pattern-matching functions, or {@link matchOrdinaryFunction} otherwise.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchFunction(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(ruleTok.type!='function') {
+        return false;
+    }
+    switch(ruleTok.name) {
+        case 'm_uses':
+            var names = ruleTree.args.map(function(t){ return t.tok.name; });
+            return matchUses(names,exprTree);
+        case 'm_exactly':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{allowOtherTerms:false}));
+        case 'm_commutative':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{commutative:true}));
+        case 'm_noncommutative':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{commutative:false}));
+        case 'm_associative':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{associative:true}));
+        case 'm_nonassociative':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{associative:false}));
+        case 'm_strictplus':
+            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{strictPlus:true}));
+        case 'm_type':
+            var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
+            return matchType(wantedType,exprTree);
+        case 'm_func':
+            return matchGenericFunction(ruleTree,exprTree,options);
+        case 'm_op':
+            return matchGenericOp(ruleTree,exprTree,options);
+        default:
+            return matchOrdinaryFunction(ruleTree,exprTree,options);
+    }
+}
+
+/** Match the application of any function. The first argument of `ruleTree` is a pattern that the function's name, considered as a string, must satisfy, and the second argument is a pattern that the function's arguments, considered as a list, must satisfy.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchGenericFunction(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='function') {
+        return false;
+    }
+    var nameRule = ruleTree.args[0];
+    var argsRule = ruleTree.args[1];
+    var exprNameTree = {tok: new jme.types.TString(exprTree.tok.name)};
+    var argsTree = {tok: new jme.types.TList(), args: exprTree.args};
+    var m_name = matchTree(nameRule, exprNameTree, options);
+    var m_args = matchTree(argsRule, argsTree, options);
+    if(m_name &amp;&amp; m_args) {
+        return mergeMatches([m_name,m_args]);
+    } else {
+        return false;
+    }
+}
+
+/** Match the application of any operator. The first argument of `ruleTree` is a pattern that the operator's name, considered as a string, must satisfy, and the second argument is a pattern that the operator's arguments, considered as a list, must satisfy.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchGenericOp(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='op') {
+        return false;
+    }
+    var nameRule = ruleTree.args[0];
+    var argsRule = ruleTree.args[1];
+    var exprNameTree = {tok: new jme.types.TString(exprTree.tok.name)};
+    var argsTree = {tok: new jme.types.TList(), args: exprTree.args};
+    var m_name = matchTree(nameRule, exprNameTree, options);
+    var m_args = matchTree(argsRule, argsTree, options);
+    if(m_name &amp;&amp; m_args) {
+        return mergeMatches([m_name,m_args]);
+    } else {
+        return false;
+    }
+}
+
+/** Match an application of an operator.
+ * Dispatches to one of the special pattern-matching operators, or {@link matchOrdinaryOp} otherwise.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match. It's assumed that the topmost token is an operator.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchOp(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(ruleTok.type!='op') {
+        return false;
+    }
+    switch(ruleTok.name) {
+        case '`?':
+        case '`*':
+        case '`+':
+            return matchTree(ruleTree.args[0],exprTree,options);
+        case '`|':
+            return matchAny(ruleTree.args,exprTree,options);
+        case '`:':
+            return matchDefault(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+        case '`+-u':
+            return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
+        case '`!':
+            return matchNot(ruleTree.args[0],exprTree,options);
+        case '`&amp;':
+            return matchAnd(ruleTree.args,exprTree,options);
+        case '`where':
+            return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+        default:
+            return matchOrdinaryOp(ruleTree,exprTree,options);
+    }
+    return false;
+}
+
+/** Match a `where` condition - the expression must match the given pattern, and the condition specified in terms of the matched names must evaluate to `true`.
+ * @param {Numbas.jme.tree} pattern - the pattern to match
+ * @param {Numbas.jme.tree} condition - the condition to evaluate
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchWhere(pattern,condition,exprTree,options) {
+    var scope = new Numbas.jme.Scope(options.scope);
+
+    var m = matchTree(pattern,exprTree,options);
+    if(!m) {
+        return false;
+    }
+
+    condition = Numbas.util.copyobj(condition,true);
+    condition = jme.substituteTree(condition,new jme.Scope([{variables:m}]));
+    try {
+        var result = scope.evaluate(condition,null,true);
+        if(result.type=='boolean' &amp;&amp; result.value==false) {
+            return false;
+        }
+    } catch(e) {
+        return false;
+    }
+    return m;
+}
+
+/** Match the application of a function.
+ * Matches if the expression is the application of the same function, and all of the arguments match the arguments of the pattern.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchOrdinaryFunction(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    if(exprTok.type!='function' || (ruleTok.name!='?' &amp;&amp; ruleTok.name!=exprTok.name)) {
+        return false;
+    }
+    return matchNonAssociativeOp(ruleTree,exprTree,options);
+}
+
+/** Match the given expression against the given pattern, which is assumed to be a list.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchList(ruleTree,exprTree,options) {
+    if(exprTree.tok.type!='list') {
+        return false;
+    }
+    /** Get the elements of a list. If it's been evaluated, the elements will be stored as the token's value. Otherwise, they're the arguments of the tree.
+     * @param {Numbas.jme.tree} list
+     * @returns {Array.&lt;Numbas.jme.tree>}
+     */
+    function getElements(list) {
+        if(list.args) {
+            return list.args;
+        } else {
+            return list.tok.value.map(function(e) { return {tok: e}; });
+        }
+    }
+    var ruleElements = getElements(ruleTree);
+    var exprElements = getElements(exprTree);
+    // TODO - pay attention to quantifiers to allow for different lengths of list
+    if(ruleElements.length!=exprElements.length) {
+        return false;
+    }
     var matches = [];
-    var m = matchTree(ruleTree,exprTree,doCommute);
+    for(var i=0;i&lt;ruleElements.length;i++) {
+        var m = matchTree(ruleElements[i],exprElements[i],options);
+        if(!m) {
+            return false;
+        }
+        matches.push(m);
+    }
+    return mergeMatches(matches);
+}
+
+/** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
+ */
+var quantifier_limits = {
+    '0': [0,0],
+    '1': [1,1],
+    '`?': [0,1],
+    '`*': [0,Infinity],
+    '`+': [1,Infinity]
+};
+
+/** Resolve the name and value to store when capturing a subexpression.
+ * @param {Numbas.jme.tree} nameTree - right-hand side of the `;` capturing operator. Either a name, or a keypair giving a name and the value to store.
+ * @param {Numbas.jme.tree} value - the value to store, if `nameTree` doesn't override it.
+ * @returns {Object} - `name` is the name to store under, and `value` is the value
+ */
+function resolveName(nameTree,value) {
+    var nameTok = nameTree.tok;
+    if(!(nameTok.type=='name' || nameTok.type=='keypair')) {
+        throw(new Numbas.Error('jme.matchTree.group name not a name'));
+    }
+    var name;
+    if(nameTok.type=='name') {
+        name = nameTok.name;
+    } else if(nameTok.type=='keypair') {
+        name = nameTok.key;
+        value = nameTree.args[0];
+    }
+    return {name: name, value: value};
+}
+
+/** Match an expression against a pattern which is an application of an operator to one or more terms.
+ * Assuming that the pattern and the expression trees are each a sequence of terms joined by the same operator, find the terms of each, and try to match them up, obeying quantifiers in the pattern.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match, whose top token must be an operator.
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Numbas.jme.jme_pattern_match}
+ */
+function matchOrdinaryOp(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprTok = exprTree.tok;
+    var op = ruleTok.name;
+    var commuting = options.commutative &amp;&amp; ruleTok.commutative;
+    var associating = options.associative &amp;&amp; ruleTok.associative;
+    var term_options = {associative: associating, strictPlus: options.strictPlus};
+    var ruleTerms = getTerms(ruleTree,op,term_options,[],true);
+    var exprTerms = getTerms(exprTree,op,term_options,[],false);
+    if(exprTerms.length&lt;ruleTerms.min_total) {
+        return false;
+    }
+
+    if(!associating) {
+        if(!jme.isOp(exprTok,op) &amp;&amp; ruleTerms.length==1) {
+            return false;
+        }
+    }
+    var matches = {};
+    exprTerms.forEach(function(_,i){ matches[i] = {} });
+
+    /** Does the given input term match the given rule term?
+     * The indices of the input and rule terms are given so the result of the match can be cached
+     * @param {Numbas.jme.rules.term} exprTerm - the input term
+     * @param {Numbas.jme.rules.term} ruleTerm - the term in the pattern which must be matched
+     * @param {Number} ic - the index of the input term 
+     * @param {Number} pc - the index of the rule term
+     * @returns {Boolean}
+     */
+    function term_ok(exprTerm,ruleTerm,ic,pc) {
+        if(matches[ic][pc]===undefined) {
+            var m = matchTree(ruleTerm.term,exprTerm.term,options);
+            var equalnames = {};
+            ruleTerm.equalnames.forEach(function(nameTree) {
+                var name = nameTree.tok.name;
+                var t = m[name] || resolveName(nameTree,exprTerm.term).value;
+                equalnames[name] = t;
+            });
+            matches[ic][pc] = {
+                match: m,
+                equalnames: equalnames
+            }
+        }
+        return matches[ic][pc].match!==false; 
+    }
+
+    /** Does the given assignment satisfy the constraints of the matching algorithm?
+     * At the moment, the only constraint is that all subexpressions matched with the same name using the `;=` operator must be equal, according to {@link Numbas.jme.compareTrees}.
+     * @param {Object} assignment - the result of {@link Numbas.jme.rules.match_sequence}
+     * @param {Number} ic - the current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
+     * @param {Number} pc - the current index in the list of pattern terms
+     * @returns {Boolean}
+     */
+    function constraint_ok(assignment,ic,pc) {
+        var m = matches[ic][pc];
+        var equalnames = ruleTerms[pc].equalnames;
+        if(!equalnames.length) {
+            return true;
+        }
+        var ok = assignment.every(function(p,i) {
+            if(p&lt;0 || p==pc || p>=ruleTerms.length) {
+                return true;
+            }
+            var m2 = matches[i][p];
+            return equalnames.every(function(nameTree) {
+                var name = nameTree.tok.name;
+                if(m2.equalnames[name]===undefined) {
+                    return true;
+                }
+                return jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
+            });
+        });
+        return ok;
+    }
+
+    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: options.allowOtherTerms});
+    if(assignment===false) {
+        return false;
+    }
+
+    var namedTerms = {};
+
+    var identified_names = {};
+    ruleTerms.forEach(function(ruleTerm) {
+        ruleTerm.equalnames.forEach(function(nameTree) {
+            var name = nameTree.tok.name;
+            identified_names[name] = (identified_names[name] || 0) + 1;
+        });
+    });
+    /** Record that `term` was captured with the given name.
+     * @param {String} name
+     * @param {Numbas.jme.tree} term
+     * @param {Boolean} allowReservedName - if `false`, reserved names such as `_match` and `_rest`, which are introduced by the matching algorithm, will be ignored.
+     */
+    function nameTerm(name,term,allowReservedName) {
+        if(!allowReservedName &amp;&amp; name.match(/^_/)) {
+            return;
+        }
+        if(!namedTerms[name]) {
+            namedTerms[name] = [];
+        }
+        if(identified_names[name]>1 &amp;&amp; namedTerms[name].length) {
+            return;
+        }
+        namedTerms[name].push(term);
+    }
+    /** Record that `exprTree` was matched against `ruleTerm` - add `exprTree` to all of `ruleTerm`'s names.
+     * @param {Numbas.jme.rules.term} ruleTerm
+     * @param {Numbas.jme.tree} exprTree
+     */
+    function matchTerm(ruleTerm,exprTree){ 
+        ruleTerm.names.forEach(function(name) {
+            var o = resolveName(name,exprTree);
+            nameTerm(o.name,o.value);
+        });
+    }
+
+    assignment.result.forEach(function(is,j) {
+        var ruleTerm = ruleTerms[j];
+
+        if(is.length) {
+            is.forEach(function(i) {
+                var match = matches[i][j].match;
+                for(var name in match) {
+                    nameTerm(name,match[name]);
+                }
+                matchTerm(ruleTerm,exprTerms[i].term);
+            });
+        } else if(ruleTerm.defaultValue) {
+            matchTerm(ruleTerm,ruleTerm.defaultValue);
+        }
+    });
+    assignment.ignored_start_terms.forEach(function(i) {
+        nameTerm('_rest',exprTerms[i].term,true);
+        nameTerm('_rest_start',exprTerms[i].term,true);
+    });
+    assignment.ignored_end_terms.forEach(function(i) {
+        nameTerm('_rest',exprTerms[i].term,true);
+        nameTerm('_rest_end',exprTerms[i].term,true);
+    });
+
+    // collate the named groups
+    var match = {};
+    for(var name in namedTerms) {
+        var terms = namedTerms[name];
+        var sub = terms[0];
+        for(var i=1;i&lt;terms.length;i++) {
+            sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+        }
+        match[name] = sub;
+    }
+    match['__op__'] = op;
+    return match;
+}
+
+/** Options for {@link Numbas.jme.rules.match_sequence}.
+ * @type Object
+ * @typedef Numbas.jme.rules.match_sequence_options
+ * @property {Boolean} allowOtherTerms - if `true`, terms that don't match any term in the pattern can be ignored
+ * @property {Boolean} commutative - can the input terms be considered in any order?
+ * @property {Function} constraintFn - function to test if the current set of matches satisfies constraints
+ * @property {Function} checkFn - function to test if an input term matches a given pattern term
+ */
+
+/** Match a sequence of terms against a given pattern sequence of terms.
+ * Try to find an assignment of input terms to the pattern, satisfying the quantifier for each term in the pattern.
+ * The match is greedy - input terms will match earlier pattern terms in preference to later ones.
+ *
+ * @method
+ * @memberof Numbas.jme.rules
+ *
+ * @param {Array.&lt;Numbas.jme.rules.term>} pattern
+ * @param {Array.&lt;Numbas.jme.tree>} input
+ * @param {Numbas.jme.rules.match_sequence_options} options
+ * @returns {Object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
+ */
+var match_sequence = jme.rules.match_sequence = function(pattern,input,options) {
+    var capture = [];
+    var start = 0;
+    var done = false;
+    var failed = false;
+    var pc = 0;
+    var ic = 0;
+
+    /** Count the number of times we have matched pattern term `p` so far.
+     * @param {Number} p - index of the term
+     * @returns {Number}
+     */
+    function count(p) {
+        return capture.filter(function(x){return x==p}).length;
+    }
+    /** Have we consumed pattern term `p` as many times as allowed?
+     * @param {Number} p
+     * @returns {Boolean}
+     */
+    function consumed(p) {
+        return count(p)>=pattern[p].max;
+    }
+    /** Have we matched this pattern term at least its minimum number of times?
+     * @param {Number} p - the index of the pattern term
+     * @returns {Boolean}
+     */
+    function enough(p) {
+        return count(p)>=pattern[p].min;
+    }
+    /** Move the start pointer along one.
+     * Terms before the start will be returned in `ignored_start_terms`
+     */
+    function increment_start() {
+        //debug('increment start position');
+        start += 1;
+        ic = start;
+        pc = 0;
+    }
+    /** Backtrack to the last time we made a free choice.
+     * If we're already at the start and `allowOtherTerms` is enabled, advance the start pointer.
+     */
+    function backtrack() {
+        //debug('backtrack');
+        if(options.allowOtherTerms &amp;&amp; ic==start &amp;&amp; capture.length==start &amp;&amp; start&lt;input.length-1) {
+            capture.push(-1);
+            increment_start();
+            return;
+        } 
+        
+        ic -= 1;
+        while(ic>=start &amp;&amp; (ic>=capture.length || capture[ic]>=pattern.length)) {
+            ic -= 1;
+        }
+        //debug('backtracked to '+ic);
+
+        if(ic&lt;start) {
+            if(start&lt;input.length-1) {
+                capture = [];
+                increment_start();
+                return;
+            } else {
+                failed = true;
+                return;
+            }
+        }
+        pc = capture[ic]+1;
+        capture = capture.slice(0,ic);
+    }
+    /** Move the input pointer along one.
+     * If using commutativity, set the pattern pointer back to the start.
+     */
+    function advance_input() {
+        ic += 1;
+        if(options.commutative) {
+            pc = start;
+        }
+    }
+    var steps = 0;
+    while(!done &amp;&amp; !failed) {
+        //show();
+        steps += 1;
+        while(pc&lt;pattern.length &amp;&amp; consumed(pc)) { // if have consumed this term fully, move on
+            //debug('term '+pc+' consumed, move on');
+            pc += 1;
+        }
+        if(ic==input.length) { // if we've reached the end of the input
+            while(pc&lt;pattern.length &amp;&amp; enough(pc)) {
+                //debug('got enough of '+pc+', skip forward');
+                pc += 1;
+            }
+            if(pc==pattern.length) { // if we've consumed all the terms
+                if(!pattern.every(function(_,p) { return enough(p); })) {
+                    //debug('reached end but some terms not matched enough times');
+                    backtrack();
+                } else {
+                    //debug('reached end of pattern and end of input: done');
+                    done = true;
+                }
+            } else {
+                //debug('end of input but still pattern to match')
+                backtrack();
+            }
+        } else if(pc>=pattern.length) {
+            //debug("end of pattern but unconsumed input");
+            if(pc==pattern.length &amp;&amp; options.commutative &amp;&amp; options.allowOtherTerms) {
+                //debug('capturing '+ic+' as ignored end term');
+                capture.push(pattern.length);
+                advance_input();
+            } else if(pc==pattern.length &amp;&amp; !options.commutative &amp;&amp; options.allowOtherTerms) {
+                while(ic&lt;input.length) {
+                    //debug('capturing '+ic+' as ignored end term');
+                    capture.push(pattern.length);
+                    advance_input();
+                }
+            } else {
+                backtrack();
+            }
+        } else if(options.checkFn(input[ic],pattern[pc],ic,pc) &amp;&amp; options.constraintFn(capture,ic,pc)) {
+            //debug('capture '+ic+' at '+pc);
+            capture.push(pc);
+            advance_input();
+        } else if(options.commutative || enough(pc)) {
+            //debug('trying the next pattern term');
+            pc += 1;
+        } else {
+            //debug('can\'t match next input')
+            backtrack();
+        }
+    }
+    if(failed) {
+        return false;
+    }
+    var result = pattern.map(function(p,i) {
+        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;}).map(function(j){ return j+start});
+    });
+    var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
+    var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
+    //debug(result);
+    return {ignored_start_terms: ignored_start_terms, result: result, ignored_end_terms: ignored_end_terms};
+}
+
+/** Match any of the given patterns.
+ * The first pattern which successfully matches is used.
+ * @param {Array.&lt;Numbas.jme.tree>} patterns
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchAny(patterns,exprTree,options) {
+    for(var i=0;i&lt;patterns.length;i++) {
+        var m = matchTree(patterns[i],exprTree,options);
+        if(m) {
+            return m;
+        }
+    }
+    return false;
+}
+
+/** Perform a match with a default value.
+ * This operation only makes sense when matching a sequence of terms, so just match the pattern.
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} defaultValue - ignored
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchDefault(ruleTree, defaultValue, exprTree, options) {
+    var m = matchTree(ruleTree,exprTree,options);
+    return m;
+}
+
+/** Bring any unary minus to the top of the tree.
+ * @param {Numbas.jme.tree} tree
+ * @returns {Numbas.jme.tree}
+ */
+function extractLeadingMinus(tree) {
+    if(jme.isOp(tree.tok,'*') || jme.isOp(tree.tok,'/')) {
+        if(jme.isOp(tree.args[0].tok,'-u')) {
+            return {tok:tree.args[0].tok, args: [{tok:tree.tok, args: [tree.args[0].args[0],tree.args[1]]}]};
+        } else {
+            var left = extractLeadingMinus(tree.args[0]);
+            if(jme.isOp(left.tok,'-u')) {
+                return {tok: left.tok, args: [{tok: tree.tok, args: [left, tree.args[1]]}]};
+            } else {
+                return tree;
+            }
+        }
+    } else {
+        return tree;
+    }
+}
+
+/** Match `rule`, or `-(rule)`.
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchPrefixPlusMinus(ruleTree,exprTree,options) {
+    var originalExpr = exprTree;
+    exprTree = extractLeadingMinus(exprTree);
+    if(jme.isOp(exprTree.tok,'-u')) {
+        exprTree = exprTree.args[0];
+    }
+    var m = matchTree(ruleTree,exprTree,options);
+    if(m) {
+        m._match = originalExpr;
+        return m;
+    } else {
+        return false;
+    }
+}
+
+/** Match if the expression doesn't match the given pattern
+ * @param {Numbas.jme.tree} ruleTree - the pattern which must not be matched
+ * @param {Numbas.jme.tree} exprTree - the expression to teset
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchNot(ruleTree,exprTree,options) {
+    if(!matchTree(ruleTree,exprTree,options)) {
+        return preserve_match({},exprTree);
+    } else {
+        return false;
+    }
+}
+
+/** Match if the expression uses all of the given names as free variables.
+ * @param {Array.&lt;String>} names
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchUses(names,exprTree) {
+    var vars = jme.findvars(exprTree);
+    for(var i=0;i&lt;names.length;i++) {
+        if(!vars.contains(names[i])) {
+            return false;
+        }
+    }
+    return {};
+}
+
+/** Match if the top token of the given expression is of the given type.
+ * @param {String} wantedType - the required type
+ * @param {Numbas.jme.tree} exprTree
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchType(wantedType,exprTree) {
+    if(exprTree.tok.type==wantedType) {
+        return {};
+    } else {
+        return false;
+    }
+}
+
+/** Match all of the given patterns against the given expression. 
+ * Return `false` if any of the patterns don't match.
+ * @param {Array.&lt;Numbas.jme.tree>} patterns
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ */
+function matchAnd(patterns,exprTree,options) {
+    var matches = [];
+    for(var i=0;i&lt;patterns.length;i++) {
+        var m = matchTree(patterns[i],exprTree,options);
+        if(m) {
+            matches.push(m);
+        } else {
+            return false;
+        }
+    }
+    return mergeMatches(matches);
+}
+
+/** Find all matches for the rule, anywhere within the given expression.
+ * @memberof Numbas.jme.rules
+ * @method
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Array.&lt;Numbas.jme.rules.jme_pattern_match>}
+ */
+var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) {
+    var matches = [];
+    var m = matchTree(ruleTree,exprTree,options);
     if(m) {
         matches = [m];
     }
     if(exprTree.args) {
         exprTree.args.forEach(function(arg) {
-            var submatches = matchAllTree(ruleTree,arg,doCommute);
+            var submatches = matchAllTree(ruleTree,arg,options);
             matches = matches.concat(submatches);
         });
     }
     return matches;
 }
+
+/** Merge a list of matches into one match object.
+ * Later matches override earlier ones: if two matches have the same captured name, the later one is used.
+ * @param {Array.&lt;Numbas.jme.rules.jme_pattern_match>} matches
+ * @returns {Numbas.jme.rules.jme_pattern_match}
+ */
+function mergeMatches(matches) {
+    var ms = matches.slice();
+    ms.splice(0,0,{});
+    return util.extend_object.apply(this,ms);
+}
+
+/** Apply operations specified in the result of a tree transformation: `eval(x)` is replaced with the result of evaluating `x`.
+ * @memberof Numbas.jme.rules
+ * @method
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Numbas.jme.tree}
+ */
+var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,options) {
+    var tok = tree.tok;
+    if(jme.isFunction(tok,'eval')) {
+        return {tok: jme.evaluate(tree.args[0],options.scope)};
+    }
+    if(tree.args) {
+        var args = tree.args.map(function(arg) {
+            return applyPostReplacement(arg,options);
+        });
+        return {tok:tok, args: args};
+    }
+    return tree;
+}
+
+/** Object returned by {@link Numbas.jme.rules.transform}
+ * @type Object
+ * @typedef Numbas.jme.rules.transform_result
+ * @property {Boolean} changed - Is the result expression different to the input expression?
+ * @property {Numbas.jme.tree} expression - the result expression
+ */
+
+/** Replace one expression with another, if it matches the given rule
+ * @memberof Numbas.jme.rules
+ * @method
+ * @param {Numbas.jme.tree} ruleTree - the rule to test against
+ * @param {Numbas.jme.tree} resultTree - the tree to output, with named groups from the rule substituted in.
+ * @param {Numbas.jme.tree} exprTree - the expression to be tested
+ * @param {Numbas.jme.rules.matchTree_options} options - options for the match
+ * @returns {Numbas.jme.rules.transform_result}
+ */
+var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,options) {
+    var match = matchTree(ruleTree,exprTree,options);
+    if(!match) {
+        return {expression: exprTree, changed: false};
+    }
+
+    var out = jme.substituteTree(resultTree,new jme.Scope([{variables: match}]), true);
+    out = applyPostReplacement(out,options);
+    var ruleTok = ruleTree.tok;
+    if(match._rest_start) {
+        out = {tok: new jme.types.TOp(match.__op__), args: [match._rest_start, out]};
+    }
+    if(match._rest_end) {
+        out = {tok: new jme.types.TOp(match.__op__), args: [out, match._rest_end]};
+    }
+    return {expression: out, changed: !jme.treesSame(exprTree,out)};
+}
+
+/** Replace anything matching the rule with the given result, at any position in the given expression
+ * @memberof Numbas.jme.rules
+ * @method
+ * @param {Numbas.jme.tree} ruleTree - the rule to test against
+ * @param {Numbas.jme.tree} resultTree - the tree to output, with named groups from the rule substituted in.
+ * @param {Numbas.jme.tree} exprTree - the expression to be tested
+ * @param {Numbas.jme.rules.matchTree_options} options - options for the match
+ * @returns {Numbas.jme.rules.transform_result}
+ */
+var transformAll = jme.rules.transformAll = function(ruleTree,resultTree,exprTree,options) {
+    var changed = false;
+    if(exprTree.args) {
+        var args = exprTree.args.map(function(arg){ 
+            var o = transformAll(ruleTree,resultTree,arg,options);
+            changed = changed || o.changed;
+            return  o.expression;
+        });
+        exprTree = {tok: exprTree.tok, args: args};
+    }
+
+    var o = transform(ruleTree,resultTree,exprTree,options);
+    changed = changed || o.changed;
+    return {expression: o.expression, changed: changed};
+}
+
+/** A parser for JME patterns. Adds pattern-matching operators to the standard parser.
+ * @memberof Numbas.jme.rules
+ */
+var patternParser = jme.rules.patternParser = new jme.Parser();
+patternParser.addPostfixOperator('`?','`?',{precedence: 0.5});  // optional
+patternParser.addPostfixOperator('`*','`*',{precedence: 0.5}); // any number of times
+patternParser.addPostfixOperator('`+','`+',{precedence: 0.5}); // at least one time
+
+patternParser.addPrefixOperator('`!','`!',{precedence: 0.5});  // not 
+patternParser.addPrefixOperator('`+-','`+-u',{precedence: 0.5});  // unary plus or minus
+
+patternParser.addBinaryOperator(';', {precedence: 0});
+patternParser.addBinaryOperator(';=', {precedence: 0});
+patternParser.addBinaryOperator('`+-', {precedence: 1000000});  // plus or minus
+patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
+patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
+patternParser.addBinaryOperator('`&amp;',{precedence: 100000});     // and
+patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
+
+
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
  *
  * @memberof Numbas.jme.rules
@@ -445,14 +1297,22 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,doCommute
  *
  * @param {JME} pattern
  * @param {JME} expr
- * @param {Boolean} doCommute
+ * @param {Numbas.jme.rules.matchTree_options} options - default is `commutative`, `associative`, and `allowOtherTerms` all `true`, and using {@link Numbas.jme.builtinScope}.
  *
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
  */
-var matchExpression = jme.rules.matchExpression = function(pattern,expr,doCommute) {
-    pattern = jme.compile(pattern);
+var matchExpression = jme.rules.matchExpression = function(pattern,expr,options) {
+    var default_options = {
+        commutative: true,
+        associative: true,
+        allowOtherTerms: true,
+        strictPlus: false,
+        scope: Numbas.jme.builtinScope
+    };
+    options = util.extend_object({},default_options,options);
+    pattern = patternParser.compile(pattern);
     expr = jme.compile(expr);
-    return matchTree(pattern,expr,doCommute);
+    return matchTree(pattern,expr,options);
 }
 /** Flags used to control the behaviour of JME display functions.
  * Values are `undefined` so they can be overridden
@@ -484,7 +1344,8 @@ var Ruleset = jme.rules.Ruleset = function(rules,flags) {
 }
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     /** Test whether flag is set
-     * @memberof Numbas.jme.rules.Ruleset.prototype
+     * @param {String} flag
+     * @returns {Boolean}
      */
     flagSet: function(flag) {
         flag = flag.toLowerCase();
@@ -492,26 +1353,70 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
             return this.flags[flag];
         else
             return false;
+    },
+
+    /** Apply this set's rules to the given expression until they don't change any more 
+     * @param {Numbas.jme.tree} exprTree
+     * @param {Numbas.jme.Scope} scope
+     * @see Numbas.jme.rules.transform
+     * @see Numbas.jme.rules.matchTree
+     * @returns {Numbas.jme.tree}
+     */
+    simplify: function(exprTree,scope) {
+        var rs = this;
+        var changed = true;
+        var depth = 0;
+        while(changed) {
+            if(exprTree.args) {
+                var nargs = exprTree.args.map(function(arg) { return rs.simplify(arg,scope); });
+                exprTree = {tok: exprTree.tok, args: nargs};
+            }
+            changed = false;
+            for(var i=0;i&lt;this.rules.length;i++) {
+                var result = this.rules[i].replace(exprTree,{scope: scope});
+                if(result.changed) {
+                    changed = true;
+                    exprTree = result.expression;
+                    depth += 1;
+                    if(depth > 100) {
+                        var str = Numbas.jme.display.treeToJME(exprTree);
+                        throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
+                    }
+                    break;
+                }
+            }
+        }
+        return exprTree;
     }
 }
 var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
+/** Merge two rulesets: combine their lists of rules, and merge their flags. The second rule takes precedence over the first.
+ * @param {Numbas.jme.rules.Ruleset} r1
+ * @param {Numbas.jme.rules.Ruleset} r2
+ * @returns {Numbas.jme.rules.Ruleset}
+ */
 function mergeRulesets(r1,r2) {
     var rules = r1.rules.merge(r2.rules,ruleSort);
     var flags = util.extend_object({},r1.flags,r2.flags);
     return new Ruleset(rules, flags);
 }
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
+ * @memberof Numbas.jme.rules
+ * @method
  * @param {String|Array.&lt;String|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
  * @param {Object.&lt;Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
- * @returns Numbas.jme.rules.Ruleset
+ * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 {
     scopeSets = util.copyobj(scopeSets);
-    if(!set)
+    if(!set) {
         return new Ruleset([],{});
-    if(!scopeSets)
+    }
+    if(!scopeSets) {
         throw(new Numbas.Error('jme.display.collectRuleset.no sets'));
+    }
+
     var rules = [];
     var flags = {};
     if(typeof(set)=='string') {
@@ -523,50 +1428,36 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
         if(set.rules)
             set = set.rules;
     }
-    for(var i=0; i&lt;set.length; i++ )
-    {
-        if(typeof(set[i])=='string')
-        {
+    for(var i=0; i&lt;set.length; i++ ) {
+        if(typeof(set[i])=='string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
             var neg = m[1]=='!' ? true : false;
             var name = m[2].trim().toLowerCase();
-            if(name in displayFlags)
-            {
+            if(name in displayFlags) {
                 flags[name]= !neg;
-            }
-            else if(name.length>0)
-            {
-                if(!(name in scopeSets))
-                {
+            } else if(name.length>0) {
+                if(!(name in scopeSets)) {
                     throw(new Numbas.Error('jme.display.collectRuleset.set not defined',{name:name}));
                 }
                 var sub = collectRuleset(scopeSets[name],scopeSets);
                 flags = util.extend_object(flags,sub.flags);
                 scopeSets[name] = sub;
-                if(neg)
-                {
-                    for(var j=0; j&lt;sub.rules.length; j++)
-                    {
-                        if((m=rules.indexOf(sub.rules[j]))>=0)
-                        {
+                sub.rules.forEach(function(r) {
+                    var m = rules.indexOf(r);
+                    if(neg) {
+                        if(m>=0) {
                             rules.splice(m,1);
                         }
-                    }
-                }
-                else
-                {
-                    for(var j=0; j&lt;sub.rules.length; j++)
-                    {
-                        if(!(rules.contains(sub.rules[j])))
-                        {
-                            rules.push(sub.rules[j]);
+                    } else {
+                        if(m==-1) {
+                            rules.push(r);
                         }
                     }
-                }
+                });
             }
-        }
-        else
+        } else {
             rules.push(set[i]);
+        }
     }
     return new Ruleset(rules,flags);
 }
@@ -576,163 +1467,89 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
  */
 var simplificationRules = jme.rules.simplificationRules = {
     basic: [
-        ['?;x',['x isa "number"','x&lt;0'],'-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
-        ['+(?;x)',[],'x'],                    //get rid of unary plus
-        ['?;x+(-?;y)',[],'x-y'],            //plus minus = minus
-        ['?;x+?;y',['y isa "number"','y&lt;0'],'x-eval(-y)'],
-        ['?;x-?;y',['y isa "number"','y&lt;0'],'x+eval(-y)'],
-        ['?;x-(-?;y)',[],'x+y'],            //minus minus = plus
-        ['-(-?;x)',[],'x'],                //unary minus minus = plus
-        ['-?;x',['x isa "complex"','re(x)&lt;0'],'eval(-x)'],
-        ['?;x+?;y',['x isa "number"','y isa "complex"','re(y)=0'],'eval(x+y)'],
-        ['-?;x+?;y',['x isa "number"','y isa "complex"','re(y)=0'],'-eval(x-y)'],
-        ['(-?;x)/?;y',[],'-(x/y)'],            //take negation to left of fraction
-        ['?;x/(-?;y)',[],'-(x/y)'],
-        ['(-?;x)*?;y',['not (x isa "complex")'],'-(x*y)'],            //take negation to left of multiplication
-        ['?;x*(-?;y)',['not (y isa "complex")'],'-(x*y)'],
-        ['?;x+(?;y+?;z)',[],'(x+y)+z'],        //make sure sums calculated left-to-right
-        ['?;x-(?;y+?;z)',[],'(x-y)-z'],
-        ['?;x+(?;y-?;z)',[],'(x+y)-z'],
-        ['?;x-(?;y-?;z)',[],'(x-y)+z'],
-        ['(?;x*?;y)*?;z',[],'x*(y*z)'],        //make sure multiplications go right-to-left
-        ['?;n*i',['n isa "number"'],'eval(n*i)'],            //always collect multiplication by i
-        ['i*?;n',['n isa "number"'],'eval(n*i)']
+        ['negative:m_number;x','','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
+        ['+(?;x)','','x'],                    //get rid of unary plus
+        ['?;x+(-?;y)','g','x-y'],            //plus minus = minus
+        ['?;x-(-?;y)','g','x+y'],            //minus minus = plus
+        ['-(-?;x)','','x'],                //unary minus minus = plus
+        ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
+        ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
+        ['(-?;x)/?;y','','-(x/y)'],            //take negation to left of fraction
+        ['?;x/(-?;y)','','-(x/y)'],
+        ['(-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
+        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
+        ['-(?;a+?`+;b)','','-a-b']
     ],
     unitFactor: [
-        ['1*?;x',[],'x'],
-        ['?;x*1',[],'x']
+        ['1*?;x','acg','x'],
     ],
     unitPower: [
-        ['?;x^1',[],'x']
+        ['?;x^1','','x']
     ],
     unitDenominator: [
-        ['?;x/1',[],'x']
+        ['?;x/1','','x']
     ],
     zeroFactor: [
-        ['?;x*0',[],'0'],
-        ['0*?;x',[],'0'],
-        ['0/?;x',[],'0']
+        ['?;x*0','acg','0'],
+        ['0/?;x','','0']
     ],
     zeroTerm: [
-        ['0+?;x',[],'x'],
-        ['?;x+0',[],'x'],
-        ['?;x-0',[],'x'],
-        ['0-?;x',[],'-x']
+        ['(`+-0) + (`+- ?);x','acg','x']
     ],
     zeroPower: [
-        ['?;x^0',[],'1']
+        ['?;x^0','','1']
     ],
     noLeadingMinus: [
-        ['-?;x+?;y',[],'y-x'],                                            //don't start with a unary minus
-        ['-0',[],'0']
+        ['-?;x + ?;y','p','y-x'],                                            //don't start with a unary minus
+        ['-0','','0']
     ],
     collectNumbers: [
-        ['-?;x-?;y',['x isa "number"','y isa "number"'],'-(x+y)'],                                        //collect minuses
-        ['?;n+?;m',['n isa "number"','m isa "number"'],'eval(n+m)'],    //add numbers
-        ['?;n-?;m',['n isa "number"','m isa "number"'],'eval(n-m)'],    //subtract numbers
-        ['?;n+?;x',['n isa "number"','!(x isa "number")'],'x+n'],        //add numbers last
-        ['(?;x+?;n)+?;m',['n isa "number"','m isa "number"'],'x+eval(n+m)'],    //collect number sums
-        ['(?;x-?;n)+?;m',['n isa "number"','m isa "number"'],'x+eval(m-n)'],
-        ['(?;x+?;n)-?;m',['n isa "number"','m isa "number"'],'x+eval(n-m)'],
-        ['(?;x-?;n)-?;m',['n isa "number"','m isa "number"'],'x-eval(n+m)'],
-        ['(?;x+?;n)+?;y',['n isa "number"'],'(x+y)+n'],                        //shift numbers to right hand side
-        ['(?;x+?;n)-?;y',['n isa "number"'],'(x-y)+n'],
-        ['(?;x-?;n)+?;y',['n isa "number"'],'(x+y)-n'],
-        ['(?;x-?;n)-?;y',['n isa "number"'],'(x-y)-n'],
-        ['?;n*?;m',['n isa "number"','m isa "number"'],'eval(n*m)'],        //multiply numbers
-        ['?;x*?;n',['n isa "number"','!(x isa "number")','n&lt;>i'],'n*x'],            //shift numbers to left hand side
-        ['?;m*(?;n*?;x)',['m isa "number"','n isa "number"'],'eval(n*m)*x']
+        ['(`+- m_number);n1 + (`+- m_number)`+;n2','acg','eval(n1+n2)'],
+        ['m_number;n * m_number;m','acg','eval(n*m)'],        //multiply numbers
+        ['(`! m_number)`+;x * real:m_number;n','acg','n*x']            //shift numbers to left hand side
     ],
     simplifyFractions: [
-        ['?;n/?;m',['n isa "number"','m isa "number"','gcd_without_pi_or_i(n,m)>1'],'eval(n/gcd_without_pi_or_i(n,m))/eval(m/gcd_without_pi_or_i(n,m))'],            //cancel simple fraction
-        ['(?;n*?;x)/?;m',['n isa "number"','m isa "number"','gcd_without_pi_or_i(n,m)>1'],'(eval(n/gcd_without_pi_or_i(n,m))*x)/eval(m/gcd_without_pi_or_i(n,m))'],    //cancel algebraic fraction
-        ['?;n/(?;m*?;x)',['n isa "number"','m isa "number"','gcd_without_pi_or_i(n,m)>1'],'eval(n/gcd_without_pi_or_i(n,m))/(eval(m/gcd_without_pi_or_i(n,m))*x)'],
-        ['(?;n*?;x)/(?;m*?;y)',['n isa "number"','m isa "number"','gcd_without_pi_or_i(n,m)>1'],'(eval(n/gcd_without_pi_or_i(n,m))*x)/(eval(m/gcd_without_pi_or_i(n,m))*y)'],
-        ['?;n/?;m',['n isa "complex"','m isa "complex"','re(n)=0','re(m)=0'],'eval(n/i)/eval(m/i)']            // cancel i when numerator and denominator are both purely imaginary
+        ['(m_number;n * (?`* `: 1);top) / (m_number;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
+        ['imaginary:m_number;n / imaginary:m_number;m','','eval(n/i)/eval(m/i)']            // cancel i when numerator and denominator are both purely imaginary
     ],
     zeroBase: [
-        ['0^?;x',[],'0']
+        ['0^?;x','','0']
     ],
     constantsFirst: [
-        ['?;x*?;n',['n isa "number"','!(x isa "number")','n&lt;>i'],'n*x'],
-        ['?;x*(?;n*?;y)',['n isa "number"','n&lt;>i','!(x isa "number")'],'n*(x*y)']
+        ['(`! m_number);x * real:m_number;n','ag','n*x']
     ],
     sqrtProduct: [
-        ['sqrt(?;x)*sqrt(?;y)',[],'sqrt(x*y)']
+        ['sqrt(?;x)*sqrt(?;y)','','sqrt(x*y)']
     ],
     sqrtDivision: [
-        ['sqrt(?;x)/sqrt(?;y)',[],'sqrt(x/y)']
+        ['sqrt(?;x)/sqrt(?;y)','','sqrt(x/y)']
     ],
     sqrtSquare: [
-        ['sqrt(?;x^2)',[],'x'],
-        ['sqrt(?;x)^2',[],'x'],
-        ['sqrt(?;n)',['n isa "number"','isint(sqrt(n))'],'eval(sqrt(n))']
+        ['sqrt(?;x^2)','','x'],
+        ['sqrt(?;x)^2','','x'],
+        ['sqrt(integer:m_number;n) `where isint(sqrt(n))','','eval(sqrt(n))']
     ],
     trig: [
-        ['sin(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(sin(n))'],
-        ['cos(?;n)',['n isa "number"','isint(2*n/pi)'],'eval(cos(n))'],
-        ['tan(?;n)',['n isa "number"','isint(n/pi)'],'0'],
-        ['cosh(0)',[],'1'],
-        ['sinh(0)',[],'0'],
-        ['tanh(0)',[],'0']
-    ],
-    trigPowers: [
-        ['sin^(?;n)(?;x)',[],'sin(x)^n']
+        ['sin(m_number;n) `where isint(2*n/pi)','','eval(sin(n))'],
+        ['cos(m_number;n) `where isint(2*n/pi)','','eval(cos(n))'],
+        ['tan(m_number;n) `where isint(n/pi)','','0'],
+        ['cosh(0)','','1'],
+        ['sinh(0)','','0'],
+        ['tanh(0)','','0']
     ],
     otherNumbers: [
-        ['?;n^?;m',['n isa "number"','m isa "number"'],'eval(n^m)']
+        ['m_number;n ^ m_number;m','','eval(n^m)']
     ],
     cancelTerms: [
-        // x+y or rest+x+y
-        ['(?;rest+?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)*x'],
-        ['(?;rest+?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
-        ['(?;rest+?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+1)*x'],
-        ['(?;rest+?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+2*x'],
-        ['?;n*?;x+?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)*x'],
-        ['?;n*?;x+?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
-        ['-?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
-        ['-?;x+?;y',['canonical_compare(x,y)=0'],'0*x'],
-        ['?;x+?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n+1)*x'],
-        ['?;x+?;y',['canonical_compare(x,y)=0'],'2*x'],
-        // x-y or rest+x-y
-        ['(?;rest+?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)*x'],
-        ['(?;rest+?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-1)*x'],
-        ['(?;rest+?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest+?;x) - ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
-        ['?;n*?;x-?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)*x'],
-        ['?;n*?;x-?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(n-1)*x'],
-        ['-?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(-1-n)*x'],
-        ['-?;x-?;y',['canonical_compare(x,y)=0'],'-2*x'],
-        ['?;x-?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'eval(1-n)*x'],
-        ['?;x-?;y',['canonical_compare(x,y)=0'],'0*x'],
-        // rest-x-y or rest-x+y
-        ['(?;rest-?;n*?;x) + ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)*x'],
-        ['(?;rest-?;n*?;x) + ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest-?;x) + ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest+eval(1-n)*x'],
-        ['(?;rest-?;n*?;x) - ?;m*?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)*x'],
-        ['(?;rest-?;n*?;x) - ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+1)*x'],
-        ['(?;rest-?;x) - ?;n*?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest-eval(1+n)*x'],
-        ['(?;rest-?;x) - ?;y',['canonical_compare(x,y)=0'],'rest-2*x'],
-        ['(?;rest-?;x) + ?;y',['canonical_compare(x,y)=0'],'rest+0*x'],
-        ['(?;rest+?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n+m)/x'],
-        ['(?;n)/(?;x)+(?;m)/(?;y)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n+m)/x'],
-        ['(?;rest+?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(n-m)/x'],
-        ['?;n/?;x-?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'eval(n-m)/x'],
-        ['(?;rest-?;n/?;x) + ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest+eval(m-n)/x'],
-        ['(?;rest-?;n/?;x) - ?;m/?;y',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest-eval(n+m)/x']
+        ['((`+- ? `: 1);n * (?`+ `&amp; `! -?);=x `| -?;=x;n:-1) + ((`+- ? `: 1);m * (?`+ `&amp; `! -?);=x `| -?;=x;m:-1)','acg','(n+m)*x']
     ],
     cancelFactors: [
-        // x*y or rest*x*y
-        ['(?;rest*(?;x)^(?;n)) * (?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^(n+m)'],
-        ['(?;rest*(?;x)^(?;n)) * ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
-        ['(?;rest*?;x) * (?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n+1)'],
-        ['(?;rest*?;x) * ?;y',['canonical_compare(x,y)=0'],'rest*x^2'],
-        ['(?;x)^(?;n)*(?;y)^(?;m)',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'x^eval(n+m)'],
-        ['(?;x)^(?;n)*?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
-        ['(?;x)^(-?;n)*?;y',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(-n+1)'],
-        ['?;x*(?;y)^(?;n)',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(n+1)'],
-        ['?;x*(?;y)^(-?;n)',['n isa "number"','canonical_compare(x,y)=0'],'x^eval(-n+1)'],
-        ['?;x*?;y',['canonical_compare(x,y)=0'],'x^2'],
+        ['?;=x^(? `: 1);n * ?;=x^(? `: 1);m','acg','x^(m+n)'],
+    ],
+    collectLikeFractions: [
+        ['?;a/?;=d + `+- ?;b/?;=d','acg','(a+b)/d']
+    ]
+    /*
         // x/y or rest*x/y
         ['(?;rest*(?;x)^(?;n)) / ((?;y)^(?;m))',['n isa "number"','m isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n-m)'],
         ['(?;rest*(?;x)^(?;n)) / ?;y',['n isa "number"','canonical_compare(x,y)=0'],'rest*x^eval(n-1)'],
@@ -752,42 +1569,32 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(?;rest/?;x) / ?;y',['canonical_compare(x,y)=0'],'rest/(x^2)'],
         ['(?;rest/?;x) * ?;y',['canonical_compare(x,y)=0'],'rest/(x^0)']
     ],
-    collectLikeFractions: [
-        ['?;a/?;b+?;c/?;d',['canonical_compare(b,d)=0'],'(a+c)/b']
-    ]
+    */
 };
 // these rules conflict with noLeadingMinus
 var canonicalOrderRules = [
-    ['?;x+?;y',['canonical_compare(x,y)=1'],'y+x'],
-    ['?;x-?;y',['canonical_compare(x,y)=1'],'(-y)+x'],
-    ['-?;x+?;y',['canonical_compare(x,y)=1'],'y-x'],
-    ['-?;x-?;y',['canonical_compare(x,y)=1'],'(-y)-x'],
-    ['(?;x+?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)+y'],
-    ['(?;x+?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)+y'],
-    ['(?;x-?;y)+?;z',['canonical_compare(y,z)=1'],'(x+z)-y'],
-    ['(?;x-?;y)-?;z',['canonical_compare(y,z)=1'],'(x-z)-y'],
-    ['?;x*?;y',['canonical_compare(x,y)=-1'],'y*x'],
-    ['(?;x*?;y)*?;z',['canonical_compare(y,z)=-1'],'(x*z)*y'],
-    ['?;x*(?;y*?;z)',['canonical_compare(x,y)=-1'],'y*(x*z)'],
+    ['(`+- ?);x+(`+- ?);y `where canonical_compare(x,y)=1','ag','y+x'],
+    ['?;x*?;y `where canonical_compare(x,y)=-1','ag','y*x'],
 ]
 var expandBracketsRules = [
-    ['(?;x+?;y)*?;z',[],'x*z+y*z'],
-    ['?;x*(?;y+?;z)',[],'x*y+x*z'],
-    ['(?;x-?;y)*?;z',[],'x*z-y*z'],
-    ['?;x*(?;y-?;z)',[],'x*y-x*z']
+    ['(?;x + ((`+- ?)`+);y) * ?;z','ag','x*z+y*z'],
+    ['?;x * (?;y + ((`+- ?)`+);z)','ag','x*y+x*z']
 ]
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
+ * @memberof Numbas.jme.rules
+ * @method
  * @param {Array} rules
+ * @param {String} name - a name for this group of rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
-var compileRules = jme.rules.compileRules = function(rules)
+var compileRules = jme.rules.compileRules = function(rules,name)
 {
     for(var i=0;i&lt;rules.length;i++)
     {
         var pattern = rules[i][0];
-        var conditions = rules[i][1];
+        var options = rules[i][1];
         var result = rules[i][2];
-        rules[i] = new Rule(pattern,conditions,result);
+        rules[i] = new Rule(pattern,result,options,name);
     }
     return new Ruleset(rules,{});
 }
@@ -796,13 +1603,13 @@ var compiledSimplificationRules = {};
 var notAll = ['canonicalOrder','expandBrackets'];
 for(var x in simplificationRules)
 {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x]);
+    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
     if(!notAll.contains(x)) {
     all = all.concat(compiledSimplificationRules[x].rules);
     }
 }
-compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules);
-compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules);
+compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules,'canonicalOrder');
+compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules,'expandBrackets');
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
@@ -823,8 +1630,6 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="global"><a href="global.html">global</a></li>
 		
 			<li class="search-result" data-longname="complex"><a href="global.html#complex">complex</a></li>
-		
-			<li class="search-result" data-longname="complex.complexToString"><a href="global.html#complex#.complexToString">complex.complexToString</a></li>
 		
 			<li class="search-result" data-longname="fraction"><a href="global.html#fraction">fraction</a></li>
 		
@@ -879,6 +1684,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.createQuestionFromJSON"><a href="Numbas.html#.createQuestionFromJSON">Numbas.createQuestionFromJSON</a></li>
 		
 			<li class="search-result" data-longname="Numbas.createQuestionFromXML"><a href="Numbas.html#.createQuestionFromXML">Numbas.createQuestionFromXML</a></li>
+		
+			<li class="search-result" data-longname="Numbas.custom_part_types"><a href="Numbas.html#.custom_part_types">Numbas.custom_part_types</a></li>
 		
 			<li class="search-result" data-longname="Numbas.debug"><a href="Numbas.html#.debug">Numbas.debug</a></li>
 		
@@ -969,8 +1776,6 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.display.feedbackable"><a href="Numbas.display.html#.feedbackable">Numbas.display.feedbackable</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.getLocalisedAttribute"><a href="Numbas.display.html#.getLocalisedAttribute">Numbas.display.getLocalisedAttribute</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.inInput"><a href="Numbas.display.html#.inInput">Numbas.display.inInput</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.init"><a href="Numbas.display.html#.init">Numbas.display.init</a></li>
 		
@@ -1136,6 +1941,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.Error"><a href="Numbas.Error.html">Numbas.Error</a></li>
 		
+			<li class="search-result" data-longname="Numbas.exam"><a href="Numbas.html#.exam">Numbas.exam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam"><a href="Numbas.Exam.html">Numbas.Exam</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#begin"><a href="Numbas.Exam.html#begin">Numbas.Exam#begin</a></li>
@@ -1252,6 +2059,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.arity"><a href="Numbas.jme.html#.arity">Numbas.jme.arity</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.associative"><a href="Numbas.jme.html#.associative">Numbas.jme.associative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.checkingFunction"><a href="Numbas.jme.html#.checkingFunction">Numbas.jme.checkingFunction</a></li>
@@ -1263,6 +2072,10 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.jme.compare"><a href="Numbas.jme.html#.compare">Numbas.jme.compare</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compare_settings"><a href="Numbas.jme.html#.compare_settings">Numbas.jme.compare_settings</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.compareTokens"><a href="Numbas.jme.html#.compareTokens">Numbas.jme.compareTokens</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.compareTokensByValue"><a href="Numbas.jme.html#.compareTokensByValue">Numbas.jme.compareTokensByValue</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compareTrees"><a href="Numbas.jme.html#.compareTrees">Numbas.jme.compareTrees</a></li>
 		
@@ -1303,6 +2116,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets."^""><a href="Numbas.jme.display.opBrackets.html#.%22%5E%22">Numbas.jme.display.opBrackets."^"</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.and"><a href="Numbas.jme.display.opBrackets.html#.and">Numbas.jme.display.opBrackets.and</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.fact"><a href="Numbas.jme.display.opBrackets.html#.fact">Numbas.jme.display.opBrackets.fact</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.or"><a href="Numbas.jme.display.opBrackets.html#.or">Numbas.jme.display.opBrackets.or</a></li>
 		
@@ -1406,25 +2221,23 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions"><a href="Numbas.jme.html#.jme.mapFunctions">Numbas.jme.jme.mapFunctions</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.list"><a href="Numbas.jme.html#.jme.mapFunctions#.list">Numbas.jme.jme.mapFunctions.list</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.matrix"><a href="Numbas.jme.html#.jme.mapFunctions#.matrix">Numbas.jme.jme.mapFunctions.matrix</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.range"><a href="Numbas.jme.html#.jme.mapFunctions#.range">Numbas.jme.jme.mapFunctions.range</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.set"><a href="Numbas.jme.html#.jme.mapFunctions#.set">Numbas.jme.jme.mapFunctions.set</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.vector"><a href="Numbas.jme.html#.jme.mapFunctions#.vector">Numbas.jme.jme.mapFunctions.vector</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.mapFunctions"><a href="Numbas.jme.html#.mapFunctions">Numbas.jme.mapFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.opSynonyms"><a href="Numbas.jme.html#.opSynonyms">Numbas.jme.opSynonyms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addBinaryOperator"><a href="Numbas.jme.Parser.html#addBinaryOperator">Numbas.jme.Parser#addBinaryOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addOperator"><a href="Numbas.jme.Parser.html#addOperator">Numbas.jme.Parser#addOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPostfixOperator"><a href="Numbas.jme.Parser.html#addPostfixOperator">Numbas.jme.Parser#addPostfixOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPrefixOperator"><a href="Numbas.jme.Parser.html#addPrefixOperator">Numbas.jme.Parser#addPrefixOperator</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#compile"><a href="Numbas.jme.Parser.html#compile">Numbas.jme.Parser#compile</a></li>
 		
@@ -1434,51 +2247,89 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#re"><a href="Numbas.jme.Parser.html#re">Numbas.jme.Parser#re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#setOperatorProperties"><a href="Numbas.jme.Parser.html#setOperatorProperties">Numbas.jme.Parser#setOperatorProperties</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#shunt"><a href="Numbas.jme.Parser.html#shunt">Numbas.jme.Parser#shunt</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#shunt_type_actions.op"><a href="Numbas.jme.Parser_shunt_type_actions.op.html">Numbas.jme.Parser#shunt_type_actions.op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#tokenise"><a href="Numbas.jme.Parser.html#tokenise">Numbas.jme.Parser#tokenise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#tokeniser_types"><a href="Numbas.jme.Parser.html#tokeniser_types">Numbas.jme.Parser#tokeniser_types</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.parser_options"><a href="Numbas.jme.html#.parser_options">Numbas.jme.parser_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.postfixForm"><a href="Numbas.jme.html#.postfixForm">Numbas.jme.postfixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.postfixForm."!""><a href="Numbas.jme.html#.postfixForm#.%22!%22">Numbas.jme.postfixForm."!"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.precedence"><a href="Numbas.jme.html#.precedence">Numbas.jme.precedence</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.prefixForm"><a href="Numbas.jme.html#.prefixForm">Numbas.jme.prefixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."!""><a href="Numbas.jme.html#.prefixForm#.%22!%22">Numbas.jme.prefixForm."!"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."+""><a href="Numbas.jme.html#.prefixForm#.%22+%22">Numbas.jme.prefixForm."+"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."-""><a href="Numbas.jme.html#.prefixForm#.%22-%22">Numbas.jme.prefixForm."-"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.resultsEqual"><a href="Numbas.jme.html#.resultsEqual">Numbas.jme.resultsEqual</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rightAssociative"><a href="Numbas.jme.html#.rightAssociative">Numbas.jme.rightAssociative</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules"><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.applyPostReplacement"><a href="Numbas.jme.rules.html#.applyPostReplacement">Numbas.jme.rules.applyPostReplacement</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.collectRuleset"><a href="Numbas.jme.rules.html#.collectRuleset">Numbas.jme.rules.collectRuleset</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.compileRules"><a href="Numbas.jme.rules.html#.compileRules">Numbas.jme.rules.compileRules</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.displayFlags"><a href="Numbas.jme.rules.html#.displayFlags">Numbas.jme.rules.displayFlags</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms"><a href="Numbas.jme.rules.html#.getTerms">Numbas.jme.rules.getTerms</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms_options"><a href="Numbas.jme.rules.html#.getTerms_options">Numbas.jme.rules.getTerms_options</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.jme_pattern_match"><a href="Numbas.jme.rules.html#.jme_pattern_match">Numbas.jme.rules.jme_pattern_match</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.match_sequence"><a href="Numbas.jme.rules.html#.match_sequence">Numbas.jme.rules.match_sequence</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.match_sequence_options"><a href="Numbas.jme.rules.html#.match_sequence_options">Numbas.jme.rules.match_sequence_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchAllTree"><a href="Numbas.jme.rules.html#.matchAllTree">Numbas.jme.rules.matchAllTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchExpression"><a href="Numbas.jme.rules.html#.matchExpression">Numbas.jme.rules.matchExpression</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchTree"><a href="Numbas.jme.rules.html#.matchTree">Numbas.jme.rules.matchTree</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchTree_options"><a href="Numbas.jme.rules.html#.matchTree_options">Numbas.jme.rules.matchTree_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.number_conditions"><a href="Numbas.jme.rules.html#.number_conditions">Numbas.jme.rules.number_conditions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.patternParser"><a href="Numbas.jme.rules.html#.patternParser">Numbas.jme.rules.patternParser</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule"><a href="Numbas.jme.rules.Rule.html">Numbas.jme.rules.Rule</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#get_options"><a href="Numbas.jme.rules.Rule.html#get_options">Numbas.jme.rules.Rule#get_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule#match"><a href="Numbas.jme.rules.Rule.html#match">Numbas.jme.rules.Rule#match</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchConditions"><a href="Numbas.jme.rules.Rule.html#matchConditions">Numbas.jme.rules.Rule#matchConditions</a></li>
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchAll"><a href="Numbas.jme.rules.Rule.html#matchAll">Numbas.jme.rules.Rule#matchAll</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replace"><a href="Numbas.jme.rules.Rule.html#replace">Numbas.jme.rules.Rule#replace</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replaceAll"><a href="Numbas.jme.rules.Rule.html#replaceAll">Numbas.jme.rules.Rule#replaceAll</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset"><a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#flagSet"><a href="Numbas.jme.rules.Ruleset.html#flagSet">Numbas.jme.rules.Ruleset#flagSet</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#simplify"><a href="Numbas.jme.rules.Ruleset.html#simplify">Numbas.jme.rules.Ruleset#simplify</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.ruleset_flags"><a href="Numbas.jme.rules.html#.ruleset_flags">Numbas.jme.rules.ruleset_flags</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.simplificationRules"><a href="Numbas.jme.rules.html#.simplificationRules">Numbas.jme.rules.simplificationRules</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.term"><a href="Numbas.jme.rules.html#.term">Numbas.jme.rules.term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform"><a href="Numbas.jme.rules.html#.transform">Numbas.jme.rules.transform</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform_result"><a href="Numbas.jme.rules.html#.transform_result">Numbas.jme.rules.transform_result</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transformAll"><a href="Numbas.jme.rules.html#.transformAll">Numbas.jme.rules.transformAll</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></li>
 		
@@ -1512,9 +2363,9 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.setOperatorProperties"><a href="Numbas.jme.html#.setOperatorProperties">Numbas.jme.setOperatorProperties</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.shunt"><a href="Numbas.jme.html#.shunt">Numbas.jme.shunt</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.standardParser"><a href="Numbas.jme.html#.standardParser">Numbas.jme.standardParser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.substituteTree"><a href="Numbas.jme.html#.substituteTree">Numbas.jme.substituteTree</a></li>
 		
@@ -1526,11 +2377,15 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.token"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.tokenComparisons"><a href="Numbas.jme.html#.tokenComparisons">Numbas.jme.tokenComparisons</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.tokenise"><a href="Numbas.jme.html#.tokenise">Numbas.jme.tokenise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tokenToDisplayString"><a href="Numbas.jme.html#.tokenToDisplayString">Numbas.jme.tokenToDisplayString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tree"><a href="Numbas.jme.html#.tree">Numbas.jme.tree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.treesSame"><a href="Numbas.jme.html#.treesSame">Numbas.jme.treesSame</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typecheck_fn"><a href="Numbas.jme.html#.typecheck_fn">Numbas.jme.typecheck_fn</a></li>
 		
@@ -1579,6 +2434,10 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.jme.variables.computeRuleset"><a href="Numbas.jme.variables.html#.computeRuleset">Numbas.jme.variables.computeRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.computeVariable"><a href="Numbas.jme.variables.html#.computeVariable">Numbas.jme.variables.computeVariable</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber"><a href="Numbas.jme.variables.DOMcontentsubber.html">Numbas.jme.variables.DOMcontentsubber</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber#sub_element"><a href="Numbas.jme.variables.DOMcontentsubber_sub_element.html">Numbas.jme.variables.DOMcontentsubber#sub_element</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubvars"><a href="Numbas.jme.variables.html#.DOMcontentsubvars">Numbas.jme.variables.DOMcontentsubvars</a></li>
 		
@@ -1632,9 +2491,13 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.loadScript"><a href="Numbas.html#.loadScript">Numbas.loadScript</a></li>
 		
+			<li class="search-result" data-longname="Numbas.locale"><a href="Numbas.html#.locale">Numbas.locale</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking"><a href="Numbas.marking.html">Numbas.marking</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.compute_note"><a href="Numbas.marking.html#.compute_note">Numbas.marking.compute_note</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.feedback"><a href="Numbas.marking.html#.feedback">Numbas.marking.feedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.feedback_item"><a href="Numbas.marking.html#.feedback_item">Numbas.marking.feedback_item</a></li>
 		
@@ -1702,6 +2565,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setVariable"><a href="Numbas.marking.StatefulScope.html#setVariable">Numbas.marking.StatefulScope#setVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking_scripts"><a href="Numbas.html#.marking_scripts">Numbas.marking_scripts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math"><a href="Numbas.math.html">Numbas.math</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.abs"><a href="Numbas.math.html#.abs">Numbas.math.abs</a></li>
@@ -1733,6 +2598,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.math.combinations"><a href="Numbas.math.html#.combinations">Numbas.math.combinations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.complexToString"><a href="Numbas.math.html#.complexToString">Numbas.math.complexToString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
 		
@@ -1816,15 +2683,21 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.math.negate"><a href="Numbas.math.html#.negate">Numbas.math.negate</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.negative"><a href="Numbas.math.html#.negative">Numbas.math.negative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.neq"><a href="Numbas.math.html#.neq">Numbas.math.neq</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber"><a href="Numbas.math.html#.niceNumber">Numbas.math.niceNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber_settings"><a href="Numbas.math.html#.niceNumber_settings">Numbas.math.niceNumber_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.nonnegative"><a href="Numbas.math.html#.nonnegative">Numbas.math.nonnegative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.permutations"><a href="Numbas.math.html#.permutations">Numbas.math.permutations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.piDegree"><a href="Numbas.math.html#.piDegree">Numbas.math.piDegree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.positive"><a href="Numbas.math.html#.positive">Numbas.math.positive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.pow"><a href="Numbas.math.html#.pow">Numbas.math.pow</a></li>
 		
@@ -3028,6 +3901,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#apply_feedback"><a href="Numbas.parts.Part.html#apply_feedback">Numbas.parts.Part#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScripts"><a href="Numbas.parts.Part_applyScripts.html">Numbas.parts.Part#applyScripts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#baseMarkingScript"><a href="Numbas.parts.Part.html#baseMarkingScript">Numbas.parts.Part#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#calculateScore"><a href="Numbas.parts.Part.html#calculateScore">Numbas.parts.Part#calculateScore</a></li>
@@ -3408,6 +4283,10 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.queueScript"><a href="Numbas.html#.queueScript">Numbas.queueScript</a></li>
 		
+			<li class="search-result" data-longname="Numbas.raw_marking_scripts"><a href="Numbas.html#.raw_marking_scripts">Numbas.raw_marking_scripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.rawxml"><a href="Numbas.html#.rawxml">Numbas.rawxml</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule"><a href="Numbas.schedule.html">Numbas.schedule</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.add"><a href="Numbas.schedule.html#.add">Numbas.schedule.add</a></li>
@@ -3632,6 +4511,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.timing.show"><a href="Numbas.timing.html#.show">Numbas.timing.show</a></li>
 		
+			<li class="search-result" data-longname="Numbas.timing.start"><a href="Numbas.timing.html#.start">Numbas.timing.start</a></li>
+		
 			<li class="search-result" data-longname="Numbas.timing.startacc"><a href="Numbas.timing.html#.startacc">Numbas.timing.startacc</a></li>
 		
 			<li class="search-result" data-longname="Numbas.timing.stress"><a href="Numbas.timing.html#.stress">Numbas.timing.stress</a></li>
@@ -3708,6 +4589,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.util.numberNotationStyles"><a href="Numbas.util.html#.numberNotationStyles">Numbas.util.numberNotationStyles</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.objects_equal"><a href="Numbas.util.html#.objects_equal">Numbas.util.objects_equal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.parseBool"><a href="Numbas.util.html#.parseBool">Numbas.util.parseBool</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseFraction"><a href="Numbas.util.html#.parseFraction">Numbas.util.parseFraction</a></li>
@@ -3723,6 +4606,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.util.re_fraction"><a href="Numbas.util.html#.re_fraction">Numbas.util.re_fraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.rpad"><a href="Numbas.util.html#.rpad">Numbas.util.rpad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.separateThousands"><a href="Numbas.util.html#.separateThousands">Numbas.util.separateThousands</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.sortBy"><a href="Numbas.util.html#.sortBy">Numbas.util.sortBy</a></li>
 		
@@ -3778,6 +4663,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.xml"><a href="Numbas.xml.html">Numbas.xml</a></li>
 		
+			<li class="search-result" data-longname="Numbas.xml.examXML"><a href="Numbas.xml.html#.examXML">Numbas.xml.examXML</a></li>
+		
 			<li class="search-result" data-longname="Numbas.xml.getTextContent"><a href="Numbas.xml.html#.getTextContent">Numbas.xml.getTextContent</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.isEmpty"><a href="Numbas.xml.html#.isEmpty">Numbas.xml.isEmpty</a></li>
@@ -3795,6 +4682,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.xml.serializeMessage"><a href="Numbas.xml.html#.serializeMessage">Numbas.xml.serializeMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.setTextContent"><a href="Numbas.xml.html#.setTextContent">Numbas.xml.setTextContent</a></li>
+		
+			<li class="search-result" data-longname="Numbas.xml.templates"><a href="Numbas.xml.html#.templates">Numbas.xml.templates</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.tryGetAttribute"><a href="Numbas.xml.html#.tryGetAttribute">Numbas.xml.tryGetAttribute</a></li>
 		
@@ -3868,6 +4757,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="vector"><a href="global.html#vector">vector</a></li>
 		
+			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
+		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -3896,7 +4787,7 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

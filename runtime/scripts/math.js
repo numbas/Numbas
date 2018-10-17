@@ -31,7 +31,10 @@ Numbas.queueScript('math',['base'],function() {
  * @see Numbas.math.defineRange
  */
 var math = Numbas.math = /** @lends Numbas.math */ {
-    /** Regex to match numbers in scientific notation */
+    /** Regex to match numbers in scientific notation 
+     * @type {RegExp}
+     * @memberof Numbas.math
+     */
     re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
     /** Construct a complex number from real and imaginary parts.
      *
@@ -49,9 +52,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             toString: math.complexToString}
     },
     /** String version of a complex number
-     * @returns {String}
+     * @see Numbas.math.niceNumber
      * @method
-     * @memberof! complex
+     * @returns {String}
      */
     complexToString: function()
     {

@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
+// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/timing.js  runtime/scripts/xml.js  runtime/scripts/start-exam.js  runtime/scripts/numbas.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -209,6 +209,24 @@ Numbas.checkAllScriptsLoaded = function() {
     }
 }
 })();
+
+/** Resources to do with localisation: `preferred_locale` is the code of the locale to use, and `resources` is a dictionary of localisations.
+ * @name locale
+ * @memberof Numbas
+ * @type {Object}
+ */
+
+/** Definitions of marking scripts for the built-in part types
+ * @name raw_marking_scripts
+ * @memberof Numbas
+ * @type {Object.<String>}
+ */
+
+/** Marking scripts for the built-in part types
+ * @name marking_scripts
+ * @memberof Numbas
+ * @type {Object.<Numbas.marking.MarkingScript>}
+ */
 
 Numbas.queueScript('localisation',['i18next','localisation-resources'],function() {
     i18next.init({
@@ -455,6 +473,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     neq: function(a,b) {
         return !util.eq(a,b);
     },
+
+    /** Are the given objects equal?
+     * False if they're of different types.
+     * If they're both arrays, uses {@link Numbas.util.arraysEqual}.
+     * If they're both objects, true if every key in `b` is also in `a`, and `a[k]` is equal to `b[k]` for every `k` in `a`.
+     * Otherwise, uses JavaScript's equality test.
+     * @param {*} a
+     * @param {*} b
+     * @returns {Boolean}
+     */
     objects_equal: function(a,b) {
         if(typeof(a)!=typeof(b)) {
             return false;
@@ -643,8 +671,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         b = b.toString().toLowerCase();
         return( b=='true' || b=='yes' );
     },
-    /** Regular expression recognising a fraction */
+    /** Regular expression recognising a fraction 
+     * @type RegExp
+     */
     re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
+
     /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
      * @param {String} thousands - the string used to separate powers of 1000
      * @param {String} decimal_mark - the decimal mark character
@@ -869,7 +900,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return s + suffix;
         }
     },
-    /* Write a number with every three digits separated by the given separator character
+
+    /** Write a number with every three digits separated by the given separator character
      * @example separateThousands(1234567.1234,',') => '1,234,567.1234'
      * @param {Number} n
      * @param {String} separator
@@ -1571,7 +1603,10 @@ Numbas.queueScript('math',['base'],function() {
  * @see Numbas.math.defineRange
  */
 var math = Numbas.math = /** @lends Numbas.math */ {
-    /** Regex to match numbers in scientific notation */
+    /** Regex to match numbers in scientific notation 
+     * @type {RegExp}
+     * @memberof Numbas.math
+     */
     re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
     /** Construct a complex number from real and imaginary parts.
      *
@@ -1589,9 +1624,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             toString: math.complexToString}
     },
     /** String version of a complex number
-     * @returns {String}
+     * @see Numbas.math.niceNumber
      * @method
-     * @memberof! complex
+     * @returns {String}
      */
     complexToString: function()
     {
@@ -8351,7 +8386,11 @@ var associative = jme.associative =
 };
 
 
-jme.standardParser = new jme.Parser();
+/** A standard parser for JME expressions
+ * @memberof Numbas.jme
+ * @type Numbas.jme.Parser
+ */
+var standardParser = jme.standardParser = new jme.Parser();
 jme.standardParser.addBinaryOperator(';',{precedence:0});
 
 
@@ -8808,7 +8847,7 @@ var varsUsed = jme.varsUsed = function(tree) {
  *
  * @memberof Numbas.jme
  * @method
- * @see @Numbas.jme.tokenComparisons
+ * @see Numbas.jme.tokenComparisons
  * @param {Numbas.jme.token} a
  * @param {Numbas.jme.token} b
  * @returns {Boolean}
@@ -8820,6 +8859,7 @@ var compareTokensByValue = jme.compareTokensByValue = function(a,b) {
 /** Functions to compare two tokens of the same type.
  * Returns -1 if a<b, 0 if a=b, and 1 if a>b
  * @see Numbas.jme.compareTokens
+ * @memberof Numbas.jme
  */
 var tokenComparisons = Numbas.jme.tokenComparisons = {
     'number': compareTokensByValue,
@@ -8851,6 +8891,7 @@ var compareTokens = jme.compareTokens = function(a,b) {
 }
 
 /** Are the two given trees exactly the same?
+ * @memberof Numbas.jme
  * @param {Numbas.jme.tree} a
  * @param {Numbas.jme.tree} b
  * @returns {Boolean}

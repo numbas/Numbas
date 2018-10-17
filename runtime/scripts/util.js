@@ -225,6 +225,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     neq: function(a,b) {
         return !util.eq(a,b);
     },
+
+    /** Are the given objects equal?
+     * False if they're of different types.
+     * If they're both arrays, uses {@link Numbas.util.arraysEqual}.
+     * If they're both objects, true if every key in `b` is also in `a`, and `a[k]` is equal to `b[k]` for every `k` in `a`.
+     * Otherwise, uses JavaScript's equality test.
+     * @param {*} a
+     * @param {*} b
+     * @returns {Boolean}
+     */
     objects_equal: function(a,b) {
         if(typeof(a)!=typeof(b)) {
             return false;
@@ -413,8 +423,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         b = b.toString().toLowerCase();
         return( b=='true' || b=='yes' );
     },
-    /** Regular expression recognising a fraction */
+    /** Regular expression recognising a fraction 
+     * @type RegExp
+     */
     re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
+
     /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
      * @param {String} thousands - the string used to separate powers of 1000
      * @param {String} decimal_mark - the decimal mark character
@@ -639,7 +652,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return s + suffix;
         }
     },
-    /* Write a number with every three digits separated by the given separator character
+
+    /** Write a number with every three digits separated by the given separator character
      * @example separateThousands(1234567.1234,',') => '1,234,567.1234'
      * @param {Number} n
      * @param {String} separator
