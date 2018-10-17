@@ -938,6 +938,13 @@
                     
                     var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
                     assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
+
+                    assert.ok(matchExpression('[1,2,3]','[1,2,3]'));
+                    assert.notOk(matchExpression('[1,2,3]','[1,2]'));
+                    assert.ok(matchExpression('[m_number`+]','[1,2,3]'));
+                    assert.ok(matchExpression('[m_number`+,3]','[1,2,3]'));
+                    assert.notOk(matchExpression('[m_number`+,2]','[1,2,3]'));
+                    assert.ok(matchExpression('[m_number`+,2`?]','[1,2,3]'));
                 });
 
 				QUnit.module('Display');

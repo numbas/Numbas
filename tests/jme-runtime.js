@@ -4914,6 +4914,75 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @property {Numbas.jme.tree} defaultValue - a value to use if this term is missing
  */
 
+/** A term in a sequence.
+ * @constructor
+ * @param {Numbas.jme.tree} tree
+ * @property {Numbas.jme.tree} term
+ * @property {Array.<String>} names - names captured by this term
+ * @property {Array.<String>} equalnames - identified names captured by this term
+ * @property {String} quantifier - code describing how many times the term can appear, if it's a pattern term
+ * @property {Number} min - the minimum number of times the term must appear
+ * @property {Number} max - the maximum number of times the term can appear
+ * @property {Numbas.jme.tree} defaultValue - a value to use if this term is missing
+ */
+var Term = Numbas.jme.rules.Term = function(tree) {
+    var names = [];
+    var equalnames = [];
+    var quantifier = '1';
+    var defaultValue = null;
+    if(jme.isName(tree,'m_nothing')) {
+        quantifier = '0';
+    }
+    var quantifier_combo = {
+        '0': {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
+        '1': {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
+        '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
+        '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
+        '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
+    };
+    while(tree.tok.type=='op') {
+        var op = tree.tok.name;
+        if(op==';') {
+            names.push(tree.args[1]);
+        } else if(op==';=') {
+            names.push(tree.args[1]);
+            equalnames.push(tree.args[1]);
+        } else if(op=='`?' || op=='`*' || op=='`+') {
+            quantifier = quantifier_combo[quantifier][tree.tok.name];
+        } else if(op=='`:') {
+            quantifier = quantifier_combo[quantifier][tree.tok.name];
+            if(defaultValue===null) {
+                defaultValue = tree.args[1];
+            }
+        } else {
+            break;
+        }
+        tree = tree.args[0];
+    }
+    /** Find "identified names" - captured subexpressions which must be equal every time the name is captured - inside this tree.
+     * These are the right-hand arguments of the `;=` operator.
+     * Names found are appended to the list `equalnames`.
+     * @param {Numbas.jme.tree} tree
+     */
+    function find_equal_names(tree) {
+        if(jme.isOp(tree.tok,';=')) {
+            equalnames.push(tree.args[1]);
+        }
+        if(tree.args) {
+            tree.args.forEach(find_equal_names);
+        }
+    }
+    find_equal_names(tree);
+
+    this.term = tree;
+    this.names = names;
+    this.equalnames = equalnames;
+    this.quantifier = quantifier;
+    this.min = quantifier_limits[quantifier][0];
+    this.max = quantifier_limits[quantifier][1];
+    this.defaultValue = defaultValue;
+}
+
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
  * @memberof Numbas.jme.rules
  * @param {Numbas.jme.tree} tree - tree to find terms in
@@ -4942,6 +5011,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
         });
     }
 
+    // we'll cache the results of this call in the tree object, to save time if the same thing is asked for again
     var intree = tree;
     if(intree.terms === undefined) {
         intree.terms = {};
@@ -4981,68 +5051,11 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
 
     for(var i=0; i<args.length;i++) {
         var arg = args[i];
-        var oarg = arg;
-        var names = [];
-        var equalnames = [];
-        var quantifier = '1';
-        var defaultValue = null;
-        if(jme.isName(arg,'m_nothing')) {
-            quantifier = '0';
-        }
-        var quantifier_combo = {
-            '0': {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
-            '1': {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
-            '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
-            '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
-            '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
-        };
-        while(arg.tok.type=='op') {
-            var argop = arg.tok.name;
-            if(argop==';') {
-                names.push(arg.args[1]);
-            } else if(argop==';=') {
-                names.push(arg.args[1]);
-                equalnames.push(arg.args[1]);
-            } else if(argop=='`?' || argop=='`*' || argop=='`+') {
-                quantifier = quantifier_combo[quantifier][arg.tok.name];
-            } else if(argop=='`:') {
-                quantifier = quantifier_combo[quantifier][arg.tok.name];
-                if(defaultValue===null) {
-                    defaultValue = arg.args[1];
-                }
-            } else {
-                break;
-            }
-            arg = arg.args[0];
-        }
-        /** Find "identified names" - captured subexpressions which must be equal every time the name is captured - inside this tree.
-         * These are the right-hand arguments of the `;=` operator.
-         * Names found are appended to the list `equalnames`.
-         * @param {Numbas.jme.tree} tree
-         */
-        function find_equal_names(tree) {
-            if(jme.isOp(tree.tok,';=')) {
-                equalnames.push(tree.args[1]);
-            }
-            if(tree.args) {
-                tree.args.forEach(find_equal_names);
-            }
-        }
-        find_equal_names(arg);
-        var item = {
-            term: arg,
-            names: names,
-            equalnames: equalnames,
-            quantifier: quantifier,
-            min: quantifier_limits[quantifier][0],
-            max: quantifier_limits[quantifier][1],
-            defaultValue: defaultValue,
-            occurrences: 0
-        };
+        var item = new Term(arg);
         if(options.associative && (jme.isOp(arg.tok,op) || (!options.strictPlus && op=='+' && jme.isOp(arg.tok,'-')))) {
-            var sub = getTerms(arg,op,options,existing_names.length==0 ? names : existing_names.concat(names),false);
-            if(quantifier!='1') {
-                sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][quantifier]; });
+            var sub = getTerms(arg,op,options,existing_names.length==0 ? item.names : existing_names.concat(item.names),false);
+            if(item.quantifier!='1') {
+                sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][item.quantifier]; });
             }
             terms = terms.concat(sub);
         } else {
@@ -5321,6 +5334,8 @@ function matchOp(ruleTree,exprTree,options) {
             return matchAnd(ruleTree.args,exprTree,options);
         case '`where':
             return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+        case '`@':
+            return matchMacro(ruleTree.args[0],ruleTree.args[1],exprTree,options);
         default:
             return matchOrdinaryOp(ruleTree,exprTree,options);
     }
@@ -5353,6 +5368,27 @@ function matchWhere(pattern,condition,exprTree,options) {
         return false;
     }
     return m;
+}
+
+/** Substitute sub-patterns into a bigger pattern before matching.
+ * @param {Numbas.jme.tree} subPatterns - a dictionary of patterns
+ * @param {Numbas.jme.tree} pattern - the pattern to substitute into
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchMacro(subPatterns, pattern, exprTree, options) {
+    if(subPatterns.tok.type!='dict') {
+        throw(new Numbas.Error('jme.matchTree.match macro first argument not a dictionary'));
+    }
+    var d = {}
+    subPatterns.args.forEach(function(keypair) {
+        var name = keypair.tok.key;
+        var tree = keypair.args[0];
+        d[name] = tree;
+    });
+    pattern = jme.substituteTree(pattern,new jme.Scope([{variables:d}]),true);
+    return matchTree(pattern,exprTree,options)
 }
 
 /** Match the application of a function.
@@ -5392,21 +5428,23 @@ function matchList(ruleTree,exprTree,options) {
             return list.tok.value.map(function(e) { return {tok: e}; });
         }
     }
-    var ruleElements = getElements(ruleTree);
-    var exprElements = getElements(exprTree);
-    // TODO - pay attention to quantifiers to allow for different lengths of list
-    if(ruleElements.length!=exprElements.length) {
+    var ruleElements = getElements(ruleTree).map(function(t){ return new Term(t) });
+    var exprElements = getElements(exprTree).map(function(t){ return new Term(t); });
+
+    options = util.extend_object({},options,{allowOtherTerms:false});
+
+    var namedTerms = matchTermSequence(ruleElements,exprElements,false,options);
+    if(namedTerms===false) {
         return false;
     }
-    var matches = [];
-    for(var i=0;i<ruleElements.length;i++) {
-        var m = matchTree(ruleElements[i],exprElements[i],options);
-        if(!m) {
-            return false;
-        }
-        matches.push(m);
+
+    // collate the named groups
+    var match = {};
+    for(var name in namedTerms) {
+        var terms = namedTerms[name];
+        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
     }
-    return mergeMatches(matches);
+    return match;
 }
 
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
@@ -5464,6 +5502,37 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
             return false;
         }
     }
+
+    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options);
+    if(namedTerms===false) {
+        return false;
+    }
+
+    // collate the named groups
+    var match = {};
+    for(var name in namedTerms) {
+        var terms = namedTerms[name];
+        var sub = terms[0];
+        for(var i=1;i<terms.length;i++) {
+            sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+        }
+        match[name] = sub;
+    }
+    match['__op__'] = op;
+
+    return match;
+}
+
+/** Match a sequence of terms.
+ * Calls {@link Numbas.jme.rules.match_sequence}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
+ *
+ * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
+ * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
+ * @param {Boolean} commuting - can the terms match in any order?
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Object.<Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
+ */
+function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -5587,18 +5656,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
         nameTerm('_rest_end',exprTerms[i].term,true);
     });
 
-    // collate the named groups
-    var match = {};
-    for(var name in namedTerms) {
-        var terms = namedTerms[name];
-        var sub = terms[0];
-        for(var i=1;i<terms.length;i++) {
-            sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
-        }
-        match[name] = sub;
-    }
-    match['__op__'] = op;
-    return match;
+    return namedTerms;
 }
 
 /** Options for {@link Numbas.jme.rules.match_sequence}.
@@ -6029,6 +6087,7 @@ patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
 patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
 patternParser.addBinaryOperator('`&',{precedence: 100000});     // and
 patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
+patternParser.addBinaryOperator('`@', {precedence: 1000000});   // macro
 
 
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
