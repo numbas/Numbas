@@ -931,7 +931,7 @@
 				QUnit.module('Pattern-matching');
                 QUnit.test('matchExpression', function(assert) {
                     function matchExpression(rule,expr,commute) {
-                        return Numbas.jme.rules.matchExpression(rule,expr,{doCommute: commute, scope:Numbas.jme.builtinScope});
+                        return Numbas.jme.rules.matchExpression(rule,expr,{commutative: commute, scope:Numbas.jme.builtinScope});
                     }
                     assert.ok(matchExpression('?','x'));
                     var rule = '(`+-m_number;n);sn + (`+-m_number;m);sm';
@@ -947,6 +947,31 @@
                     assert.ok(matchExpression('[m_number`+,2`?]','[1,2,3]'));
                 });
 
+                QUnit.test('replace', function(assert) {
+                    function replace(pattern,repl,options,expr) {
+                        var rule = new Numbas.jme.rules.Rule(pattern,repl,options);
+                        return rule.replace(Numbas.jme.compile(expr), Numbas.jme.builtinScope);
+                    }
+                    function replaceAll(pattern,repl,options,expr) {
+                        var rule = new Numbas.jme.rules.Rule(pattern,repl,options);
+                        return rule.replaceAll(Numbas.jme.compile(expr), Numbas.jme.builtinScope);
+                    }
+                    
+                    var res = replace('?;x+?;y','x*y','acg','1+2');
+                    assert.ok(res.changed);
+                    var treeToJME = Numbas.jme.display.treeToJME;
+                    assert.equal(treeToJME(res.expression),'1*2');
+
+                    var res = replace('?;x+?;y','x*y','acg','1*2');
+                    assert.notOk(res.changed);
+
+                    var res = replace('?;x*?;y','x+y','acg','1*2+3*4');
+                    assert.notOk(res.changed);
+
+                    var res = replaceAll('?;x*?;y','x+y','acg','1*2+3*4');
+                    assert.ok(res.changed);
+                    assert.equal(treeToJME(res.expression),'1 + 2 + 3 + 4');
+                });
 				QUnit.module('Display');
 
 				QUnit.test('niceNumber',function(assert) {

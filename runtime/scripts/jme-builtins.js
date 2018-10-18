@@ -1405,41 +1405,112 @@ newBuiltin('resultsequal',['?','?',TString,TNum],TBool,null, {
         return new TBool(jme.resultsEqual(a,b,checkingFunction,accuracy));
     }
 });
+
+/** Helper function for the JME `match` function
+ * @param {Numbas.jme.tree} expr
+ * @param {String} pattern
+ * @param {String} options
+ * @param {Numbas.jme.Scope} scope
+ * @returns {Numbas.jme.token}
+ * @see Numbas.jme.rules.Rule#match
+ */
+function match_subexpression(expr,pattern,options,scope) {
+    var rule = new jme.rules.Rule(pattern, null, options);
+    var match = rule.match(expr,scope);
+    if(!match) {
+        return jme.wrapValue({match: false, groups: {}});
+    } else {
+        var groups = {}
+        for(var x in match) {
+            if(x.slice(0,2)!='__') {
+                groups[x] = new TExpression(match[x]);
+            }
+        }
+        return jme.wrapValue({
+            match: true,
+            groups: groups
+        });
+    }
+}
+
 newBuiltin('match',[TExpression,TString],TDict,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
-        var pattern = Numbas.jme.compile(args[1].value);
-        var match = Numbas.jme.display.matchTree(pattern,expr,false);
-        if(!match) {
-            return jme.wrapValue({match: false, groups: {}});
-        } else {
-            var groups = {}
-            for(var x in match) {
-                groups[x] = new TExpression(match[x]);
-            }
-            return jme.wrapValue({
-                match: true,
-                groups: groups
-            });
-        }
+        var pattern = args[1].value;
+        var options = 'acg';
+        return match_subexpression(expr,pattern,options,scope);
     }
 });
+newBuiltin('match',[TExpression,TString,TString],TDict,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0].tree;
+        var pattern = args[1].value;
+        var options = args[2].value;
+        return match_subexpression(expr,pattern,options,scope);
+    }
+});
+
+/** Helper function for the JME `matches` function
+ * @param {Numbas.jme.tree} expr
+ * @param {String} pattern
+ * @param {String} options
+ * @param {Numbas.jme.Scope} scope
+ * @returns {Numbas.jme.token}
+ * @see Numbas.jme.rules.Rule#match
+ */
+function matches_subexpression(expr,pattern,options,scope) {
+    var rule = new jme.rules.Rule(pattern, null, options);
+    var match = rule.match(expr,scope);
+    return new TBool(match && true);
+}
+
 newBuiltin('matches',[TExpression,TString],TBool,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
-        var pattern = Numbas.jme.compile(args[1].value);
-        var match = Numbas.jme.display.matchTree(pattern,expr,false);
-        return new TBool(match && true);
+        var pattern = args[1].value;
+        var options = 'acg';
+        return matches_subexpression(expr,pattern,options,scope);
     }
 });
+newBuiltin('matches',[TExpression,TString,TString],TBool,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0].tree;
+        var pattern = args[1].value;
+        var options = args[2].value;
+        return matches_subexpression(expr,pattern,options,scope);
+    }
+});
+
+/** Helper function for the JME `replace` function
+ * @param {String} pattern
+ * @param {String} repl
+ * @param {Numbas.jme.tree} expr
+ * @param {String} options
+ * @param {Numbas.jme.Scope} scope
+ * @returns {Numbas.jme.token}
+ * @see Numbas.jme.rules.Rule#replaceAll
+ */
+function replace_expression(pattern,repl,expr,options,scope) {
+        var rule = new jme.rules.Rule(pattern,repl,options);
+        var out = rule.replaceAll(expr,scope).expression;
+        return new TExpression(out);
+}
 newBuiltin('replace',[TString,TString,TExpression],TExpression,null,{
     evaluate: function(args, scope) {
         var pattern = args[0].value;
         var repl = args[1].value;
         var expr = args[2].tree;
-        var rule = new jme.rules.Rule(pattern,[],repl);
-        var set = new jme.rules.Ruleset([rule]);
-        return new TExpression(jme.display.simplifyTree(expr,set,scope,true));
+        var options = 'acg';
+        return replace_expression(pattern,repl,expr,options,scope);
+    }
+});
+newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
+    evaluate: function(args, scope) {
+        var pattern = args[0].value;
+        var repl = args[1].value;
+        var expr = args[2].tree;
+        var options = args[3].value;
+        return replace_expression(pattern,repl,expr,options,scope);
     }
 });
 newBuiltin('canonical_compare',['?','?'],TNum,null, {

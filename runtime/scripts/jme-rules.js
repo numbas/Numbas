@@ -77,7 +77,6 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
                 strictPlus: options.strictPlus===undefined ? this.options.strictPlus : options.strictPlus,
                 scope: options.scope===undefined ? this.options.scope : options.scope
             };
-            return Numbas.util.extend_object({},this.options,options);
         }
     },
     /** Match a rule on given syntax tree.
@@ -103,22 +102,22 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
 
     /** Transform the given expression if it matches this rule's pattern.
      * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
-     * @param {Numbas.jme.rules.matchTree_options} options - used when checking conditions
+     * @param {Numbas.jme.Scope} scope - used when checking conditions
      * @returns {Numbas.jme.rules.transform_result}
      * @see Numbas.jme.rules.transform
      */
-    replace: function(exprTree,options) {
-        return transform(this.pattern, this.result, exprTree, this.get_options(options));
+    replace: function(exprTree,scope) {
+        return transform(this.pattern, this.result, exprTree, this.get_options({scope:scope}));
     },
 
     /** Transform all occurences of this rule's pattern in the given expression.
      * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
-     * @param {Numbas.jme.rules.matchTree_options} options - used when checking conditions
+     * @param {Numbas.jme.Scope} scope - used when checking conditions
      * @returns {Numbas.jme.rules.transform_result}
      * @see Numbas.jme.rules.transform
      */
-    replaceAll: function(exprTree,options) {
-        return transformAll(this.pattern, this.result, exprTree, this.get_options(options));
+    replaceAll: function(exprTree,scope) {
+        return transformAll(this.pattern, this.result, exprTree, this.get_options({scope: scope}));
     }
 }
 
@@ -1400,7 +1399,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
             }
             changed = false;
             for(var i=0;i<this.rules.length;i++) {
-                var result = this.rules[i].replace(exprTree,{scope: scope});
+                var result = this.rules[i].replace(exprTree,scope);
                 if(result.changed) {
                     changed = true;
                     exprTree = result.expression;
