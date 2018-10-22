@@ -5335,15 +5335,20 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     */
 };
-// these rules conflict with noLeadingMinus
-var canonicalOrderRules = [
-    ['(`+- ?);x+(`+- ?);y `where canonical_compare(x,y)=1','ag','y+x'],
-    ['?;x*?;y `where canonical_compare(x,y)=-1','ag','y*x'],
-]
-var expandBracketsRules = [
-    ['(?;x + ((`+- ?)`+);y) * ?;z','ag','x*z+y*z'],
-    ['?;x * (?;y + ((`+- ?)`+);z)','ag','x*y+x*z']
-]
+var conflictingSimplificationRules = {
+    // these rules conflict with noLeadingMinus
+    canonicalOrder: [
+        ['(`+- ?);x+(`+- ?);y `where canonical_compare(x,y)=1','ag','y+x'],
+        ['?;x*?;y `where canonical_compare(x,y)=-1','ag','y*x'],
+    ],
+    expandBrackets: [
+        ['(?;x + ((`+- ?)`+);y) * ?;z','ag','x*z+y*z'],
+        ['?;x * (?;y + ((`+- ?)`+);z)','ag','x*y+x*z']
+    ],
+    noDivision: [
+        ['?;top/(?;base^(?`? `: 1);degree)','','top * base^(-degree)']
+    ]
+}
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
  * @memberof Numbas.jme.rules
  * @method
@@ -5364,16 +5369,13 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 }
 var all=[];
 var compiledSimplificationRules = {};
-var notAll = ['canonicalOrder','expandBrackets'];
-for(var x in simplificationRules)
-{
+for(var x in simplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
-    if(!notAll.contains(x)) {
     all = all.concat(compiledSimplificationRules[x].rules);
-    }
 }
-compiledSimplificationRules['canonicalorder'] = compileRules(canonicalOrderRules,'canonicalOrder');
-compiledSimplificationRules['expandbrackets'] = compileRules(expandBracketsRules,'expandBrackets');
+for(var x in conflictingSimplificationRules) {
+    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(conflictingSimplificationRules[x],x);
+}
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
