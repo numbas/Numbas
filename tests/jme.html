@@ -930,21 +930,160 @@
 
 				QUnit.module('Pattern-matching');
                 QUnit.test('matchExpression', function(assert) {
-                    function matchExpression(rule,expr,commute) {
-                        return Numbas.jme.rules.matchExpression(rule,expr,{commutative: commute, scope:Numbas.jme.builtinScope});
+                    function matchExpression(rule,expr,options) {
+                        return Numbas.jme.rules.matchExpression(rule,expr,Numbas.jme.rules.extend_options(options,{scope:Numbas.jme.builtinScope}));
                     }
-                    assert.ok(matchExpression('?','x'));
-                    var rule = '(`+-m_number;n);sn + (`+-m_number;m);sm';
-                    
+                    function matchTree(pattern,exprTree) {
+                        var r = new Numbas.jme.rules.Rule(pattern,null);
+                        return r.match(exprTree,Numbas.jme.builtinScope);
+                    }
+                    function matchCapturedNames(pattern,namePatterns,expr,options) {
+                        options = Numbas.jme.rules.extend_options(options,{scope: Numbas.jme.builtinScope});
+                        var m = matchExpression(pattern,expr,options);
+                        return Object.entries(namePatterns).every(function(kv) {
+                            var name = kv[0];
+                            var namePattern = kv[1];
+                            var r = new Numbas.jme.rules.Rule(namePattern,null,options);
+                            return r.match(m[name],Numbas.jme.builtinScope);
+                        })
+                    }
+
                     var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
                     assert.ok(Numbas.jme.isOp(tokens[0],'`+-u'),'first token of `+-x is `+-u');
 
-                    assert.ok(matchExpression('[1,2,3]','[1,2,3]'));
-                    assert.notOk(matchExpression('[1,2,3]','[1,2]'));
-                    assert.ok(matchExpression('[m_number`+]','[1,2,3]'));
-                    assert.ok(matchExpression('[m_number`+,3]','[1,2,3]'));
-                    assert.notOk(matchExpression('[m_number`+,2]','[1,2,3]'));
-                    assert.ok(matchExpression('[m_number`+,2`?]','[1,2,3]'));
+                    // names
+                    assert.ok(matchExpression('?','x'),'? matches x');
+                    assert.ok(matchExpression('?','1+sin(x)'),'? matches 1+sin(x)');
+                    assert.ok(matchExpression('?;x','1'),'?;x matches 1');
+                    assert.ok(matchExpression('?;x','1').x,'?;x captures a group called x');
+                    assert.ok(matchExpression('m_number','5'),'m_number matches 5');
+                    assert.notOk(matchExpression('m_number','true'),'m_number does not match true');
+                    assert.ok(matchTree('complex:m_number',{tok:Numbas.jme.builtinScope.evaluate('2+i')}),'complex:m_number matches 2+i');
+                    assert.ok(matchExpression('complex:m_number','i'),'complex:m_number matches i');
+                    assert.notOk(matchExpression('complex:m_number','2'),'complex:m_number does not match 2');
+                    assert.ok(matchExpression('imaginary:m_number','i'),'imaginary:m_number matches i');
+                    assert.notOk(matchExpression('imaginary:m_number','2'),'imaginary:m_number does not match 2');
+                    assert.notOk(matchTree('imaginary:m_number',{tok:Numbas.jme.builtinScope.evaluate('2+i')}),'imaginary:m_number does not match 2+i');
+                    assert.ok(matchExpression('real:m_number','2'),'real:m_number matches 2');
+                    assert.notOk(matchExpression('real:m_number','i'),'real:m_number does not match i');
+                    assert.ok(matchExpression('positive:m_number','2'),'positive:m_number matches 2');
+                    assert.notOk(matchTree('positive:m_number',{tok:Numbas.jme.builtinScope.evaluate('-2')}),'positive:m_number does not match -2');
+                    assert.notOk(matchExpression('positive:m_number','i'),'positive:m_number does not match i');
+                    assert.ok(matchTree('negative:m_number',{tok:Numbas.jme.builtinScope.evaluate('-2')}),'negative:m_number matches -2');
+                    assert.notOk(matchExpression('negative:m_number','5'),'negative:m_number does not match 5');
+                    assert.ok(matchExpression('nonnegative:m_number','0'),'nonnegative:m_number matches 0');
+                    assert.ok(matchExpression('nonnegative:m_number','15'),'nonnegative:m_number matches 0');
+                    assert.ok(matchExpression('nonnegative:m_number','i'),'nonnegative:m_number matches i');
+                    assert.ok(matchExpression('integer:m_number','5'),'integer:m_number matches 5');
+                    assert.notOk(matchExpression('integer:m_number','1.5'),'integer:m_number does not match 1.5');
+                    assert.ok(matchExpression('m_name','x'),'m_name matches x');
+                    assert.notOk(matchExpression('m_name','5'),'m_name does not match 5');
+                    assert.ok(matchExpression('?+m_nothing','x'),'?+m_nothing matches x');
+
+
+                    // functions
+                    assert.ok(matchExpression('sin(?)','sin(5)'),'sin(?) matches sin(5)');
+                    assert.notOk(matchExpression('sin(0)','0'),'sin(0) does not match 0');
+                    assert.ok(matchExpression('m_uses(x,y)','x+y'),'m_uses(x,y) matches x+y');
+                    assert.notOk(matchExpression('m_uses(x,y)','x^2'),'m_uses(x,y) does not match x^2');
+                    assert.ok(matchExpression('m_exactly(?+?)','x+y'),'m_exactly(?+?) matches x+y');
+                    assert.notOk(matchExpression('m_exactly(?+?)','x+y+z',{associative:true}),'m_exactly(?+?) does not match x+y+z');
+                    assert.ok(matchExpression('m_commutative(1+2)','2+1',{commutative:false}),'m_commutative(1+2) matches 2+1');
+                    assert.ok(matchExpression('m_noncommutative(1+2)','1+2',{commutative:true}),'m_noncommutative(1+2) matches 1+2');
+                    assert.notOk(matchExpression('m_noncommutative(1+2)','2+1',{commutative:true}),'m_noncommutative(1+2) does not match 2+1');
+                    assert.ok(matchExpression('m_noncommutative(1*2)+3','3+1*2',{commutative:true}),'m_noncommutative(1*2)+3 matches 3+1*2');
+                    assert.notOk(matchExpression('m_noncommutative(1*2)+3','3+2*1',{commutative:true}),'m_noncommutative(1*2)+3 does not match 3+2*1');
+                    assert.ok(matchExpression('m_associative(1+2+3)','1+2+3',{associative:false}),'m_associative(1+2+3) matches 1+2+3');
+                    assert.notOk(matchExpression('m_associative(1+2+3)','3+2+1',{associative:false,commutative:false}),'m_associative(1+2+3) does not match 3+2+1');
+                    assert.ok(matchExpression('m_nonassociative(1+2+3)','(1+2)+3',{associative:true}),'m_nonassociative(1+2+3) matches (1+2)+3');
+                    assert.notOk(matchExpression('m_nonassociative(1+2+3)','1+(2+3)',{associative:true}),'m_nonassociative(1+2+3) does not match 1+(2+3)');
+                    assert.ok(matchExpression('m_nonassociative(1*2*3)+4+5','(1*2)*3+(4+5)',{associative:true}),'m_nonassociative(1*2*3)+4+5 matches (1*2)*3+(4+5)');
+                    assert.ok(matchExpression('?+?','x-y'),'?+? matches x-y');
+                    assert.notOk(matchExpression('m_strictplus(?+?)','x-y'),'m_strictplus(?+?) does not match x-y');
+                    assert.ok(matchExpression('m_type("boolean")','true'),'m_type("boolean") matches true');
+                    assert.notOk(matchExpression('m_type("boolean")','x=y'),'m_type("boolean") does not match x=y');
+                    assert.ok(matchExpression('m_func("sum",[m_number`*])','sum(1,2,3)'),'m_func("sum",[m_number`*]) matches sum(1,2,3)');
+                    assert.notOk(matchExpression('m_func("sum",[m_number`*])','mean(1,2,3)'),'m_func("sum",[m_number`*]) does not match mean(1,2,3)');
+                    assert.notOk(matchExpression('m_func("sum",[m_number`*])','sum(x)'),'m_func("sum",[m_number`*]) does not match sum(x)');
+                    assert.ok(matchExpression('m_op("+",[m_number,x])','1+x'),'m_func("+",[m_number,x]) matches 1+x');
+                    assert.notOk(matchExpression('m_op("+",[m_number,x])','1-x'),'m_func("+",[m_number,x]) does not match 1-x');
+                    assert.notOk(matchExpression('m_op("+",[m_number,x])','x+1'),'m_func("+",[m_number,x]) does not match x+1');
+                    assert.ok(matchExpression('m_anywhere(?*?)','x+2z'),'m_anywhere(?*?) matches x+2z');
+                    assert.notOk(matchExpression('m_anywhere(?*?)','x+2'),'m_anywhere(?*?) does not match x+2');
+
+
+                    // ops
+                    assert.ok(matchExpression('x+y','x+y'),'x+y matches x+y');
+                    assert.ok(matchExpression('x+y','y+x'),'x+y matches y+x (+ is commutative)');
+                    assert.notOk(matchExpression('x-y','y-x'),'x+y does not match y-x');
+                    assert.ok(matchExpression('-?','-2'),'-? matches -2');
+                    assert.notOk(matchExpression('-?','0-2'),'-? does not match 0-2');
+
+                    assert.ok(matchExpression('x+y`?','x+y'),'x+y`? matches x+y');
+                    assert.ok(matchExpression('x+y`?','x'),'x+y`? matches x');
+                    assert.notOk(matchExpression('x+y`?','x+y+y',{allowOtherTerms:false}),'x+y`? does not match x+y+y');
+
+                    assert.ok(matchExpression('x+y`*','x+y'),'x+y`* matches x+y');
+                    assert.ok(matchExpression('x+y`*','x'),'x+y`* matches x');
+                    assert.ok(matchExpression('x+y`*','x+y+y',{allowOtherTerms:false}),'x+y`* matches x+y+y');
+
+                    assert.ok(matchExpression('x+y`+','x+y'),'x+y`+ matches x+y');
+                    assert.notOk(matchExpression('x+y`+','x'),'x+y`+ does not match x');
+                    assert.ok(matchExpression('x+y`+','x+y+y',{allowOtherTerms:false}),'x+y`+ matches x+y+y');
+
+                    assert.ok(matchExpression('x `| y','x'),'x `| y matches x');
+                    assert.ok(matchExpression('x `| y','y'),'x `| y matches y');
+                    assert.notOk(matchExpression('x `| y','z'),'x `| y does not match z');
+
+                    assert.ok(matchExpression('x+(y `: 1)','x'),'x+(y `: 1) matches x');
+                    assert.ok(matchExpression('x+(y `: 1)','x+y'),'x+(y `: 1) matches x+y');
+                    assert.ok(matchExpression('x+(y `: 1)','x+z'),'x+(y `: 1) does not match x+z');
+                    assert.ok(Numbas.jme.isName(matchExpression('x+(y `: 1);rhs','x+y').rhs.tok,'y'),'x+(y `: 1);rhs matches x+y with rhs as y');
+                    var res = matchExpression('x+(y `: 1);rhs','x').rhs.tok;
+                    assert.ok(res.type=='number' && res.value==1,'x+(y `: 1);rhs matches x with rhs as 1');
+
+                    assert.ok(matchExpression('`+- x','x'),'`+- x matches x');
+                    assert.ok(matchExpression('`+- x','-x'),'`+- x matches -x');
+                    assert.ok(matchExpression('x + (`+- y)','x+y'),'`x + (+- y) matches x+y');
+                    assert.ok(matchExpression('x + (`+- y)','x-y'),'`x + (+- y) matches x-y');
+                    assert.notOk(matchExpression('x + y','x-y'),'`x + y does not match x-y');
+
+                    assert.ok(matchExpression('`! x','y'),'`! x matches y');
+                    assert.notOk(matchExpression('`! x','x'),'`! x does not match x');
+                    assert.ok(matchExpression('`! m_uses(x)','y+sin(z)'),'`! m_uses(x) matches y+sin(z)');
+
+                    assert.ok(matchExpression('m_uses(x) `& `! m_uses(y)','x+z'),'m_uses(x) `& `! m_uses(y) matches x+z');
+                    assert.notOk(matchExpression('m_uses(x) `& `! m_uses(y)','x+y'),'m_uses(x) `& `! m_uses(y) does not match x+y');
+
+                    assert.ok(matchExpression('m_number;x + m_number;y `where x+y=4','1+3'),'m_number;x + m_number;y `where x+y=4 matches 1+3');
+                    assert.ok(matchExpression('m_number;x + m_number;y `where x+y=4','0.5+3.5'),'m_number;x + m_number;y `where x+y=4 matches 0.5+3.5');
+                    assert.notOk(matchExpression('m_number;x + m_number;y `where x+y=4','2+3'),'m_number;x + m_number;y `where x+y=4 does not match 2+3');
+
+                    assert.ok(matchExpression('["f": m_number/m_number] `@ f + f','1/2 + 3/4'),'["f": m_number/m_number] `@ f + f matches 1/2 + 3/4');
+
+                    // lists
+                    assert.ok(matchExpression('[]','[]'),'[] matches []');
+                    assert.ok(matchExpression('[1,2,3]','[1,2,3]'),'[1,2,3] matches [1,2,3]');
+                    assert.notOk(matchExpression('[1,2,3]','[3,2,1]'),'[1,2,3] does not match [3,2,1]');
+                    assert.notOk(matchExpression('[1,2,3]','[1,2]'),'[1,2,3] does not match [1,2]');
+                    assert.ok(matchExpression('[m_number`+]','[1,2,3]'),'[m_number`+] matches [1,2,3]');
+                    assert.ok(matchExpression('[m_number`+,3]','[1,2,3]'),'[m_number`+,3] matches [1,2,3]');
+                    assert.notOk(matchExpression('[m_number`+,2]','[1,2,3]'),'[m_number`+,2] does not match [1,2,3]');
+                    assert.ok(matchExpression('[m_number`+,2`?]','[1,2,3]'),'[m_number`+,2`?] matches [1,2,3]');
+
+                    // named groups
+                    assert.ok(matchCapturedNames('?;x',{x:'1'},'1'),'?;x on 1 captures x as 1');
+                    assert.ok(matchCapturedNames('?;x',{x:'sin(pi+3)'},'sin(pi+3)'),'?;x on sin(pi+3) captures x as sin(pi+3)');
+                    assert.ok(matchCapturedNames('?`+;x+?;y',{x:'1',y:'2'},'1+2'),'?;x+?;y on 1+2 captures x as 1 and y as 2');
+                    assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+2+y'),'?`+;x+y on x+2+y captures x as x+2');
+                    assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+y+2'),'?`+;x+y on x+y+2 captures x as x+2');
+                    assert.ok(matchCapturedNames('2^(-?;x)',{x:'1'},'2^-1'),'2^(-?;x) on 2^-1 captures x as 1');
+                    assert.ok(matchCapturedNames('sin(?;x)',{x:'[1]'},'sin(1)'),'sin(?;x) on sin(1) captures x as [1]');
+
+                    // identified names
+                    assert.ok(matchExpression('m_number*?;=x + m_number*?;=x','2y+3y'),'m_number*?;=x + m_number*?;=x matches 2y+3y');
+                    assert.ok(matchExpression('m_number*?;=x + m_number*?;=x','2(x+1)+3(x+1)'),'m_number*?;=x + m_number*?;=x matches 2(x+1)+3(x+1)');
+                    assert.notOk(matchExpression('m_number*?;=x + m_number*?;=x','2(x+1)+3z'),'m_number*?;=x + m_number*?;=x does not match 2(x+1)+3z');
                 });
 
                 QUnit.test('replace', function(assert) {

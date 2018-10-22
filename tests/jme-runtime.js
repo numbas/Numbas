@@ -4806,6 +4806,24 @@ function parse_options(str) {
     };
 }
 
+/** Override or extend a matchTree options object with new values.
+ * @memberof Numbas.jme.rules
+ * @param {Numbas.jme.rules.matchTree_options} a
+ * @param {Numbas.jme.rules.matchTree_options} b
+ * @returns {Numbas.jme.rules.matchTree_options}
+ */
+var extend_options = Numbas.jme.rules.extend_options = function(a,b) {
+    a = a || {};
+    b = b || {};
+    return {
+        commutative: b.commutative===undefined ? a.commutative : b.commutative,
+        associative: b.associative===undefined ? a.associative : b.associative,
+        allowOtherTerms: b.allowOtherTerms===undefined ? a.allowOtherTerms : b.allowOtherTerms,
+        strictPlus: b.strictPlus===undefined ? a.strictPlus : b.strictPlus,
+        scope: b.scope===undefined ? a.scope : b.scope
+    };
+}
+
 /** Simplification rule
  * @memberof Numbas.jme.rules
  * @constructor
@@ -4843,13 +4861,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
         if(!options) {
             return this.options;
         } else {
-            return {
-                commutative: options.commutative===undefined ? this.options.commutative : options.commutative,
-                associative: options.associative===undefined ? this.options.associative : options.associative,
-                allowOtherTerms: options.allowOtherTerms===undefined ? this.options.allowOtherTerms : options.allowOtherTerms,
-                strictPlus: options.strictPlus===undefined ? this.options.strictPlus : options.strictPlus,
-                scope: options.scope===undefined ? this.options.scope : options.scope
-            };
+            return extend_options(this.options,options);
         }
     },
     /** Match a rule on given syntax tree.
@@ -4929,7 +4941,7 @@ var Term = Numbas.jme.rules.Term = function(tree) {
     var equalnames = [];
     var quantifier = '1';
     var defaultValue = null;
-    if(jme.isName(tree,'m_nothing')) {
+    if(jme.isName(tree.tok,'m_nothing')) {
         quantifier = '0';
     }
     var quantifier_combo = {
@@ -5058,7 +5070,9 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
             }
             terms = terms.concat(sub);
         } else {
-            terms.push(item);
+            if(item.max>0) {
+                terms.push(item);
+            }
         }
     }
 
@@ -5168,7 +5182,44 @@ var number_conditions = jme.rules.number_conditions = {
     }
 }
 
-/** Match a name token. `?` and `??` match any name, `m_number` matches a number, with constraints specified by annotations, `m_nothing` never matches.
+/** Special JME names used in pattern-matching
+ * @enum {Function}
+ * @memberof Numbas.jme.rules
+ */
+var specialMatchNames = jme.rules.specialMatchNames = {
+    '?': function(ruleTree,exprTree,options) {
+        return {};
+    },
+    'm_number': function(ruleTree,exprTree,options) {
+        var ruleTok = ruleTree.tok;
+        var exprTok = exprTree.tok;
+        if(exprTok.type!='number') {
+            return false;
+        }
+        if(ruleTok.annotation!==undefined) {
+            var satisfies = ruleTok.annotation.every(function(condition) {
+                var test = number_conditions[condition];
+                return !test || test(exprTok);
+            });
+            if(!satisfies) {
+                return false;
+            }
+        }
+        return {};
+    },
+    'm_name': function(ruleTree,exprTree,options) {
+        var exprTok = exprTree.tok;
+        if(exprTok.type!='name') {
+            return false;
+        }
+        return {};
+    },
+    'm_nothing': function(ruleTree,exprTree,options) {
+        return false;
+    }
+}
+
+/** Match a name token. `?` matches any name, `m_number` matches a number, with constraints specified by annotations, `m_nothing` never matches.
  * Otherwise, the name matches if the expression being considered is exactly the same name, ignoring case.
  * @param {Numbas.jme.tree} ruleTree - the pattern to match. The top token is assumed to be a name.
  * @param {Numbas.jme.tree} exprTree - the expression being considered.
@@ -5182,37 +5233,76 @@ function matchName(ruleTree,exprTree,options) {
     if(ruleTok.type!='name') {
         return false;
     }
-    switch(ruleTok.name) {
-        case '?':
-        case '??':
-            return {};
-        case 'm_number':
-            if(exprTok.type!='number') {
-                return false;
-            }
-            if(ruleTok.annotation!==undefined) {
-                var satisfies = ruleTok.annotation.every(function(condition) {
-                    var test = number_conditions[condition];
-                    return !test || test(exprTok);
-                });
-                if(!satisfies) {
-                    return false;
-                }
-            }
-            return {};
-        case 'm_name':
-            if(exprTok.type!='name') {
-                return false;
-            }
-            return {};
-        case 'm_nothing':
+    if(ruleTok.name in specialMatchNames) {
+        return specialMatchNames[ruleTok.name](ruleTree,exprTree,options);
+    } else {
+        if(exprTok.type!='name') {
             return false;
-        default:
-            if(exprTok.type!='name') {
-                return false;
+        }
+        var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
+        return same ? {} : false;
+    }
+}
+
+/** Make a matching function which overrides one or more matching options, then calls {@link Numbas.jme.rules.matchTree}
+ * @param {Numbas.jme.rules.matchTree_options} new_options
+ * @returns {Function}
+ */
+function setMatchOptions(new_options) {
+    return function(ruleTree,exprTree,options) {
+        return matchTree(ruleTree.args[0],exprTree,extend_options(options,new_options));
+    }
+}
+
+/** Match if the given pattern occurs as a subexpression anywhere in the given expression
+ * @param {Numbas.jme.tree} ruleTree
+ * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchAnywhere(ruleTree,exprTree,options) {
+    var m = matchTree(ruleTree,exprTree,options);
+    if(m!==false) {
+        return m;
+    }
+    if(exprTree.args) {
+        for(var i=0;i<exprTree.args.length;i++) {
+            var am = matchAnywhere(ruleTree,exprTree.args[i],options);
+            if(am!==false)  {
+                return am;
             }
-            var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
-            return same ? {} : false;
+        }
+    }
+    return false;
+}
+
+/** Special JME functions used in pattern-matching
+ * @enum {Function}
+ * @memberof Numbas.jme.rules
+ */
+var specialMatchFunctions = jme.rules.specialMatchFunctions = {
+    'm_uses': function(ruleTree,exprTree,options) {
+        var names = ruleTree.args.map(function(t){ return t.tok.name; });
+        return matchUses(names,exprTree);
+    },
+    'm_exactly': setMatchOptions({allowOtherTerms:false}),
+    'm_commutative': setMatchOptions({commutative:true}),
+    'm_noncommutative': setMatchOptions({commutative:false}),
+    'm_associative': setMatchOptions({associative:true}),
+    'm_nonassociative': setMatchOptions({associative:false}),
+    'm_strictplus': setMatchOptions({strictPlus:true}),
+    'm_type': function(ruleTree,exprTree,options) {
+        var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
+        return matchType(wantedType,exprTree);
+    },
+    'm_func': function(ruleTree,exprTree,options) {
+        return matchGenericFunction(ruleTree,exprTree,options);
+    },
+    'm_op': function(ruleTree,exprTree,options) {
+        return matchGenericOp(ruleTree,exprTree,options);
+    },
+    'm_anywhere': function(ruleTree,exprTree,options) {
+        return matchAnywhere(ruleTree.args[0],exprTree,options);
     }
 }
 
@@ -5229,31 +5319,10 @@ function matchFunction(ruleTree,exprTree,options) {
     if(ruleTok.type!='function') {
         return false;
     }
-    switch(ruleTok.name) {
-        case 'm_uses':
-            var names = ruleTree.args.map(function(t){ return t.tok.name; });
-            return matchUses(names,exprTree);
-        case 'm_exactly':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{allowOtherTerms:false}));
-        case 'm_commutative':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{commutative:true}));
-        case 'm_noncommutative':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{commutative:false}));
-        case 'm_associative':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{associative:true}));
-        case 'm_nonassociative':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{associative:false}));
-        case 'm_strictplus':
-            return matchTree(ruleTree.args[0],exprTree,util.extend_object({},options,{strictPlus:true}));
-        case 'm_type':
-            var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
-            return matchType(wantedType,exprTree);
-        case 'm_func':
-            return matchGenericFunction(ruleTree,exprTree,options);
-        case 'm_op':
-            return matchGenericOp(ruleTree,exprTree,options);
-        default:
-            return matchOrdinaryFunction(ruleTree,exprTree,options);
+    if(ruleTok.name in specialMatchFunctions) {
+        return specialMatchFunctions[ruleTok.name](ruleTree,exprTree,options);
+    } else { 
+        return matchOrdinaryFunction(ruleTree,exprTree,options);
     }
 }
 
@@ -5303,6 +5372,43 @@ function matchGenericOp(ruleTree,exprTree,options) {
     }
 }
 
+/** Special JME operators used in pattern-matching
+ * @enum {Function}
+ * @memberof Numbas.jme.rules
+ */
+var specialMatchOps = jme.rules.specialMatchOps = {
+    '`?': function(ruleTree,exprTree,options) {
+        return matchTree(ruleTree.args[0],exprTree,options);
+    },
+    '`*': function(ruleTree,exprTree,options) {
+        return matchTree(ruleTree.args[0],exprTree,options);
+    },
+    '`+': function(ruleTree,exprTree,options) {
+        return matchTree(ruleTree.args[0],exprTree,options);
+    },
+    '`|': function(ruleTree,exprTree,options) {
+        return matchAny(ruleTree.args,exprTree,options);
+    },
+    '`:': function(ruleTree,exprTree,options) {
+        return matchDefault(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+    },
+    '`+-u': function(ruleTree,exprTree,options) {
+        return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
+    },
+    '`!': function(ruleTree,exprTree,options) {
+        return matchNot(ruleTree.args[0],exprTree,options);
+    },
+    '`&': function(ruleTree,exprTree,options) {
+        return matchAnd(ruleTree.args,exprTree,options);
+    },
+    '`where': function(ruleTree,exprTree,options) {
+        return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+    },
+    '`@': function(ruleTree,exprTree,options) {
+        return matchMacro(ruleTree.args[0],ruleTree.args[1],exprTree,options);
+    }
+}
+
 /** Match an application of an operator.
  * Dispatches to one of the special pattern-matching operators, or {@link matchOrdinaryOp} otherwise.
  * @param {Numbas.jme.tree} ruleTree - the pattern to match. It's assumed that the topmost token is an operator.
@@ -5312,33 +5418,14 @@ function matchGenericOp(ruleTree,exprTree,options) {
  */
 function matchOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
-    var exprTok = exprTree.tok;
     if(ruleTok.type!='op') {
         return false;
     }
-    switch(ruleTok.name) {
-        case '`?':
-        case '`*':
-        case '`+':
-            return matchTree(ruleTree.args[0],exprTree,options);
-        case '`|':
-            return matchAny(ruleTree.args,exprTree,options);
-        case '`:':
-            return matchDefault(ruleTree.args[0],ruleTree.args[1],exprTree,options);
-        case '`+-u':
-            return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
-        case '`!':
-            return matchNot(ruleTree.args[0],exprTree,options);
-        case '`&':
-            return matchAnd(ruleTree.args,exprTree,options);
-        case '`where':
-            return matchWhere(ruleTree.args[0],ruleTree.args[1],exprTree,options);
-        case '`@':
-            return matchMacro(ruleTree.args[0],ruleTree.args[1],exprTree,options);
-        default:
-            return matchOrdinaryOp(ruleTree,exprTree,options);
+    if(ruleTok.name in specialMatchOps) {
+        return specialMatchOps[ruleTok.name](ruleTree,exprTree,options);
+    } else {
+        return matchOrdinaryOp(ruleTree,exprTree,options);
     }
-    return false;
 }
 
 /** Match a `where` condition - the expression must match the given pattern, and the condition specified in terms of the matched names must evaluate to `true`.
@@ -5403,7 +5490,23 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
     if(exprTok.type!='function' || (ruleTok.name!='?' && ruleTok.name!=exprTok.name)) {
         return false;
     }
-    return matchNonAssociativeOp(ruleTree,exprTree,options);
+    var ruleArgs = ruleTree.args.map(function(t){ return new Term(t); });
+    var exprArgs = exprTree.args.map(function(t){ return new Term(t); });
+
+    options = extend_options(options,{allowOtherTerms:false, commutative: false});
+
+    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,options);
+    if(namedTerms===false) {
+        return false;
+    }
+
+    // collate the named groups
+    var match = {};
+    for(var name in namedTerms) {
+        var terms = namedTerms[name];
+        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+    }
+    return match;
 }
 
 /** Match the given expression against the given pattern, which is assumed to be a list.
@@ -5430,7 +5533,7 @@ function matchList(ruleTree,exprTree,options) {
     var ruleElements = getElements(ruleTree).map(function(t){ return new Term(t) });
     var exprElements = getElements(exprTree).map(function(t){ return new Term(t); });
 
-    options = util.extend_object({},options,{allowOtherTerms:false});
+    options = extend_options(options,{allowOtherTerms:false});
 
     var namedTerms = matchTermSequence(ruleElements,exprElements,false,options);
     if(namedTerms===false) {
@@ -5735,7 +5838,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
         //debug('backtracked to '+ic);
 
         if(ic<start) {
-            if(start<input.length-1) {
+            if(options.allowOtherTerms && start<input.length-1) {
                 capture = [];
                 increment_start();
                 return;
@@ -6108,7 +6211,7 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
         strictPlus: false,
         scope: Numbas.jme.builtinScope
     };
-    options = util.extend_object({},default_options,options);
+    options = extend_options(default_options,options);
     pattern = patternParser.compile(pattern);
     expr = jme.compile(expr);
     return matchTree(pattern,expr,options);
