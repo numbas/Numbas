@@ -100,6 +100,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             if(messageNode)
                 settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
+        //get pattern the student's answer must match
+        var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
+        if(mustMatchNode) {
+            //partial credit for failing not-allowed test
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit'],['mustMatchPattern','mustMatchPC']);
+            var messageNode = mustMatchNode.selectSingleNode('message');
+            if(messageNode) {
+                settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            }
+        }
+
         tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
         var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
         if(expectedVariableNamesNode)
@@ -118,6 +129,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
     },
     resume: function() {
@@ -169,6 +181,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
      * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
      * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+     * @property {String} mustMatchPattern - A pattern that the student's answer must match
+     * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
+     * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
      */
     settings:
     {
@@ -195,7 +210,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowed: [],
         notAllowedPC: 0,
         notAllowedMessage: '',
-        notAllowedShowStrings: false
+        notAllowedShowStrings: false,
+        mustMatchPattern: '',
+        mustMatchPC: 0,
+        mustMatchMessage: ''
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
