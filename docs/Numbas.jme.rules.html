@@ -126,6 +126,8 @@
 					
 						<li class="name"><a href="Numbas.jme.rules.html#.displayFlags">displayFlags</a></li>
 					
+						<li class="name"><a href="Numbas.jme.rules.html#.extend_options">extend_options</a></li>
+					
 						<li class="name"><a href="Numbas.jme.rules.html#.getTerms">getTerms</a></li>
 					
 						<li class="name"><a href="Numbas.jme.rules.html#.number_conditions">number_conditions</a></li>
@@ -133,6 +135,12 @@
 						<li class="name"><a href="Numbas.jme.rules.html#.patternParser">patternParser</a></li>
 					
 						<li class="name"><a href="Numbas.jme.rules.html#.simplificationRules">simplificationRules</a></li>
+					
+						<li class="name"><a href="Numbas.jme.rules.html#.specialMatchFunctions">specialMatchFunctions</a></li>
+					
+						<li class="name"><a href="Numbas.jme.rules.html#.specialMatchNames">specialMatchNames</a></li>
+					
+						<li class="name"><a href="Numbas.jme.rules.html#.specialMatchOps">specialMatchOps</a></li>
 					
 					</ul>
 				</div>
@@ -245,7 +253,71 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1289">runtime/scripts/jme-rules.js, line 1289</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1450">runtime/scripts/jme-rules.js, line 1450</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".extend_options"><span class="type-signature">(static) </span>extend_options<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Override or extend a matchTree options object with new values.</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L42">runtime/scripts/jme-rules.js, line 42</a>
     </li></ul></dd>
     
 
@@ -309,7 +381,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L153">runtime/scripts/jme-rules.js, line 153</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L233">runtime/scripts/jme-rules.js, line 233</a>
     </li></ul></dd>
     
 
@@ -573,7 +645,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L362">runtime/scripts/jme-rules.js, line 362</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L388">runtime/scripts/jme-rules.js, line 388</a>
     </li></ul></dd>
     
 
@@ -637,7 +709,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1244">runtime/scripts/jme-rules.js, line 1244</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1404">runtime/scripts/jme-rules.js, line 1404</a>
     </li></ul></dd>
     
 
@@ -1200,7 +1272,891 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1436">runtime/scripts/jme-rules.js, line 1436</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1597">runtime/scripts/jme-rules.js, line 1597</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".specialMatchFunctions"><span class="type-signature">(static) </span>specialMatchFunctions<span class="type-signature"> :function</span></h4>
+
+
+
+
+<div class="description">
+    <p>Special JME functions used in pattern-matching</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>m_uses</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_exactly</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_commutative</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_noncommutative</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_associative</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_nonassociative</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_strictplus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_func</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_op</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_anywhere</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L510">runtime/scripts/jme-rules.js, line 510</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".specialMatchNames"><span class="type-signature">(static) </span>specialMatchNames<span class="type-signature"> :function</span></h4>
+
+
+
+
+<div class="description">
+    <p>Special JME names used in pattern-matching</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>"?"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_number</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>m_nothing</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L416">runtime/scripts/jme-rules.js, line 416</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".specialMatchOps"><span class="type-signature">(static) </span>specialMatchOps<span class="type-signature"> :function</span></h4>
+
+
+
+
+<div class="description">
+    <p>Special JME operators used in pattern-matching</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>"`?"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`*"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`+"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`|"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`:"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`+-u"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`!"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`&"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`where"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"`@"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L606">runtime/scripts/jme-rules.js, line 606</a>
     </li></ul></dd>
     
 
@@ -1399,7 +2355,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1168">runtime/scripts/jme-rules.js, line 1168</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1328">runtime/scripts/jme-rules.js, line 1328</a>
     </li></ul></dd>
     
 
@@ -1592,7 +2548,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1378">runtime/scripts/jme-rules.js, line 1378</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1539">runtime/scripts/jme-rules.js, line 1539</a>
     </li></ul></dd>
     
 
@@ -1782,7 +2738,7 @@ Values are <code>undefined</code> so they can be overridden</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1558">runtime/scripts/jme-rules.js, line 1558</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1724">runtime/scripts/jme-rules.js, line 1724</a>
     </li></ul></dd>
     
 
@@ -2001,7 +2957,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L852">runtime/scripts/jme-rules.js, line 852</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1012">runtime/scripts/jme-rules.js, line 1012</a>
     </li></ul></dd>
     
 
@@ -2214,7 +3170,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1135">runtime/scripts/jme-rules.js, line 1135</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1295">runtime/scripts/jme-rules.js, line 1295</a>
     </li></ul></dd>
     
 
@@ -2434,7 +3390,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1272">runtime/scripts/jme-rules.js, line 1272</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1433">runtime/scripts/jme-rules.js, line 1433</a>
     </li></ul></dd>
     
 
@@ -2654,7 +3610,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L323">runtime/scripts/jme-rules.js, line 323</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L349">runtime/scripts/jme-rules.js, line 349</a>
     </li></ul></dd>
     
 
@@ -2890,7 +3846,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1198">runtime/scripts/jme-rules.js, line 1198</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1358">runtime/scripts/jme-rules.js, line 1358</a>
     </li></ul></dd>
     
 
@@ -3126,7 +4082,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1225">runtime/scripts/jme-rules.js, line 1225</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1385">runtime/scripts/jme-rules.js, line 1385</a>
     </li></ul></dd>
     
 
@@ -3282,7 +4238,7 @@ The match is greedy - input terms will match earlier pattern terms in preference
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L125">runtime/scripts/jme-rules.js, line 125</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L136">runtime/scripts/jme-rules.js, line 136</a>
     </li></ul></dd>
     
 
@@ -3357,7 +4313,7 @@ Maps variable names to trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L307">runtime/scripts/jme-rules.js, line 307</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L333">runtime/scripts/jme-rules.js, line 333</a>
     </li></ul></dd>
     
 
@@ -3559,7 +4515,7 @@ Maps variable names to trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L831">runtime/scripts/jme-rules.js, line 831</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L991">runtime/scripts/jme-rules.js, line 991</a>
     </li></ul></dd>
     
 
@@ -3949,7 +4905,7 @@ Maps variable names to trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1295">runtime/scripts/jme-rules.js, line 1295</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1456">runtime/scripts/jme-rules.js, line 1456</a>
     </li></ul></dd>
     
 
@@ -4220,7 +5176,7 @@ Maps variable names to trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L132">runtime/scripts/jme-rules.js, line 132</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L143">runtime/scripts/jme-rules.js, line 143</a>
     </li></ul></dd>
     
 
@@ -4369,7 +5325,7 @@ Maps variable names to trees.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1182">runtime/scripts/jme-rules.js, line 1182</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-rules.js#L1342">runtime/scripts/jme-rules.js, line 1342</a>
     </li></ul></dd>
     
 
@@ -5057,6 +6013,8 @@ Maps variable names to trees.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.displayFlags"><a href="Numbas.jme.rules.html#.displayFlags">Numbas.jme.rules.displayFlags</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.extend_options"><a href="Numbas.jme.rules.html#.extend_options">Numbas.jme.rules.extend_options</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.getTerms"><a href="Numbas.jme.rules.html#.getTerms">Numbas.jme.rules.getTerms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.getTerms_options"><a href="Numbas.jme.rules.html#.getTerms_options">Numbas.jme.rules.getTerms_options</a></li>
@@ -5101,7 +6059,15 @@ Maps variable names to trees.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.simplificationRules"><a href="Numbas.jme.rules.html#.simplificationRules">Numbas.jme.rules.simplificationRules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchFunctions"><a href="Numbas.jme.rules.html#.specialMatchFunctions">Numbas.jme.rules.specialMatchFunctions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchNames"><a href="Numbas.jme.rules.html#.specialMatchNames">Numbas.jme.rules.specialMatchNames</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchOps"><a href="Numbas.jme.rules.html#.specialMatchOps">Numbas.jme.rules.specialMatchOps</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.term"><a href="Numbas.jme.rules.html#.term">Numbas.jme.rules.term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Term"><a href="Numbas.jme.rules.Term.html">Numbas.jme.rules.Term</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.transform"><a href="Numbas.jme.rules.html#.transform">Numbas.jme.rules.transform</a></li>
 		
