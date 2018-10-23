@@ -235,11 +235,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
+        var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var expr = jme.subvars(settings.correctAnswerString,scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
-            settings.answerSimplification,
+            answerSimplification,
             scope
         );
         if(settings.correctAnswer == '' && this.marks>0) {
