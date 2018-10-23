@@ -1046,6 +1046,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         } else {
             this.calculateScore();
         }
+        this.display && this.display.showSteps();
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }

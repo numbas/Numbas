@@ -57,7 +57,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             {
             case 'ab-initio':
                 job(exam.init,exam);
-                exam.signals.on('question list initialised', function() {
+                exam.signals.on('ready', function() {
                     job(function() {
                             Numbas.display.init();
                     });
@@ -76,7 +76,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             case 'resume':
             case 'review':
                 job(exam.load,exam);
-                exam.signals.on('question list initialised', function() {
+                exam.signals.on('ready', function() {
                     job(Numbas.display.init);
                     job(function() {
                         if(entry == 'review')

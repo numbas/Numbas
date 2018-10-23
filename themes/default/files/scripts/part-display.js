@@ -130,14 +130,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsPenaltyMessage = Knockout.computed(function() {
-            if(this.stepsOpen())
+            if(this.stepsOpen()) {
                 return R('question.hide steps no penalty');
-            else if(this.part.settings.stepsPenalty==0 || this.revealed())
+            } else if(this.part.settings.stepsPenalty==0 || this.revealed()) {
                 return R('question.show steps no penalty');
-            else if(this.stepsShown())
+            } else if(this.stepsShown()) {
                 return R('question.show steps already penalised');
-            else
+            } else {
                 return R('question.show steps penalty',{count:this.part.settings.stepsPenalty});
+            }
         },this);
         /** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true
          * @member {observable|Boolean} showCorrectAnswer
@@ -334,8 +335,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         /** Called when 'show steps' button is pressed, or coming back to a part after steps shown
          * @memberof Numbas.display.PartDisplay
          */
-        showSteps: function()
-        {
+        showSteps: function() {
             this.stepsShown(this.part.stepsShown);
             this.stepsOpen(this.part.stepsOpen);
             for(var i=0;i<this.part.steps.length;i++)

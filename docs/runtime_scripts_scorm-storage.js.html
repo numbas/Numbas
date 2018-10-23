@@ -757,7 +757,7 @@ scorm.partTypeStorage = {
             return Numbas.math.niceNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceNumber(part.settings.maxvalue);
         },
         student_answer: function(part) {
-            return Numbas.math.niceNumber(part.studentAnswer);
+            return part.studentAnswer;
         },
         suspend_data: function() {},
         load: function(part, data) { return data.answer || ''; }

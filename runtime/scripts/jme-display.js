@@ -1293,11 +1293,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_type = args[i].tok.type;
             var arg_value = args[i].tok.value;
             var pd;
-            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact');
-            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true; // if this kind of op as an argument to the parent op always gets brackets
-            bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
-            bracketArg = bracketArg || (arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp);  // put brackets around multiples of pi
-            bracketArg = bracketArg || (arg_type=='number' && bracketNumberOp && bits[i].indexOf('/')>=0); // put brackets around fractions when necessary
+            var arg_op = null;
+            if(arg_type=='op') {
+                arg_op = args[i].tok.name;
+            } else if(arg_type=='number' && arg_value.complex && arg_value.im!=0) {
+                if(arg_value.re!=0) {
+                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction becuase this number will be written in the form 'a+bi'
+                } else if(arg_value.im!=1) {
+                    arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+                }
+            } else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
+                arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
+            } else if(arg_type=='number' && bits[i].indexOf('/')>=0) {
+                arg_op = '/';   // implied division because this number will be written in the form 'a/b'
+            }
+            var bracketArg = arg_op!=null && op in opBrackets && opBrackets[op][i][arg_op]==true;
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
                 args[i].bracketed=true;
@@ -1419,7 +1429,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
     '*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
-    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],

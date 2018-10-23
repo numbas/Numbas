@@ -295,6 +295,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
+     * @fires Numbas.Exam#event:ready
      */
     init: function()
     {
@@ -304,14 +305,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         exam.scope.variables = result.variables;
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
-        if(this.store) {
-        job(this.store.init,this.store,exam);        //initialise storage
-    job(this.store.save,this.store);            //make sure data get saved to LMS
-        }
+        exam.signals.on('question list initialised', function() {
+            if(exam.store) {
+                job(exam.store.init,exam.store,exam);        //initialise storage
+                job(exam.store.save,exam.store);            //make sure data get saved to LMS
+            }
+            exam.signals.trigger('ready');
+        });
     },
-    /** Restore previously started exam from storage */
-    load: function()
-    {
+    /** Restore previously started exam from storage 
+     * @fires Numbas.Exam#event:ready
+     * @listens Numbas.Exam#event:question list initialised
+     */
+    load: function() {
+        var exam = this;
         if(!this.store) {
             return;
         }
@@ -340,11 +347,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.score = suspendData.score;
         },this);
         job(this.makeQuestionList,this,true);
-        job(function() {
+        exam.signals.on('question list initialised', function() {
             if(suspendData.currentQuestion!==undefined)
-                this.changeQuestion(suspendData.currentQuestion);
-            this.loading = false;
-        },this);
+                exam.changeQuestion(suspendData.currentQuestion);
+            exam.loading = false;
+            exam.calculateScore();
+            exam.signals.trigger('ready');
+        });
     },
     /** Decide which questions to use and in what order
      * @see Numbas.QuestionGroup#chooseQuestionSubset

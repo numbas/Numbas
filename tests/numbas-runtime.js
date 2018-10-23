@@ -10987,11 +10987,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_type = args[i].tok.type;
             var arg_value = args[i].tok.value;
             var pd;
-            var bracketNumberOp = (op=='*' || op=='-u' || op=='/' || op=='^' || op=='fact');
-            var bracketArg = arg_type=='op' && op in opBrackets && opBrackets[op][i][args[i].tok.name]==true; // if this kind of op as an argument to the parent op always gets brackets
-            bracketArg = bracketArg || ((arg_type=='number' && arg_value.complex && bracketNumberOp) && (arg_value.im!=0 && !(arg_value.im==1 && arg_value.re==0)));  // put brackets round a complex number
-            bracketArg = bracketArg || (arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1 && bracketNumberOp);  // put brackets around multiples of pi
-            bracketArg = bracketArg || (arg_type=='number' && bracketNumberOp && bits[i].indexOf('/')>=0); // put brackets around fractions when necessary
+            var arg_op = null;
+            if(arg_type=='op') {
+                arg_op = args[i].tok.name;
+            } else if(arg_type=='number' && arg_value.complex && arg_value.im!=0) {
+                if(arg_value.re!=0) {
+                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction becuase this number will be written in the form 'a+bi'
+                } else if(arg_value.im!=1) {
+                    arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+                }
+            } else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
+                arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
+            } else if(arg_type=='number' && bits[i].indexOf('/')>=0) {
+                arg_op = '/';   // implied division because this number will be written in the form 'a/b'
+            }
+            var bracketArg = arg_op!=null && op in opBrackets && opBrackets[op][i][arg_op]==true;
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
                 args[i].bracketed=true;
@@ -11113,7 +11123,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
     '*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
-    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],
@@ -12680,6 +12690,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         } else {
             this.calculateScore();
         }
+        this.display && this.display.showSteps();
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }
@@ -13702,6 +13713,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
+     * @fires Numbas.Exam#event:ready
      */
     init: function()
     {
@@ -13711,14 +13723,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         exam.scope.variables = result.variables;
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
-        if(this.store) {
-        job(this.store.init,this.store,exam);        //initialise storage
-    job(this.store.save,this.store);            //make sure data get saved to LMS
-        }
+        exam.signals.on('question list initialised', function() {
+            if(exam.store) {
+                job(exam.store.init,exam.store,exam);        //initialise storage
+                job(exam.store.save,exam.store);            //make sure data get saved to LMS
+            }
+            exam.signals.trigger('ready');
+        });
     },
-    /** Restore previously started exam from storage */
-    load: function()
-    {
+    /** Restore previously started exam from storage 
+     * @fires Numbas.Exam#event:ready
+     * @listens Numbas.Exam#event:question list initialised
+     */
+    load: function() {
+        var exam = this;
         if(!this.store) {
             return;
         }
@@ -13747,11 +13765,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.score = suspendData.score;
         },this);
         job(this.makeQuestionList,this,true);
-        job(function() {
+        exam.signals.on('question list initialised', function() {
             if(suspendData.currentQuestion!==undefined)
-                this.changeQuestion(suspendData.currentQuestion);
-            this.loading = false;
-        },this);
+                exam.changeQuestion(suspendData.currentQuestion);
+            exam.loading = false;
+            exam.calculateScore();
+            exam.signals.trigger('ready');
+        });
     },
     /** Decide which questions to use and in what order
      * @see Numbas.QuestionGroup#chooseQuestionSubset
@@ -15624,7 +15644,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             {
             case 'ab-initio':
                 job(exam.init,exam);
-                exam.signals.on('question list initialised', function() {
+                exam.signals.on('ready', function() {
                     job(function() {
                             Numbas.display.init();
                     });
@@ -15643,7 +15663,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             case 'resume':
             case 'review':
                 job(exam.load,exam);
-                exam.signals.on('question list initialised', function() {
+                exam.signals.on('ready', function() {
                     job(Numbas.display.init);
                     job(function() {
                         if(entry == 'review')
