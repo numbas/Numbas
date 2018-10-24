@@ -1437,7 +1437,7 @@ newBuiltin('match',[TExpression,TString],TDict,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = args[1].value;
-        var options = 'acg';
+        var options = 'ac';
         return match_subexpression(expr,pattern,options,scope);
     }
 });
@@ -1468,7 +1468,7 @@ newBuiltin('matches',[TExpression,TString],TBool,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = args[1].value;
-        var options = 'acg';
+        var options = 'ac';
         return matches_subexpression(expr,pattern,options,scope);
     }
 });

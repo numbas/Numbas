@@ -722,16 +722,35 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false, commutative: false});
 
-    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,options);
+    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,false,options);
     if(namedTerms===false) {
+        return false;
+    }
+
+    function name_captured(name,tree) {
+        if(jme.isOp(tree.tok,';')) {
+            var res = resolveName(tree.args[1]);
+            if(res.name==name) {
+                return true;
+            }
+        }
+        if(tree.args) {
+            return tree.args.some(function(t2){ return name_captured(name,t2); });
+        }
         return false;
     }
 
     // collate the named groups
     var match = {};
     for(var name in namedTerms) {
+        var occurrences = 0;
+        for(var i=0;i<ruleTree.args.length;i++) {
+            if(name_captured(name,ruleTree.args[i])) {
+                occurrences += 1;
+            }
+        }
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        match[name] = occurrences<=1 ? terms[0] : {tok: new jme.types.TList(terms.length), args: terms};
     }
     return match;
 }
@@ -762,7 +781,7 @@ function matchList(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false});
 
-    var namedTerms = matchTermSequence(ruleElements,exprElements,false,options);
+    var namedTerms = matchTermSequence(ruleElements,exprElements,false,false,options);
     if(namedTerms===false) {
         return false;
     }
@@ -832,7 +851,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
         }
     }
 
-    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options);
+    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options.allowOtherTerms && associating, options);
     if(namedTerms===false) {
         return false;
     }
@@ -858,10 +877,11 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
  * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
  * @param {Boolean} commuting - can the terms match in any order?
+ * @param {Boolean} allowOtherTerms - allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Boolean|Object.<Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
  */
-function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
+function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -919,7 +939,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
         return ok;
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: options.allowOtherTerms});
+    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
     if(assignment===false) {
         return false;
     }
@@ -1083,7 +1103,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
     function advance_input() {
         ic += 1;
         if(options.commutative) {
-            pc = start;
+            pc = 0;
         }
     }
     var steps = 0;
@@ -1142,7 +1162,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
         return false;
     }
     var result = pattern.map(function(p,i) {
-        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;}).map(function(j){ return j+start});
+        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;});
     });
     var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
     var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});

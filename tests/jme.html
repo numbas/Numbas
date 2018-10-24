@@ -1061,6 +1061,8 @@
 
                     assert.ok(matchExpression('["f": m_number/m_number] `@ f + f','1/2 + 3/4'),'["f": m_number/m_number] `@ f + f matches 1/2 + 3/4');
 
+                    assert.notOk(matchExpression('m_number`+/m_number`?','3pi/4',{allowOtherTerms:true}),'m_number`+/m_number`? does not match 3pi/4');
+
                     // lists
                     assert.ok(matchExpression('[]','[]'),'[] matches []');
                     assert.ok(matchExpression('[1,2,3]','[1,2,3]'),'[1,2,3] matches [1,2,3]');
@@ -1078,7 +1080,8 @@
                     assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+2+y'),'?`+;x+y on x+2+y captures x as x+2');
                     assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+y+2'),'?`+;x+y on x+y+2 captures x as x+2');
                     assert.ok(matchCapturedNames('2^(-?;x)',{x:'1'},'2^-1'),'2^(-?;x) on 2^-1 captures x as 1');
-                    assert.ok(matchCapturedNames('sin(?;x)',{x:'[1]'},'sin(1)'),'sin(?;x) on sin(1) captures x as [1]');
+                    assert.ok(matchCapturedNames('sin(?;x)',{x:'1'},'sin(1)'),'sin(?;x) on sin(1) captures x as 1');
+                    assert.ok(matchCapturedNames('f(?;x,?;x)',{x:'[1,2]'},'f(1,2)'),'f(?;x,?;x) on f(1,2) captures x as [1,2]');
 
                     // identified names
                     assert.ok(matchExpression('m_number*?;=x + m_number*?;=x','2y+3y'),'m_number*?;=x + m_number*?;=x matches 2y+3y');

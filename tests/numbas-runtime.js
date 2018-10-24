@@ -4460,16 +4460,35 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false, commutative: false});
 
-    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,options);
+    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,false,options);
     if(namedTerms===false) {
+        return false;
+    }
+
+    function name_captured(name,tree) {
+        if(jme.isOp(tree.tok,';')) {
+            var res = resolveName(tree.args[1]);
+            if(res.name==name) {
+                return true;
+            }
+        }
+        if(tree.args) {
+            return tree.args.some(function(t2){ return name_captured(name,t2); });
+        }
         return false;
     }
 
     // collate the named groups
     var match = {};
     for(var name in namedTerms) {
+        var occurrences = 0;
+        for(var i=0;i<ruleTree.args.length;i++) {
+            if(name_captured(name,ruleTree.args[i])) {
+                occurrences += 1;
+            }
+        }
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        match[name] = occurrences<=1 ? terms[0] : {tok: new jme.types.TList(terms.length), args: terms};
     }
     return match;
 }
@@ -4500,7 +4519,7 @@ function matchList(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false});
 
-    var namedTerms = matchTermSequence(ruleElements,exprElements,false,options);
+    var namedTerms = matchTermSequence(ruleElements,exprElements,false,false,options);
     if(namedTerms===false) {
         return false;
     }
@@ -4570,7 +4589,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
         }
     }
 
-    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options);
+    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options.allowOtherTerms && associating, options);
     if(namedTerms===false) {
         return false;
     }
@@ -4596,10 +4615,11 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
  * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
  * @param {Boolean} commuting - can the terms match in any order?
+ * @param {Boolean} allowOtherTerms - allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Boolean|Object.<Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
  */
-function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
+function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -4657,7 +4677,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
         return ok;
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: options.allowOtherTerms});
+    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
     if(assignment===false) {
         return false;
     }
@@ -4821,7 +4841,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
     function advance_input() {
         ic += 1;
         if(options.commutative) {
-            pc = start;
+            pc = 0;
         }
     }
     var steps = 0;
@@ -4880,7 +4900,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
         return false;
     }
     var result = pattern.map(function(p,i) {
-        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;}).map(function(j){ return j+start});
+        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;});
     });
     var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
     var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
@@ -9600,7 +9620,7 @@ newBuiltin('match',[TExpression,TString],TDict,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = args[1].value;
-        var options = 'acg';
+        var options = 'ac';
         return match_subexpression(expr,pattern,options,scope);
     }
 });
@@ -9631,7 +9651,7 @@ newBuiltin('matches',[TExpression,TString],TBool,null, {
     evaluate: function(args, scope) {
         var expr = args[0].tree;
         var pattern = args[1].value;
-        var options = 'acg';
+        var options = 'ac';
         return matches_subexpression(expr,pattern,options,scope);
     }
 });
@@ -17989,6 +18009,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             if(messageNode)
                 settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
+        //get pattern the student's answer must match
+        var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
+        if(mustMatchNode) {
+            //partial credit for failing not-allowed test
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit'],['mustMatchPattern','mustMatchPC']);
+            var messageNode = mustMatchNode.selectSingleNode('message');
+            if(messageNode) {
+                settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            }
+        }
+
         tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
         var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
         if(expectedVariableNamesNode)
@@ -18007,6 +18038,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
     },
     resume: function() {
@@ -18058,6 +18090,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
      * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
      * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+     * @property {String} mustMatchPattern - A pattern that the student's answer must match
+     * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
+     * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
      */
     settings:
     {
@@ -18084,7 +18119,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowed: [],
         notAllowedPC: 0,
         notAllowedMessage: '',
-        notAllowedShowStrings: false
+        notAllowedShowStrings: false,
+        mustMatchPattern: '',
+        mustMatchPC: 0,
+        mustMatchMessage: ''
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -18106,11 +18144,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
+        var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var expr = jme.subvars(settings.correctAnswerString,scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
-            settings.answerSimplification,
+            answerSimplification,
             scope
         );
         if(settings.correctAnswer == '' && this.marks>0) {
