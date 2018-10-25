@@ -907,8 +907,9 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
             var equalnames = {};
             ruleTerm.equalnames.forEach(function(nameTree) {
                 var name = nameTree.tok.name;
-                var t = m[name] || resolveName(nameTree,exprTerm.term).value;
-                equalnames[name] = t;
+                if(m[name]) {
+                    equalnames[name] = m[name];
+                }
             });
             matches[ic][pc] = {
                 match: m,
@@ -932,13 +933,13 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
             return true;
         }
         var ok = assignment.every(function(p,i) {
-            if(p<0 || p==pc || p>=ruleTerms.length) {
+            if(p<0 || p>=ruleTerms.length) {
                 return true;
             }
             var m2 = matches[i][p];
             return equalnames.every(function(nameTree) {
                 var name = nameTree.tok.name;
-                if(m2.equalnames[name]===undefined) {
+                if(m.equalnames[name]===undefined || m2.equalnames[name]===undefined) {
                     return true;
                 }
                 return jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
