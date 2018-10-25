@@ -4146,6 +4146,9 @@ var number_conditions = jme.rules.number_conditions = {
     },
     'integer': function(tok) {
         return Numbas.util.isInt(tok.value);
+    },
+    'decimal': function(tok) {
+        return Numbas.math.countDP(tok.originalValue)>0;
     }
 }
 
