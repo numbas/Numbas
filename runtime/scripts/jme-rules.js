@@ -29,6 +29,7 @@ function parse_options(str) {
         commutative: str.match(/c/),
         associative: str.match(/a/),
         allowOtherTerms: str.match(/g/),
+        gatherList: str.match(/l/),
         strictPlus: str.match(/p/)
     };
 }
@@ -46,6 +47,7 @@ var extend_options = Numbas.jme.rules.extend_options = function(a,b) {
         commutative: b.commutative===undefined ? a.commutative : b.commutative,
         associative: b.associative===undefined ? a.associative : b.associative,
         allowOtherTerms: b.allowOtherTerms===undefined ? a.allowOtherTerms : b.allowOtherTerms,
+        gatherList: b.gatherList===undefined ? a.gatherList : b.gatherList,
         strictPlus: b.strictPlus===undefined ? a.strictPlus : b.strictPlus,
         scope: b.scope===undefined ? a.scope : b.scope
     };
@@ -518,6 +520,8 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_associative': setMatchOptions({associative:true}),
     'm_nonassociative': setMatchOptions({associative:false}),
     'm_strictplus': setMatchOptions({strictPlus:true}),
+    'm_gather': setMatchOptions({gatherList:false}),
+    'm_nogather': setMatchOptions({gatherList:true}),
     'm_type': function(ruleTree,exprTree,options) {
         var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
         return matchType(wantedType,exprTree);
@@ -860,11 +864,15 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        var sub = terms[0];
-        for(var i=1;i<terms.length;i++) {
-            sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+        if(options.gatherList) {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(t)} })};
+        } else {
+            var sub = terms[0];
+            for(var i=1;i<terms.length;i++) {
+                sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+            }
+            match[name] = sub;
         }
-        match[name] = sub;
     }
     match['__op__'] = op;
 
@@ -1347,14 +1355,14 @@ function mergeMatches(matches) {
  */
 var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,options) {
     var tok = tree.tok;
-    if(jme.isFunction(tok,'eval')) {
-        return {tok: jme.evaluate(tree.args[0],options.scope)};
-    }
     if(tree.args) {
         var args = tree.args.map(function(arg) {
             return applyPostReplacement(arg,options);
         });
-        return {tok:tok, args: args};
+        tree = {tok:tok, args: args};
+    }
+    if(jme.isFunction(tok,'eval')) {
+        return {tok: jme.evaluate(tree.args[0],options.scope)};
     }
     return tree;
 }
@@ -1455,6 +1463,7 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
         commutative: true,
         associative: true,
         allowOtherTerms: true,
+        gatherList: false,
         strictPlus: false,
         scope: Numbas.jme.builtinScope
     };
