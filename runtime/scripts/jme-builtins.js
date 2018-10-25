@@ -1520,6 +1520,15 @@ newBuiltin('canonical_compare',['?','?'],TNum,null, {
     }
 });
 jme.lazyOps.push('canonical_compare');
+
+newBuiltin('numerical_compare',[TExpression,TExpression],TBool,null,{
+    evaluate: function(args,scope) {
+        var a = args[0].tree;
+        var b = args[1].tree;
+        return new TBool(jme.compare(a,b,{},scope));
+    }
+});
+
 newBuiltin('translate',[TString],TString,function(s) {
     return R(s);
 });

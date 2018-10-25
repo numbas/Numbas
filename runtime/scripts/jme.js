@@ -279,6 +279,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @property {Number} vsetRangePoints - The number of values to pick for each variable.
      * @property {Number} checkingAccuracy - A parameter for the checking function to determine if two results are equal. See {@link Numbas.jme.checkingFunctions}.
      * @property {Number} failureRate - The number of times the comparison must fail to declare that the expressions are unequal.
+     * @property {Boolean} sameVars - if true, then both expressions should have exactly the same free variables
      */
     /** Compare two expressions over some randomly selected points in the space of variables, to decide if they're equal.
      * @param {JME} expr1
@@ -287,16 +288,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {Numbas.jme.Scope} scope
      * @returns {Boolean}
      */
-    compare: function(expr1,expr2,settings,scope) {
-        expr1 += '';
-        expr2 += '';
-        var compile = jme.compile, evaluate = jme.evaluate;
+    compare: function(tree1,tree2,settings,scope) {
+        var default_settings = {
+            vsetRangeStart: 0,
+            vsetRangeEnd: 1,
+            vsetRangePoints: 5,
+            checkingType: 'absdiff',
+            checkingAccuracy: 0.0001,
+            failureRate: 1
+        }
+        settings = util.extend_object({},default_settings,settings);
         var checkingFunction = checkingFunctions[settings.checkingType.toLowerCase()];    //work out which checking type is being used
         try {
-            var tree1 = compile(expr1,scope);
-            var tree2 = compile(expr2,scope);
-            if(tree1 == null || tree2 == null)
-            {    //one or both expressions are invalid, can't compare
+            if(tree1 == null || tree2 == null) {    
+                //one or both expressions are invalid, can't compare
                 return false;
             }
             //find variable names used in both expressions - can't compare if different
@@ -306,33 +311,33 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 delete vars1[v];
                 delete vars2[v];
             }
-            if( !varnamesAgree(vars1,vars2) )
-            {    //whoops, differing variables
-                return false;
-            }
-            if(vars1.length)
-            {    // if variables are used,  evaluate both expressions over a random selection of values and compare results
-                var errors = 0;
-                var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, settings.vsetRangePoints);
-                for(var i = 0; i<rs.length; i++) {
-                    var nscope = new jme.Scope([scope,{variables:rs[i]}]);
-                    var r1 = evaluate(tree1,nscope);
-                    var r2 = evaluate(tree2,nscope);
-                    if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { errors++; }
-                }
-                if(errors < settings.failureRate) {
-                    return true;
-                }else{
+            if(settings.sameVars) {
+                if( !varnamesAgree(vars1,vars2) ) {    //whoops, differing variables
                     return false;
                 }
-            } else {
-                //if no variables used, can just evaluate both expressions once and compare
-                r1 = evaluate(tree1,scope);
-                r2 = evaluate(tree2,scope);
-                return resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy);
+            } else { 
+                vars2.forEach(function(n) {
+                    if(vars1.indexOf(n)==-1) {
+                        vars1.push(n);
+                    }
+                });
             }
-        }
-        catch(e) {
+            var hasNames = vars1.length > 0;
+            var numRuns = hasNames ? settings.vsetRangePoints: 1;
+            var failureRate = hasNames ? settings.failureRate : 1;
+            // if variables are used,  evaluate both expressions over a random selection of values and compare results
+            var errors = 0;
+            var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, numRuns);
+            for(var i = 0; i<rs.length; i++) {
+                var nscope = new jme.Scope([scope,{variables:rs[i]}]);
+                var r1 = nscope.evaluate(tree1);
+                var r2 = nscope.evaluate(tree2);
+                if( !resultsEqual(r1,r2,checkingFunction,settings.checkingAccuracy) ) { 
+                    errors++; 
+                }
+            }
+            return errors < failureRate;
+        } catch(e) {
             return false;
         }
     },
@@ -2202,7 +2207,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
  */
 function randoms(varnames,min,max,times)
 {
-    times *= varnames.length;
+    times *= varnames.length || 1;
     var rs = [];
     for( var i=0; i<times; i++ )
     {
