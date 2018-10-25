@@ -114,9 +114,11 @@ sameVars (Does the student use the same variables as the correct answer?):
     )
 
 failMatchPattern (Does the student's answer not match the required pattern?):
-    assert(settings["mustMatchPattern"]="" or matches(studentExpr,settings["mustMatchPattern"]),
-        multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"]);
-        true
+    assert(settings["mustMatchPattern"]="", 
+        assert(matches(studentExpr,settings["mustMatchPattern"]),
+            multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"]);
+            true
+        )
     )
 
 mark:
