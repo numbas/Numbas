@@ -31,9 +31,10 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {TeX}
      */
-    exprToLaTeX: function(expr,ruleset,scope)
+    exprToLaTeX: function(expr,ruleset,scope,parser)
     {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
@@ -41,7 +42,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         expr+='';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
-        var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
+        var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
         var tex = texify(tree,ruleset.flags); //render the tree as TeX
         return tex;
     },
@@ -65,21 +66,22 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr,ruleset,scope)
+    simplify: function(expr,ruleset,scope,parser)
     {
         if(expr.trim()=='')
             return;
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset,scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
-        try
-        {
-            var exprTree = jme.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        parser = parser || Numbas.jme.standardParser;
+        try {
+            var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
             return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
         }
         catch(e)
