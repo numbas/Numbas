@@ -118,6 +118,12 @@
             </div>
             <div>
                 <label>
+                    <span class="label-text">Gather terms matched under the same name?</span>
+                    <input type="checkbox" data-bind="checked: gather"/>
+                </label>
+            </div>
+            <div>
+                <label>
                     <span class="label-text">Replace all?</span>
                     <input type="checkbox" data-bind="checked: replaceAll"/>
                 </label>
@@ -206,6 +212,7 @@
                     this.associative = ko.observable(true);
                     this.strictPlus = ko.observable(false);
                     this.allowOtherTerms = ko.observable(true);
+                    this.gather = ko.observable(true);
                     this.replaceAll = ko.observable(false);
                     this.error = ko.observable('');
 
@@ -233,7 +240,7 @@
                             return null;
                         }
                         try {
-                            var options = {commutative: this.commutative(), associative: this.associative(), strictPlus: this.strictPlus(), allowOtherTerms: this.allowOtherTerms(), scope: Numbas.jme.builtinScope};
+                            var options = {commutative: this.commutative(), associative: this.associative(), strictPlus: this.strictPlus(), allowOtherTerms: this.allowOtherTerms(), gatherList: !this.gather(), scope: Numbas.jme.builtinScope};
                             var match = Numbas.jme.display.matchTree(pattern,expression,options);
                             if(match) {
                                 var out = [];

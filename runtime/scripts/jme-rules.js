@@ -1631,13 +1631,15 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;x+(-?;y)','g','x-y'],            //plus minus = minus
         ['?;x-(-?;y)','g','x+y'],            //minus minus = plus
         ['-(-?;x)','','x'],                //unary minus minus = plus
-        ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
-        ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
         ['(-?;x)/?;y','','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','','-(x/y)'],
-        ['(-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
-        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
+        ['`!-? `& (-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b']
+    ],
+    collectComplex: [
+        ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
+        ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
+        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
     ],
     unitFactor: [
         ['1*?;x','acg','x'],
