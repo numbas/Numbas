@@ -5974,6 +5974,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return v.name;
             case 'expression':
                 return v.tree;
+            case 'nothing':
+                return undefined;
             default:
                 return v.value;
         }
@@ -11925,7 +11927,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
-        this.finalised_result = [];
+        this.finalised_result = {valid: false, credit: 0, states: []};
         this.submitting = true;
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.setDirty(true);
@@ -12337,6 +12339,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         } else {
             this.calculateScore();
         }
+        this.display && this.display.showSteps();
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }
@@ -13359,6 +13362,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
+     * @fires Numbas.Exam#event:ready
      */
     init: function()
     {
@@ -13368,14 +13372,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         exam.scope.variables = result.variables;
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
-        if(this.store) {
-        job(this.store.init,this.store,exam);        //initialise storage
-    job(this.store.save,this.store);            //make sure data get saved to LMS
-        }
+        exam.signals.on('question list initialised', function() {
+            if(exam.store) {
+                job(exam.store.init,exam.store,exam);        //initialise storage
+                job(exam.store.save,exam.store);            //make sure data get saved to LMS
+            }
+            exam.signals.trigger('ready');
+        });
     },
-    /** Restore previously started exam from storage */
-    load: function()
-    {
+    /** Restore previously started exam from storage 
+     * @fires Numbas.Exam#event:ready
+     * @listens Numbas.Exam#event:question list initialised
+     */
+    load: function() {
+        var exam = this;
         if(!this.store) {
             return;
         }
@@ -13404,11 +13414,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.score = suspendData.score;
         },this);
         job(this.makeQuestionList,this,true);
-        job(function() {
+        exam.signals.on('question list initialised', function() {
             if(suspendData.currentQuestion!==undefined)
-                this.changeQuestion(suspendData.currentQuestion);
-            this.loading = false;
-        },this);
+                exam.changeQuestion(suspendData.currentQuestion);
+            exam.loading = false;
+            exam.calculateScore();
+            exam.signals.trigger('ready');
+        });
     },
     /** Decide which questions to use and in what order
      * @see Numbas.QuestionGroup#chooseQuestionSubset
@@ -14380,7 +14392,19 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(new jme.funcObj('mark_part',[TString,'?'],TDict,null,{
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
-            var part_result = part.mark_answer(args[1]);
+            var answer = args[1];
+            var part_result;
+            if(answer.type=='nothing') {
+                part.setCredit(0,R('part.marking.nothing entered'));
+                part_result = {
+                    states: {mark: []},
+                    state_valid: {},
+                    state_errors: {},
+                    values: {interpreted_answer:answer}
+                }
+            } else {
+                var part_result = part.mark_answer(answer);
+            }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
                 marks: part.marks,
@@ -15768,6 +15792,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
+        if(this.gaps.some(function(g){ return g.rawStudentAnswerAsJME()===undefined; })) {
+            return undefined;
+        }
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
     },
     storeAnswer: function(answer) {
@@ -15787,37 +15814,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     studentAnswerAsJME: function() {
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
-    },
-    /** Mark this part - add up the scores from each of the child gaps.
-     */
-    mark_old: function()
-    {
-        this.credit=0;
-        if(this.marks>0)
-        {
-            for(var i=0; i<this.gaps.length; i++)
-            {
-                var gap = this.gaps[i];
-            gap.submit();
-                this.credit += gap.credit*gap.marks;
-                if(this.gaps.length>1)
-                    this.markingComment(R('part.gapfill.feedback header',{index:i+1}));
-                for(var j=0;j<gap.markingFeedback.length;j++)
-                {
-                    var action = util.copyobj(gap.markingFeedback[j]);
-                    action.gap = i;
-                    this.markingFeedback.push(action);
-                }
-            }
-            this.credit/=this.marks;
-        }
-        //go through all gaps, and if any one fails to validate then
-        //whole part fails to validate
-        var success = true;
-        for(var i=0; i<this.gaps.length; i++) {
-            success = success && this.gaps[i].answered;
-        }
-        this.answered = success;
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
@@ -17005,6 +17001,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.resolved_input_options;
     },
     rawStudentAnswerAsJME: function() {
+        if(this.studentAnswer===undefined) {
+            return new types.TNothing();
+        }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
     student_answer_jme_types: {

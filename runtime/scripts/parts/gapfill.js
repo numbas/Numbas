@@ -100,6 +100,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
+        if(this.gaps.some(function(g){ return g.rawStudentAnswerAsJME()===undefined; })) {
+            return undefined;
+        }
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
     },
     storeAnswer: function(answer) {
@@ -119,37 +122,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     studentAnswerAsJME: function() {
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
-    },
-    /** Mark this part - add up the scores from each of the child gaps.
-     */
-    mark_old: function()
-    {
-        this.credit=0;
-        if(this.marks>0)
-        {
-            for(var i=0; i<this.gaps.length; i++)
-            {
-                var gap = this.gaps[i];
-            gap.submit();
-                this.credit += gap.credit*gap.marks;
-                if(this.gaps.length>1)
-                    this.markingComment(R('part.gapfill.feedback header',{index:i+1}));
-                for(var j=0;j<gap.markingFeedback.length;j++)
-                {
-                    var action = util.copyobj(gap.markingFeedback[j]);
-                    action.gap = i;
-                    this.markingFeedback.push(action);
-                }
-            }
-            this.credit/=this.marks;
-        }
-        //go through all gaps, and if any one fails to validate then
-        //whole part fails to validate
-        var success = true;
-        for(var i=0; i<this.gaps.length; i++) {
-            success = success && this.gaps[i].answered;
-        }
-        this.answered = success;
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {

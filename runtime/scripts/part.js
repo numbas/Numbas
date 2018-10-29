@@ -613,7 +613,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
-        this.finalised_result = [];
+        this.finalised_result = {valid: false, credit: 0, states: []};
         this.submitting = true;
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.setDirty(true);

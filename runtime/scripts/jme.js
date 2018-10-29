@@ -524,6 +524,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return v.name;
             case 'expression':
                 return v.tree;
+            case 'nothing':
+                return undefined;
             default:
                 return v.value;
         }
