@@ -351,8 +351,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
                 // I have only myself to thank for this - CP
                 var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,scope));
+                var layoutFunction = function(row,column) { return layoutMatrix[row][column]; };
+            } else {
+                var layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             }
-            var layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             for(var i=0;i<this.numAnswers;i++) {
                 var row = [];
                 for(var j=0;j<this.numChoices;j++) {
@@ -725,8 +727,7 @@ Numbas.parts.MultipleResponsePart.layoutTypes = {
     lowertriangle: function(row,column) { return row>=column; },
     strictlowertriangle: function(row,column) { return row>column; },
     uppertriangle: function(row,column) { return row<=column; },
-    strictuppertriangle: function(row,column) { return row<column; },
-    expression: function(row,column) { return layoutMatrix[row][column]; }
+    strictuppertriangle: function(row,column) { return row<column; }
 };
 Numbas.partConstructors['1_n_2'] = util.extend(Part,MultipleResponsePart);
 Numbas.partConstructors['m_n_2'] = util.extend(Part,MultipleResponsePart);
