@@ -161,7 +161,7 @@
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking {{part}}: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
-    "part.marking.no result": "This part could not be marked.",
+    "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",
     "marking.apply marking script.script not found": "Marking script <code>{{name}}</code> not found",
