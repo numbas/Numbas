@@ -49,6 +49,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.flipped = false;
         }
         //work out marks available
+        tryGetAttribute(settings,xml,'.','showCellAnswerState');
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
         if(this.type=='1_n_2') {
             settings.maxMarksEnabled = false;

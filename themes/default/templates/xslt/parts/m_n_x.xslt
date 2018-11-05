@@ -2,7 +2,7 @@
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <form autocomplete="nope">
-        <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
+        <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
             <thead localise-data-jme-context-description="part.mcq.answers">
                 <td/>
                 <xsl:for-each select="answers/answer">
