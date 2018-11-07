@@ -164,13 +164,14 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      */
     setStudentAnswer: function() {
         if(this.stagedAnswer !== undefined) {
-            this.studentAnswerRows = parseInt(this.stagedAnswer.rows);
-            this.studentAnswerColumns = parseInt(this.stagedAnswer.columns);
+            var m = this.stagedAnswer;
+            this.studentAnswerRows = m.length;
+            this.studentAnswerColumns = this.studentAnswerRows>0 ? m[0].length : 0;
         } else {
             this.studentAnswerRows = 0;
             this.studentAnswerColumns = 0;
         }
-            this.studentAnswer = this.stagedAnswer;
+        this.studentAnswer = this.stagedAnswer;
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the marking script
      * @abstract
