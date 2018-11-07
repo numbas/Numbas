@@ -164,6 +164,7 @@ newBuiltin('dict',['*keypair'],TDict,null,{
         return new TDict(value);
     }
 });
+Numbas.jme.lazyOps.push('dict');
 newBuiltin('keys',[TDict],TList,function(d) {
     var o = [];
     Object.keys(d).forEach(function(key) {
@@ -263,6 +264,7 @@ newBuiltin('safe',[TString],TString,null, {
         return variables.length==1 && variables[0].type=='string';
     }
 });
+Numbas.jme.lazyOps.push('safe');
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
@@ -550,6 +552,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
             return jme.evaluate(args[2],scope);
     }
 });
+Numbas.jme.lazyOps.push('if');
 newBuiltin('switch',[],'?', null, {
     typecheck: function(variables)
     {
@@ -589,6 +592,7 @@ newBuiltin('switch',[],'?', null, {
             throw(new Numbas.Error('jme.func.switch.no default case'));
     }
 });
+Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
@@ -607,6 +611,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
         return new TBool(match);
     }
 });
+Numbas.jme.lazyOps.push('isa');
 // repeat(expr,n) evaluates expr n times and returns a list of the results
 newBuiltin('repeat',['?',TNum],TList, null, {
     evaluate: function(args,scope)
@@ -620,6 +625,7 @@ newBuiltin('repeat',['?',TNum],TList, null, {
         return new TList(value);
     }
 });
+Numbas.jme.lazyOps.push('repeat');
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
         if(definitions.length!=names.length) {
@@ -662,6 +668,7 @@ newBuiltin('satisfy', [TList,TList,TList,TNum], TList, null, {
         return new TList(names.map(function(name){ return variables[name]; }));
     }
 });
+Numbas.jme.lazyOps.push('satisfy');
 jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
     var names = tree.args[0].args.map(function(t){return t.tok.name});
     boundvars = boundvars.concat(0,0,names);
@@ -757,6 +764,7 @@ newBuiltin('isset',[TName],TBool,null, {
         return new TBool(name in scope.variables);
     }
 });
+Numbas.jme.lazyOps.push('isset');
 jme.findvarsOps.isset = function(tree,boundvars,scope) {
     boundvars = boundvars.slice();
     boundvars.push(tree.args[1].tok.name.toLowerCase());
@@ -832,6 +840,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
         return jme.mapFunctions[value.type](lambda,names,value.value,scope);
     }
 });
+Numbas.jme.lazyOps.push('map');
 jme.findvarsOps.map = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
@@ -876,6 +885,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
         return new TList(value);
     }
 });
+Numbas.jme.lazyOps.push('filter');
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
@@ -894,6 +904,65 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
     tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
     return tree;
 }
+
+
+newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
+    evaluate: function(args,scope) {
+        var n = scope.evaluate(args[0]).value;
+        var lambda = args[1];
+        var list = scope.evaluate(args[3]);
+        switch(list.type) {
+        case 'list':
+            list = list.value;
+            break;
+        case 'range':
+            list = math.rangeToList(list.value);
+            for(var i=0;i<list.length;i++) {
+                list[i] = new TNum(list[i]);
+            }
+            break;
+        default:
+            throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+        }
+        scope = new Scope(scope);
+        var name = args[2].tok.name;
+        var value = [];
+        for(var i=0;i<list.length && value.length<n;i++) {
+            var v = list[i];
+            scope.setVariable(name,v);
+            var ok = scope.evaluate(lambda).value;
+            if(ok) {
+                value.push(v);
+            }
+        };
+        return new TList(value);
+    }
+});
+Numbas.jme.lazyOps.push('take');
+jme.findvarsOps.take = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    if(tree.args[2].tok.type=='list') {
+        var names = tree.args[2].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+    }
+    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
+    var args = tree.args.slice();
+    args[0] = jme.substituteTree(args[0],scope,allowUnbound);
+    args[3] = jme.substituteTree(args[3],scope,allowUnbound);
+    return {tok:tree.tok, args: args};
+}
+
+
+
 function tok_is_true(item){return item.type=='boolean' && item.value}
 newBuiltin('all',[TList],TBool,function(list) {
     return list.every(tok_is_true);
@@ -933,6 +1002,7 @@ newBuiltin('let',['?'],TList, null, {
         }
     }
 });
+Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree,boundvars,scope) {
     // find vars used in variable assignments
     var vars = [];
