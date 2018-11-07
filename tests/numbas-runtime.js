@@ -1051,6 +1051,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return out;
     },
+
+    /** Cartesian product of list, repeated n times
+     * @param {Array} l
+     * @param {Number} n
+     * @returns {Array}
+     */
+    cartesian_power: function(l,n) {
+        var o = [[]];
+        for(var i=0;i<n;i++) {
+            var no = [];
+            o.forEach(function(ol) {
+                l.forEach(function(x) {
+                    var nl = ol.slice();
+                    nl.push(x);
+                    no.push(nl);
+                })
+            });
+            o = no;
+        }
+        return o;
+    },
+
     /** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
      * @param {Array} lists - list of arrays
      * @returns {Array}
@@ -4336,6 +4358,12 @@ var vectormath = Numbas.vectormath = {
         m.rows = m.length;
         m.columns = 1;
         return m;
+    },
+
+    /** Is every component of this vector zero?
+     */
+    is_zero: function(v) {
+        return v.every(function(c){return c==0;});
     }
 }
 /** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
@@ -8010,6 +8038,7 @@ newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
@@ -8939,6 +8968,11 @@ newBuiltin('product',['?'],TList,function() {
         return true;
     }
 });
+
+newBuiltin('product',[TList,TNum],TList,function(l,n) {
+    return util.cartesian_power(l,n).map(function(sl){ return new TList(sl); });
+});
+
 newBuiltin('zip',['?'],TList,function() {
     var lists = Array.prototype.slice.call(arguments);
     var zipped = util.zip(lists);
@@ -11961,28 +11995,30 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
                         try {
                             var scope = this.errorCarriedForwardScope();
-                        } catch(e) {
-                            if(!result) {
-                                this.giveWarning(e.originalMessage);
-                                this.answered = false;
-                                throw(e);
+                            var result_replacement = this.markAgainstScope(scope,existing_feedback);
+                            if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
+                                result = result_replacement;
+                                result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
+                                result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
-                        }
-                        var result_replacement = this.markAgainstScope(scope,existing_feedback);
-                        if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
-                            result = result_replacement;
-                            result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
-                            result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
+                        } catch(e) {
+                            try{
+                                this.error(e.message);
+                            } catch(pe) {
+                                console.error(pe.message);
+                            }
                         }
                     }
                     if(!result) {
-                        this.error('part.marking.no result');
+                        this.setCredit(0,R('part.marking.no result after replacement'));
+                        this.answered = true;
+                    } else {
+                        this.setWarnings(result.warnings);
+                        this.markingFeedback = result.markingFeedback;
+                        this.finalised_result = result.finalised_result;
+                        this.credit = result.credit;
+                        this.answered = result.answered;
                     }
-                    this.setWarnings(result.warnings);
-                    this.markingFeedback = result.markingFeedback;
-                    this.finalised_result = result.finalised_result;
-                    this.credit = result.credit;
-                    this.answered = result.answered;
                 } catch(e) {
                     throw(new Numbas.Error('part.marking.uncaught error',{part:util.nicePartName(this.path),message:e.message}));
                 }
@@ -16182,6 +16218,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.flipped = false;
         }
         //work out marks available
+        tryGetAttribute(settings,xml,'.','showCellAnswerState');
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
         if(this.type=='1_n_2') {
             settings.maxMarksEnabled = false;

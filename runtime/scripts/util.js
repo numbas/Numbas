@@ -819,6 +819,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return out;
     },
+
+    /** Cartesian product of list, repeated n times
+     * @param {Array} l
+     * @param {Number} n
+     * @returns {Array}
+     */
+    cartesian_power: function(l,n) {
+        var o = [[]];
+        for(var i=0;i<n;i++) {
+            var no = [];
+            o.forEach(function(ol) {
+                l.forEach(function(x) {
+                    var nl = ol.slice();
+                    nl.push(x);
+                    no.push(nl);
+                })
+            });
+            o = no;
+        }
+        return o;
+    },
+
     /** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
      * @param {Array} lists - list of arrays
      * @returns {Array}

@@ -1051,6 +1051,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return out;
     },
+
+    /** Cartesian product of list, repeated n times
+     * @param {Array} l
+     * @param {Number} n
+     * @returns {Array}
+     */
+    cartesian_power: function(l,n) {
+        var o = [[]];
+        for(var i=0;i<n;i++) {
+            var no = [];
+            o.forEach(function(ol) {
+                l.forEach(function(x) {
+                    var nl = ol.slice();
+                    nl.push(x);
+                    no.push(nl);
+                })
+            });
+            o = no;
+        }
+        return o;
+    },
+
     /** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
      * @param {Array} lists - list of arrays
      * @returns {Array}
@@ -4336,6 +4358,12 @@ var vectormath = Numbas.vectormath = {
         m.rows = m.length;
         m.columns = 1;
         return m;
+    },
+
+    /** Is every component of this vector zero?
+     */
+    is_zero: function(v) {
+        return v.every(function(c){return c==0;});
     }
 }
 /** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
@@ -8010,6 +8038,7 @@ newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
@@ -8939,6 +8968,11 @@ newBuiltin('product',['?'],TList,function() {
         return true;
     }
 });
+
+newBuiltin('product',[TList,TNum],TList,function(l,n) {
+    return util.cartesian_power(l,n).map(function(sl){ return new TList(sl); });
+});
+
 newBuiltin('zip',['?'],TList,function() {
     var lists = Array.prototype.slice.call(arguments);
     var zipped = util.zip(lists);

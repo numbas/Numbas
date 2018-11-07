@@ -116,6 +116,7 @@ newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
@@ -1045,6 +1046,11 @@ newBuiltin('product',['?'],TList,function() {
         return true;
     }
 });
+
+newBuiltin('product',[TList,TNum],TList,function(l,n) {
+    return util.cartesian_power(l,n).map(function(sl){ return new TList(sl); });
+});
+
 newBuiltin('zip',['?'],TList,function() {
     var lists = Array.prototype.slice.call(arguments);
     var zipped = util.zip(lists);
