@@ -2035,6 +2035,17 @@ var associative = jme.associative =
     'xor': true
 };
 
+/** Binary operations which have an equivalent operation written the other way round.
+ * @enum {String}
+ * @memberof Numbas.jme
+ */
+var oppositeOps = jme.oppositeOps = {
+    '<': '>',
+    '>': '<',
+    '<=': '>=',
+    '>=': '<='
+}
+
 
 /** A standard parser for JME expressions
  * @memberof Numbas.jme

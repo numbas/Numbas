@@ -2,6 +2,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
 
+    marking.ignore_note_errors = true;
+
     var jme = Numbas.jme;
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
@@ -553,7 +555,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         }
                     }
                 }
-                if(invalid_dep || Numbas.marking.ignore_note_errors) {
+                if(invalid_dep || marking.ignore_note_errors) {
                     scope.state_valid[name] = false;
                 } else {
                     throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));

@@ -3904,6 +3904,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
 /** Options for {@link Numbas.jme.rules.getTerms}
  * @typedef Numbas.jme.rules.getTerms_options
  * @type Object
+ * @property {Boolean} commutative - should the operator be considered as commutative, for the purposes of matching ops with opposites? If yes, `a>c` will produce terms `c` and `a` when `op='<'`.
  * @property {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
  * @property {Boolean} strictPlus - if `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  */
@@ -4052,13 +4053,27 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
     if(!options.strictPlus && op=='+' && jme.isOp(tree.tok,'-')) {
         tree = {tok: new jme.types.TOp('+',false,false,2,true,true), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
     }
+
+    function isThisOp(tok) {
+        if(jme.isOp(tok,op)) {
+            return true;
+        }
+        if(options.commutative && jme.oppositeOps[op] && jme.isOp(tok,jme.oppositeOps[op])) {
+            return true;
+        }
+    }
+
     var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
+    if(options.commutative && jme.oppositeOps[op] && jme.isOp(tree.tok,jme.oppositeOps[op])) {
+        args = tree.args.slice().reverse();
+    }
+
     var terms = [];
 
     for(var i=0; i<args.length;i++) {
         var arg = args[i];
         var item = new Term(arg);
-        if(options.associative && (jme.isOp(arg.tok,op) || (!options.strictPlus && op=='+' && jme.isOp(arg.tok,'-')))) {
+        if(options.associative && (isThisOp(arg.tok) || (!options.strictPlus && op=='+' && jme.isOp(arg.tok,'-')))) {
             var sub = getTerms(arg,op,options,existing_names.length==0 ? item.names : existing_names.concat(item.names),false);
             if(item.quantifier!='1') {
                 sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][item.quantifier]; });
@@ -4598,6 +4613,26 @@ function resolveName(nameTree,value) {
     return {name: name, value: value};
 }
 
+/** Find names captured by this pattern
+ * @param {Numbas.jme.tree} ruleTree
+ * @returns {Array.<String>}
+ */
+var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
+    var tok = ruleTree.tok;
+    var names = [];
+    if(jme.isOp(tok,';') || jme.isOp(tok,';=')) {
+        var res = resolveName(ruleTree.args[1]);
+        names.push(res.name);
+    }
+    if(ruleTree.args) {
+        for(var i=0;i<ruleTree.args.length;i++) {
+            var argnames = findCapturedNames(ruleTree.args[i]);
+            names = names.merge(argnames);
+        }
+    }
+    return names;
+}
+
 /** Match an expression against a pattern which is an application of an operator to one or more terms.
  * Assuming that the pattern and the expression trees are each a sequence of terms joined by the same operator, find the terms of each, and try to match them up, obeying quantifiers in the pattern.
  * @param {Numbas.jme.tree} ruleTree - the pattern to match, whose top token must be an operator.
@@ -4611,7 +4646,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var op = ruleTok.name;
     var commuting = options.commutative && ruleTok.commutative;
     var associating = options.associative && ruleTok.associative;
-    var term_options = {associative: associating, strictPlus: options.strictPlus};
+    var term_options = {commutative: options.commutative, associative: associating, strictPlus: options.strictPlus};
     var ruleTerms = getTerms(ruleTree,op,term_options,[],true);
     var exprTerms = getTerms(exprTree,op,term_options,[],false);
     if(exprTerms.length<ruleTerms.min_total) {
@@ -7582,6 +7617,17 @@ var associative = jme.associative =
     'or': true,
     'xor': true
 };
+
+/** Binary operations which have an equivalent operation written the other way round.
+ * @enum {String}
+ * @memberof Numbas.jme
+ */
+var oppositeOps = jme.oppositeOps = {
+    '<': '>',
+    '>': '<',
+    '<=': '>=',
+    '>=': '<='
+}
 
 
 /** A standard parser for JME expressions
@@ -14617,6 +14663,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
 
+    marking.ignore_note_errors = true;
+
     var jme = Numbas.jme;
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
@@ -15168,7 +15216,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                         }
                     }
                 }
-                if(invalid_dep || Numbas.marking.ignore_note_errors) {
+                if(invalid_dep || marking.ignore_note_errors) {
                     scope.state_valid[name] = false;
                 } else {
                     throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));
@@ -18137,7 +18185,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit'],['mustMatchPattern','mustMatchPC']);
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
                 settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -18162,7 +18210,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
-        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
     },
     resume: function() {
@@ -18217,6 +18265,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {String} mustMatchPattern - A pattern that the student's answer must match
      * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
      * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
+     * @property {String} nameToCompare - the name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
      */
     settings:
     {
@@ -18246,7 +18295,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: ''
+        mustMatchMessage: '',
+        nameToCompare: ''
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}

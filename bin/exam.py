@@ -851,16 +851,18 @@ class StringRestriction(Restriction):
 
 class PatternRestriction(Restriction):
     pattern = ''
+    nameToCompare = ''
 
     @classmethod
     def fromDATA(cls, builder, name, data, restriction=None):
         restriction = super().fromDATA(builder,name,data,restriction)
-        tryLoad(data,['pattern'],restriction)
+        tryLoad(data,['pattern','nameToCompare'],restriction)
         return restriction
 
     def toxml(self):
         restriction = super().toxml()
         restriction.attrib['pattern'] = strcons_fix(self.pattern)
+        restriction.attrib['nameToCompare'] = strcons_fix(self.nameToCompare)
 
         return restriction
 

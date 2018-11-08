@@ -104,7 +104,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit'],['mustMatchPattern','mustMatchPC']);
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
                 settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
@@ -129,7 +129,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
-        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
     },
     resume: function() {
@@ -184,6 +184,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {String} mustMatchPattern - A pattern that the student's answer must match
      * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
      * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
+     * @property {String} nameToCompare - the name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
      */
     settings:
     {
@@ -213,7 +214,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: ''
+        mustMatchMessage: '',
+        nameToCompare: ''
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}

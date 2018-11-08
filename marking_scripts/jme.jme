@@ -1,4 +1,4 @@
-studentExpr (The student's answer, parsed): 
+studentExpr (The student's answer, parsed):
     assert(trim(studentAnswer)<>"",
         warn(translate("part.marking.nothing entered"));
         fail(translate("part.marking.nothing entered"))
@@ -12,11 +12,45 @@ studentExpr (The student's answer, parsed):
 
 cleanedStudentString (The student's answer as a string, cleaned up): string(studentExpr)
 
-scope_vars (Variables already defined in the scope): 
+scope_vars (Variables already defined in the scope):
     definedvariables()
 
-studentVariables (Variables used in the student's answer): 
-    set(findvars(studentExpr))-set(scope_vars)
+correctExpr (The correct answer, parsed):
+    parse(settings["correctAnswer"])
+
+studentMatch (The result of matching the student's expression against the pattern):
+    match(studentExpr,settings["mustMatchPattern"])
+
+correctMatch (The result of matching the correct answer against the pattern):
+    match(correctExpr,settings["mustMatchPattern"])
+
+compareName (The name of the matched group from each expression to compare): settings["nameToCompare"]
+
+studentCompare (The part of the student's expression to compare):
+    if(
+        settings["mustMatchPattern"]="" or compareName="",
+        studentExpr,
+        studentMatch["groups"][compareName]
+    )
+
+correctCompare (The part of the correct expression to compare):
+    if(
+        settings["mustMatchPattern"]="" or compareName="",
+        correctExpr,
+        correctMatch["groups"][compareName]
+    )
+
+failNameToCompare (If comparing just a subexpression, stop marking if the student's expression doesn't have that subexpression):
+    assert(settings["mustMatchPattern"]="" or compareName="" or (studentMatch["match"] and compareName in studentMatch["groups"]),
+        incorrect(settings["mustMatchMessage"]);
+        end()
+    )
+
+studentVariables (Variables used in the student's answer):
+    set(findvars(studentCompare))-set(scope_vars)
+
+correctVariables (Variables used in the correct answer):
+    set(findvars(correctCompare))-set(scope_vars)
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in settings["expectedVariableNames"]),x,list(studentVariables)),
@@ -64,25 +98,19 @@ requiredStringsPenalty:
         warn(settings["mustHaveMessage"])
     )
 
-correctExpr (The correct answer, parsed): 
-    parse(settings["correctAnswer"])
-
-correctVars (Variables used in the correct answer): 
-    set(findvars(correctExpr))-set(scope_vars)
-
-vRange (The range to pick variable values from): 
+vRange (The range to pick variable values from):
     settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
 
 vset (The sets of variable values to test against):
     repeat(
-        dict(map([x,random(vRange)],x,correctVars or studentVariables)),
+        dict(map([x,random(vRange)],x,correctVariables or studentVariables)),
         settings["vsetRangePoints"]
     )
 
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
     map(
         try(
-            resultsEqual(eval(studentexpr,vars),eval(correctexpr,vars),settings["checkingType"],settings["checkingAccuracy"]),
+            resultsEqual(eval(studentCompare,vars),eval(correctCompare,vars),settings["checkingType"],settings["checkingAccuracy"]),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));
@@ -92,7 +120,7 @@ agree (Do the student's answer and the expected answer agree on each of the sets
         vset
     )
 
-numFails (The number of times the student's answer and the expected answer disagree): 
+numFails (The number of times the student's answer and the expected answer disagree):
     apply(agree);
     len(filter(not x,x,agree))
 
@@ -105,7 +133,7 @@ numericallyCorrect (Is the student's answer numerically correct?):
     )
 
 sameVars (Does the student use the same variables as the correct answer?):
-    if(studentVariables=correctVars,
+    if(studentVariables=correctVariables,
         true
     ,
         incorrect();
@@ -114,15 +142,20 @@ sameVars (Does the student use the same variables as the correct answer?):
     )
 
 failMatchPattern (Does the student's answer not match the required pattern?):
-    assert(settings["mustMatchPattern"]="", 
+    assert(settings["mustMatchPattern"]="",
         assert(matches(studentExpr,settings["mustMatchPattern"]),
-            multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"]);
+            if(compareName="",
+                multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"])
+            ,
+                set_credit(0,settings["mustMatchMessage"])
+            );
             true
         )
     )
 
 mark:
     apply(studentExpr);
+    apply(failNameToCompare);
     apply(unexpectedVariables);
     apply(sameVars);
     apply(numericallyCorrect);
