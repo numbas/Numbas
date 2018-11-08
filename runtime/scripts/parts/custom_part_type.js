@@ -141,6 +141,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.resolved_input_options;
     },
     rawStudentAnswerAsJME: function() {
+        if(this.studentAnswer===undefined) {
+            return new types.TNothing();
+        }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
     student_answer_jme_types: {

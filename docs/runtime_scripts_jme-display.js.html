@@ -63,9 +63,10 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.&lt;String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {TeX}
      */
-    exprToLaTeX: function(expr,ruleset,scope)
+    exprToLaTeX: function(expr,ruleset,scope,parser)
     {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
@@ -73,7 +74,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         expr+='';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
-        var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
+        var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
         var tex = texify(tree,ruleset.flags); //render the tree as TeX
         return tex;
     },
@@ -97,21 +98,22 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.&lt;String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr,ruleset,scope)
+    simplify: function(expr,ruleset,scope,parser)
     {
         if(expr.trim()=='')
             return;
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset,scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
-        try
-        {
-            var exprTree = jme.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        parser = parser || Numbas.jme.standardParser;
+        try {
+            var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
             return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
         }
         catch(e)
@@ -2998,8 +3000,6 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -4400,6 +4400,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.combinations"><a href="Numbas.util.html#.combinations">Numbas.util.combinations</a></li>
@@ -4511,6 +4513,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 			<li class="search-result" data-longname="Numbas.vectormath.dot"><a href="Numbas.vectormath.html#.dot">Numbas.vectormath.dot</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
+		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		

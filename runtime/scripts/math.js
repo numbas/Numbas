@@ -1835,6 +1835,12 @@ var vectormath = Numbas.vectormath = {
         m.rows = m.length;
         m.columns = 1;
         return m;
+    },
+
+    /** Is every component of this vector zero?
+     */
+    is_zero: function(v) {
+        return v.every(function(c){return c==0;});
     }
 }
 /** A two-dimensional matrix: an array of rows, each of which is an array of numbers.

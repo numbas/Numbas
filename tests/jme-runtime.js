@@ -1118,6 +1118,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return out;
     },
+
+    /** Cartesian product of list, repeated n times
+     * @param {Array} l
+     * @param {Number} n
+     * @returns {Array}
+     */
+    cartesian_power: function(l,n) {
+        var o = [[]];
+        for(var i=0;i<n;i++) {
+            var no = [];
+            o.forEach(function(ol) {
+                l.forEach(function(x) {
+                    var nl = ol.slice();
+                    nl.push(x);
+                    no.push(nl);
+                })
+            });
+            o = no;
+        }
+        return o;
+    },
+
     /** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
      * @param {Array} lists - list of arrays
      * @returns {Array}
@@ -3407,6 +3429,12 @@ var vectormath = Numbas.vectormath = {
         m.rows = m.length;
         m.columns = 1;
         return m;
+    },
+
+    /** Is every component of this vector zero?
+     */
+    is_zero: function(v) {
+        return v.every(function(c){return c==0;});
     }
 }
 /** A two-dimensional matrix: an array of rows, each of which is an array of numbers.
@@ -7049,6 +7077,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return v.name;
             case 'expression':
                 return v.tree;
+            case 'nothing':
+                return undefined;
             default:
                 return v.value;
         }
@@ -8550,9 +8580,9 @@ var funcSynonyms = jme.funcSynonyms = {
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments
  * @memberof Numbas.jme
  */
-var lazyOps = jme.lazyOps = ['if','switch','repeat','map','let','isa','satisfy','filter','isset','dict','safe'];
+var lazyOps = jme.lazyOps = [];
 
-/** Operations which are right-associative
+/** Right-associative operations
  * @memberof Numbas.jme
  */
 var rightAssociative = jme.rightAssociative = {
@@ -9364,6 +9394,7 @@ newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
@@ -9411,6 +9442,7 @@ newBuiltin('dict',['*keypair'],TDict,null,{
         return new TDict(value);
     }
 });
+Numbas.jme.lazyOps.push('dict');
 newBuiltin('keys',[TDict],TList,function(d) {
     var o = [];
     Object.keys(d).forEach(function(key) {
@@ -9510,6 +9542,7 @@ newBuiltin('safe',[TString],TString,null, {
         return variables.length==1 && variables[0].type=='string';
     }
 });
+Numbas.jme.lazyOps.push('safe');
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
@@ -9797,6 +9830,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
             return jme.evaluate(args[2],scope);
     }
 });
+Numbas.jme.lazyOps.push('if');
 newBuiltin('switch',[],'?', null, {
     typecheck: function(variables)
     {
@@ -9836,6 +9870,7 @@ newBuiltin('switch',[],'?', null, {
             throw(new Numbas.Error('jme.func.switch.no default case'));
     }
 });
+Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
@@ -9854,6 +9889,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
         return new TBool(match);
     }
 });
+Numbas.jme.lazyOps.push('isa');
 // repeat(expr,n) evaluates expr n times and returns a list of the results
 newBuiltin('repeat',['?',TNum],TList, null, {
     evaluate: function(args,scope)
@@ -9867,6 +9903,8 @@ newBuiltin('repeat',['?',TNum],TList, null, {
         return new TList(value);
     }
 });
+Numbas.jme.lazyOps.push('repeat');
+
 /** Evaluate the given expressions until the list of conditions is satisfied
  * @param {Array.<String>} names - names for each expression
  * @param {Array.<Numbas.jme.tree>} definitions - definition of each expression
@@ -9917,6 +9955,7 @@ newBuiltin('satisfy', [TList,TList,TList,TNum], TList, null, {
         return new TList(names.map(function(name){ return variables[name]; }));
     }
 });
+Numbas.jme.lazyOps.push('satisfy');
 jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
     var names = tree.args[0].args.map(function(t){return t.tok.name});
     boundvars = boundvars.concat(0,0,names);
@@ -10012,6 +10051,7 @@ newBuiltin('isset',[TName],TBool,null, {
         return new TBool(name in scope.variables);
     }
 });
+Numbas.jme.lazyOps.push('isset');
 jme.findvarsOps.isset = function(tree,boundvars,scope) {
     boundvars = boundvars.slice();
     boundvars.push(tree.args[1].tok.name.toLowerCase());
@@ -10095,6 +10135,7 @@ newBuiltin('map',['?',TName,'?'],TList, null, {
         return jme.mapFunctions[value.type](lambda,names,value.value,scope);
     }
 });
+Numbas.jme.lazyOps.push('map');
 jme.findvarsOps.map = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
@@ -10139,6 +10180,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
         return new TList(value);
     }
 });
+Numbas.jme.lazyOps.push('filter');
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     if(tree.args[1].tok.type=='list') {
@@ -10157,6 +10199,65 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
     tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
     return tree;
 }
+
+
+newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
+    evaluate: function(args,scope) {
+        var n = scope.evaluate(args[0]).value;
+        var lambda = args[1];
+        var list = scope.evaluate(args[3]);
+        switch(list.type) {
+        case 'list':
+            list = list.value;
+            break;
+        case 'range':
+            list = math.rangeToList(list.value);
+            for(var i=0;i<list.length;i++) {
+                list[i] = new TNum(list[i]);
+            }
+            break;
+        default:
+            throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+        }
+        scope = new Scope(scope);
+        var name = args[2].tok.name;
+        var value = [];
+        for(var i=0;i<list.length && value.length<n;i++) {
+            var v = list[i];
+            scope.setVariable(name,v);
+            var ok = scope.evaluate(lambda).value;
+            if(ok) {
+                value.push(v);
+            }
+        };
+        return new TList(value);
+    }
+});
+Numbas.jme.lazyOps.push('take');
+jme.findvarsOps.take = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    if(tree.args[2].tok.type=='list') {
+        var names = tree.args[2].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+    }
+    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
+    var args = tree.args.slice();
+    args[0] = jme.substituteTree(args[0],scope,allowUnbound);
+    args[3] = jme.substituteTree(args[3],scope,allowUnbound);
+    return {tok:tree.tok, args: args};
+}
+
+
+
 /** Is the given token the value `true`?
  * @param {Numbas.jme.token} item
  * @returns {Boolean}
@@ -10200,6 +10301,7 @@ newBuiltin('let',['?'],TList, null, {
         }
     }
 });
+Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree,boundvars,scope) {
     // find vars used in variable assignments
     var vars = [];
@@ -10313,6 +10415,11 @@ newBuiltin('product',['?'],TList,function() {
         return true;
     }
 });
+
+newBuiltin('product',[TList,TNum],TList,function(l,n) {
+    return util.cartesian_power(l,n).map(function(sl){ return new TList(sl); });
+});
+
 newBuiltin('zip',['?'],TList,function() {
     var lists = Array.prototype.slice.call(arguments);
     var zipped = util.zip(lists);

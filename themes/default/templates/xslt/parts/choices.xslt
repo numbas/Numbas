@@ -4,17 +4,17 @@
     <span localise-data-jme-context-description="part.mcq.choices">
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <xsl:apply-templates select="choice" mode="radiogroup"/>
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <xsl:apply-templates select="choice" mode="checkbox"/>
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}">
+            <select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <option value=""></option>
                 <xsl:apply-templates select="choice" mode="dropdownlist"/>
             </select>

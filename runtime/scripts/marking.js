@@ -306,7 +306,19 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     state_functions.push(new jme.funcObj('mark_part',[TString,'?'],TDict,null,{
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
-            var part_result = part.mark_answer(args[1]);
+            var answer = args[1];
+            var part_result;
+            if(answer.type=='nothing') {
+                part.setCredit(0,R('part.marking.nothing entered'));
+                part_result = {
+                    states: {mark: []},
+                    state_valid: {},
+                    state_errors: {},
+                    values: {interpreted_answer:answer}
+                }
+            } else {
+                var part_result = part.mark_answer(answer);
+            }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
                 marks: part.marks,

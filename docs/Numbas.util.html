@@ -131,6 +131,8 @@
 					
 						<li class="name"><a href="Numbas.util.html#.capitalise">capitalise</a></li>
 					
+						<li class="name"><a href="Numbas.util.html#.cartesian_power">cartesian_power</a></li>
+					
 						<li class="name"><a href="Numbas.util.html#.cleanNumber">cleanNumber</a></li>
 					
 						<li class="name"><a href="Numbas.util.html#.combinations">combinations</a></li>
@@ -355,7 +357,7 @@ Dictionary mapping token type name to function.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1045">runtime/scripts/util.js, line 1045</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1067">runtime/scripts/util.js, line 1067</a>
     </li></ul></dd>
     
 
@@ -826,6 +828,196 @@ Dictionary mapping token type name to function.</p>
 		<div class="item function">
 	
 
+    <h4 class="name" id=".cartesian_power"><span class="type-signature">(static) </span>cartesian_power<span class="signature">(l, n)</span><span class="type-signature"> &rarr; {Array}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Cartesian product of list, repeated n times</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>l</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L879">runtime/scripts/util.js, line 879</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
     <h4 class="name" id=".cleanNumber"><span class="type-signature">(static) </span>cleanNumber<span class="signature">(s, styles, strictStyle<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
@@ -1245,7 +1437,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L899">runtime/scripts/util.js, line 899</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L921">runtime/scripts/util.js, line 921</a>
     </li></ul></dd>
     
 
@@ -1435,7 +1627,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L930">runtime/scripts/util.js, line 930</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L952">runtime/scripts/util.js, line 952</a>
     </li></ul></dd>
     
 
@@ -1823,7 +2015,7 @@ Remove space, and then try to identify a notation style.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1133">runtime/scripts/util.js, line 1133</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1155">runtime/scripts/util.js, line 1155</a>
     </li></ul></dd>
     
 
@@ -5532,7 +5724,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1003">runtime/scripts/util.js, line 1003</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1025">runtime/scripts/util.js, line 1025</a>
     </li></ul></dd>
     
 
@@ -6400,7 +6592,7 @@ e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1024">runtime/scripts/util.js, line 1024</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L1046">runtime/scripts/util.js, line 1046</a>
     </li></ul></dd>
     
 
@@ -7372,7 +7564,7 @@ Otherwise, uses JavaScript's equality test.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L961">runtime/scripts/util.js, line 961</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L983">runtime/scripts/util.js, line 983</a>
     </li></ul></dd>
     
 
@@ -9314,7 +9506,7 @@ Otherwise, uses JavaScript's equality test.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L877">runtime/scripts/util.js, line 877</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/util.js#L899">runtime/scripts/util.js, line 899</a>
     </li></ul></dd>
     
 
@@ -10859,8 +11051,6 @@ Otherwise, uses JavaScript's equality test.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -12261,6 +12451,8 @@ Otherwise, uses JavaScript's equality test.</p>
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.combinations"><a href="Numbas.util.html#.combinations">Numbas.util.combinations</a></li>
@@ -12372,6 +12564,8 @@ Otherwise, uses JavaScript's equality test.</p>
 			<li class="search-result" data-longname="Numbas.vectormath.dot"><a href="Numbas.vectormath.html#.dot">Numbas.vectormath.dot</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
+		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		

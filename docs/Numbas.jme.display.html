@@ -232,7 +232,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L843">runtime/scripts/jme-display.js, line 843</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L845">runtime/scripts/jme-display.js, line 845</a>
     </li></ul></dd>
     
 
@@ -381,7 +381,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1376">runtime/scripts/jme-display.js, line 1376</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1378">runtime/scripts/jme-display.js, line 1378</a>
     </li></ul></dd>
     
 
@@ -445,7 +445,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L784">runtime/scripts/jme-display.js, line 784</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L786">runtime/scripts/jme-display.js, line 786</a>
     </li></ul></dd>
     
 
@@ -646,7 +646,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L753">runtime/scripts/jme-display.js, line 753</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L755">runtime/scripts/jme-display.js, line 755</a>
     </li></ul></dd>
     
 
@@ -2865,7 +2865,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L203">runtime/scripts/jme-display.js, line 203</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L205">runtime/scripts/jme-display.js, line 205</a>
     </li></ul></dd>
     
 
@@ -3246,7 +3246,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1195">runtime/scripts/jme-display.js, line 1195</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1197">runtime/scripts/jme-display.js, line 1197</a>
     </li></ul></dd>
     
 
@@ -3627,7 +3627,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L853">runtime/scripts/jme-display.js, line 853</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L855">runtime/scripts/jme-display.js, line 855</a>
     </li></ul></dd>
     
 
@@ -3660,7 +3660,7 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id=".exprToLaTeX"><span class="type-signature">(static) </span>exprToLaTeX<span class="signature">(expr, ruleset, scope)</span><span class="type-signature"> &rarr; {<a href="global.html#TeX">TeX</a>}</span></h4>
+    <h4 class="name" id=".exprToLaTeX"><span class="type-signature">(static) </span>exprToLaTeX<span class="signature">(expr, ruleset, scope, parser<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="global.html#TeX">TeX</a>}</span></h4>
 
     
 
@@ -3691,7 +3691,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -3716,7 +3720,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -3742,7 +3758,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"><p>can be anything accepted by <code>Numbas.jme.display.collectRuleset</code></p></td>
@@ -3765,7 +3793,58 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Numbas.jme.standardParser
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -3852,7 +3931,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L36">runtime/scripts/jme-display.js, line 36</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L37">runtime/scripts/jme-display.js, line 37</a>
     </li></ul></dd>
     
 
@@ -3876,7 +3955,7 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id=".simplify"><span class="type-signature">(static) </span>simplify<span class="signature">(expr, ruleset, scope)</span><span class="type-signature"> &rarr; {<a href="Numbas.jme.html#.tree">Numbas.jme.tree</a>}</span></h4>
+    <h4 class="name" id=".simplify"><span class="type-signature">(static) </span>simplify<span class="signature">(expr, ruleset, scope, parser<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {<a href="Numbas.jme.html#.tree">Numbas.jme.tree</a>}</span></h4>
 
     
 
@@ -3907,7 +3986,11 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -3932,7 +4015,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -3958,7 +4053,19 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -3981,7 +4088,58 @@
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>parser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    Numbas.jme.standardParser
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -4068,7 +4226,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L73">runtime/scripts/jme-display.js, line 73</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L75">runtime/scripts/jme-display.js, line 75</a>
     </li></ul></dd>
     
 
@@ -4293,7 +4451,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L57">runtime/scripts/jme-display.js, line 57</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L58">runtime/scripts/jme-display.js, line 58</a>
     </li></ul></dd>
     
 
@@ -4539,7 +4697,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L102">runtime/scripts/jme-display.js, line 102</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L104">runtime/scripts/jme-display.js, line 104</a>
     </li></ul></dd>
     
 
@@ -4739,7 +4897,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L979">runtime/scripts/jme-display.js, line 979</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L981">runtime/scripts/jme-display.js, line 981</a>
     </li></ul></dd>
     
 
@@ -4929,7 +5087,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1401">runtime/scripts/jme-display.js, line 1401</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1403">runtime/scripts/jme-display.js, line 1403</a>
     </li></ul></dd>
     
 
@@ -5121,7 +5279,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1386">runtime/scripts/jme-display.js, line 1386</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L1388">runtime/scripts/jme-display.js, line 1388</a>
     </li></ul></dd>
     
 
@@ -5283,7 +5441,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L832">runtime/scripts/jme-display.js, line 832</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L834">runtime/scripts/jme-display.js, line 834</a>
     </li></ul></dd>
     
 
@@ -5468,7 +5626,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L960">runtime/scripts/jme-display.js, line 960</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L962">runtime/scripts/jme-display.js, line 962</a>
     </li></ul></dd>
     
 
@@ -7012,8 +7170,6 @@
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -8414,6 +8570,8 @@
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.combinations"><a href="Numbas.util.html#.combinations">Numbas.util.combinations</a></li>
@@ -8525,6 +8683,8 @@
 			<li class="search-result" data-longname="Numbas.vectormath.dot"><a href="Numbas.vectormath.html#.dot">Numbas.vectormath.dot</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
+		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		

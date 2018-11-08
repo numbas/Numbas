@@ -666,7 +666,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
-        this.finalised_result = [];
+        this.finalised_result = {valid: false, credit: 0, states: []};
         this.submitting = true;
         if(this.parentPart &amp;&amp; !this.parentPart.submitting) {
             this.parentPart.setDirty(true);
@@ -700,28 +700,30 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
                         try {
                             var scope = this.errorCarriedForwardScope();
-                        } catch(e) {
-                            if(!result) {
-                                this.giveWarning(e.originalMessage);
-                                this.answered = false;
-                                throw(e);
+                            var result_replacement = this.markAgainstScope(scope,existing_feedback);
+                            if(!(result_original) || (result_replacement.answered &amp;&amp; result_replacement.credit>result_original.credit)) {
+                                result = result_replacement;
+                                result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
+                                result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
-                        }
-                        var result_replacement = this.markAgainstScope(scope,existing_feedback);
-                        if(!(result_original) || (result_replacement.answered &amp;&amp; result_replacement.credit>result_original.credit)) {
-                            result = result_replacement;
-                            result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
-                            result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
+                        } catch(e) {
+                            try{
+                                this.error(e.message);
+                            } catch(pe) {
+                                console.error(pe.message);
+                            }
                         }
                     }
                     if(!result) {
-                        this.error('part.marking.no result');
+                        this.setCredit(0,R('part.marking.no result after replacement'));
+                        this.answered = true;
+                    } else {
+                        this.setWarnings(result.warnings);
+                        this.markingFeedback = result.markingFeedback;
+                        this.finalised_result = result.finalised_result;
+                        this.credit = result.credit;
+                        this.answered = result.answered;
                     }
-                    this.setWarnings(result.warnings);
-                    this.markingFeedback = result.markingFeedback;
-                    this.finalised_result = result.finalised_result;
-                    this.credit = result.credit;
-                    this.answered = result.answered;
                 } catch(e) {
                     throw(new Numbas.Error('part.marking.uncaught error',{part:util.nicePartName(this.path),message:e.message}));
                 }
@@ -2638,8 +2640,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -4040,6 +4040,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.combinations"><a href="Numbas.util.html#.combinations">Numbas.util.combinations</a></li>
@@ -4151,6 +4153,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 			<li class="search-result" data-longname="Numbas.vectormath.dot"><a href="Numbas.vectormath.html#.dot">Numbas.vectormath.dot</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
+		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		

@@ -1034,6 +1034,7 @@ class MultipleChoicePart(Part):
     warningType = 'none'
     layoutType = 'all'
     layoutExpression = ''
+    showCellAnswerState = True
     
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
@@ -1054,7 +1055,7 @@ class MultipleChoicePart(Part):
         }
 
         self.displayType = displayTypes[self.kind]
-        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType'],self)
+        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType','showCellAnswerState'],self)
 
         if haskey(data,'minmarks'):
             self.minMarksEnabled = True
@@ -1091,13 +1092,15 @@ class MultipleChoicePart(Part):
         part = super(MultipleChoicePart,self).toxml()
         appendMany(part,['choices','answers','layout',['marking','matrix','maxmarks','minmarks','distractors','warning']])
 
+        part.attrib['showcellanswerstate'] = strcons_fix(self.showCellAnswerState)
+
         choices = part.find('choices')
         choices.attrib = {
             'minimumexpected': strcons_fix(self.minAnswers),
             'maximumexpected': strcons_fix(self.maxAnswers),
             'displaycolumns': strcons_fix(self.displayColumns),
             'shuffle': strcons_fix(self.shuffleChoices),
-            'displaytype': strcons(self.displayType)
+            'displaytype': strcons(self.displayType),
         }
 
         if isinstance(self.choices,str):

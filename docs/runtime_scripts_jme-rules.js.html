@@ -61,6 +61,7 @@ function parse_options(str) {
         commutative: str.match(/c/),
         associative: str.match(/a/),
         allowOtherTerms: str.match(/g/),
+        gatherList: str.match(/l/),
         strictPlus: str.match(/p/)
     };
 }
@@ -78,6 +79,7 @@ var extend_options = Numbas.jme.rules.extend_options = function(a,b) {
         commutative: b.commutative===undefined ? a.commutative : b.commutative,
         associative: b.associative===undefined ? a.associative : b.associative,
         allowOtherTerms: b.allowOtherTerms===undefined ? a.allowOtherTerms : b.allowOtherTerms,
+        gatherList: b.gatherList===undefined ? a.gatherList : b.gatherList,
         strictPlus: b.strictPlus===undefined ? a.strictPlus : b.strictPlus,
         scope: b.scope===undefined ? a.scope : b.scope
     };
@@ -438,6 +440,9 @@ var number_conditions = jme.rules.number_conditions = {
     },
     'integer': function(tok) {
         return Numbas.util.isInt(tok.value);
+    },
+    'decimal': function(tok) {
+        return Numbas.math.countDP(tok.originalValue)>0;
     }
 }
 
@@ -550,6 +555,8 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_associative': setMatchOptions({associative:true}),
     'm_nonassociative': setMatchOptions({associative:false}),
     'm_strictplus': setMatchOptions({strictPlus:true}),
+    'm_gather': setMatchOptions({gatherList:false}),
+    'm_nogather': setMatchOptions({gatherList:true}),
     'm_type': function(ruleTree,exprTree,options) {
         var wantedType = ruleTree.args[0].tok.name || ruleTree.args[0].tok.value;
         return matchType(wantedType,exprTree);
@@ -754,16 +761,35 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false, commutative: false});
 
-    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,options);
+    var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,false,options);
     if(namedTerms===false) {
+        return false;
+    }
+
+    function name_captured(name,tree) {
+        if(jme.isOp(tree.tok,';')) {
+            var res = resolveName(tree.args[1]);
+            if(res.name==name) {
+                return true;
+            }
+        }
+        if(tree.args) {
+            return tree.args.some(function(t2){ return name_captured(name,t2); });
+        }
         return false;
     }
 
     // collate the named groups
     var match = {};
     for(var name in namedTerms) {
+        var occurrences = 0;
+        for(var i=0;i&lt;ruleTree.args.length;i++) {
+            if(name_captured(name,ruleTree.args[i])) {
+                occurrences += 1;
+            }
+        }
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        match[name] = occurrences&lt;=1 ? terms[0] : {tok: new jme.types.TList(terms.length), args: terms};
     }
     return match;
 }
@@ -794,7 +820,7 @@ function matchList(ruleTree,exprTree,options) {
 
     options = extend_options(options,{allowOtherTerms:false});
 
-    var namedTerms = matchTermSequence(ruleElements,exprElements,false,options);
+    var namedTerms = matchTermSequence(ruleElements,exprElements,false,false,options);
     if(namedTerms===false) {
         return false;
     }
@@ -864,7 +890,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
         }
     }
 
-    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options);
+    var namedTerms = matchTermSequence(ruleTerms,exprTerms,commuting,options.allowOtherTerms &amp;&amp; associating, options);
     if(namedTerms===false) {
         return false;
     }
@@ -873,11 +899,15 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        var sub = terms[0];
-        for(var i=1;i&lt;terms.length;i++) {
-            sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+        if(options.gatherList) {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(t)} })};
+        } else {
+            var sub = terms[0];
+            for(var i=1;i&lt;terms.length;i++) {
+                sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
+            }
+            match[name] = sub;
         }
-        match[name] = sub;
     }
     match['__op__'] = op;
 
@@ -890,10 +920,11 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {Array.&lt;Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
  * @param {Array.&lt;Numbas.jme.rules.Term>} exprTerms - the terms in the expression
  * @param {Boolean} commuting - can the terms match in any order?
+ * @param {Boolean} allowOtherTerms - allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Boolean|Object.&lt;Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
  */
-function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
+function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -911,8 +942,9 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
             var equalnames = {};
             ruleTerm.equalnames.forEach(function(nameTree) {
                 var name = nameTree.tok.name;
-                var t = m[name] || resolveName(nameTree,exprTerm.term).value;
-                equalnames[name] = t;
+                if(m[name]) {
+                    equalnames[name] = m[name];
+                }
             });
             matches[ic][pc] = {
                 match: m,
@@ -936,13 +968,13 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
             return true;
         }
         var ok = assignment.every(function(p,i) {
-            if(p&lt;0 || p==pc || p>=ruleTerms.length) {
+            if(p&lt;0 || p>=ruleTerms.length) {
                 return true;
             }
             var m2 = matches[i][p];
             return equalnames.every(function(nameTree) {
                 var name = nameTree.tok.name;
-                if(m2.equalnames[name]===undefined) {
+                if(m.equalnames[name]===undefined || m2.equalnames[name]===undefined) {
                     return true;
                 }
                 return jme.compareTrees(m.equalnames[name], m2.equalnames[name]) == 0;
@@ -951,7 +983,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, options) {
         return ok;
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: options.allowOtherTerms});
+    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
     if(assignment===false) {
         return false;
     }
@@ -1115,7 +1147,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
     function advance_input() {
         ic += 1;
         if(options.commutative) {
-            pc = start;
+            pc = 0;
         }
     }
     var steps = 0;
@@ -1174,7 +1206,7 @@ var match_sequence = jme.rules.match_sequence = function(pattern,input,options) 
         return false;
     }
     var result = pattern.map(function(p,i) {
-        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;}).map(function(j){ return j+start});
+        return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;});
     });
     var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
     var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
@@ -1359,14 +1391,14 @@ function mergeMatches(matches) {
  */
 var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,options) {
     var tok = tree.tok;
-    if(jme.isFunction(tok,'eval')) {
-        return {tok: jme.evaluate(tree.args[0],options.scope)};
-    }
     if(tree.args) {
         var args = tree.args.map(function(arg) {
             return applyPostReplacement(arg,options);
         });
-        return {tok:tok, args: args};
+        tree = {tok:tok, args: args};
+    }
+    if(jme.isFunction(tok,'eval')) {
+        return {tok: jme.evaluate(tree.args[0],options.scope)};
     }
     return tree;
 }
@@ -1467,6 +1499,7 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
         commutative: true,
         associative: true,
         allowOtherTerms: true,
+        gatherList: false,
         strictPlus: false,
         scope: Numbas.jme.builtinScope
     };
@@ -1633,13 +1666,15 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;x+(-?;y)','g','x-y'],            //plus minus = minus
         ['?;x-(-?;y)','g','x+y'],            //minus minus = plus
         ['-(-?;x)','','x'],                //unary minus minus = plus
-        ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
-        ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
         ['(-?;x)/?;y','','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','','-(x/y)'],
-        ['(-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
-        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
+        ['`!-? `&amp; (-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b']
+    ],
+    collectComplex: [
+        ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
+        ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
+        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
     ],
     unitFactor: [
         ['1*?;x','acg','x'],
@@ -3298,8 +3333,6 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -4700,6 +4733,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.combinations"><a href="Numbas.util.html#.combinations">Numbas.util.combinations</a></li>
@@ -4811,6 +4846,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.vectormath.dot"><a href="Numbas.vectormath.html#.dot">Numbas.vectormath.dot</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
+		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		
