@@ -11048,6 +11048,9 @@ function texifyWouldBracketOpArg(thing,i, settings) {
     var tok = thing.args[i].tok;
     var precedence = jme.precedence;
     if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
+        if(thing.args.length==1) {
+            return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
+        }
         var op1 = thing.args[i].tok.name;    //child op
         var op2 = thing.tok.name;            //parent op
         var p1 = precedence[op1];    //precedence of child op
@@ -11095,11 +11098,12 @@ function infixTex(code)
         var arity = thing.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
-            return code+texArgs[0];
+            var arg = texifyOpArg(thing,texArgs,0);
+            return thing.tok.postfix ? arg+code : code+arg;
         }
         else if ( arity == 2 )    //if operation is binary, put code in between arguments
         {
-            return texArgs[0]+' '+code+' '+texArgs[1];
+            return texifyOpArg(thing,texArgs,0)+' '+code+' '+texifyOpArg(thing,texArgs,1);
         }
     }
 }
@@ -11129,6 +11133,11 @@ function funcTex(code)
     f.code = code;
     return f;
 }
+
+function patternName(code) {
+    return '\\operatorname{\\color{grey}{'+code+'}}';
+}
+
 /** Define how to texify each operation and function
  * @enum {function}
  * @memberof Numbas.jme.display
@@ -11420,6 +11429,40 @@ var texOps = jme.display.texOps = {
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
+    },
+    '`+-u': infixTex(patternName('\\pm')),
+    '`|': infixTex(patternName('|')),
+    '`&': infixTex(patternName('\\wedge')),
+    '`!': infixTex(patternName('\\neg')),
+    '`where': infixTex(patternName('where')),
+    '`@': infixTex(patternName('@')),
+    '`?': infixTex(patternName('{}^{?}')),
+    '`*': infixTex(patternName('{}^{\\ast}')),
+    '`+': infixTex(patternName('{}^{+}')),
+    '`:': infixTex(patternName(':')),
+    ';': function(thing,texArgs,settings) {
+        return '\\underbrace{'+texArgs[0]+'}_{'+texArgs[1]+'}';
+    },
+    ';=': function(thing,texArgs,settings) {
+        return '\\underbrace{'+texArgs[0]+'}_{= '+texArgs[1]+'}';
+    },
+    'm_uses': funcTex(patternName('uses')),
+    'm_type': funcTex(patternName('type')),
+    'm_exactly': funcTex(patternName('exactly')),
+    'm_commutative': overbraceTex('commutative'),
+    'm_noncommutative': overbraceTex('non-commutative'),
+    'm_associative': overbraceTex('associative'),
+    'm_nonassociative': overbraceTex('non-associative'),
+    'm_strictplus': overbraceTex('strict-plus'),
+    'm_gather': overbraceTex('gather'),
+    'm_nogather': overbraceTex('no-gather'),
+    'm_func': funcTex(patternName('func')),
+    'm_op': funcTex(patternName('op')),
+    'm_numeric': overbraceTex('numeric ='),
+}
+function overbraceTex(label) {
+    return function(thing,texArgs) {
+        return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
     }
 }
 /** Convert a special number to TeX, or return undefined if not a special number.
@@ -11701,6 +11744,18 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     },
     matrix: function(name) {
         return '\\mathrm{'+name+'}';
+    },
+    complex: propertyAnnotation('complex'),
+    real: propertyAnnotation('real'),
+    positive: propertyAnnotation('positive'),
+    nonnegative: propertyAnnotation('non-negative'),
+    negative: propertyAnnotation('negative'),
+    integer: propertyAnnotation('integer'),
+    decimal: propertyAnnotation('decimal')
+}
+function propertyAnnotation(text) {
+    return function(name) {
+        return '\\text{'+text+' } '+name;
     }
 }
 texNameAnnotations.verb = texNameAnnotations.verbatim;
@@ -11737,6 +11792,9 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
         }
         return name;
     }
+    if(specialNames[name]) {
+        return applyAnnotations(specialNames[name]);
+    }
     var num_subscripts = name.length - name.replace('_','').length;
     var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
     var m,isgreek;
@@ -11761,6 +11819,21 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
     }
     return name;
 }
+
+function texPatternName(display) {
+    return '\\text{'+display+'}';
+}
+
+/** Names with special renderings
+ * @memberof Numbas.jme.display
+ * @type {Object.<String>}
+ */
+var specialNames = jme.display.specialNames = {
+    'm_nothing': texPatternName('nothing'),
+    'm_number': texPatternName('number'),
+    'm_name': texPatternName('name')
+}
+
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 /** Definition of a number with a special name
  * @typedef Numbas.jme.display.special_number_definition
@@ -11815,7 +11888,7 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     keypair: function(thing,tok,texArgs,settings) {
         var key = '\\textrm{'+tok.key+'}';
-        return key+' \\colon '+texArgs[0];
+        return key+' \\operatorname{\\colon} '+texArgs[0];
     },
     dict: function(thing,tok,texArgs,settings) {
         if(!texArgs)

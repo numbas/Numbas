@@ -13,6 +13,8 @@
         <script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
         <script charset="UTF-8" type="text/javascript" src="../runtime/scripts/knockout/knockout.js"></script>
 
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
         <style type="text/css">
             body {
                 font-size: 17px;
@@ -79,6 +81,7 @@
                     <span class="label-text">Pattern:</span>
                     <input type="text" data-bind="textInput: pattern"/>
                 </label>
+                <span data-bind="tex: patternTeX"></span>
             </div>
             <div>
                 <label>
@@ -176,24 +179,6 @@
             <dl>
                 <dt><code>?</code></dt>
                 <dd>Match anything</dd>
-                <dt><code>??</code></dt>
-                <dd>Match anything or nothing (optional term)</dd>
-                <dt><code>expr;g</code></dt>
-                <dd>Capture <code>expr</code> in the group named <code>g</code>.</dd>
-                <dt><code>m_any(expr1,expr2,...)</code></dt>
-                <dd>Match any of the expressions <code>exprN</code></dd>
-                <dt><code>m_all(expr)</code></dt>
-                <dd>Capture all terms matching <code>expr</code></dd>
-                <dt><code>m_pm(expr)</code></dt>
-                <dd>Capture <code>expr</code> or <code>-(expr)</code>.</dd>
-                <dt><code>m_not(expr)</code></dt>
-                <dd>Match anything <em>except</em> <code>expr</code></dd>
-                <dt><code>m_uses(name1,name2,...)</code></dt>
-                <dd>Match any expression which uses the named variables</dd>
-                <dt><code>m_commute(expr)</code></dt>
-                <dd>Match the terms in <code>expr</code> in any order, following the laws of commutativity. (Use if you only want to use commutativity in certain places)</dd>
-                <dt><code>m_nothing</code></dt>
-                <dd>Match nothing. Useful as an empty term to set up a sum where you want all terms to match one pattern.</dd>
             </dl>
         </div>
 
@@ -201,6 +186,19 @@
             Numbas.queueScript('base',[],function() {
             });
             Numbas.queueScript('go',['jme','localisation','knockout'],function() {
+
+                ko.bindingHandlers.tex = {
+                    update: function(element, valueAccessor) {
+                        var value = ko.unwrap(valueAccessor());
+                        $(element).html('\\('+value+'\\)');
+                        if(window.MathJax) {
+                            MathJax.Hub.Queue(['Typeset',MathJax.Hub,element]);
+                        }
+                    }
+                }
+
+
+
                 function ViewModel() {
                     var vm = this;
                     this.pattern = ko.observable('');
@@ -216,10 +214,20 @@
                     this.replaceAll = ko.observable(false);
                     this.error = ko.observable('');
 
+                    this.patternTeX = ko.computed(function() {
+                        try {
+                            var expr = Numbas.jme.rules.patternParser.compile(this.pattern());
+                            return Numbas.jme.display.texify(expr,{});
+                        } catch(e) {
+                            console.log(e);
+                            return '';
+                        }
+                    },this);
+
                     var simplifyRuleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.rulesets);
 
                     this.matches = ko.computed(function() {
-                        console.clear();
+                        //console.clear();
                         this.result('');
                         try {
                             var pattern = Numbas.jme.rules.patternParser.compile(this.pattern());
