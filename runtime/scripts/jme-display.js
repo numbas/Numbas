@@ -203,6 +203,10 @@ function funcTex(code)
     return f;
 }
 
+/** TeX the name of a pattern-matching operator
+ * @param {TeX} code
+ * @returns {TeX}
+ */
 function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
@@ -529,6 +533,11 @@ var texOps = jme.display.texOps = {
     'm_op': funcTex(patternName('op')),
     'm_numeric': overbraceTex('numeric ='),
 }
+
+/** Returns a function which puts the given label over the first arg of the op
+ * @param {String} label
+ * @returns {Function}
+ */
 function overbraceTex(label) {
     return function(thing,texArgs) {
         return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
@@ -822,6 +831,11 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     integer: propertyAnnotation('integer'),
     decimal: propertyAnnotation('decimal')
 }
+
+/** Return a function which TeXs an annotation which marks a property for pattern-matching
+ * @param {String} text
+ * @returns {Function}
+ */
 function propertyAnnotation(text) {
     return function(name) {
         return '\\text{'+text+' } '+name;
@@ -889,6 +903,10 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
     return name;
 }
 
+/** TeX a special name used in pattern-matching
+ * @param {TeX} display
+ * @returns {TeX}
+ */
 function texPatternName(display) {
     return '\\text{'+display+'}';
 }
