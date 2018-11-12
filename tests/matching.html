@@ -285,6 +285,16 @@
 
                     this.examples = [
                         {
+                            description: "Sum of two positive numbers",
+                            pattern: "positive:m_number + positive:m_number",
+                            expression: "1+2"
+                        },
+                        {
+                            description: "All brackets expanded",
+                            pattern: "`! m_anywhere(?*(? + ?`+))",
+                            expression: "x^2 + 2x + 1"
+                        },
+                        {
                             description: "Get all x terms",
                             pattern: "(`+- x^?`?*?`*)`+;xs + ?`*;rest",
                             expression: "C+x-x+2x-2x+(a+1)x+x^2+2x^3+(1+2)x^(n+1)-2"

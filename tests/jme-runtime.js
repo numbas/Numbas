@@ -3432,6 +3432,8 @@ var vectormath = Numbas.vectormath = {
     },
 
     /** Is every component of this vector zero?
+     * @param {vector} v
+     * @returns {Boolean}
      */
     is_zero: function(v) {
         return v.every(function(c){return c==0;});
@@ -4831,7 +4833,7 @@ function parse_options(str) {
         associative: str.match(/a/),
         allowOtherTerms: str.match(/g/),
         gatherList: str.match(/l/),
-        strictPlus: str.match(/p/)
+        strictPlus: str.match(/s/)
     };
 }
 
@@ -5025,26 +5027,86 @@ var Term = Numbas.jme.rules.Term = function(tree) {
     this.defaultValue = defaultValue;
 }
 
+/** Replacements to make when identifying terms in a sequence of applications of a given op.
+ * When looking for terms joined by `op`, `nonStrictReplacements[op]` is a list of objects with keys `op` and `replacement`. 
+ * A tree `A op B` should be replaced with `replacement(tree)`.
+ * For example, `x-y` should be rewritten to `x+(-y)`.
+ */
+var nonStrictReplacements = {
+    '+': {
+        '-': function(tree) {
+            return {tok: new jme.types.TOp('+',false,false,2,true,true), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
+        }
+    },
+    '*': { 
+        '/': function(tree) {
+            return {tok: new jme.types.TOp('*',false,false,2,true,true), args: [tree.args[0],{tok:new jme.types.TOp('/u',false,true,1,false,false),args:[tree.args[1]]}]};
+        }
+    }
+};
+
+/** Dictionary of 'canonical' ops to match in non-strict mode.
+ * For example, `a-b` will be matched as `a+(-b)`.
+ */
+var nonStrictCanonicalOps = {
+    '-': '+',
+    '/': '*'
+}
+
+/** Insert a unary minus in this tree.
+ * If it's a product, the minus applies to the leftmost factor.
+ * @param {Numbas.jme.tree} tree
+ * @returns {Numbas.jme.tree}
+ */
+function insertUnaryMinus(tree) {
+    if(jme.isOp(tree.tok,'*')) {
+        return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
+    } else {
+        return {tok: new jme.types.TOp('-u',false,true,1,false,false), args: [tree]};
+    }
+}
+
+/** Remove capturing operators ; and ;= from the top of a tree
+ * @param {Numbas.jme.tree} tree
+ * @returns {Object} - `tree`: the unwrapped tree, `names`: a list of names removed, `equalnames`: a list of identified names removed
+ */
+function unwrapCapture(tree) {
+    var names = [];
+    var equalnames = [];
+    while(jme.isOp(tree.tok,';')) {
+        names.push(tree.args[1]);
+        tree = tree.args[0];
+    }
+    while(jme.isOp(tree.tok,';=')) {
+        names.push(tree.args[1]);
+        equalnames.push(tree.args[1]);
+        tree = tree.args[0];
+    }
+
+    return {tree:tree, names:names, equalnames: equalnames};
+}
+
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
  * @memberof Numbas.jme.rules
  * @param {Numbas.jme.tree} tree - tree to find terms in
  * @param {String} op - the name of the operator whose terms are to be found.
  * @param {Numbas.jme.rules.getTerms_options} options
- * @param {String[]} [existing_names] - a list of match names set for this tree by a parent, used when called recursively.
  * @param {Boolean} calculate_minimum - Should the minimum allowed number of occurrences of each term be calculated? This is a pre-process step when getting the terms in a pattern expression.
  * @returns {Array.<Numbas.jme.rules.term>}
  */
-var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_names,calculate_minimum) {
+var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_minimum) {
     /** Add the list of existing names passed in at the start to each term
      * @param {Array.<Numbas.jme.rules.term>} items
+     * @param {Array.<Numbas.jme.tree>} existing_names - names captured higher up the tree
+     * @param {Array.<Numbas.jme.tree>} existing_equal_names - identified names captured higher up the tree
      * @returns {Array.<Numbas.jme.rules.term>}
      */
-    function add_existing_names(items) {
-        return existing_names.length==0 ? items : items.map(function(item) {
+    function add_existing_names(items,existing_names,existing_equal_names) {
+        return existing_names.length==0 && existing_equal_names.length==0 ? items : items.map(function(item) {
             return {
                 term: item.term, 
                 names: existing_names.concat(item.names),
-                equalnames: item.equalnames, 
+                equalnames: existing_equal_names.concat(item.equalnames),
                 quantifier: item.quantifier, 
                 min: item.min, 
                 max: item.max,
@@ -5064,42 +5126,41 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
     var option_signature = options.associative*2 + (options.strictPlus);
 
     if(intree.terms[op][option_signature]) {
-        return add_existing_names(intree.terms[op][option_signature]);
+        return intree.terms[op][option_signature];
     }
 
-
-    /** Insert a unary minus in this tree.
-     * If it's a product, the minus applies to the leftmost factor.
-     * @param {Numbas.jme.tree} tree
-     * @returns {Numbas.jme.tree}
-     */
-    function insertUnaryMinus(tree) {
-        if(jme.isOp(tree.tok,'*')) {
-            return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
-        } else {
-            return {tok: new jme.types.TOp('-u',false,true,1,false,false), args: [tree]};
-        }
-    }
 
     if(jme.isOp(tree.tok,'-u') && op=='*') {
         tree = insertUnaryMinus(tree.args[0]);
     }
 
-    if(!options.strictPlus && op=='+' && jme.isOp(tree.tok,'-')) {
-        tree = {tok: new jme.types.TOp('+',false,false,2,true,true), args: [tree.args[0],insertUnaryMinus(tree.args[1])]};
+    if(!options.strictPlus && op in nonStrictReplacements) {
+        for(var subop in nonStrictReplacements[op]) {
+            if(jme.isOp(tree.tok,subop)) {
+                tree = nonStrictReplacements[op][subop](tree);
+            }
+        };
     }
 
+    /** Is the given token the op we're looking for?
+     * True if it's literally that operator, it's the converse of that operator, or it would be replaced to that op in non-strict mode
+     * @param {Numbas.jme.token} tok
+     * @returns {Boolean}
+     */
     function isThisOp(tok) {
         if(jme.isOp(tok,op)) {
             return true;
         }
-        if(options.commutative && jme.oppositeOps[op] && jme.isOp(tok,jme.oppositeOps[op])) {
+        if(options.commutative && jme.converseOps[op] && jme.isOp(tok,jme.converseOps[op])) {
+            return true;
+        }
+        if(!options.strictPlus && op in nonStrictReplacements && tok.type=='op' && tok.name in nonStrictReplacements[op]) {
             return true;
         }
     }
 
     var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
-    if(options.commutative && jme.oppositeOps[op] && jme.isOp(tree.tok,jme.oppositeOps[op])) {
+    if(options.commutative && jme.converseOps[op] && jme.isOp(tree.tok,jme.converseOps[op])) {
         args = tree.args.slice().reverse();
     }
 
@@ -5108,8 +5169,11 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
     for(var i=0; i<args.length;i++) {
         var arg = args[i];
         var item = new Term(arg);
-        if(options.associative && (isThisOp(arg.tok) || (!options.strictPlus && op=='+' && jme.isOp(arg.tok,'-')))) {
-            var sub = getTerms(arg,op,options,existing_names.length==0 ? item.names : existing_names.concat(item.names),false);
+        var res = unwrapCapture(arg);
+        var argtok = res.tree.tok;
+        if(options.associative && (isThisOp(argtok) || (!options.strictPlus && op=='+' && jme.isOp(argtok,'-')))) {
+            var sub = getTerms(res.tree,op,options,false);
+            sub = add_existing_names(sub,item.names,item.equalnames);
             if(item.quantifier!='1') {
                 sub = sub.map(function(t){ t.quantifier = quantifier_combo[t.quantifier][item.quantifier]; });
             }
@@ -5129,7 +5193,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,existing_nam
     }
 
     intree.terms[op][option_signature] = terms;
-    return add_existing_names(terms);
+    return terms;
 }
 
 /** The `_match` name in a match object stores the whole tree that matched the pattern.
@@ -5440,7 +5504,10 @@ var specialMatchOps = jme.rules.specialMatchOps = {
         return matchDefault(ruleTree.args[0],ruleTree.args[1],exprTree,options);
     },
     '`+-u': function(ruleTree,exprTree,options) {
-        return matchPrefixPlusMinus(ruleTree.args[0],exprTree,options);
+        return matchOptionalPrefix('-u',ruleTree.args[0],exprTree,options);
+    },
+    '`*/u': function(ruleTree,exprTree,options) {
+        return matchOptionalPrefix('/u',ruleTree.args[0],exprTree,options);
     },
     '`!': function(ruleTree,exprTree,options) {
         return matchNot(ruleTree.args[0],exprTree,options);
@@ -5547,6 +5614,11 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
         return false;
     }
 
+    /** Is the given name captured by this tree?
+     * @param {String} name
+     * @param {Numbas.jme.tree} tree
+     * @returns {Boolean}
+     */
     function name_captured(name,tree) {
         if(jme.isOp(tree.tok,';')) {
             var res = resolveName(tree.args[1]);
@@ -5623,7 +5695,7 @@ function matchList(ruleTree,exprTree,options) {
  */
 function matchToken(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
-    var exprtok = exprTree.tok;
+    var exprTok = exprTree.tok;
     if(ruleTok.type!=exprTok.type) {
         return false;
     }
@@ -5680,6 +5752,23 @@ var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
     return names;
 }
 
+/** Remove unary divisions from a tree.
+ * They're only introduced to make pattern-matching products work more easily, and are a hassle to deal with elsewhere.
+ * Expressions of the form `a*(/b)` are replaced with `a/b`
+ * @param {Numbas.jme.tree} tree
+ * @returns {Numbas.jme.tree}
+ */
+function removeUnaryDivision(tree) {
+    if(jme.isOp(tree.tok,'*')) {
+        var args = tree.args.map(removeUnaryDivision);
+        if(jme.isOp(tree.args[1].tok,'/u')) {
+            return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [args[0],args[1].args[0]]};
+        }
+        return {tok: tree.tok, args:args}
+    }
+    return tree;
+}
+
 /** Match an expression against a pattern which is an application of an operator to one or more terms.
  * Assuming that the pattern and the expression trees are each a sequence of terms joined by the same operator, find the terms of each, and try to match them up, obeying quantifiers in the pattern.
  * @param {Numbas.jme.tree} ruleTree - the pattern to match, whose top token must be an operator.
@@ -5693,9 +5782,14 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var op = ruleTok.name;
     var commuting = options.commutative && ruleTok.commutative;
     var associating = options.associative && ruleTok.associative;
+    if(!options.strictPlus && nonStrictCanonicalOps[op]) {
+        op = nonStrictCanonicalOps[op];
+        commuting = options.commutative && jme.commutative[op];
+        associating = options.associative && jme.associative[op];
+    }
     var term_options = {commutative: options.commutative, associative: associating, strictPlus: options.strictPlus};
-    var ruleTerms = getTerms(ruleTree,op,term_options,[],true);
-    var exprTerms = getTerms(exprTree,op,term_options,[],false);
+    var ruleTerms = getTerms(ruleTree,op,term_options,true);
+    var exprTerms = getTerms(exprTree,op,term_options,false);
     if(exprTerms.length<ruleTerms.min_total) {
         return false;
     }
@@ -5722,6 +5816,9 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
             for(var i=1;i<terms.length;i++) {
                 sub = {tok: new jme.types.TOp(op), args: [sub,terms[i]]};
             }
+            if(op=='*') {
+                sub = removeUnaryDivision(sub);
+            }
             match[name] = sub;
         }
     }
@@ -5731,7 +5828,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
 }
 
 /** Match a sequence of terms.
- * Calls {@link Numbas.jme.rules.match_sequence}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
+ * Calls {@link Numbas.jme.rules.findSequenceMatch}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
  *
  * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
  * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
@@ -5772,7 +5869,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
 
     /** Does the given assignment satisfy the constraints of the matching algorithm?
      * At the moment, the only constraint is that all subexpressions matched with the same name using the `;=` operator must be equal, according to {@link Numbas.jme.compareTrees}.
-     * @param {Object} assignment - the result of {@link Numbas.jme.rules.match_sequence}
+     * @param {Object} assignment - the result of {@link Numbas.jme.rules.findSequenceMatch}
      * @param {Number} ic - the current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
      * @param {Number} pc - the current index in the list of pattern terms
      * @returns {Boolean}
@@ -5799,7 +5896,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         return ok;
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
+    var assignment = findSequenceMatch(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
     if(assignment===false) {
         return false;
     }
@@ -5868,9 +5965,9 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     return namedTerms;
 }
 
-/** Options for {@link Numbas.jme.rules.match_sequence}.
+/** Options for {@link Numbas.jme.rules.findSequenceMatch}.
  * @type Object
- * @typedef Numbas.jme.rules.match_sequence_options
+ * @typedef Numbas.jme.rules.findSequenceMatch_options
  * @property {Boolean} allowOtherTerms - if `true`, terms that don't match any term in the pattern can be ignored
  * @property {Boolean} commutative - can the input terms be considered in any order?
  * @property {Function} constraintFn - function to test if the current set of matches satisfies constraints
@@ -5886,10 +5983,10 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
  * @param {Array.<Numbas.jme.tree>} input
- * @param {Numbas.jme.rules.match_sequence_options} options
+ * @param {Numbas.jme.rules.findSequenceMatch_options} options
  * @returns {Object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
-var match_sequence = jme.rules.match_sequence = function(pattern,input,options) {
+var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,options) {
     var capture = [];
     var start = 0;
     var done = false;
@@ -6081,16 +6178,17 @@ function extractLeadingMinus(tree) {
     }
 }
 
-/** Match `rule`, or `-(rule)`.
+/** Match `rule`, or `prefix(rule)` - allow an optional unary operator at the top of the tree
+ * @param {String} prefix - the name of the optional operator
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
  */
-function matchPrefixPlusMinus(ruleTree,exprTree,options) {
+function matchOptionalPrefix(prefix,ruleTree,exprTree,options) {
     var originalExpr = exprTree;
     exprTree = extractLeadingMinus(exprTree);
-    if(jme.isOp(exprTree.tok,'-u')) {
+    if(jme.isOp(exprTree.tok,prefix)) {
         exprTree = exprTree.args[0];
     }
     var m = matchTree(ruleTree,exprTree,options);
@@ -6288,10 +6386,12 @@ patternParser.addPostfixOperator('`+','`+',{precedence: 0.5}); // at least one t
 
 patternParser.addPrefixOperator('`!','`!',{precedence: 0.5});  // not 
 patternParser.addPrefixOperator('`+-','`+-u',{precedence: 0.5});  // unary plus or minus
+patternParser.addPrefixOperator('`*/','`*/u',{precedence: 0.5});  // unary multiply or divide
 
 patternParser.addBinaryOperator(';', {precedence: 0});
 patternParser.addBinaryOperator(';=', {precedence: 0});
 patternParser.addBinaryOperator('`+-', {precedence: 1000000});  // plus or minus
+patternParser.addBinaryOperator('`*/', {precedence: 1000000});  // multiply or divide
 patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
 patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
 patternParser.addBinaryOperator('`&',{precedence: 100000});     // and
@@ -6376,6 +6476,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
         var rs = this;
         var changed = true;
         var depth = 0;
+        var applied = []
         while(changed) {
             if(exprTree.args) {
                 var nargs = exprTree.args.map(function(arg) { return rs.simplify(arg,scope); });
@@ -6388,6 +6489,9 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                     changed = true;
                     exprTree = result.expression;
                     depth += 1;
+                    if(applied.indexOf(this.rules[i])==-1) {
+                        applied.push(this.rules[i]);
+                    }
                     if(depth > 100) {
                         var str = Numbas.jme.display.treeToJME(exprTree);
                         throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
@@ -6481,19 +6585,20 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['+(?;x)','','x'],                    //get rid of unary plus
         ['?;x+(-?;y)','g','x-y'],            //plus minus = minus
         ['?;x-(-?;y)','g','x+y'],            //minus minus = plus
+        ['?;x/(/?;y)','g','x*y'],            //minus minus = plus
         ['-(-?;x)','','x'],                //unary minus minus = plus
-        ['(-?;x)/?;y','','-(x/y)'],            //take negation to left of fraction
-        ['?;x/(-?;y)','','-(x/y)'],
+        ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
+        ['?;x/(-?;y)','s','-(x/y)'],
         ['`!-? `& (-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b']
     ],
     collectComplex: [
         ['-complex:negative:m_number;x','','eval(-x)'],   // negation of a complex number with negative real part
         ['(`+- real:m_number);x + (`+- imaginary:m_number);y','cg','eval(x+y)'],    // collect the two parts of a complex number
-        ['m_number;n*i','acg','eval(n*i)'],            //always collect multiplication by i
+        ['m_number;n*i','acsg','eval(n*i)'],            //always collect multiplication by i
     ],
     unitFactor: [
-        ['1*?;x','acg','x'],
+        ['1*(`! (/?));x','acg','x'],
     ],
     unitPower: [
         ['?;x^1','','x']
@@ -6512,13 +6617,13 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;x^0','','1']
     ],
     noLeadingMinus: [
-        ['-?;x + ?;y','p','y-x'],                                            //don't start with a unary minus
+        ['-?;x + ?;y','s','y-x'],                                            //don't start with a unary minus
         ['-0','','0']
     ],
     collectNumbers: [
         ['(`+- m_number);n1 + (`+- m_number)`+;n2','acg','eval(n1+n2)'],
         ['m_number;n * m_number;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! m_number)`+;x * real:m_number;n','acg','n*x']            //shift numbers to left hand side
+        ['(`! m_number)`+;x * real:m_number;n','acgs','n*x']            //shift numbers to left hand side
     ],
     simplifyFractions: [
         ['(m_number;n * (?`* `: 1);top) / (m_number;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
@@ -6912,8 +7017,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @property {Boolean} sameVars - if true, then both expressions should have exactly the same free variables
      */
     /** Compare two expressions over some randomly selected points in the space of variables, to decide if they're equal.
-     * @param {JME} expr1
-     * @param {JME} expr2
+     * @param {JME} tree1
+     * @param {JME} tree2
      * @param {Numbas.jme.compare_settings} settings
      * @param {Numbas.jme.Scope} scope
      * @returns {Boolean}
@@ -8536,7 +8641,8 @@ var arity = jme.arity = {
     'not': 1,
     'fact': 1,
     '+u': 1,
-    '-u': 1
+    '-u': 1,
+    '/u': 1
 }
 /** Some names represent different operations when used as prefix. This dictionary translates them.
  * @readonly
@@ -8546,6 +8652,7 @@ var arity = jme.arity = {
 var prefixForm = jme.prefixForm = {
     '+': '+u',
     '-': '-u',
+    '/': '/u',
     '!': 'not',
     'not': 'not'
 }
@@ -8568,6 +8675,7 @@ var precedence = jme.precedence = {
     'not': 1,
     '+u': 2.5,
     '-u': 2.5,
+    '/u': 2.5,
     '^': 2,
     '*': 3,
     '/': 3,
@@ -8635,7 +8743,8 @@ var lazyOps = jme.lazyOps = [];
 var rightAssociative = jme.rightAssociative = {
     '^': true,
     '+u': true,
-    '-u': true
+    '-u': true,
+    '/u': true
 }
 /** Operations which commute.
  * @enum {Boolean}
@@ -8669,7 +8778,7 @@ var associative = jme.associative =
  * @enum {String}
  * @memberof Numbas.jme
  */
-var oppositeOps = jme.oppositeOps = {
+var converseOps = jme.converseOps = {
     '<': '>',
     '>': '<',
     '<=': '>=',

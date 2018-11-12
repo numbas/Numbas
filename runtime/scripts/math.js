@@ -1838,6 +1838,8 @@ var vectormath = Numbas.vectormath = {
     },
 
     /** Is every component of this vector zero?
+     * @param {vector} v
+     * @returns {Boolean}
      */
     is_zero: function(v) {
         return v.every(function(c){return c==0;});

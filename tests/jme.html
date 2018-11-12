@@ -180,7 +180,7 @@
 					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*',false,false,2,true,true),0)],'*');
 					deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true,1),0)],'+');
 					deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true,1),0)],'-');
-					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/'),0)],'/');
+					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/u',false,true,1),0)],'/');
 					deepCloseEqual(assert, tokenise('^'),[tokWithPos(new types.TOp('^'),0)],'^');
 					deepCloseEqual(assert, tokenise('<'),[tokWithPos(new types.TOp('<'),0)],'<');
 					deepCloseEqual(assert, tokenise('>'),[tokWithPos(new types.TOp('>'),0)],'>');
@@ -1061,7 +1061,7 @@
 
                     assert.ok(matchExpression('["f": m_number/m_number] `@ f + f','1/2 + 3/4'),'["f": m_number/m_number] `@ f + f matches 1/2 + 3/4');
 
-                    assert.notOk(matchExpression('m_number`+/m_number`?','3pi/4',{allowOtherTerms:true}),'m_number`+/m_number`? does not match 3pi/4');
+                    assert.notOk(matchExpression('m_number`+/m_number`?','3pi/4',{allowOtherTerms:true,strictPlus:true}),'m_number`+/m_number`? does not match 3pi/4');
 
                     // lists
                     assert.ok(matchExpression('[]','[]'),'[] matches []');

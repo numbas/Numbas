@@ -282,8 +282,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @property {Boolean} sameVars - if true, then both expressions should have exactly the same free variables
      */
     /** Compare two expressions over some randomly selected points in the space of variables, to decide if they're equal.
-     * @param {JME} expr1
-     * @param {JME} expr2
+     * @param {JME} tree1
+     * @param {JME} tree2
      * @param {Numbas.jme.compare_settings} settings
      * @param {Numbas.jme.Scope} scope
      * @returns {Boolean}
@@ -1906,7 +1906,8 @@ var arity = jme.arity = {
     'not': 1,
     'fact': 1,
     '+u': 1,
-    '-u': 1
+    '-u': 1,
+    '/u': 1
 }
 /** Some names represent different operations when used as prefix. This dictionary translates them.
  * @readonly
@@ -1916,6 +1917,7 @@ var arity = jme.arity = {
 var prefixForm = jme.prefixForm = {
     '+': '+u',
     '-': '-u',
+    '/': '/u',
     '!': 'not',
     'not': 'not'
 }
@@ -1938,6 +1940,7 @@ var precedence = jme.precedence = {
     'not': 1,
     '+u': 2.5,
     '-u': 2.5,
+    '/u': 2.5,
     '^': 2,
     '*': 3,
     '/': 3,
@@ -2005,7 +2008,8 @@ var lazyOps = jme.lazyOps = [];
 var rightAssociative = jme.rightAssociative = {
     '^': true,
     '+u': true,
-    '-u': true
+    '-u': true,
+    '/u': true
 }
 /** Operations which commute.
  * @enum {Boolean}
@@ -2039,7 +2043,7 @@ var associative = jme.associative =
  * @enum {String}
  * @memberof Numbas.jme
  */
-var oppositeOps = jme.oppositeOps = {
+var converseOps = jme.converseOps = {
     '<': '>',
     '>': '<',
     '<=': '>=',
