@@ -299,6 +299,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     values: {interpreted_answer:answer}
                 }
             } else {
+                part.getCorrectAnswer(scope);
                 var part_result = part.mark_answer(answer);
             }
             var result = marking.finalise_state(part_result.states.mark);
