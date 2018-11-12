@@ -5190,10 +5190,7 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             case 'list':
                 return matchList(ruleTree,exprTree,options);
             default:
-                if(ruleTok.type!=exprTok.type) {
-                    return false;
-                }
-                return util.eq(ruleTok,exprTok) ? {} : false;
+                return matchToken(ruleTree,exprTree,options);
         }
     })();
     return preserve_match(m,exprTree);
@@ -5616,6 +5613,21 @@ function matchList(ruleTree,exprTree,options) {
         match[name] = {tok: new jme.types.TList(terms.length), args: terms};
     }
     return match;
+}
+
+/** Match an exact token - the expression must be the same type, and equal to, the rule token.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchToken(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprtok = exprTree.tok;
+    if(ruleTok.type!=exprTok.type) {
+        return false;
+    }
+    return util.eq(ruleTok,exprTok) ? {} : false;
 }
 
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.

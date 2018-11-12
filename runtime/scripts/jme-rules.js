@@ -389,10 +389,7 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             case 'list':
                 return matchList(ruleTree,exprTree,options);
             default:
-                if(ruleTok.type!=exprTok.type) {
-                    return false;
-                }
-                return util.eq(ruleTok,exprTok) ? {} : false;
+                return matchToken(ruleTree,exprTree,options);
         }
     })();
     return preserve_match(m,exprTree);
@@ -817,6 +814,21 @@ function matchList(ruleTree,exprTree,options) {
     return match;
 }
 
+/** Match an exact token - the expression must be the same type, and equal to, the rule token.
+ * @param {Numbas.jme.tree} ruleTree - the pattern to match
+ * @param {Numbas.jme.tree} exprTree - the expression being considered
+ * @param {Numbas.jme.rules.matchTree_options} options
+ * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ */
+function matchToken(ruleTree,exprTree,options) {
+    var ruleTok = ruleTree.tok;
+    var exprtok = exprTree.tok;
+    if(ruleTok.type!=exprTok.type) {
+        return false;
+    }
+    return util.eq(ruleTok,exprTok) ? {} : false;
+}
+
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
  */
 var quantifier_limits = {
@@ -918,7 +930,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
 }
 
 /** Match a sequence of terms.
- * Calls {@link Numbas.jme.rules.match_sequence}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
+ * Calls {@link Numbas.jme.rules.findSequenceMatch}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
  *
  * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
  * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
@@ -959,7 +971,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
 
     /** Does the given assignment satisfy the constraints of the matching algorithm?
      * At the moment, the only constraint is that all subexpressions matched with the same name using the `;=` operator must be equal, according to {@link Numbas.jme.compareTrees}.
-     * @param {Object} assignment - the result of {@link Numbas.jme.rules.match_sequence}
+     * @param {Object} assignment - the result of {@link Numbas.jme.rules.findSequenceMatch}
      * @param {Number} ic - the current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
      * @param {Number} pc - the current index in the list of pattern terms
      * @returns {Boolean}
@@ -986,7 +998,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         return ok;
     }
 
-    var assignment = match_sequence(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
+    var assignment = findSequenceMatch(ruleTerms,exprTerms,{checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
     if(assignment===false) {
         return false;
     }
@@ -1055,9 +1067,9 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     return namedTerms;
 }
 
-/** Options for {@link Numbas.jme.rules.match_sequence}.
+/** Options for {@link Numbas.jme.rules.findSequenceMatch}.
  * @type Object
- * @typedef Numbas.jme.rules.match_sequence_options
+ * @typedef Numbas.jme.rules.findSequenceMatch_options
  * @property {Boolean} allowOtherTerms - if `true`, terms that don't match any term in the pattern can be ignored
  * @property {Boolean} commutative - can the input terms be considered in any order?
  * @property {Function} constraintFn - function to test if the current set of matches satisfies constraints
@@ -1073,10 +1085,10 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
  * @param {Array.<Numbas.jme.tree>} input
- * @param {Numbas.jme.rules.match_sequence_options} options
+ * @param {Numbas.jme.rules.findSequenceMatch_options} options
  * @returns {Object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
-var match_sequence = jme.rules.match_sequence = function(pattern,input,options) {
+var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,options) {
     var capture = [];
     var start = 0;
     var done = false;
