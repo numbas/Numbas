@@ -11429,11 +11429,18 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
-Numbas.queueScript('part',['base','jme','jme-variables','util','marking'],function() {
+Numbas.queueScript('part',['base','jme','jme-variables','math','util','marking'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
+
+/** Definitions of custom part types
+ * @name custom_part_types
+ * @type {Object}
+ * @memberof Numbas
+ */
+
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
  * @typedef Numbas.parts.partpath
  * @type {String}
@@ -11519,10 +11526,10 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
 /** Base question part object
  * @constructor
  * @memberof Numbas.parts
- * @param {Element} xml
  * @param {Numbas.parts.partpath} [path='p0']
- * @param {Numbas.Question} Question
+ * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -11847,7 +11854,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
-     * @returns {Numbas.Error}
+     * @throws {Numbas.Error}
      */
     error: function(message) {
         message = R.apply(this,arguments);
@@ -11879,20 +11886,34 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     break;
                 default:
                     var originalScript = this[name];
+                    /** Create a function which runs `script` (instead of the built-in script)
+                     * @param {Function} script
+                     * @returns {Function}
+                     */
                     function instead(script) {
                         return function() {
                             return script.apply(part,arguments);
                         }
                     }
+                    /** Create a function which runs `script` before `originalScript`
+                     * @param {Function} script
+                     * @param {Function} originalScript
+                     * @returns {Function}
+                     */
                     function before(script,originalScript) {
                         return function() {
                             script.apply(part,arguments);
-                            return originalScript.apply(this,arguments);
+                            return originalScript.apply(part,arguments);
                         }
                     }
+                    /** Create a function which runs `script` after `originalScript`
+                     * @param {Function} script
+                     * @param {Function} originalScript
+                     * @returns {Function}
+                     */
                     function after(script,originalScript) {
                         return function() {
-                            originalScript.apply(this,arguments);
+                            originalScript.apply(part,arguments);
                             return script.apply(part,arguments);
                         }
                     }
@@ -12164,8 +12185,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = feedback.markingFeedback.slice();
         var finalised_result = {states: [], valid: false, credit: 0};
         try {
-            this.getCorrectAnswer(scope);
-            finalised_result = this.mark();
+            finalised_result = this.mark(scope);
         } catch(e) {
             this.giveWarning(e.message);
         }
@@ -12245,15 +12265,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
      * @see Numbas.parts.Part#markingScript
      * @see Numbas.parts.Part#answered
+     * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.marking.finalised_state}
      */
-    mark: function() {
+    mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
         if(studentAnswer==undefined) {
             this.setCredit(0,R('part.marking.nothing entered'));
             return;
         }
-        var result = this.mark_answer(studentAnswer);
+        var result = this.mark_answer(studentAnswer,scope);
         var finalised_result = marking.finalise_state(result.states.mark)
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
@@ -12339,13 +12360,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Run the marking script against the given answer.
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      * @param {Numbas.jme.token} studentAnswer
+     * @param {Numbas.jme.Scope} scope
      * @see Numbas.parts.Part#mark
      * @returns {Numbas.marking.marking_script_result}
      */
-    mark_answer: function(studentAnswer) {
+    mark_answer: function(studentAnswer,scope) {
         try {
+            this.getCorrectAnswer(scope);
             var result = this.markingScript.evaluate(
-                this.getScope(),
+                scope,
                 this.marking_parameters(studentAnswer)
             );
         } catch(e) {
@@ -14509,7 +14532,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     values: {interpreted_answer:answer}
                 }
             } else {
-                var part_result = part.mark_answer(answer);
+                var part_result = part.mark_answer(answer,scope);
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
