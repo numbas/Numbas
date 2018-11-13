@@ -503,25 +503,26 @@ var texOps = jme.display.texOps = {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
     },
-    '`+-u': infixTex(patternName('\\pm')),
+    '`+-': infixTex(patternName('\\pm')),
+    '`*/': infixTex(patternName('\\times \\atop \\div')),
     '`|': infixTex(patternName('|')),
     '`&': infixTex(patternName('\\wedge')),
     '`!': infixTex(patternName('\\neg')),
     '`where': infixTex(patternName('where')),
     '`@': infixTex(patternName('@')),
-    '`?': infixTex(patternName('{}^{?}')),
-    '`*': infixTex(patternName('{}^{\\ast}')),
-    '`+': infixTex(patternName('{}^{+}')),
+    '`?': unaryPatternTex(patternName('?')),
+    '`*': unaryPatternTex(patternName('\\ast')),
+    '`+': unaryPatternTex(patternName('+')),
     '`:': infixTex(patternName(':')),
     ';': function(thing,texArgs,settings) {
-        return '\\underbrace{'+texArgs[0]+'}_{'+texArgs[1]+'}';
+        return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
     ';=': function(thing,texArgs,settings) {
-        return '\\underbrace{'+texArgs[0]+'}_{= '+texArgs[1]+'}';
+        return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
     'm_uses': funcTex(patternName('uses')),
     'm_type': funcTex(patternName('type')),
-    'm_exactly': funcTex(patternName('exactly')),
+    'm_exactly': overbraceTex('exactly'),
     'm_commutative': overbraceTex('commutative'),
     'm_noncommutative': overbraceTex('non-commutative'),
     'm_associative': overbraceTex('associative'),
@@ -543,6 +544,13 @@ function overbraceTex(label) {
         return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
     }
 }
+
+function unaryPatternTex(code) {
+    return function(thing,texArgs) {
+        return '{'+texArgs[0]+'}^{'+code+'}';
+    }
+}
+
 /** Convert a special number to TeX, or return undefined if not a special number.
  *  @memberof Numbas.jme.display
  *  @private

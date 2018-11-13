@@ -3949,6 +3949,8 @@ var Term = Numbas.jme.rules.Term = function(tree) {
         '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
         '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
     };
+    /** Unwrap quantifiers from the top of the tree
+     */
     while(tree.tok.type=='op') {
         var op = tree.tok.name;
         if(op==';') {
@@ -3963,6 +3965,10 @@ var Term = Numbas.jme.rules.Term = function(tree) {
             if(defaultValue===null) {
                 defaultValue = tree.args[1];
             }
+        } else if(tree.args.length==1 && tree.args[0].tok.type=='op' && ['`?','`*','`+','`:'].indexOf(tree.args[0].tok.name)>=0) {
+            // pull quantifiers through unary operations, so "-(x`?)" is equivalent to "(-x)`?".
+            tree = {tok:tree.args[0].tok, args: [{tok:tree.tok, args: tree.args[0].args}]};
+            continue;
         } else {
             break;
         }
@@ -4468,11 +4474,11 @@ var specialMatchOps = jme.rules.specialMatchOps = {
     '`:': function(ruleTree,exprTree,options) {
         return matchDefault(ruleTree.args[0],ruleTree.args[1],exprTree,options);
     },
-    '`+-u': function(ruleTree,exprTree,options) {
-        return matchOptionalPrefix('-u',ruleTree.args[0],exprTree,options);
+    '`+-': function(ruleTree,exprTree,options) {
+        return matchOptionalPrefix(['-u','+u'],ruleTree.args[0],exprTree,options);
     },
-    '`*/u': function(ruleTree,exprTree,options) {
-        return matchOptionalPrefix('/u',ruleTree.args[0],exprTree,options);
+    '`*/': function(ruleTree,exprTree,options) {
+        return matchOptionalPrefix(['/u'],ruleTree.args[0],exprTree,options);
     },
     '`!': function(ruleTree,exprTree,options) {
         return matchNot(ruleTree.args[0],exprTree,options);
@@ -4725,15 +4731,13 @@ var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
  */
 function removeUnaryDivision(tree) {
     if(jme.isOp(tree.tok,'*')) {
-        var args = tree.args.map(removeUnaryDivision);
         if(jme.isOp(tree.args[1].tok,'/u')) {
-            return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [args[0],args[1].args[0]]};
+            return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [removeUnaryDivision(tree.args[0]),removeUnaryDivision(tree.args[1].args[0])]};
         }
-        return {tok: tree.tok, args:args}
+        return {tok: tree.tok, args: tree.args.map(removeUnaryDivision)}
     }
     if(jme.isOp(tree.tok,'/u')) {
-        var args = tree.args.map(removeUnaryDivision);
-        return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [{tok:new Numbas.jme.types.TNum(1)},args[0]]};
+        return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [{tok:new Numbas.jme.types.TNum(1)},removeUnaryDivision(tree.args[0])]};
     }
     return tree;
 }
@@ -4779,7 +4783,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     for(var name in namedTerms) {
         var terms = namedTerms[name];
         if(options.gatherList) {
-            match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(t)} })};
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(removeUnaryDivision(t))} })};
         } else {
             var sub = terms[0];
             for(var i=1;i<terms.length;i++) {
@@ -4891,7 +4895,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         if(!namedTerms[name]) {
             namedTerms[name] = [];
         }
-        if(identified_names[name]>1 && namedTerms[name].length) {
+        if(identified_names[name]>=1 && namedTerms[name].length) {
             return;
         }
         namedTerms[name].push(term);
@@ -5147,18 +5151,22 @@ function extractLeadingMinus(tree) {
     }
 }
 
-/** Match `rule`, or `prefix(rule)` - allow an optional unary operator at the top of the tree
- * @param {String} prefix - the name of the optional operator
+/** Match `rule`, or `prefix(rule)` - allow any of a list of optional unary operators at the top of the tree
+ * @param {Array.<String>} prefixes - the names of the optional operators
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
  */
-function matchOptionalPrefix(prefix,ruleTree,exprTree,options) {
+function matchOptionalPrefix(prefixes,ruleTree,exprTree,options) {
     var originalExpr = exprTree;
     exprTree = extractLeadingMinus(exprTree);
-    if(jme.isOp(exprTree.tok,prefix)) {
-        exprTree = exprTree.args[0];
+    for(var i=0;i<prefixes.length;i++) {
+        var prefix = prefixes[i];
+        if(jme.isOp(exprTree.tok,prefix)) {
+            exprTree = exprTree.args[0];
+            break;
+        }
     }
     var m = matchTree(ruleTree,exprTree,options);
     if(m) {
@@ -5354,13 +5362,11 @@ patternParser.addPostfixOperator('`*','`*',{precedence: 0.5}); // any number of 
 patternParser.addPostfixOperator('`+','`+',{precedence: 0.5}); // at least one time
 
 patternParser.addPrefixOperator('`!','`!',{precedence: 0.5});  // not 
-patternParser.addPrefixOperator('`+-','`+-u',{precedence: 0.5});  // unary plus or minus
-patternParser.addPrefixOperator('`*/','`*/u',{precedence: 0.5});  // unary multiply or divide
+patternParser.addPrefixOperator('`+-','`+-',{precedence: 0.5});  // unary plus or minus
+patternParser.addPrefixOperator('`*/','`*/',{precedence: 0.5});  // unary multiply or divide
 
 patternParser.addBinaryOperator(';', {precedence: 0});
 patternParser.addBinaryOperator(';=', {precedence: 0});
-patternParser.addBinaryOperator('`+-', {precedence: 1000000});  // plus or minus
-patternParser.addBinaryOperator('`*/', {precedence: 1000000});  // multiply or divide
 patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
 patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
 patternParser.addBinaryOperator('`&',{precedence: 100000});     // and
@@ -5463,6 +5469,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                     }
                     if(depth > 100) {
                         var str = Numbas.jme.display.treeToJME(exprTree);
+                        console.log(applied);
                         throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                     }
                     break;
@@ -5551,11 +5558,10 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
 var simplificationRules = jme.rules.simplificationRules = {
     basic: [
         ['negative:m_number;x','','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
-        ['+(?;x)','','x'],                    //get rid of unary plus
-        ['?;x+(-?;y)','g','x-y'],            //plus minus = minus
-        ['?;x-(-?;y)','g','x+y'],            //minus minus = plus
-        ['?;x/(/?;y)','g','x*y'],            //minus minus = plus
-        ['-(-?;x)','','x'],                //unary minus minus = plus
+        ['+(?;x)','s','x'],                    //get rid of unary plus
+        ['?;x+(-?;y)','gs','x-y'],            //plus minus = minus
+        ['?;x-(-?;y)','gs','x+y'],            //minus minus = plus
+        ['-(-?;x)','s','x'],                //unary minus minus = plus
         ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','s','-(x/y)'],
         ['`!-? `& (-(real:m_number `| `!m_number);x)*?;y','acg','-(x*y)'],            //take negation to left of multiplication
@@ -10524,25 +10530,26 @@ var texOps = jme.display.texOps = {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
     },
-    '`+-u': infixTex(patternName('\\pm')),
+    '`+-': infixTex(patternName('\\pm')),
+    '`*/': infixTex(patternName('\\times \\atop \\div')),
     '`|': infixTex(patternName('|')),
     '`&': infixTex(patternName('\\wedge')),
     '`!': infixTex(patternName('\\neg')),
     '`where': infixTex(patternName('where')),
     '`@': infixTex(patternName('@')),
-    '`?': infixTex(patternName('{}^{?}')),
-    '`*': infixTex(patternName('{}^{\\ast}')),
-    '`+': infixTex(patternName('{}^{+}')),
+    '`?': unaryPatternTex(patternName('?')),
+    '`*': unaryPatternTex(patternName('\\ast')),
+    '`+': unaryPatternTex(patternName('+')),
     '`:': infixTex(patternName(':')),
     ';': function(thing,texArgs,settings) {
-        return '\\underbrace{'+texArgs[0]+'}_{'+texArgs[1]+'}';
+        return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
     ';=': function(thing,texArgs,settings) {
-        return '\\underbrace{'+texArgs[0]+'}_{= '+texArgs[1]+'}';
+        return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
     'm_uses': funcTex(patternName('uses')),
     'm_type': funcTex(patternName('type')),
-    'm_exactly': funcTex(patternName('exactly')),
+    'm_exactly': overbraceTex('exactly'),
     'm_commutative': overbraceTex('commutative'),
     'm_noncommutative': overbraceTex('non-commutative'),
     'm_associative': overbraceTex('associative'),
@@ -10564,6 +10571,13 @@ function overbraceTex(label) {
         return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
     }
 }
+
+function unaryPatternTex(code) {
+    return function(thing,texArgs) {
+        return '{'+texArgs[0]+'}^{'+code+'}';
+    }
+}
+
 /** Convert a special number to TeX, or return undefined if not a special number.
  *  @memberof Numbas.jme.display
  *  @private

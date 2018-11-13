@@ -32,13 +32,15 @@
                 min-width: 150px;
                 margin-right: 1em;
             }
-            label input {
+            label input, label textarea {
+                font-size: 1em;
                 font-family: monospace;
                 padding: 0.5em;
                 margin-bottom: 0.5em;
             }
-            label input[type=text] {
+            label input[type=text], label textarea {
                 width: 500px;
+                display: block;
             }
 
             .examples .example {
@@ -79,7 +81,7 @@
             <div>
                 <label>
                     <span class="label-text">Pattern:</span>
-                    <input type="text" data-bind="textInput: pattern"/>
+                    <textarea data-bind="textInput: pattern" class="form-control"></textarea>
                 </label>
                 <span data-bind="tex: patternTeX"></span>
             </div>
@@ -296,8 +298,33 @@
                         },
                         {
                             description: "Complex number in argument-modulus form",
-                            pattern: "(m_number`? `: 1)*e^(`+- m_number*m_number`*/m_number`?)",
+                            pattern: "m_exactly((m_number`? `: 1)*e^(((`*/ `+-m_number)`*;x)*i))",
                             expression: "2e^(pi*i/2)"
+                        },
+                        {
+                            description: "Complex number in Cartesian form",
+                            pattern: "m_exactly(((`+-real:m_number)`? `: 0);re + ((`+-i*real:m_number`?)`? `: 0);im)",
+                            expression: "2i-3"
+                        },
+                        {
+                            description: "Product of 2 or more terms, none of which is equal to 1",
+                            pattern: " m_nogather(?;factors*?`+;factors `where all(map(not numerical_compare(x,expression(\"1\")),x,factors)))",
+                            expression: "(x+2)(x+3)"
+                        },
+                        {
+                            description: "A power of 2",
+                            pattern: "2^?",
+                            expression: "2^100"
+                        },
+                        {
+                            description: "A polynomial with rational coefficients",
+                            pattern: "m_exactly(`+- (m_number`* / m_number`* * (m_name);=base^?`? `| m_number/m_number`?)`* + m_nothing)",
+                            expression: "1/3 - 2x^2/3 + x^4/6 + 2x^5"
+                        },
+                        {
+                            description: "Sum of terms all over the same denominator",
+                            pattern: "m_exactly((`+-(?/?;=d))`* + m_nothing)",
+                            expression: "1/2 -3/2"
                         },
                         {
                             description: "Get all x terms",
