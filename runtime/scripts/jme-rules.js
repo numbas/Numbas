@@ -963,6 +963,10 @@ function removeUnaryDivision(tree) {
         }
         return {tok: tree.tok, args:args}
     }
+    if(jme.isOp(tree.tok,'/u')) {
+        var args = tree.args.map(removeUnaryDivision);
+        return {tok: new Numbas.jme.types.TOp('/',false,false,2,false,false), args: [{tok:new Numbas.jme.types.TNum(1)},args[0]]};
+    }
     return tree;
 }
 

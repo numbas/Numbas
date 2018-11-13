@@ -295,6 +295,11 @@
                             expression: "x^2 + 2x + 1"
                         },
                         {
+                            description: "Complex number in argument-modulus form",
+                            pattern: "(m_number`? `: 1)*e^(`+- m_number*m_number`*/m_number`?)",
+                            expression: "2e^(pi*i/2)"
+                        },
+                        {
                             description: "Get all x terms",
                             pattern: "(`+- x^?`?*?`*)`+;xs + ?`*;rest",
                             expression: "C+x-x+2x-2x+(a+1)x+x^2+2x^3+(1+2)x^(n+1)-2"
