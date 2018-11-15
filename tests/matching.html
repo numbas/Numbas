@@ -216,6 +216,37 @@
                     this.replaceAll = ko.observable(false);
                     this.error = ko.observable('');
 
+                    var localStorageKey = 'jme-matching';
+
+                    var saved_properties = ['pattern','expression','replacement','commutative','associative','strictPlus','allowOtherTerms','gather','replaceAll'];
+                    function save() {
+                        var d = {};
+                        saved_properties.forEach(function(k) {
+                            d[k] = ko.unwrap(vm[k]);
+                        });
+                        this.localStorage.setItem(localStorageKey, JSON.stringify(d));
+                    }
+                    function load() {
+                        var d = this.localStorage.getItem(localStorageKey);
+                        if(d===null) {
+                            return;
+                        }
+                        try { 
+                            d = JSON.parse(d);
+                        } catch(e) {
+                            return;
+                        }
+                        saved_properties.forEach(function(k) {
+                            if(d[k]!==undefined) {
+                                vm[k](d[k]);
+                            }
+                        });
+                    }
+                    load();
+                    ko.computed(function() {
+                        save();
+                    });
+
                     this.patternTeX = ko.computed(function() {
                         try {
                             var expr = Numbas.jme.rules.patternParser.compile(this.pattern());
@@ -229,7 +260,7 @@
                     var simplifyRuleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.rulesets);
 
                     this.matches = ko.computed(function() {
-                        //console.clear();
+                        console.clear();
                         this.result('');
                         try {
                             var pattern = Numbas.jme.rules.patternParser.compile(this.pattern());
