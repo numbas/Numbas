@@ -929,6 +929,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         part.answered = valid;
     },
     marking_parameters: function(studentAnswer) {
+        studentAnswer = jme.makeSafe(studentAnswer);
         return {
             path: jme.wrapValue(this.path),
             studentAnswer: studentAnswer,
