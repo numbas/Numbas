@@ -26,11 +26,11 @@ jme.rules = {};
  */
 function parse_options(str) {
     return {
-        commutative: str.match(/c/),
-        associative: str.match(/a/),
-        allowOtherTerms: str.match(/g/),
-        gatherList: str.match(/l/),
-        strictPlus: str.match(/s/)
+        commutative: str.match(/c/) !== null,
+        associative: str.match(/a/) !== null,
+        allowOtherTerms: str.match(/g/) !== null,
+        gatherList: str.match(/l/) !== null,
+        strictPlus: str.match(/s/) !== null
     };
 }
 
