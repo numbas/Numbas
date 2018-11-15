@@ -746,6 +746,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         }
     },
 
+    addTokenType: function(re,parse) {
+        this.tokeniser_types.splice(0,0,{re:re,parse:parse});
+    },
+
     /** Add an operator to the parser
      * @param {String} name
      * @see Numbas.jme.Parser#addBinaryOperator
@@ -968,7 +972,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var got = false;
             for(var i=0;i<this.tokeniser_types.length;i++) {
                 var tt = this.tokeniser_types[i];
-                var regex = tt.re=='re_op' ? re_op : this.re[tt.re];
+                var regex = (tt.re instanceof RegExp) ? tt.re : (tt.re=='re_op' ? re_op : this.re[tt.re]);
                 var m = expr.slice(pos).match(regex);
                 if(m) {
                     var result = tt.parse.apply(this,[m,tokens,expr,pos]);

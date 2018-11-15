@@ -319,7 +319,7 @@
                     this.examples = [
                         {
                             description: "Sum of two positive numbers",
-                            pattern: "positive:m_number + positive:m_number",
+                            pattern: "positive:$n + positive:$n",
                             expression: "1+2"
                         },
                         {
@@ -329,12 +329,12 @@
                         },
                         {
                             description: "Complex number in argument-modulus form",
-                            pattern: "m_exactly((m_number`? `: 1)*e^(((`*/ `+-m_number)`*;x)*i))",
+                            pattern: "m_exactly(($n`? `: 1)*e^(((`*/ `+-$n)`*;x)*i))",
                             expression: "2e^(pi*i/2)"
                         },
                         {
                             description: "Complex number in Cartesian form",
-                            pattern: "m_exactly(((`+-real:m_number)`? `: 0);re + ((`+-i*real:m_number`?)`? `: 0);im)",
+                            pattern: "m_exactly(((`+-real:$n)`? `: 0);re + ((`+-i*real:$n`?)`? `: 0);im)",
                             expression: "2i-3"
                         },
                         {
@@ -349,13 +349,28 @@
                         },
                         {
                             description: "A polynomial with rational coefficients",
-                            pattern: "m_exactly(`+- (m_number`* / m_number`* * (m_name);=base^?`? `| m_number/m_number`?)`* + m_nothing)",
+                            pattern: "m_exactly(`+- ($n`* / $n`* * ($v);=base^?`? `| $n/$n`?)`* + $z)",
                             expression: "1/3 - 2x^2/3 + x^4/6 + 2x^5"
                         },
                         {
                             description: "Sum of terms all over the same denominator",
-                            pattern: "m_exactly((`+-(?/?;=d))`* + m_nothing)",
+                            pattern: "m_exactly((`+-(?/?;=d))`* + $z)",
                             expression: "1/2 -3/2"
+                        },
+                        {
+                            description: "No decimals anywhere except pi",
+                            pattern: "`!m_anywhere(decimal:$n `& `!pi)",
+                            expression: "1/2 + x^4 - sin(pi/2)"
+                        },
+                        {
+                            description: "No surds in the denominator",
+                            pattern: "`+- ? / (`!m_anywhere(sqrt(?) `| ?^(`! `+-integer:$n)))",
+                            expression: "(x+2*sqrt(5))/(x+4)"
+                        },
+                        {
+                            description: "Sum of fractions, no denominator is 1 and no numerator is 0",
+                            pattern: "m_nogather(m_gather(`+- (?;tops/?;bottoms));fractions`*+$z) `where len(fractions)>1 and all(map(not numerical_compare(x,expression(\"1\")),x,bottoms)) and all(map(not numerical_compare(x,expression(\"0\")),x,tops))",
+                            expression: "1/(x+2) - (x+4)/(x^2+6)"
                         },
                         {
                             description: "Get all x terms",

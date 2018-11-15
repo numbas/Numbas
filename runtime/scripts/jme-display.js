@@ -94,7 +94,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @see Numbas.jme.rules.Ruleset#simplify
      * @param {Numbas.jme.tree} exprTree
-     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
+     * @param {Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} allowUnbound
      * @returns {Numbas.jme.tree}
@@ -924,9 +924,9 @@ function texPatternName(display) {
  * @type {Object.<String>}
  */
 var specialNames = jme.display.specialNames = {
-    'm_nothing': texPatternName('nothing'),
-    'm_number': texPatternName('number'),
-    'm_name': texPatternName('name')
+    '$z': texPatternName('nothing'),
+    '$n': texPatternName('number'),
+    '$v': texPatternName('name')
 }
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
