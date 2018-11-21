@@ -400,8 +400,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Boolean}
      */
     eq: function(a,b) {
-        if(isNaN(a)) {
-            return isNaN(b);
+        if(typeof(a)!=='object' && isNaN(a)) {
+            return typeof(b)!='object' && isNaN(b);
         }
         if(a.complex)
         {

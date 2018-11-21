@@ -258,6 +258,7 @@
 					assert.equal(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
                     assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
                     assert.ok(Numbas.math.eq(NaN,NaN),'NaN = NaN');
+                    assert.notOk(Numbas.math.eq({complex:true,re:1,im:1},{complex:true,re:1,im:2}));
 				});
 
                 var evaluate = function(t,scope) { 
@@ -1049,6 +1050,7 @@
 					function simplifyExpression(expr,rules) {
 						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
 					}
+                    assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
 					assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');

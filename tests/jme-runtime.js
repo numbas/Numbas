@@ -2950,8 +2950,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Boolean}
      */
     eq: function(a,b) {
-        if(isNaN(a)) {
-            return isNaN(b);
+        if(typeof(a)!=='object' && isNaN(a)) {
+            return typeof(b)!='object' && isNaN(b);
         }
         if(a.complex)
         {
@@ -6008,6 +6008,37 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return v.value;
         }
     },
+
+    /** Mark a token as 'safe', so it doesn't have {@link Numbas.jme.subvars} applied to it, or any strings it contains, when it's evaluated
+     * @param {Numbas.jme.token} t
+     * @returns {Numbas.jme.token}
+     */
+    makeSafe: function(t) {
+        if(!t) {
+            return t;
+        }
+        switch(t.type) {
+            case 'string':
+                t.safe = true;
+                var t2 = new TString(t.value);
+                if(t.latex!==undefined) {
+                    t2.latex = t.latex;
+                }
+                t2.safe = true;
+                return t2;
+            case 'list':
+                return new TList(t.value.map(jme.makeSafe));
+            case 'dict':
+                var o = {};
+                for(var x in t.value) {
+                    o[x] = jme.makeSafe(t.value[x]);
+                }
+                return new TDict(o);
+            default:
+                return t;
+        }
+    },
+
     /** Wrap up a plain JavaScript value (number, string, bool or array) as a {@link Numbas.jme.token}.
      * @param {Object} v
      * @param {String} typeHint - name of the expected type (to differentiate between, for example, matrices, vectors and lists
@@ -6809,7 +6840,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             if(!tok.safe && value.contains('{')) {
                 value = jme.contentsubvars(value,scope)
                 var t = new TString(value);
-                t.latex = tok.latex
+                if(tok.latex!==undefined) {
+                    t.latex = tok.latex
+                }
                 return t;
             } else {
                 return tok;
