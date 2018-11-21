@@ -476,6 +476,11 @@ table {
 	margin: .5em 0;
 }
 
+.part.gap {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .question > .parts {
 	margin-left: 1em;
 }
@@ -534,6 +539,15 @@ table {
 
 .stepsBtn {
 	margin-bottom: 1em;
+}
+
+
+.multiplechoice {
+    margin-bottom: 0;
+}
+
+.gap .multiplechoice {
+    display: inline-block;
 }
 
 .multiplechoice li {
