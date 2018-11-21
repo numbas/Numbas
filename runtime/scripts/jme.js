@@ -549,7 +549,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 t2.safe = true;
                 return t2;
             case 'list':
-                console.log(t);
                 return new TList(t.value.map(jme.makeSafe));
             case 'dict':
                 var o = {};
