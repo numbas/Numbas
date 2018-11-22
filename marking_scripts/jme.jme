@@ -16,7 +16,7 @@ scope_vars (Variables already defined in the scope):
     definedvariables()
 
 studentVariables (Variables used in the student's answer): 
-    set(findvars(studentExpr))-set(scope_vars)
+    set(findvars(studentExpr))
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in settings["expectedVariableNames"]),x,list(studentVariables)),
@@ -68,7 +68,7 @@ correctExpr (The correct answer, parsed):
     parse(settings["correctAnswer"])
 
 correctVars (Variables used in the correct answer): 
-    set(findvars(correctExpr))-set(scope_vars)
+    set(findvars(correctExpr))
 
 vRange (The range to pick variable values from): 
     settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
@@ -82,7 +82,7 @@ vset (The sets of variable values to test against):
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
     map(
         try(
-            resultsEqual(eval(studentexpr,vars),eval(correctexpr,vars),settings["checkingType"],settings["checkingAccuracy"]),
+            resultsEqual(unset(question_definitions,eval(studentexpr,vars)),unset(question_definitions,eval(correctexpr,vars)),settings["checkingType"],settings["checkingAccuracy"]),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));

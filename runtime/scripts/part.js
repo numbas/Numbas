@@ -932,6 +932,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         studentAnswer = jme.makeSafe(studentAnswer);
         return {
             path: jme.wrapValue(this.path),
+            question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),
             marks: new jme.types.TNum(this.marks),

@@ -363,6 +363,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('variablesSet',function() {
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
+            q.local_definitions = {
+                variables: Object.keys(q.variablesTodo),
+                functions: Object.keys(q.functionsTodo),
+                rulesets: Object.keys(q.rulesets)
+            };
             q.unwrappedVariables = {};
             var all_variables = q.scope.allVariables()
             for(var name in all_variables) {

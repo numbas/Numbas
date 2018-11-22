@@ -1173,6 +1173,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     deleteVariable: function(name) {
         this.deleted.variables[name] = true;
     },
+    /** Mark the given function name as deleted from the scope.
+     * @param {String} name
+     */
+    deleteFunction: function(name) {
+        this.deleted.functions[name] = true;
+    },
+    /** Mark the given ruleset name as deleted from the scope.
+     * @param {String} name
+     */
+    deleteRuleset: function(name) {
+        this.deleted.rulesets[name] = true;
+    },
     /** Get the object with given name from the given collection
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
      * @param {String} name - the name of the object to retrieve
@@ -1302,6 +1314,31 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         this.variables = this.allVariables();
         this.rulesets = this.allRulesets();
     },
+
+    /** Return a new scope created by unsetting the members specified by the given object.
+     * @param {Object} defs - a dictionary with elements `variables`, `rulesets` and `functions`, each lists of names to unset.
+     * @returns {Numbas.jme.Scope}
+     */
+    unset: function(defs) {
+        var s = new Scope([this]);
+        if(defs.variables) {
+            defs.variables.forEach(function(v) {
+                s.deleteVariable(v);
+            });
+        }
+        if(defs.functions) {
+            defs.functions.forEach(function(f) {
+                s.deleteFunction(f);
+            });
+        }
+        if(defs.rulesets) {
+            defs.rulesets.forEach(function(r) {
+                s.deleteRuleset(r);
+            });
+        }
+        return s;
+    },
+
     /** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
      * @param {JME} expr
      * @param {Object.<Numbas.jme.token|Object>} [variables] - Dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
