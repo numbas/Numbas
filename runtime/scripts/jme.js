@@ -500,6 +500,37 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return v.value;
         }
     },
+
+    /** Mark a token as 'safe', so it doesn't have {@link Numbas.jme.subvars} applied to it, or any strings it contains, when it's evaluated
+     * @param {Numbas.jme.token} t
+     * @returns {Numbas.jme.token}
+     */
+    makeSafe: function(t) {
+        if(!t) {
+            return t;
+        }
+        switch(t.type) {
+            case 'string':
+                t.safe = true;
+                var t2 = new TString(t.value);
+                if(t.latex!==undefined) {
+                    t2.latex = t.latex;
+                }
+                t2.safe = true;
+                return t2;
+            case 'list':
+                return new TList(t.value.map(jme.makeSafe));
+            case 'dict':
+                var o = {};
+                for(var x in t.value) {
+                    o[x] = jme.makeSafe(t.value[x]);
+                }
+                return new TDict(o);
+            default:
+                return t;
+        }
+    },
+
     /** Wrap up a plain JavaScript value (number, string, bool or array) as a {@link Numbas.jme.token}.
      * @param {Object} v
      * @param {String} typeHint - name of the expected type (to differentiate between, for example, matrices, vectors and lists
@@ -1337,6 +1368,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     deleteVariable: function(name) {
         this.deleted.variables[name] = true;
     },
+    /** Mark the given function name as deleted from the scope.
+     * @param {String} name
+     */
+    deleteFunction: function(name) {
+        this.deleted.functions[name] = true;
+    },
+    /** Mark the given ruleset name as deleted from the scope.
+     * @param {String} name
+     */
+    deleteRuleset: function(name) {
+        this.deleted.rulesets[name] = true;
+    },
     /** Get the object with given name from the given collection
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
      * @param {String} name - the name of the object to retrieve
@@ -1470,6 +1513,31 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         this.variables = this.allVariables();
         this.rulesets = this.allRulesets();
     },
+
+    /** Return a new scope created by unsetting the members specified by the given object.
+     * @param {Object} defs - a dictionary with elements `variables`, `rulesets` and `functions`, each lists of names to unset.
+     * @returns {Numbas.jme.Scope}
+     */
+    unset: function(defs) {
+        var s = new Scope([this]);
+        if(defs.variables) {
+            defs.variables.forEach(function(v) {
+                s.deleteVariable(v);
+            });
+        }
+        if(defs.functions) {
+            defs.functions.forEach(function(f) {
+                s.deleteFunction(f);
+            });
+        }
+        if(defs.rulesets) {
+            defs.rulesets.forEach(function(r) {
+                s.deleteRuleset(r);
+            });
+        }
+        return s;
+    },
+
     /** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`
      * @param {JME} expr
      * @param {Object.<Numbas.jme.token|Object>} [variables] - Dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
@@ -1530,7 +1598,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             if(!tok.safe && value.contains('{')) {
                 value = jme.contentsubvars(value,scope)
                 var t = new TString(value);
-                t.latex = tok.latex
+                if(tok.latex!==undefined) {
+                    t.latex = tok.latex
+                }
                 return t;
             } else {
                 return tok;

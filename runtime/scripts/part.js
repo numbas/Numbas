@@ -767,8 +767,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = feedback.markingFeedback.slice();
         var finalised_result = {states: [], valid: false, credit: 0};
         try {
-            this.getCorrectAnswer(scope);
-            finalised_result = this.mark();
+            finalised_result = this.mark(scope);
         } catch(e) {
             this.giveWarning(e.message);
         }
@@ -848,15 +847,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
      * @see Numbas.parts.Part#markingScript
      * @see Numbas.parts.Part#answered
+     * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.marking.finalised_state}
      */
-    mark: function() {
+    mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
         if(studentAnswer==undefined) {
             this.setCredit(0,R('part.marking.nothing entered'));
             return;
         }
-        var result = this.mark_answer(studentAnswer);
+        var result = this.mark_answer(studentAnswer,scope);
         var finalised_result = marking.finalise_state(result.states.mark)
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
@@ -929,8 +929,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         part.answered = valid;
     },
     marking_parameters: function(studentAnswer) {
+        studentAnswer = jme.makeSafe(studentAnswer);
         return {
             path: jme.wrapValue(this.path),
+            question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),
             marks: new jme.types.TNum(this.marks),
@@ -942,13 +944,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Run the marking script against the given answer.
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      * @param {Numbas.jme.token} studentAnswer
+     * @param {Numbas.jme.Scope} scope
      * @see Numbas.parts.Part#mark
      * @returns {Numbas.marking.marking_script_result}
      */
-    mark_answer: function(studentAnswer) {
+    mark_answer: function(studentAnswer,scope) {
         try {
+            this.getCorrectAnswer(scope);
             var result = this.markingScript.evaluate(
-                this.getScope(),
+                scope,
                 this.marking_parameters(studentAnswer)
             );
         } catch(e) {

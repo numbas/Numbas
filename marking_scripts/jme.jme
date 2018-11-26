@@ -24,7 +24,8 @@ studentMatch (The result of matching the student's expression against the patter
 correctMatch (The result of matching the correct answer against the pattern):
     match(correctExpr,settings["mustMatchPattern"])
 
-compareName (The name of the matched group from each expression to compare): settings["nameToCompare"]
+compareName (The name of the matched group from each expression to compare): 
+    settings["nameToCompare"]
 
 studentCompare (The part of the student's expression to compare):
     if(
@@ -46,11 +47,11 @@ failNameToCompare (If comparing just a subexpression, stop marking if the studen
         end()
     )
 
-studentVariables (Variables used in the student's answer):
-    set(findvars(studentCompare))-set(scope_vars)
+studentVariables (Variables used in the student's answer): 
+    set(findvars(studentExpr))
 
 correctVariables (Variables used in the correct answer):
-    set(findvars(correctCompare))-set(scope_vars)
+    set(findvars(correctCompare))
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in settings["expectedVariableNames"]),x,list(studentVariables)),
@@ -98,7 +99,7 @@ requiredStringsPenalty:
         warn(settings["mustHaveMessage"])
     )
 
-vRange (The range to pick variable values from):
+vRange (The range to pick variable values from): 
     settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
 
 vset (The sets of variable values to test against):
@@ -110,7 +111,7 @@ vset (The sets of variable values to test against):
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
     map(
         try(
-            resultsEqual(eval(studentCompare,vars),eval(correctCompare,vars),settings["checkingType"],settings["checkingAccuracy"]),
+            resultsEqual(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));

@@ -1054,6 +1054,16 @@ jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
         tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
     }
 }
+
+newBuiltin('unset',[TDict,'?'],'?',null,{
+    evaluate: function(args,scope) {
+        var defs = jme.unwrapValue(scope.evaluate(args[0]));
+        var nscope = scope.unset(defs);
+        return nscope.evaluate(args[1]);
+    }
+});
+Numbas.jme.lazyOps.push('unset');
+
 newBuiltin('sort',[TList],TList, null, {
     evaluate: function(args,scope)
     {

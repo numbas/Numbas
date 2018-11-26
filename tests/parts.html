@@ -40,11 +40,12 @@
 
                 var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(data, 'p0', null, null); };
 
-                function mark_part(p, answer) {
+                function mark_part(p, answer, scope) {
                     var answer = answer;
+                    scope = scope || p.getScope();
                     p.storeAnswer(answer);
                     p.setStudentAnswer();
-                    return p.mark();
+                    return p.mark(scope);
                 }
 
                 function matrix(cells) {
@@ -204,6 +205,25 @@
                     assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
                 });
 
+                QUnit.test('Variables defined by the question aren\'t used in evaluating student\'s expression', function(assert) {
+                    var data = {"name":"scope used when evaluating JME","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"[1,2,3]","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $2a$</p>","answer":"2a","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]};
+                    var done = assert.async();
+
+                    var q = Numbas.createQuestionFromJSON(data, 0);
+                    q.generateVariables();
+                    q.signals.on('ready',function() {
+                        var p = q.getPart('p0');
+                        p.storeAnswer('2a');
+                        p.setStudentAnswer();
+                        q.submit();
+
+                        assert.equal(q.score,1,'Score is 1');
+
+                        done();
+                    });
+
+                });
+
                 QUnit.module('Pattern match');
                 QUnit.test('Answer is "hi+"', function(assert) {
                     var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});
@@ -303,7 +323,7 @@
                     var p = createPartFromJSON({type:'gapfill', gaps: [{type: 'jme', answer: 'x+2'}]});
                     var scope = p.getScope();
                     scope.question = {getPart: function(path){ return p.gaps.filter(function(p){return p.path==path})[0]; }};
-                    var res = mark_part(p,['x+2']);
+                    var res = mark_part(p,['x+2'],scope);
                     assert.equal(res.credit,1,'"x+2" correct');
                 });
                 QUnit.test('One JME gap with string restrictions', function(assert) {
@@ -319,6 +339,8 @@
                         var res2 = mark_part(p,['x*(x+1)']);
                         assert.equal(res2.credit,1,"x*(x+1) is correct");
                         done();
+                    }).catch(function(e) {
+                        console.error(e);
                     });
                 });
 

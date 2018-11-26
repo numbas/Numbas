@@ -258,6 +258,7 @@
 					assert.equal(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
                     assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
                     assert.ok(Numbas.math.eq(NaN,NaN),'NaN = NaN');
+                    assert.notOk(Numbas.math.eq({complex:true,re:1,im:1},{complex:true,re:1,im:2}));
 				});
 
                 var evaluate = function(t,scope) {
@@ -1234,12 +1235,12 @@
 					assert.ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
 				});
 
-                QUnit.test('tree to JME',function(assert) {
-          
-                    function simplifyExpression(expr,rules) {
-                        return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
-                    }
+				QUnit.test('tree to JME', function(assert) {
+					function simplifyExpression(expr,rules) {
+						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
+					}
                     assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
+                    assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
 					assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
@@ -1257,6 +1258,7 @@
                     assert.equal(simplifyExpression('3i/5','basic,collectComplex'),'3i/5','don\'t put brackets on imaginary numerator');
                     assert.equal(simplifyExpression('-3/5','basic'),'-3/5','don\'t put brackets on single number numerator');
                     assert.equal(simplifyExpression('3/4i','basic,collectComplex'),'(3/4)*i','put brackets round a fraction preceding i');
+                    assert.equal(simplifyExpression('(e^t)^2'),'(e^t)^2','put brackets around power taken to a power');
 					assert.equal(simplifyExpression('3!',[]),'3!','3!');
 					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','(3+1)! is bracketed');
 					assert.equal(simplifyExpression('pi*x',['all']),'pi*x','pi*x doesn\t omit the *');

@@ -243,7 +243,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         if( obj.doesMarking() && showFeedbackIcon && (revealed || (settings.showAnswerState && anyAnswered())) ) {
             if(credit<=0) {
                 return 'wrong';
-            } else if(credit==1) {
+            } else if(Numbas.math.precround(credit,10)==1) {
                 return 'correct';
             } else {
                 return 'partial';

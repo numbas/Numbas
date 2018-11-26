@@ -319,7 +319,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     values: {interpreted_answer:answer}
                 }
             } else {
-                var part_result = part.mark_answer(answer);
+                var part_result = part.mark_answer(answer,scope);
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
