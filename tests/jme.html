@@ -244,6 +244,7 @@
 					raisesNumbasError(assert, function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
                     raisesNumbasError(assert, function(){ compile('["a":1,2]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: ["a":1,2]');
                     raisesNumbasError(assert, function(){ compile('[2,"a":1]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: [2,"a":1]');
+                    assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
 				})
 			
 				

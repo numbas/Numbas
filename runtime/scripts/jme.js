@@ -776,7 +776,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         pos += olen - expr.length;
         var tokens = [];
         var i = 0;
-        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',this.ops.join('|')));
+        var re_op = new RegExp(this.re.re_op.source.replace('__ANY_OP__',this.ops.join('|')),'i');
         while( expr.length ) {
             olen = expr.length;
             expr = expr.replace(this.re.re_strip_whitespace, '');    //get rid of whitespace
@@ -801,7 +801,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else if (result = expr.match(re_op)) {
                 if(result[2])        //if word-ish operator
                     result[0] = result[2];
-                token = result[0];
+                token = result[0].toLowerCase();
                 //work out if operation is being used prefix or postfix
                 var nt;
                 var postfix = false;
