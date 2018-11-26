@@ -1068,6 +1068,7 @@
                     assert.equal(simplifyExpression('3i/5','basic'),'3i/5','don\'t put brackets on imaginary numerator');
                     assert.equal(simplifyExpression('-3/5','basic'),'-3/5','don\'t put brackets on single number numerator');
                     assert.equal(simplifyExpression('3/4i','basic'),'(3/4)*i','put brackets round a fraction preceding i');
+                    assert.equal(simplifyExpression('(e^t)^2'),'(e^t)^2','put brackets around power taken to a power');
 
 					assert.equal(simplifyExpression('3!',[]),'3!','3!');
 					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','3!');

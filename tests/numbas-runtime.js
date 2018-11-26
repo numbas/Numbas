@@ -10835,7 +10835,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 arg_op = args[i].tok.name;
             } else if(arg_type=='number' && arg_value.complex && arg_value.im!=0) {
                 if(arg_value.re!=0) {
-                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction becuase this number will be written in the form 'a+bi'
+                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
                 } else if(arg_value.im!=1) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                 }
@@ -10971,7 +10971,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '-': [{},{'+':true,'-':true}],
     '*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
     '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
-    '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
+    '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true, '^': true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
