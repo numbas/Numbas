@@ -1277,7 +1277,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length)) {
             ic -= 1;
         }
-        debug('backtracked to '+ic);
+        //debug('backtracked to '+ic);
 
         if(ic<start) {
             if(options.allowOtherTerms && start<input.length-1) {
@@ -1306,35 +1306,35 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         //show();
         steps += 1;
         while(pc<pattern.length && consumed(pc)) { // if have consumed this term fully, move on
-            debug('term '+pc+' consumed, move on');
+            //debug('term '+pc+' consumed, move on');
             pc += 1;
         }
         if(ic==input.length) { // if we've reached the end of the input
             while(pc<pattern.length && enough(pc)) {
-                debug('got enough of '+pc+', skip forward');
+                //debug('got enough of '+pc+', skip forward');
                 pc += 1;
             }
             if(pc==pattern.length) { // if we've consumed all the terms
                 if(!pattern.every(function(_,p) { return enough(p); })) {
-                    debug('reached end but some terms not matched enough times');
+                    //debug('reached end but some terms not matched enough times');
                     backtrack();
                 } else {
-                    debug('reached end of pattern and end of input: done');
+                    //debug('reached end of pattern and end of input: done');
                     done = true;
                 }
             } else {
-                debug('end of input but still pattern to match')
+                //debug('end of input but still pattern to match')
                 backtrack();
             }
         } else if(pc>=pattern.length) {
-            debug("end of pattern but unconsumed input");
+            //debug("end of pattern but unconsumed input");
             if(pc==pattern.length && options.commutative && options.allowOtherTerms) {
-                debug('capturing '+ic+' as ignored end term');
+                //debug('capturing '+ic+' as ignored end term');
                 capture.push(pattern.length);
                 advance_input();
             } else if(pc==pattern.length && !options.commutative && options.allowOtherTerms) {
                 while(ic<input.length) {
-                    debug('capturing '+ic+' as ignored end term');
+                    //debug('capturing '+ic+' as ignored end term');
                     capture.push(pattern.length);
                     advance_input();
                 }
@@ -1342,14 +1342,14 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
                 backtrack();
             }
         } else if(options.checkFn(input[ic],pattern[pc],ic,pc) && options.constraintFn(capture,ic,pc)) {
-            debug('capture '+ic+' at '+pc);
+            //debug('capture '+ic+' at '+pc);
             capture.push(pc);
             advance_input();
         } else if(options.commutative || enough(pc)) {
-            debug('trying the next pattern term');
+            //debug('trying the next pattern term');
             pc += 1;
         } else {
-            debug('can\'t match next input')
+            //debug('can\'t match next input')
             backtrack();
         }
     }
@@ -1374,7 +1374,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
         var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
     }
-    debug(result);
+    //debug(result);
     return {ignored_start_terms: ignored_start_terms, result: result, ignored_end_terms: ignored_end_terms};
 }
 
