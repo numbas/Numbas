@@ -1538,6 +1538,103 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '=': [{},{}],
     'fact': [{'+': true, '-': true}]
 };
+
+function align(name,items) {
+    function centre(line,n) {
+        if(line.length>=n) {
+            return line;
+        }
+        var npad = (n-line.length)/2;
+        var nlpad = Math.floor(npad);
+        var nrpad = Math.ceil(npad);
+        for(var i=0;i<nlpad;i++) {
+            line = ' '+line;
+        }
+        for(var i=0;i<nrpad;i++) {
+            line = line+' ';
+        }
+        return line;
+    }
+    
+    var item_lines = items.map(function(item){return item.split('\n')});
+    var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m,l){return Math.max(l.length,m)},0)});
+    console.log(item_widths);
+    var num_lines = item_lines.reduce(function(t,ls){return Math.max(ls.length,t)},0);
+    item_lines = item_lines.map(function(lines,i) {
+        var w = item_widths[i];
+        var o = [];
+        for(var j=0;j<num_lines;j++) {
+            var l = lines[j] || '';
+            for(var i=l.length;i<w;i++) {
+                l += ' ';
+            }
+            o.push(l);
+        }
+        return o;
+    });
+    var bottom_lines = [];
+    for(var i=0;i<num_lines;i++) {
+        bottom_lines.push(item_lines.map(function(lines){return lines[i]}).join('  '));
+    }
+    var bottom_line = bottom_lines.join('\n');
+    var width = item_widths.reduce(function(t,w){return t+w},0)+2*(items.length-1);
+    var ci = Math.floor(width/2-0.5);
+    var top_line = '';
+    top_line = centre(name,width);
+    var middle_line;
+    if(items.length==1) {
+        middle_line = '';
+        for(var i=0;i<width;i++) {
+            middle_line += i==ci ? '│' : ' ';
+        }
+    } else {
+        middle_line = items.map(function(rarg,i) {
+            var s = '';
+            var mid = Math.floor(item_widths[i]/2-0.5);
+            for(var j=0;j<item_widths[i];j++) {
+                if(i==0) {
+                    s += j<mid ? ' ' : j==mid ? '┌' : '─';
+                } else if(i==items.length-1) {
+                    s += j<mid ? '─' : j==mid ? '┐' : ' ';
+                } else {
+                    s += j==mid ? '┬' : '─';
+                }
+            }
+            return s;
+        }).join('──');
+    }
+    var top_joins = {
+        '│': '│',
+        '┌': '├',
+        '┐': '┤',
+        '─': '┴',
+        '┬': '┼'
+    }
+    var mid = top_joins[middle_line[ci]];
+    middle_line = middle_line.slice(0,ci)+mid+middle_line.slice(ci+1);
+    if(top_line.length>bottom_line.length) {
+        middle_line = centre(middle_line,name.length);
+        bottom_line = centre(bottom_line,name.length);
+    }
+    return [top_line,middle_line,bottom_line].join('\n');
+}
+
+/** Display a tree as a diagram using
+ * @param {Numbas.jme.tree} tree
+ * @returns {String}
+ */
+var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
+    switch(tree.tok.type) {
+        case 'op':
+        case 'function':
+            var args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            console.log(treeToJME(tree));
+            return align(tree.tok.name, args);
+        default:
+            return treeToJME(tree);
+    }
+};
+
 /** For backwards compatibility, copy references from some Numbas.jme.rules members to Numbas.jme.display.
  *  These used to belong to Numbas.jme.display, but were moved into a separate file.
  */

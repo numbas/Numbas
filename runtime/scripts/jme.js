@@ -883,7 +883,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
                 var matched_name = result[0];
-                var name = matched_name;
+                var name = matched_name.toLowerCase();
                 var nt;
                 var postfix = false;
                 var prefix = false;
