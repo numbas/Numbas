@@ -261,7 +261,7 @@
                     var res = mark_part(p,matrix([['1.222','1.227'],['3.000','4.000']]));
                     assert.equal(res.credit,0.5,'[[1.222,1.227],[3.000,4.000]] partially correct');
                     var res = mark_part(p,matrix([['1.222','1.227'],['3.00','4.00']]));
-                    assert.ok(contains_note(res,{note:'all_same_precision',message:'part.matrix.not all cells same precision'}),'not all cells same precision warning');
+                    assert.ok(contains_note(res,{note:'all_same_precision',message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
                 });
 
                 QUnit.module('Choose one from a list');
