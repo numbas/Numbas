@@ -1062,7 +1062,6 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @returns {Boolean|Object.<Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
  */
 function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
-    //console.log('matchTermSequence');
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -1112,9 +1111,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     function constraint_ok(assignment,ic,pc) {
         var m1 = matches[ic][pc];
         var ruleTerm = ruleTerms[pc];
-        //console.log(`constraint_ok? ${ic} ${pc} ${JSON.stringify(assignment)}`);
         if(ruleTerm.inside_equalnames.length==0 && ruleTerm.outside_equalnames.length==0) {
-            //console.log('no equalnames');
             return true;
         }
         var ok = assignment.every(function(p,i) {
@@ -1126,13 +1123,10 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
             return ruleTerm[equalnames].every(function(name) {
                 var e1 = m1[equalnames][name];
                 var e2 = m2[equalnames][name];
-                //console.log(`try ${name}: ${Numbas.jme.display.treeToJME(e1)} (${ic},${pc}) v ${Numbas.jme.display.treeToJME(e2)} (${i},${p})`);
                 if(e1===undefined || e2===undefined) {
-                    //console.log(true);
                     return true;
                 }
                 var res = jme.compareTrees(e1, e2) == 0;
-                //console.log(res);
                 return res;
             });
         });
@@ -1166,12 +1160,9 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         if(!namedTerms[name]) {
             namedTerms[name] = [];
         }
-        //console.log('name',name,identified_names[name]!==undefined,identified_names[name]!==ruleTerm,namedTerms[name].length);
-        //console.log(Numbas.jme.display.treeToJME(exprTree));
         if(identified_names[name]!==undefined && identified_names[name]!==ruleTerm && namedTerms[name].length) {
             return;
         }
-        //console.log('got',name,Numbas.jme.display.treeToJME(exprTree));
         namedTerms[name].push(exprTree);
     }
     /** Record that `exprTree` was matched against `ruleTerm` - add `exprTree` to all of `ruleTerm`'s names.
@@ -1241,10 +1232,6 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
     var pc = 0;
     var ic = 0;
 
-    function debug(s) {
-        ////console.log(s);
-    }
-
     /** Count the number of times we have matched pattern term `p` so far.
      * @param {Number} p - index of the term
      * @returns {Number}
@@ -1270,7 +1257,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
      * Terms before the start will be returned in `ignored_start_terms`
      */
     function increment_start() {
-        debug('increment start position');
+        //debug('increment start position');
         start += 1;
         ic = start;
         pc = 0;
@@ -1279,7 +1266,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
      * If we're already at the start and `allowOtherTerms` is enabled, advance the start pointer.
      */
     function backtrack() {
-        debug('backtrack');
+        //debug('backtrack');
         if(options.allowOtherTerms && ic==start && capture.length==start && start<input.length-1) {
             capture.push(-1);
             increment_start();
@@ -1754,7 +1741,6 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     simplify: function(exprTree,scope) {
         pd += '  ';
         poo += 1;
-        //console.log(pd+Numbas.jme.display.treeToJME(exprTree));
         if(poo>100) {
             //throw(new Error("Poo"));
         }
@@ -1771,22 +1757,16 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
             for(var i=0;i<this.rules.length;i++) {
                 var result = this.rules[i].replace(exprTree,scope);
                 if(result.changed) {
-                    if(!jme.compare(exprTree,result.expression,{},scope)) {
- //                       console.log(`${pd}applied ${this.rules[i].patternString} ${this.rules[i].name}`);
-                        console.log(`${pd}${Numbas.jme.display.treeToJME(exprTree)}\n${pd}    ${this.rules[i].patternString} ${this.rules[i].name}\n${pd}${Numbas.jme.display.treeToJME(result.expression)}\n\n`);
-                    }
-                    changed = true;
-                    exprTree = result.expression;
-                    depth += 1;
                     if(depth > 100) {
                         var str = Numbas.jme.display.treeToJME(exprTree);
                         if(seen.indexOf(str)!=-1) {
-                            //console.log(applied);
-                            //console.log(str);
                             throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
                         }
                         seen.push(str);
                     }
+                    changed = true;
+                    exprTree = result.expression;
+                    depth += 1;
                     break;
                 }
             }
@@ -1881,8 +1861,9 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','s','-(x/y)'],
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
-        ['`!-? `& (-(real:$n `| `!$n);x) * ?;y','asg','-(x*y)'],            //take negation to left of multiplication
-        ['-(?;a+?`+;b)','','-a-b']
+        ['`!-? `& (-(real:$n `| `!$n);x) * ?;y','asgc','-(x*y)'],            //take negation to left of multiplication
+        ['-(?;a+?`+;b)','','-a-b'],
+        ['?;a+(-?;b-?;c)','','a-b-c']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
@@ -1950,7 +1931,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['$n;n ^ $n;m','','eval(n^m)']
     ],
     cancelTerms: [
-        ['((`+- $n `: 1);n * (?`+ `& `! -?);=x `| -?;=x;n:-1) + ((`+- $n `: 1);m * (?`+ `& `! -?);=x `| -?;=x;m:-1)','acg','eval(n+m)*x']
+        ['m_exactly((`+- $n `: 1);n * (?`+ `& `! -?);=x `| -?;=x;n:-1) + m_exactly((`+- $n `: 1);m * (?`+ `& `! -?);=x `| -?;=x;m:-1)','acg','eval(n+m)*x']
     ],
     cancelFactors: [
         ['?;=x^(? `: 1);n * ?;=x^(? `: 1);m','acg','x^(m+n)'],
