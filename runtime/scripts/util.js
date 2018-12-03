@@ -408,9 +408,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     isNonemptyHTML: function(html) {
-        var d = document.createElement('div');
-        d.innerHTML = html;
-        return $(d).text().trim().length>0;
+        if(window.document) {
+            var d = document.createElement('div');
+            d.innerHTML = html;
+            return $(d).text().trim().length>0;
+        } else {
+            return html.trim() != '';
+        }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
      * @param {Object} b
