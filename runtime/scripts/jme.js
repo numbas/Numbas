@@ -712,16 +712,16 @@ var Parser = jme.Parser = function(options) {
     this.ops = this.ops.slice();
     this.re = util.extend_object({},this.re);
     this.tokeniser_types = this.tokeniser_types.slice();
-    this.constants = util.extend_object({}, jme.constants);
-    this.prefixForm = util.extend_object({}, jme.prefixForm);
-    this.postfixForm = util.extend_object({}, jme.postfixForm);
-    this.arity = util.extend_object({}, jme.arity);
-    this.precedence = util.extend_object({}, jme.precedence);
-    this.commutative = util.extend_object({}, jme.commutative);
-    this.associative = util.extend_object({}, jme.associative);
-    this.funcSynonyms = util.extend_object({}, jme.funcSynonyms);
-    this.opSynonyms = util.extend_object({}, jme.opSynonyms);
-    this.rightAssociative = util.extend_object({}, jme.rightAssociative);
+    this.constants = {};
+    this.prefixForm = {};
+    this.postfixForm = {};
+    this.arity = {};
+    this.precedence = {};
+    this.commutative = {};
+    this.associative = {};
+    this.funcSynonyms = {};
+    this.opSynonyms = {};
+    this.rightAssociative = {};
 }
 jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Default options for new parsers
@@ -731,6 +731,84 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         closeMissingBrackets: false,
         addMissingArguments: false
     },
+
+    /** There are many dictionaries storing definitions of things like constants and alternate names, which are defined both globally in Numbas.jme and locally in a Parser.
+     * This is a wrapper to load the value of the setting if it exists, and return `undefined` otherwise.
+     * @param {String} setting - the name of the dictionary. Both `this` and of `Numbas.jme` must have members with this name.
+     * @param {String} name - the name of the setting to try to load from the dictionary.
+     * @returns {*}
+     */
+    getSetting: function(setting,name) {
+        if(name in this[setting]) {
+            return this[setting][name];
+        }
+        if(name in jme[setting]) {
+            return jme[setting][name];
+        }
+        return undefined;
+    },
+
+    /** If the given name is defined as a constant, return its value, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getConstant: function(name) { return this.getSetting('constants',name); },
+
+    /** If the given operator name has a defined prefix form, return it, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {String}
+     */
+    getPrefixForm: function(name) { return this.getSetting('prefixForm',name); },
+
+    /** If the given operator name has a defined postfix form, return it, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {String}
+     */
+    getPostfixForm: function(name) { return this.getSetting('postfixForm',name); },
+
+    /** Get the arity of the given operator.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getArity: function(name) { return this.getSetting('arity',name) || 2; },
+
+    /** Get the precedence of the given operator.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getPrecedence: function(name) { return this.getSetting('precedence',name); },
+
+    /** Is the given operator commutative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isCommutative: function(name) { return this.getSetting('commutative',name) || false; },
+
+    /** Is the given operator associative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isAssociative: function(name) { return this.getSetting('associative',name) || false; },
+
+    /** Is the given operator right-associative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isRightAssociative: function(name) { return this.getSetting('rightAssociative',name) || false; },
+
+    /** If the given function name has a synonym, use it, otherwise return the original name.
+     * @see Numbas.jme.funcSynonyms
+     * @param {String} name
+     * @returns {String}
+     */
+    funcSynonym: function(name) { return this.getSetting('funcSynonyms',name) || name; },
+
+    /** If the given operator name has a synonym, use it, otherwise return the original name.
+     * @see Numbas.jme.opSynonyms
+     * @param {String} name
+     * @returns {String}
+     */
+    opSynonym: function(name) { return this.getSetting('opSynonyms',name) || name; },
 
     /** Binary operations
      * @type {Array.<String>}
@@ -830,12 +908,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     },
 
     op: function(name,postfix,prefix) {
-        var arity = 2;
-        if(this.arity[name]!==undefined) {
-            arity = this.arity[name];
-        }
-        var commutative = arity>1 && this.commutative[name] || false;
-        var associative = arity>1 && this.associative[name] || false;
+        var arity = this.getArity(name);
+        var commutative = arity>1 && this.isCommutative(name);
+        var associative = arity>1 && this.isAssociative(name);
 
         return new TOp(name,postfix,prefix,arity,commutative,associative);
     },
@@ -887,17 +962,17 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var nt;
                 var postfix = false;
                 var prefix = false;
-                if(name in this.opSynonyms) {
-                    name = this.opSynonyms[name];
-                }
+                name = this.opSynonym(name);
                 if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
-                    if(name in this.prefixForm) {
-                        name = this.prefixForm[name];
+                    var prefixForm = this.getPrefixForm(name);
+                    if(prefixForm!==undefined) {
+                        name = prefixForm;
                         prefix = true;
                     }
                 } else {
-                    if(name in this.postfixForm) {
-                        name = this.postfixForm[name];
+                    var postfixForm = this.getPostfixForm(name);
+                    if(postfixForm !== undefined) {
+                        name = postfixForm;
                         postfix = true;
                     }
                 }
@@ -914,8 +989,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 if(!annotation) {
                     var lname = name.toLowerCase();
                     // fill in constants here to avoid having more 'variables' than necessary
-                    if(lname in this.constants) {
-                        token = new TNum(this.constants[lname]);
+                    var constant = this.getConstant(lname);
+                    if(constant !== undefined) {
+                        token = new TNum(constant);
                     } else {
                         token = new TName(name);
                     }
@@ -1032,9 +1108,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var i = this.i;
             // if followed by an open bracket, this is a function application
             if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
-                    if(this.funcSynonyms[tok.name]) {
-                        tok.name = this.funcSynonyms[tok.name];
-                    }
+                    tok.name = this.funcSynonym(tok.name);
                     this.stack.push(new TFunc(tok.name,tok.annotation));
                     this.numvars.push(0);
                     this.olength.push(this.output.length);
@@ -1055,7 +1129,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         'op': function(tok) {
             if(!tok.prefix) {
-                var o1 = this.precedence[tok.name];
+                var o1 = this.getPrecedence(tok.name);
                 //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
                 
                 /** Should the next token on the stack be popped off?
@@ -1066,7 +1140,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         return false;
                     }
                     var prev = this.stack[this.stack.length-1];
-                    if(prev.type=="op" && ((o1 > this.precedence[prev.name]) || (!this.rightAssociative[tok.name] && o1 == this.precedence[prev.name]))) {
+                    if(prev.type=="op" && ((o1 > this.getPrecedence(prev.name)) || (!this.isRightAssociative(tok.name) && o1 == this.getPrecedence(prev.name)))) {
                         return true;
                     }
                     if(prev.type=='keypair' && prev.pairmode=='match') {
