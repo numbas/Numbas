@@ -216,8 +216,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         if('steps' in data) {
             data.steps.map(function(sd,i) {
-                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this, this.store);
-                p.addStep(sd,i);
+                var s = createPartFromJSON(sd, p.path+'s'+i, p.question, p, p.store);
+                p.addStep(s,i);
             });
         }
         var marking = {};
