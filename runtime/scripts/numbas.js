@@ -47,14 +47,14 @@ Numbas.showError = function(e)
     var message = (e || e.message)+'';
     message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
     Numbas.debug(message);
-    Numbas.display.showAlert(message);
+    Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };
 /** Generic error class. Extends JavaScript's Error
  * @constructor
  * @param {String} message - A description of the error. Localised by R.js.
  */
-Numbas.Error = function(message)
+Numbas.Error = function(message, args, originalError)
 {
     Error.call(this);
     if(Error.captureStackTrace) {
@@ -62,7 +62,14 @@ Numbas.Error = function(message)
     }
     this.name="Numbas Error";
     this.originalMessage = message;
-    this.message = R.apply(this,arguments);
+    this.message = R.apply(this,[message,args]);
+    this.originalMessages = [message];
+    if(originalError!==undefined) {
+        this.originalError = originalError;
+        if(originalError.originalMessages) {
+            this.originalMessages = this.originalMessages.concat(originalError.originalMessages);
+        }
+    }
 }
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
@@ -78,19 +85,39 @@ var scriptreqs = {};
  * @property {Array.<String>} fdeps - Scripts which this one depends on (it must run after them)
  * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
-function RequireScript(file)
+var RequireScript = Numbas.RequireScript = function(file,fdeps,callback)
 {
     this.file = file;
     scriptreqs[file] = this;
     this.backdeps = [];
-    this.fdeps = [];
+    this.fdeps = fdeps || [];
+    this.callback = callback;
 }
 RequireScript.prototype = {
     loaded: false,
     executed: false,
     backdeps: [],
     fdeps: [],
-    callback: null
+    callback: null,
+
+    
+    /** Try to run this script. It will run if all of its dependencies have run.
+     * Once it has run, every script which depends on it will try to run.
+     */
+    tryRun: function() {
+        if(this.loaded && !this.executed) {
+            var dependencies_executed = this.fdeps.every(function(r){ return scriptreqs[r].executed; });
+            if(dependencies_executed) {
+                if(this.callback) {
+                    this.callback({exports:window});
+                }
+                this.executed = true;
+                this.backdeps.forEach(function(r) {
+                    scriptreqs[r].tryRun();
+                });
+            }
+        }
+    }
 };
 /** Ask to load a javascript file. Unless `noreq` is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter.
  * @memberof Numbas
@@ -102,9 +129,11 @@ var loadScript = Numbas.loadScript = function(file,noreq)
     if(!noreq)
     {
         if(scriptreqs[file]!==undefined)
-            return;
+            return scriptreqs[file];
         var req = new RequireScript(file);
+        return req;
     }
+    return scriptreqs[file];
 }
 /**
  * Queue up a file's code to be executed.
@@ -113,10 +142,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
  * @param {Function} callback - A function wrapping up this file's code
  */
-Numbas.queueScript = function(file, deps, callback)
-{
-    // find a RequireScript
-    var req = scriptreqs[file] || new RequireScript(file);
+Numbas.queueScript = function(file, deps, callback) {
     if(typeof(deps)=='string')
         deps = [deps];
     for(var i=0;i<deps.length;i++)
@@ -126,8 +152,14 @@ Numbas.queueScript = function(file, deps, callback)
         loadScript(dep);
         scriptreqs[dep].backdeps.push(file);
     }
-    req.fdeps = deps;
-    req.callback = callback;
+
+    var req = scriptreqs[file];
+    if(req) {
+        req.fdeps = deps;
+        req.callback = callback;
+    } else {
+        req = new RequireScript(file,deps,callback);
+    }
     req.loaded = true;
     Numbas.tryInit();
 }
@@ -139,35 +171,10 @@ Numbas.tryInit = function()
     }
     //put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
     var stack = [];
-    /** Try to run the given requirement
-     * @param {RequireScript} req
-     */
-    function tryRun(req) {
-        if(req.loaded && !req.executed) {
-            var go = true;
-            for(var j=0;j<req.fdeps.length;j++)
-            {
-                if(!scriptreqs[req.fdeps[j]].executed) {
-                    go=false;
-                    break;
-                }
-            }
-            if(go)
-            {
-                if(req.callback) {
-                    req.callback({exports:window});
-                }
-                req.executed=true;
-                for(var j=0;j<req.backdeps.length;j++) {
-                    tryRun(scriptreqs[req.backdeps[j]]);
-                }
-            }
-        }
-    }
     for(var x in scriptreqs)
     {
         try {
-            tryRun(scriptreqs[x]);
+            scriptreqs[x].tryRun();
         } catch(e) {
             alert(e+'');
             Numbas.debug(e.stack);
@@ -176,6 +183,27 @@ Numbas.tryInit = function()
         }
     }
 }
+
+Numbas.runImmediately = function(deps,fn) {
+    var missing_dependencies = deps.filter(function(r) {
+        if(!scriptreqs[r]) {
+            //console.error("Dependency "+r+" does not exist");
+            return true;
+        } else if(!scriptreqs[r].loaded) {
+            //console.error("Dependency "+r+" has not been loaded");
+            return true;
+        } else if(!scriptreqs[r].executed) {
+            //console.error("Dependency "+r+" has not been executed");
+            //console.error(scriptreqs[r].fdeps.map(function(d){return d+': '+loadScript(d).executed}).join(', '));
+            return true;
+        }
+    });
+    if(missing_dependencies.length) {
+        throw(new Error("Can't run because the following dependencies have not run: "+missing_dependencies.join(', ')));
+    }
+    fn();
+}
+
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
@@ -200,7 +228,6 @@ Numbas.checkAllScriptsLoaded = function() {
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
             var err = new Numbas.Error('die.script not loaded',{file:file});
-            console.log(err.message);
             Numbas.display && Numbas.display.die(err);
             break;
         }
