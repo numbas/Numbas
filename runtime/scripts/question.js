@@ -298,8 +298,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
                     q.addPart(p,i);
                 });
-                q.signals.trigger('partsGenerated');
             }
+            q.signals.trigger('partsGenerated');
         });
     },
     /** Add a part to the question
