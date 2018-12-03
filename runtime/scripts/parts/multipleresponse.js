@@ -246,7 +246,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
-                if(settings.choices.type!='list') {
+                if(!choices || choices.type!='list') {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }
                 settings.choices = jme.unwrapValue(choices);
@@ -258,7 +258,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
-                if(settings.answers.type!='list') {
+                if(!answers || answers.type!='list') {
                     this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
                 settings.answers = jme.unwrapValue(answers);
