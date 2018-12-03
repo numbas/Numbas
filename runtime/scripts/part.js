@@ -239,7 +239,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     finaliseLoad: function() {
         this.applyScripts();
         if(this.customConstructor) {
-            this.customConstructor.apply(this);
+            try {
+                this.customConstructor.apply(this);
+            } catch(e) {
+                throw(e);
+            }
         }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
@@ -322,7 +326,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
+            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -438,10 +442,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {String} message
      * @throws {Numbas.Error}
      */
-    error: function(message) {
-        message = R.apply(this,arguments);
+    error: function(message,args, originalError) {
+        var nmessage = R.apply(this,[message,args]);
+        if(nmessage!=message) {
+            originalError = new Error(nmessage);
+            originalError.originalMessages = [message].concat(originalError.originalMessages || []);
+        }
         var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
-        throw(new Numbas.Error('part.error',{path: niceName, message: message}));
+        throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -676,7 +684,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             }
                         } catch(e) {
                             try{
-                                this.error(e.message);
+                                this.error(e.message,{},e);
                             } catch(pe) {
                                 console.error(pe.message);
                             }

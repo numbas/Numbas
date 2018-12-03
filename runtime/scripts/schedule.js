@@ -199,7 +199,6 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                 for(var x in sb.callbacks) {
                     sb.callbacks[x].reject(e);
                 }
-                return Promise.reject(e);
             });
         }
         return promise;

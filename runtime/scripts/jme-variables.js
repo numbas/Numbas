@@ -203,7 +203,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var value = jme.evaluate(v.tree,scope);
             scope.setVariable(name,value);
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
+            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message},e));
         }
         return value;
     },

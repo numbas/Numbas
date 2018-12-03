@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/timing.js  runtime/scripts/xml.js  runtime/scripts/start-exam.js  runtime/scripts/numbas.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/patternmatch.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js
+// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/timing.js  runtime/scripts/start-exam.js  runtime/scripts/numbas.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/patternmatch.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -49,14 +49,14 @@ Numbas.showError = function(e)
     var message = (e || e.message)+'';
     message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
     Numbas.debug(message);
-    Numbas.display.showAlert(message);
+    Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };
 /** Generic error class. Extends JavaScript's Error
  * @constructor
  * @param {String} message - A description of the error. Localised by R.js.
  */
-Numbas.Error = function(message)
+Numbas.Error = function(message, args, originalError)
 {
     Error.call(this);
     if(Error.captureStackTrace) {
@@ -64,7 +64,14 @@ Numbas.Error = function(message)
     }
     this.name="Numbas Error";
     this.originalMessage = message;
-    this.message = R.apply(this,arguments);
+    this.message = R.apply(this,[message,args]);
+    this.originalMessages = [message];
+    if(originalError!==undefined) {
+        this.originalError = originalError;
+        if(originalError.originalMessages) {
+            this.originalMessages = this.originalMessages.concat(originalError.originalMessages);
+        }
+    }
 }
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
@@ -80,19 +87,39 @@ var scriptreqs = {};
  * @property {Array.<String>} fdeps - Scripts which this one depends on (it must run after them)
  * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
-function RequireScript(file)
+var RequireScript = Numbas.RequireScript = function(file,fdeps,callback)
 {
     this.file = file;
     scriptreqs[file] = this;
     this.backdeps = [];
-    this.fdeps = [];
+    this.fdeps = fdeps || [];
+    this.callback = callback;
 }
 RequireScript.prototype = {
     loaded: false,
     executed: false,
     backdeps: [],
     fdeps: [],
-    callback: null
+    callback: null,
+
+    
+    /** Try to run this script. It will run if all of its dependencies have run.
+     * Once it has run, every script which depends on it will try to run.
+     */
+    tryRun: function() {
+        if(this.loaded && !this.executed) {
+            var dependencies_executed = this.fdeps.every(function(r){ return scriptreqs[r].executed; });
+            if(dependencies_executed) {
+                if(this.callback) {
+                    this.callback({exports:window});
+                }
+                this.executed = true;
+                this.backdeps.forEach(function(r) {
+                    scriptreqs[r].tryRun();
+                });
+            }
+        }
+    }
 };
 /** Ask to load a javascript file. Unless `noreq` is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter.
  * @memberof Numbas
@@ -104,9 +131,11 @@ var loadScript = Numbas.loadScript = function(file,noreq)
     if(!noreq)
     {
         if(scriptreqs[file]!==undefined)
-            return;
+            return scriptreqs[file];
         var req = new RequireScript(file);
+        return req;
     }
+    return scriptreqs[file];
 }
 /**
  * Queue up a file's code to be executed.
@@ -115,10 +144,7 @@ var loadScript = Numbas.loadScript = function(file,noreq)
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
  * @param {Function} callback - A function wrapping up this file's code
  */
-Numbas.queueScript = function(file, deps, callback)
-{
-    // find a RequireScript
-    var req = scriptreqs[file] || new RequireScript(file);
+Numbas.queueScript = function(file, deps, callback) {
     if(typeof(deps)=='string')
         deps = [deps];
     for(var i=0;i<deps.length;i++)
@@ -128,8 +154,14 @@ Numbas.queueScript = function(file, deps, callback)
         loadScript(dep);
         scriptreqs[dep].backdeps.push(file);
     }
-    req.fdeps = deps;
-    req.callback = callback;
+
+    var req = scriptreqs[file];
+    if(req) {
+        req.fdeps = deps;
+        req.callback = callback;
+    } else {
+        req = new RequireScript(file,deps,callback);
+    }
     req.loaded = true;
     Numbas.tryInit();
 }
@@ -141,35 +173,10 @@ Numbas.tryInit = function()
     }
     //put all scripts in a list and go through evaluating the ones that can be evaluated, until everything has been evaluated
     var stack = [];
-    /** Try to run the given requirement
-     * @param {RequireScript} req
-     */
-    function tryRun(req) {
-        if(req.loaded && !req.executed) {
-            var go = true;
-            for(var j=0;j<req.fdeps.length;j++)
-            {
-                if(!scriptreqs[req.fdeps[j]].executed) {
-                    go=false;
-                    break;
-                }
-            }
-            if(go)
-            {
-                if(req.callback) {
-                    req.callback({exports:window});
-                }
-                req.executed=true;
-                for(var j=0;j<req.backdeps.length;j++) {
-                    tryRun(scriptreqs[req.backdeps[j]]);
-                }
-            }
-        }
-    }
     for(var x in scriptreqs)
     {
         try {
-            tryRun(scriptreqs[x]);
+            scriptreqs[x].tryRun();
         } catch(e) {
             alert(e+'');
             Numbas.debug(e.stack);
@@ -178,6 +185,27 @@ Numbas.tryInit = function()
         }
     }
 }
+
+Numbas.runImmediately = function(deps,fn) {
+    var missing_dependencies = deps.filter(function(r) {
+        if(!scriptreqs[r]) {
+            //console.error("Dependency "+r+" does not exist");
+            return true;
+        } else if(!scriptreqs[r].loaded) {
+            //console.error("Dependency "+r+" has not been loaded");
+            return true;
+        } else if(!scriptreqs[r].executed) {
+            //console.error("Dependency "+r+" has not been executed");
+            //console.error(scriptreqs[r].fdeps.map(function(d){return d+': '+loadScript(d).executed}).join(', '));
+            return true;
+        }
+    });
+    if(missing_dependencies.length) {
+        throw(new Error("Can't run because the following dependencies have not run: "+missing_dependencies.join(', ')));
+    }
+    fn();
+}
+
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
@@ -202,7 +230,6 @@ Numbas.checkAllScriptsLoaded = function() {
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
             var err = new Numbas.Error('die.script not loaded',{file:file});
-            console.log(err.message);
             Numbas.display && Numbas.display.die(err);
             break;
         }
@@ -656,9 +683,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     isNonemptyHTML: function(html) {
-        var d = document.createElement('div');
-        d.innerHTML = html;
-        return $(d).text().trim().length>0;
+        if(window.document) {
+            var d = document.createElement('div');
+            d.innerHTML = html;
+            return $(d).text().trim().length>0;
+        } else {
+            return html.trim() != '';
+        }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
      * @param {Object} b
@@ -5045,7 +5076,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length)) {
             ic -= 1;
         }
-        debug('backtracked to '+ic);
+        //debug('backtracked to '+ic);
 
         if(ic<start) {
             if(options.allowOtherTerms && start<input.length-1) {
@@ -5074,35 +5105,35 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         //show();
         steps += 1;
         while(pc<pattern.length && consumed(pc)) { // if have consumed this term fully, move on
-            debug('term '+pc+' consumed, move on');
+            //debug('term '+pc+' consumed, move on');
             pc += 1;
         }
         if(ic==input.length) { // if we've reached the end of the input
             while(pc<pattern.length && enough(pc)) {
-                debug('got enough of '+pc+', skip forward');
+                //debug('got enough of '+pc+', skip forward');
                 pc += 1;
             }
             if(pc==pattern.length) { // if we've consumed all the terms
                 if(!pattern.every(function(_,p) { return enough(p); })) {
-                    debug('reached end but some terms not matched enough times');
+                    //debug('reached end but some terms not matched enough times');
                     backtrack();
                 } else {
-                    debug('reached end of pattern and end of input: done');
+                    //debug('reached end of pattern and end of input: done');
                     done = true;
                 }
             } else {
-                debug('end of input but still pattern to match')
+                //debug('end of input but still pattern to match')
                 backtrack();
             }
         } else if(pc>=pattern.length) {
-            debug("end of pattern but unconsumed input");
+            //debug("end of pattern but unconsumed input");
             if(pc==pattern.length && options.commutative && options.allowOtherTerms) {
-                debug('capturing '+ic+' as ignored end term');
+                //debug('capturing '+ic+' as ignored end term');
                 capture.push(pattern.length);
                 advance_input();
             } else if(pc==pattern.length && !options.commutative && options.allowOtherTerms) {
                 while(ic<input.length) {
-                    debug('capturing '+ic+' as ignored end term');
+                    //debug('capturing '+ic+' as ignored end term');
                     capture.push(pattern.length);
                     advance_input();
                 }
@@ -5110,14 +5141,14 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
                 backtrack();
             }
         } else if(options.checkFn(input[ic],pattern[pc],ic,pc) && options.constraintFn(capture,ic,pc)) {
-            debug('capture '+ic+' at '+pc);
+            //debug('capture '+ic+' at '+pc);
             capture.push(pc);
             advance_input();
         } else if(options.commutative || enough(pc)) {
-            debug('trying the next pattern term');
+            //debug('trying the next pattern term');
             pc += 1;
         } else {
-            debug('can\'t match next input')
+            //debug('can\'t match next input')
             backtrack();
         }
     }
@@ -5142,7 +5173,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
         var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
         var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
     }
-    debug(result);
+    //debug(result);
     return {ignored_start_terms: ignored_start_terms, result: result, ignored_end_terms: ignored_end_terms};
 }
 
@@ -6488,16 +6519,16 @@ var Parser = jme.Parser = function(options) {
     this.ops = this.ops.slice();
     this.re = util.extend_object({},this.re);
     this.tokeniser_types = this.tokeniser_types.slice();
-    this.constants = util.extend_object({}, jme.constants);
-    this.prefixForm = util.extend_object({}, jme.prefixForm);
-    this.postfixForm = util.extend_object({}, jme.postfixForm);
-    this.arity = util.extend_object({}, jme.arity);
-    this.precedence = util.extend_object({}, jme.precedence);
-    this.commutative = util.extend_object({}, jme.commutative);
-    this.associative = util.extend_object({}, jme.associative);
-    this.funcSynonyms = util.extend_object({}, jme.funcSynonyms);
-    this.opSynonyms = util.extend_object({}, jme.opSynonyms);
-    this.rightAssociative = util.extend_object({}, jme.rightAssociative);
+    this.constants = {};
+    this.prefixForm = {};
+    this.postfixForm = {};
+    this.arity = {};
+    this.precedence = {};
+    this.commutative = {};
+    this.associative = {};
+    this.funcSynonyms = {};
+    this.opSynonyms = {};
+    this.rightAssociative = {};
 }
 jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Default options for new parsers
@@ -6507,6 +6538,84 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         closeMissingBrackets: false,
         addMissingArguments: false
     },
+
+    /** There are many dictionaries storing definitions of things like constants and alternate names, which are defined both globally in Numbas.jme and locally in a Parser.
+     * This is a wrapper to load the value of the setting if it exists, and return `undefined` otherwise.
+     * @param {String} setting - the name of the dictionary. Both `this` and of `Numbas.jme` must have members with this name.
+     * @param {String} name - the name of the setting to try to load from the dictionary.
+     * @returns {*}
+     */
+    getSetting: function(setting,name) {
+        if(name in this[setting]) {
+            return this[setting][name];
+        }
+        if(name in jme[setting]) {
+            return jme[setting][name];
+        }
+        return undefined;
+    },
+
+    /** If the given name is defined as a constant, return its value, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getConstant: function(name) { return this.getSetting('constants',name); },
+
+    /** If the given operator name has a defined prefix form, return it, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {String}
+     */
+    getPrefixForm: function(name) { return this.getSetting('prefixForm',name); },
+
+    /** If the given operator name has a defined postfix form, return it, otherwise return `undefined`.
+     * @param {String} name
+     * @returns {String}
+     */
+    getPostfixForm: function(name) { return this.getSetting('postfixForm',name); },
+
+    /** Get the arity of the given operator.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getArity: function(name) { return this.getSetting('arity',name) || 2; },
+
+    /** Get the precedence of the given operator.
+     * @param {String} name
+     * @returns {Number}
+     */
+    getPrecedence: function(name) { return this.getSetting('precedence',name); },
+
+    /** Is the given operator commutative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isCommutative: function(name) { return this.getSetting('commutative',name) || false; },
+
+    /** Is the given operator associative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isAssociative: function(name) { return this.getSetting('associative',name) || false; },
+
+    /** Is the given operator right-associative?
+     * @param {String} name
+     * @returns {Boolean}
+     */
+    isRightAssociative: function(name) { return this.getSetting('rightAssociative',name) || false; },
+
+    /** If the given function name has a synonym, use it, otherwise return the original name.
+     * @see Numbas.jme.funcSynonyms
+     * @param {String} name
+     * @returns {String}
+     */
+    funcSynonym: function(name) { return this.getSetting('funcSynonyms',name) || name; },
+
+    /** If the given operator name has a synonym, use it, otherwise return the original name.
+     * @see Numbas.jme.opSynonyms
+     * @param {String} name
+     * @returns {String}
+     */
+    opSynonym: function(name) { return this.getSetting('opSynonyms',name) || name; },
 
     /** Binary operations
      * @type {Array.<String>}
@@ -6606,12 +6715,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     },
 
     op: function(name,postfix,prefix) {
-        var arity = 2;
-        if(this.arity[name]!==undefined) {
-            arity = this.arity[name];
-        }
-        var commutative = arity>1 && this.commutative[name] || false;
-        var associative = arity>1 && this.associative[name] || false;
+        var arity = this.getArity(name);
+        var commutative = arity>1 && this.isCommutative(name);
+        var associative = arity>1 && this.isAssociative(name);
 
         return new TOp(name,postfix,prefix,arity,commutative,associative);
     },
@@ -6663,17 +6769,17 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var nt;
                 var postfix = false;
                 var prefix = false;
-                if(name in this.opSynonyms) {
-                    name = this.opSynonyms[name];
-                }
+                name = this.opSynonym(name);
                 if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
-                    if(name in this.prefixForm) {
-                        name = this.prefixForm[name];
+                    var prefixForm = this.getPrefixForm(name);
+                    if(prefixForm!==undefined) {
+                        name = prefixForm;
                         prefix = true;
                     }
                 } else {
-                    if(name in this.postfixForm) {
-                        name = this.postfixForm[name];
+                    var postfixForm = this.getPostfixForm(name);
+                    if(postfixForm !== undefined) {
+                        name = postfixForm;
                         postfix = true;
                     }
                 }
@@ -6690,8 +6796,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 if(!annotation) {
                     var lname = name.toLowerCase();
                     // fill in constants here to avoid having more 'variables' than necessary
-                    if(lname in this.constants) {
-                        token = new TNum(this.constants[lname]);
+                    var constant = this.getConstant(lname);
+                    if(constant !== undefined) {
+                        token = new TNum(constant);
                     } else {
                         token = new TName(name);
                     }
@@ -6808,9 +6915,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var i = this.i;
             // if followed by an open bracket, this is a function application
             if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
-                    if(this.funcSynonyms[tok.name]) {
-                        tok.name = this.funcSynonyms[tok.name];
-                    }
+                    tok.name = this.funcSynonym(tok.name);
                     this.stack.push(new TFunc(tok.name,tok.annotation));
                     this.numvars.push(0);
                     this.olength.push(this.output.length);
@@ -6831,7 +6936,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         'op': function(tok) {
             if(!tok.prefix) {
-                var o1 = this.precedence[tok.name];
+                var o1 = this.getPrecedence(tok.name);
                 //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
                 
                 /** Should the next token on the stack be popped off?
@@ -6842,7 +6947,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         return false;
                     }
                     var prev = this.stack[this.stack.length-1];
-                    if(prev.type=="op" && ((o1 > this.precedence[prev.name]) || (!this.rightAssociative[tok.name] && o1 == this.precedence[prev.name]))) {
+                    if(prev.type=="op" && ((o1 > this.getPrecedence(prev.name)) || (!this.isRightAssociative(tok.name) && o1 == this.getPrecedence(prev.name)))) {
                         return true;
                     }
                     if(prev.type=='keypair' && prev.pairmode=='match') {
@@ -12023,7 +12128,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var value = jme.evaluate(v.tree,scope);
             scope.setVariable(name,value);
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
+            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message},e));
         }
         return value;
     },
@@ -12539,8 +12644,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         if('steps' in data) {
             data.steps.map(function(sd,i) {
-                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this, this.store);
-                p.addStep(sd,i);
+                var s = createPartFromJSON(sd, p.path+'s'+i, p.question, p, p.store);
+                p.addStep(s,i);
             });
         }
         var marking = {};
@@ -12562,7 +12667,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     finaliseLoad: function() {
         this.applyScripts();
         if(this.customConstructor) {
-            this.customConstructor.apply(this);
+            try {
+                this.customConstructor.apply(this);
+            } catch(e) {
+                throw(e);
+            }
         }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
@@ -12645,7 +12754,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
+            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -12761,10 +12870,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {String} message
      * @throws {Numbas.Error}
      */
-    error: function(message) {
-        message = R.apply(this,arguments);
+    error: function(message,args, originalError) {
+        var nmessage = R.apply(this,[message,args]);
+        if(nmessage!=message) {
+            originalError = new Error(nmessage);
+            originalError.originalMessages = [message].concat(originalError.originalMessages || []);
+        }
         var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
-        throw(new Numbas.Error('part.error',{path: niceName, message: message}));
+        throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -12999,7 +13112,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             }
                         } catch(e) {
                             try{
-                                this.error(e.message);
+                                this.error(e.message,{},e);
                             } catch(pe) {
                                 console.error(pe.message);
                             }
@@ -13468,7 +13581,7 @@ var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, numb
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message},e));
     }
     return q;
 }
@@ -13690,6 +13803,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(variables) {
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
+                if(!vd.definition) {
+                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+                }
                 try {
                     var tree = Numbas.jme.compile(vd.definition);
                 } catch(e) {
@@ -13714,8 +13830,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
                     q.addPart(p,i);
                 });
-                q.signals.trigger('partsGenerated');
             }
+            q.signals.trigger('partsGenerated');
         });
     },
     /** Add a part to the question
@@ -15123,7 +15239,6 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                 for(var x in sb.callbacks) {
                     sb.callbacks[x].reject(e);
                 }
-                return Promise.reject(e);
             });
         }
         return promise;
@@ -15997,294 +16112,6 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
             var end = new Date();
             acc.total += (end - acc.start);
         }
-    }
-};
-});
-
-/*
-Copyright 2011-14 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
-Numbas.queueScript('xml',['base','jme'],function() {
-
-/** Raw XML of the exam definition
- * @name rawxml 
- * @memberof Numbas
- * @type {Object.<String>}
- */
-
-/** XML for the current exam
- * @name examXML
- * @memberof Numbas.xml
- * @type {XMLDocument}
- */
-
-/** XSLT stylesheets
- * @name templates
- * @memberof Numbas.xml
- * @type {Object.<XMLDocument>}
- */
-
-/** @namespace Numbas.xml */
-var xml = Numbas.xml = {
-    /** DOM parser to use to parse XML
-     * @type {DOMParser}
-     * @private
-     */
-    dp: new DOMParser(),
-    /** Load in all the XSLT/XML documents from {@link Numbas.rawxml} */
-    loadXMLDocs: function()
-    {
-        var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
-        var templates = xml.templates = {};
-        for(var x in Numbas.rawxml.templates)
-        {
-            templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
-            xml.localise(templates[x]);
-        }
-    },
-    /** Load in a single XML document
-     * @param {String} xmlstring
-     * @returns {XMLDocument}
-     */
-    loadXML: function(xmlstring)
-    {
-        //parse the XML document
-        var doc = xml.dp.parseFromString(xmlstring,'text/xml');
-        //check for errors
-        if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
-        {
-            throw(new Numbas.Error('xml.could not load',{message:Sarissa.getParseErrorText(doc)}));
-        }
-        //allow XPath to be used to select nodes
-        doc.setProperty('SelectionLanguage','XPath');
-        //convert all the attribute names to lower case
-        var es = doc.selectNodes('descendant::*');
-        for(var i=0; i<es.length; i++)
-        {
-            var e = es[i];
-            var attrs = [];
-            var j=0;
-            for(j=0; j< e.attributes.length; j++)
-            {
-                attrs.push(e.attributes[j].name);
-            }
-            for(j=0; j< attrs.length; j++)
-            {
-                var name = attrs[j];
-                if(name!=name.toLowerCase())
-                {
-                    var value = e.getAttribute(name);
-                    e.removeAttribute(name);
-                    e.setAttribute(name.toLowerCase(),value);
-                }
-            }
-        }
-        return doc;
-    },
-    /** Load user-defined functions from an XML node
-     * @param {Element} xml
-     * @returns {Numbas.jme.variables.func_data[]}
-     */
-    loadFunctions: function(xml)
-    {
-        var tmpFunctions = [];
-        //work out functions
-        var functionNodes = xml.selectNodes('functions/function');
-        if(!functionNodes)
-            return {};
-        //first pass: get function names and types
-        for(var i=0; i<functionNodes.length; i++)
-        {
-            var name = functionNodes[i].getAttribute('name').toLowerCase();
-            var definition = functionNodes[i].getAttribute('definition');
-            var language = functionNodes[i].getAttribute('language');
-            var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-            var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-            var parameters = [];
-            for(var j=0; j<parameterNodes.length; j++)
-            {
-                parameters.push({
-                    name: parameterNodes[j].getAttribute('name'),
-                    type: parameterNodes[j].getAttribute('type').toLowerCase()
-                });
-            }
-            tmpFunctions.push({
-                name: name,
-                definition: definition,
-                language: language,
-                outtype: outtype,
-                parameters: parameters
-            });
-        }
-        return tmpFunctions;
-    },
-    /** Load variable definitions from an XML node
-     * @param {Element} xml
-     * @param {Numbas.jme.Scope} scope - scope to compile relative to
-     * @returns {Numbas.jme.variables.variable_data_dict[]}
-     */
-    loadVariables: function(xml,scope) {
-        var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
-        if(!variableNodes)
-            return {};
-        //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-        var todo = {};
-        for( var i=0; i<variableNodes.length; i++ )
-        {
-            var name = variableNodes[i].getAttribute('name').toLowerCase();
-            var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
-            if(value.trim()=='') {
-                throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
-            }
-            try {
-                var tree = Numbas.jme.compile(value);
-            } catch(e) {
-                throw(new Numbas.Error('variable.error in variable definition',{name:name}));
-            }
-            var vars = Numbas.jme.findvars(tree);
-            todo[name]={
-                tree: tree,
-                vars: vars
-            };
-        }
-        return todo;
-    },
-    /** Lots of the time we have a message stored inside content/html/.. structure.
-     *
-     * This pulls the message out and serializes it so it can be inserted easily with jQuery
-     * @param {Element} node
-     * @returns {String}
-     */
-    serializeMessage: function(node)
-    {
-        return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
-    },
-    /** Get all the text belonging to an element
-     * @param {Element} elem
-     * @returns {String}
-     */
-    getTextContent: function(elem)
-    {
-        return $(elem).text();
-    },
-    /** Set the text content of an element
-     * @param {Element} elem
-     * @param {String} text
-     */
-    setTextContent: function(elem,text)
-    {
-        if(elem.textContent!==undefined)
-            elem.textContent = text;
-        else
-            elem.text = text;
-    },
-    /** @typedef {Object} Numbas.xml.tryGetAttribute_options
-     * @property {Boolean} string - Always return the attribute as a string.
-     */
-    /** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
-     * @param {Object} obj - object to fill up
-     * @param {Element} xmlroot - root XML element
-     * @param {Element|String} elem - either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`
-     * @param {String[]} names - names of attributes to load
-     * @param {String[]} [altnames] - names of object properties to associate with attribute names. If undefined, the attribute name is used.
-     * @param {Numbas.xml.tryGetAttribute_options} options
-     * @returns {Object} - The last attribute loaded.
-     */
-    tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
-    {
-        if(!options)
-            options = {};
-        if(typeof(elem)=='string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
-            elem = xmlroot.selectSingleNode(elem);
-        if(!elem)
-            return false;
-        if(typeof(names)=='string')
-            names=[names];
-        if(!altnames)
-            altnames=[];
-        else if(typeof(altnames)=='string')
-            altnames=[altnames];
-        for(var i=0;i<names.length;i++)
-        {
-            var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
-            if(value!==null)
-            {
-                //establish which field of target object we're filling in
-                var name = altnames[i] ? altnames[i] : names[i];
-                if(options.string)
-                {
-                }
-                //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                else if(obj!==null && obj[name]!==undefined)
-                {
-                    if(value.length>0)
-                    {
-                        if(typeof(obj[name]) == 'number')
-                        {
-                            if(Numbas.util.isFloat(value))
-                                value = parseFloat(value);
-                            else if(Numbas.util.isFloat(Numbas.util.unPercent(value)))
-                            {
-                                value = Numbas.util.unPercent(value);
-                            }
-                            else
-                                throw(new Numbas.Error('xml.property not number',{name:name,value:value,element:elem}));
-                        }
-                        else if(typeof(obj[name]) == 'boolean')
-                        {
-                            if(Numbas.util.isBool(value))
-                                value = Numbas.util.parseBool(value);
-                            else
-                                throw(new Numbas.Error('xml.property not boolean',{name:name,value:value,element:elem}));
-                        }
-                        //otherwise must be a string, so leave it alone
-                    }
-                }
-                else
-                {
-                    //automatically convert to a number or a boolean if possible
-                    if(Numbas.util.isFloat(value))
-                    {
-                        value = parseFloat(value);
-                    }
-                    else if(Numbas.util.isBool(value))
-                    {
-                        value = Numbas.util.parseBool(value);
-                    }
-                }
-                if(obj)
-                    obj[name] = value;
-            }
-        }
-        return value;
-    },
-    /** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
-     * @param {Element} template
-     * @returns {Element}
-     */
-    localise: function(template) {
-        $(template).find('localise').each(function() {
-            var localString = R($(this).text());
-            $(this).replaceWith(localString);
-        });
-        return template;
-    },
-    /** Is the given node empty? True if it has no children.
-     * @param {Element} node
-     * @returns {Boolean}
-     */
-    isEmpty: function(node) {
-        return node.childNodes.length==0;
     }
 };
 });
@@ -18219,7 +18046,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message);
+            this.error(e.message,{},e);
         }
         this.stagedAnswer = '';
         if(Numbas.display) {
@@ -18331,6 +18158,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var fudge = 0.00000000001;
         settings.minvalue = minvalue - fudge;
         settings.maxvalue = maxvalue + fudge;
+        return settings.displayAnswer;
     },
     /** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.
@@ -18488,6 +18316,10 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     studentAnswerAsJME: function() {
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
+    },
+
+    getCorrectAnswer: function(scope) {
+        return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
@@ -18814,6 +18646,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
+        return settings.correctAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -19082,7 +18915,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
-                if(settings.choices.type!='list') {
+                if(!choices || choices.type!='list') {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }
                 settings.choices = jme.unwrapValue(choices);
@@ -19094,7 +18927,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
-                if(settings.answers.type!='list') {
+                if(!answers || answers.type!='list') {
                     this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
                 settings.answers = jme.unwrapValue(answers);
@@ -19471,6 +19304,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             break;
         }
         settings.matrix = matrix;
+        return settings.maxMatrix.map(function(row) { return row.map(function(c) { return c>0; }) });
     },
     /** Store the student's choices 
      * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
@@ -19673,7 +19507,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             try {
                 settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
             } catch(e) {
-                p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
+                p.error('part.custom.error evaluating setting',{setting: name, error: e.message},e);
             }
         });
         var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
@@ -19702,13 +19536,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             try {
                 p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
             } catch(e) {
-                p.error('part.custom.error evaluating input option',{option:option,error:e.message});
+                p.error('part.custom.error evaluating input option',{option:option,error:e.message},e);
             }
         }
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message);
+            this.error(e.message,{},e);
         }
         if(Numbas.display) {
             this.display = new Numbas.display.CustomPartDisplay(this);
@@ -19717,6 +19551,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
+        switch(this.definition.input_widget) {
+            case 'jme':
+                return jme.display.treeToJME(this.correctAnswer.tree);
+            case 'checkboxes':
+                return this.correctAnswer.value.map(function(c){ return c.value; });
+            default:
+                return this.correctAnswer.value;
+        }
     },
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;
@@ -20063,6 +19905,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
         settings.precision = jme.evaluate(settings.precision,scope).value;
+
+        var correctInput = settings.correctAnswer.map(function(row) {
+            return row.map(function(c) {
+                return Numbas.math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            });
+        });
+        correctInput.rows = settings.correctAnswer.rows;
+        correctInput.columns = settings.correctAnswer.columns;
+        return correctInput;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -20206,6 +20057,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
                 break;
         }
         settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+        return settings.displayAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

@@ -52,7 +52,7 @@ var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, numb
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message},e));
     }
     return q;
 }
@@ -274,6 +274,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(variables) {
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
+                if(!vd.definition) {
+                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+                }
                 try {
                     var tree = Numbas.jme.compile(vd.definition);
                 } catch(e) {
