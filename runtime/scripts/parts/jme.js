@@ -249,6 +249,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
+        return settings.correctAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

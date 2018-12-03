@@ -126,6 +126,10 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     studentAnswerAsJME: function() {
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
+    },
+
+    getCorrectAnswer: function(scope) {
+        return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {

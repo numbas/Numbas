@@ -86,7 +86,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             try {
                 settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
             } catch(e) {
-                p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
+                p.error('part.custom.error evaluating setting',{setting: name, error: e.message},e);
             }
         });
         var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
@@ -115,13 +115,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             try {
                 p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
             } catch(e) {
-                p.error('part.custom.error evaluating input option',{option:option,error:e.message});
+                p.error('part.custom.error evaluating input option',{option:option,error:e.message},e);
             }
         }
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message);
+            this.error(e.message,{},e);
         }
         if(Numbas.display) {
             this.display = new Numbas.display.CustomPartDisplay(this);
@@ -130,6 +130,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
+        switch(this.definition.input_widget) {
+            case 'jme':
+                return jme.display.treeToJME(this.correctAnswer.tree);
+            case 'checkboxes':
+                return this.correctAnswer.value.map(function(c){ return c.value; });
+            default:
+                return this.correctAnswer.value;
+        }
     },
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;

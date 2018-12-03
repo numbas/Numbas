@@ -113,6 +113,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
                 break;
         }
         settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+        return settings.displayAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

@@ -67,7 +67,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message);
+            this.error(e.message,{},e);
         }
         this.stagedAnswer = '';
         if(Numbas.display) {
@@ -179,6 +179,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var fudge = 0.00000000001;
         settings.minvalue = minvalue - fudge;
         settings.maxvalue = maxvalue + fudge;
+        return settings.displayAnswer;
     },
     /** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.

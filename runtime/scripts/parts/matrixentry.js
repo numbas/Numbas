@@ -164,6 +164,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
         settings.precision = jme.evaluate(settings.precision,scope).value;
+
+        var correctInput = settings.correctAnswer.map(function(row) {
+            return row.map(function(c) {
+                return Numbas.math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            });
+        });
+        correctInput.rows = settings.correctAnswer.rows;
+        correctInput.columns = settings.correctAnswer.columns;
+        return correctInput;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

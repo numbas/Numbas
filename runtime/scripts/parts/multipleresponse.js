@@ -635,6 +635,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             break;
         }
         settings.matrix = matrix;
+        return settings.maxMatrix.map(function(row) { return row.map(function(c) { return c>0; }) });
     },
     /** Store the student's choices 
      * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
