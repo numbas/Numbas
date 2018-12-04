@@ -274,11 +274,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(variables) {
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
-                if(!vd.definition) {
+                var definition = vd.definition+'';
+                if(definition=='') {
                     throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
                 }
                 try {
-                    var tree = Numbas.jme.compile(vd.definition);
+                    var tree = Numbas.jme.compile(definition);
                 } catch(e) {
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
