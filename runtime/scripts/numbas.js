@@ -67,7 +67,7 @@ Numbas.Error = function(message, args, originalError)
     if(originalError!==undefined) {
         this.originalError = originalError;
         if(originalError.originalMessages) {
-            this.originalMessages = this.originalMessages.concat(originalError.originalMessages);
+            this.originalMessages = this.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
         }
     }
 }

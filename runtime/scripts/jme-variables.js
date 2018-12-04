@@ -191,7 +191,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
-                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message}));
+                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message},e));
                     }
                 }
             }
