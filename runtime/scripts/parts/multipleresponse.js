@@ -631,18 +631,25 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxMatrix = matrix.map(function(r){ return [r[0]>0]; });
             break;
         case 'm_n_x':
-            var correctTicks = [];
-            for(var i=0; i<this.numChoices; i++) {
-                var maxj=-1,max=0;
-                for(var j=0;j<this.numAnswers; j++) {
-                    if(maxj==-1 || matrix[j][i]>max) {
-                        maxj = j;
-                        max = matrix[j][i];
+            switch(this.settings.displayType) {
+                case 'radiogroup':
+                    var correctTicks = [];
+                    for(var i=0; i<this.numChoices; i++) {
+                        var maxj=-1,max=0;
+                        for(var j=0;j<this.numAnswers; j++) {
+                            if(maxj==-1 || matrix[j][i]>max) {
+                                maxj = j;
+                                max = matrix[j][i];
+                            }
+                        }
+                        correctTicks.push(maxj);
                     }
-                }
-                correctTicks.push(maxj);
+                    settings.maxMatrix = matrix.map(function(r,j) { return r.map(function(c,i) { return j==correctTicks[i]; }) });
+                    break;
+                case 'checkbox':
+                    settings.maxMatrix = matrix.map(function(r) { return r.map(function(c){ return c>0; }) });
+                    break;
             }
-            settings.maxMatrix = matrix.map(function(r,j) { return r.map(function(c,i) { return j==correctTicks[i]; }) })
             break;
         }
         settings.matrix = matrix;
