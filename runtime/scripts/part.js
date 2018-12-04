@@ -566,11 +566,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
             if(stepsMarks!=0 && stepsScore!=0)
             {
                 if(this.credit==1)
@@ -587,11 +583,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         else
         {
             this.score = this.credit * this.marks;
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
         }
         if(this.revealed) {
             this.score = 0;
@@ -600,6 +592,23 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.parentPart.calculateScore();
         this.display && this.display.showScore(this.answered);
     },
+
+    /** Make sure the awarded score is between the minimum and maximum available.
+     */
+    applyScoreLimits: function() {
+        if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+            this.score = this.settings.minimumMarks;
+            this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
+            this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+        }
+        if(this.score>this.marks) {
+            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:this.marks})));
+            this.score = this.marks;
+            this.credit = 1;
+            this.markingComment(R('part.marking.maximum score applied',{score:this.marks}));
+        }
+    },
+
     /** Update the stored answer from the student (called when the student changes their answer, but before submitting)
      * @param {*} answer
      * @see {Numbas.parts.Part.stagedAnswer}
@@ -679,7 +688,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             var result_replacement = this.markAgainstScope(scope,existing_feedback);
                             if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                                 result = result_replacement;
-                                result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
+                                result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
                                 result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
                         } catch(e) {
