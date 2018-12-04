@@ -1482,6 +1482,9 @@ var jmeFunctions = jme.display.jmeFunctions = {
         } else {
             return '( '+bits[0]+' )!';
         }
+    },
+    'listval': function(tree,tok,bits,settings) {
+        return bits[0]+'['+bits[1]+']';
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
