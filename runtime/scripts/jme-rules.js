@@ -1284,6 +1284,9 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
             if(options.allowOtherTerms && start<input.length-1) {
                 capture = [];
                 increment_start();
+                for(var i=0;i<start;i++) {
+                    capture.push(-1);
+                }
                 return;
             } else {
                 failed = true;
