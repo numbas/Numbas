@@ -4076,6 +4076,8 @@ var nonStrictCanonicalOps = {
 function insertUnaryMinus(tree) {
     if(jme.isOp(tree.tok,'*')) {
         return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
+    } else if(jme.isOp(tree.tok,'/')) {
+        return {tok: tree.tok, args: [insertUnaryMinus(tree.args[0]),tree.args[1]]};
     } else {
         return {tok: new jme.types.TOp('-u',false,true,1,false,false), args: [tree]};
     }
@@ -4187,6 +4189,9 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         var item = new Term(arg);
         var res = unwrapCapture(arg);
         var argtok = res.tree.tok;
+        if(op=='*' && jme.isOp(argtok,'-u')) {
+            argtok = unwrapCapture(args[i].args[0]).tree.tok;
+        }
         if(options.associative && (isThisOp(argtok) || (!options.strictPlus && op=='+' && jme.isOp(argtok,'-')))) {
             var sub = getTerms(res.tree,op,options,false);
             sub = add_existing_names(sub,item.names,item.outside_equalnames);
@@ -11818,8 +11823,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '-u':[{'+':true,'-':true}],
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
-    '*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
-    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+    '*': [{'+u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
+    '/': [{'+u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true, '^': true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],

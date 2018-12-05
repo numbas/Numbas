@@ -1065,6 +1065,8 @@
 
                     assert.notOk(matchExpression('$n`+/$n`?','3pi/4',{allowOtherTerms:true,strictPlus:true}),'$n`+/$n`? does not match 3pi/4');
 
+                    assert.ok(matchExpression('((`*/ `+- $n)`*;x)*i','-(1/2)*pi*i'),'deal with unary minus amongst factors');
+
                     // lists
                     assert.ok(matchExpression('[]','[]'),'[] matches []');
                     assert.ok(matchExpression('[1,2,3]','[1,2,3]'),'[1,2,3] matches [1,2,3]');
@@ -1294,6 +1296,7 @@
                     assert.equal(simplifyExpression('-6x - 20x',['all']),'-26x','collect two negatives together');
                     assert.equal(simplifyExpression('2x*(3/5)',['all']),'6(x/5)','2x*(3/5) doesn\'t get stuck in a loop');
                     assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
+                    assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
                 });
 
                 QUnit.test('large product',function(assert) {
