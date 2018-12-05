@@ -5083,6 +5083,9 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
             if(options.allowOtherTerms && start<input.length-1) {
                 capture = [];
                 increment_start();
+                for(var i=0;i<start;i++) {
+                    capture.push(-1);
+                }
                 return;
             } else {
                 failed = true;
@@ -19936,7 +19939,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
         var correctInput = settings.correctAnswer.map(function(row) {
             return row.map(function(c) {
-                return Numbas.math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+                if(settings.allowFractions) {
+                    var f = math.rationalApproximation(c);
+                    if(f[1]!=1) {
+                        return f[0]+'/'+f[1];
+                    }
+                }
+                return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });
         });
         correctInput.rows = settings.correctAnswer.rows;
