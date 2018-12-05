@@ -488,8 +488,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         shuffleChoices: false,
         shuffleAnswers: false,
         matrix: [],                    //marks matrix
-        displayType: '',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-        warningType: '',                //what to do if wrong number of responses
+        displayType: 'radiogroup',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
+        warningType: 'none',                //what to do if wrong number of responses
         layoutType: 'all',
         layoutExpression: ''
     },
