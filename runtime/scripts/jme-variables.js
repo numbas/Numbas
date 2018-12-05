@@ -116,7 +116,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         fn.intype = intype;
         fn.paramNames = paramNames;
         fn.definition = tmpfn.definition;
-        fn.name = tmpfn.name;
+        fn.name = tmpfn.name.toLowerCase();
         fn.language = tmpfn.language;
         try {
             switch(fn.language)
@@ -148,9 +148,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         for(var i=0;i<tmpFunctions.length;i++)
         {
             var cfn = jme.variables.makeFunction(tmpFunctions[i],scope,withEnv);
-            if(functions[cfn.name]===undefined)
-                functions[cfn.name] = [];
-            functions[cfn.name].push(cfn);
+            scope.addFunction(cfn);
         }
         return functions;
     },

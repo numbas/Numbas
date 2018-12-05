@@ -1428,30 +1428,34 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.funcObj} fn - function to add
      */
     addFunction: function(fn) {
-        if(!(fn.name in this.functions)) {
-            this.functions[fn.name] = [fn];
+        var name = fn.name.toLowerCase();
+        if(!(name in this.functions)) {
+            this.functions[name] = [fn];
         } else {
-            this.functions[fn.name].push(fn);
-            delete this._resolved_functions[fn.name];
+            this.functions[name].push(fn);
+            delete this._resolved_functions[name];
         }
-        this.deleted.functions[fn.name] = false;
+        this.deleted.functions[name] = false;
     },
     /** Mark the given variable name as deleted from the scope.
      * @param {String} name
      */
     deleteVariable: function(name) {
+        name = name.toLowerCase();
         this.deleted.variables[name] = true;
     },
     /** Mark the given function name as deleted from the scope.
      * @param {String} name
      */
     deleteFunction: function(name) {
+        name = name.toLowerCase();
         this.deleted.functions[name] = true;
     },
     /** Mark the given ruleset name as deleted from the scope.
      * @param {String} name
      */
     deleteRuleset: function(name) {
+        name = name.toLowerCase();
         this.deleted.rulesets[name] = true;
     },
     /** Get the object with given name from the given collection
@@ -1461,6 +1465,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     resolve: function(collection,name) {
         var scope = this;
+        name = name.toLowerCase();
         while(scope) {
             if(scope.deleted[collection][name]) {
                 return;
@@ -1476,7 +1481,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.token}
      */
     getVariable: function(name) {
-        return this.resolve('variables',name.toLowerCase());
+        return this.resolve('variables',name);
     },
     /** Set the given variable name
      * @param {String} name
@@ -1492,6 +1497,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
      */
     getFunction: function(name) {
+        name = name.toLowerCase();
         if(!this._resolved_functions[name]) {
             var scope = this;
             var o = [];
@@ -1517,8 +1523,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.rules.Ruleset[]} rules
      */
     setRuleset: function(name, rules) {
-        this.rulesets[name] = this.rulesets[name.toLowerCase()] = rules;
-        this.deleted.rulesets[name.toLowerCase()] = false;
+        name = name.toLowerCase();
+        this.rulesets[name] = rules;
+        this.deleted.rulesets[name] = false;
     },
     /** Collect together all items from the given collection
      * @param {String} collection - name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
