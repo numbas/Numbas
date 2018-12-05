@@ -69,7 +69,7 @@ Numbas.Error = function(message, args, originalError)
     if(originalError!==undefined) {
         this.originalError = originalError;
         if(originalError.originalMessages) {
-            this.originalMessages = this.originalMessages.concat(originalError.originalMessages);
+            this.originalMessages = this.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
         }
     }
 }
@@ -5089,7 +5089,8 @@ var nonStrictReplacements = {
     },
     '*': { 
         '/': function(tree) {
-            return {tok: new jme.types.TOp('*',false,false,2,true,true), args: [tree.args[0],{tok:new jme.types.TOp('/u',false,true,1,false,false),args:[tree.args[1]]}]};
+            tree = {tok: new jme.types.TOp('*',false,false,2,true,true), args: [tree.args[0],{tok:new jme.types.TOp('/u',false,true,1,false,false),args:[tree.args[1]]}]};
+            return tree;
         }
     }
 };
@@ -5866,7 +5867,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     for(var name in namedTerms) {
         var terms = namedTerms[name];
         if(terms.length==1) {
-            match[name] = terms[0];
+            match[name] = removeUnaryDivision(terms[0]);
         } else if(options.gatherList) {
             match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(removeUnaryDivision(t))} })};
         } else {
@@ -6550,8 +6551,6 @@ var Ruleset = jme.rules.Ruleset = function(rules,flags) {
     this.flags = util.extend_object({},displayFlags,flags);
 }
 
-var poo = 0;
-var pd = '';
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     /** Test whether flag is set
      * @param {String} flag
@@ -6573,11 +6572,6 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @returns {Numbas.jme.tree}
      */
     simplify: function(exprTree,scope) {
-        pd += '  ';
-        poo += 1;
-        if(poo>100) {
-            //throw(new Error("Poo"));
-        }
         var rs = this;
         var changed = true;
         var depth = 0;
@@ -6605,7 +6599,6 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                 }
             }
         }
-        pd = pd.slice(2);
         return exprTree;
     }
 }
@@ -6728,6 +6721,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0','','0']
     ],
     collectNumbers: [
+        ['$n;a * 1/$n;b','ag','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
         ['(`! $n)`+;x * real:$n;n','acgs','n*x']            //shift numbers to left hand side
@@ -12799,6 +12793,9 @@ var jmeFunctions = jme.display.jmeFunctions = {
         } else {
             return '( '+bits[0]+' )!';
         }
+    },
+    'listval': function(tree,tok,bits,settings) {
+        return bits[0]+'['+bits[1]+']';
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
@@ -13151,7 +13148,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
-                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message}));
+                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message},e));
                     }
                 }
             }

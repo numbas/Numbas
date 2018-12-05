@@ -69,7 +69,7 @@ Numbas.Error = function(message, args, originalError)
     if(originalError!==undefined) {
         this.originalError = originalError;
         if(originalError.originalMessages) {
-            this.originalMessages = this.originalMessages.concat(originalError.originalMessages);
+            this.originalMessages = this.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
         }
     }
 }
@@ -4054,7 +4054,8 @@ var nonStrictReplacements = {
     },
     '*': { 
         '/': function(tree) {
-            return {tok: new jme.types.TOp('*',false,false,2,true,true), args: [tree.args[0],{tok:new jme.types.TOp('/u',false,true,1,false,false),args:[tree.args[1]]}]};
+            tree = {tok: new jme.types.TOp('*',false,false,2,true,true), args: [tree.args[0],{tok:new jme.types.TOp('/u',false,true,1,false,false),args:[tree.args[1]]}]};
+            return tree;
         }
     }
 };
@@ -4831,7 +4832,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     for(var name in namedTerms) {
         var terms = namedTerms[name];
         if(terms.length==1) {
-            match[name] = terms[0];
+            match[name] = removeUnaryDivision(terms[0]);
         } else if(options.gatherList) {
             match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t){ return {tok: new jme.types.TExpression(removeUnaryDivision(t))} })};
         } else {
@@ -5515,8 +5516,6 @@ var Ruleset = jme.rules.Ruleset = function(rules,flags) {
     this.flags = util.extend_object({},displayFlags,flags);
 }
 
-var poo = 0;
-var pd = '';
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
     /** Test whether flag is set
      * @param {String} flag
@@ -5538,11 +5537,6 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @returns {Numbas.jme.tree}
      */
     simplify: function(exprTree,scope) {
-        pd += '  ';
-        poo += 1;
-        if(poo>100) {
-            //throw(new Error("Poo"));
-        }
         var rs = this;
         var changed = true;
         var depth = 0;
@@ -5570,7 +5564,6 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                 }
             }
         }
-        pd = pd.slice(2);
         return exprTree;
     }
 }
@@ -5693,6 +5686,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0','','0']
     ],
     collectNumbers: [
+        ['$n;a * 1/$n;b','ag','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
         ['(`! $n)`+;x * real:$n;n','acgs','n*x']            //shift numbers to left hand side
@@ -11764,6 +11758,9 @@ var jmeFunctions = jme.display.jmeFunctions = {
         } else {
             return '( '+bits[0]+' )!';
         }
+    },
+    'listval': function(tree,tok,bits,settings) {
+        return bits[0]+'['+bits[1]+']';
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
@@ -12116,7 +12113,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
-                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message}));
+                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message},e));
                     }
                 }
             }
@@ -12994,11 +12991,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
             if(stepsMarks!=0 && stepsScore!=0)
             {
                 if(this.credit==1)
@@ -13015,11 +13008,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         else
         {
             this.score = this.credit * this.marks;
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
         }
         if(this.revealed) {
             this.score = 0;
@@ -13028,6 +13017,23 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.parentPart.calculateScore();
         this.display && this.display.showScore(this.answered);
     },
+
+    /** Make sure the awarded score is between the minimum and maximum available.
+     */
+    applyScoreLimits: function() {
+        if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+            this.score = this.settings.minimumMarks;
+            this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
+            this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+        }
+        if(this.score>this.marks) {
+            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:this.marks})));
+            this.score = this.marks;
+            this.credit = 1;
+            this.markingComment(R('part.marking.maximum score applied',{score:this.marks}));
+        }
+    },
+
     /** Update the stored answer from the student (called when the student changes their answer, but before submitting)
      * @param {*} answer
      * @see {Numbas.parts.Part.stagedAnswer}
@@ -13107,7 +13113,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             var result_replacement = this.markAgainstScope(scope,existing_feedback);
                             if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                                 result = result_replacement;
-                                result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
+                                result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
                                 result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
                         } catch(e) {
@@ -13803,11 +13809,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(variables) {
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
-                if(!vd.definition) {
+                var definition = vd.definition+'';
+                if(definition=='') {
                     throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
                 }
                 try {
-                    var tree = Numbas.jme.compile(vd.definition);
+                    var tree = Numbas.jme.compile(definition);
                 } catch(e) {
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
@@ -18032,6 +18039,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
+        if('answer' in data) {
+            settings.minvalueString = settings.maxvalueString = data.answer+'';
+        }
         tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
@@ -19300,11 +19310,29 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxMatrix = matrix.map(function(r){ return [r[0]>0]; });
             break;
         case 'm_n_x':
-            settings.maxMatrix = matrix.map(function(r){ return r.map(function(c){return c>0; }) });
+            switch(this.settings.displayType) {
+                case 'radiogroup':
+                    var correctTicks = [];
+                    for(var i=0; i<this.numChoices; i++) {
+                        var maxj=-1,max=0;
+                        for(var j=0;j<this.numAnswers; j++) {
+                            if(maxj==-1 || matrix[j][i]>max) {
+                                maxj = j;
+                                max = matrix[j][i];
+                            }
+                        }
+                        correctTicks.push(maxj);
+                    }
+                    settings.maxMatrix = matrix.map(function(r,j) { return r.map(function(c,i) { return j==correctTicks[i]; }) });
+                    break;
+                case 'checkbox':
+                    settings.maxMatrix = matrix.map(function(r) { return r.map(function(c){ return c>0; }) });
+                    break;
+            }
             break;
         }
         settings.matrix = matrix;
-        return settings.maxMatrix.map(function(row) { return row.map(function(c) { return c>0; }) });
+        return settings.maxMatrix;
     },
     /** Store the student's choices 
      * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
@@ -19989,7 +20017,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
-        tryLoad(data, ['caseSensitive', 'partialCredit'], settings);
+        tryLoad(data, ['caseSensitive', 'partialCredit','matchMode'], settings);
     },
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());

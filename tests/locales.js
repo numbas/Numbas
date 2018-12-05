@@ -2317,6 +2317,7 @@ Numbas.locale = {
     "part.marking.did not answer": "You did not answer this question.",
     "part.marking.total score": "You scored <strong>{{count,niceNumber}}</strong> $t(mark) for this part.",
     "part.marking.minimum score applied": "The minimum score for this part is <strong>{{score,niceNumber}}</strong>.",
+    "part.marking.maximum score applied": "The maximum score for this part is <strong>{{score,niceNumber}}</strong>.",
     "part.marking.nothing entered": "You did not enter an answer.",
     "part.marking.incorrect": "Your answer is incorrect.",
     "part.marking.correct": "Your answer is correct.",
