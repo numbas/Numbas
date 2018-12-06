@@ -15,7 +15,7 @@ jme.rules = {};
  * @property {Boolean} commutative - should the commutativity of operations be used? If `false`, terms must appear in the same order as in the pattern.
  * @property {Boolean} associative - should the associativity of operations be used? If `true`, all terms in nested applications of associative ops are gathered together before comparing.
  * @property {Boolean} allowOtherTerms - when matching an associative op, if the expression contains terms that don't match any of the pattern, should they be ignored? If `false`, every term in the expression must match a term in the pattern.
- * @property {Boolean} strictPlus - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
+ * @property {Boolean} strictInverse - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  * @property {Numbas.jme.Scope} scope - A JME scope in which to evaluate conditions.
  */
 
@@ -30,7 +30,7 @@ function parse_options(str) {
         associative: str.match(/a/) !== null,
         allowOtherTerms: str.match(/g/) !== null,
         gatherList: str.match(/l/) !== null,
-        strictPlus: str.match(/s/) !== null
+        strictInverse: str.match(/s/) !== null
     };
 }
 
@@ -48,7 +48,7 @@ var extend_options = Numbas.jme.rules.extend_options = function(a,b) {
         associative: b.associative===undefined ? a.associative : b.associative,
         allowOtherTerms: b.allowOtherTerms===undefined ? a.allowOtherTerms : b.allowOtherTerms,
         gatherList: b.gatherList===undefined ? a.gatherList : b.gatherList,
-        strictPlus: b.strictPlus===undefined ? a.strictPlus : b.strictPlus,
+        strictInverse: b.strictInverse===undefined ? a.strictInverse : b.strictInverse,
         scope: b.scope===undefined ? a.scope : b.scope
     };
 }
@@ -140,7 +140,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @type Object
  * @property {Boolean} commutative - should the operator be considered as commutative, for the purposes of matching ops with opposites? If yes, `a>c` will produce terms `c` and `a` when `op='<'`.
  * @property {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
- * @property {Boolean} strictPlus - if `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
+ * @property {Boolean} strictInverse - if `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  */
 
 /** Information to do with a term found in an expression by {@link Numbas.jme.rules.getTerms}.
@@ -342,7 +342,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
     if(intree.terms[op] === undefined) {
         intree.terms[op] = {};
     }
-    var option_signature = options.associative*2 + (options.strictPlus);
+    var option_signature = options.associative*2 + (options.strictInverse);
 
     if(intree.terms[op][option_signature]) {
         return intree.terms[op][option_signature];
@@ -353,7 +353,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         tree = insertUnaryMinus(tree.args[0]);
     }
 
-    if(!options.strictPlus && op in nonStrictReplacements) {
+    if(!options.strictInverse && op in nonStrictReplacements) {
         for(var subop in nonStrictReplacements[op]) {
             if(jme.isOp(tree.tok,subop)) {
                 tree = nonStrictReplacements[op][subop](tree);
@@ -373,7 +373,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         if(options.commutative && jme.converseOps[op] && jme.isOp(tok,jme.converseOps[op])) {
             return true;
         }
-        if(!options.strictPlus && op in nonStrictReplacements && tok.type=='op' && tok.name in nonStrictReplacements[op]) {
+        if(!options.strictInverse && op in nonStrictReplacements && tok.type=='op' && tok.name in nonStrictReplacements[op]) {
             return true;
         }
     }
@@ -393,7 +393,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         if(op=='*' && jme.isOp(argtok,'-u')) {
             argtok = unwrapCapture(args[i].args[0]).tree.tok;
         }
-        if(options.associative && (isThisOp(argtok) || (!options.strictPlus && op=='+' && jme.isOp(argtok,'-')))) {
+        if(options.associative && (isThisOp(argtok) || (!options.strictInverse && op=='+' && jme.isOp(argtok,'-')))) {
             var sub = getTerms(res.tree,op,options,false);
             sub = add_existing_names(sub,item.names,item.outside_equalnames);
             if(item.quantifier!='1') {
@@ -625,7 +625,7 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_noncommutative': setMatchOptions({commutative:false}),
     'm_associative': setMatchOptions({associative:true}),
     'm_nonassociative': setMatchOptions({associative:false}),
-    'm_strictplus': setMatchOptions({strictPlus:true}),
+    'm_strictinverse': setMatchOptions({strictInverse:true}),
     'm_gather': setMatchOptions({gatherList:false}),
     'm_nogather': setMatchOptions({gatherList:true}),
     'm_type': function(ruleTree,exprTree,options) {
@@ -1010,12 +1010,12 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
     var op = ruleTok.name;
     var commuting = options.commutative && ruleTok.commutative;
     var associating = options.associative && ruleTok.associative;
-    if(!options.strictPlus && nonStrictCanonicalOps[op]) {
+    if(!options.strictInverse && nonStrictCanonicalOps[op]) {
         op = nonStrictCanonicalOps[op];
         commuting = options.commutative && jme.commutative[op];
         associating = options.associative && jme.associative[op];
     }
-    var term_options = {commutative: options.commutative, associative: associating, strictPlus: options.strictPlus};
+    var term_options = {commutative: options.commutative, associative: associating, strictInverse: options.strictInverse};
     var ruleTerms = getTerms(ruleTree,op,term_options,true);
     var exprTerms = getTerms(exprTree,op,term_options,false);
     if(exprTerms.length<ruleTerms.min_total) {
@@ -1688,7 +1688,7 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
         associative: true,
         allowOtherTerms: true,
         gatherList: false,
-        strictPlus: false,
+        strictInverse: false,
         scope: Numbas.jme.builtinScope
     };
     options = extend_options(default_options,options);
