@@ -52,12 +52,7 @@
     <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
-        <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
+        <xsl:attribute name="data-bind">css: {'start-column': ((part.shuffleAnswers.filter((_,i) => i % parseInt(<xsl:value-of select="$cols"/>) == 0 &amp;&amp; i > 0)).indexOf(<xsl:value-of select="$choicenum"/>)>-1),checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
         <label>
             <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
@@ -71,11 +66,7 @@
     <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
+        <xsl:attribute name="data-bind">css: {'start-column': ((part.shuffleAnswers.filter((_,i) => i % parseInt(<xsl:value-of select="$cols"/>) == 0 &amp;&amp; i > 0)).indexOf(<xsl:value-of select="$choicenum"/>)>-1)}</xsl:attribute>
         <label>
             <input type="radio" class="choice" name="{$path}-choice-correctanswer" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
@@ -86,12 +77,7 @@
     <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
-        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
+        <xsl:attribute name="data-bind">css: {'start-column': ((part.shuffleAnswers.filter((_,i) => i % parseInt(<xsl:value-of select="$cols"/>) == 0 &amp;&amp; i > 0)).indexOf(<xsl:value-of select="$choicenum"/>)>-1),checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
             <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
             <xsl:apply-templates select="content"/>
@@ -102,11 +88,7 @@
     <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
+        <xsl:attribute name="data-bind">css: {'start-column': ((part.shuffleAnswers.filter((_,i) => i % parseInt(<xsl:value-of select="$cols"/>) == 0 &amp;&amp; i > 0)).indexOf(<xsl:value-of select="$choicenum"/>)>-1)}</xsl:attribute>
         <label>
             <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
             <xsl:apply-templates select="content"/>
