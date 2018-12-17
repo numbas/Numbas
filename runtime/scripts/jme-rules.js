@@ -1668,7 +1668,7 @@ patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
 patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
 patternParser.addBinaryOperator('`&',{precedence: 100000});     // and
 patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
-patternParser.addBinaryOperator('`@', {precedence: 1000000});   // macro
+patternParser.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
 
 
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
