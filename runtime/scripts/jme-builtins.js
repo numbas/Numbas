@@ -682,7 +682,7 @@ newBuiltin('satisfy', [TList,TList,TList,TNum], TList, null, {
         var names = args[0].args.map(function(t){ return t.tok.name; });
         var definitions = args[1].args;
         var conditions = args[2].args;
-        var maxRuns = args.length>3 ? jme.evaluate(args[3]).value : 100;
+        var maxRuns = args.length>3 ? scope.evaluate(args[3]).value : 100;
         var variables = satisfy(names,definitions,conditions,scope,maxRuns);
         return new TList(names.map(function(name){ return variables[name]; }));
     }
