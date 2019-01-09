@@ -503,9 +503,17 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
          * @returns {Numbas.marking.marking_script_result}
          */
         evaluate: function(scope, variables) {
+            scope = new jme.Scope([scope]);
+
+            // if any names used by notes are already defined as variables in this scope, delete them
+            Object.keys(this.notes).forEach(function(name) {
+                scope.deleteVariable(name);
+            });
+
             scope = new StatefulScope([
                 scope, {variables: variables}
             ]);
+
             var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
             return {
                 states: scope.states,

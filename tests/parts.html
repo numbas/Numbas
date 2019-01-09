@@ -264,6 +264,29 @@
                     assert.ok(contains_note(res,{note:'all_same_precision',message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
                 });
 
+                QUnit.test('Note name used both for question variable and marking note',function(assert) {
+                    var data = {"name":"wrong size matrix","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"rows":{"name":"rows","group":"Ungrouped variables","definition":"4","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["rows"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"\n<p>[[0]]</p>","gaps":[{"type":"matrix","marks":"4","showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"correctAnswer":"matrix([1,0,3,3,1],[0,1,4,4,2],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0])","correctAnswerFractions":true,"numRows":"6","numColumns":"5","allowResize":true,"tolerance":0,"markPerCell":false,"allowFractions":true}],"sortAnswers":false}]};
+
+                    var done = assert.async();
+                    assert.expect(1);
+
+                    var q = Numbas.createQuestionFromJSON(data);
+                    q.generateVariables();
+                    var promise = q.signals.on('ready',function() {
+                        var g = q.getPart('p0g0');
+                        g.storeAnswer(matrix([['2','0'],['0','1']]));
+                        var p = q.getPart('p0');
+                        p.submit();
+                        assert.ok(p.answered,'can submit a smaller matrix than expected');
+                        done();
+                    }).catch(function(e) {
+                        console.log(e);
+                        done();
+                        throw(e);
+                    });
+
+                });
+
                 QUnit.module('Choose one from a list');
                 QUnit.test('Three choices, first answer is correct', function(assert) {
                     var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
