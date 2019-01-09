@@ -10355,12 +10355,12 @@ function satisfy(names,definitions,conditions,scope,maxRuns) {
             runs += 1;
             var variables = {};
             for(var i=0; i<names.length; i++) {
-                variables[names[i]] = jme.evaluate(definitions[i],scope);
+                variables[names[i]] = scope.evaluate(definitions[i]);
             }
             var nscope = new jme.Scope([scope,{variables:variables}]);
             satisfied = true;
             for(var i=0; i<conditions.length; i++) {
-                var ok = jme.evaluate(conditions[i],nscope);
+                var ok = nscope.evaluate(conditions[i]);
                 if(ok.type!='boolean') {
                     throw(new Numbas.Error('jme.func.satisfy.condition not a boolean'));
                 }
