@@ -19,9 +19,17 @@
             body {
                 font-size: 17px;
                 font-family: sans-serif;
-                max-width: 700px;
-                margin: 0 auto;
+                margin: 0 1em;
             }
+
+            main {
+                display: grid;
+                grid-template-columns: repeat(3,1fr);
+                justify-content: center;
+                grid-auto-flow: row dense;
+                grid-gap: 2rem;
+            }
+
             label {
                 display: block;
                 clear: both;
@@ -77,112 +85,117 @@
     <body>
         <h1>Pattern-matching algebraic expressions!</h1>
 
-        <form>
-            <div>
-                <label>
-                    <span class="label-text">Pattern:</span>
-                    <textarea data-bind="textInput: pattern" class="form-control"></textarea>
-                </label>
-                <span data-bind="tex: patternTeX"></span>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Expression to test:</span>
-                    <input type="text" data-bind="textInput: expression"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Replacement expression:</span>
-                    <input type="text" data-bind="textInput: replacement"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Use commutativity?</span>
-                    <input type="checkbox" data-bind="checked: commutative"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Use associativity?</span>
-                    <input type="checkbox" data-bind="checked: associative"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Strict addition?</span>
-                    <input type="checkbox" data-bind="checked: strictPlus"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Allow other terms?</span>
-                    <input type="checkbox" data-bind="checked: allowOtherTerms"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Gather terms matched under the same name?</span>
-                    <input type="checkbox" data-bind="checked: gather"/>
-                </label>
-            </div>
-            <div>
-                <label>
-                    <span class="label-text">Replace all?</span>
-                    <input type="checkbox" data-bind="checked: replaceAll"/>
-                </label>
-            </div>
-        </form>
+        <p>See <a href="https://docs.numbas.org.uk/en/pattern-matching/pattern-matching/index.html">the documentation</a>.</p>
 
-        <h2>Match</h2>
+        <main>
+            <section>
+                <h2>Pattern</h2>
+                <form>
+                    <div>
+                        <label>
+                            <span class="label-text">Pattern:</span>
+                            <textarea data-bind="textInput: pattern" class="form-control"></textarea>
+                        </label>
+                        <span data-bind="tex: patternTeX"></span>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Expression to test:</span>
+                            <input type="text" data-bind="textInput: expression"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Replacement expression:</span>
+                            <input type="text" data-bind="textInput: replacement"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Use commutativity?</span>
+                            <input type="checkbox" data-bind="checked: commutative"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Use associativity?</span>
+                            <input type="checkbox" data-bind="checked: associative"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Strict addition?</span>
+                            <input type="checkbox" data-bind="checked: strictPlus"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Allow other terms?</span>
+                            <input type="checkbox" data-bind="checked: allowOtherTerms"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Gather terms matched under the same name?</span>
+                            <input type="checkbox" data-bind="checked: gather"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Replace all?</span>
+                            <input type="checkbox" data-bind="checked: replaceAll"/>
+                        </label>
+                    </div>
+                </form>
+            </section>
 
-        <div data-bind="if: !matches()">
-            <p>&#x2717; <span data-bind="html: error"></span></p>
-        </div>
+            <section>
+                <h2>Match</h2>
 
-        <div class="matches" data-bind="if: matches">
-            <p>Match! &#x2713;</p>
-            <div data-bind="if: matches().length">
-                <h3>Captured groups</h3>
-                <table id="groups">
-                    <thead>
-                        <th>Group</th>
-                        <th>Expression</th>
-                    </thead>
-                    <tbody data-bind="foreach: matches">
-                        <tr>
-                            <td class="name" data-bind="text: name"></td>
-                            <td data-bind="text: expression"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                <div data-bind="if: !matches()">
+                    <p>&#x2717; <span data-bind="html: error"></span></p>
+                </div>
 
-        <div data-bind="visible: !error()">
-            <h2>Result</h2>
+                <div class="matches" data-bind="if: matches">
+                    <p>Match! &#x2713;</p>
+                    <div data-bind="if: matches().length">
+                        <h3>Captured groups</h3>
+                        <table id="groups">
+                            <thead>
+                                <th>Group</th>
+                                <th>Expression</th>
+                            </thead>
+                            <tbody data-bind="foreach: matches">
+                                <tr>
+                                    <td class="name" data-bind="text: name"></td>
+                                    <td data-bind="text: expression"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-            <div class="result">
-                <code class="result" data-bind="text: result"></code>
-                <p data-bind="visible: !resultChanged()">(Not changed)</p>
-            </div>
-        </div>
+            <section>
+                <h2>Result</h2>
 
-        <div class="examples">
-            <h2>Examples</h2>
-            <ul data-bind="foreach: examples">
-                <li><span class="example" data-bind="text: description, click: $root.setExample"></span></li>
-            </ul>
-        </div>
+                <div data-bind="visible: !error()">
+                    <div class="result">
+                        <code class="result" data-bind="text: result"></code>
+                        <p data-bind="visible: !resultChanged()">(Not changed)</p>
+                    </div>
+                </div>
+            </section>
 
-        <div class="commands">
-            <h2>Special elements</h2>
-            <dl>
-                <dt><code>?</code></dt>
-                <dd>Match anything</dd>
-            </dl>
-        </div>
+            <section>
+                <div class="examples">
+                    <h2>Examples</h2>
+                    <ul data-bind="foreach: examples">
+                        <li><span class="example" data-bind="text: description, click: $root.setExample"></span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
 
         <script type="text/javascript">
             Numbas.queueScript('base',[],function() {

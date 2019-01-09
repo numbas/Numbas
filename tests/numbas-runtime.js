@@ -13832,7 +13832,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
                 var vars = Numbas.jme.findvars(tree);
-                q.variablesTodo[name] = {
+                q.variablesTodo[name.toLowerCase()] = {
                     tree: tree,
                     vars: vars
                 }
