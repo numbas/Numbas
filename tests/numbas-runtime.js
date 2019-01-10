@@ -18938,7 +18938,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.flipped = false;
         }
-        tryLoad(data, ['maxMarks'], this, ['marks']);
+        if(this.type!='1_n_2') {
+            tryLoad(data, ['maxMarks'], this, ['marks']);
+        }
         tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType']);
         tryLoad(data, ['warningType'], settings);
