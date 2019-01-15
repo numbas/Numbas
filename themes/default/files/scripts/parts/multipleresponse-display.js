@@ -39,6 +39,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         }
         this.layout = util.copyarray(p.layout);
         this.showCellAnswerState = ko.observable(p.settings.showCellAnswerState);
+        this.displayColumns = ko.observable(p.settings.displayColumns);
         switch(p.type) {
         case '1_n_2':
             /** Index of student's current answer choice (not necessarily submitted)

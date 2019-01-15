@@ -8693,7 +8693,7 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var list = args[0];
         var size = list.vars;
         var start = util.wrapListIndex(range[0],size);
-        var end = util.wrapListIndex(range[1]),size;
+        var end = util.wrapListIndex(range[1],size);
         var step = range[2];
         var value;
         if(step!=1) {

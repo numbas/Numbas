@@ -54,6 +54,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         tryLoad(data, ['notationStyles'], settings);
         tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
         var settings = this.settings;
