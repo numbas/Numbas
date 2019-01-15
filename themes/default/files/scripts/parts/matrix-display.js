@@ -20,7 +20,18 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        this.correctAnswer = Knockout.observable(p.settings.correctAnswer);
+        var correctInput = p.settings.correctAnswer.map(function(row) {
+            return row.map(function(c) {
+                if(p.settings.allowFractions) {
+                    return c;
+                }
+                return Numbas.math.niceNumber(c,{precisionType: p.settings.precisionType, precision: p.settings.precision, style: p.settings.correctAnswerStyle});
+            });
+        });
+        correctInput.rows = p.settings.correctAnswer.rows;
+        correctInput.columns = p.settings.correctAnswer.columns;
+
+        this.correctAnswer = Knockout.observable(correctInput);
         this.correctAnswerLaTeX = Knockout.computed(function() {
             var correctAnswer = this.correctAnswer();
             var m = new Numbas.jme.types.TMatrix(correctAnswer);
