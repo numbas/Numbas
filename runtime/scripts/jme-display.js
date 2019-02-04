@@ -345,7 +345,7 @@ var texOps = jme.display.texOps = {
     '>': infixTex('\\gt'),
     '<=': infixTex('\\leq'),
     '>=': infixTex('\\geq'),
-    '<>': infixTex('\neq'),
+    '<>': infixTex('\\neq'),
     '=': infixTex('='),
     'and': infixTex('\\wedge'),
     'or': infixTex('\\vee'),
