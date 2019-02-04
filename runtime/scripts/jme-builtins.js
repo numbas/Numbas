@@ -1493,6 +1493,14 @@ newBuiltin('resultsequal',['?','?',TString,TNum],TBool,null, {
     }
 });
 
+newBuiltin('infer_variable_types',[TExpression],TDict,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0];
+        var assignments = jme.inferVariableTypes(expr.tree,scope);
+        return jme.wrapValue(assignments);
+    }
+});
+
 /** Helper function for the JME `match` function
  * @param {Numbas.jme.tree} expr
  * @param {String} pattern

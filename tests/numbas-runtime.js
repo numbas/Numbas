@@ -8047,7 +8047,7 @@ var funcObjAcc = 0;    //accumulator for ids for funcObjs, so they can be sorted
  * @memberof Numbas.jme
  * @constructor
  * @param {String} name
- * @param {Array.<Function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {Array.<Function|String>} intype - A list of data type constructors for the function's parameters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
  * @param {Function} outcons - The constructor for the output value of the function
  * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
  * @param {Numbas.jme.funcObj_options} options
@@ -8660,6 +8660,130 @@ var compareTrees = jme.compareTrees = function(a,b) {
     }
     return sign_a==sign_b ? 0 : sign_a ? 1 : -1;
 }
+
+/** Infer the types of variables in an expression, by trying all definitions of functions and returning only those that can be satisfied by an assignment of types to variable names.
+ * Doesn't work well on functions with unknown return type, like `if` and `switch`. In these cases, it assumes the return type of the function is whatever it needs to be, even if that is inconsistent with what the function would actually do.
+ * Returns a list of possible assignments of types, arranged in order of preference: numbers are preferred to matrices, for example, and then by specificity (number of variables assigned a type).
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.Scope} scope
+ * @param {String} outtype - the desired return type of the expression
+ * @param {Object.<String>} assigned_types - types of variables which have already been inferred
+ * @returns {Array.<Object.<String>>}
+ */
+var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype, assigned_types) {
+    /** Deduplicate a list of objects
+     * Return only items with unique sets of entries
+     * @param {Array.<Object>} objs
+     * @returns {Arra.<Object>}
+     */
+    function dedup(objs) {
+        if(!objs.length) {
+            return [];
+        }
+        function compare(a,b) {
+            var as = Object.entries(a).sort();
+            var bs = Object.entries(b).sort();
+            for(var i=0;i<Math.max(as.length,bs.length);i++) {
+                if(i>=as.length) {
+                    return -1;
+                }
+                if(i>=bs.length) {
+                    return 1;
+                }
+                var ai = as[i][0];
+                var bi = bs[i][0];
+                var av = as[i][1];
+                var bv = bs[i][1];
+                var r = ai>bi ? 1 : ai<bi ? -1 : av>bv ? 1 : av<bv ? -1 : 0;
+                if(r!=0) {
+                    return r;
+                }
+            }
+            return 0;
+        }
+        objs.sort(compare);
+        var out = [objs[0]];
+
+        for(var i=1;i<objs.length;i++) {
+            if(compare(objs[i],objs[i-1])!=0) {
+                out.push(objs[i]);
+            }
+        }
+        return out;
+    }
+
+    assigned_types = assigned_types || {};
+    //console.log(`infer for ${Numbas.jme.display.treeToJME(tree)}, want ${outtype}, assigned ${JSON.stringify(assigned_types)}`);
+    if(outtype=='?') {
+        outtype = undefined;
+    }
+    switch(tree.tok.type) {
+        case 'name':
+            var name = tree.tok.name.toLowerCase();
+            if(assigned_types[name] !== undefined) {
+                if(!outtype || outtype==assigned_types[name]) {
+                    return [assigned_types];
+                } else {
+                    return [];
+                }
+            } else {
+                var assignment = util.copyobj(assigned_types);
+                if(outtype) {
+                    assignment[name] = outtype;
+                }
+                return [assignment];
+            }
+        case 'op':
+        case 'function':
+            var name = tree.tok.name.toLowerCase();
+            var functions = scope.getFunction(name.toLowerCase());
+            var assignments = [];
+            functions.forEach(function(fn) {
+                //console.log(`try ${name} : ${fn.intype} -> ${fn.outtype}`);
+                var fn_assignments = [assigned_types];
+                for(var i=0;i<tree.args.length;i++) {
+                    var nassignments = [];
+                    fn_assignments.forEach(function(assignment) {
+                        var res = inferVariableTypes(tree.args[i],scope,fn.intype[i],assignment);
+                        nassignments = nassignments.concat(res);
+                    });
+                    fn_assignments = nassignments;
+                }
+                assignments = assignments.concat(fn_assignments);
+            });
+            assignments = dedup(assignments);
+            //console.log('Decision:');
+            //assignments.forEach(r=>console.log(`* ${JSON.stringify(r)}`));
+            var type_preference_order = ['number','matrix','vector','boolean','set'];
+            function preference(type) {
+                var i = type_preference_order.indexOf(type);
+                return i==-1 ? Infinity : i;
+            }
+            assignments.sort(function(a,b) {
+                var as = Object.keys(a).sort();
+                var bs = Object.keys(b).sort();
+                for(var i=0;i<Math.max(as.length,bs.length);i++) {
+                    if(i>=as.length) {
+                        return -1;
+                    }
+                    if(i>=bs.length) {
+                        return 1;
+                    }
+                    var ai = preference(a[as[i]]);
+                    var bi = preference(b[bs[i]]);
+                    var r = ai>bi ? 1 : ai<bi ? -1 : 0;
+                    if(r!=0) {
+                        return r;
+                    }
+                }
+                return 0;
+            });
+            return assignments;
+        default:
+            return [assigned_types];
+    }
+}
+
 });
 
 /*
@@ -10157,6 +10281,14 @@ newBuiltin('resultsequal',['?','?',TString,TNum],TBool,null, {
     }
 });
 
+newBuiltin('infer_variable_types',[TExpression],TDict,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0];
+        var assignments = jme.inferVariableTypes(expr.tree,scope);
+        return jme.wrapValue(assignments);
+    }
+});
+
 /** Helper function for the JME `match` function
  * @param {Numbas.jme.tree} expr
  * @param {String} pattern
@@ -10636,7 +10768,7 @@ var texOps = jme.display.texOps = {
     '>': infixTex('\\gt'),
     '<=': infixTex('\\leq'),
     '>=': infixTex('\\geq'),
-    '<>': infixTex('\neq'),
+    '<>': infixTex('\\neq'),
     '=': infixTex('='),
     'and': infixTex('\\wedge'),
     'or': infixTex('\\vee'),
@@ -18460,6 +18592,7 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
 {
     var settings = this.settings;
     util.copyinto(JMEPart.prototype.settings,settings);
+    settings.valueGenerators = {};
     settings.mustHave = [];
     settings.notAllowed = [];
     settings.expectedVariableNames = [];
@@ -18480,6 +18613,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var parametersPath = 'answer';
         tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
         tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
+        
+        var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
+        if(valueGeneratorsNode) {
+            var valueGenerators = valueGeneratorsNode.selectNodes('generator');
+            for(var i=0;i<valueGenerators.length;i++) {
+                var generator = {};
+                tryGetAttribute(generator,xml,valueGenerators[i],['name','value']);
+                this.addValueGenerator(generator.name, generator.value);
+            }
+        }
+
         //max length and min length
         tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
         var messageNode = xml.selectSingleNode('answer/maxlength/message');
@@ -18549,16 +18693,30 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
     },
     loadFromJSON: function(data) {
+        var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['vsetRangePoints'], settings);
+        var vsetRange = tryGet(data,'vsetRange');
+        if(vsetRange) {
+            settings.vsetRangeStart = vsetRange[0];
+            settings.vsetRangeEnd = vsetRange[1];
+        }
         tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+        var valuegenerators = tryGet(data,'valuegenerators');
+        if(valuegenerators) {
+            valuegenerators.forEach(function(g) {
+                p.addValueGenerator(g.name,g.value);
+            });
+        }
     },
     resume: function() {
         if(!this.store) {
@@ -18690,6 +18848,21 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
+    },
+
+    /** Add a value generator expression to the list in this part's settings.
+     * @param {String} name
+     * @param {JME} expr
+     */
+    addValueGenerator: function(name, expr) {
+        try {
+            var expression = new jme.types.TExpression(expr);
+            if(expression.tree) {
+                this.settings.valueGenerators[name] = expression;
+            }
+        } catch(e) {
+            this.error('part.jme.invalid value generator expression',{name: name, expr: expr, message: e.message}, e);
+        }
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

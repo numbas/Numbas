@@ -696,6 +696,7 @@ class JMEPart(Part):
     vsetRangeEnd = 1
     vsetRangePoints = 5
     checkVariableNames = False
+    valueGenerators = []
 
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
@@ -745,12 +746,16 @@ class JMEPart(Part):
                 self.vsetRangeStart = vsetrange[0]
                 self.vsetRangeEnd = vsetrange[1]
 
+        if haskey(data,'valuegenerators'):
+            self.valueGenerators = case_insensitive_get(data,'valuegenerators')
+
     def toxml(self):
         part = super(JMEPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['correctanswer',['math']],
                                 ['checking',
-                                        ['range']
+                                        ['range'],
+                                        ['valuegenerators'],
                                 ]
                             ]))
 
@@ -770,13 +775,20 @@ class JMEPart(Part):
                 'failurerate': strcons_fix(self.failureRate)
         }
         checking.find('range').attrib = {'start': strcons_fix(self.vsetRangeStart), 'end': strcons_fix(self.vsetRangeEnd),  'points': strcons_fix(self.vsetRangePoints)}
+
+        valueGenerators = checking.find('valuegenerators')
+        for g in self.valueGenerators:
+            generator = etree.Element('generator')
+            generator.attrib = {'name': g['name'], 'value': g['value']}
+            valueGenerators.append(generator)
+
         answer.append(self.maxLength.toxml())
         answer.append(self.minLength.toxml())
         answer.append(self.mustHave.toxml())
         answer.append(self.notAllowed.toxml())
         answer.append(self.expectedVariableNames.toxml())
         answer.append(self.mustMatchPattern.toxml())
-        
+
         return part
 
 class Restriction:

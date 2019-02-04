@@ -32,6 +32,7 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
 {
     var settings = this.settings;
     util.copyinto(JMEPart.prototype.settings,settings);
+    settings.valueGenerators = {};
     settings.mustHave = [];
     settings.notAllowed = [];
     settings.expectedVariableNames = [];
@@ -52,6 +53,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var parametersPath = 'answer';
         tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
         tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
+        
+        var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
+        if(valueGeneratorsNode) {
+            var valueGenerators = valueGeneratorsNode.selectNodes('generator');
+            for(var i=0;i<valueGenerators.length;i++) {
+                var generator = {};
+                tryGetAttribute(generator,xml,valueGenerators[i],['name','value']);
+                this.addValueGenerator(generator.name, generator.value);
+            }
+        }
+
         //max length and min length
         tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
         var messageNode = xml.selectSingleNode('answer/maxlength/message');
@@ -121,16 +133,30 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
     },
     loadFromJSON: function(data) {
+        var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['vsetRangePoints'], settings);
+        var vsetRange = tryGet(data,'vsetRange');
+        if(vsetRange) {
+            settings.vsetRangeStart = vsetRange[0];
+            settings.vsetRangeEnd = vsetRange[1];
+        }
         tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+        var valuegenerators = tryGet(data,'valuegenerators');
+        if(valuegenerators) {
+            valuegenerators.forEach(function(g) {
+                p.addValueGenerator(g.name,g.value);
+            });
+        }
     },
     resume: function() {
         if(!this.store) {
@@ -262,6 +288,21 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
+    },
+
+    /** Add a value generator expression to the list in this part's settings.
+     * @param {String} name
+     * @param {JME} expr
+     */
+    addValueGenerator: function(name, expr) {
+        try {
+            var expression = new jme.types.TExpression(expr);
+            if(expression.tree) {
+                this.settings.valueGenerators[name] = expression;
+            }
+        } catch(e) {
+            this.error('part.jme.invalid value generator expression',{name: name, expr: expr, message: e.message}, e);
+        }
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

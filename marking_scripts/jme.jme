@@ -100,11 +100,38 @@ requiredStringsPenalty:
     )
 
 vRange (The range to pick variable values from): 
-    settings["vsetRangeStart"]..settings["vsetRangeEnd"]#0
+    settings["vsetRangeStart"]..settings["vsetRangeEnd"] # 0
+
+answerVariables (Variables used in either the correct answer or the student's answer):
+    correctVariables or studentVariables
+
+value_generators (Expressions which generate values for each variable in the answer):
+    dict(map(
+        [name, get(settings["valueGenerators"],name,default_value_generator[get(variable_types,name,"number")])],
+        name,
+        answerVariables
+    ))
+
+variable_types (Inferred types for each of the variables):
+    infer_variable_types(correctExpr)[0]
+
+default_value_generator:
+    [
+        "number": expression("random(vRange)"),
+        "matrix": expression("matrix(repeat(repeat(random(vRange),3),3))"),
+        "vector": expression("vector(repeat(random(vRange),3))"),
+        "boolean": expression("random(true,false)"),
+        "set": expression("set(repeat(random(vRange),5))")
+    ]
 
 vset (The sets of variable values to test against):
     repeat(
-        dict(map([x,random(vRange)],x,correctVariables or studentVariables)),
+        dict(map([
+            x,
+            let(generator,value_generators[x],
+                eval(generator,["vrange":vRange])
+            )
+        ],x,answerVariables)),
         settings["vsetRangePoints"]
     )
 
