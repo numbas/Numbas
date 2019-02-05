@@ -55,6 +55,8 @@ Numbas.showError = function(e)
 /** Generic error class. Extends JavaScript's Error
  * @constructor
  * @param {String} message - A description of the error. Localised by R.js.
+ * @param {Object} args - Arguments for the error message
+ * @param {Error} originalError - If this is a re-thrown error, the original error object.
  */
 Numbas.Error = function(message, args, originalError)
 {
@@ -78,6 +80,8 @@ Numbas.Error.prototype.constructor = Numbas.Error;
 var scriptreqs = {};
 /** Keep track of loading status of a script and its dependencies
  * @param {String} file - name of script
+ * @param {Array.<String>} fdeps - Scripts which this one depends on
+ * @param {Function} callback
  * @global
  * @constructor
  * @property {String} file - Name of script
@@ -125,6 +129,7 @@ RequireScript.prototype = {
  * @memberof Numbas
  * @param {String} file
  * @param {Boolean} noreq - don't create a {@link Numbas.RequireScript} object
+ * @returns {Numbas.RequireScript}
  */
 var loadScript = Numbas.loadScript = function(file,noreq)
 {
@@ -2005,7 +2010,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a<b;
+        return !math.geq(a,b);
     },
     /** Is `a` greater than `b`?
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
@@ -2017,7 +2022,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a>b;
+        return !math.leq(a,b);
     },
     /** Is `a` less than or equal to `b`?
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
@@ -2029,7 +2034,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a<=b;
+        return a<b || math.eq(a,b);
     },
     /** Is `a` greater than or equal to `b`?
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
@@ -2041,7 +2046,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a>=b;
+        return a>b || math.eq(a,b);
     },
     /** Is `a` equal to `b`?
      * @param {Number} a
@@ -2062,10 +2067,24 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 if(isNaN(a)) {
                     return isNaN(b);
                 }
-                return a==b;
+                return a==b || math.isclose(a,b);
             }
         }
     },
+
+    /** Is `a` close to `b`?
+     * @param {Number} a
+     * @param {Number} b
+     * @param {Number} [rel_tol=1e-12] - relative tolerance: amount of error relative to `max(abs(a),abs(b))`.
+     * @param {Number} [abs_tol=0] - absolute tolerance: maximum absolute difference between `a` and `b`.
+     * @returns {Boolean}
+     */
+    isclose: function(a,b,rel_tol,abs_tol) {
+        rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
+        abs_tol = abs_tol===undefined ? 0 : rel_tol;
+        return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
+    },
+
     /** Greatest of two numbers - wraps `Math.max`
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
      * @param {Number} a
@@ -5661,9 +5680,10 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','s','-(x/y)'],
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
-        ['`!-? `& (-(real:$n `| `!$n);x) * ?;y','asgc','-(x*y)'],            //take negation to left of multiplication
+        ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c']
+        ['?;a+(-?;b-?;c)','','a-b-c'],
+        ['?;x*(?;y*?;z)','s','x*y*z']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
@@ -5707,7 +5727,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['0^?;x','','0']
     ],
     constantsFirst: [
-        ['(`! $n);x * (real:$n/real:$n`?);n','asg','n*x']
+        ['(`! `+- $n);x * (real:$n/real:$n`?);n','asg','n*x']
     ],
     sqrtProduct: [
         ['sqrt(?;x)*sqrt(?;y)','','sqrt(x*y)']
@@ -8680,6 +8700,11 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
         if(!objs.length) {
             return [];
         }
+        /** Compare two assignment dictionaries.
+         * @param {Object} a
+         * @param {Object} b
+         * @returns {Number}
+         */
         function compare(a,b) {
             var as = Object.entries(a).sort();
             var bs = Object.entries(b).sort();
@@ -8713,7 +8738,6 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
     }
 
     assigned_types = assigned_types || {};
-    //console.log(`infer for ${Numbas.jme.display.treeToJME(tree)}, want ${outtype}, assigned ${JSON.stringify(assigned_types)}`);
     if(outtype=='?') {
         outtype = undefined;
     }
@@ -8739,7 +8763,6 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
             var functions = scope.getFunction(name.toLowerCase());
             var assignments = [];
             functions.forEach(function(fn) {
-                //console.log(`try ${name} : ${fn.intype} -> ${fn.outtype}`);
                 var fn_assignments = [assigned_types];
                 for(var i=0;i<tree.args.length;i++) {
                     var nassignments = [];
@@ -8752,9 +8775,11 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
                 assignments = assignments.concat(fn_assignments);
             });
             assignments = dedup(assignments);
-            //console.log('Decision:');
-            //assignments.forEach(r=>console.log(`* ${JSON.stringify(r)}`));
-            var type_preference_order = ['number','matrix','vector','boolean','set'];
+            var type_preference_order = ['number','vector','matrix','boolean','set'];
+            /** Preference rating for the given type. A lower value is more preferred. Unrecognised types produce `Infinity`.
+             * @param {String} type
+             * @returns {Number}
+             */
             function preference(type) {
                 var i = type_preference_order.indexOf(type);
                 return i==-1 ? Infinity : i;
@@ -9168,6 +9193,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
         return new TBool(util.eq(args[0],args[1]));
     }
 });
+newBuiltin('isclose', [TNum,TNum,TNum,TNum], TBool, math.isclose);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
@@ -10289,6 +10315,37 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     }
 });
 
+newBuiltin('make_variables',[TDict],TDict,null, {
+    evaluate: function(args,scope) {
+        var todo = {};
+        var scope = new jme.Scope([scope]);
+        for(var x in args[0].value) {
+            scope.deleteVariable(x);
+            var tree = args[0].value[x].tree;
+            var vars = jme.findvars(tree);
+            todo[x] = {tree: args[0].value[x].tree, vars: vars};
+        }
+        var result = jme.variables.makeVariables(todo,scope);
+        var out = {};
+        for(var x in result.variables) {
+            out[x] = result.variables[x];
+        }
+        return new TDict(out);
+    },
+    typecheck: function(variables) {
+        if(variables.length!=1) {
+            return false;
+        }
+        var d = variables[0];
+        for(var x in d.value) {
+            if(d.value[x].type!='expression') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 /** Helper function for the JME `match` function
  * @param {Numbas.jme.tree} expr
  * @param {String} pattern
@@ -10482,7 +10539,8 @@ jme.display = /** @lends Numbas.jme.display */ {
     {
         if(expr.trim()=='')
             return '';
-        return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset.flags);
+        var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
+        return treeToJME(simplifiedTree,ruleset.flags);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
      *
@@ -10968,6 +11026,10 @@ function overbraceTex(label) {
     }
 }
 
+/** Produce LaTeX for a unary pattern-matching operator
+ * @param {String} code - TeX for the operator's name
+ * @returns {Function}
+ */
 function unaryPatternTex(code) {
     return function(thing,texArgs) {
         return '{'+texArgs[0]+'}^{'+code+'}';
@@ -11965,7 +12027,17 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'fact': [{'+': true, '-': true}]
 };
 
-function align(name,items) {
+/** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
+ * @param {String} header
+ * @param {Array.<String>} items
+ * @returns {String}
+ */
+function align(header,items) {
+    /** Pad a lien of text so it's in the centre of a line of length `n`.
+     * @param {String} line
+     * @param {Number} n
+     * @returns {String}
+     */
     function centre(line,n) {
         if(line.length>=n) {
             return line;
@@ -12005,7 +12077,7 @@ function align(name,items) {
     var width = item_widths.reduce(function(t,w){return t+w},0)+2*(items.length-1);
     var ci = Math.floor(width/2-0.5);
     var top_line = '';
-    top_line = centre(name,width);
+    top_line = centre(header,width);
     var middle_line;
     if(items.length==1) {
         middle_line = '';
@@ -12038,8 +12110,8 @@ function align(name,items) {
     var mid = top_joins[middle_line[ci]];
     middle_line = middle_line.slice(0,ci)+mid+middle_line.slice(ci+1);
     if(top_line.length>bottom_line.length) {
-        middle_line = centre(middle_line,name.length);
-        bottom_line = centre(bottom_line,name.length);
+        middle_line = centre(middle_line,header.length);
+        bottom_line = centre(bottom_line,header.length);
     }
     return [top_line,middle_line,bottom_line].join('\n');
 }
@@ -13010,9 +13082,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
+     * @param {Object} args - arguments for the error message
+     * @param {Error} [originalError] - if this is a re-thrown error, the original error object
      * @throws {Numbas.Error}
      */
-    error: function(message,args, originalError) {
+    error: function(message, args, originalError) {
         var nmessage = R.apply(this,[message,args]);
         if(nmessage!=message) {
             originalError = new Error(nmessage);
@@ -18285,6 +18359,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {String}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -18820,6 +18895,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {JME}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -19396,8 +19472,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             answerAsArray: true
         };
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope - a matrix filled with 1 for choices that should be selected, and 0 otherwise.
      * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -20115,6 +20192,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -20277,6 +20355,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {String}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

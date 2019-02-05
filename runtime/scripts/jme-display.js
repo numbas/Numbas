@@ -59,7 +59,8 @@ jme.display = /** @lends Numbas.jme.display */ {
     {
         if(expr.trim()=='')
             return '';
-        return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset.flags);
+        var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
+        return treeToJME(simplifiedTree,ruleset.flags);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
      *

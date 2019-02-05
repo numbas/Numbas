@@ -1862,9 +1862,10 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','s','-(x/y)'],
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
-        ['`!-? `& (-(real:$n `| `!$n);x) * ?;y','asgc','-(x*y)'],            //take negation to left of multiplication
+        ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c']
+        ['?;a+(-?;b-?;c)','','a-b-c'],
+        ['?;x*(?;y*?;z)','s','x*y*z']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
@@ -1908,7 +1909,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['0^?;x','','0']
     ],
     constantsFirst: [
-        ['(`! $n);x * (real:$n/real:$n`?);n','asg','n*x']
+        ['(`! `+- $n);x * (real:$n/real:$n`?);n','asg','n*x']
     ],
     sqrtProduct: [
         ['sqrt(?;x)*sqrt(?;y)','','sqrt(x*y)']
