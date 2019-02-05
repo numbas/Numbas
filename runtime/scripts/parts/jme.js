@@ -260,6 +260,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {JME}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

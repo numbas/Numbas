@@ -523,8 +523,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             answerAsArray: true
         };
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope - a matrix filled with 1 for choices that should be selected, and 0 otherwise.
      * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

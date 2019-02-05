@@ -53,6 +53,8 @@ Numbas.showError = function(e)
 /** Generic error class. Extends JavaScript's Error
  * @constructor
  * @param {String} message - A description of the error. Localised by R.js.
+ * @param {Object} args - Arguments for the error message
+ * @param {Error} originalError - If this is a re-thrown error, the original error object.
  */
 Numbas.Error = function(message, args, originalError)
 {
@@ -76,6 +78,8 @@ Numbas.Error.prototype.constructor = Numbas.Error;
 var scriptreqs = {};
 /** Keep track of loading status of a script and its dependencies
  * @param {String} file - name of script
+ * @param {Array.<String>} fdeps - Scripts which this one depends on
+ * @param {Function} callback
  * @global
  * @constructor
  * @property {String} file - Name of script
@@ -123,6 +127,7 @@ RequireScript.prototype = {
  * @memberof Numbas
  * @param {String} file
  * @param {Boolean} noreq - don't create a {@link Numbas.RequireScript} object
+ * @returns {Numbas.RequireScript}
  */
 var loadScript = Numbas.loadScript = function(file,noreq)
 {

@@ -150,6 +150,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

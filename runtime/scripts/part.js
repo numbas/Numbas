@@ -440,9 +440,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
+     * @param {Object} args - arguments for the error message
+     * @param {Error} [originalError] - if this is a re-thrown error, the original error object
      * @throws {Numbas.Error}
      */
-    error: function(message,args, originalError) {
+    error: function(message, args, originalError) {
         var nmessage = R.apply(this,[message,args]);
         if(nmessage!=message) {
             originalError = new Error(nmessage);

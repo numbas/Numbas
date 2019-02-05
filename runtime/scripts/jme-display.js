@@ -545,6 +545,10 @@ function overbraceTex(label) {
     }
 }
 
+/** Produce LaTeX for a unary pattern-matching operator
+ * @param {String} code - TeX for the operator's name
+ * @returns {Function}
+ */
 function unaryPatternTex(code) {
     return function(thing,texArgs) {
         return '{'+texArgs[0]+'}^{'+code+'}';
@@ -1542,7 +1546,17 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'fact': [{'+': true, '-': true}]
 };
 
-function align(name,items) {
+/** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
+ * @param {String} header
+ * @param {Array.<String>} items
+ * @returns {String}
+ */
+function align(header,items) {
+    /** Pad a lien of text so it's in the centre of a line of length `n`.
+     * @param {String} line
+     * @param {Number} n
+     * @returns {String}
+     */
     function centre(line,n) {
         if(line.length>=n) {
             return line;
@@ -1582,7 +1596,7 @@ function align(name,items) {
     var width = item_widths.reduce(function(t,w){return t+w},0)+2*(items.length-1);
     var ci = Math.floor(width/2-0.5);
     var top_line = '';
-    top_line = centre(name,width);
+    top_line = centre(header,width);
     var middle_line;
     if(items.length==1) {
         middle_line = '';
@@ -1615,8 +1629,8 @@ function align(name,items) {
     var mid = top_joins[middle_line[ci]];
     middle_line = middle_line.slice(0,ci)+mid+middle_line.slice(ci+1);
     if(top_line.length>bottom_line.length) {
-        middle_line = centre(middle_line,name.length);
-        bottom_line = centre(bottom_line,name.length);
+        middle_line = centre(middle_line,header.length);
+        bottom_line = centre(bottom_line,header.length);
     }
     return [top_line,middle_line,bottom_line].join('\n');
 }

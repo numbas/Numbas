@@ -103,6 +103,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     },
     /** Compute the correct answer, based on the given scope
      * @param {Numbas.jme.Scope} scope
+     * @returns {String}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;

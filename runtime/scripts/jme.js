@@ -2871,6 +2871,11 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
         if(!objs.length) {
             return [];
         }
+        /** Compare two assignment dictionaries.
+         * @param {Object} a
+         * @param {Object} b
+         * @returns {Number}
+         */
         function compare(a,b) {
             var as = Object.entries(a).sort();
             var bs = Object.entries(b).sort();
@@ -2942,6 +2947,10 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
             });
             assignments = dedup(assignments);
             var type_preference_order = ['number','vector','matrix','boolean','set'];
+            /** Preference rating for the given type. A lower value is more preferred. Unrecognised types produce `Infinity`.
+             * @param {String} type
+             * @returns {Number}
+             */
             function preference(type) {
                 var i = type_preference_order.indexOf(type);
                 return i==-1 ? Infinity : i;
