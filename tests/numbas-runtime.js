@@ -5682,8 +5682,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
         ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c'],
-        ['?;x*(?;y*?;z)','s','x*y*z']
+        ['?;a+(-?;b-?;c)','','a-b-c']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part

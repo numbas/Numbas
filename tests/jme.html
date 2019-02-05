@@ -1242,7 +1242,7 @@
 					function simplifyExpression(expr,rules) {
 						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
 					}
-                    assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
+                    assert.equal(simplifyExpression('-1*x*3'),'-1*x*3','pull minus to left of product');
                     assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
@@ -1297,7 +1297,7 @@
                     assert.equal(simplifyExpression('2x*(3/5)',['all']),'6(x/5)','2x*(3/5) doesn\'t get stuck in a loop');
                     assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
                     assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
-                    assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
+                    assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096*(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
                 });
 
                 QUnit.test('large product',function(assert) {
