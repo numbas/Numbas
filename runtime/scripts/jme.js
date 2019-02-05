@@ -2904,7 +2904,6 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
     }
 
     assigned_types = assigned_types || {};
-    //console.log(`infer for ${Numbas.jme.display.treeToJME(tree)}, want ${outtype}, assigned ${JSON.stringify(assigned_types)}`);
     if(outtype=='?') {
         outtype = undefined;
     }
@@ -2930,7 +2929,6 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
             var functions = scope.getFunction(name.toLowerCase());
             var assignments = [];
             functions.forEach(function(fn) {
-                //console.log(`try ${name} : ${fn.intype} -> ${fn.outtype}`);
                 var fn_assignments = [assigned_types];
                 for(var i=0;i<tree.args.length;i++) {
                     var nassignments = [];
@@ -2943,9 +2941,7 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
                 assignments = assignments.concat(fn_assignments);
             });
             assignments = dedup(assignments);
-            //console.log('Decision:');
-            //assignments.forEach(r=>console.log(`* ${JSON.stringify(r)}`));
-            var type_preference_order = ['number','matrix','vector','boolean','set'];
+            var type_preference_order = ['number','vector','matrix','boolean','set'];
             function preference(type) {
                 var i = type_preference_order.indexOf(type);
                 return i==-1 ? Infinity : i;
