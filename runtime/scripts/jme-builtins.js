@@ -1502,6 +1502,37 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     }
 });
 
+newBuiltin('make_variables',[TDict],TDict,null, {
+    evaluate: function(args,scope) {
+        var todo = {};
+        var scope = new jme.Scope([scope]);
+        for(var x in args[0].value) {
+            scope.deleteVariable(x);
+            var tree = args[0].value[x].tree;
+            var vars = jme.findvars(tree);
+            todo[x] = {tree: args[0].value[x].tree, vars: vars};
+        }
+        var result = jme.variables.makeVariables(todo,scope);
+        var out = {};
+        for(var x in result.variables) {
+            out[x] = result.variables[x];
+        }
+        return new TDict(out);
+    },
+    typecheck: function(variables) {
+        if(variables.length!=1) {
+            return false;
+        }
+        var d = variables[0];
+        for(var x in d.value) {
+            if(d.value[x].type!='expression') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 /** Helper function for the JME `match` function
  * @param {Numbas.jme.tree} expr
  * @param {String} pattern

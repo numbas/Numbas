@@ -126,13 +126,21 @@ default_value_generator:
 
 vset (The sets of variable values to test against):
     repeat(
-        dict(map([
-            x,
-            let(generator,value_generators[x],
-                eval(generator,["vrange":vRange])
-            )
-        ],x,answerVariables)),
+        make_variables(value_generators),
         settings["vsetRangePoints"]
+    )
+
+evaluated:
+    map(
+        try(
+            [unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars))],
+            message,
+            warn(translate("part.jme.answer invalid",["message":message]));
+            fail(translate("part.jme.answer invalid",["message":message]));
+            false
+        ),
+        vars,
+        vset
     )
 
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
