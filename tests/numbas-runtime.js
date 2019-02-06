@@ -9117,7 +9117,7 @@ jme.findvarsOps.safe = function(tree,boundvars,scope) {
 newBuiltin('render',[TString,TDict],TString, null, {
     evaluate: function(args,scope) {
         var str = args[0].value;
-        var variables = args[1].value;
+        var variables = args.length>1 ? args[1].value : {};
         scope = new Scope([scope,{variables: variables}]);
         return new TString(jme.contentsubvars(str,scope,true));
     },
