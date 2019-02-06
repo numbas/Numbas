@@ -54,8 +54,8 @@ correctVariables (Variables used in the correct answer):
     set(findvars(correctCompare))
 
 unexpectedVariables (Unexpected variables used in the student's answer):
-    let(uvars, filter(not (x in settings["expectedVariableNames"]),x,list(studentVariables)),
-        assert(len(settings["expectedVariableNames"])=0 or len(uvars)=0,
+    let(uvars, filter(not (x in correctVariables),x,list(studentVariables)),
+        assert(not settings["checkVariableNames"] or len(settings["expectedVariableNames"])=0 or len(uvars)=0,
             warn(translate("part.jme.unexpected variable name",["name":uvars[0]]))
         );
         uvars

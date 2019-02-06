@@ -18669,7 +18669,6 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
     settings.valueGenerators = {};
     settings.mustHave = [];
     settings.notAllowed = [];
-    settings.expectedVariableNames = [];
 }
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 {
@@ -18758,13 +18757,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
 
         tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
-        var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
-        if(expectedVariableNamesNode)
-        {
-            var nameNodes = expectedVariableNamesNode.selectNodes('string');
-            for(var i=0; i<nameNodes.length; i++)
-                settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
-        }
     },
     loadFromJSON: function(data) {
         var p = this;

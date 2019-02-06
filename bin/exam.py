@@ -707,7 +707,6 @@ class JMEPart(Part):
         self.minLength.length = 0
         self.mustHave = StringRestriction('musthave',0,'Your answer does not contain all required elements.')
         self.notAllowed = StringRestriction('notallowed',0,'Your answer contains elements which are not allowed.')
-        self.expectedVariableNames = StringRestriction('expectedvariablenames')
         self.mustMatchPattern = PatternRestriction('mustmatchpattern')
     
     def loadDATA(self, builder, data):
@@ -731,12 +730,6 @@ class JMEPart(Part):
             self.mustHave = builder.string_restriction('musthave',data['musthave'],self.mustHave)
         if haskey(data,'notallowed'):
             self.notAllowed = builder.string_restriction('notallowed',data['notallowed'],self.notAllowed)
-        if haskey(data,'expectedvariablenames'):
-            self.expectedVariableNames = StringRestriction('expectedvariablenames')
-            try:
-                self.expectedVariableNames.strings = list(case_insensitive_get(data,'expectedvariablenames'))
-            except TypeError:
-                raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
         if haskey(data,'mustmatchpattern'):
             self.mustMatchPattern = builder.pattern_restriction('mustmatchpattern',data['mustmatchpattern'],self.mustMatchPattern)
 
@@ -786,7 +779,6 @@ class JMEPart(Part):
         answer.append(self.minLength.toxml())
         answer.append(self.mustHave.toxml())
         answer.append(self.notAllowed.toxml())
-        answer.append(self.expectedVariableNames.toxml())
         answer.append(self.mustMatchPattern.toxml())
 
         return part
