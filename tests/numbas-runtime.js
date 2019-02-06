@@ -6172,14 +6172,38 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Substitute variables into content. To substitute variables, use {@link Numbas.jme.variables.DOMcontentsubvars}.
      * @param {String} str
      * @param {Numbas.jme.Scope} scope
+     * @param {Boolean} [sub_tex=false] - substitute into TeX? Normally this is left to MathJax
      * @returns {String}
      */
-    contentsubvars: function(str, scope)
+    contentsubvars: function(str, scope, sub_tex)
     {
         var bits = util.contentsplitbrackets(str);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-        for(var i=0; i<bits.length; i+=4)
-        {
+        for(var i=0; i<bits.length; i+=4) {
             bits[i] = jme.subvars(bits[i],scope,true);
+            if(sub_tex && i+3<bits.length) {
+                var tbits = jme.texsplit(bits[i+2]);
+                var out = '';
+                for(var j=0;j<tbits.length;j+=4) {
+                    out += tbits[j];
+                    if(j+3<tbits.length) {
+                        var cmd = tbits[j+1];
+                        var rules = jme.collectRuleset(tbits[j+2], scope.allRulesets());
+                        var expr = tbits[j+3];
+                        switch(cmd) {
+                        case 'var':
+                            var v = scope.evaluate(expr);
+                            var tex = jme.display.texify({tok: v}, rules);
+                            out += '{'+tex+'}';
+                            break;
+                        case 'simplify':
+                            expr = jme.subvars(expr,scope);
+                            out += '{'+jme.display.exprToLaTeX(expr,rules,scope)+'}';
+                            break;
+                        }
+                    }
+                }
+                bits[i+2] = out;
+            }
         }
         return bits.join('');
     },
@@ -9090,6 +9114,17 @@ Numbas.jme.lazyOps.push('safe');
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
+newBuiltin('render',[TString,TDict],TString, null, {
+    evaluate: function(args,scope) {
+        var str = args[0].value;
+        var variables = args[1].value;
+        scope = new Scope([scope,{variables: variables}]);
+        return new TString(jme.contentsubvars(str,scope,true));
+    },
+    typecheck: function(variables) {
+        return variables[0].type=='string' && (variables.length==1 || variables[1].type=='dict');
+    }
+});
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });

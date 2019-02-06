@@ -278,6 +278,17 @@ Numbas.jme.lazyOps.push('safe');
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
+newBuiltin('render',[TString,TDict],TString, null, {
+    evaluate: function(args,scope) {
+        var str = args[0].value;
+        var variables = args[1].value;
+        scope = new Scope([scope,{variables: variables}]);
+        return new TString(jme.contentsubvars(str,scope,true));
+    },
+    typecheck: function(variables) {
+        return variables[0].type=='string' && (variables.length==1 || variables[1].type=='dict');
+    }
+});
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
