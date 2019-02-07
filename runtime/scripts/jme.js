@@ -1472,7 +1472,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Add a ruleset to the scope.
      * @param {String} name
-     * @param {Numbas.jme.rules.Ruleset} ruleset
+     * @param {Numbas.jme.rules.Ruleset} set
      */
     addRuleset: function(name, set) {
         this.rulesets[name] = set;
