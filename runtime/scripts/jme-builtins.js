@@ -289,6 +289,13 @@ newBuiltin('render',[TString,TDict],TString, null, {
         return variables[0].type=='string' && (variables.length==1 || variables[1].type=='dict');
     }
 });
+jme.findvarsOps.render = function(tree,boundvars,scope) {
+    if(tree.args.length>1) {
+        return jme.findvars(tree.args[1],boundvars,scope);
+    } else {
+        return [];
+    }
+}
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });

@@ -1448,6 +1448,15 @@ var Scope = jme.Scope = function(scopes) {
     return;
 }
 Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
+    /** Set the given variable name
+     * @param {String} name
+     * @param {Numbas.jme.token} value
+     */
+    setVariable: function(name, value) {
+        name = name.toLowerCase();
+        this.variables[name] = value;
+        this.deleted.variables[name] = false;
+    },
     /** Add a JME function to the scope.
      * @param {Numbas.jme.funcObj} fn - function to add
      */
@@ -1460,6 +1469,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             delete this._resolved_functions[name];
         }
         this.deleted.functions[name] = false;
+    },
+    /** Add a ruleset to the scope.
+     * @param {String} name
+     * @param {Numbas.jme.rules.Ruleset} ruleset
+     */
+    addRuleset: function(name, set) {
+        this.rulesets[name] = set;
+        this.deleted.rulesets[name] = false;
     },
     /** Mark the given variable name as deleted from the scope.
      * @param {String} name
@@ -1506,15 +1523,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     getVariable: function(name) {
         return this.resolve('variables',name);
-    },
-    /** Set the given variable name
-     * @param {String} name
-     * @param {Numbas.jme.token} value
-     */
-    setVariable: function(name, value) {
-        name = name.toLowerCase();
-        this.variables[name] = value;
-        this.deleted.variables[name] = false;
     },
     /** Get all definitions of the given function name.
      * @param {String} name
