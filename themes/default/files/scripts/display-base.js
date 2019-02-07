@@ -266,7 +266,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         state: state,
         answered: answered,
         answeredString: Knockout.computed(function() {
-            if(obj.marks()==0 || !(obj.revealed() || settings.showActualMark || settings.showTotalMark)) {
+            if((obj.marks()==0 && !obj.doesMarking()) || !(obj.revealed() || settings.showActualMark || settings.showTotalMark)) {
                 return '';
             }
             var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
