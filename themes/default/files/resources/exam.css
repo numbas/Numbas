@@ -623,6 +623,7 @@ table {
 
 .part .partFeedback {
     margin-top: 1em;
+    text-align: right;
 }
 
 .part .feedbackMessages {

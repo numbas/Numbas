@@ -993,12 +993,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     {
         var oCredit = this.credit;
         this.credit = credit;
-        this.markingFeedback.push({
-            op: 'set_credit',
-            credit: this.credit - oCredit,
-            message: message,
-            reason: reason
-        });
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'set_credit',
+                credit: this.credit - oCredit,
+                message: message,
+                reason: reason
+            });
+        }
     },
     /** Add an absolute value to `credit`
      * @param {Number} credit - amount to add
@@ -1007,11 +1009,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     addCredit: function(credit,message)
     {
         this.credit += credit;
-        this.markingFeedback.push({
-            op: 'add_credit',
-            credit: credit,
-            message: message
-        });
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'add_credit',
+                credit: credit,
+                message: message
+            });
+        }
     },
     /** Subtract an absolute value from `credit`
      * @param {Number} credit - amount to subtract
@@ -1020,11 +1024,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     subCredit: function(credit,message)
     {
         this.credit -= credit;
-        this.markingFeedback.push({
-            op: 'sub_credit',
-            credit: credit,
-            message: message
-        });
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'sub_credit',
+                credit: credit,
+                message: message
+            });
+        }
     },
     /** Multiply `credit` by the given amount - use to apply penalties
      * @param {Number} factor
@@ -1034,12 +1040,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     {
         var oCredit = this.credit
         this.credit *= factor;
-        this.markingFeedback.push({
-            op: 'multiply_credit',
-            credit: this.credit - oCredit,
-            factor: factor,
-            message: message
-        });
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'multiply_credit',
+                credit: this.credit - oCredit,
+                factor: factor,
+                message: message
+            });
+        }
     },
     /** Add a comment to the marking feedback
      * @param {String} message
