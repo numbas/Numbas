@@ -75,7 +75,7 @@
         </span>
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
-            <div class="submit-and-feedback">
+            <div class="submit-and-feedback" data-bind="visible: doesMarking">
                 <xsl:if test="count(../part) &gt; 1 or ancestor::steps">
                     <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
                 </xsl:if>
