@@ -20,7 +20,8 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.correctAnswer = Knockout.observable(p.settings.displayAnswer);
+        this.correctAnswer = Knockout.observable('');
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
         ko.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
@@ -103,6 +104,9 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
     }
     display.NumberEntryPartDisplay.prototype =
     {
+        updateCorrectAnswer: function(answer) {
+            this.correctAnswer(answer);
+        },
         restoreAnswer: function()
         {
             this.studentAnswer(this.part.studentAnswer);

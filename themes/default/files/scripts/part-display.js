@@ -267,6 +267,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             this.feedbackShown(false);
             this.showScore(this.part.answered,true);
         },
+        /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking)
+         * The displayed correct answer should update.
+         * @memberof Numbas.display.PartDisplay
+         * @param answer
+         * @abstract
+         */
+        updateCorrectAnswer: function(answer) {},
         /** Show/update the student's score and answer status on this part
          * @memberof Numbas.display.PartDisplay
          */

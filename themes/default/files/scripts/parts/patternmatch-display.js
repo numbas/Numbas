@@ -19,18 +19,25 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
          * @member {observable|RegExp} correctAnswer
          * @memberof Numbas.display.PatternMatchPartDisplay
          */
-        this.correctAnswer = Knockout.observable(p.settings.correctAnswer);
+        this.correctAnswer = Knockout.observable('');
         /** A representative correct answer to display when answers are revealed
          * @member {observable|string} displayAnswer
          * @memberof Numbas.display.PatternMatchPartDisplay
          */
-        this.displayAnswer = Knockout.observable(p.settings.displayAnswer);
+        this.displayAnswer = Knockout.observable();
+
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
+
         ko.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
     }
     display.PatternMatchPartDisplay.prototype =
     {
+        updateCorrectAnswer: function(answer) {
+            this.correctAnswer(this.part.settings.correctAnswer);
+            this.displayAnswer(answer);
+        },
         restoreAnswer: function()
         {
             this.studentAnswer(this.part.studentAnswer);

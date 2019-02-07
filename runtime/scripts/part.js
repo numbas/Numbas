@@ -743,7 +743,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(this.answered && this.question) {
             for(var path in this.errorCarriedForwardBackReferences) {
                 var p2 = this.question.getPart(path);
-                p2.pleaseResubmit();
+                if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
+                    var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
+                    p2.display && p2.display.updateCorrectAnswer(answer);
+                }
+                if(p2.answered) {
+                    p2.pleaseResubmit();
+                }
             }
         }
     },
@@ -819,10 +825,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             } else if(vr.must_go_first) {
                 throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:util.nicePartName(vr.part)}));
             }
-        }
-        for(var i=0;i<replace.length;i++) {
-            var p2 = this.question.getPart(replace[i].part);
-            p2.errorCarriedForwardBackReferences[this.path] = true;
         }
         var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
         // find dependent variables which need to be recomputed

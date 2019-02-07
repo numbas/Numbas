@@ -16,24 +16,26 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.studentAnswer = Knockout.observable('');
-        /** The correct answer
-         * @member {observable|JME} correctAnswer
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.correctAnswer = p.settings.correctAnswer;
+        ko.computed(function() {
+            p.storeAnswer(this.studentAnswer());
+        },this);
         /** Should the LaTeX rendering of the student's answer be shown?
          * @member {boolean} showPreview
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.showPreview = p.settings.showPreview;
+        /** The correct answer
+         * @member {observable|JME} correctAnswer
+         * @memberof Numbas.display.JMEPartDisplay
+         */
+        this.correctAnswer = ko.observable('');
         /** The correct answer, in LaTeX form
          * @member {observable|TeX} correctAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.correctAnswerLaTeX = jme.display.exprToLaTeX(this.correctAnswer,p.settings.answerSimplification,p.question.scope);
-        ko.computed(function() {
-            p.storeAnswer(this.studentAnswer());
-        },this);
+        this.correctAnswerLaTeX = ko.observable('');
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
+
         /** The student's answer, in LaTeX form
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
@@ -56,7 +58,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 var tree = jme.compile(studentAnswer,p.question.scope);
                 var usedvars = jme.findvars(tree);
                 var failExpectedVariableNames = false;
-                var expectedVariableNames = jme.findvars(jme.compile(this.correctAnswer));
+                var expectedVariableNames = jme.findvars(jme.compile(this.correctAnswer()));
                 var unexpectedVariableName;
                 for(var i=0;i<usedvars.length;i++) {
                     if(!expectedVariableNames.contains(usedvars[i])) {
@@ -97,6 +99,11 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
     }
     display.JMEPartDisplay.prototype =
     {
+        updateCorrectAnswer: function(answer) {
+            var p = this.part;
+            this.correctAnswer(answer);
+            this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.question.scope));
+        },
         restoreAnswer: function()
         {
             this.studentAnswer(this.part.studentAnswer);

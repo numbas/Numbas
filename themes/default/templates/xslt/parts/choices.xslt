@@ -91,7 +91,7 @@
                 <xsl:text>start-column</xsl:text>
             </xsl:if>
         </xsl:attribute>
-        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
+        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
             <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
             <xsl:apply-templates select="content"/>
@@ -108,7 +108,7 @@
             </xsl:if>
         </xsl:attribute>
         <label>
-            <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks[{$choicenum}]" disabled="true" />
+            <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks()[{$choicenum}]" disabled="true" />
             <xsl:apply-templates select="content"/>
         </label>
     </li>

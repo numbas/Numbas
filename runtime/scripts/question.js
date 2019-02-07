@@ -74,6 +74,9 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
         e.message = R('question.error',{'number':q.number+1,message:e.message});
         throw(e);
     });
+    q.signals.on('partsGenerated',function() {
+        q.setErrorCarriedForwardBackReferences();
+    })
     q.exam = exam;
     q.group = group;
     q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
@@ -306,6 +309,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.signals.trigger('partsGenerated');
         });
     },
+
+    setErrorCarriedForwardBackReferences: function() {
+        var q = this;
+        this.allParts().forEach(function(p) {
+            p.settings.errorCarriedForwardReplacements.forEach(function(r) {
+                var p2 = q.getPart(r.part);
+                p2.errorCarriedForwardBackReferences[p.path] = true;
+            });
+        });
+    },
+
+    allParts: function() {
+        return this.parts.reduce(function(out, p) {
+            return out.concat([p],p.gaps,p.steps);
+        },[]);
+    },
+
     /** Add a part to the question
      * @param {Numbas.parts.Part} part
      * @param {Number} index

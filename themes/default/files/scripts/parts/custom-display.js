@@ -24,7 +24,8 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @memberof Numbas.display.CustomPartDisplay
          */
         this.studentAnswer = ko.observable({valid: false, value: this.part.studentAnswer});
-        this.correctAnswer = ko.observable({valid: true, value: this.input_options.correctAnswer});
+        this.correctAnswer = ko.observable({});
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
         ko.computed(function() {
             var answer = this.studentAnswer();
             if(Numbas.util.objects_equal(answer.value, p.stagedAnswer) || !answer.valid && p.stagedAnswer===undefined) {
@@ -41,6 +42,9 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
         },this);
     };
     display.CustomPartDisplay.prototype = {
+        updateCorrectAnswer: function(answer) {
+            this.correctAnswer({valid: true, value: answer});
+        },
         restoreAnswer: function() {
             this.studentAnswer({valid: this.part.studentAnswer!==undefined, value: this.part.studentAnswer});
         }
