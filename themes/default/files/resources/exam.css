@@ -415,6 +415,25 @@ input.jme {
 	padding-left: 1em;
 }
 
+#frontpage .password {
+    margin: 1em 0;
+    display: flex;
+    line-height: 2em;
+}
+#frontpage .password input {
+    flex-grow: 1;
+    margin: 0 0.5em;
+    text-transform: uppercase;
+}
+#frontpage .password-feedback {
+  text-align: center;
+  line-height: 1.666em;
+}
+
+.input-group-addon.invisible {
+    display: none;
+}
+
 #infoDisplay .info-buttons {
 	margin-top: 1em;
 	text-align: center;

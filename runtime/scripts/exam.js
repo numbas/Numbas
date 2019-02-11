@@ -36,7 +36,7 @@ function Exam(store)
     //load settings from XML
     tryGetAttribute(settings,xml,'.',['name','percentPass']);
     tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-    tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','showResultsPage','preventLeave']);
+    tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','showResultsPage','preventLeave','startPassword']);
     //get navigation events and actions
     settings.navigationEvents = {};
     var navigationEventNodes = xml.selectNodes('settings/navigation/event');
@@ -148,6 +148,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {Boolean} shuffleQuestions - should the questions be shuffled?
      * @property {Number} numQuestions - number of questions in this sitting
      * @property {Boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
+     * @property {String} startPassword - password the student must enter before beginning the exam
      * @property {Boolean} allowRegen -can student re-randomise a question?
      * @property {Boolean} navigateReverse - can student navigate to previous question?
      * @property {Boolean} navigateBrowse - can student jump to any question they like?
@@ -171,6 +172,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         shuffleQuestions: false,
         numQuestions: 0,
         preventLeave: true,
+        startPassword: '',
         allowRegen: false,
         navigateReverse: false,
         navigateBrowse: false,
@@ -433,6 +435,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.currentQuestion.leave();
         this.display.showInfoPage(page);
     },
+
+    /** Accept the given password to begin the exam?
+     * @param {String} password
+     * @returns {Boolean}
+     * @see Numbas.exam#settings#startPassword
+     */
+    acceptPassword: function(password) {
+        password = password.trim().toLowerCase();
+        var startPassword = this.settings.startPassword.trim().toLowerCase();
+        return this.settings.password=='' || password==startPassword;
+    },
+
     /**
      * Begin the exam - start timing, go to the first question
      */

@@ -195,6 +195,29 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.feedbackMessage = Knockout.observable(null);
+
+        this.needsPassword = e.settings.startPassword != '';
+
+        /** Password entered by the student
+         * @member {observable|String} enteredPassword
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.enteredPassword = Knockout.observable('');
+
+        this.canBegin = Knockout.computed(function() {
+            return this.exam.acceptPassword(this.enteredPassword());
+        },this);
+
+        this.passwordFeedback = Knockout.computed(function() {
+            if(this.canBegin()) {
+                return {iconClass: 'icon-ok', title: R('exam.password.correct'), buttonClass: 'btn-success'};
+            } else if(this.enteredPassword()=='') {
+                return {iconClass: '', title: '', buttonClass: 'btn-primary'}
+            } else {
+                return {iconClass: 'icon-remove', title: R('exam.password.incorrect'), buttonClass: 'btn-danger'};
+            }
+        },this);
+
         document.title = e.settings.name;
     }
     display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */
@@ -204,6 +227,14 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         exam: undefined,
+
+        /** Try to begin the exam
+         * @memberof Numbas.display.ExamDisplay
+         */
+        beginExam: function() {
+            Numbas.controls.beginExam();
+        },
+
         /** Update the timer
          * @memberof Numbas.display.ExamDisplay
          */
