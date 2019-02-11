@@ -196,6 +196,10 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.feedbackMessage = Knockout.observable(null);
 
+        /** Does this exam need a password to begin?
+         * @member {observable|Boolean} canBegin
+         * @memberof Numbas.display.ExamDisplay
+         */
         this.needsPassword = e.settings.startPassword != '';
 
         /** Password entered by the student
@@ -204,10 +208,20 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.enteredPassword = Knockout.observable('');
 
+        /** Can the exam begin? True if no password is required, or if the student has entered the right password
+         * @see Numbas.Exam.acceptPassword
+         * @member {observable|Boolean} canBegin
+         * @memberof Numbas.display.ExamDisplay
+         */
         this.canBegin = Knockout.computed(function() {
             return this.exam.acceptPassword(this.enteredPassword());
         },this);
 
+        /** Feedback on the password the student has entered.
+         * Has properties `iconClass`, `title` and `buttonClass`
+         * @member {observable|Object} passwordFeedback.
+         * @memberof Numbas.display.ExamDisplay
+         */
         this.passwordFeedback = Knockout.computed(function() {
             if(this.canBegin()) {
                 return {iconClass: 'icon-ok', title: R('exam.password.correct'), buttonClass: 'btn-success'};
