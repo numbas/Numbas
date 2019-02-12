@@ -1990,7 +1990,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     options = options || {};
     for(var i=0;i<intype.length;i++)
     {
-        if(intype[i]!='?' && intype[i]!='?*')
+        if(intype[i]!='?' && intype[i]!='*?')
         {
             if(intype[i][0]=='*')
             {
@@ -2052,7 +2052,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
                     if(variables[0].type==ntype || ntype=='?' || variables[0].type=='?')
                         variables = variables.slice(1);
                     else
-                        return false;
+                        break;
                 }
             }else{
                 if(variables.length==0)
