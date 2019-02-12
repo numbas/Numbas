@@ -809,27 +809,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @throws {Numbas.Error} "math.precround.complex" if b is complex
      */
     siground: function(a,b) {
-        if(b.complex)
+        if(b.complex) {
             throw(new Numbas.Error('math.siground.complex'));
-        if(a.complex)
+        }
+        if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
-        else
-        {
+        } else {
             var s = math.sign(a);
             if(a==0) { return 0; }
             if(a==Infinity || a==-Infinity) { return a; }
-            b = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+            var bp = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+            var ibp = Math.pow(10, Math.ceil(math.log10(s*a))-b);
             //test to allow a bit of leeway to account for floating point errors
             //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*b*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+            var v = a*bp*10 % 1;
+            var d = (a>0 ? Math.floor : Math.ceil)(a*bp*10 % 10);
+            var out = a*bp;
             if(d==4 && 1-v<1e-9) {
-                return Math.round(a*b+1)/b;
+                out += 1;
+            } else if(d==-5 && v>-1e-9 && v<0) {
+                out += 1;
             }
-            else if(d==-5 && v>-1e-9 && v<0) {
-                return Math.round(a*b+1)/b;
-            }
-            return Math.round(a*b)/b;
+            return Math.round(out)*ibp;
         }
     },
     /** Count the number of decimal places used in the string representation of a number.

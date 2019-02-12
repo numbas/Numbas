@@ -561,21 +561,25 @@ table {
 
 .multiplechoice {
     margin-bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+.multiplechoice.columns {
+    display: grid;
+    grid-gap: 0.2em 1em;
 }
 
-.gap .multiplechoice {
-    display: inline-block;
+.gap .multiplechoice.columns {
+    display: inline-grid;
 }
 
 .multiplechoice li {
 	list-style: none;
 	padding-right: 2em;
 	line-height: 1.5em;
-	float: left;
 }
-
-.multiplechoice li.start-column {
-	clear: both;
+.multiplechoice:not(.columns) li {
+    margin-bottom: 1em;
 }
 
 .multiplechoice p {

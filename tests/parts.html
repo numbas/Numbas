@@ -103,7 +103,7 @@
                     assert.notOk(res.valid,'"!" is invalid');
                 });
                 QUnit.test('Partial credit for wrong precision', function(assert) {
-                    var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', precisionPartialCredit: 0.2});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '0.1', maxValue: '0.1', precision: '2', precisionType: 'dp', precisionPartialCredit: 20});
                     var res = mark_part(p,'0.1000');
                     assert.equal(res.credit,0.2,'"0.1000" gets partial credit');
                 });
@@ -148,7 +148,7 @@
                     assert.equal(res.credit,0,'"0.1" incorrect');
                 });
                 QUnit.test('Answer is 1.22, to 1 dp, strict', function(assert) {
-                    var p = createPartFromJSON({type:'numberentry', minValue: '1.22', maxValue: '1.22', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.22', maxValue: '1.22', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 50});
                     var res = mark_part(p,'1.20');
                     assert.equal(res.credit,0,'"1.20" incorrect');
                     var res = mark_part(p,'1.22');
@@ -158,7 +158,7 @@
                     assert.equal(res.credit,1,'"1.2" correct');
                 });
                 QUnit.test('Answer is 1.27, to 1 dp, strict', function(assert) {
-                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 50});
                     var res = mark_part(p,'1.27');
                     assert.equal(res.credit,0.5,'"1.27" correct but penalty');
                     assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
@@ -166,7 +166,7 @@
                     assert.equal(res.credit,1,'"1.3" correct');
                 });
                 QUnit.test('Answer is 1.27, to 2 sf, strict', function(assert) {
-                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
                     var res = mark_part(p,'1.27');
                     assert.equal(res.credit,0.5,'"1.27" correct but penalty');
                     assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
@@ -174,7 +174,7 @@
                     assert.equal(res.credit,1,'"1.3" correct');
                 });
                 QUnit.test('Answer is 12700, to 2 sf, strict', function(assert) {
-                    var p = createPartFromJSON({type:'numberentry', minValue: '12700', maxValue: '12700', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 0.5});
+                    var p = createPartFromJSON({type:'numberentry', minValue: '12700', maxValue: '12700', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
                     var res = mark_part(p,'12700');
                     assert.equal(res.credit,0.5,'"12700" correct but penalty');
                     assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));

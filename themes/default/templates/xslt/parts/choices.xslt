@@ -4,12 +4,20 @@
     <span localise-data-jme-context-description="part.mcq.choices">
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <xsl:variable name="cols" select="@displaycolumns"/>
+                <xsl:if test="$cols>0"> 
+                    <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,max-content);</xsl:attribute>
+                </xsl:if>
                 <xsl:apply-templates select="choice" mode="radiogroup"/>
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <xsl:variable name="cols" select="@displaycolumns"/>
+                <xsl:if test="$cols>0"> 
+                    <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,max-content);</xsl:attribute>
+                </xsl:if>
                 <xsl:apply-templates select="choice" mode="checkbox"/>
             </ul>
         </xsl:when>
@@ -27,12 +35,12 @@
     <span>
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                 <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                 <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
             </ul>
         </xsl:when>
@@ -49,14 +57,8 @@
     <xsl:variable name="path">
         <xsl:apply-templates select="../.." mode="path"/>
     </xsl:variable>
-    <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
         <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
         <label>
             <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
@@ -68,14 +70,8 @@
     <xsl:variable name="path">
         <xsl:apply-templates select="../.." mode="path"/>
     </xsl:variable>
-    <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
         <label>
             <input type="radio" class="choice" name="{$path}-choice-correctanswer" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
@@ -83,7 +79,6 @@
     </li>
 </xsl:template>
 <xsl:template match="choice" mode="checkbox">
-    <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
         <xsl:attribute name="class">
@@ -99,14 +94,8 @@
     </li>
 </xsl:template>
 <xsl:template match="choice" mode="checkbox-correctanswer">
-    <xsl:variable name="cols" select="../@displaycolumns"/>
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
         <label>
             <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks()[{$choicenum}]" disabled="true" />
             <xsl:apply-templates select="content"/>
