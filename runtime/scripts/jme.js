@@ -1573,7 +1573,11 @@ var THTML = types.THTML = types.html = function(html) {
         this.value = $(html);
     } else {
         var elem = document.createElement('div');
-        elem.innerHTML = html;
+        if(typeof html == 'string') {
+            elem.innerHTML = html;
+        } else {
+            elem.appendChild(html);
+        }
         this.value = elem.children;
     }
 }
