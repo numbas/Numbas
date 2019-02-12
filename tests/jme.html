@@ -632,6 +632,7 @@
 					assert.equal(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
 					assert.equal(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
 					assert.equal(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
+					assert.equal(evaluate('siground(14515200,3)').value,14500000,'siground(14515200,3)');
 				});
 
                 QUnit.test('Currency',function(assert) {
