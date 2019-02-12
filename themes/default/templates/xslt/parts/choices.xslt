@@ -13,7 +13,7 @@
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                 <xsl:variable name="cols" select="@displaycolumns"/>
                 <xsl:if test="$cols>0"> 
                     <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,max-content);</xsl:attribute>
@@ -35,12 +35,12 @@
     <span>
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                 <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
             </ul>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <ul class="multiplechoice clearfix" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+            <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                 <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
             </ul>
         </xsl:when>
