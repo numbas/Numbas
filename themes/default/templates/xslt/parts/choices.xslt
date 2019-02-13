@@ -81,11 +81,6 @@
 <xsl:template match="choice" mode="checkbox">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
-        <xsl:attribute name="class">
-            <xsl:if test="($choicenum mod $cols = 0) and ($cols>0)">
-                <xsl:text>start-column</xsl:text>
-            </xsl:if>
-        </xsl:attribute>
         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
             <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
