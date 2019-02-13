@@ -398,10 +398,10 @@ input.jme {
 
 /* front/exit pages */
 
-#infoDisplay table .rtd {
+#performance-summary td {
 	text-align: right;
 }
-#infoDisplay table .qtd {
+#question-breakdown td {
 	text-align: center;
 }
 #frontpage table {
