@@ -20,7 +20,7 @@
 <div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
 <div id="standalone-warning" class="alert alert-info col-sm-6 col-sm-offset-3" data-bind="visible: !Numbas.storage.lmsConnected" data-localise="frontpage.scorm.lms not connected"></div>
 <form data-bind="submit: beginExam" class="info-buttons col-sm-6 col-sm-offset-3">
-    <div class="password" data-bind="css: {'has-error': enteredPassword().length && !canBegin(), 'has-success': canBegin()}">
+    <div class="password" data-bind="visible: needsPassword, css: {'has-error': enteredPassword().length && !canBegin(), 'has-success': canBegin()}">
         <label for="begin-exam-password" data-localise="exam.enter password"></label>
         <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: enteredPassword">
         <span class="password-feedback feedback-icon" data-bind="css: passwordFeedback().iconClass, attr: {title: passwordFeedback().title}"></span>
