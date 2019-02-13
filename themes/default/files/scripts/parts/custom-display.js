@@ -23,10 +23,10 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.studentAnswer = ko.observable({valid: false, value: this.part.studentAnswer});
-        this.correctAnswer = ko.observable({});
+        this.studentAnswer = Knockout.observable({valid: false, value: this.part.studentAnswer});
+        this.correctAnswer = Knockout.observable({});
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-        ko.computed(function() {
+        Knockout.computed(function() {
             var answer = this.studentAnswer();
             if(Numbas.util.objects_equal(answer.value, p.stagedAnswer) || !answer.valid && p.stagedAnswer===undefined) {
                 return;

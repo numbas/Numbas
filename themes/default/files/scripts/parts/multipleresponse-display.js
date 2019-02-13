@@ -12,8 +12,8 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     {
         var p = this.part;
         function makeTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeTick({answer:answer, choice:choice, ticked:obs()});
             },p);
             return obs;
@@ -31,15 +31,15 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             return obs;
         }
         function makeCheckboxTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeTick({answer:answer, choice:choice, ticked:obs()});
             });
             return obs;
         }
         this.layout = util.copyarray(p.layout);
-        this.showCellAnswerState = ko.observable(p.settings.showCellAnswerState);
-        this.displayColumns = ko.observable(p.settings.displayColumns);
+        this.showCellAnswerState = Knockout.observable(p.settings.showCellAnswerState);
+        this.displayColumns = Knockout.observable(p.settings.displayColumns);
         switch(p.type) {
         case '1_n_2':
             /** Index of student's current answer choice (not necessarily submitted)
@@ -83,7 +83,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.correctTicks = ko.observableArray([]);
+            this.correctTicks = Knockout.observableArray([]);
             for(var i=0; i<p.numAnswers; i++) {
                 this.ticks[i] = makeTicker(i,0);
             }
@@ -101,7 +101,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             break;
         case 'm_n_x':
-            this.correctTicks = ko.observableArray([]);
+            this.correctTicks = Knockout.observableArray([]);
             switch(p.settings.displayType) {
             case 'radiogroup':
                 this.ticks = [];

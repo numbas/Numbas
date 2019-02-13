@@ -162,13 +162,13 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             return {controlsDescendantBindings: true};
         }
     }
-    ko.bindingHandlers.reorder_table = {
+    Knockout.bindingHandlers.reorder_table = {
         // reorder the rows and columns of a table, including the header
         // value is an object {rows, columns, leaders}
         // rows and columns are permutations
         // leaders is the number of columns at the start of each row to ignore (so column headers aren't moved)
         init: function(element, valueAccessor) {
-            var value = ko.unwrap(valueAccessor());
+            var value = Knockout.unwrap(valueAccessor());
             var row_order = value.rows;
             var column_order = value.columns;
             var leaders = value.leaders || 0;
@@ -186,9 +186,9 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             })
         }
     }
-    ko.bindingHandlers.reorder_list = {
+    Knockout.bindingHandlers.reorder_list = {
         init: function(element, valueAccessor) {
-            var value = ko.unwrap(valueAccessor());
+            var value = Knockout.unwrap(valueAccessor());
             var order = value.order;
             var leaders = value.leaders || 0;
             var items = Array.prototype.slice.call(element.children, leaders);

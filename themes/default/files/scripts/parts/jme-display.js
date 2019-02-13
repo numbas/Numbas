@@ -16,7 +16,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.studentAnswer = Knockout.observable('');
-        ko.computed(function() {
+        Knockout.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
         /** Should the LaTeX rendering of the student's answer be shown?
@@ -28,12 +28,12 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|JME} correctAnswer
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.correctAnswer = ko.observable('');
+        this.correctAnswer = Knockout.observable('');
         /** The correct answer, in LaTeX form
          * @member {observable|TeX} correctAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.correctAnswerLaTeX = ko.observable('');
+        this.correctAnswerLaTeX = Knockout.observable('');
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
 
         /** The student's answer, in LaTeX form

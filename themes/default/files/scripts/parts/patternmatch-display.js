@@ -28,7 +28,7 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
 
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
 
-        ko.computed(function() {
+        Knockout.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
     }

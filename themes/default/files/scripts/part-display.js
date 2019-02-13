@@ -162,7 +162,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showFeedbackIcon
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackIcon = ko.observable(feedback_settings.showFeedbackIcon);
+        this.showFeedbackIcon = Knockout.observable(feedback_settings.showFeedbackIcon);
         /** Show the marks feedback?
          * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay

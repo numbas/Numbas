@@ -22,7 +22,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          */
         this.correctAnswer = Knockout.observable('');
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-        ko.computed(function() {
+        Knockout.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
         /** Cleaned-up version of student answer (remove commas and trim whitespace)
