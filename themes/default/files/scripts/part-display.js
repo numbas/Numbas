@@ -16,6 +16,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.part = p;
+        /** The display name of this part
+         * @see Numbas.parts.Part#name
+         */
+        this.name = Knockout.observable('');
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay
@@ -235,6 +239,12 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
+        /** Set this part's name
+         * @param {String} name
+         */
+        setName: function(name) {
+            this.name(name);
+        },
         /** Show a warning message about this part
          * @param {String} warning
          * @memberof Numbas.display.PartDisplay

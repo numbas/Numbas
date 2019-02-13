@@ -405,6 +405,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(Numbas.display) {
             q.display = new Numbas.display.QuestionDisplay(q);
         }
+        q.signals.on('partsGenerated', function() {
+            var i = 0;
+            q.parts.forEach(function(p) {
+                var hasName = p.assignName(i,q.parts.length-1);
+                i += hasName ? 1 : 0;
+                if(p.gaps) {
+                    var gi = 0;
+                    p.gaps.forEach(function(g) {
+                        var hasName = g.assignName(gi,p.gaps.length-1);
+                        gi += hasName ? 1 : 0;
+                    });
+                }
+                if(p.steps) {
+                    var si = 0;
+                    p.steps.forEach(function(s) {
+                        var hasName = s.assignName(si,p.steps.length-1);
+                        si += hasName ? 1 : 0;
+                    });
+                }
+            });
+        });
         q.signals.on(['variablesGenerated','partsGenerated'], function() {
             //initialise display - get question HTML, make menu item, etc.
             q.display && q.display.makeHTML();

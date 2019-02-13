@@ -498,15 +498,11 @@ table {
     margin-bottom: 0;
 }
 
-.question > .parts {
+.parts > .part.has-name {
 	margin-left: 1em;
 }
 .partheader {
 	margin-left: -1em;
-}
-
-.question .parts {
-	margin-left: 1em;
 }
 
 .part.type-gapfill > .prompt .part {

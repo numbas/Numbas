@@ -209,7 +209,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.enteredPassword = Knockout.observable('');
 
         /** Can the exam begin? True if no password is required, or if the student has entered the right password
-         * @see Numbas.Exam.acceptPassword
+         * @see Numbas.Exam#acceptPassword
          * @member {observable|Boolean} canBegin
          * @memberof Numbas.display.ExamDisplay
          */

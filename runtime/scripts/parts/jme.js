@@ -15,7 +15,6 @@ Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','mark
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var nicePartName = util.nicePartName;
 var Part = Numbas.parts.Part;
 /** Judged Mathematical Expression
  *

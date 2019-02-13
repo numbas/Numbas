@@ -21,7 +21,7 @@ define created
 endef
 
 tests/numbas-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/%, $(ALL_SOURCES))
-	@echo "// Compiled using $(ALL_SOURCES)" > $@
+	@echo "// Compiled using $^" > $@
 	@printf "// From the Numbas compiler directory\n" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)
@@ -29,7 +29,7 @@ tests/numbas-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/%, $(ALL_SOURCES))
 runtime: tests/numbas-runtime.js
 
 tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(MINIMAL_SOURCES) $(THIRD_PARTY_SOURCES) $(JME_SOURCES))
-	@echo "// Compiled using $(ALL_SOURCES)" > $@
+	@echo "// Compiled using $^" > $@
 	@printf "// From the Numbas compiler directory\n" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)

@@ -27,15 +27,17 @@ gap_order:
     )
 
 gap_feedback (Feedback on each of the gaps):
-  map(
-    let(result,submit_part(gaps[gap_number]["path"],answer),
-      feedback(translate('part.gapfill.feedback header',["index":index]));
-      concat_feedback(result["feedback"], if(marks>0,result["marks"]/marks,1));
-      result
-    ),
-    [gap_number,answer,index],
-    zip(gap_order,studentAnswer,list(1..len(gaps)))
-  )
+    map(
+        let(
+            result,submit_part(gaps[gap_number]["path"],answer),
+            name,gaps[gap_number]["name"],
+                assert(name="",feedback(translate('part.gapfill.feedback header',["name": name])));
+                concat_feedback(result["feedback"], if(marks>0,result["marks"]/marks,1));
+                result
+        ),
+        [gap_number,answer,index],
+        zip(gap_order,studentAnswer,list(1..len(gaps)))
+    )
 
 all_valid (Are the answers to all of the gaps valid?):
   all(map(res["valid"],res,marked_original_order))

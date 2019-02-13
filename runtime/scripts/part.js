@@ -112,6 +112,8 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store]
+ * @property {Boolean} isStep - is this part a step?
+ * @proeprty {Boolean} isGap - is this part a gap?
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -124,6 +126,9 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.parentPart = parentPart;
     //remember a path for this part, for stuff like marking and warnings
     this.path = path || 'p0';
+
+    this.label = '';
+
     if(this.question) {
     this.question.partDictionary[path] = this;
     }
@@ -134,6 +139,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.gaps = [];
     this.steps = [];
     this.isStep = false;
+    this.isGap = false;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
     this.markingFeedback = [];
@@ -156,7 +162,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromXML: function(xml) {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this,this.xml,'.',['type','marks']);
+        tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
@@ -205,7 +211,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['marks'],this);
+        tryLoad(data,['marks','useCustomName','customName'],this);
         this.marks = parseFloat(this.marks);
         tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
@@ -326,7 +332,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -342,6 +348,41 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Numbas.parts.partpath}
      */
     path: '',
+    /** A readable name for this part, to show to the student.
+     * Change it with {@link Numbas.parts.Part#setName}
+     * @type {String}
+     */
+    name: '',
+    /** Should a custom name be used?
+     * @type {Boolean}
+     */
+    useCustomName: false,
+    /** Custom name for this part, or null if none.
+     * Variables will be substituted into this string from the part's scope.
+     * @type {String}
+     */
+    customName: '',
+    /** Assign a name to this part
+     * @param {Number} index - the number of parts before this one that have names.
+     * @param {Number} siblings - the number of siblings this part has
+     * @returns {Boolean} true if this part has a name that should increment the label counter
+     */
+    assignName: function(index,siblings) {
+        if(this.useCustomName) {
+            this.name = jme.subvars(this.customName,this.getScope(),true);
+        } else if(siblings==0) {
+            return '';
+        } else if(this.isGap) {
+            this.name = util.capitalise(R('gap'))+' '+index;
+        } else if(this.isStep) {
+            this.name = util.capitalise(R('step'))+' '+index;
+        } else {
+            this.name = util.letterOrdinal(index)+')';
+        }
+
+        this.display && this.display.setName(this.name);
+        return this.name!='';
+    },
     /** This part's type, e.g. "jme", "numberentry", ...
      * @type {String}
      */
@@ -450,7 +491,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             originalError = new Error(nmessage);
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
-        var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
+        var niceName = this.name;
         throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
@@ -712,7 +753,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         this.answered = result.answered;
                     }
                 } catch(e) {
-                    throw(new Numbas.Error('part.marking.uncaught error',{part:util.nicePartName(this.path),message:e.message}));
+                    this.error('part.marking.uncaught error',{message:e.message},e);
                 }
             } else {
                 this.giveWarning(R('part.marking.not submitted'));
@@ -823,7 +864,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 new_variables[vr.variable] = p2.studentAnswerAsJME();
                 replaced.push(vr.variable);
             } else if(vr.must_go_first) {
-                throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:util.nicePartName(vr.part)}));
+                throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
         }
         var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
@@ -953,6 +994,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         studentAnswer = jme.makeSafe(studentAnswer);
         return {
             path: jme.wrapValue(this.path),
+            name: jme.wrapValue(this.name),
             question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),

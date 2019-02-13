@@ -594,6 +594,8 @@ class VariableReplacement(object):
         return replacement
 
 class Part(object):
+    useCustomName = False
+    customName = ''
     prompt = ''
     kind = ''
     stepsPenalty = 0
@@ -613,7 +615,7 @@ class Part(object):
         self.variable_replacements = []
 
     def loadDATA(self, builder, data):
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
+        tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
 
         if haskey(data,'marks'):
             self.marks = data['marks']
@@ -645,6 +647,8 @@ class Part(object):
                         ])
 
         part.attrib = {
+            'usecustomname': strcons_fix(self.useCustomName),
+            'customName': strcons_fix(self.customName),
             'type': strcons(self.kind), 
             'marks': strcons_fix(self.marks), 
             'stepspenalty': strcons_fix(self.stepsPenalty), 

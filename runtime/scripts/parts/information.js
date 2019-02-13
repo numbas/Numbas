@@ -28,6 +28,14 @@ var Part = Numbas.parts.Part;
 var InformationPart = Numbas.parts.InformationPart = function(path, question, parentPart, store) {
 }
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
+    assignName: function(index) {
+        if(this.useCustomName) {
+            Part.prototype.assignName.apply(this,arguments);
+            return false;
+        }
+        return false;
+    },
+
     loadFromXML: function() {
     },
     loadFromJSON: function() {

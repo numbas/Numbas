@@ -49,16 +49,14 @@
             <xsl:when test="@type='1_n_2' and @displaytype='radiogroup'"><xsl:text> block</xsl:text></xsl:when>
         </xsl:choose>
     </xsl:variable>
-    <xsl:if test="parent::parts">
-        <xsl:if test="count(../part) &gt; 1">
-            <h4 class="partheader"><xsl:number count="part" format="a) "/></h4>
-        </xsl:if>
-    </xsl:if>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="$path" />').isDirty}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="$path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="$path" />').name()}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="$path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
+        <xsl:if test="parent::parts">
+            <h4 class="partheader" data-bind="visible: name, latex: name"></h4>
+        </xsl:if>
         <xsl:if test="not(ancestor::gaps)">
             <xsl:apply-templates select="prompt" />
         </xsl:if>

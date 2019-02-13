@@ -439,7 +439,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Accept the given password to begin the exam?
      * @param {String} password
      * @returns {Boolean}
-     * @see Numbas.exam#settings#startPassword
      */
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
