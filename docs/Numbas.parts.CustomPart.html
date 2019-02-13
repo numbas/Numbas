@@ -340,6 +340,8 @@
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#credit">credit</a></li>
 					
+						<li class="name"><a href="Numbas.parts.CustomPart.html#customName">customName</a></li>
+					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#display">display</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#doesMarking">doesMarking</a></li>
@@ -355,6 +357,8 @@
 						<li class="name"><a href="Numbas.parts.CustomPart.html#markingScript">markingScript</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#marks">marks</a></li>
+					
+						<li class="name"><a href="Numbas.parts.CustomPart.html#name">name</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#parentPart">parentPart</a></li>
 					
@@ -382,6 +386,8 @@
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#type">type</a></li>
 					
+						<li class="name"><a href="Numbas.parts.CustomPart.html#useCustomName">useCustomName</a></li>
+					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#warnings">warnings</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#xml">xml</a></li>
@@ -402,6 +408,10 @@
 						<li class="name"><a href="Numbas.parts.CustomPart.html#addVariableReplacement">addVariableReplacement</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#apply_feedback">apply_feedback</a></li>
+					
+						<li class="name"><a href="Numbas.parts.CustomPart.html#applyScoreLimits">applyScoreLimits</a></li>
+					
+						<li class="name"><a href="Numbas.parts.CustomPart.html#assignName">assignName</a></li>
 					
 						<li class="name"><a href="Numbas.parts.CustomPart.html#baseMarkingScript">baseMarkingScript</a></li>
 					
@@ -552,7 +562,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L385">runtime/scripts/part.js, line 385</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L430">runtime/scripts/part.js, line 430</a>
     </li></ul></dd>
     
 
@@ -631,7 +641,87 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L356">runtime/scripts/part.js, line 356</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L401">runtime/scripts/part.js, line 401</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id="customName"><span class="type-signature"></span>customName<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    <p>Custom name for this part, or null if none.
+Variables will be substituted into this string from the part's scope.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Numbas.parts.Part.html#customName">Numbas.parts.Part#customName</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L364">runtime/scripts/part.js, line 364</a>
     </li></ul></dd>
     
 
@@ -710,7 +800,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L519">runtime/scripts/part.js, line 519</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L570">runtime/scripts/part.js, line 570</a>
     </li></ul></dd>
     
 
@@ -789,7 +879,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L410">runtime/scripts/part.js, line 410</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L455">runtime/scripts/part.js, line 455</a>
     </li></ul></dd>
     
 
@@ -868,7 +958,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L368">runtime/scripts/part.js, line 368</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L413">runtime/scripts/part.js, line 413</a>
     </li></ul></dd>
     
 
@@ -947,7 +1037,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L390">runtime/scripts/part.js, line 390</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L435">runtime/scripts/part.js, line 435</a>
     </li></ul></dd>
     
 
@@ -1026,7 +1116,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L376">runtime/scripts/part.js, line 376</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L421">runtime/scripts/part.js, line 421</a>
     </li></ul></dd>
     
 
@@ -1105,7 +1195,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L364">runtime/scripts/part.js, line 364</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L409">runtime/scripts/part.js, line 409</a>
     </li></ul></dd>
     
 
@@ -1184,7 +1274,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L435">runtime/scripts/part.js, line 435</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L480">runtime/scripts/part.js, line 480</a>
     </li></ul></dd>
     
 
@@ -1263,7 +1353,87 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L348">runtime/scripts/part.js, line 348</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L393">runtime/scripts/part.js, line 393</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id="name"><span class="type-signature"></span>name<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    <p>A readable name for this part, to show to the student.
+Change it with <code>Numbas.parts.Part#setName</code></p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Numbas.parts.Part.html#name">Numbas.parts.Part#name</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L355">runtime/scripts/part.js, line 355</a>
     </li></ul></dd>
     
 
@@ -1342,7 +1512,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L336">runtime/scripts/part.js, line 336</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L346">runtime/scripts/part.js, line 346</a>
     </li></ul></dd>
     
 
@@ -1421,7 +1591,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L340">runtime/scripts/part.js, line 340</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L350">runtime/scripts/part.js, line 350</a>
     </li></ul></dd>
     
 
@@ -1500,7 +1670,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L332">runtime/scripts/part.js, line 332</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L342">runtime/scripts/part.js, line 342</a>
     </li></ul></dd>
     
 
@@ -1579,7 +1749,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L360">runtime/scripts/part.js, line 360</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L405">runtime/scripts/part.js, line 405</a>
     </li></ul></dd>
     
 
@@ -1848,7 +2018,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L421">runtime/scripts/part.js, line 421</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L466">runtime/scripts/part.js, line 466</a>
     </li></ul></dd>
     
 
@@ -1927,7 +2097,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L406">runtime/scripts/part.js, line 406</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L451">runtime/scripts/part.js, line 451</a>
     </li></ul></dd>
     
 
@@ -2006,7 +2176,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L380">runtime/scripts/part.js, line 380</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L425">runtime/scripts/part.js, line 425</a>
     </li></ul></dd>
     
 
@@ -2085,7 +2255,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L394">runtime/scripts/part.js, line 394</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L439">runtime/scripts/part.js, line 439</a>
     </li></ul></dd>
     
 
@@ -2164,7 +2334,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L352">runtime/scripts/part.js, line 352</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L397">runtime/scripts/part.js, line 397</a>
     </li></ul></dd>
     
 
@@ -2243,7 +2413,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L402">runtime/scripts/part.js, line 402</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L447">runtime/scripts/part.js, line 447</a>
     </li></ul></dd>
     
 
@@ -2322,7 +2492,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L398">runtime/scripts/part.js, line 398</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L443">runtime/scripts/part.js, line 443</a>
     </li></ul></dd>
     
 
@@ -2401,7 +2571,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L148">runtime/scripts/part.js, line 148</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L154">runtime/scripts/part.js, line 154</a>
     </li></ul></dd>
     
 
@@ -2480,7 +2650,86 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L344">runtime/scripts/part.js, line 344</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L389">runtime/scripts/part.js, line 389</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id="useCustomName"><span class="type-signature"></span>useCustomName<span class="type-signature"> :Boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Should a custom name be used?</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Numbas.parts.Part_.html#useCustomName">Numbas.parts.Part#useCustomName</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L359">runtime/scripts/part.js, line 359</a>
     </li></ul></dd>
     
 
@@ -2559,7 +2808,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L372">runtime/scripts/part.js, line 372</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L417">runtime/scripts/part.js, line 417</a>
     </li></ul></dd>
     
 
@@ -2638,7 +2887,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L152">runtime/scripts/part.js, line 152</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L158">runtime/scripts/part.js, line 158</a>
     </li></ul></dd>
     
 
@@ -2813,7 +3062,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L982">runtime/scripts/part.js, line 982</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1051">runtime/scripts/part.js, line 1051</a>
     </li></ul></dd>
     
 
@@ -2979,7 +3228,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L269">runtime/scripts/part.js, line 269</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L279">runtime/scripts/part.js, line 279</a>
     </li></ul></dd>
     
 
@@ -3168,7 +3417,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L279">runtime/scripts/part.js, line 279</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L289">runtime/scripts/part.js, line 289</a>
     </li></ul></dd>
     
 
@@ -3311,7 +3560,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L869">runtime/scripts/part.js, line 869</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L931">runtime/scripts/part.js, line 931</a>
     </li></ul></dd>
     
 
@@ -3324,6 +3573,297 @@
             <li><a href="Numbas.marking.html#.finalise_state">Numbas.marking.finalise_state</a></li>
         </ul>
     </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="applyScoreLimits"><span class="type-signature"></span>applyScoreLimits<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Make sure the awarded score is between the minimum and maximum available.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Numbas.parts.Part.html#applyScoreLimits">Numbas.parts.Part#applyScoreLimits</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L641">runtime/scripts/part.js, line 641</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="assignName"><span class="type-signature"></span>assignName<span class="signature">(index, siblings)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Assign a name to this part</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the number of parts before this one that have names.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>siblings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the number of siblings this part has</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>true if this part has a name that should increment the label counter</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="Numbas.parts.Part.html#assignName">Numbas.parts.Part#assignName</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L370">runtime/scripts/part.js, line 370</a>
+    </li></ul></dd>
+    
+
+    
+
     
 
     
@@ -3441,7 +3981,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L291">runtime/scripts/part.js, line 291</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L301">runtime/scripts/part.js, line 301</a>
     </li></ul></dd>
     
 
@@ -3536,7 +4076,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L547">runtime/scripts/part.js, line 547</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L598">runtime/scripts/part.js, line 598</a>
     </li></ul></dd>
     
 
@@ -3560,7 +4100,7 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id="error"><span class="type-signature"></span>error<span class="signature">(message)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="error"><span class="type-signature"></span>error<span class="signature">(message, args, originalError<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -3591,6 +4131,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -3616,10 +4158,82 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
             <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>arguments for the error message</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>originalError</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>if this is a re-thrown error, the original error object</p></td>
         </tr>
 
     
@@ -3694,7 +4308,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L441">runtime/scripts/part.js, line 441</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L488">runtime/scripts/part.js, line 488</a>
     </li></ul></dd>
     
 
@@ -3817,7 +4431,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L786">runtime/scripts/part.js, line 786</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L851">runtime/scripts/part.js, line 851</a>
     </li></ul></dd>
     
 
@@ -3911,7 +4525,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L239">runtime/scripts/part.js, line 239</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L245">runtime/scripts/part.js, line 245</a>
     </li></ul></dd>
     
 
@@ -4055,7 +4669,7 @@ Anything to do with marking that depends on the scope should be in this method, 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L829">runtime/scripts/part.js, line 829</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L890">runtime/scripts/part.js, line 890</a>
     </li></ul></dd>
     
 
@@ -4179,7 +4793,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L621">runtime/scripts/part.js, line 621</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L681">runtime/scripts/part.js, line 681</a>
     </li></ul></dd>
     
 
@@ -4322,7 +4936,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L524">runtime/scripts/part.js, line 524</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L575">runtime/scripts/part.js, line 575</a>
     </li></ul></dd>
     
 
@@ -4452,7 +5066,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L735">runtime/scripts/part.js, line 735</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L801">runtime/scripts/part.js, line 801</a>
     </li></ul></dd>
     
 
@@ -4553,7 +5167,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1064">runtime/scripts/part.js, line 1064</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1139">runtime/scripts/part.js, line 1139</a>
     </li></ul></dd>
     
 
@@ -4676,7 +5290,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L455">runtime/scripts/part.js, line 455</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L506">runtime/scripts/part.js, line 506</a>
     </li></ul></dd>
     
 
@@ -4799,7 +5413,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L449">runtime/scripts/part.js, line 449</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L500">runtime/scripts/part.js, line 500</a>
     </li></ul></dd>
     
 
@@ -4942,7 +5556,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L203">runtime/scripts/part.js, line 203</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L209">runtime/scripts/part.js, line 209</a>
     </li></ul></dd>
     
 
@@ -5085,7 +5699,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L156">runtime/scripts/part.js, line 156</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L162">runtime/scripts/part.js, line 162</a>
     </li></ul></dd>
     
 
@@ -5109,7 +5723,7 @@ If <code>this.question</code> is set, use the question's scope. Otherwise, use <
 		<div class="item function">
 	
 
-    <h4 class="name" id="mark"><span class="type-signature"></span>mark<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Numbas.marking.html#.finalised_state">Numbas.marking.finalised_state</a>}</span></h4>
+    <h4 class="name" id="mark"><span class="type-signature"></span>mark<span class="signature">(scope)</span><span class="type-signature"> &rarr; {<a href="Numbas.marking.html#.finalised_state">Numbas.marking.finalised_state</a>}</span></h4>
 
     
 
@@ -5126,6 +5740,55 @@ If the question has been answered in a way that can be marked, <code>this.answer
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>scope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -5209,7 +5872,7 @@ If the question has been answered in a way that can be marked, <code>this.answer
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L853">runtime/scripts/part.js, line 853</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L915">runtime/scripts/part.js, line 915</a>
     </li></ul></dd>
     
 
@@ -5242,7 +5905,7 @@ If the question has been answered in a way that can be marked, <code>this.answer
 		<div class="item function">
 	
 
-    <h4 class="name" id="mark_answer"><span class="type-signature"></span>mark_answer<span class="signature">(studentAnswer)</span><span class="type-signature"> &rarr; {<a href="Numbas.marking.html#.marking_script_result">Numbas.marking.marking_script_result</a>}</span></h4>
+    <h4 class="name" id="mark_answer"><span class="type-signature"></span>mark_answer<span class="signature">(studentAnswer, scope)</span><span class="type-signature"> &rarr; {<a href="Numbas.marking.html#.marking_script_result">Numbas.marking.marking_script_result</a>}</span></h4>
 
     
 
@@ -5293,6 +5956,29 @@ This does NOT apply the feedback and credit to the part object, it just returns 
             
                 
 <span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>scope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></span>
 
 
             
@@ -5391,7 +6077,7 @@ This does NOT apply the feedback and credit to the part object, it just returns 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L948">runtime/scripts/part.js, line 948</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1014">runtime/scripts/part.js, line 1014</a>
     </li></ul></dd>
     
 
@@ -5593,7 +6279,7 @@ This does NOT apply the feedback and credit to the part object, it just returns 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L765">runtime/scripts/part.js, line 765</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L831">runtime/scripts/part.js, line 831</a>
     </li></ul></dd>
     
 
@@ -5736,7 +6422,7 @@ This does NOT apply the feedback and credit to the part object, it just returns 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1022">runtime/scripts/part.js, line 1022</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1097">runtime/scripts/part.js, line 1097</a>
     </li></ul></dd>
     
 
@@ -5902,7 +6588,7 @@ This does NOT apply the feedback and credit to the part object, it just returns 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1008">runtime/scripts/part.js, line 1008</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1081">runtime/scripts/part.js, line 1081</a>
     </li></ul></dd>
     
 
@@ -5996,7 +6682,7 @@ This does NOT apply the feedback and credit to the part object, it just returns 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1058">runtime/scripts/part.js, line 1058</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1133">runtime/scripts/part.js, line 1133</a>
     </li></ul></dd>
     
 
@@ -6091,7 +6777,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L741">runtime/scripts/part.js, line 741</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L807">runtime/scripts/part.js, line 807</a>
     </li></ul></dd>
     
 
@@ -6214,7 +6900,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L838">runtime/scripts/part.js, line 838</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L899">runtime/scripts/part.js, line 899</a>
     </li></ul></dd>
     
 
@@ -6308,7 +6994,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L540">runtime/scripts/part.js, line 540</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L591">runtime/scripts/part.js, line 591</a>
     </li></ul></dd>
     
 
@@ -6410,7 +7096,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L251">runtime/scripts/part.js, line 251</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L261">runtime/scripts/part.js, line 261</a>
     </li></ul></dd>
     
 
@@ -6553,7 +7239,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1073">runtime/scripts/part.js, line 1073</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1148">runtime/scripts/part.js, line 1148</a>
     </li></ul></dd>
     
 
@@ -6742,7 +7428,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L967">runtime/scripts/part.js, line 967</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1034">runtime/scripts/part.js, line 1034</a>
     </li></ul></dd>
     
 
@@ -6885,7 +7571,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L607">runtime/scripts/part.js, line 607</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L667">runtime/scripts/part.js, line 667</a>
     </li></ul></dd>
     
 
@@ -7051,7 +7737,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L296">runtime/scripts/part.js, line 296</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L306">runtime/scripts/part.js, line 306</a>
     </li></ul></dd>
     
 
@@ -7240,7 +7926,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L314">runtime/scripts/part.js, line 314</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L324">runtime/scripts/part.js, line 324</a>
     </li></ul></dd>
     
 
@@ -7341,7 +8027,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L833">runtime/scripts/part.js, line 833</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L894">runtime/scripts/part.js, line 894</a>
     </li></ul></dd>
     
 
@@ -7484,7 +8170,7 @@ Sets this part as dirty, and gives a warning explaining why the student must res
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L533">runtime/scripts/part.js, line 533</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L584">runtime/scripts/part.js, line 584</a>
     </li></ul></dd>
     
 
@@ -7635,7 +8321,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1034">runtime/scripts/part.js, line 1034</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1109">runtime/scripts/part.js, line 1109</a>
     </li></ul></dd>
     
 
@@ -7778,7 +8464,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L599">runtime/scripts/part.js, line 599</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L659">runtime/scripts/part.js, line 659</a>
     </li></ul></dd>
     
 
@@ -7908,7 +8594,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L844">runtime/scripts/part.js, line 844</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L905">runtime/scripts/part.js, line 905</a>
     </li></ul></dd>
     
 
@@ -8074,7 +8760,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L995">runtime/scripts/part.js, line 995</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L1066">runtime/scripts/part.js, line 1066</a>
     </li></ul></dd>
     
 
@@ -8168,7 +8854,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L633">runtime/scripts/part.js, line 633</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/part.js#L693">runtime/scripts/part.js, line 693</a>
     </li></ul></dd>
     
 
@@ -8281,7 +8967,11 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.beginExam"><a href="Numbas.display.ExamDisplay.html#.beginExam">Numbas.display.ExamDisplay.beginExam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canAdvance"><a href="Numbas.display.ExamDisplay.html#.canAdvance">Numbas.display.ExamDisplay.canAdvance</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canBegin"><a href="Numbas.display.ExamDisplay.html#.canBegin">Numbas.display.ExamDisplay.canBegin</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canReverse"><a href="Numbas.display.ExamDisplay.html#.canReverse">Numbas.display.ExamDisplay.canReverse</a></li>
 		
@@ -8294,6 +8984,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.exam"><a href="Numbas.display.ExamDisplay.html#.exam">Numbas.display.ExamDisplay.exam</a></li>
 		
@@ -8314,6 +9006,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.mode"><a href="Numbas.display.ExamDisplay.html#.mode">Numbas.display.ExamDisplay.mode</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -8437,11 +9131,15 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.toggleFeedbackText"><a href="Numbas.display.PartDisplay.html#.toggleFeedbackText">Numbas.display.PartDisplay.toggleFeedbackText</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.updateCorrectAnswer">Numbas.display.PartDisplay.updateCorrectAnswer</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay"><a href="Numbas.display.QuestionDisplay.html">Numbas.display.QuestionDisplay</a></li>
 		
@@ -8523,6 +9221,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.Exam"><a href="Numbas.Exam.html">Numbas.Exam</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Exam#acceptPassword"><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam#begin"><a href="Numbas.Exam.html#begin">Numbas.Exam#begin</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#calculateScore"><a href="Numbas.Exam.html#calculateScore">Numbas.Exam#calculateScore</a></li>
@@ -8546,6 +9246,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.Exam#endTiming"><a href="Numbas.Exam.html#endTiming">Numbas.Exam#endTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#event:question list initialised"><a href="Numbas.Exam.html#event:questionlistinitialised">Numbas.Exam#event:question list initialised</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#event:ready"><a href="Numbas.Exam.html#event:ready">Numbas.Exam#event:ready</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
 		
@@ -8665,6 +9367,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.contentsubvars"><a href="Numbas.jme.html#.contentsubvars">Numbas.jme.contentsubvars</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.converseOps"><a href="Numbas.jme.html#.converseOps">Numbas.jme.converseOps</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display"><a href="Numbas.jme.display.html">Numbas.jme.display</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.exprToLaTeX"><a href="Numbas.jme.display.html#.exprToLaTeX">Numbas.jme.display.exprToLaTeX</a></li>
@@ -8708,6 +9412,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.jme.display.simplifyTree"><a href="Numbas.jme.display.html#.simplifyTree">Numbas.jme.display.simplifyTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.special_number_definition"><a href="Numbas.jme.display.html#.special_number_definition">Numbas.jme.display.special_number_definition</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.specialNames"><a href="Numbas.jme.display.html#.specialNames">Numbas.jme.display.specialNames</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.texify"><a href="Numbas.jme.display.html#.texify">Numbas.jme.display.texify</a></li>
 		
@@ -8801,6 +9507,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.makeSafe"><a href="Numbas.jme.html#.makeSafe">Numbas.jme.makeSafe</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.mapFunctions"><a href="Numbas.jme.html#.mapFunctions">Numbas.jme.mapFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
@@ -8819,7 +9527,29 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#compile"><a href="Numbas.jme.Parser.html#compile">Numbas.jme.Parser#compile</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#funcSynonym"><a href="Numbas.jme.Parser.html#funcSynonym">Numbas.jme.Parser#funcSynonym</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getArity"><a href="Numbas.jme.Parser.html#getArity">Numbas.jme.Parser#getArity</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getConstant"><a href="Numbas.jme.Parser.html#getConstant">Numbas.jme.Parser#getConstant</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPostfixForm"><a href="Numbas.jme.Parser.html#getPostfixForm">Numbas.jme.Parser#getPostfixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrecedence"><a href="Numbas.jme.Parser.html#getPrecedence">Numbas.jme.Parser#getPrecedence</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrefixForm"><a href="Numbas.jme.Parser.html#getPrefixForm">Numbas.jme.Parser#getPrefixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getSetting"><a href="Numbas.jme.Parser.html#getSetting">Numbas.jme.Parser#getSetting</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isAssociative"><a href="Numbas.jme.Parser.html#isAssociative">Numbas.jme.Parser#isAssociative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isCommutative"><a href="Numbas.jme.Parser.html#isCommutative">Numbas.jme.Parser#isCommutative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isRightAssociative"><a href="Numbas.jme.Parser.html#isRightAssociative">Numbas.jme.Parser#isRightAssociative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#option_defaults"><a href="Numbas.jme.Parser.html#option_defaults">Numbas.jme.Parser#option_defaults</a></li>
 		
@@ -8859,15 +9589,15 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.extend_options"><a href="Numbas.jme.rules.html#.extend_options">Numbas.jme.rules.extend_options</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch"><a href="Numbas.jme.rules.html#.findSequenceMatch">Numbas.jme.rules.findSequenceMatch</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch_options"><a href="Numbas.jme.rules.html#.findSequenceMatch_options">Numbas.jme.rules.findSequenceMatch_options</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.getTerms"><a href="Numbas.jme.rules.html#.getTerms">Numbas.jme.rules.getTerms</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.getTerms_options"><a href="Numbas.jme.rules.html#.getTerms_options">Numbas.jme.rules.getTerms_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.jme_pattern_match"><a href="Numbas.jme.rules.html#.jme_pattern_match">Numbas.jme.rules.jme_pattern_match</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.rules.match_sequence"><a href="Numbas.jme.rules.html#.match_sequence">Numbas.jme.rules.match_sequence</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.rules.match_sequence_options"><a href="Numbas.jme.rules.html#.match_sequence_options">Numbas.jme.rules.match_sequence_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchAllTree"><a href="Numbas.jme.rules.html#.matchAllTree">Numbas.jme.rules.matchAllTree</a></li>
 		
@@ -8923,6 +9653,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#addFunction"><a href="Numbas.jme.Scope.html#addFunction">Numbas.jme.Scope#addFunction</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#addRuleset"><a href="Numbas.jme.Scope.html#addRuleset">Numbas.jme.Scope#addRuleset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allFunctions"><a href="Numbas.jme.Scope.html#allFunctions">Numbas.jme.Scope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allRulesets"><a href="Numbas.jme.Scope.html#allRulesets">Numbas.jme.Scope#allRulesets</a></li>
@@ -8930,6 +9662,10 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.jme.Scope#allVariables"><a href="Numbas.jme.Scope.html#allVariables">Numbas.jme.Scope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#collect"><a href="Numbas.jme.Scope.html#collect">Numbas.jme.Scope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteFunction"><a href="Numbas.jme.Scope.html#deleteFunction">Numbas.jme.Scope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteRuleset"><a href="Numbas.jme.Scope.html#deleteRuleset">Numbas.jme.Scope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#deleteVariable"><a href="Numbas.jme.Scope.html#deleteVariable">Numbas.jme.Scope#deleteVariable</a></li>
 		
@@ -8948,6 +9684,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.jme.Scope#setRuleset"><a href="Numbas.jme.Scope.html#setRuleset">Numbas.jme.Scope#setRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#setVariable"><a href="Numbas.jme.Scope.html#setVariable">Numbas.jme.Scope#setVariable</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#unset"><a href="Numbas.jme.Scope.html#unset">Numbas.jme.Scope#unset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
 		
@@ -9055,6 +9793,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.JMEPart"><a href="Numbas.JMEPart.html">Numbas.JMEPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.JMEPart#addValueGenerator"><a href="Numbas.JMEPart.html#addValueGenerator">Numbas.JMEPart#addValueGenerator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.JMEPart#baseMarkingScript"><a href="Numbas.JMEPart.html#baseMarkingScript">Numbas.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.JMEPart#getCorrectAnswer"><a href="Numbas.JMEPart.html#getCorrectAnswer">Numbas.JMEPart#getCorrectAnswer</a></li>
@@ -9127,6 +9867,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addFunction"><a href="Numbas.marking.StatefulScope.html#addFunction">Numbas.marking.StatefulScope#addFunction</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addRuleset"><a href="Numbas.marking.StatefulScope.html#addRuleset">Numbas.marking.StatefulScope#addRuleset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allFunctions"><a href="Numbas.marking.StatefulScope.html#allFunctions">Numbas.marking.StatefulScope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allRulesets"><a href="Numbas.marking.StatefulScope.html#allRulesets">Numbas.marking.StatefulScope#allRulesets</a></li>
@@ -9134,6 +9876,10 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allVariables"><a href="Numbas.marking.StatefulScope.html#allVariables">Numbas.marking.StatefulScope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#collect"><a href="Numbas.marking.StatefulScope.html#collect">Numbas.marking.StatefulScope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteFunction"><a href="Numbas.marking.StatefulScope.html#deleteFunction">Numbas.marking.StatefulScope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteRuleset"><a href="Numbas.marking.StatefulScope.html#deleteRuleset">Numbas.marking.StatefulScope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteVariable"><a href="Numbas.marking.StatefulScope.html#deleteVariable">Numbas.marking.StatefulScope#deleteVariable</a></li>
 		
@@ -9152,6 +9898,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setRuleset"><a href="Numbas.marking.StatefulScope.html#setRuleset">Numbas.marking.StatefulScope#setRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setVariable"><a href="Numbas.marking.StatefulScope.html#setVariable">Numbas.marking.StatefulScope#setVariable</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#unset"><a href="Numbas.marking.StatefulScope.html#unset">Numbas.marking.StatefulScope#unset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking_scripts"><a href="Numbas.html#.marking_scripts">Numbas.marking_scripts</a></li>
 		
@@ -9244,6 +9992,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.math.im"><a href="Numbas.math.html#.im">Numbas.math.im</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.inverse"><a href="Numbas.math.html#.inverse">Numbas.math.inverse</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.isclose"><a href="Numbas.math.html#.isclose">Numbas.math.isclose</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.lcm"><a href="Numbas.math.html#.lcm">Numbas.math.lcm</a></li>
 		
@@ -9397,11 +10147,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#apply_feedback"><a href="Numbas.parts.CustomPart.html#apply_feedback">Numbas.parts.CustomPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#applyScoreLimits"><a href="Numbas.parts.CustomPart.html#applyScoreLimits">Numbas.parts.CustomPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#assignName"><a href="Numbas.parts.CustomPart.html#assignName">Numbas.parts.CustomPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#baseMarkingScript"><a href="Numbas.parts.CustomPart.html#baseMarkingScript">Numbas.parts.CustomPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#calculateScore"><a href="Numbas.parts.CustomPart.html#calculateScore">Numbas.parts.CustomPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#credit"><a href="Numbas.parts.CustomPart.html#credit">Numbas.parts.CustomPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#customName"><a href="Numbas.parts.CustomPart.html#customName">Numbas.parts.CustomPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#display"><a href="Numbas.parts.CustomPart.html#display">Numbas.parts.CustomPart#display</a></li>
 		
@@ -9452,6 +10208,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#marks"><a href="Numbas.parts.CustomPart.html#marks">Numbas.parts.CustomPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#multCredit"><a href="Numbas.parts.CustomPart.html#multCredit">Numbas.parts.CustomPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#name"><a href="Numbas.parts.CustomPart.html#name">Numbas.parts.CustomPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#openSteps"><a href="Numbas.parts.CustomPart.html#openSteps">Numbas.parts.CustomPart#openSteps</a></li>
 		
@@ -9513,6 +10271,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#type"><a href="Numbas.parts.CustomPart.html#type">Numbas.parts.CustomPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#useCustomName"><a href="Numbas.parts.CustomPart.html#useCustomName">Numbas.parts.CustomPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#warnings"><a href="Numbas.parts.CustomPart.html#warnings">Numbas.parts.CustomPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#xml"><a href="Numbas.parts.CustomPart.html#xml">Numbas.parts.CustomPart#xml</a></li>
@@ -9529,6 +10289,10 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#apply_feedback"><a href="Numbas.parts.ExtensionPart.html#apply_feedback">Numbas.parts.ExtensionPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#applyScoreLimits"><a href="Numbas.parts.ExtensionPart.html#applyScoreLimits">Numbas.parts.ExtensionPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#assignName"><a href="Numbas.parts.ExtensionPart.html#assignName">Numbas.parts.ExtensionPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#baseMarkingScript"><a href="Numbas.parts.ExtensionPart.html#baseMarkingScript">Numbas.parts.ExtensionPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#calculateScore"><a href="Numbas.parts.ExtensionPart.html#calculateScore">Numbas.parts.ExtensionPart#calculateScore</a></li>
@@ -9536,6 +10300,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#createSuspendData"><a href="Numbas.parts.ExtensionPart.html#createSuspendData">Numbas.parts.ExtensionPart#createSuspendData</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#credit"><a href="Numbas.parts.ExtensionPart.html#credit">Numbas.parts.ExtensionPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#customName"><a href="Numbas.parts.ExtensionPart.html#customName">Numbas.parts.ExtensionPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#display"><a href="Numbas.parts.ExtensionPart.html#display">Numbas.parts.ExtensionPart#display</a></li>
 		
@@ -9588,6 +10354,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#marks"><a href="Numbas.parts.ExtensionPart.html#marks">Numbas.parts.ExtensionPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#multCredit"><a href="Numbas.parts.ExtensionPart.html#multCredit">Numbas.parts.ExtensionPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#name"><a href="Numbas.parts.ExtensionPart.html#name">Numbas.parts.ExtensionPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#openSteps"><a href="Numbas.parts.ExtensionPart.html#openSteps">Numbas.parts.ExtensionPart#openSteps</a></li>
 		
@@ -9649,6 +10417,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#type"><a href="Numbas.parts.ExtensionPart.html#type">Numbas.parts.ExtensionPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#useCustomName"><a href="Numbas.parts.ExtensionPart.html#useCustomName">Numbas.parts.ExtensionPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#warnings"><a href="Numbas.parts.ExtensionPart.html#warnings">Numbas.parts.ExtensionPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#xml"><a href="Numbas.parts.ExtensionPart.html#xml">Numbas.parts.ExtensionPart#xml</a></li>
@@ -9669,11 +10439,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#apply_feedback"><a href="Numbas.parts.GapFillPart.html#apply_feedback">Numbas.parts.GapFillPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#applyScoreLimits"><a href="Numbas.parts.GapFillPart.html#applyScoreLimits">Numbas.parts.GapFillPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#assignName"><a href="Numbas.parts.GapFillPart.html#assignName">Numbas.parts.GapFillPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#baseMarkingScript"><a href="Numbas.parts.GapFillPart.html#baseMarkingScript">Numbas.parts.GapFillPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#calculateScore"><a href="Numbas.parts.GapFillPart.html#calculateScore">Numbas.parts.GapFillPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#credit"><a href="Numbas.parts.GapFillPart.html#credit">Numbas.parts.GapFillPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#customName"><a href="Numbas.parts.GapFillPart.html#customName">Numbas.parts.GapFillPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#display"><a href="Numbas.parts.GapFillPart.html#display">Numbas.parts.GapFillPart#display</a></li>
 		
@@ -9724,6 +10500,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#marks"><a href="Numbas.parts.GapFillPart.html#marks">Numbas.parts.GapFillPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#multCredit"><a href="Numbas.parts.GapFillPart.html#multCredit">Numbas.parts.GapFillPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#name"><a href="Numbas.parts.GapFillPart.html#name">Numbas.parts.GapFillPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#openSteps"><a href="Numbas.parts.GapFillPart.html#openSteps">Numbas.parts.GapFillPart#openSteps</a></li>
 		
@@ -9785,6 +10563,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#type"><a href="Numbas.parts.GapFillPart.html#type">Numbas.parts.GapFillPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#useCustomName"><a href="Numbas.parts.GapFillPart.html#useCustomName">Numbas.parts.GapFillPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#warnings"><a href="Numbas.parts.GapFillPart.html#warnings">Numbas.parts.GapFillPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#xml"><a href="Numbas.parts.GapFillPart.html#xml">Numbas.parts.GapFillPart#xml</a></li>
@@ -9807,11 +10587,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#apply_feedback"><a href="Numbas.parts.InformationPart.html#apply_feedback">Numbas.parts.InformationPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#applyScoreLimits"><a href="Numbas.parts.InformationPart.html#applyScoreLimits">Numbas.parts.InformationPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#assignName"><a href="Numbas.parts.InformationPart.html#assignName">Numbas.parts.InformationPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#baseMarkingScript"><a href="Numbas.parts.InformationPart.html#baseMarkingScript">Numbas.parts.InformationPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#calculateScore"><a href="Numbas.parts.InformationPart.html#calculateScore">Numbas.parts.InformationPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#credit"><a href="Numbas.parts.InformationPart.html#credit">Numbas.parts.InformationPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#customName"><a href="Numbas.parts.InformationPart.html#customName">Numbas.parts.InformationPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#display"><a href="Numbas.parts.InformationPart.html#display">Numbas.parts.InformationPart#display</a></li>
 		
@@ -9862,6 +10648,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#marks"><a href="Numbas.parts.InformationPart.html#marks">Numbas.parts.InformationPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#multCredit"><a href="Numbas.parts.InformationPart.html#multCredit">Numbas.parts.InformationPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#name"><a href="Numbas.parts.InformationPart.html#name">Numbas.parts.InformationPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#openSteps"><a href="Numbas.parts.InformationPart.html#openSteps">Numbas.parts.InformationPart#openSteps</a></li>
 		
@@ -9923,6 +10711,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#type"><a href="Numbas.parts.InformationPart.html#type">Numbas.parts.InformationPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#useCustomName"><a href="Numbas.parts.InformationPart.html#useCustomName">Numbas.parts.InformationPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#warnings"><a href="Numbas.parts.InformationPart.html#warnings">Numbas.parts.InformationPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#xml"><a href="Numbas.parts.InformationPart.html#xml">Numbas.parts.InformationPart#xml</a></li>
@@ -9939,11 +10729,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#apply_feedback"><a href="Numbas.parts.JMEPart.html#apply_feedback">Numbas.parts.JMEPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#applyScoreLimits"><a href="Numbas.parts.JMEPart.html#applyScoreLimits">Numbas.parts.JMEPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#assignName"><a href="Numbas.parts.JMEPart.html#assignName">Numbas.parts.JMEPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#baseMarkingScript"><a href="Numbas.parts.JMEPart.html#baseMarkingScript">Numbas.parts.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#calculateScore"><a href="Numbas.parts.JMEPart.html#calculateScore">Numbas.parts.JMEPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#credit"><a href="Numbas.parts.JMEPart.html#credit">Numbas.parts.JMEPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#customName"><a href="Numbas.parts.JMEPart.html#customName">Numbas.parts.JMEPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#display"><a href="Numbas.parts.JMEPart.html#display">Numbas.parts.JMEPart#display</a></li>
 		
@@ -9994,6 +10790,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#marks"><a href="Numbas.parts.JMEPart.html#marks">Numbas.parts.JMEPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#multCredit"><a href="Numbas.parts.JMEPart.html#multCredit">Numbas.parts.JMEPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#name"><a href="Numbas.parts.JMEPart.html#name">Numbas.parts.JMEPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#openSteps"><a href="Numbas.parts.JMEPart.html#openSteps">Numbas.parts.JMEPart#openSteps</a></li>
 		
@@ -10055,6 +10853,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#type"><a href="Numbas.parts.JMEPart.html#type">Numbas.parts.JMEPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#useCustomName"><a href="Numbas.parts.JMEPart.html#useCustomName">Numbas.parts.JMEPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#warnings"><a href="Numbas.parts.JMEPart.html#warnings">Numbas.parts.JMEPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#xml"><a href="Numbas.parts.JMEPart.html#xml">Numbas.parts.JMEPart#xml</a></li>
@@ -10073,11 +10873,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#apply_feedback"><a href="Numbas.parts.MatrixEntryPart.html#apply_feedback">Numbas.parts.MatrixEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#applyScoreLimits"><a href="Numbas.parts.MatrixEntryPart.html#applyScoreLimits">Numbas.parts.MatrixEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#assignName"><a href="Numbas.parts.MatrixEntryPart.html#assignName">Numbas.parts.MatrixEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#baseMarkingScript"><a href="Numbas.parts.MatrixEntryPart.html#baseMarkingScript">Numbas.parts.MatrixEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#calculateScore"><a href="Numbas.parts.MatrixEntryPart.html#calculateScore">Numbas.parts.MatrixEntryPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#credit"><a href="Numbas.parts.MatrixEntryPart.html#credit">Numbas.parts.MatrixEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#customName"><a href="Numbas.parts.MatrixEntryPart.html#customName">Numbas.parts.MatrixEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#display"><a href="Numbas.parts.MatrixEntryPart.html#display">Numbas.parts.MatrixEntryPart#display</a></li>
 		
@@ -10128,6 +10934,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#marks"><a href="Numbas.parts.MatrixEntryPart.html#marks">Numbas.parts.MatrixEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#multCredit"><a href="Numbas.parts.MatrixEntryPart.html#multCredit">Numbas.parts.MatrixEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#name"><a href="Numbas.parts.MatrixEntryPart.html#name">Numbas.parts.MatrixEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#openSteps"><a href="Numbas.parts.MatrixEntryPart.html#openSteps">Numbas.parts.MatrixEntryPart#openSteps</a></li>
 		
@@ -10191,6 +10999,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#type"><a href="Numbas.parts.MatrixEntryPart.html#type">Numbas.parts.MatrixEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#useCustomName"><a href="Numbas.parts.MatrixEntryPart.html#useCustomName">Numbas.parts.MatrixEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#warnings"><a href="Numbas.parts.MatrixEntryPart.html#warnings">Numbas.parts.MatrixEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#xml"><a href="Numbas.parts.MatrixEntryPart.html#xml">Numbas.parts.MatrixEntryPart#xml</a></li>
@@ -10209,11 +11019,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#apply_feedback"><a href="Numbas.parts.MultipleResponsePart.html#apply_feedback">Numbas.parts.MultipleResponsePart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#applyScoreLimits"><a href="Numbas.parts.MultipleResponsePart.html#applyScoreLimits">Numbas.parts.MultipleResponsePart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#assignName"><a href="Numbas.parts.MultipleResponsePart.html#assignName">Numbas.parts.MultipleResponsePart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#baseMarkingScript"><a href="Numbas.parts.MultipleResponsePart.html#baseMarkingScript">Numbas.parts.MultipleResponsePart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#calculateScore"><a href="Numbas.parts.MultipleResponsePart.html#calculateScore">Numbas.parts.MultipleResponsePart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#credit"><a href="Numbas.parts.MultipleResponsePart.html#credit">Numbas.parts.MultipleResponsePart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#customName"><a href="Numbas.parts.MultipleResponsePart.html#customName">Numbas.parts.MultipleResponsePart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#display"><a href="Numbas.parts.MultipleResponsePart.html#display">Numbas.parts.MultipleResponsePart#display</a></li>
 		
@@ -10266,6 +11082,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#marks"><a href="Numbas.parts.MultipleResponsePart.html#marks">Numbas.parts.MultipleResponsePart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#multCredit"><a href="Numbas.parts.MultipleResponsePart.html#multCredit">Numbas.parts.MultipleResponsePart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#name"><a href="Numbas.parts.MultipleResponsePart.html#name">Numbas.parts.MultipleResponsePart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#numAnswers"><a href="Numbas.parts.MultipleResponsePart.html#numAnswers">Numbas.parts.MultipleResponsePart#numAnswers</a></li>
 		
@@ -10335,6 +11153,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#type"><a href="Numbas.parts.MultipleResponsePart.html#type">Numbas.parts.MultipleResponsePart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#useCustomName"><a href="Numbas.parts.MultipleResponsePart.html#useCustomName">Numbas.parts.MultipleResponsePart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#warnings"><a href="Numbas.parts.MultipleResponsePart.html#warnings">Numbas.parts.MultipleResponsePart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#xml"><a href="Numbas.parts.MultipleResponsePart.html#xml">Numbas.parts.MultipleResponsePart#xml</a></li>
@@ -10351,6 +11171,10 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#apply_feedback"><a href="Numbas.parts.NumberEntryPart.html#apply_feedback">Numbas.parts.NumberEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#applyScoreLimits"><a href="Numbas.parts.NumberEntryPart.html#applyScoreLimits">Numbas.parts.NumberEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#assignName"><a href="Numbas.parts.NumberEntryPart.html#assignName">Numbas.parts.NumberEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#baseMarkingScript"><a href="Numbas.parts.NumberEntryPart.html#baseMarkingScript">Numbas.parts.NumberEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#calculateScore"><a href="Numbas.parts.NumberEntryPart.html#calculateScore">Numbas.parts.NumberEntryPart#calculateScore</a></li>
@@ -10358,6 +11182,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#cleanAnswer"><a href="Numbas.parts.NumberEntryPart.html#cleanAnswer">Numbas.parts.NumberEntryPart#cleanAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#credit"><a href="Numbas.parts.NumberEntryPart.html#credit">Numbas.parts.NumberEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#customName"><a href="Numbas.parts.NumberEntryPart.html#customName">Numbas.parts.NumberEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#display"><a href="Numbas.parts.NumberEntryPart.html#display">Numbas.parts.NumberEntryPart#display</a></li>
 		
@@ -10408,6 +11234,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#marks"><a href="Numbas.parts.NumberEntryPart.html#marks">Numbas.parts.NumberEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#multCredit"><a href="Numbas.parts.NumberEntryPart.html#multCredit">Numbas.parts.NumberEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#name"><a href="Numbas.parts.NumberEntryPart.html#name">Numbas.parts.NumberEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#openSteps"><a href="Numbas.parts.NumberEntryPart.html#openSteps">Numbas.parts.NumberEntryPart#openSteps</a></li>
 		
@@ -10471,6 +11299,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#type"><a href="Numbas.parts.NumberEntryPart.html#type">Numbas.parts.NumberEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#useCustomName"><a href="Numbas.parts.NumberEntryPart.html#useCustomName">Numbas.parts.NumberEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#warnings"><a href="Numbas.parts.NumberEntryPart.html#warnings">Numbas.parts.NumberEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#xml"><a href="Numbas.parts.NumberEntryPart.html#xml">Numbas.parts.NumberEntryPart#xml</a></li>
@@ -10487,13 +11317,19 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#apply_feedback"><a href="Numbas.parts.Part.html#apply_feedback">Numbas.parts.Part#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScoreLimits"><a href="Numbas.parts.Part.html#applyScoreLimits">Numbas.parts.Part#applyScoreLimits</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#applyScripts"><a href="Numbas.parts.Part_applyScripts.html">Numbas.parts.Part#applyScripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#assignName"><a href="Numbas.parts.Part.html#assignName">Numbas.parts.Part#assignName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#baseMarkingScript"><a href="Numbas.parts.Part.html#baseMarkingScript">Numbas.parts.Part#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#calculateScore"><a href="Numbas.parts.Part.html#calculateScore">Numbas.parts.Part#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#credit"><a href="Numbas.parts.Part.html#credit">Numbas.parts.Part#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#customName"><a href="Numbas.parts.Part.html#customName">Numbas.parts.Part#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#display"><a href="Numbas.parts.Part.html#display">Numbas.parts.Part#display</a></li>
 		
@@ -10544,6 +11380,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.Part#marks"><a href="Numbas.parts.Part.html#marks">Numbas.parts.Part#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#multCredit"><a href="Numbas.parts.Part.html#multCredit">Numbas.parts.Part#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#name"><a href="Numbas.parts.Part.html#name">Numbas.parts.Part#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#openSteps"><a href="Numbas.parts.Part.html#openSteps">Numbas.parts.Part#openSteps</a></li>
 		
@@ -10605,6 +11443,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#type"><a href="Numbas.parts.Part_.html#type">Numbas.parts.Part#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#useCustomName"><a href="Numbas.parts.Part_.html#useCustomName">Numbas.parts.Part#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#warnings"><a href="Numbas.parts.Part_.html#warnings">Numbas.parts.Part#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#xml"><a href="Numbas.parts.Part_.html#xml">Numbas.parts.Part#xml</a></li>
@@ -10623,11 +11463,17 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#apply_feedback"><a href="Numbas.parts.PatternMatchPart.html#apply_feedback">Numbas.parts.PatternMatchPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#applyScoreLimits"><a href="Numbas.parts.PatternMatchPart.html#applyScoreLimits">Numbas.parts.PatternMatchPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#assignName"><a href="Numbas.parts.PatternMatchPart.html#assignName">Numbas.parts.PatternMatchPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#baseMarkingScript"><a href="Numbas.parts.PatternMatchPart.html#baseMarkingScript">Numbas.parts.PatternMatchPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#calculateScore"><a href="Numbas.parts.PatternMatchPart.html#calculateScore">Numbas.parts.PatternMatchPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#credit"><a href="Numbas.parts.PatternMatchPart.html#credit">Numbas.parts.PatternMatchPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#customName"><a href="Numbas.parts.PatternMatchPart.html#customName">Numbas.parts.PatternMatchPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#display"><a href="Numbas.parts.PatternMatchPart.html#display">Numbas.parts.PatternMatchPart#display</a></li>
 		
@@ -10678,6 +11524,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#marks"><a href="Numbas.parts.PatternMatchPart.html#marks">Numbas.parts.PatternMatchPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#multCredit"><a href="Numbas.parts.PatternMatchPart.html#multCredit">Numbas.parts.PatternMatchPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#name"><a href="Numbas.parts.PatternMatchPart.html#name">Numbas.parts.PatternMatchPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#openSteps"><a href="Numbas.parts.PatternMatchPart.html#openSteps">Numbas.parts.PatternMatchPart#openSteps</a></li>
 		
@@ -10738,6 +11586,8 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#submit"><a href="Numbas.parts.PatternMatchPart.html#submit">Numbas.parts.PatternMatchPart#submit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#type"><a href="Numbas.parts.PatternMatchPart.html#type">Numbas.parts.PatternMatchPart#type</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#useCustomName"><a href="Numbas.parts.PatternMatchPart.html#useCustomName">Numbas.parts.PatternMatchPart#useCustomName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#warnings"><a href="Numbas.parts.PatternMatchPart.html#warnings">Numbas.parts.PatternMatchPart#warnings</a></li>
 		
@@ -11377,7 +12227,7 @@ If the answers have not been revealed, we should apply the steps penalty.</p>
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

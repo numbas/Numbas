@@ -128,6 +128,10 @@ function Exam(store)
 }
 Numbas.Exam = Exam;
 
+/** The exam is ready for the student to start interacting with it.
+ * @event Numbas.Exam#ready
+ */
+
 /** The question list has been initialised - every question is loaded and ready to use.
  * @event Numbas.Exam#question list initialised
  */
