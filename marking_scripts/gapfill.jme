@@ -32,7 +32,7 @@ gap_feedback (Feedback on each of the gaps):
             result,submit_part(gaps[gap_number]["path"],answer),
             name,gaps[gap_number]["name"],
                 assert(name="",feedback(translate('part.gapfill.feedback header',["name": name])));
-                concat_feedback(result["feedback"], if(marks>0,result["marks"]/marks,1));
+                concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1));
                 result
         ),
         [gap_number,answer,index],
