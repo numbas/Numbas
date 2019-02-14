@@ -61,11 +61,50 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = Knockout.observableArray([]);
-        /** Are the warnings visible?
+        /** Does the part have any warnings to show?
+         * Changes to false immediately.
+         * Only changes to true after a delay if the part is dirty, but immediately if the part is not (i.e. it's just been submitted)
+         * @member {observable|Boolean} hasWarnings
+         */
+        this.hasWarnings = Knockout.observable(false);
+        var lastWarningReset;
+        Knockout.computed(function() {
+            if(this.warnings().length==0) {
+                this.hasWarnings(false);
+                if(lastWarningReset) {
+                    clearTimeout(lastWarningReset);
+                    lastWarningReset = null;
+                }
+            }
+        },this);
+        Knockout.computed(function() {
+            if(this.warnings().length>0) {
+                if(lastWarningReset) {
+                    clearTimeout(lastWarningReset);
+                }
+                if(this.isDirty()) {
+                    lastWarningReset = setTimeout(function() {
+                        pd.hasWarnings(true);
+                    },500);
+                } else {
+                    pd.hasWarnings(true);
+                }
+            }
+        },this);
+
+        var _warningsShown = Knockout.observable(false);
+        /** Should the warning box be shown?
          * @member {observable|Boolean} warningsShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.warningsShown = Knockout.observable(false);
+        this.warningsShown = Knockout.computed({
+            read: function() {
+                return this.hasWarnings() && (_warningsShown() || this.alwaysShowWarnings);
+            },
+            write: function(v) {
+                return _warningsShown(v);
+            }
+        },this);
         /** Show the warnings
          * @member {function} showWarnings
          * @method
@@ -231,6 +270,12 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 }
                 else
                     return true;
+            },
+            blur: function() {
+                pd.hideWarnings();
+            },
+            focus: function() {
+                pd.showWarnings();
             }
         }
         var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';

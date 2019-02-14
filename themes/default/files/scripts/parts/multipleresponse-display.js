@@ -151,6 +151,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     }
     display.MultipleResponsePartDisplay.prototype =
     {
+        alwaysShowWarnings: true,
         updateCorrectAnswer: function(answer) {
             var p = this.part;
             switch(p.type) {

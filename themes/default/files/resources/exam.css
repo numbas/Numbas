@@ -288,6 +288,13 @@ input.jme {
     border-bottom-color: #34444f;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
+.student-answer.has-warnings input {
+    border-top-style: dashed;
+    border-left-style: dashed;
+    border-right-style: dashed;
+    border-color: hsl(50,50%,50%);
+    background: hsl(50,80%,95%);
+}
 .part:not(.dirty) > .student-answer.answered input {
     border: 1px solid;
     border-color: hsl(204,72%,50%);
@@ -627,6 +634,11 @@ table {
 	z-index: 1;
 	max-width: 20em;
 	display: inline-block;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.warnings.shown {
+    opacity: 1;
 }
 .warning {
 	margin: 0.1em;

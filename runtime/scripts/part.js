@@ -659,7 +659,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     storeAnswer: function(answer) {
         this.stagedAnswer = answer;
         this.setDirty(true);
-        this.display && this.display.removeWarnings();
+        this.removeWarnings();
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
      * @param {Boolean} dirty
@@ -709,8 +709,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         this.setStudentAnswer();
         if(this.doesMarking) {
+            this.removeWarnings();
             if(this.hasStagedAnswer()) {
-                this.display && this.display.removeWarnings();
                 this.setDirty(false);
                 // save existing feedback
                 var existing_feedback = {

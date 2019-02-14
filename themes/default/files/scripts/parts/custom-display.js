@@ -40,6 +40,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
                 answer.warnings.forEach(function(warning){ p.giveWarning(warning); });
             }
         },this);
+        this.alwaysShowWarnings = {radios: true, checkboxes: true, dropdown: true}[this.input_widget] || false;
     };
     display.CustomPartDisplay.prototype = {
         updateCorrectAnswer: function(answer) {
