@@ -73,11 +73,11 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         this.focusInput = function() {
             this.inputHasFocus(true);
         }
-        /** Some text describing what precision the student should round their answer to
-         * @member {observable|string} precisionHint
+        /** Some text describing how the student should enter their answer
+         * @member {observable|string} inputHint
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.precisionHint = Knockout.computed(function() {
+        this.inputHint = Knockout.computed(function() {
             if(this.part.settings.precisionType=='none') {
                 if(this.part.settings.mustBeReduced) {
                     return R('part.numberentry.give your answer as a reduced fraction');
@@ -94,12 +94,19 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                 }
             }
         },this);
-        /** Show the precision restriction hint?
-         * @member {observable|string} showPrecisionHint
+        /** Show the input hint?
+         * @member {observable|string} showInputHint
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
-        this.showPrecisionHint = Knockout.computed(function() {
-            return this.part.settings.showPrecisionHint && this.precisionHint();
+        this.showInputHint = Knockout.computed(function() {
+            if(!this.inputHint()) {
+                return false;
+            }
+            if(this.part.settings.precisionType=='none') {
+                return this.part.settings.showFractionHint;
+            } else {
+                return this.part.settings.showPrecisionHint;
+            }
         },this);
     }
     display.NumberEntryPartDisplay.prototype =

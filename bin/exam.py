@@ -926,6 +926,7 @@ class NumberEntryPart(Part):
     precisionPartialCredit = 0
     precisionMessage = ''
     showPrecisionHint = True
+    showFractionHint = True
     strictPrecision = True
 
     def __init__(self,marks=0,prompt=''):
@@ -934,7 +935,7 @@ class NumberEntryPart(Part):
     def loadDATA(self, builder, data):
         super(NumberEntryPart,self).loadDATA(builder, data)
 
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],self)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint','showFractionHint'],self)
         if self.checkingType == 'range':
             if haskey(data,'answer'):
                 self.maxvalue = self.minvalue = data['answer']
@@ -955,6 +956,7 @@ class NumberEntryPart(Part):
             'checkingType': strcons(self.checkingType),
             'inputstep': strcons_fix(self.inputStep),
             'allowfractions': strcons_fix(self.allowFractions),
+            'showfractionhint': strcons_fix(self.showFractionHint),
             'notationstyles': strcons_fix(','.join(self.notationStyles)),
             'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
             'correctanswerstyle': strcons_fix(self.correctAnswerStyle),

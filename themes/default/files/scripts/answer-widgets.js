@@ -46,7 +46,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
+            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
         '
     });
     Knockout.components.register('answer-widget-number', {

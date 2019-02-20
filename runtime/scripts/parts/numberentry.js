@@ -36,7 +36,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
         var answerNode = xml.selectSingleNode('answer');
         var notationStyles = answerNode.getAttribute('notationstyles');
@@ -60,7 +60,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
         settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
@@ -109,6 +109,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
      * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
      * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+     * @property {Boolean} showPrecisionHint - show a hint about the required precision next to the input?
+     * @property {Boolean} showFractionHint - show a hint that the answer should be a fraction next to the input?
      */
     settings:
     {
@@ -128,7 +130,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         mustBeReduced: false,
         mustBeReducedPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
-        showPrecisionHint: true
+        showPrecisionHint: true,
+        showFractionHint: true
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
