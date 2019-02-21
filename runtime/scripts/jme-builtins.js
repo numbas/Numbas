@@ -1107,6 +1107,54 @@ newBuiltin('sort',[TList],TList, null, {
         return newlist;
     }
 });
+newBuiltin('sort_by',[TNum,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('sort_by',[TString,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('sort_destinations',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
@@ -1124,6 +1172,81 @@ newBuiltin('sort_destinations',[TList],TList,null, {
         return newlist;
     }
 });
+
+newBuiltin('group_by',[TNum,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('group_by',[TString,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];

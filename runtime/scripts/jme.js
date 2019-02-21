@@ -2746,6 +2746,26 @@ var compareTokens = jme.compareTokens = function(a,b) {
     }
 }
 
+/** Produce a comparison function which sorts tokens after applying a function to them
+ * @memberof Numbas.jme
+ * @method
+ * @param {Function} fn - take a token and return a token
+ * @returns {Function}
+ */
+jme.sortTokensBy = function(fn) {
+    return function(a,b) {
+        a = fn(a);
+        b = fn(b);
+        if(a===undefined) {
+            return b===undefined ? 0 : 1;
+        } else if(b===undefined) {
+            return -1;
+        } else {
+            return jme.compareTokens(a,b);
+        }
+    }
+}
+
 /** Are the two given trees exactly the same?
  * @memberof Numbas.jme
  * @param {Numbas.jme.tree} a

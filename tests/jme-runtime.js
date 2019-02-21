@@ -1,4 +1,4 @@
-// Compiled using  runtime/scripts/numbas.js  runtime/scripts/localisation.js  runtime/scripts/util.js  runtime/scripts/math.js  runtime/scripts/jme-rules.js  runtime/scripts/jme.js  runtime/scripts/jme-builtins.js  runtime/scripts/jme-display.js  runtime/scripts/jme-variables.js  runtime/scripts/part.js  runtime/scripts/question.js  runtime/scripts/exam.js  runtime/scripts/schedule.js  runtime/scripts/marking.js  runtime/scripts/json.js  runtime/scripts/timing.js  runtime/scripts/start-exam.js  runtime/scripts/numbas.js  runtime/scripts/i18next/i18next.js  runtime/scripts/es5-shim.js  themes/default/files/scripts/answer-widgets.js ./runtime/scripts/parts/numberentry.js ./runtime/scripts/parts/gapfill.js ./runtime/scripts/parts/information.js ./runtime/scripts/parts/jme.js ./runtime/scripts/parts/multipleresponse.js ./runtime/scripts/parts/custom_part_type.js ./runtime/scripts/parts/extension.js ./runtime/scripts/parts/matrixentry.js ./runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/es5-shim.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -9610,6 +9610,26 @@ var compareTokens = jme.compareTokens = function(a,b) {
     }
 }
 
+/** Produce a comparison function which sorts tokens after applying a function to them
+ * @memberof Numbas.jme
+ * @method
+ * @param {Function} fn - take a token and return a token
+ * @returns {Function}
+ */
+jme.sortTokensBy = function(fn) {
+    return function(a,b) {
+        a = fn(a);
+        b = fn(b);
+        if(a===undefined) {
+            return b===undefined ? 0 : 1;
+        } else if(b===undefined) {
+            return -1;
+        } else {
+            return jme.compareTokens(a,b);
+        }
+    }
+}
+
 /** Are the two given trees exactly the same?
  * @memberof Numbas.jme
  * @param {Numbas.jme.tree} a
@@ -10991,6 +11011,54 @@ newBuiltin('sort',[TList],TList, null, {
         return newlist;
     }
 });
+newBuiltin('sort_by',[TNum,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('sort_by',[TString,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('sort_destinations',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
@@ -11008,6 +11076,81 @@ newBuiltin('sort_destinations',[TList],TList,null, {
         return newlist;
     }
 });
+
+newBuiltin('group_by',[TNum,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('group_by',[TString,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];

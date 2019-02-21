@@ -8575,6 +8575,26 @@ var compareTokens = jme.compareTokens = function(a,b) {
     }
 }
 
+/** Produce a comparison function which sorts tokens after applying a function to them
+ * @memberof Numbas.jme
+ * @method
+ * @param {Function} fn - take a token and return a token
+ * @returns {Function}
+ */
+jme.sortTokensBy = function(fn) {
+    return function(a,b) {
+        a = fn(a);
+        b = fn(b);
+        if(a===undefined) {
+            return b===undefined ? 0 : 1;
+        } else if(b===undefined) {
+            return -1;
+        } else {
+            return jme.compareTokens(a,b);
+        }
+    }
+}
+
 /** Are the two given trees exactly the same?
  * @memberof Numbas.jme
  * @param {Numbas.jme.tree} a
@@ -9956,6 +9976,54 @@ newBuiltin('sort',[TList],TList, null, {
         return newlist;
     }
 });
+newBuiltin('sort_by',[TNum,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('sort_by',[TString,TList],TList, null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        return newlist;
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('sort_destinations',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
@@ -9973,6 +10041,81 @@ newBuiltin('sort_destinations',[TList],TList,null, {
         return newlist;
     }
 });
+
+newBuiltin('group_by',[TNum,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='number') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='list') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
+newBuiltin('group_by',[TString,TList],TList,null, {
+    evaluate: function(args,scope) {
+        var index = args[0].value;
+        var list = args[1];
+        var newlist = new TList(list.vars);
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var out = [];
+        for(var i=0;i<sorted.length;) {
+            var key = sorted[i].value[index];
+            var values = [sorted[i]];
+            for(i++;i<sorted.length;i++) {
+                if(jme.compareTokens(key,sorted[i].value[index])==0) {
+                    values.push(sorted[i]);
+                } else {
+                    break;
+                }
+            }
+            out.push(new TList([key,new TList(values)]));
+        }
+        return new TList(out);
+    },
+    typecheck: function(variables) {
+        if(variables[0].type!='string') {
+            return false;
+        }
+        if(variables[1].type!='list') {
+            return false;
+        }
+        for(var i=0;i<variables[1].value.length; i++) {
+            if(variables[1].value[i].type!='dict') {
+                return false;
+            }
+        }
+        return true;
+    }
+});
+
 newBuiltin('reverse',[TList],TList,null, {
     evaluate: function(args,scope) {
         var list = args[0];
@@ -13370,7 +13513,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     storeAnswer: function(answer) {
         this.stagedAnswer = answer;
         this.setDirty(true);
-        this.display && this.display.removeWarnings();
+        this.removeWarnings();
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
      * @param {Boolean} dirty
@@ -13420,8 +13563,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         this.setStudentAnswer();
         if(this.doesMarking) {
+            this.removeWarnings();
             if(this.hasStagedAnswer()) {
-                this.display && this.display.removeWarnings();
                 this.setDirty(false);
                 // save existing feedback
                 var existing_feedback = {
@@ -14739,6 +14882,10 @@ function Exam(store)
     this.display = new Numbas.display.ExamDisplay(this);
 }
 Numbas.Exam = Exam;
+
+/** The exam is ready for the student to start interacting with it.
+ * @event Numbas.Exam#ready
+ */
 
 /** The question list has been initialised - every question is loaded and ready to use.
  * @event Numbas.Exam#question list initialised
@@ -17673,9 +17820,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.widget_options = params.widget_options || this.part.input_options();
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
+            this.events = params.events;
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {
@@ -17686,6 +17834,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.disable = params.disable;
             this.options = params.options;
+            this.events = params.events;
             this.allowEmpty = this.options.allowEmpty;
             var lastValue = this.input();
             this.subscriptions = [
@@ -17708,7 +17857,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed)">\
+            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
         '
     });
     Knockout.components.register('answer-widget-number', {
@@ -17720,6 +17869,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
+            this.events = params.events;
             var init = Knockout.unwrap(this.answerJSON);
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
@@ -17772,7 +17922,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed)">\
+            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
         '
     });
     Knockout.components.register('answer-widget-jme', {
@@ -17783,6 +17933,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
             this.disable = params.disable;
+            this.events = params.events;
             var init = Knockout.unwrap(this.answerJSON);
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
@@ -17862,7 +18013,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: part.inputEvents, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed)">\
+            <input type="text" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed)">\
             <span class="jme-preview" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
@@ -17901,6 +18052,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answerJSON;
             this.options = params.options;
             this.disable = params.disable;
+            this.events = params.events;
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.allowResize = this.options.allowResize===undefined ? true : this.options.allowResize;
@@ -17975,7 +18127,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns"></matrix-input>\
+            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, events: events"></matrix-input>\
         '
     });
     Knockout.components.register('matrix-input',{
@@ -18056,6 +18208,25 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 return false;
             }
+
+            this.events = params.events || {};
+            var okeydown = params.events && params.events.keydown;
+            this.events.keydown = function(obj,e) {
+                vm.keydown(obj,e);
+                if(okeydown) {
+                    return okeydown(obj,e);
+                }
+                return true;
+            };
+            var okeyup = params.events && params.events.keyup;
+            this.events.keyup = function(obj,e) {
+                vm.moveArrow(obj,e);
+                if(okeyup) {
+                    return okeyup(obj,e);
+                }
+                return true;
+            };
+
             this.result = Knockout.observableArray([]);
             make_result();
             this.update = function() {
@@ -18125,7 +18296,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
         +'                <tr data-bind="foreach: $data">'
-        +'                    <td class="cell"><input type="text" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: {keydown: $parents[1].keydown, keyup: $parents[1].moveArrow}"></td>'
+        +'                    <td class="cell"><input type="text" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"></td>'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'
@@ -18139,6 +18310,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.disable = params.disable;
             this.options = params.options;
+            this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
@@ -18185,7 +18357,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable"> <span data-bind="html: $data"></span></label></li>\
+                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"> <span data-bind="html: $data"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -18195,6 +18367,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.disable = params.disable;
             this.options = params.options;
+            this.events = params.events;
             this.choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
             this.choices.splice(0,0,{label: '', index: null});
             this.answerAsArray = this.options.answerAsArray;
@@ -18246,7 +18419,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable"></select>\
+            <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable, event: events"></select>\
         '
     });
     Knockout.components.register('answer-widget-checkboxes', {
@@ -18255,6 +18428,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.disable = params.disable;
             this.options = params.options;
+            this.events = params.events;
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON);
             this.answerAsArray = this.options.answerAsArray;
@@ -18304,7 +18478,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable"> <span data-bind="html: content"></span></label></li>\
+                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"> <span data-bind="html: content"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -18315,6 +18489,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answerJSON;
             this.disable = params.disable;
             this.options = params.options;
+            this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
             this.ticks = Knockout.computed(function() {
@@ -18376,7 +18551,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     <tr>\
                         <th><span data-bind="html: $parent.choices()[$index()]"></span></th>\
                         <!-- ko foreach: $data -->\
-                        <td><input type="checkbox" data-bind="checked: ticked, disable: $parents[1].disable"></td>\
+                        <td><input type="checkbox" data-bind="checked: ticked, disable: $parents[1].disable, event: $parents[1].events"></td>\
                         <!-- /ko -->\
                     </tr>\
                 </tbody>\
@@ -18424,7 +18599,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
         var answerNode = xml.selectSingleNode('answer');
         var notationStyles = answerNode.getAttribute('notationstyles');
@@ -18448,7 +18623,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
         settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
@@ -18497,6 +18672,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
      * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
      * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+     * @property {Boolean} showPrecisionHint - show a hint about the required precision next to the input?
+     * @property {Boolean} showFractionHint - show a hint that the answer should be a fraction next to the input?
      */
     settings:
     {
@@ -18516,7 +18693,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         mustBeReduced: false,
         mustBeReducedPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
-        showPrecisionHint: true
+        showPrecisionHint: true,
+        showFractionHint: true
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
