@@ -1145,12 +1145,12 @@ var numberNotationStyles = util.numberNotationStyles = {
     },
     // Significand-exponent ("scientific") style
     'scientific': {
-        re: /^([0-9]+)(\x2E[0-9]+)?[eE]([\-+]?[0-9]+)/,
+        re: /^(\d[ \d]*)(\x2E\d[ \d]*)?[eE]([\-+]?\d[ \d]*)/,
         clean: function(m) {
             return Numbas.math.unscientific(m[0]);
         },
         format: function(integer, decimal) {
-            return Numbas.math.scientific(parseFloat(integer+'.'+decimal));
+            return Numbas.math.niceNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
         }
     }
 }

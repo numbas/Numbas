@@ -623,7 +623,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
@@ -709,7 +709,7 @@ function texRealNumber(n, settings)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         switch(piD)
@@ -1174,7 +1174,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
         var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
@@ -1257,7 +1257,7 @@ function jmeRealNumber(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
         switch(piD)

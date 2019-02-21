@@ -612,9 +612,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 n /= Math.pow(Math.PI,piD);
             var out;
             if(options.style=='scientific') {
-                var s = math.scientific(n);
+                var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision};
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: 'si-en'};
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
@@ -789,33 +789,26 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {{significand: Number, exponent: Number}}
      */
     parseScientific: function(str) {
-        var m = /(-?\d+(?:\.\d+)?)e([\-+]?\d+)/i.exec(str);
+        var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
         if(!m) {
             debugger;
         }
-        return {significand: parseFloat(m[1]), exponent: parseInt(m[2])};
+        return {significand: parseFloat(m[1].replace(' ','')), exponent: parseInt(m[2].replace(' ',''))};
     },
 
-    /** Write the given number in "scientific" notation, like 1e2.
-     * @param {Number} n
-     * @returns {String}
-     */
-    scientific: function(n) {
-        return n.toExponential();
-    },
     /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
      * For example, '1.23e-5' is returned as '0.0000123'
      * @param {String} str
      * @returns {String}
      */
     unscientific: function(str) {
-        var m = /(-)?(\d+)(?:\.(\d+))?e([\-+]?\d+)/i.exec(str);
+        var m = /(-)?([ \d]+)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
         if(!m) {
             return str;
         }
         var minus = m[1] || '';
-        var digits = m[2]+(m[3] || '');
-        var pow = parseInt(m[4]);
+        var digits = (m[2]+(m[3] || '')).replace(' ','');
+        var pow = parseInt(m[4].replace(' ',''));
         var l = digits.length;
         var out;
         if(pow>=l-1) {

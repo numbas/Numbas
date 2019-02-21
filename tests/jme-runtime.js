@@ -1425,12 +1425,12 @@ var numberNotationStyles = util.numberNotationStyles = {
     },
     // Significand-exponent ("scientific") style
     'scientific': {
-        re: /^([0-9]+)(\x2E[0-9]+)?[eE]([\-+]?[0-9]+)/,
+        re: /^(\d[ \d]*)(\x2E\d[ \d]*)?[eE]([\-+]?\d[ \d]*)/,
         clean: function(m) {
             return Numbas.math.unscientific(m[0]);
         },
         format: function(integer, decimal) {
-            return Numbas.math.scientific(parseFloat(integer+'.'+decimal));
+            return Numbas.math.niceNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
         }
     }
 }
@@ -2257,9 +2257,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 n /= Math.pow(Math.PI,piD);
             var out;
             if(options.style=='scientific') {
-                var s = math.scientific(n);
+                var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision};
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: 'si-en'};
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
@@ -2434,33 +2434,26 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {{significand: Number, exponent: Number}}
      */
     parseScientific: function(str) {
-        var m = /(-?\d+(?:\.\d+)?)e([\-+]?\d+)/i.exec(str);
+        var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
         if(!m) {
             debugger;
         }
-        return {significand: parseFloat(m[1]), exponent: parseInt(m[2])};
+        return {significand: parseFloat(m[1].replace(' ','')), exponent: parseInt(m[2].replace(' ',''))};
     },
 
-    /** Write the given number in "scientific" notation, like 1e2.
-     * @param {Number} n
-     * @returns {String}
-     */
-    scientific: function(n) {
-        return n.toExponential();
-    },
     /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
      * For example, '1.23e-5' is returned as '0.0000123'
      * @param {String} str
      * @returns {String}
      */
     unscientific: function(str) {
-        var m = /(-)?(\d+)(?:\.(\d+))?e([\-+]?\d+)/i.exec(str);
+        var m = /(-)?([ \d]+)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
         if(!m) {
             return str;
         }
         var minus = m[1] || '';
-        var digits = m[2]+(m[3] || '');
-        var pow = parseInt(m[4]);
+        var digits = (m[2]+(m[3] || '')).replace(' ','');
+        var pow = parseInt(m[4].replace(' ',''));
         var l = digits.length;
         var out;
         if(pow>=l-1) {
@@ -12397,7 +12390,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
@@ -12483,7 +12476,7 @@ function texRealNumber(n, settings)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         switch(piD)
@@ -12948,7 +12941,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
         var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
@@ -13031,7 +13024,7 @@ function jmeRealNumber(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
-            var bits = math.parseScientific(math.scientific(n));
+            var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
         switch(piD)
