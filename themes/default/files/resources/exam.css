@@ -292,8 +292,8 @@ input.jme {
     border-top-style: dashed;
     border-left-style: dashed;
     border-right-style: dashed;
-    border-color: hsl(50,50%,50%);
-    background: hsl(50,80%,95%);
+    border-color: hsl(30,20%,50%);
+    background: hsl(30,20%,95%);
 }
 .part:not(.dirty) > .student-answer.answered input {
     border: 1px solid;
@@ -636,9 +636,14 @@ table {
 	display: inline-block;
     opacity: 0;
     transition: opacity 0.2s;
+    border-color: hsl(30, 20%, 50%);
+    background-color: hsl(30, 20%, 95%);
+    color: #333;
 }
 .warnings.shown {
     opacity: 1;
+}
+.warnings.alert-warning {
 }
 .warning {
 	margin: 0.1em;
