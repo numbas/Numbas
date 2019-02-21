@@ -246,10 +246,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 while(np.isGap)
                     np = np.parentPart;
                 np.submit();
-                if(!np.answered)
-                {
-                    Numbas.display.showAlert(R('question.can not submit'));
-                }
                 Numbas.store.save();
             },
             showSteps: function() {

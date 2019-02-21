@@ -14707,13 +14707,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //keep track of how many times question successfully submitted
         if(this.answered)
             this.submitted += 1;
-        //display message about success or failure
-        if(! this.answered ) {
-            if(this.display) {
-                Numbas.display.showAlert(R('question.can not submit'));
-                this.display.scrollToError();
-            }
-        }
         this.updateScore();
         if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
             this.getAdvice();
