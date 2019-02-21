@@ -1573,7 +1573,11 @@ var THTML = types.THTML = types.html = function(html) {
         this.value = $(html);
     } else {
         var elem = document.createElement('div');
-        elem.innerHTML = html;
+        if(typeof html == 'string') {
+            elem.innerHTML = html;
+        } else {
+            elem.appendChild(html);
+        }
         this.value = elem.children;
     }
 }
@@ -1986,7 +1990,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     options = options || {};
     for(var i=0;i<intype.length;i++)
     {
-        if(intype[i]!='?' && intype[i]!='?*')
+        if(intype[i]!='?' && intype[i]!='*?')
         {
             if(intype[i][0]=='*')
             {
@@ -2048,7 +2052,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
                     if(variables[0].type==ntype || ntype=='?' || variables[0].type=='?')
                         variables = variables.slice(1);
                     else
-                        return false;
+                        break;
                 }
             }else{
                 if(variables.length==0)

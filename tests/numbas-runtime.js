@@ -3321,27 +3321,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @throws {Numbas.Error} "math.precround.complex" if b is complex
      */
     siground: function(a,b) {
-        if(b.complex)
+        if(b.complex) {
             throw(new Numbas.Error('math.siground.complex'));
-        if(a.complex)
+        }
+        if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
-        else
-        {
+        } else {
             var s = math.sign(a);
             if(a==0) { return 0; }
             if(a==Infinity || a==-Infinity) { return a; }
-            b = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+            var bp = Math.pow(10, b-Math.ceil(math.log10(s*a)));
+            var ibp = Math.pow(10, Math.ceil(math.log10(s*a))-b);
             //test to allow a bit of leeway to account for floating point errors
             //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*b*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*b*10 % 10);
+            var v = a*bp*10 % 1;
+            var d = (a>0 ? Math.floor : Math.ceil)(a*bp*10 % 10);
+            var out = a*bp;
             if(d==4 && 1-v<1e-9) {
-                return Math.round(a*b+1)/b;
+                out += 1;
+            } else if(d==-5 && v>-1e-9 && v<0) {
+                out += 1;
             }
-            else if(d==-5 && v>-1e-9 && v<0) {
-                return Math.round(a*b+1)/b;
-            }
-            return Math.round(a*b)/b;
+            return Math.round(out)*ibp;
         }
     },
     /** Count the number of decimal places used in the string representation of a number.
@@ -7051,7 +7052,11 @@ var THTML = types.THTML = types.html = function(html) {
         this.value = $(html);
     } else {
         var elem = document.createElement('div');
-        elem.innerHTML = html;
+        if(typeof html == 'string') {
+            elem.innerHTML = html;
+        } else {
+            elem.appendChild(html);
+        }
         this.value = elem.children;
     }
 }
@@ -7464,7 +7469,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     options = options || {};
     for(var i=0;i<intype.length;i++)
     {
-        if(intype[i]!='?' && intype[i]!='?*')
+        if(intype[i]!='?' && intype[i]!='*?')
         {
             if(intype[i][0]=='*')
             {
@@ -7526,7 +7531,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
                     if(variables[0].type==ntype || ntype=='?' || variables[0].type=='?')
                         variables = variables.slice(1);
                     else
-                        return false;
+                        break;
                 }
             }else{
                 if(variables.length==0)
@@ -8970,14 +8975,29 @@ newBuiltin('let',['?'],TList, null, {
         if(args[0].tok.type=='dict') {
             var d = scope.evaluate(args[0]);
             variables = d.value;
+            var nscope = new Scope([scope,{variables:variables}]);
         } else {
+            var nscope = new Scope([scope]);
             for(var i=0;i<args.length-1;i+=2) {
-                var name = args[i].tok.name;
-                var value = scope.evaluate(args[i+1]);
-                variables[name] = value;
+                var value = nscope.evaluate(args[i+1]);
+                if(args[i].tok.type=='name') {
+                    var name = args[i].tok.name;
+                    nscope.setVariable(name,value);
+                } else if(args[i].tok.type=='list') {
+                    var names = args[i].args.map(function(t){return t.tok.name});
+                    if(value.type!='list') {
+                        throw(new Numbas.Error("jme.let.list assignment not a list"));
+                    }
+                    var values = value.value;
+                    if(values.length<names.length) {
+                        throw(new Numbas.Error("jme.let.list not long enough"));
+                    }
+                    for(var j=0;j<names.length;j++) {
+                        nscope.setVariable(names[j],values[j]);
+                    }
+                }
             }
         }
-        var nscope = new Scope([scope,{variables:variables}]);
         return nscope.evaluate(lambda);
     },
     typecheck: function(variables) {
@@ -8988,7 +9008,7 @@ newBuiltin('let',['?'],TList, null, {
             return false;
         }
         for(var i=0;i<variables.length-1;i+=2) {
-            if(variables[i].tok.type!='name') {
+            if(variables[i].tok.type!='name' && variables[i].tok.type!='list') {
                 return false;
             }
         }
@@ -16527,7 +16547,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(!choicesNode) {
             this.error('part.mcq.choices missing');
         }
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType'],['minAnswersString','maxAnswersString','shuffleChoices']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType','displayColumns'],['minAnswersString','maxAnswersString','shuffleChoices']);
         var choiceNodes = choicesNode.selectNodes('choice');
         var answersNode, answerNodes;
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -16684,7 +16704,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         tryLoad(data, ['maxMarks'], this, ['marks']);
         tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
-        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType']);
+        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns']);
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
@@ -16918,6 +16938,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {String} shuffleAnswers - should the order of answers be randomised?
      * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
      * @property {String} displayType - how to display the response selectors. Can be `radiogroup`, `checkbox` or `dropdownlist`.
+     * @property {Number} displayColumns - how many columns to use to display the choices
      * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
      * @property {String} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.

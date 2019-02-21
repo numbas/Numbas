@@ -978,14 +978,29 @@ newBuiltin('let',['?'],TList, null, {
         if(args[0].tok.type=='dict') {
             var d = scope.evaluate(args[0]);
             variables = d.value;
+            var nscope = new Scope([scope,{variables:variables}]);
         } else {
+            var nscope = new Scope([scope]);
             for(var i=0;i<args.length-1;i+=2) {
-                var name = args[i].tok.name;
-                var value = scope.evaluate(args[i+1]);
-                variables[name] = value;
+                var value = nscope.evaluate(args[i+1]);
+                if(args[i].tok.type=='name') {
+                    var name = args[i].tok.name;
+                    nscope.setVariable(name,value);
+                } else if(args[i].tok.type=='list') {
+                    var names = args[i].args.map(function(t){return t.tok.name});
+                    if(value.type!='list') {
+                        throw(new Numbas.Error("jme.let.list assignment not a list"));
+                    }
+                    var values = value.value;
+                    if(values.length<names.length) {
+                        throw(new Numbas.Error("jme.let.list not long enough"));
+                    }
+                    for(var j=0;j<names.length;j++) {
+                        nscope.setVariable(names[j],values[j]);
+                    }
+                }
             }
         }
-        var nscope = new Scope([scope,{variables:variables}]);
         return nscope.evaluate(lambda);
     },
     typecheck: function(variables) {
@@ -996,7 +1011,7 @@ newBuiltin('let',['?'],TList, null, {
             return false;
         }
         for(var i=0;i<variables.length-1;i+=2) {
-            if(variables[i].tok.type!='name') {
+            if(variables[i].tok.type!='name' && variables[i].tok.type!='list') {
                 return false;
             }
         }
