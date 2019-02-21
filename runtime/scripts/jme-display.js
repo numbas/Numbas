@@ -621,14 +621,10 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
         var piD;
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
-        var m;
         var out = math.niceNumber(n);
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+' \\times 10^{'+exponent+'}';
+        if(out.length>20) {
+            var bits = math.parseScientific(math.scientific(n));
+            return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
         if(f[1]==1) {
@@ -712,13 +708,9 @@ function texRealNumber(n, settings)
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
-        var m;
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+' \\times 10^{'+exponent+'}';
+        if(out.length>20) {
+            var bits = math.parseScientific(math.scientific(n));
+            return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         switch(piD)
         {
@@ -1175,19 +1167,15 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         var piD;
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
-        var m;
         var out;
         if(settings.niceNumber===false) {
             out = n+'';
         } else {
             out = math.niceNumber(n);
         }
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+'*10^('+exponent+')';
+        if(out.length>20) {
+            var bits = math.parseScientific(math.scientific(n));
+            return bits.significand+'*10^('+bits.exponent+')';
         }
         var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
         if(f[1]==1)
@@ -1268,13 +1256,9 @@ function jmeRealNumber(n,settings)
         } else {
             out = math.niceNumber(n);
         }
-        var m;
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+'*10^('+exponent+')';
+        if(out.length>20) {
+            var bits = math.parseScientific(math.scientific(n));
+            return bits.significand+'*10^('+bits.exponent+')';
         }
         switch(piD)
         {

@@ -489,15 +489,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 var m;
                 if(re && (m=re.exec(s.slice(pos))) && (!mustMatchAll || s.slice(pos+m[0].length).trim()=='')) {
                     matched = true;
-                    var integer = m[1].replace(/\D/g,'');
                     var mcleaned;
-                    if(m[2]) {
-                        var decimal = m[2].replace(/\D/g,'');
-                        mcleaned = minus + integer + '.' + decimal
-                    } else {
-                        mcleaned = minus + integer;
-                    }
                     var mpos = pos + m[0].length;
+                    if(style.clean) {
+                        mcleaned = minus + style.clean(m);
+                    } else {
+                        var integer = m[1].replace(/\D/g,'');
+                        if(m[2]) {
+                            var decimal = m[2].replace(/\D/g,'');
+                            mcleaned = minus + integer + '.' + decimal
+                        } else {
+                            mcleaned = minus + integer;
+                        }
+                        mpos = pos + m[0].length;
+                    }
                     if(mpos > bestpos) {
                         bestpos = mpos;
                         cleaned = mcleaned;
@@ -1136,6 +1141,16 @@ var numberNotationStyles = util.numberNotationStyles = {
             } else {
                 return integer;
             }
+        }
+    },
+    // Significand-exponent ("scientific") style
+    'scientific': {
+        re: /^([0-9]+)(\x2E[0-9]+)?[eE]([\-+]?[0-9]+)/,
+        clean: function(m) {
+            return Numbas.math.unscientific(m[0]);
+        },
+        format: function(integer, decimal) {
+            return Numbas.math.scientific(parseFloat(integer+'.'+decimal));
         }
     }
 }

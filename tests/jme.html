@@ -1144,6 +1144,7 @@
                     assert.equal(Numbas.math.niceNumber(2.2e-10,{precisionType:'sigfig',precision:3}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(2e-10,{precisionType:'dp',precision:12}),'0.000000000200','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(2.2e-10,{precisionType:'dp',precision:12}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
+                    assert.equal(Numbas.math.niceNumber(1.234e5,{style:'scientific',precisionType:'dp',precision:1}),'1.2e+5','precision formatting on a scientific form number');
 				});
 
                 QUnit.test('Number notation styles',function(assert) {
@@ -1216,6 +1217,13 @@
                             ['-1,234.0','-1234.0',-1234,'-1,234'],
                             ['1,2,3','1,2,3',NaN]
                         ],
+                        scientific: [
+                            ['0e+0','0',0,],
+                            ['1e+2','100',100],
+                            ['1.23e+2','123',123],
+                            ['1.23e-2','0.0123',0.0123],
+                            ['-9.1e+2','-910',-910],
+                        ]
                     }
                     for(var style in tests) {
                         tests[style].forEach(function(t) {

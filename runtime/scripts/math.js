@@ -611,41 +611,53 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
                 n /= Math.pow(Math.PI,piD);
             var out;
-            switch(options.precisionType) {
-            case 'sigfig':
-                var precision = options.precision;
-                out = math.siground(n,precision)+'';
-                var sigFigs = math.countSigFigs(out,true);
-                if(sigFigs<precision) {
-                    out = math.addDigits(out,precision-sigFigs);
+            if(options.style=='scientific') {
+                var s = math.scientific(n);
+                var bits = math.parseScientific(s);
+                var noptions = {precisionType: options.precisionType, precision: options.precision};
+                var significand = math.niceNumber(bits.significand,noptions);
+                var exponent = bits.exponent;
+                if(exponent>=0) {
+                    exponent = '+'+exponent;
                 }
-                break;
-            case 'dp':
-                var precision = options.precision;
-                out = math.precround(n,precision)+'';
-                var dp = math.countDP(out);
-                if(dp<precision) {
-                    out = math.addDigits(out,precision-dp);
+                return significand+'e'+exponent;
+            } else {
+                switch(options.precisionType) {
+                case 'sigfig':
+                    var precision = options.precision;
+                    out = math.siground(n,precision)+'';
+                    var sigFigs = math.countSigFigs(out,true);
+                    if(sigFigs<precision) {
+                        out = math.addDigits(out,precision-sigFigs);
+                    }
+                    break;
+                case 'dp':
+                    var precision = options.precision;
+                    out = math.precround(n,precision)+'';
+                    var dp = math.countDP(out);
+                    if(dp<precision) {
+                        out = math.addDigits(out,precision-dp);
+                    }
+                    break;
+                default:
+                    var a = Math.abs(n);
+                    if(a<1e-15) {
+                        out = '0';
+                    } else if(Math.abs(n)<1e-8) {
+                        out = n+'';
+                    } else {
+                        out = math.precround(n,10)+'';
+                    }
                 }
-                break;
-            default:
-                var a = Math.abs(n);
-                if(a<1e-15) {
-                    out = '0';
-                } else if(Math.abs(n)<1e-8) {
-                    out = n+'';
-                } else {
-                    out = math.precround(n,10)+'';
+                out = math.unscientific(out);
+                if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                    var match_neg = /^(-)?(.*)/.exec(out);
+                    var minus = match_neg[1] || '';
+                    var bits = match_neg[2].split('.');
+                    var integer = bits[0];
+                    var decimal = bits[1];
+                    out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
                 }
-            }
-            out = math.unscientific(out);
-            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
             }
             switch(piD)
             {
@@ -771,13 +783,33 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             }
         }
     },
+
+    /** Get the significand and exponent of a number written in exponential form
+     * @param {String} str
+     * @returns {{significand: Number, exponent: Number}}
+     */
+    parseScientific: function(str) {
+        var m = /(-?\d+(?:\.\d+)?)e([\-+]?\d+)/i.exec(str);
+        if(!m) {
+            debugger;
+        }
+        return {significand: parseFloat(m[1]), exponent: parseInt(m[2])};
+    },
+
+    /** Write the given number in "scientific" notation, like 1e2.
+     * @param {Number} n
+     * @returns {String}
+     */
+    scientific: function(n) {
+        return n.toExponential();
+    },
     /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
      * For example, '1.23e-5' is returned as '0.0000123'
      * @param {String} str
      * @returns {String}
      */
     unscientific: function(str) {
-        var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
+        var m = /(-)?(\d+)(?:\.(\d+))?e([\-+]?\d+)/i.exec(str);
         if(!m) {
             return str;
         }
