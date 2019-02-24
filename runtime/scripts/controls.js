@@ -110,7 +110,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     regenQuestion: function()
     {
         job(function() {
-            Numbas.display.showConfirm(R('control.confirm regen'),
+            Numbas.display.showConfirm(R(`control.confirm regen${Numbas.exam.mark == 0 ? ' no marks' : ''}`),
                 function(){Numbas.exam.regenQuestion();}
             );
         });
@@ -128,7 +128,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     revealAnswer: function()
     {
         job(function() {
-            Numbas.display.showConfirm(R('control.confirm reveal'),
+            Numbas.display.showConfirm(R(`control.confirm reveal${Numbas.exam.mark == 0 ? ' no marks' : ''}`),
                 function(){ Numbas.exam.currentQuestion.revealAnswer(); }
             );
         });
