@@ -56,16 +56,17 @@ Numbas.showError = function(e)
  */
 Numbas.Error = function(message)
 {
-    Error.call(this);
-    if(Error.captureStackTrace) {
-        Error.captureStackTrace(this, this.constructor);
-    }
-    this.name="Numbas Error";
-    this.originalMessage = message;
-    this.message = R.apply(this,arguments);
+    var e = new Error();
+    e.name = "Numbas Error";
+    e.originalMessage = message;
+    e.message = R.apply(this,arguments);
+    e.stack = e.stack || "No stack trace available";
+
+    // This also overrides the return value of
+    //     new Numbas.Error()
+    return e;
 }
-Numbas.Error.prototype = Error.prototype;
-Numbas.Error.prototype.constructor = Numbas.Error;
+
 var scriptreqs = {};
 /** Keep track of loading status of a script and its dependencies
  * @param {String} file - name of script
