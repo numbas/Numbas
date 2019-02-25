@@ -400,7 +400,12 @@ input.jme {
 	margin-top: 1em;
 }
 .menuButtons button {
-	min-width: 6em;
+	min-width: 90%;
+}
+
+#pauseBtn {
+    min-width: 6em;
+    margin-bottom: 1em;
 }
 
 /* front/exit pages */
