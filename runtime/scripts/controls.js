@@ -128,7 +128,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     revealAnswer: function()
     {
         job(function() {
-            Numbas.display.showConfirm('control.confirm reveal'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
+            Numbas.display.showConfirm(R('control.confirm reveal'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
                 function(){ Numbas.exam.currentQuestion.revealAnswer(); }
             );
         });
