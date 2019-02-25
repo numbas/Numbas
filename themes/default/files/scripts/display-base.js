@@ -79,6 +79,35 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             display.modal.cancel();
             display.modal.ok = display.modal.cancel = function() {};
         })
+
+        var lightbox = document.querySelector('#lightbox');
+        function show_lightbox() {
+            lightbox.classList.add('shown');
+            lightbox.focus();
+        }
+        function hide_lightbox() {
+            lightbox.classList.remove('shown');
+            lightbox.innerHTML = '';
+        }
+        $('#questionDisplay').on('click','img,object',function(e) {
+            var elem = e.target.cloneNode();
+            elem.removeAttribute('width');
+            elem.removeAttribute('height');
+            console.log(elem.height, elem.width);
+            var box = e.target.getBoundingClientRect();
+            console.log(box.width,box.height);
+            if(elem.width>box.width || elem.height>box.height) {
+                lightbox.innerHTML = '';
+                lightbox.appendChild(elem);
+                show_lightbox();
+            }
+        });
+        lightbox.addEventListener('click',hide_lightbox);
+        document.body.addEventListener('keyup',function() {
+            if(lightbox.classList.contains('shown')) {
+                hide_lightbox();
+            }
+        });
     },
     //alert / confirm boxes
     //
