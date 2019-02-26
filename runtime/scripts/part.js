@@ -146,6 +146,18 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
+
+    Object.defineProperty(this,"credit", {
+        /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
+         * @type {Number}
+         */
+        get: function() {
+            return this.creditFraction.toFloat();
+        },
+        set: function(credit) {
+            this.creditFraction = math.Fraction.fromFloat(credit);
+        }
+    });
 }
 Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Storage engine
@@ -395,10 +407,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Number}
      */
     stepsMarks: 0,
-    /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
-     * @type {Number}
+    /** Credit as a fraction. Used to avoid simple floating point errors.
+     * @type {Numbas.math.Fraction}
      */
-    credit: 0,
+    creditFraction: new math.Fraction(0,1),
     /** Student's score on this part
      * @type {Number}
      */
@@ -641,13 +653,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     applyScoreLimits: function() {
         if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
             this.score = this.settings.minimumMarks;
-            this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
+            this.creditFraction = this.marks!=0 ? math.Fraction.fromFloat(this.settings.minimumMarks,this.marks) : 0;
             this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
         }
         if(this.score>this.marks) {
             this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:this.marks})));
             this.score = this.marks;
-            this.credit = 1;
+            this.creditFraction = math.Fraction.one;
             this.markingComment(R('part.marking.maximum score applied',{score:this.marks}));
         }
     },
@@ -971,14 +983,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     }
                     break;
                 case "start_lift":
-                    lifts.push({credit: this.credit,scale:scale});
+                    lifts.push({credit: this.credit, creditFraction: this.creditFraction, scale:scale});
                     this.credit = 0;
                     scale = state.scale;
                     break;
                 case 'end_lift':
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
-                    this.credit = last_lift.credit;
+                    this.creditFraction = last_lift.creditFraction;
                     this.addCredit(lift_credit*last_lift.scale);
                     scale = last_lift.scale;
                     break;
@@ -1033,12 +1045,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     setCredit: function(credit,message,reason)
     {
-        var oCredit = this.credit;
-        this.credit = credit;
+        var oCredit = this.creditFraction;
+        this.creditFraction = math.Fraction.fromFloat(credit);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'set_credit',
-                credit: this.credit - oCredit,
+                credit: this.creditFraction.subtract(oCredit).toFloat(),
                 message: message,
                 reason: reason
             });
@@ -1050,7 +1062,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addCredit: function(credit,message)
     {
-        this.credit += credit;
+        var creditFraction = math.Fraction.fromFloat(credit);
+        this.creditFraction = this.creditFraction.add(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'add_credit',
@@ -1065,7 +1078,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     subCredit: function(credit,message)
     {
-        this.credit -= credit;
+        var creditFraction = math.Fraction.fromFloat(credit);
+        this.creditFraction = this.creditFraction.subtract(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'sub_credit',
@@ -1080,12 +1094,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     multCredit: function(factor,message)
     {
-        var oCredit = this.credit
-        this.credit *= factor;
+        var oCreditFraction = this.creditFraction;
+        this.creditFraction = this.creditFraction.multiply(math.Fraction.fromFloat(factor));
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'multiply_credit',
-                credit: this.credit - oCredit,
+                credit: this.creditFraction.subtract(oCreditFraction).toFloat(),
                 factor: factor,
                 message: message
             });
@@ -1160,4 +1174,5 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     }
 };
+
 });
