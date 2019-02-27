@@ -373,7 +373,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var variables = {};
             for(var name in qobj.variables)
             {
-                variables[name] = Numbas.jme.evaluate(qobj.variables[name],question.scope);
+                variables[name] = question.scope.evaluate(qobj.variables[name]);
             }
             return {
                     name: qobj.name,

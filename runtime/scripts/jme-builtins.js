@@ -256,7 +256,7 @@ newBuiltin('latex',[TString],TString,null,{
 });
 newBuiltin('safe',[TString],TString,null, {
     evaluate: function(args,scope) {
-        var t = args[0].tok;
+        var t = new TString(args[0].tok.value);
         t.safe = true;
         return t;
     },
