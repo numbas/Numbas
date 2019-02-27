@@ -366,6 +366,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(i % 2)
             {
                 var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                if(v===null) {
+                    throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
+                }
                 v = doToken(v);
             }
             else
