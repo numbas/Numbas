@@ -48,4 +48,5 @@
 * [Pablo Roldan](https://github.com/Roldans) ([issue #521](https://github.com/numbas/Numbas/issues/521))
 * [Mohit Jayanti Gurumukhani](https://github.com/mjguru) ([issue #503](https://github.com/numbas/Numbas/issues/503))
 * [RingoKid](https://github.com/RingoKid) ([issue #576](https://github.com/numbas/Numbas/issues/573))
+* [Johan Forslund](https://github.com/johanforslund) ([issue #599](https://github.com/numbas/Numbas/issues/599))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
