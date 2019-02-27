@@ -5926,9 +5926,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {String}
      */
     tokenToDisplayString: function(v) {
-        if(v===null) {
-            throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
-        }
         if(v.type in jme.typeToDisplayString) {
             return jme.typeToDisplayString[v.type](v);
         } else {
@@ -5953,6 +5950,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             if(i % 2)
             {
                 var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                if(v===null) {
+                    throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
+                }
                 if(display) {
                     v = jme.tokenToDisplayString(v);
                 } else {
