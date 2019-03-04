@@ -488,30 +488,76 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
  */
 var number_conditions = jme.rules.number_conditions = {
     'complex': function(exprTree) {
-        return exprTree.tok.type=='number' && exprTree.tok.value.complex;
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return tok.value.complex;
     },
     'imaginary': function(exprTree) {
-        return exprTree.tok.type=='number' && exprTree.tok.value.complex && Numbas.math.re(exprTree.tok.value)==0;
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return tok.value.complex && Numbas.math.re(tok.value)==0;
     },
     'real': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.math.im(exprTree.tok.value)==0;
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.math.im(tok.value)==0;
     },
     'positive': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.math.positive(exprTree.tok.value);
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.math.positive(tok.value);
     },
     'nonnegative': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.math.nonnegative(exprTree.tok.value);
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.math.nonnegative(tok.value);
     },
     'negative': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.math.negative(exprTree.tok.value);
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.math.negative(tok.value);
     },
     'integer': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.util.isInt(exprTree.tok.value);
+        if(exprTree.tok.type=='integer') {
+            return true;
+        }
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.util.isInt(tok.value);
     },
     'decimal': function(exprTree) {
-        return exprTree.tok.type=='number' && Numbas.math.countDP(exprTree.tok.originalValue)>0;
+        try {
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e) {
+            return false;
+        }
+        return Numbas.math.countDP(exprTree.tok.originalValue)>0;
     },
     'rational': function(exprTree,options) {
+        if(exprTree.tok.type=='rational') {
+            return true;
+        }
         return matchTree(patternParser.compile('integer:$n/integer:$n`?'),exprTree,options);
     }
 }
@@ -536,7 +582,7 @@ var specialMatchNames = jme.rules.specialMatchNames = {
                 return false;
             }
         } else {
-            if(exprTok.type!='number') {
+            if(!jme.isType(exprTok,'number')) {
                 return false;
             }
         }
@@ -922,9 +968,6 @@ function matchList(ruleTree,exprTree,options) {
 function matchToken(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    if(ruleTok.type!=exprTok.type) {
-        return false;
-    }
     return util.eq(ruleTok,exprTok) ? {} : false;
 }
 

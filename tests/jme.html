@@ -116,11 +116,11 @@
                 QUnit.test('Numbers', function(assert) {
                     function checkNumber(str,expected) {
                         var n = tokenise(str);
-                        assert.ok(n.length==1);
+                        assert.ok(n.length==1,str+' is one token');
                         n = n[0];
-                        expected = new types.TNum(expected);
-                        assert.equal(n.type,expected.type);
-                        deepCloseEqual(assert, n.value,expected.value);
+                        expected = /^[0-9]+(?!\x2E)/.exec(str) ? new types.TInt(expected) : new types.TNum(expected);
+                        assert.equal(n.type,expected.type,str+' is a '+expected.type);
+                        deepCloseEqual(assert, n.value,expected.value,str+' has the right value');
                     }
                     checkNumber('0',0);
                     checkNumber('0.0',0);
@@ -157,11 +157,11 @@
 				});
 
                 QUnit.test('Whitespace',function(assert) {
-                    var one = new types.TNum(1);
+                    var one = new types.TInt(1);
                     one.originalValue = '1';
                     one.pos = 1;
 					deepCloseEqual(assert, tokenise('\u00A01'),[one],'\\u00A01');
-                    var one = new types.TNum(1);
+                    var one = new types.TInt(1);
                     one.originalValue = '1';
                     one.pos = 0;
 					deepCloseEqual(assert, tokenise('1        '),[one],'1       (whitespace at end of expression)');
@@ -270,6 +270,11 @@
                     return jme.evaluate(t,scope)
                 };
 
+                function evaluateNumber(t,scope) {
+                    var v = evaluate(t,scope);
+                    return jme.castToType(v,'number').value;
+                }
+
 				QUnit.test('jme.typecheck',function(assert) {
 					raisesNumbasError(assert, function(){ evaluate('x()') },'jme.typecheck.function not defined','function not defined: x()');
 					raisesNumbasError(assert, function(){ evaluate('x+y',new jme.Scope()) },'jme.typecheck.op not defined','op not defined with empty scope: x+y');
@@ -317,20 +322,20 @@
 				});
 
 				QUnit.test('Operator precedence',function(assert) {
-					closeEqual(assert, evaluate('2*3!').value,12,'factorial highest: 2*3! = 2*(3!)');
-					closeEqual(assert, evaluate('(2*3)!').value,6*5*4*3*2,'brackets work: (2*3)! = 6!');
-					closeEqual(assert, evaluate('2^1^2').value,2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
-					closeEqual(assert, evaluate('2*3^2').value,18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
-					closeEqual(assert, evaluate('5*4+3*2').value,26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
-					closeEqual(assert, evaluate('5/4+3/2').value,2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
-					closeEqual(assert, evaluate('5*4/3-5/3*4').value,0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
-					closeEqual(assert, evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
-					closeEqual(assert, evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
-					closeEqual(assert, evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
-					closeEqual(assert, evaluate('3*2^-1').value,1.5,'unary minus with power');
-					closeEqual(assert, evaluate('3+--2').value,5,'lots of unary minus in a chain');
-					closeEqual(assert, evaluate('-2^2').value,-4,'unary minus before a power');
-					closeEqual(assert, evaluate('-2+3').value,1,'unary minus before addition');
+					closeEqual(assert, evaluateNumber('2*3!'),12,'factorial highest: 2*3! = 2*(3!)');
+					closeEqual(assert, evaluateNumber('(2*3)!'),6*5*4*3*2,'brackets work: (2*3)! = 6!');
+					closeEqual(assert, evaluateNumber('2^1^2'),2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
+					closeEqual(assert, evaluateNumber('2*3^2'),18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
+					closeEqual(assert, evaluateNumber('5*4+3*2'),26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
+					closeEqual(assert, evaluateNumber('5/4+3/2'),2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
+					closeEqual(assert, evaluateNumber('5*4/3-5/3*4'),0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
+					closeEqual(assert, evaluateNumber('1/2/3'),1/6,'division is left-associative: 1/2/3 = (1/2)/3');
+					closeEqual(assert, evaluateNumber('5-+2'),3,'unary addition: 5-+2 = 5-2');
+					closeEqual(assert, evaluateNumber('5--2'),7,'unary minus: 5--2 = 5+2');
+					closeEqual(assert, evaluateNumber('3*2^-1'),1.5,'unary minus with power');
+					closeEqual(assert, evaluateNumber('3+--2'),5,'lots of unary minus in a chain');
+					closeEqual(assert, evaluateNumber('-2^2'),-4,'unary minus before a power');
+					closeEqual(assert, evaluateNumber('-2+3'),1,'unary minus before addition');
 					deepCloseEqual(assert, evaluate('-vector(1,2,-3.3)').value,[-1,-2,3.3],'unary minus: -vector(1,2,-3.3)==vector(-1,-2,3.3)');
 					deepCloseEqual(assert, evaluate('-matrix([1,0],[2,3])').value,[[-1,0],[-2,-3]],'unary minus: -matrix([1,0],[2,3])==matrix([-1,0],[-2,-3]))');
 					assert.ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
@@ -371,10 +376,10 @@
 				});
 
 				QUnit.test('Arithmetic',function(assert) {
-					closeEqual(assert, evaluate('+2').value,2,'+2');
-					closeEqual(assert, evaluate('-2').value,-2,'-2');
-					closeEqual(assert, evaluate('1+2').value,3,'1+2');
-					deepCloseEqual(assert, evaluate('i+1').value,math.complex(1,1),'i+1');
+					closeEqual(assert, evaluateNumber('+2'),2,'+2');
+					closeEqual(assert, evaluateNumber('-2'),-2,'-2');
+					closeEqual(assert, evaluateNumber('1+2'),3,'1+2');
+					deepCloseEqual(assert, evaluateNumber('i+1'),math.complex(1,1),'i+1');
 					deepCloseEqual(assert, evaluate('[1,2]+[3,4]').value.map(getValue),[1,2,3,4],'[1,2]+[3,4]');
 					deepCloseEqual(assert, evaluate('[1,2]+3').value.map(getValue),[1,2,3],'[1,2]+3');
 					deepCloseEqual(assert, evaluate('["x","y"]+"z"').value.map(getValue),['x','y','z'],'["x","y"]+"z"');
@@ -383,29 +388,29 @@
 					closeEqual(assert, evaluate('2+" things"').value,'2 things','2+" things"');
 					deepCloseEqual(assert, evaluate('vector(1,2)+vector(2,3)').value,[3,5],'vector(1,2)+vector(2,3)');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])+matrix([0,1],[1,0])').value,[[1,1],[1,1]],'matrix([1,0],[0,1])+matrix([0,1],[1,0])');
-					closeEqual(assert, evaluate('3-13').value,-10,'3-13');
+					closeEqual(assert, evaluateNumber('3-13'),-10,'3-13');
 					deepCloseEqual(assert, evaluate('vector(1,2)-vector(5,5)').value,[-4,-3],'vector(1,2)-vector(5,5)');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])-matrix([2,1],[2,1])').value,[[-1,-1],[-2,0]],'matrix([1,0],[0,1])-matrix([2,1],[2,1])');
-					closeEqual(assert, evaluate('5*4').value,20,'5*4');
-					closeEqual(assert, evaluate('i*i').value,-1,'i*i');
+					closeEqual(assert, evaluateNumber('5*4'),20,'5*4');
+					closeEqual(assert, evaluateNumber('i*i'),-1,'i*i');
 					deepCloseEqual(assert, evaluate('5*vector(1,2)').value,[5,10],'5*vector(1,2)');
 					deepCloseEqual(assert, evaluate('vector(1,2)*5').value,[5,10],'vector(1,2)*5');
 					deepCloseEqual(assert, evaluate('matrix([1,1],[3,2])*vector(1,2)').value,[3,7],'matrix([1,1],[3,2])*vector(1,2)');
 					deepCloseEqual(assert, evaluate('5*matrix([1,0],[0,1])').value,[[5,0],[0,5]],'5*matrix([1,0],[0,1])');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])*5').value,[[5,0],[0,5]],'matrix([1,0],[0,1])*5');
 					deepCloseEqual(assert, evaluate('matrix([1,2],[1,1])*matrix([2,3],[4,5])').value,[[10,13],[6,8]],'matrix([1,2],[1,1])*matrix([2,3],[4,5])');
-					closeEqual(assert, evaluate('5/2').value,2.5,'5/2');
-					deepCloseEqual(assert, evaluate('5/(1+i)').value,math.complex(2.5,-2.5),'5/(1+i)');
-					deepCloseEqual(assert, evaluate('(1+i)/5').value,math.complex(0.2,0.2),'(1+i)/5');
-					deepCloseEqual(assert, evaluate('(1+i)/(2-i)').value,math.complex(0.2,0.6),'(1+i)/(2+i)');
-					closeEqual(assert, evaluate('2^4').value,16,'2^4');
-					closeEqual(assert, evaluate('(-6)^2').value,36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
-					deepCloseEqual(assert, evaluate('(1+i)^0').value,1,'(1+i)^0');
-					deepCloseEqual(assert, evaluate('(1+i)^5').value,math.complex(-4,-4),'(1+i)^5');
-					deepCloseEqual(assert, evaluate('(1+i)^6').value,math.complex(0,-8),'(1+i)^6');
-					deepCloseEqual(assert, evaluate('(1+i)^(-2)').value,math.complex(0,-0.5),'(1+i)^(-2)');
-					deepCloseEqual(assert, evaluate('(1+i)^(-3)').value,math.complex(-0.25,-0.25),'(1+i)^(-3)');
-					deepCloseEqual(assert, evaluate('2^i').value,math.complex(0.7692389013639721,0.6389612763136348),'2^i');
+					closeEqual(assert, evaluateNumber('5/2'),2.5,'5/2');
+					deepCloseEqual(assert, evaluateNumber('5/(1+i)'),math.complex(2.5,-2.5),'5/(1+i)');
+					deepCloseEqual(assert, evaluateNumber('(1+i)/5'),math.complex(0.2,0.2),'(1+i)/5');
+					deepCloseEqual(assert, evaluateNumber('(1+i)/(2-i)'),math.complex(0.2,0.6),'(1+i)/(2+i)');
+					closeEqual(assert, evaluateNumber('2^4'),16,'2^4');
+					closeEqual(assert, evaluateNumber('(-6)^2'),36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^0'),1,'(1+i)^0');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^5'),math.complex(-4,-4),'(1+i)^5');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^6'),math.complex(0,-8),'(1+i)^6');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^(-2)'),math.complex(0,-0.5),'(1+i)^(-2)');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^(-3)'),math.complex(-0.25,-0.25),'(1+i)^(-3)');
+					deepCloseEqual(assert, evaluateNumber('2^i'),math.complex(0.7692389013639721,0.6389612763136348),'2^i');
 				});
 
 				QUnit.test('Logic',function(assert) {
@@ -1052,7 +1057,7 @@
                     assert.ok(matchExpression('x+(y `: 1)','x+z'),'x+(y `: 1) does not match x+z');
                     assert.ok(Numbas.jme.isName(matchExpression('x+(y `: 1);rhs','x+y').rhs.tok,'y'),'x+(y `: 1);rhs matches x+y with rhs as y');
                     var res = matchExpression('x+(y `: 1);rhs','x').rhs.tok;
-                    assert.ok(res.type=='number' && res.value==1,'x+(y `: 1);rhs matches x with rhs as 1');
+                    assert.ok(res.type=='integer' && res.value==1,'x+(y `: 1);rhs matches x with rhs as 1');
 
                     assert.ok(matchExpression('`+- x','x'),'`+- x matches x');
                     assert.ok(matchExpression('`+- x','-x'),'`+- x matches -x');

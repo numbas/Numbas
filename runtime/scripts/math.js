@@ -1733,6 +1733,12 @@ Fraction.prototype = {
     },
     reciprocal: function() {
         return new Fraction(this.denominator, this.numerator);
+    },
+    negate: function() {
+        return new Fraction(-this.numerator, this.denominator);
+    },
+    equals: function(b) {
+        return this.subtract(b).numerator==0;
     }
 }
 Fraction.zero = new Fraction(0,1);

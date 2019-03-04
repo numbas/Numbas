@@ -132,7 +132,7 @@ function texifyWouldBracketOpArg(thing,i, settings) {
     else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
         var v = thing.args[i].tok.value;
         return !(v.re==0 || v.im==0);
-    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
         return true;
     }
     return false;
@@ -254,7 +254,7 @@ var texOps = jme.display.texOps = {
             tex0 = '\\left ( ' +tex0+' \\right )';
         }
         var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
-        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && thing.args[1].tok.type=='number' && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
+        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && jme.isType(thing.args[1].tok,'number') && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
             return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
         }
         return (tex0+'^{ '+texArgs[1]+' }');
@@ -273,29 +273,29 @@ var texOps = jme.display.texOps = {
                 if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 //anything times e^(something) or (not number)^(something)
-                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || right.args[0].tok.type!='number')) {
+                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || !jme.isType(right.args[0].tok,'number'))) {
                     use_symbol = false;
                 //real number times Pi or E
-                } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
+                } else if (jme.isType(right.tok,'number') && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && jme.isType(left.tok,'number') && !(left.tok.value.complex)) {
                     use_symbol = false
                 //number times a power of i
-                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number') {
+                } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
                     use_symbol = true;
                 //(anything except i) times i
-                } else if ( !(left.tok.type=='number' && math.eq(left.tok.value,math.complex(0,1))) && right.tok.type=='number' && math.eq(right.tok.value,math.complex(0,1))) {
+                } else if ( !(jme.isType(left.tok,'number') && math.eq(left.tok.value,math.complex(0,1))) && jme.isType(right.tok,'number') && math.eq(right.tok.value,math.complex(0,1))) {
                     use_symbol = false;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if ( right.tok.type=='number'
+                } else if ( jme.isType(right.tok,'number')
                         ||
                             jme.isOp(right.tok,'-u')
                         ||
                         (
                             !jme.isOp(right.tok,'-u')
                             && (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*']
-                                && (right.args[0].tok.type=='number'
+                                && (jme.isType(right.args[0].tok,'number')
                                 && right.args[0].tok.value!=Math.E)
                             )
                         )
@@ -372,12 +372,9 @@ var texOps = jme.display.texOps = {
     'exp': (function(thing,texArgs) { return ('e^{ '+texArgs[0]+' }'); }),
     'fact': (function(thing,texArgs)
             {
-                if(thing.args[0].tok.type=='number' || thing.args[0].tok.type=='name')
-                {
+                if(jme.isType(thing.args[0].tok=='number') || thing.args[0].tok.type=='name') {
                     return texArgs[0]+'!';
-                }
-                else
-                {
+                } else {
                     return '\\left ('+texArgs[0]+' \\right )!';
                 }
             }),
@@ -387,19 +384,16 @@ var texOps = jme.display.texOps = {
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'diff': (function(thing,texArgs)
             {
-                var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
-                if(thing.args[0].tok.type=='name')
-                {
+                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
+                if(thing.args[0].tok.type=='name') {
                     return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
-                }
-                else
-                {
+                } else {
                     return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
                 }
             }),
     'partialdiff': (function(thing,texArgs)
             {
-                var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
+                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name')
                 {
                     return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
@@ -952,6 +946,12 @@ var typeToTeX = jme.display.typeToTeX = {
     'nothing': function(thing,tok,texArgs,settings) {
         return '\\text{nothing}';
     },
+    'integer': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value, settings);
+    },
+    'rational': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value.toFloat(), settings);
+    },
     'number': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value, settings);
     },
@@ -1286,6 +1286,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     'nothing': function(tree,tok,bits,settings) {
         return 'nothing';
     },
+    'integer': function(tree,tok,bits,settings) {
+        return settings.jmeNumber(tok.value,settings);
+    },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)
         {
@@ -1380,21 +1383,23 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var op = tok.name;
         var args = tree.args, l = args.length;
         for(var i=0;i<l;i++) {
-            var arg_type = args[i].tok.type;
-            var arg_value = args[i].tok.value;
+            var arg = args[i].tok;
+            var isNumber = jme.isType(arg,'number');
+            var arg_type = arg.type;
+            var arg_value = arg.value;
             var pd;
             var arg_op = null;
             if(arg_type=='op') {
                 arg_op = args[i].tok.name;
-            } else if(arg_type=='number' && arg_value.complex && arg_value.im!=0) {
+            } else if(isNumber && arg_value.complex && arg_value.im!=0) {
                 if(arg_value.re!=0) {
                     arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
                 } else if(arg_value.im!=1) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                 }
-            } else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
+            } else if(isNumber && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
                 arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-            } else if(arg_type=='number' && bits[i].indexOf('/')>=0) {
+            } else if(isNumber && bits[i].indexOf('/')>=0) {
                 arg_op = '/';   // implied division because this number will be written in the form 'a/b'
             }
             var bracketArg = arg_op!=null && op in opBrackets && opBrackets[op][i][arg_op]==true;
@@ -1407,7 +1412,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         if(op=='*') {
             //number or brackets followed by name or brackets doesn't need a times symbol
             //except <anything>*(-<something>) does
-            if(!settings.alwaystimes && ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )
+            if(!settings.alwaystimes && ((jme.isType(args[0].tok,'number') && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )
             {
                 op = '';
             }
@@ -1466,7 +1471,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 var jmeFunctions = jme.display.jmeFunctions = {
     'dict': typeToJME.dict,
     'fact': function(tree,tok,bits,settings) {
-        if(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name') {
+        if(jme.isType(tree.args[0].tok,'number') || tree.args[0].tok.type=='name') {
             return bits[0]+'!';
         } else {
             return '( '+bits[0]+' )!';

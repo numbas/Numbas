@@ -138,8 +138,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     eq: function(a,b) {
-        if(a.type != b.type)
-            return false;
+        if(a.type != b.type) {
+            var type = Numbas.jme.findCompatibleType(a,b);
+            if(type) {
+                a = Numbas.jme.castToType(a,type);
+                b = Numbas.jme.castToType(b,type);
+            } else {
+                return false;
+            }
+        }
         if(a.type in util.equalityTests) {
             return util.equalityTests[a.type](a,b);
         } else {
@@ -174,7 +181,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return true;
         },
         'expression': function(a,b) {
-            return jme.treesSame(a.tree,b.tree);
+            return Numbas.jme.treesSame(a.tree,b.tree);
         },
         'function': function(a,b) {
             return a.name==b.name;
@@ -199,6 +206,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         },
         'number': function(a,b) {
             return Numbas.math.eq(a.value,b.value);
+        },
+        'integer': function(a,b) {
+            return Numbas.math.eq(a.value,b.value);
+        },
+        'rational': function(a,b) {
+            return a.equals(b);
         },
         'op': function(a,b) {
             return a.name==b.name;

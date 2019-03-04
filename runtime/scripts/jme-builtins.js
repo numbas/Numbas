@@ -25,6 +25,8 @@ var types = Numbas.jme.types;
 var Scope = jme.Scope;
 var funcObj = jme.funcObj;
 var TNum = types.TNum;
+var TInt = types.TInt;
+var TRational = types.TRational;
 var TString = types.TString;
 var TBool = types.TBool;
 var THTML = types.THTML;
@@ -58,6 +60,27 @@ var funcs = {};
 function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
+
+var Fraction = math.Fraction;
+// Integer arithmetic
+newBuiltin('int',[TNum],TInt, function(n){ return n; });
+newBuiltin('+u', [TInt], TInt, function(a){return a;});
+newBuiltin('-u', [TInt], TInt, math.negate);
+newBuiltin('+', [TInt,TInt], TInt, math.add);
+newBuiltin('-', [TInt,TInt], TInt, math.sub);
+newBuiltin('*', [TInt,TInt], TInt, math.mul );
+newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
+newBuiltin('^', [TInt,TInt], TNum, math.pow );
+
+// Rational arithmetic
+newBuiltin('rational',[TNum],TRational,Fraction.fromFloat);
+newBuiltin('+u', [TRational], TRational, function(a){return a;});
+newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
+newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b); });
+newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
+newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
+newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
+
 newBuiltin('+u', [TNum], TNum, function(a){return a;});
 newBuiltin('+u', [TVector], TVector, function(a){return a;});
 newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;});
@@ -472,7 +495,7 @@ newBuiltin('random',[TList],'?',null, {
         return math.choose(args[0].value);
     }
 });
-newBuiltin( 'random',[],'?', null, {
+newBuiltin( 'random',['*?'],'?', null, {
     random:true,
     typecheck: function() { return true; },
     evaluate: function(args,scope) { return math.choose(args);}
@@ -582,7 +605,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
     }
 });
 Numbas.jme.lazyOps.push('if');
-newBuiltin('switch',[],'?', null, {
+newBuiltin('switch',['*?'],'?', null, {
     typecheck: function(variables)
     {
         //should take alternating booleans and [any value]
@@ -635,7 +658,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
         }
         else
         {
-            match = args[0].tok.type == kind;
+            match = jme.isType(args[0].tok, kind);
         }
         return new TBool(match);
     }
@@ -850,20 +873,20 @@ jme.mapFunctions = {
         return new TMatrix(matrixmath.map(matrix,function(n) {
             scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
-            if(o.type!='number') {
+            if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.matrix map returned non number"))
             }
-            return o.value;
+            return jme.castToType(o,'number').value;
         }));
     },
     'vector': function(lambda,name,vector,scope) {
         return new TVector(vectormath.map(vector,function(n) {
             scope.setVariable(name,new TNum(n));
             var o = scope.evaluate(lambda);
-            if(o.type!='number') {
+            if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.vector map returned non number"))
             }
-            return o.value;
+            return jme.castToType(o,'number').value;
         }));
     }
 }
@@ -1116,7 +1139,7 @@ newBuiltin('sort_by',[TNum,TList],TList, null, {
         return newlist;
     },
     typecheck: function(variables) {
-        if(variables[0].type!='number') {
+        if(!jme.isType(variables[0],'number')) {
             return false;
         }
         if(variables[1].type!='list') {
@@ -1195,7 +1218,7 @@ newBuiltin('group_by',[TNum,TList],TList,null, {
         return new TList(out);
     },
     typecheck: function(variables) {
-        if(variables[0].type!='number') {
+        if(!jme.isType(variables[0],'number')) {
             return false;
         }
         if(variables[1].type!='list') {
@@ -1339,7 +1362,7 @@ newBuiltin('combinations',['?',TNum],TList,function(list,r) {
     return prod.map(function(l){ return new TList(l); });
 }, {
     typecheck: function(variables) {
-        return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+        return (variables[0].type=='set' || variables[0].type=='list') && jme.isType(variables[1],'number');
     }
 });
 newBuiltin('combinations_with_replacement',['?',TNum],TList,function(list,r) {
@@ -1347,7 +1370,7 @@ newBuiltin('combinations_with_replacement',['?',TNum],TList,function(list,r) {
     return prod.map(function(l){ return new TList(l); });
 }, {
     typecheck: function(variables) {
-        return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+        return (variables[0].type=='set' || variables[0].type=='list') && jme.isType(variables[1],'number');
     }
 });
 newBuiltin('permutations',['?',TNum],TList,function(list,r) {
@@ -1355,7 +1378,7 @@ newBuiltin('permutations',['?',TNum],TList,function(list,r) {
     return prod.map(function(l){ return new TList(l); });
 }, {
     typecheck: function(variables) {
-        return (variables[0].type=='set' || variables[0].type=='list') && variables[1].type=='number';
+        return (variables[0].type=='set' || variables[0].type=='list') && jme.isType(variables[1],'number');
     }
 });
 newBuiltin('vector',['*TNum'],TVector, null, {
@@ -1388,13 +1411,7 @@ newBuiltin('matrix',[TList],TMatrix,null, {
             rows = 0;
             columns = 0;
         } else {
-            switch(list.value[0].type)
-            {
-            case 'number':
-                value = [list.value.map(function(e){return e.value})];
-                rows = 1;
-                columns = list.vars;
-                break;
+            switch(list.value[0].type) {
             case 'vector':
                 value = list.value.map(function(v){return v.value});
                 columns = list.value[0].value.length;
@@ -1408,7 +1425,13 @@ newBuiltin('matrix',[TList],TMatrix,null, {
                 }
                 break;
             default:
-                throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
+                if(jme.isType(list.value[0],'number')) {
+                    value = [list.value.map(function(e){return jme.castToType(e,'number').value})];
+                    rows = 1;
+                    columns = list.vars;
+                } else {
+                    throw(new Numbas.Error('jme.func.matrix.invalid row type',{type:list.value[0].type}));
+                }
             }
         }
         value.rows = rows;
@@ -1634,7 +1657,7 @@ newBuiltin('findvars',[TExpression],TList,null, {
         return new TList(vars.map(function(v){ return new TString(v) }));
     }
 });
-newBuiltin('definedvariables',[],TList,null, {
+newBuiltin('definedvariables',['*?'],TList,null, {
     evaluate: function(args, scope) {
         var vars = Object.keys(scope.allVariables());
         return new TList(vars.map(function(x){ return new TString(x) }));
