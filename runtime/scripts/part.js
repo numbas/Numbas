@@ -127,6 +127,8 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     //remember a path for this part, for stuff like marking and warnings
     this.path = path || 'p0';
 
+    this.name = util.capitalise(util.nicePartName(path));
+
     this.label = '';
 
     if(this.question) {

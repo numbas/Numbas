@@ -2,11 +2,11 @@ everything: update_tests docs
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts
+update_tests: jme runtime marking_scripts locales
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
-THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js
+THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js decimal/decimal.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js
 RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js schedule.js  marking.js json.js timing.js start-exam.js numbas.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)

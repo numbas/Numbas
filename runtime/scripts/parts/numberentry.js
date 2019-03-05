@@ -164,29 +164,27 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         }
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
-        if(minvalue && minvalue.type=='number') {
-            minvalue = minvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('minimum value')}));
+        try {
+            minvalue = jme.castToType(minvalue,'decimal').value;
+            settings.minvalue = minvalue;
+        } catch(e) {
+            this.error('part.setting not present',{property:R('minimum value')});
         }
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
-        if(maxvalue && maxvalue.type=='number') {
-            maxvalue = maxvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
+        try {
+            maxvalue = jme.castToType(maxvalue,'decimal').value;
+            settings.maxvalue = maxvalue;
+        } catch(e) {
+            this.error('part.setting not present',{property:R('maximum value')});
         }
-        var displayAnswer = (minvalue + maxvalue)/2;
+        var displayAnswer = minvalue.add(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {
-            var diff = Math.abs(maxvalue-minvalue)/2;
-            var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
-            settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
+            var frac = math.Fraction.fromDecimal(displayAnswer);
+            settings.displayAnswer = frac.toString();
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
-        var fudge = 0.00000000001;
-        settings.minvalue = minvalue - fudge;
-        settings.maxvalue = maxvalue + fudge;
         return settings.displayAnswer;
     },
     /** Tidy up the student's answer - at the moment, just remove space.

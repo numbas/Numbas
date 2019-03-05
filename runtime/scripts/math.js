@@ -14,7 +14,13 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
  */
-Numbas.queueScript('math',['base'],function() {
+Numbas.queueScript('math',['base','decimal'],function() {
+    
+    Decimal.set({ 
+        precision: 40,
+        modulo: Decimal.EUCLID 
+    });
+
 /** Mathematical functions, providing stuff that the built-in `Math` object doesn't
  * @namespace Numbas.math */
 /** A complex number.
@@ -790,9 +796,6 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     parseScientific: function(str) {
         var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
-        if(!m) {
-            debugger;
-        }
         return {significand: parseFloat(m[1].replace(' ','')), exponent: parseInt(m[2].replace(' ',''))};
     },
 
@@ -1746,6 +1749,10 @@ Fraction.one = new Fraction(1,1);
 Fraction.fromFloat = function(n) {
     var approx = math.rationalApproximation(n);
     return new Fraction(approx[0],approx[1]);
+}
+Fraction.fromDecimal = function(n) {
+    var approx = n.toFraction();
+    return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
 /** A list of a vector's components.

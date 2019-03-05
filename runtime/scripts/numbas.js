@@ -113,7 +113,7 @@ RequireScript.prototype = {
             var dependencies_executed = this.fdeps.every(function(r){ return scriptreqs[r].executed; });
             if(dependencies_executed) {
                 if(this.callback) {
-                    this.callback({exports:window});
+                    this.callback.apply(window,[{exports:window}]);
                 }
                 this.executed = true;
                 this.backdeps.forEach(function(r) {

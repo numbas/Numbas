@@ -344,16 +344,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         settings.minimumMarks = util.parseNumber(settings.minimumMarks) || 0;
         var minAnswers = jme.subvars(settings.minAnswersString, scope);
         minAnswers = jme.evaluate(minAnswers, scope);
-        if(minAnswers && minAnswers.type=='number') {
-            settings.minAnswers = minAnswers.value;
-        } else {
+        try {
+            settings.minAnswers = jme.castToType(minAnswers,'number').value;
+        } catch(e) {
             this.error('part.setting not present',{property: 'minimum answers'});
         }
         var maxAnswers = jme.subvars(settings.maxAnswersString, scope);
         maxAnswers = jme.evaluate(maxAnswers, scope);
-        if(maxAnswers && maxAnswers.type=='number') {
-            settings.maxAnswers = maxAnswers.value;
-        } else {
+        try {
+            settings.maxAnswers = jme.castToType(maxAnswers,'number').value;
+        } catch(e) {
             this.error('part.setting not present',{property: 'maximum answers'});
         }
         // fill layout matrix

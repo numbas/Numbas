@@ -591,6 +591,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                             v = v.map(jme.wrapValue);
                             return new jme.types.TList(v);
                         }
+                    } else if(v instanceof Decimal) {
+                        return new jme.types.TDecimal(v);
+                    } else if(v instanceof math.Fraction) {
+                        return new jme.types.TRational(v);
                     } else if(v===null || v===undefined) { // CONTROVERSIAL! Cast null to the empty string, because we don't have a null type.
                         return new jme.types.TString('');
                     } else if(v!==null && typeof v=='object' && v.type===undefined) {
@@ -620,18 +624,30 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     },
     /** Cast a token to the given type, if possible
      * @param {Numbas.jme.token} tok
-     * @param {String} type
+     * @param {String|Object} type
      * @returns {Numbas.jme.token}
      */
     castToType: function(tok,type) {
+        var typeDescription = {};
+        if(typeof(type)=='object') {
+            typeDescription = type;
+            type = typeDescription.type;
+        }
+        var ntok;
         if(tok.type!=type) {
             if(!tok.casts || !tok.casts[type]) {
                 throw(new Numbas.Error('jme.type.no cast method',{from: tok.type, to: type}));
             }
-            return tok.casts[type](tok);
+            ntok = tok.casts[type](tok);
         } else {
-            return tok;
+            ntok = tok;
         }
+        if(type=='list' && typeDescription.items) {
+            ntok.value = ntok.value.map(function(item,i) {
+                return jme.castToType(item,typeDescription.items[i]);
+            });
+        }
+        return ntok;
     },
     /** Find a type that both `a` and `b` can be automatically cast to, or return `undefined`.
      *
@@ -648,6 +664,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return b.type;
             }
             if(b.casts) {
+                if(b.casts[a.type]) {
+                    return a.type;
+                }
                 for(var x in a.casts) {
                     if(b.casts[x]) {
                         return x;
@@ -893,7 +912,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Binary operations
      * @type {Array.<String>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as'],
 
     /** Regular expressions to match tokens 
      * @type {Object.<RegExp>}
@@ -1637,19 +1656,57 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
             }
         }
+        function type_difference(tok,typeDescription) {
+            if(tok.type!=typeDescription.type) {
+                return [typeDescription.type];
+            }
+            var out = [null];
+            switch(typeDescription.type) {
+                case 'list':
+                    if(typeDescription.items) {
+                        for(var i=0;i<tok.value.length;i++) {
+                            out = out.concat(type_difference(tok.value[i],typeDescription.items[i]));
+                        }
+                    }
+            }
+            return out;
+        }
         function compare_matches(m1,m2) {
             for(var i=0;i<args.length;i++) {
-                if(args[i].type==m1[i]) {
-                    if(args[i].type==m2[i]) {
-                        continue;
-                    } else {
+                var d1 = type_difference(args[i],m1[i]);
+                var d2 = type_difference(args[i],m2[i]);
+                for(var j=0;j<d1.length && j<d2.length;j++) {
+                    if(j>=d1.length) {
+                        return 1;
+                    } else if(j>=d2.length) {
                         return -1;
                     }
-                } else {
-                    if(args[i].type==m2[i]) {
-                        return 1;
+                    if(d1[j]===null) {
+                        if(d2[j]===null) {
+                            continue;
+                        } else {
+                            return -1;
+                        }
                     } else {
-                        continue;
+                        if(d2[j]===null) {
+                            return 1;
+                        } else {
+                            if(args[i].casts) {
+                                var casts = Object.keys(args[i].casts);
+                                var i1 = casts.indexOf(d1[j]);
+                                if(i1==-1) {
+                                    i1 = Infinity;
+                                }
+                                var i2 = casts.indexOf(d2[j]);
+                                if(i2==-1) {
+                                    i2 = Infinity;
+                                }
+                                if(i1!=i2) {
+                                    return i1<i2 ? -1 : 1;
+                                }
+                            }
+                            continue;
+                        }
                     }
                 }
             }
@@ -1659,12 +1716,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         for(var j=0;j<fns.length; j++) {
             var fn = fns[j];
             if(fn.typecheck(args)) {
-                var match = fn.check_signature(args);
+                var match = fn.intype(args);
                 if(match.every(function(m,i) { return args[i].type==m; })) {
                     return {fn: fn, signature: match};
                 }
                 var pcandidate = {fn: fn, signature: match};
-                if(candidate===null || compare_matches(match,candidate.signature)==-1) {
+                if(candidate===null || compare_matches(pcandidate.signature, candidate.signature)==-1) {
                     candidate = pcandidate;
                 }
             }
@@ -1869,7 +1926,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
-                    var castargs = eargs.map(function(arg,i) { return jme.castToType(arg,signature[i]); });
+                    var castargs = eargs.map(function(arg,i) { 
+                        return jme.castToType(arg,signature[i]); 
+                    });
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
@@ -1932,6 +1991,11 @@ var TNum = types.TNum = types.number = function(num)
     this.value = num.complex ? num : parseFloat(num);
 }
 TNum.prototype.type = 'number';
+TNum.prototype.casts = {
+    'decimal': function(n) {
+        return new TDecimal(new Decimal(n.value));
+    }
+}
 
 var TInt = types.TInt = types.integer = function(num) {
     this.originalValue = num;
@@ -1946,6 +2010,9 @@ TInt.prototype.casts = {
     },
     'rational': function(n) {
         return new TRational(new math.Fraction(n.value,1));
+    },
+    'decimal': function(n) {
+        return new TDecimal(new Decimal(n.value));
     }
 }
 var TRational = types.TRational = types.integer = function(value) {
@@ -1955,6 +2022,22 @@ TRational.prototype.type = 'rational';
 TRational.prototype.casts = {
     'number': function(n) {
         return new TNum(n.value.numerator/n.value.denominator);
+    },
+    'decimal': function(n) {
+        return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+    }
+}
+
+/** A Decimal number.
+ *  Powered by [decimal.js](http://mikemcl.github.io/decimal.js/)
+ */
+var TDecimal = types.TDecimal = types.decimal = function(value) {
+    this.value = value;
+}
+TDecimal.prototype.type = 'decimal';
+TDecimal.prototype.casts = {
+    'number': function(n) {
+        return new TNum(n.value.toNumber());
     }
 }
 
@@ -2317,7 +2400,8 @@ var funcSynonyms = jme.funcSynonyms = {
     'sgn':'sign',
     'len': 'abs',
     'length': 'abs',
-    'verb': 'verbatim'
+    'verb': 'verbatim',
+    'dec': 'decimal'
 };
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments
  * @memberof Numbas.jme
@@ -2423,10 +2507,15 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
 
     function parse_signature(sig) {
         if(typeof(sig)=='function') {
+            if(sig.kind!==undefined) {
+                return sig;
+            }
             return jme.signature.type(sig.prototype.type);
         } else {
             if(sig[0]=='*') {
                 return jme.signature.multiple(parse_signature(sig.slice(1)));
+            } else if(sig.match(/^\[(.*?)\]$/)) {
+                return jme.signature.optional(parse_signature(sig.slice(1,sig.length-1)));
             }
             if(sig=='?') {
                 return jme.signature.anything();
@@ -2434,7 +2523,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
             return jme.signature.type(jme.types[sig].prototype.type);
         }
     }
-
 
     name = name.toLowerCase();
     /** Name
@@ -2445,13 +2533,13 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     this.name = name;
     /** Check the given list of arguments against this function's calling signature.
      *
-     * @name check_signature
+     * @name intype
      * @memberof Numbas.jme.funcObj
      * @member {function}
      * @param {Array.<Numbas.jme.token>}
      * @returns {Array.<String>|Boolean} `false` if the given arguments are not valid for this function, or a list giving the desired type for each argument - arguments shouldbe cast to these types before evaluating.
      */
-    this.check_signature = jme.signature.sequence.apply(this,intype.map(parse_signature));
+    this.intype = jme.signature.sequence.apply(this,intype.map(parse_signature));
     /** The return type of this function. Either a Numbas.jme.token constructor function, or the string '?', meaning unknown type.
      * @name outtype
      * @member {function|String}
@@ -2475,7 +2563,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @returns {Boolean}
      * @memberof Numbas.jme.funcObj
      */
-    var check_signature = this.check_signature;
+    var check_signature = this.intype;
     this.typecheck = options.typecheck || function(variables) {
         var match = check_signature(variables);
         return match!==false && match.length==variables.length;
@@ -3110,14 +3198,53 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
             var assignments = [];
             functions.forEach(function(fn) {
                 var fn_assignments = [assigned_types];
-                for(var i=0;i<tree.args.length;i++) {
-                    var nassignments = [];
-                    fn_assignments.forEach(function(assignment) {
-                        var res = inferVariableTypes(tree.args[i],scope,fn.intype[i],assignment);
-                        nassignments = nassignments.concat(res);
+
+                function assignments_for_signature(sig,states) {
+                    var out = [];
+                    states.forEach(function(state) {
+                        var assignment = state[0];
+                        var pos = state[1];
+                        if(pos>=tree.args.length) {
+                            return;
+                        }
+                        switch(sig.kind) {
+                            case 'type':
+                                var res = inferVariableTypes(tree.args[pos],scope,sig.type,assignment);
+                                out = out.concat(res.map(function(a){return [a,pos+1]}));
+                                break;
+                            case 'anything':
+                                var res = inferVariableTypes(tree.args[pos],scope,'?',assignment);
+                                out = out.concat(res.map(function(a){return [a,pos+1]}));
+                                break;
+                            case 'multiple':
+                                out.push(state);
+                                var nstates = [[assignment,pos]];
+                                while(nstates.length) {
+                                    var res = assignments_for_signature(sig.signature,nstates);
+                                    nstates = res.filter(function(a){ return a[1]>pos; });
+                                    out = out.concat(nstates);
+                                }
+                                break;
+                            case 'optional':
+                                out.push(state);
+                                var nstates = [[assignment,pos]];
+                                var res = assignments_for_signature(sig.signature,nstates);
+                                nstates = res.filter(function(a){ return a[1]>pos; });
+                                out = out.concat(nstates);
+                                break;
+                            case 'sequence':
+                                var nstates = [state];
+                                sig.signatures.forEach(function(arg) {
+                                    nstates = assignments_for_signature(arg,nstates);
+                                });
+                                out = out.concat(nstates);
+                        }
                     });
-                    fn_assignments = nassignments;
+                    return out;
                 }
+                var fn_assignments = assignments_for_signature(fn.intype,[[assigned_types,0]]);
+                fn_assignments = fn_assignments.filter(function(a){return a[1]==tree.args.length}).map(function(a){return a[0];});
+
                 assignments = assignments.concat(fn_assignments);
             });
             assignments = dedup(assignments);
@@ -3157,12 +3284,14 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
 
 jme.signature = {
     anything: function() {
-        return function(args) {
-            return args.length>0 ? [args[0].type] : false;
+        var f = function(args) {
+            return args.length>0 ? [{type: args[0].type}] : false;
         }
+        f.kind = 'anything';
+        return f;
     },
     type: function(type) {
-        return function(args) {
+        var f = function(args) {
             if(args.length==0) {
                 return false;
             }
@@ -3172,11 +3301,14 @@ jme.signature = {
                     return false;
                 }
             }
-            return [type];
+            return [{type: type}];
         }
+        f.kind = 'type';
+        f.type = type;
+        return f;
     },
     multiple: function(sig) {
-        return function(args) {
+        var f = function(args) {
             var got = [];
             while(true) {
                 var match = sig(args);
@@ -3190,10 +3322,13 @@ jme.signature = {
                 }
             }
             return got;
-        }
+        };
+        f.kind = 'multiple';
+        f.signature = sig;
+        return f;
     },
     optional: function(sig) {
-        return function(args) {
+        var f = function(args) {
             var match = sig(args);
             if(match) {
                 return match;
@@ -3201,10 +3336,13 @@ jme.signature = {
                 return [];
             }
         }
+        f.kind = 'optional';
+        f.signature = sig;
+        return f;
     },
     sequence: function() {
-        var bits = arguments;
-        return function(args) {
+        var bits = Array.prototype.slice.apply(arguments);
+        var f = function(args) {
             var match  = [];
             for(var i=0;i<bits.length;i++) {
                 var bitmatch = bits[i](args);
@@ -3216,6 +3354,26 @@ jme.signature = {
             }
             return match;
         }
+        f.kind = 'sequence';
+        f.signatures = bits;
+        return f;
+    },
+    list: function() {
+        var bits = Array.prototype.slice.apply(arguments);
+        var seq = jme.signature.sequence.apply(this,bits);
+        var f = function(args) {
+            if(!jme.isType(args[0],'list')) {
+                return false;
+            }
+            var items = seq(args[0].value);
+            if(items===false || items.length!=args[0].value.length) {
+                return false;
+            }
+            return {type: 'list', items: items};
+        }
+        f.kind = 'list';
+        f.signatures = bits;
+        return f;
     }
 };
 });

@@ -952,6 +952,9 @@ var typeToTeX = jme.display.typeToTeX = {
     'rational': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value.toFloat(), settings);
     },
+    'decimal': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value.toFloat(), settings);
+    },
     'number': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value, settings);
     },
@@ -1288,6 +1291,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'integer': function(tree,tok,bits,settings) {
         return settings.jmeNumber(tok.value,settings);
+    },
+    'rational': function(tree,tok,bits,settings) {
+        return settings.jmeNumber(tok.value.toFloat(),settings);
+    },
+    'decimal': function(tree,tok,bits,settings) {
+        return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)

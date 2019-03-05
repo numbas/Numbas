@@ -211,7 +211,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Numbas.math.eq(a.value,b.value);
         },
         'rational': function(a,b) {
-            return a.equals(b);
+            return a.value.equals(b.value);
+        },
+        'decimal': function(a,b) {
+            return a.value.equals(b.value);
         },
         'op': function(a,b) {
             return a.name==b.name;
