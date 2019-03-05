@@ -10096,7 +10096,7 @@ var compareTrees = jme.compareTrees = function(a,b) {
         case 'expression':
             return jme.compareTrees(a.tok.tree, b.tok.tree);
         default:
-            if(jme.isType(a.tok,'number') {
+            if(jme.isType(a.tok,'number')) {
                 var na = jme.castToType(a.tok,'number').value;
                 var nb = jme.castToType(b.tok,'number').value;
                 if(na.complex || nb.complex) {
