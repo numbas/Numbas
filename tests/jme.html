@@ -810,7 +810,6 @@
                     assert.equal(evaluate("all([])").value,true,"all([])");
                     assert.equal(evaluate("all([true])").value,true,"all([true])");
                     assert.equal(evaluate("all([false])").value,false,"all([false])");
-                    assert.equal(evaluate("all([1])").value,false,"all([1])");
                     assert.equal(evaluate("all([true,false])").value,false,"all([true,false])");
                     assert.equal(evaluate("all([false,true])").value,false,"all([false,true])");
                     assert.equal(evaluate("all([true,true])").value,true,"all([true,true])");
@@ -818,7 +817,6 @@
                     assert.equal(evaluate("some([])").value,false,"some([])");
                     assert.equal(evaluate("some([true])").value,true,"some([true])");
                     assert.equal(evaluate("some([false])").value,false,"some([false])");
-                    assert.equal(evaluate("some([1])").value,false,"some([1])");
                     assert.equal(evaluate("some([true,false])").value,true,"some([true,false])");
                     assert.equal(evaluate("some([false,true])").value,true,"some([false,true])");
                     assert.equal(evaluate("some([true,true])").value,true,"some([true,true])");

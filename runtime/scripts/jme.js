@@ -614,6 +614,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {Boolean}
      */
     isType: function(tok,type) {
+        if(!tok) {
+            return false;
+        }
         if(tok.type==type) {
             return true;
         }
@@ -642,7 +645,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else {
             ntok = tok;
         }
+        if(type=='dict' && typeDescription.items) {
+            ntok = new TDict(ntok.value);
+            for(var x in typeDescription.items) {
+                ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+            }
+        }
         if(type=='list' && typeDescription.items) {
+            ntok = new TList(ntok.value);
             ntok.value = ntok.value.map(function(item,i) {
                 return jme.castToType(item,typeDescription.items[i]);
             });
@@ -1660,7 +1670,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             if(tok.type!=typeDescription.type) {
                 return [typeDescription.type];
             }
-            var out = [null];
+            var out = [typeDescription.nonspecific ? tok.type : null];
             switch(typeDescription.type) {
                 case 'list':
                     if(typeDescription.items) {
@@ -2159,6 +2169,11 @@ var TSet = types.TSet = types.set = function(value) {
     this.value = value;
 }
 TSet.prototype.type = 'set';
+TSet.prototype.casts = {
+    'list': function(s) {
+        return new TList(s.value);
+    }
+}
 /** Vector type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2172,6 +2187,11 @@ var TVector = types.TVector = types.vector = function(value)
     this.value = value;
 }
 TVector.prototype.type = 'vector';
+TVector.prototype.casts = {
+    'list': function(v) {
+        return new TList(v.value.map(function(n){ return new TNum(n); }));
+    }
+}
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2193,6 +2213,11 @@ var TMatrix = types.TMatrix = types.matrix = function(value)
     }
 }
 TMatrix.prototype.type = 'matrix';
+TMatrix.prototype.casts = {
+    'list': function(m) {
+        return new TList(m.value.map(function(r){return new TVector(r)}));
+    }
+}
 /** A range of numerical values - either discrete or continuous
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2217,6 +2242,11 @@ var TRange = types.TRange = types.range = function(range)
     }
 }
 TRange.prototype.type = 'range';
+TRange.prototype.casts = {
+    'list': function(r) {
+        return new TList(math.rangeToList(r.value).map(function(n){return new TNum(n)}));
+    }
+}
 /** Variable name token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -3238,6 +3268,14 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
                                     nstates = assignments_for_signature(arg,nstates);
                                 });
                                 out = out.concat(nstates);
+                                break;
+                            case 'or':
+                                sig.signatures.forEach(function(subsig) {
+                                    out = out.concat(assignments_for_signature(subsig,[state]));
+                                });
+                                break;
+                            default:
+                                break;
                         }
                     });
                     return out;
@@ -3285,7 +3323,7 @@ var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype,
 jme.signature = {
     anything: function() {
         var f = function(args) {
-            return args.length>0 ? [{type: args[0].type}] : false;
+            return args.length>0 ? [{type: args[0].type, nonspecific: true}] : false;
         }
         f.kind = 'anything';
         return f;
@@ -3362,6 +3400,9 @@ jme.signature = {
         var bits = Array.prototype.slice.apply(arguments);
         var seq = jme.signature.sequence.apply(this,bits);
         var f = function(args) {
+            if(args.length==0) {
+                return false;
+            }
             if(!jme.isType(args[0],'list')) {
                 return false;
             }
@@ -3369,9 +3410,52 @@ jme.signature = {
             if(items===false || items.length!=args[0].value.length) {
                 return false;
             }
-            return {type: 'list', items: items};
+            return [{type: 'list', items: items}];
         }
         f.kind = 'list';
+        f.signatures = bits;
+        return f;
+    },
+    listof: function(sig) {
+        return jme.signature.list(jme.signature.multiple(sig));
+    },
+    dict: function(sig) {
+        var f = function(args) {
+            if(args.length==0) {
+                return false;
+            }
+            if(!jme.isType(args[0],'dict')) {
+                return false;
+            }
+            var items = {};
+            var entries = Object.entries(args[0].value);
+            for(var i=0;i<entries.length;i++) {
+                var key = entries[i][0];
+                var value = entries[i][1];
+                var m = sig(value);
+                if(m===false) {
+                    return false;
+                }
+                items[key] = m;
+            }
+            return [{type: 'dict', items: items}];
+        }
+        f.kind = 'dict';
+        f.signature = sig;
+        return f;
+    },
+    or: function() {
+        var bits = Array.prototype.slice.apply(arguments);
+        var f = function(args) {
+            for(var i=0;i<bits.length;i++) {
+                var m = bits[i](args);
+                if(m!==false) {
+                    return m;
+                }
+            }
+            return false;
+        }
+        f.kind = 'or';
         f.signatures = bits;
         return f;
     }
