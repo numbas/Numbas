@@ -372,7 +372,7 @@ var texOps = jme.display.texOps = {
     'exp': (function(thing,texArgs) { return ('e^{ '+texArgs[0]+' }'); }),
     'fact': (function(thing,texArgs)
             {
-                if(jme.isType(thing.args[0].tok=='number') || thing.args[0].tok.type=='name') {
+                if(jme.isType(thing.args[0].tok,'number') || thing.args[0].tok.type=='name') {
                     return texArgs[0]+'!';
                 } else {
                     return '\\left ('+texArgs[0]+' \\right )!';
@@ -953,7 +953,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return settings.texNumber(tok.value.toFloat(), settings);
     },
     'decimal': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value.toFloat(), settings);
+        return settings.texNumber(tok.value.toNumber(), settings);
     },
     'number': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value, settings);
@@ -1296,7 +1296,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'decimal': function(tree,tok,bits,settings) {
-        return settings.jmeNumber(tok.value.toFloat(),settings);
+        return settings.jmeNumber(tok.value.toNumber(),settings);
     },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)
