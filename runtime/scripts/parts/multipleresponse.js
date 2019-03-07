@@ -106,10 +106,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
          */
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
-            if(values.type!='list') {
+            if(!jme.isType(values,'list')) {
                 p.error('part.mcq.options def not a list',{properties: nodeName});
             }
-            var numValues = values.value.length;
+            var numValues = jme.castToType(values,'list').value.length;
             values.value.map(function(value) {
                 var node = xml.ownerDocument.createElement(nodeName);
                 var content = xml.ownerDocument.createElement('content');
@@ -117,24 +117,26 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 content.appendChild(span);
                 node.appendChild(content);
                 topNode.appendChild(node);
-                switch(value.type) {
-                case 'string':
-                case 'number':
+                function load_string(str) {
                     var d = document.createElement('d');
-                    d.innerHTML = value.type == 'string' ? value.value : Numbas.math.niceNumber(value.value);
+                    d.innerHTML = str;
                     var newNode;
                     try {
                         newNode = xml.ownerDocument.importNode(d,true);
                     } catch(e) {
-                        d = Numbas.xml.dp.parseFromString('<d>'+value.value.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
+                        d = Numbas.xml.dp.parseFromString('<d>'+str.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
                         newNode = xml.ownerDocument.importNode(d,true);
                     }
                     while(newNode.childNodes.length) {
                         span.appendChild(newNode.childNodes[0]);
                     }
-                    break;
-                case 'html':
-                    var selection = $(value.value);
+                }
+                if(jme.isType(value,'string')) {
+                    load_string(jme.castToType(value,'string').value);
+                } else if(jme.isType(value,'number')) {
+                    load_string(Numbas.math.niceNumber(jme.castToType(value,'string')));
+                } else if(jme.isType(value,'html')) {
+                    var selection = $(jme.castToType(value,'html').value);
                     for(var i=0;i<selection.length;i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i],true));
@@ -146,8 +148,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                             }
                         }
                     }
-                    break;
-                default:
+                } else {
                     span.appendChild(xml.ownerDocument.createTextNode(value));
                 }
             });
@@ -248,10 +249,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
-                if(!choices || choices.type!='list') {
+                if(!choices || !jme.isType(choices,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }
-                settings.choices = jme.unwrapValue(choices);
+                settings.choices = jme.unwrapValue(jme.castToType(choices,'list'));
             } else {
                 settings.choices = data.choices;
             }
@@ -260,10 +261,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
-                if(!answers || answers.type!='list') {
+                if(!answers || !jme.isType(answers,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
-                settings.answers = jme.unwrapValue(answers);
+                settings.answers = jme.unwrapValue(jme.castToType(answers,'list'));
             } else {
                 settings.answers = data.answers;
             }
@@ -533,40 +534,23 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         var matrix = [];
         if(settings.markingMatrixString) {
             matrix = jme.evaluate(settings.markingMatrixString,scope);
-            switch(matrix.type) {
-            case 'list':
-                var numLists = 0;
-                var numNumbers = 0;
-                for(var i=0;i<matrix.value.length;i++) {
-                    switch(matrix.value[i].type) {
-                    case 'list':
-                        numLists++;
-                        break;
-                    case 'number':
-                        numNumbers++;
-                        break;
-                    default:
-                        this.error('part.mcq.matrix wrong type',{type: matrix.value[i].type});
-                    }
-                }
-                if(numLists == matrix.value.length) {
-                    matrix = matrix.value.map(function(row){    //convert TNums to javascript numbers
-                        return row.value.map(function(e){return e.value;});
-                    });
-                } else if(numNumbers == matrix.value.length) {
-                    matrix = matrix.value.map(function(e) {
-                        return [e.value];
-                    });
-                } else {
-                    this.error('part.mcq.matrix mix of numbers and lists');
-                }
+            var sig = Numbas.jme.signature;
+            var m;
+            if(m=sig.type('matrix')([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value;
+            } else if(m=sig.listof(sig.type('number'))([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value.map(function(e) {
+                    return [e.value];
+                });
                 matrix.rows = matrix.length;
                 matrix.columns = matrix[0].length;
-                break;
-            case 'matrix':
-                matrix = matrix.value;
-                break;
-            default:
+            } else if(m=sig.listof(sig.listof(sig.type('number')))([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value.map(function(row) {
+                    return row.value.map(function(e){return e.value;});
+                });
+                matrix.rows = matrix.length;
+                matrix.columns = matrix[0].length;
+            } else {
                 this.error('part.mcq.matrix not a list');
             }
             if(this.flipped) {
