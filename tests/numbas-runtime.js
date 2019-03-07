@@ -9493,11 +9493,11 @@ jme.signature = {
             for(var i=0;i<entries.length;i++) {
                 var key = entries[i][0];
                 var value = entries[i][1];
-                var m = sig(value);
+                var m = sig([value]);
                 if(m===false) {
                     return false;
                 }
-                items[key] = m;
+                items[key] = m[0];
             }
             return [{type: 'dict', items: items}];
         }
