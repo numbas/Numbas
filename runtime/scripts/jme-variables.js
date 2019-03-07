@@ -101,7 +101,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Object} tmpfn - contains `definition`, `name`, `language`, `parameters`
      * @param {Numbas.jme.Scope} scope
      * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {Object} - contains `outcons`, `intype`, `evaluate`
+     * @returns {Numbas.jme.funcObj}
      */
     makeFunction: function(tmpfn,scope,withEnv) {
         var intype = [],
@@ -112,8 +112,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         });
         var outcons = jme.types[tmpfn.outtype];
         var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
-        fn.outcons = outcons;
-        fn.intype = intype;
         fn.paramNames = paramNames;
         fn.definition = tmpfn.definition;
         fn.name = tmpfn.name.toLowerCase();
