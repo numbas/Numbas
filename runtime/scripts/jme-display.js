@@ -1550,7 +1550,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
  * @param {Array.<String>} items
  * @returns {String}
  */
-function align(header,items) {
+var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
     /** Pad a lien of text so it's in the centre of a line of length `n`.
      * @param {String} line
      * @param {Number} n
@@ -1643,7 +1643,7 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'op':
         case 'function':
             var args = tree.args.map(function(arg){ return tree_diagram(arg); });
-            return align(tree.tok.name, args);
+            return align_text_blocks(tree.tok.name, args);
         default:
             return treeToJME(tree);
     }

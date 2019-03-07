@@ -204,6 +204,7 @@ Numbas.runImmediately = function(deps,fn) {
         }
     });
     if(missing_dependencies.length) {
+        console.log(deps.filter(function(r){return scriptreqs[r].executed}));
         throw(new Error("Can't run because the following dependencies have not run: "+missing_dependencies.join(', ')));
     }
     fn();

@@ -110,6 +110,7 @@
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
     "jme.texsubvars.missing parameter": "Missing parameter in {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
+    "jme.type.type already registered": "The data type {{type}} has already been registered so can't be registered again.",
     "jme.type.no cast method": "Can't automatically convert from {{from}} to {{to}}.",
     "jme.user javascript.error": "Error in user-defined javascript function <code>{{name}}</code>: {{-message}}",
     "jme.user javascript.returned undefined": "User-defined javascript function <code>{{name}}</code> returned <code>undefined</code>.",

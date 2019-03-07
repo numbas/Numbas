@@ -139,7 +139,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     eq: function(a,b) {
         if(a.type != b.type) {
-            var type = Numbas.jme.findCompatibleType(a,b);
+            var type = Numbas.jme.findCompatibleType(a.type,b.type);
             if(type) {
                 a = Numbas.jme.castToType(a,type);
                 b = Numbas.jme.castToType(b,type);

@@ -659,13 +659,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
         return ntok;
     },
-    /** Find a type that both `a` and `b` can be automatically cast to, or return `undefined`.
+    /** Find a type that both types `a` and `b` can be automatically cast to, or return `undefined`.
      *
-     * @param {Numbas.jme.token} a
-     * @param {Numbas.jme.token} b
+     * @param {String} a
+     * @param {String} b
      * @returns {String}
      */
     findCompatibleType: function(a,b) {
+        a = jme.types[a];
+        b = jme.types[b];
+        if(a===undefined || b===undefined) {
+            return undefined;
+        }
+        a = a.prototype;
+        b = b.prototype;
         if(a.type==b.type) {
             return a.type;
         }
@@ -1962,13 +1969,23 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
  * @namespace Numbas.jme.types
  */
 var types = jme.types = {}
+
+jme.registerType = function(constructor,name,casts) {
+    if(jme.types[name]) {
+        throw(new Numbas.Error('jme.type.type already registered',{type:name}));
+    }
+    jme.types[name] = constructor;
+    constructor.prototype.type = name;
+    constructor.prototype.casts = casts;
+}
+
 /** Nothing type.
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @constructor
  */
-var TNothing = types.TNothing = types.nothing = function() {};
-TNothing.prototype.type = 'nothing';
+var TNothing = types.TNothing = function() {};
+jme.registerType(TNothing,'nothing');
 /** Number type.
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -1978,8 +1995,7 @@ TNothing.prototype.type = 'nothing';
  * @constructor
  * @param {Number} num
  */
-var TNum = types.TNum = types.number = function(num)
-{
+var TNum = types.TNum = function(num) {
     if(num===undefined)
         return;
     this.originalValue = num;
@@ -2000,56 +2016,69 @@ var TNum = types.TNum = types.number = function(num)
     }
     this.value = num.complex ? num : parseFloat(num);
 }
-TNum.prototype.type = 'number';
-TNum.prototype.casts = {
-    'decimal': function(n) {
-        return new TDecimal(new Decimal(n.value));
+jme.registerType(
+    TNum,
+    'number', 
+    {
+        'decimal': function(n) {
+            return new TDecimal(new Decimal(n.value));
+        }
     }
-}
+);
 
-var TInt = types.TInt = types.integer = function(num) {
+var TInt = types.TInt = function(num) {
     this.originalValue = num;
     this.value = Math.round(num);
 }
-TInt.prototype.type = 'integer';
-TInt.prototype.casts = {
-    'number': function(n) {
-        var t = new TNum(n.value);
-        t.originalValue = this.originalValue;
-        return t;
-    },
-    'rational': function(n) {
-        return new TRational(new math.Fraction(n.value,1));
-    },
-    'decimal': function(n) {
-        return new TDecimal(new Decimal(n.value));
+jme.registerType(
+    TInt,
+    'integer',
+    {
+        'number': function(n) {
+            var t = new TNum(n.value);
+            t.originalValue = this.originalValue;
+            return t;
+        },
+        'rational': function(n) {
+            return new TRational(new math.Fraction(n.value,1));
+        },
+        'decimal': function(n) {
+            return new TDecimal(new Decimal(n.value));
+        }
     }
-}
-var TRational = types.TRational = types.integer = function(value) {
+);
+
+var TRational = types.TRational = function(value) {
     this.value = value;
 }
-TRational.prototype.type = 'rational';
-TRational.prototype.casts = {
-    'number': function(n) {
-        return new TNum(n.value.numerator/n.value.denominator);
-    },
-    'decimal': function(n) {
-        return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+jme.registerType(
+    TRational,
+    'rational',
+    {
+        'number': function(n) {
+            return new TNum(n.value.numerator/n.value.denominator);
+        },
+        'decimal': function(n) {
+            return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+        }
     }
-}
+);
 
 /** A Decimal number.
  *  Powered by [decimal.js](http://mikemcl.github.io/decimal.js/)
  */
-var TDecimal = types.TDecimal = types.decimal = function(value) {
+var TDecimal = types.TDecimal = function(value) {
     this.value = value;
 }
-TDecimal.prototype.type = 'decimal';
-TDecimal.prototype.casts = {
-    'number': function(n) {
-        return new TNum(n.value.toNumber());
+jme.registerType(
+    TDecimal,
+    'decimal',
+    {
+        'number': function(n) {
+            return new TNum(n.value.toNumber());
+        }
     }
-}
+);
 
 /** String type.
  * @memberof Numbas.jme.types
@@ -2061,11 +2090,11 @@ TDecimal.prototype.casts = {
  * @constructor
  * @param {String} s
  */
-var TString = types.TString = types.string = function(s)
-{
+var TString = types.TString = function(s) {
     this.value = s;
 }
-TString.prototype.type = 'string';
+jme.registerType(TString,'string');
+
 /** Boolean type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2074,11 +2103,11 @@ TString.prototype.type = 'string';
  * @constructor
  * @param {Boolean} b
  */
-var TBool = types.TBool = types.boolean = function(b)
-{
+var TBool = types.TBool = function(b) {
     this.value = b;
 }
-TBool.prototype.type = 'boolean';
+jme.registerType(TBool,'boolean');
+
 /** HTML DOM element
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2087,7 +2116,7 @@ TBool.prototype.type = 'boolean';
  * @constructor
  * @param {Element} html
  */
-var THTML = types.THTML = types.html = function(html) {
+var THTML = types.THTML = function(html) {
     if(html.ownerDocument===undefined && !html.jquery) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
@@ -2103,7 +2132,8 @@ var THTML = types.THTML = types.html = function(html) {
         this.value = elem.children;
     }
 }
-THTML.prototype.type = 'html';
+jme.registerType(THTML,'html');
+
 /** List of elements of any data type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2113,22 +2143,21 @@ THTML.prototype.type = 'html';
  * @constructor
  * @param {Number|Array.<Numbas.jme.token>} value - Either the size of the list, or an array of values
  */
-var TList = types.TList = types.list = function(value)
-{
-    switch(typeof(value))
-    {
-    case 'number':
-        this.vars = value;
-        break;
-    case 'object':
-        this.value = value;
-        this.vars = value.length;
-        break;
-    default:
-        this.vars = 0;
+var TList = types.TList = function(value) {
+    switch(typeof(value)) {
+        case 'number':
+            this.vars = value;
+            break;
+        case 'object':
+            this.value = value;
+            this.vars = value.length;
+            break;
+        default:
+            this.vars = 0;
     }
 }
-TList.prototype.type = 'list';
+jme.registerType(TList,'list');
+
 /** Key-value pair assignment
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2136,13 +2165,14 @@ TList.prototype.type = 'list';
  * @constructor
  * @param {String} key
  */
-var TKeyPair = types.TKeyPair = types.keypair = function(key) {
+var TKeyPair = types.TKeyPair = function(key) {
     this.key = key;
 }
 TKeyPair.prototype = {
-    type: 'keypair',
     vars: 1
 }
+jme.registerType(TKeyPair,'keypair');
+
 /** Dictionary: map strings to values
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2151,12 +2181,11 @@ TKeyPair.prototype = {
  * @constructor
  * @param {Object.<Numbas.jme.token>} value
  */
-var TDict = types.TDict = types.dict = function(value) {
+var TDict = types.TDict = function(value) {
     this.value = value;
 }
-TDict.prototype = {
-    type: 'dict'
-}
+jme.registerType(TDict,'dict');
+
 /** Set type: a collection of elements, with no duplicates
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2165,15 +2194,19 @@ TDict.prototype = {
  * @constructor
  * @param {Array.<Numbas.jme.token>} value
  */
-var TSet = types.TSet = types.set = function(value) {
+var TSet = types.TSet = function(value) {
     this.value = value;
 }
-TSet.prototype.type = 'set';
-TSet.prototype.casts = {
-    'list': function(s) {
-        return new TList(s.value);
+jme.registerType(
+    TSet,
+    'set',
+    {
+        'list': function(s) {
+            return new TList(s.value);
+        }
     }
-}
+);
+
 /** Vector type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2182,16 +2215,19 @@ TSet.prototype.casts = {
  * @constructor
  * @param {Array.<Number>} value
  */
-var TVector = types.TVector = types.vector = function(value)
-{
+var TVector = types.TVector = function(value) {
     this.value = value;
 }
-TVector.prototype.type = 'vector';
-TVector.prototype.casts = {
-    'list': function(v) {
-        return new TList(v.value.map(function(n){ return new TNum(n); }));
+jme.registerType(
+    TVector,
+    'vector',
+    {
+        'list': function(v) {
+            return new TList(v.value.map(function(n){ return new TNum(n); }));
+        }
     }
-}
+);
+
 /** Matrix type
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2200,8 +2236,7 @@ TVector.prototype.casts = {
  * @constructor
  * @param {matrix} value
  */
-var TMatrix = types.TMatrix = types.matrix = function(value)
-{
+var TMatrix = types.TMatrix = function(value) {
     this.value = value;
     if(arguments.length>0) {
         if(value.length!=value.rows) {
@@ -2212,12 +2247,16 @@ var TMatrix = types.TMatrix = types.matrix = function(value)
         }
     }
 }
-TMatrix.prototype.type = 'matrix';
-TMatrix.prototype.casts = {
-    'list': function(m) {
-        return new TList(m.value.map(function(r){return new TVector(r)}));
+jme.registerType(
+    TMatrix,
+    'matrix',
+    {
+        'list': function(m) {
+            return new TList(m.value.map(function(r){return new TVector(r)}));
+        }
     }
-}
+);
+
 /** A range of numerical values - either discrete or continuous
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2230,8 +2269,7 @@ TMatrix.prototype.casts = {
  * @constructor
  * @param {Array.<Number>} range - `[start,end,step]`
  */
-var TRange = types.TRange = types.range = function(range)
-{
+var TRange = types.TRange = function(range) {
     this.value = range;
     if(this.value!==undefined)
     {
@@ -2241,12 +2279,16 @@ var TRange = types.TRange = types.range = function(range)
         this.size = Math.floor((this.end-this.start)/this.step);
     }
 }
-TRange.prototype.type = 'range';
-TRange.prototype.casts = {
-    'list': function(r) {
-        return new TList(math.rangeToList(r.value).map(function(n){return new TNum(n)}));
+jme.registerType(
+    TRange,
+    'range',
+    {
+        'list': function(r) {
+            return new TList(math.rangeToList(r.value).map(function(n){return new TNum(n)}));
+        }
     }
-}
+);
+
 /** Variable name token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2258,13 +2300,13 @@ TRange.prototype.casts = {
  * @param {String} name
  * @param {Array.<String>} annotation
  */
-var TName = types.TName = types.name = function(name,annotation)
-{
+var TName = types.TName = function(name,annotation) {
     this.name = name;
     this.value = name;
     this.annotation = annotation;
 }
-TName.prototype.type = 'name';
+jme.registerType(TName,'name');
+
 /** JME function token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2276,13 +2318,15 @@ TName.prototype.type = 'name';
  * @param {String} name
  * @param {Array.<String>} [annotation] - any annotations for the function's name
  */
-var TFunc = types.TFunc = types['function'] = function(name,annotation)
-{
+var TFunc = types.TFunc = function(name,annotation) {
     this.name = name;
     this.annotation = annotation;
 }
-TFunc.prototype.type = 'function';
-TFunc.prototype.vars = 0;
+TFunc.prototype = {
+    vars: 0
+}
+jme.registerType(TFunc,'function');
+
 /** Unary/binary operation token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2301,8 +2345,7 @@ TFunc.prototype.vars = 0;
  * @param {Boolean} commutative
  * @param {Boolean} associative
  */
-var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative,associative)
-{
+var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative) {
     this.name = op;
     this.postfix = postfix || false;
     this.prefix = prefix || false;
@@ -2310,7 +2353,8 @@ var TOp = types.TOp = types.op = function(op,postfix,prefix,arity,commutative,as
     this.commutative = commutative || false;
     this.associative = associative || false;
 }
-TOp.prototype.type = 'op';
+jme.registerType(TOp,'op');
+
 /** Punctuation token
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
@@ -2318,19 +2362,24 @@ TOp.prototype.type = 'op';
  * @constructor
  * @param {String} kind - The punctuation character
  */
-var TPunc = types.TPunc = function(kind)
-{
+var TPunc = types.TPunc = function(kind) {
     this.type = kind;
 }
-var TExpression = types.TExpression = types.expression = function(tree) {
+
+/** A JME expression, as a token.
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {Numbas.jme.tree} tree
+ * @constructor
+ * @param {String|Numbas.jme.tree} tree
+ */
+var TExpression = types.TExpression = function(tree) {
     if(typeof(tree)=='string') {
         tree = jme.compile(tree);
     }
     this.tree = tree;
 }
-TExpression.prototype = {
-    type: 'expression'
-}
+jme.registerType(TExpression,'expression');
 
 /** Arities of built-in operations
  * @readonly
@@ -3147,176 +3196,313 @@ var compareTrees = jme.compareTrees = function(a,b) {
 
 /** Infer the types of variables in an expression, by trying all definitions of functions and returning only those that can be satisfied by an assignment of types to variable names.
  * Doesn't work well on functions with unknown return type, like `if` and `switch`. In these cases, it assumes the return type of the function is whatever it needs to be, even if that is inconsistent with what the function would actually do.
- * Returns a list of possible assignments of types, arranged in order of preference: numbers are preferred to matrices, for example, and then by specificity (number of variables assigned a type).
  * @param {Numbas.jme.tree} tree
  * @param {Numbas.jme.Scope} scope
- * @param {String} outtype - the desired return type of the expression
- * @param {Object.<String>} assigned_types - types of variables which have already been inferred
- * @returns {Array.<Object.<String>>}
+ * @returns {Object.<String>} a dictionary mapping names to types.
  */
-var inferVariableTypes = jme.inferVariableTypes = function(tree, scope, outtype, assigned_types) {
-    /** Deduplicate a list of objects
-     * Return only items with unique sets of entries
-     * @param {Array.<Object>} objs
-     * @returns {Arra.<Object>}
+jme.inferVariableTypes = function(tree,scope) {
+    /** Create an annotated copy of the tree, fetching definitions for functions, and storing state to enumerate function definitions
      */
-    function dedup(objs) {
-        if(!objs.length) {
-            return [];
+    function AnnotatedTree(tree) {
+        this.tok = tree.tok;
+        if(tree.args) {
+            this.args = tree.args.map(function(a){ return new AnnotatedTree(a); });
         }
-        /** Compare two assignment dictionaries.
-         * @param {Object} a
-         * @param {Object} b
-         * @returns {Number}
+        switch(tree.tok.type) {
+            case 'op':
+            case 'function':
+                this.fns = scope.getFunction(tree.tok.name);
+                this.pos = 0;
+                this.signature_enumerators = this.fns.map(function(fn){ return new SignatureEnumerator(fn.intype) });
+                break;
+            default:
+                break;
+        }
+    }
+    AnnotatedTree.prototype = {
+
+        toString: function() {
+            var args;
+            if(this.args) {
+                args = this.args.map(function(arg){ return arg.toString(); });
+            }
+            switch(this.tok.type) {
+                case 'op':
+                case 'function':
+                    var header = this.tok.name+': '+this.signature_enumerators[this.pos].signature().join('->')+'->'+this.fns[this.pos].outtype;
+                    return jme.display.align_text_blocks(header, args);
+                default:
+                    if(args) {
+                        return jme.display.align_text_blocks(this.tok.type,args);
+                    } else {
+                        return jme.display.treeToJME({tok:this.tok});
+                    }
+            }
+        },
+
+        /** Reset this tree to its initial state
          */
-        function compare(a,b) {
-            var as = Object.entries(a).sort();
-            var bs = Object.entries(b).sort();
-            for(var i=0;i<Math.max(as.length,bs.length);i++) {
-                if(i>=as.length) {
-                    return -1;
-                }
-                if(i>=bs.length) {
-                    return 1;
-                }
-                var ai = as[i][0];
-                var bi = bs[i][0];
-                var av = as[i][1];
-                var bv = bs[i][1];
-                var r = ai>bi ? 1 : ai<bi ? -1 : av>bv ? 1 : av<bv ? -1 : 0;
-                if(r!=0) {
-                    return r;
+        backtrack: function() {
+            if(this.args) {
+                this.args.forEach(function(t){t.backtrack();});
+            }
+            switch(this.tok.type) {
+                case 'op':
+                case 'function':
+                    this.pos = 0;
+                    this.signature_enumerators.forEach(function(se){se.backtrack();});
+                    break;
+            }
+        },
+
+        /** Find an assignment of types to variables in this tree which produces the given output type
+         */
+        assign: function(outtype,assignments) {
+            if(outtype=='?') {
+                outtype = undefined;
+            }
+            function mutually_compatible_type(types) {
+                for(var x in jme.types) {
+                    var casts = jme.types[x].casts || {};
+                    if(types.every(function(t) { return t==x || casts[t]; })) {
+                        return x;
+                    }
                 }
             }
-            return 0;
-        }
-        objs.sort(compare);
-        var out = [objs[0]];
 
-        for(var i=1;i<objs.length;i++) {
-            if(compare(objs[i],objs[i-1])!=0) {
-                out.push(objs[i]);
-            }
-        }
-        return out;
-    }
-
-    assigned_types = assigned_types || {};
-    if(outtype=='?') {
-        outtype = undefined;
-    }
-    switch(tree.tok.type) {
-        case 'name':
-            var name = tree.tok.name.toLowerCase();
-            if(assigned_types[name] !== undefined) {
-                if(!outtype || outtype==assigned_types[name]) {
-                    return [assigned_types];
-                } else {
-                    return [];
-                }
-            } else {
-                var assignment = util.copyobj(assigned_types);
-                if(outtype) {
-                    assignment[name] = outtype;
-                }
-                return [assignment];
-            }
-        case 'op':
-        case 'function':
-            var name = tree.tok.name.toLowerCase();
-            var functions = scope.getFunction(name.toLowerCase());
-            var assignments = [];
-            functions.forEach(function(fn) {
-                var fn_assignments = [assigned_types];
-
-                function assignments_for_signature(sig,states) {
-                    var out = [];
-                    states.forEach(function(state) {
-                        var assignment = state[0];
-                        var pos = state[1];
-                        if(pos>=tree.args.length) {
-                            return;
+            switch(this.tok.type) {
+                case 'name':
+                    var name = this.tok.name.toLowerCase();
+                    if(outtype===undefined || assignments[name]==outtype) {
+                        return assignments;
+                    } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {
+                        assignments = util.copyobj(assignments,true);
+                        assignments[name].casts[outtype] = true;
+                        var type = mutually_compatible_type(Object.keys(assignments[name].casts));
+                        if(type) {
+                            return assignments;
+                        } else {
+                            console.log(this.toString());
+                            console.log(`${name} wants to be ${outtype} but is ${assignments[name].type}`);
+                            return false;
                         }
-                        switch(sig.kind) {
-                            case 'type':
-                                var res = inferVariableTypes(tree.args[pos],scope,sig.type,assignment);
-                                out = out.concat(res.map(function(a){return [a,pos+1]}));
-                                break;
-                            case 'anything':
-                                var res = inferVariableTypes(tree.args[pos],scope,'?',assignment);
-                                out = out.concat(res.map(function(a){return [a,pos+1]}));
-                                break;
-                            case 'multiple':
-                                out.push(state);
-                                var nstates = [[assignment,pos]];
-                                while(nstates.length) {
-                                    var res = assignments_for_signature(sig.signature,nstates);
-                                    nstates = res.filter(function(a){ return a[1]>pos; });
-                                    out = out.concat(nstates);
-                                }
-                                break;
-                            case 'optional':
-                                out.push(state);
-                                var nstates = [[assignment,pos]];
-                                var res = assignments_for_signature(sig.signature,nstates);
-                                nstates = res.filter(function(a){ return a[1]>pos; });
-                                out = out.concat(nstates);
-                                break;
-                            case 'sequence':
-                                var nstates = [state];
-                                sig.signatures.forEach(function(arg) {
-                                    nstates = assignments_for_signature(arg,nstates);
-                                });
-                                out = out.concat(nstates);
-                                break;
-                            case 'or':
-                                sig.signatures.forEach(function(subsig) {
-                                    out = out.concat(assignments_for_signature(subsig,[state]));
-                                });
-                                break;
-                            default:
-                                break;
+                    } else {
+                        assignments = util.copyobj(assignments,true);
+                        assignments[name] = {
+                            type: outtype,
+                            casts: {outtype:true}
                         }
-                    });
-                    return out;
-                }
-                var fn_assignments = assignments_for_signature(fn.intype,[[assigned_types,0]]);
-                fn_assignments = fn_assignments.filter(function(a){return a[1]==tree.args.length}).map(function(a){return a[0];});
-
-                assignments = assignments.concat(fn_assignments);
-            });
-            assignments = dedup(assignments);
-            var type_preference_order = ['number','vector','matrix','boolean','set'];
-            /** Preference rating for the given type. A lower value is more preferred. Unrecognised types produce `Infinity`.
-             * @param {String} type
-             * @returns {Number}
-             */
-            function preference(type) {
-                var i = type_preference_order.indexOf(type);
-                return i==-1 ? Infinity : i;
+                        return assignments;
+                    }
+                case 'op':
+                case 'function':
+                    if(outtype && !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
+                        console.log(this.toString());
+                        console.log(`wrong return type for ${this.tok.name}: want ${outtype} but is ${this.fns[this.pos].outtype}`);
+                        return false;
+                    }
+                    var sig = this.signature_enumerators[this.pos].signature();
+                    if(sig.length!=this.args.length) {
+                        console.log(this.toString());
+                        console.log(`wrong number of arguments for ${this.tok.name}`);
+                        return false;
+                    }
+                    return this.assign_args(assignments,sig);
+                default:
+                    if(outtype && !jme.findCompatibleType(this.tok.type,outtype)) {
+                        console.log(this.toString());
+                        console.log(`wanted ${outtype} but was ${this.tok.type}`);
+                        return false;
+                    }
+                    return this.assign_args(assignments);
             }
-            assignments.sort(function(a,b) {
-                var as = Object.keys(a).sort();
-                var bs = Object.keys(b).sort();
-                for(var i=0;i<Math.max(as.length,bs.length);i++) {
-                    if(i>=as.length) {
-                        return -1;
-                    }
-                    if(i>=bs.length) {
-                        return 1;
-                    }
-                    var ai = preference(a[as[i]]);
-                    var bi = preference(b[bs[i]]);
-                    var r = ai>bi ? 1 : ai<bi ? -1 : 0;
-                    if(r!=0) {
-                        return r;
-                    }
+        },
+
+        /** Find an assignment based on this tree's arguments, with optional specified types for each of the arguments.
+         */
+        assign_args: function(assignments,signature) {
+            if(!this.args) {
+                return assignments;
+            }
+            for(var i=0;i<this.args.length;i++) {
+                var outtype = signature!==undefined ? signature[i] : undefined;
+                assignments = this.args[i].assign(outtype,assignments);
+                if(assignments===false) {
+                    return false;
                 }
-                return 0;
-            });
+            }
             return assignments;
+        },
+
+        /** Advance to the next state
+         * @returns {Boolean} true if successful
+         */
+        next: function() {
+            if(this.args) {
+                for(var i=0;i<this.args.length;i++) {
+                    if(this.args[i].next()) {
+                        for(i++;i<this.args.length;i++) {
+                            this.args[i].backtrack();
+                        }
+                        return true;
+                    }
+                }
+            }
+            switch(this.tok.type) {
+                case 'op':
+                case 'function':
+                    var s = this.signature_enumerators[this.pos].next();
+                    if(s) {
+                        this.args.forEach(function(arg){ arg.backtrack(); });
+                        return true;
+                    } else if(this.pos<this.fns.length-1) {
+                        this.pos += 1;
+                        this.signature_enumerators[this.pos].backtrack();
+                        this.args.forEach(function(arg){ arg.backtrack(); });
+                        return true;
+                    } else {
+                        return false;
+                    }
+                default:
+                    return false;
+            }
+        }
+    }
+
+    var at = new AnnotatedTree(tree);
+    do {
+        console.log(at.toString());
+        var res = at.assign(undefined,{});
+        if(res!==false) {
+            var o = {};
+            for(var x in res) {
+                o[x] = res[x].type;
+            }
+            return o;
+        }
+    } while(at.next());
+
+    return false;
+}
+
+var SignatureEnumerator = jme.SignatureEnumerator = function(sig) {
+    this.sig = sig;
+    switch(sig.kind) {
+        case 'multiple':
+            this.children = [];
+            break;
+        case 'optional':
+            this.child = new SignatureEnumerator(sig.signature);
+            this.include = false;
+            break;
+        case 'sequence':
+            this.children = sig.signatures.map(function(s){ return new SignatureEnumerator(s)});
+            break;
+        case 'or':
+            this.children = sig.signatures.map(function(s){ return new SignatureEnumerator(s)});
+            this.pos = 0;
+            break;
+        case 'type':
+        case 'anything':
         default:
-            return [assigned_types];
+            break;
+    }
+}
+SignatureEnumerator.prototype = {
+    /** The length of the signature corresponding to the current state of the enumerator
+     * @returns {Number}
+     */
+    length: function() {
+        switch(this.sig.kind) {
+            case 'optional':
+                return this.include ? this.child.length() : 0;
+            case 'sequence':
+            case 'multiple':
+                return this.children.map(function(c){return c.length()}).reduce(function(t,c){return t+c},0);
+            case 'or':
+                return this.children[this.pos].length();
+            case 'type':
+                return 1;
+            case 'anything':
+                return 1;
+            case 'list':
+                return 1;
+            case 'dict':
+                return 1;
+        }
+    },
+    /** Get the signature corresponding to the current state of the enumerator
+     * @returns {Array.<String>}
+     */
+    signature: function() {
+        switch(this.sig.kind) {
+            case 'optional':
+                return this.include ? this.child.signature() : [];
+            case 'sequence':
+            case 'multiple':
+                return this.children.map(function(c){return c.signature()}).reduce(function(args,c){return args.concat(c)},[]);
+            case 'or':
+                return this.children[this.pos].signature();
+            case 'type':
+                return [this.sig.type];
+            case 'anything':
+                return ['?'];
+            case 'list':
+                return ['list'];
+            case 'dict':
+                return ['dict'];
+            default:
+                return ['?'];
+        }
+    },
+    /** Advance to the next state, if possible.
+     * @returns {Boolean} true if the enumerator could advance
+     */
+    next: function() {
+        switch(this.sig.kind) {
+            case 'optional':
+                return false;
+            case 'or':
+                if(!this.children[this.pos].next()) {
+                    this.pos += 1;
+                    return this.pos<this.children.length;
+                }
+                return true;
+            case 'sequence':
+            case 'multiple':
+                for(var i=this.children.length-1;i>=0;i--) {
+                    if(this.children[i].next()) {
+                        return true;
+                    }
+                    this.children[i].backtrack();
+                }
+                return false;
+            case 'type':
+            case 'anything':
+            default:
+                return false;
+        }
+    },
+    /** Reset the enumerator to its initial state
+     */
+    backtrack: function() {
+        switch(this.sig.kind) {
+            case 'optional':
+                this.child.backtrack();
+                break;
+            case 'or':
+                this.children.forEach(function(c){ c.backtrack(); });
+                this.pos = 0;
+                break;
+            case 'sequence':
+                this.children.forEach(function(c){ c.backtrack(); });
+                break;
+            case 'multiple':
+                this.children = [];
+                break;
+            default:
+                break;
+        }
     }
 }
 

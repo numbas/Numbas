@@ -668,7 +668,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
     }
 });
 Numbas.jme.lazyOps.push('if');
-newBuiltin('switch',[sig.multiple(sig.sequence(sig.type('boolean'),sig.anything()))],'?', null, {
+newBuiltin('switch',[sig.multiple(sig.sequence(sig.type('boolean'),sig.anything())),'?'],'?', null, {
     evaluate: function(args,scope) {
         for(var i=0; i<args.length-1; i+=2 )
         {
