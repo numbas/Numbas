@@ -706,6 +706,9 @@
 					}
 					assert.equal(acc,true,'random(1,2,"a") in [1,2,"a"]');
 
+                    var x = evaluate('random(1..3#0)').value;
+                    assert.ok(x>=1 && x<=3,'random(1..3#0)')
+
 					raisesNumbasError(assert, function(){ evaluate('random()') },'math.choose.empty selection','empty selection: random()');
 
 					deepCloseEqual(assert, evaluate('deal(4)').value.map(getValue).sort(),[0,1,2,3],'deal(4)');
