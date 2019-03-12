@@ -10185,6 +10185,7 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('random', [TRange], TNum, math.random, {random:true} );
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
