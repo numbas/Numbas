@@ -3262,9 +3262,21 @@ jme.inferVariableTypes = function(tree,scope) {
                 outtype = undefined;
             }
             function mutually_compatible_type(types) {
-                for(var x in jme.types) {
+                var preferred_types = ['number','decimal'];
+                function mutually_compatible(x) {
                     var casts = jme.types[x].prototype.casts || {};
                     if(types.every(function(t) { return t==x || casts[t]; })) {
+                        return true;
+                    }
+                }
+                for(var i=0;i<preferred_types.length;i++) {
+                    var type = preferred_types[i];
+                    if(mutually_compatible(type)) {
+                        return type;
+                    }
+                }
+                for(var x in jme.types) {
+                    if(mutually_compatible(x)) {
                         return x;
                     }
                 }
