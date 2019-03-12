@@ -2505,22 +2505,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
         } else {
-            var s = math.sign(a);
-            if(a==0) { return 0; }
-            if(a==Infinity || a==-Infinity) { return a; }
-            var bp = Math.pow(10, b-Math.ceil(math.log10(s*a)));
-            var ibp = Math.pow(10, Math.ceil(math.log10(s*a))-b);
-            //test to allow a bit of leeway to account for floating point errors
-            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*bp*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*bp*10 % 10);
-            var out = a*bp;
-            if(d==4 && 1-v<1e-9) {
-                out += 1;
-            } else if(d==-5 && v>-1e-9 && v<0) {
-                out += 1;
-            }
-            return Math.round(out)*ibp;
+            return parseFloat(a.toPrecision(b))
         }
     },
     /** Count the number of decimal places used in the string representation of a number.
@@ -6542,6 +6527,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             if(i % 2)
             {
                 var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                if(v===null) {
+                    throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
+                }
                 if(display) {
                     v = jme.tokenToDisplayString(v);
                 } else {
@@ -9993,7 +9981,7 @@ newBuiltin('latex',[TString],TString,null,{
 });
 newBuiltin('safe',[TString],TString,null, {
     evaluate: function(args,scope) {
-        var t = args[0].tok;
+        var t = new TString(args[0].tok.value);
         t.safe = true;
         return t;
     }
@@ -12834,6 +12822,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var str = '"'+jme.escape(tok.value)+'"';
         if(tok.latex) {
             return 'latex('+str+')';
+        } else if(tok.safe) {
+            return 'safe('+str+')';
         } else {
             return str;
         }
@@ -13023,7 +13013,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
     if(!tree)
         return '';
-    settings = settings || {};
+    settings = util.copyobj(settings || {}, true);
     var args=tree.args, l;
     if(args!==undefined && ((l=args.length)>0))
     {
@@ -13547,6 +13537,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(i % 2)
             {
                 var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                if(v===null) {
+                    throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
+                }
                 v = doToken(v);
             }
             else

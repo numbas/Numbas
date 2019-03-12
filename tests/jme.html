@@ -672,7 +672,7 @@
 
 					assert.equal(evaluate('siground(0.123,2)').value,0.12,'siground(0.123,2)');
 					assert.equal(evaluate('siground(123456.123456,3)').value,123000,'siground(123456.123456,3)');
-					assert.equal(evaluate('siground(-32.45,3)').value,-32.4,'siground(-32.45,3)');
+					assert.equal(evaluate('siground(-32.45,3)').value,-32.5,'siground(-32.45,3)');
 					assert.equal(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
 					assert.equal(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
 					assert.equal(evaluate('siground(14515200,3)').value,14500000,'siground(14515200,3)');
@@ -1192,6 +1192,7 @@
                     assert.equal(Numbas.math.niceNumber(2e-10,{precisionType:'dp',precision:12}),'0.000000000200','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(2.2e-10,{precisionType:'dp',precision:12}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(1.234e5,{style:'scientific',precisionType:'dp',precision:1}),'1.2e+5','precision formatting on a scientific form number');
+                    assert.equal(Numbas.math.niceNumber(0.0002663,{precisionType:'sigfig',precision:1}),'0.0003','sigfig precision doesn\'t add unwanted floating point error digits')
 				});
 
                 QUnit.test('Number notation styles',function(assert) {

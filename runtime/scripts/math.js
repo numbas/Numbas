@@ -843,22 +843,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
         } else {
-            var s = math.sign(a);
-            if(a==0) { return 0; }
-            if(a==Infinity || a==-Infinity) { return a; }
-            var bp = Math.pow(10, b-Math.ceil(math.log10(s*a)));
-            var ibp = Math.pow(10, Math.ceil(math.log10(s*a))-b);
-            //test to allow a bit of leeway to account for floating point errors
-            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*bp*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*bp*10 % 10);
-            var out = a*bp;
-            if(d==4 && 1-v<1e-9) {
-                out += 1;
-            } else if(d==-5 && v>-1e-9 && v<0) {
-                out += 1;
-            }
-            return Math.round(out)*ibp;
+            return parseFloat(a.toPrecision(b))
         }
     },
     /** Count the number of decimal places used in the string representation of a number.

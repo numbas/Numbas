@@ -1323,6 +1323,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var str = '"'+jme.escape(tok.value)+'"';
         if(tok.latex) {
             return 'latex('+str+')';
+        } else if(tok.safe) {
+            return 'safe('+str+')';
         } else {
             return str;
         }
@@ -1512,7 +1514,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
     if(!tree)
         return '';
-    settings = settings || {};
+    settings = util.copyobj(settings || {}, true);
     var args=tree.args, l;
     if(args!==undefined && ((l=args.length)>0))
     {

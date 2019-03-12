@@ -2267,6 +2267,7 @@ Numbas.locale = {
     "jme.func.matrix.invalid row type": "Can't construct a matrix from rows of type {{type}}",
     "jme.func.except.continuous range": "Can't use the 'except' operator on continuous ranges.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
+    "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
     "jme.texsubvars.missing parameter": "Missing parameter in {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
@@ -2467,7 +2468,9 @@ Numbas.locale = {
     "was_plural": "were",
     "part": "part",
     "gap": "gap",
-    "step": "step"
+    "step": "step",
+    "left brace": "{",
+    "right brace": "}"
 }
 }
 ,

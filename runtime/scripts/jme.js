@@ -480,6 +480,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             if(i % 2)
             {
                 var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                if(v===null) {
+                    throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
+                }
                 if(display) {
                     v = jme.tokenToDisplayString(v);
                 } else {
