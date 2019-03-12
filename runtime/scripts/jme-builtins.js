@@ -579,7 +579,11 @@ newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)
 newBuiltin('-', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.minus(b); });
 newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).minus(b); });
 newBuiltin('*', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.times(b); });
-newBuiltin('*', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
+var sig_number = sig.type('number');
+function sig_non_complex_number(args) {
+    return sig_number(args) && !args[0].value.complex ? [{type:'number'}] : false;
+}
+newBuiltin('*', [sig_non_complex_number,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
 newBuiltin('/', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.dividedBy(b); });
 newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).dividedBy(b); });
 newBuiltin('abs', [TDecimal], TDecimal, function(a){ return a.absoluteValue(); });
