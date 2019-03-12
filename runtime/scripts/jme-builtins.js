@@ -67,90 +67,6 @@ function newBuiltin(name,intype,outcons,fn,options) {
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
 
-var Fraction = math.Fraction;
-var ScientificNumber = math.ScientificNumber;
-
-// Integer arithmetic
-newBuiltin('int',[TNum],TInt, function(n){ return n; });
-newBuiltin('+u', [TInt], TInt, function(a){return a;});
-newBuiltin('-u', [TInt], TInt, math.negate);
-newBuiltin('+', [TInt,TInt], TInt, math.add);
-newBuiltin('-', [TInt,TInt], TInt, math.sub);
-newBuiltin('*', [TInt,TInt], TInt, math.mul );
-newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
-newBuiltin('^', [TInt,TInt], TDecimal, function(a,b) { return (new Decimal(a)).pow(b); });
-newBuiltin('string',[TInt], TString, function(a) { return a+''; });
-
-// Rational arithmetic
-newBuiltin('rational',[TNum],TRational,Fraction.fromFloat);
-newBuiltin('+u', [TRational], TRational, function(a){return a;});
-newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
-newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b); });
-newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
-newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
-newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
-newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
-
-//Decimal arithmetic
-newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
-newBuiltin('decimal',[TNum],TDecimal,function(x){return new Decimal(x)});
-newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
-newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
-newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
-newBuiltin('+', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.plus(b); });
-newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).plus(b); });
-newBuiltin('-', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.minus(b); });
-newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).minus(b); });
-newBuiltin('*', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.times(b); });
-newBuiltin('*', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
-newBuiltin('/', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.dividedBy(b); });
-newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).dividedBy(b); });
-newBuiltin('abs', [TDecimal], TDecimal, function(a){ return a.absoluteValue(); });
-newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.ceil(); });
-newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.cos(); });
-newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
-newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.floor(); });
-newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
-newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
-newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.cosh(); });
-newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.sinh(); });
-newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.tanh(); });
-newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.acos(); });
-newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.acosh(); });
-newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.asinh(); });
-newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.atanh(); });
-newBuiltin('asin', [TDecimal], TDecimal, function(a){ return a.asin(); });
-newBuiltin('atan', [TDecimal], TDecimal, function(a){ return a.atan(); });
-newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
-newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
-newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
-newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
-newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
-newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
-newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
-    var m = a.mod(b);
-    if(m.isNegative()) {
-        m = m.plus(b);
-    }
-    return m;
-});
-newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.exp(); });
-newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.ln(); });
-newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.countSigFigs(); });
-newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
-newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.sin(); });
-newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.sqrt(); });
-newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.tan(); });
-newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
-newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
-newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x); });
-newBuiltin('number',[TDecimal], TDecimal, function(a) {return a.toNumber(); });
-newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
-newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
-newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
-newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.trunc(); });
-newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.minus(a.trunc()); });
-
 newBuiltin('+u', [TNum], TNum, function(a){return a;});
 newBuiltin('+u', [TVector], TVector, function(a){return a;});
 newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;});
@@ -551,7 +467,6 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
-newBuiltin('random', [TRange], TNum, math.random, {random:true} );
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
@@ -627,6 +542,93 @@ newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l){
     {unwrapValues: true}
 );
 newBuiltin('|', [TNum,TNum], TBool, math.divides );
+
+
+var Fraction = math.Fraction;
+
+// Integer arithmetic
+newBuiltin('int',[TNum],TInt, function(n){ return n; });
+newBuiltin('+u', [TInt], TInt, function(a){return a;});
+newBuiltin('-u', [TInt], TInt, math.negate);
+newBuiltin('+', [TInt,TInt], TInt, math.add);
+newBuiltin('-', [TInt,TInt], TInt, math.sub);
+newBuiltin('*', [TInt,TInt], TInt, math.mul );
+newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
+newBuiltin('^', [TInt,TInt], TDecimal, function(a,b) { return (new Decimal(a)).pow(b); });
+newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+
+// Rational arithmetic
+newBuiltin('rational',[TNum],TRational,Fraction.fromFloat);
+newBuiltin('+u', [TRational], TRational, function(a){return a;});
+newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
+newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b); });
+newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
+newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
+newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
+newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
+
+//Decimal arithmetic
+newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
+newBuiltin('decimal',[TNum],TDecimal,function(x){return new Decimal(x)});
+newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
+newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
+newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
+newBuiltin('+', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.plus(b); });
+newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).plus(b); });
+newBuiltin('-', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.minus(b); });
+newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).minus(b); });
+newBuiltin('*', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.times(b); });
+newBuiltin('*', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
+newBuiltin('/', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.dividedBy(b); });
+newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).dividedBy(b); });
+newBuiltin('abs', [TDecimal], TDecimal, function(a){ return a.absoluteValue(); });
+newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.ceil(); });
+newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.cos(); });
+newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
+newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.floor(); });
+newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
+newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
+newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.cosh(); });
+newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.sinh(); });
+newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.tanh(); });
+newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.acos(); });
+newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.acosh(); });
+newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.asinh(); });
+newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.atanh(); });
+newBuiltin('asin', [TDecimal], TDecimal, function(a){ return a.asin(); });
+newBuiltin('atan', [TDecimal], TDecimal, function(a){ return a.atan(); });
+newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
+newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
+newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
+newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
+newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
+newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
+newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
+    var m = a.mod(b);
+    if(m.isNegative()) {
+        m = m.plus(b);
+    }
+    return m;
+});
+newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.exp(); });
+newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.ln(); });
+newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.countSigFigs(); });
+newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
+newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.sin(); });
+newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.sqrt(); });
+newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.tan(); });
+newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
+newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
+newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x); });
+newBuiltin('number',[TDecimal], TDecimal, function(a) {return a.toNumber(); });
+newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
+newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
+newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
+newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.trunc(); });
+newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.minus(a.trunc()); });
+
+
+
 newBuiltin('sum',[sig.listof(sig.type('number'))],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('deal',[TNum],TList,
@@ -641,15 +643,6 @@ newBuiltin('deal',[TNum],TList,
 );
 newBuiltin('shuffle',[TList],TList,
     function(list) {
-        return math.shuffle(list);
-    },
-    {
-        random:true
-    }
-);
-newBuiltin('shuffle',[TRange],TList,
-    function(range) {
-        var list = math.rangeToList(range).map(function(n){return new TNum(n)})
         return math.shuffle(list);
     },
     {
@@ -1264,9 +1257,6 @@ newBuiltin('indices',[TList,'?'],TList,null, {
 });
 newBuiltin('set',[TList],TSet,function(l) {
     return util.distinct(l);
-});
-newBuiltin('set',[TRange],TSet,function(r) {
-    return math.rangeToList(r).map(function(n){return new TNum(n)});
 });
 newBuiltin('set', ['*?'], TSet, null, {
     evaluate: function(args,scope) {
