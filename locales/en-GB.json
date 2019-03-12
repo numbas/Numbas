@@ -143,6 +143,7 @@
     "math.lt.order complex numbers": "Can't order complex numbers",
     "math.niceNumber.undefined": "Was expecting a number, but got <code>undefined</code>",
     "math.choose.empty selection": "Empty selection given to random function",
+    "math.rangeToList.zero step size": "Can't convert a range with step size zero to a list.",
     "matrixmath.abs.non-square": "Can't compute the determinant of a matrix which isn't square.",
     "matrixmath.abs.too big": "Sorry, can't compute the determinant of a matrix bigger than 3x3 yet.",
     "matrixmath.mul.different sizes": "Can't multiply matrices of different sizes.",

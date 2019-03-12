@@ -281,7 +281,45 @@
 					raisesNumbasError(assert, function(){ evaluate('gcd(2)') },'jme.typecheck.no right type definition','no right type definition: gcd(2)');
 				});
 
+                QUnit.test('jme.findCompatibleType', function(assert) {
+                    assert.equal(jme.findCompatibleType('number','number'),'number','number,number -> number');
+                    assert.equal(jme.findCompatibleType('integer','number'),'number','integer,number -> number');
+                    assert.equal(jme.findCompatibleType('number','integer'),'number','number,integer -> number');
+                    assert.equal(jme.findCompatibleType('integer','integer'),'integer','integer,integer -> integer');
+                    assert.equal(jme.findCompatibleType('number','decimal'),'decimal','number,decimal -> decimal');
+                    assert.equal(jme.findCompatibleType('integer','decimal'),'decimal','integer,decimal -> decimal');
+                    assert.equal(jme.findCompatibleType('number','string'),undefined,'number,string -> undefined');
+                });
+
 				function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
+
+                QUnit.test('Number-like types', function(assert) {
+                    assert.equal(evaluate('1').type,'integer','1 is an integer');
+                    assert.equal(evaluate('1.0').type,'number','1.0 is a number');
+                    assert.equal(evaluate('1/2').type,'rational','1/2 is a rational');
+                    assert.equal(evaluate('1^1').type,'decimal','1^1 is a decimal');
+
+                    assert.equal(evaluate('1+1.0').type,'number','1+1.0 is a number');
+                    assert.equal(evaluate('1+dec(1)').type,'decimal','1+dec(1) is a decimal');
+                    assert.equal(evaluate('dec(1)+dec(1)').type,'decimal','dec(1)+dec(1) is a decimal');
+                    assert.equal(evaluate('1/2+dec(1)').type,'decimal','1/2+dec(1) is a decimal');
+                    assert.equal(evaluate('1/6+1/6+1/6+1/6+1/6+1/6=1').value,true,'adding six sixths gives exactly 1');
+                    assert.equal(evaluate('1/2=0.5').value,true,'1/2=0.5');
+
+                    assert.ok(evaluate('vector([1,dec(1),1/2])'),'vector([1,dec(1),1/2]) - automatic casting of list elements');
+                });
+
+                QUnit.test('jme.inferVariableTypes', function(assert) {
+                    function inferVariableTypes(expr) {
+                        return jme.inferVariableTypes(jme.compile(expr), jme.builtinScope);
+                    }
+
+                    deepCloseEqual(assert, inferVariableTypes('x'),{},'x gives nothing');
+                    deepCloseEqual(assert, inferVariableTypes('1'),{},'1 gives nothing');
+                    deepCloseEqual(assert, inferVariableTypes('x+x'),{x:'number'},'x+x gives x number');
+                    deepCloseEqual(assert, inferVariableTypes('x+sin(x)'),{x:'number'},'x+sin(x) gives x number');
+                    deepCloseEqual(assert, inferVariableTypes('k*det(x)'),{x:'matrix', k:'number'},'k*det(x) gives {x:\'matrix\',k:\'number\'}');
+                });
 
 				QUnit.test('Variables',function(assert) {
 					var scope = {variables: {
@@ -840,6 +878,9 @@
 
                     raisesNumbasError(assert, function() { evaluate("dict(2)"); }, 'jme.typecheck.no right type definition','dict(2)');
                     raisesNumbasError(assert, function() { evaluate('dict(["a",1])'); }, 'jme.typecheck.no right type definition','dict(["a",1])');
+
+                    assert.equal(evaluate('sum([1,2,3])').value,6,'sum([1,2,3])');
+                    raisesNumbasError(assert, function() { evaluate('sum(["a","b"])') },'jme.typecheck.no right type definition','sum(["a","b"])');
                 });
 
                 QUnit.test('Dictionaries',function(assert) {
