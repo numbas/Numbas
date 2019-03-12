@@ -44,10 +44,8 @@ all_valid (Are the answers to all of the gaps valid?):
 
 mark:
   assert(all_valid or not settings["sortAnswers"], fail(translate("question.can not submit")));
-  apply(all_valid);
   apply(answers);
-  apply(gap_feedback);
-  assert(all_valid or settings["sortAnswers"], fail(""))
+  apply(gap_feedback)
 
 interpreted_answer:
   answers
