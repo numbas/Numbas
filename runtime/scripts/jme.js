@@ -3263,7 +3263,7 @@ jme.inferVariableTypes = function(tree,scope) {
             }
             function mutually_compatible_type(types) {
                 for(var x in jme.types) {
-                    var casts = jme.types[x].casts || {};
+                    var casts = jme.types[x].prototype.casts || {};
                     if(types.every(function(t) { return t==x || casts[t]; })) {
                         return x;
                     }
@@ -3280,38 +3280,33 @@ jme.inferVariableTypes = function(tree,scope) {
                         assignments[name].casts[outtype] = true;
                         var type = mutually_compatible_type(Object.keys(assignments[name].casts));
                         if(type) {
+                            assignments[name].type = type;
                             return assignments;
                         } else {
-                            console.log(this.toString());
-                            console.log(`${name} wants to be ${outtype} but is ${assignments[name].type}`);
                             return false;
                         }
                     } else {
                         assignments = util.copyobj(assignments,true);
+                        var casts = {};
+                        casts[outtype] = true;
                         assignments[name] = {
                             type: outtype,
-                            casts: {outtype:true}
+                            casts: casts
                         }
                         return assignments;
                     }
                 case 'op':
                 case 'function':
                     if(outtype && !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
-                        console.log(this.toString());
-                        console.log(`wrong return type for ${this.tok.name}: want ${outtype} but is ${this.fns[this.pos].outtype}`);
                         return false;
                     }
                     var sig = this.signature_enumerators[this.pos].signature();
                     if(sig.length!=this.args.length) {
-                        console.log(this.toString());
-                        console.log(`wrong number of arguments for ${this.tok.name}`);
                         return false;
                     }
                     return this.assign_args(assignments,sig);
                 default:
                     if(outtype && !jme.findCompatibleType(this.tok.type,outtype)) {
-                        console.log(this.toString());
-                        console.log(`wanted ${outtype} but was ${this.tok.type}`);
                         return false;
                     }
                     return this.assign_args(assignments);
@@ -3371,7 +3366,6 @@ jme.inferVariableTypes = function(tree,scope) {
 
     var at = new AnnotatedTree(tree);
     do {
-        console.log(at.toString());
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
