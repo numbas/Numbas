@@ -749,10 +749,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                                 result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
                         } catch(e) {
-                            try{
-                                this.error(e.message,{},e);
-                            } catch(pe) {
-                                console.error(pe.message);
+                            if(e.originalMessage=='part.marking.variable replacement part not answered') {
+                                this.markingComment(e.message);
+                            } else {
+                                try{
+                                    this.error(e.message,{},e);
+                                } catch(pe) {
+                                    console.error(pe.message);
+                                }
                             }
                         }
                     }

@@ -159,7 +159,7 @@
     "part.marking.revealed steps with penalty": "You revealed the steps. The maximum you can score for this part is <strong>{{count,niceNumber}}</strong> $t(mark). Your scores will be scaled down accordingly.",
     "part.marking.revealed steps no penalty": "You revealed the steps.",
     "part.marking.used variable replacements": "This part was marked using your answers to previous parts.",
-    "part.marking.variable replacement part not answered": "You must answer {{part}} first",
+    "part.marking.variable replacement part not answered": "You must answer {{part}} first.",
     "part.marking.resubmit because of variable replacement": "This part's marking depends on your answers to other parts, which you have changed. Submit this part again to update your score.",
     "part.marking.not submitted": "No answer submitted.",
     "part.marking.did not answer": "You did not answer this question.",
