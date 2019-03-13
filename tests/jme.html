@@ -1304,6 +1304,7 @@
 
 				QUnit.test('subvars',function(assert) {
 					assert.ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
+                    assert.equal(Numbas.jme.subvars('{1-0.9-0.1}',Numbas.jme.builtinScope),'(0)','numbers very close to zero rounded to zero');
 				});
 
 				QUnit.test('tree to JME', function(assert) {

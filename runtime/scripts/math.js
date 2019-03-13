@@ -1736,7 +1736,7 @@ Fraction.fromFloat = function(n) {
     return new Fraction(approx[0],approx[1]);
 }
 Fraction.fromDecimal = function(n) {
-    var approx = n.toFraction();
+    var approx = n.toFraction(1e15);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 

@@ -558,6 +558,29 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String|String[]} styles - styles of notation to allow.
      * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
      * @see Numbas.util.cleanNumber
+     * @returns {Decimal}
+     */
+    parseDecimal: function(s,allowFractions,styles,strictStyle) {
+        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
+        var m;
+        if(util.isFloat(cleaned_s)) {
+            return new Decimal(cleaned_s);
+        } else if(s.toLowerCase()=='infinity') {
+            return new Decimal(Infinity);
+        } else if(s.toLowerCase()=='-infinity') {
+            return new Decimal(-Infinity);
+        } else if(allowFractions && (m = util.parseFraction(s))) {
+            return new Decimal(m.numerator).dividedBy(new Decimal(m.denominator));
+        } else {
+            return new Decimal(NaN);
+        }
+    },
+    /** Parse a number - either parseFloat, or parse a fraction.
+     * @param {String} s
+     * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed?
+     * @param {String|String[]} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
+     * @see Numbas.util.cleanNumber
      * @returns {Number}
      */
     parseNumber: function(s,allowFractions,styles,strictStyle) {

@@ -183,7 +183,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             var frac = math.Fraction.fromDecimal(displayAnswer);
             settings.displayAnswer = frac.toString();
         } else {
-            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
         return settings.displayAnswer;
     },

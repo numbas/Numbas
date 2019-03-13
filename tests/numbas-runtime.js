@@ -839,6 +839,29 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String|String[]} styles - styles of notation to allow.
      * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
      * @see Numbas.util.cleanNumber
+     * @returns {Decimal}
+     */
+    parseDecimal: function(s,allowFractions,styles,strictStyle) {
+        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
+        var m;
+        if(util.isFloat(cleaned_s)) {
+            return new Decimal(cleaned_s);
+        } else if(s.toLowerCase()=='infinity') {
+            return new Decimal(Infinity);
+        } else if(s.toLowerCase()=='-infinity') {
+            return new Decimal(-Infinity);
+        } else if(allowFractions && (m = util.parseFraction(s))) {
+            return new Decimal(m.numerator).dividedBy(new Decimal(m.denominator));
+        } else {
+            return new Decimal(NaN);
+        }
+    },
+    /** Parse a number - either parseFloat, or parse a fraction.
+     * @param {String} s
+     * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed?
+     * @param {String|String[]} styles - styles of notation to allow.
+     * @param {Boolean} strictStyle - if false or not given, strings which do not match any of the allowed styles but are valid JavaScript number literals will be allowed. If true, these strings will return NaN.
+     * @see Numbas.util.cleanNumber
      * @returns {Number}
      */
     parseNumber: function(s,allowFractions,styles,strictStyle) {
@@ -1350,14 +1373,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {String}
      */
     nicePartName: function(path) {
-        var re_path = /^p(\d+)(?:g(\d+)|s(\d+))?$/;
+        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?$/;
         var m = re_path.exec(path);
         var s = R('part')+' '+util.letterOrdinal(m[1]);
         if(m[2]) {
-            s += ' '+R('gap')+' '+m[2];
+            s += ' '+R('step')+' '+m[2];
         }
         if(m[3]) {
-            s += ' '+R('step')+' '+m[3];
+            s += ' '+R('gap')+' '+m[3];
         }
         return s;
     }
@@ -3398,7 +3421,7 @@ Fraction.fromFloat = function(n) {
     return new Fraction(approx[0],approx[1]);
 }
 Fraction.fromDecimal = function(n) {
-    var approx = n.toFraction();
+    var approx = n.toFraction(1e15);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
@@ -8071,7 +8094,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(new Decimal(n.value));
+            return new TDecimal(new Decimal(n.value.toFixed(15)));
         }
     }
 );
@@ -10216,6 +10239,12 @@ newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return uti
 newBuiltin('parsenumber', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,false,styles,true);}, {unwrapValues: true});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
+
+newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
+newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
+newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
+newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
+
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
@@ -12778,6 +12807,9 @@ function jmeRealNumber(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
+            if(Math.abs(n)<1e-15) {
+                return '0';
+            }
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
@@ -19595,7 +19627,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             var frac = math.Fraction.fromDecimal(displayAnswer);
             settings.displayAnswer = frac.toString();
         } else {
-            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
         return settings.displayAnswer;
     },

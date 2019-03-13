@@ -1,8 +1,8 @@
 studentNumber (The student's answer, parsed as a number):
     if(settings["allowFractions"],
-        parseNumber_or_fraction(studentAnswer,settings["notationStyles"])
+        parsedecimal_or_fraction(studentAnswer,settings["notationStyles"])
     ,
-        parseNumber(studentAnswer,settings["notationStyles"])
+        parsedecimal(studentAnswer,settings["notationStyles"])
     )
 
 isInteger (Is the student's answer an integer?):
