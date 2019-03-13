@@ -2024,7 +2024,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(new Decimal(n.value));
+            return new TDecimal(new Decimal(n.value.toFixed(15)));
         }
     }
 );
