@@ -1263,6 +1263,9 @@ function jmeRealNumber(n,settings)
             out = math.niceNumber(n);
         }
         if(out.length>20) {
+            if(Math.abs(n)<1e-15) {
+                return '0';
+            }
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
