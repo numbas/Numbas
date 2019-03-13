@@ -583,6 +583,8 @@ var sig_number = sig.type('number');
 function sig_non_complex_number(args) {
     return sig_number(args) && !args[0].value.complex ? [{type:'number'}] : false;
 }
+sig_non_complex_number.kind = 'type';
+sig_non_complex_number.type = 'number';
 newBuiltin('*', [sig_non_complex_number,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
 newBuiltin('/', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.dividedBy(b); });
 newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).dividedBy(b); });

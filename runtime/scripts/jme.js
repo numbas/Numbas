@@ -3298,6 +3298,7 @@ jme.inferVariableTypes = function(tree,scope) {
                             assignments[name].type = type;
                             return assignments;
                         } else {
+                            //console.log(`couldn't reconcile ${assignments[name].type} with ${outtype}`);
                             return false;
                         }
                     } else {
@@ -3313,15 +3314,18 @@ jme.inferVariableTypes = function(tree,scope) {
                 case 'op':
                 case 'function':
                     if(outtype && !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
+                        //console.log(`couldn't find compatible type between ${this.fns[this.pos].outtype} and ${outtype}`);
                         return false;
                     }
                     var sig = this.signature_enumerators[this.pos].signature();
                     if(sig.length!=this.args.length) {
+                        //console.log(`wrong number of args: ${sig.length} v ${this.args.length}`);
                         return false;
                     }
                     return this.assign_args(assignments,sig);
                 default:
                     if(outtype && !jme.findCompatibleType(this.tok.type,outtype)) {
+                        //console.log(`couldn't find compatible type between ${this.tok.type} and ${outtype}`);
                         return false;
                     }
                     return this.assign_args(assignments);
@@ -3381,6 +3385,7 @@ jme.inferVariableTypes = function(tree,scope) {
 
     var at = new AnnotatedTree(tree);
     do {
+        //console.log(at+'');
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
@@ -3484,6 +3489,11 @@ SignatureEnumerator.prototype = {
                         return true;
                     }
                     this.children[i].backtrack();
+                }
+                if(this.sig.kind=='multiple') {
+                    this.children.forEach(function(c) { c.backtrack(); });
+                    this.children.push(new SignatureEnumerator(this.sig.signature));
+                    return true;
                 }
                 return false;
             case 'type':
