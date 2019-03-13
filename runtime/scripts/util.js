@@ -1069,14 +1069,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {String}
      */
     nicePartName: function(path) {
-        var re_path = /^p(\d+)(?:g(\d+)|s(\d+))?$/;
+        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?$/;
         var m = re_path.exec(path);
         var s = R('part')+' '+util.letterOrdinal(m[1]);
         if(m[2]) {
-            s += ' '+R('gap')+' '+m[2];
+            s += ' '+R('step')+' '+m[2];
         }
         if(m[3]) {
-            s += ' '+R('step')+' '+m[3];
+            s += ' '+R('gap')+' '+m[3];
         }
         return s;
     }
