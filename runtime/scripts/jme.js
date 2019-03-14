@@ -3313,6 +3313,9 @@ jme.inferVariableTypes = function(tree,scope) {
                     }
                 case 'op':
                 case 'function':
+                    if(!this.fns.length) {
+                        return this.assign_args(assignments);
+                    }
                     if(outtype && !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
                         //console.log(`couldn't find compatible type between ${this.fns[this.pos].outtype} and ${outtype}`);
                         return false;
