@@ -1259,6 +1259,9 @@ function jmeRealNumber(n,settings)
         var out;
         if(settings.niceNumber===false) {
             out = n+'';
+            if(out.match(/e/)) {
+                out = math.unscientific(out);
+            }
         } else {
             out = math.niceNumber(n);
         }
