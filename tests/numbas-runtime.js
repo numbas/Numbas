@@ -8094,7 +8094,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(new Decimal(n.value.toFixed(15)));
+            return new TDecimal(new Decimal(n.value.toFixed(14)));
         }
     }
 );
@@ -10340,6 +10340,7 @@ newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); }
 newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.floor(); });
 newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
 newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
+newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.toNumber(),b); });
 newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.cosh(); });
 newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.sinh(); });
 newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.tanh(); });
@@ -10354,6 +10355,7 @@ newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
 newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
 newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
+newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.toNumber(),b); });
 newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
 newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
     var m = a.mod(b);
@@ -19609,6 +19611,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
         try {
+            if(minvalue.type=='number') {
+                minvalue.value -= 1e-12;
+            }
             minvalue = jme.castToType(minvalue,'decimal').value;
             settings.minvalue = minvalue;
         } catch(e) {
@@ -19617,6 +19622,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
         try {
+            if(maxvalue.type=='number') {
+                maxvalue.value += 1e-12;
+            }
             maxvalue = jme.castToType(maxvalue,'decimal').value;
             settings.maxvalue = maxvalue;
         } catch(e) {
@@ -20009,8 +20017,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data, ['vsetRangePoints'], settings);
         var vsetRange = tryGet(data,'vsetRange');
         if(vsetRange) {
-            settings.vsetRangeStart = vsetRange[0];
-            settings.vsetRangeEnd = vsetRange[1];
+            settings.vsetRangeStart = util.parseNumber(vsetRange[0]);
+            settings.vsetRangeEnd = util.parseNumber(vsetRange[1]);
         }
         tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);

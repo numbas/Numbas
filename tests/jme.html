@@ -465,6 +465,9 @@
 					raisesNumbasError(assert, function(){ evaluate('i<=1') },'math.order complex numbers',"can't order complex numbers");
 					raisesNumbasError(assert, function(){ evaluate('1>=i') },'math.order complex numbers',"can't order complex numbers");
 
+                    assert.equal(evaluate('dec(1005.31)>=1005.31').value,true,'dec(1005.31)>=1005.31');
+                    assert.equal(evaluate('dec(1005.31)<=1005.31').value,true,'dec(1005.31)<=1005.31');
+
 					closeEqual(assert, evaluate('1=1').value,true,'1=1');
 					closeEqual(assert, evaluate('1/5=0.2').value,true,'1/5=0.2');
 					closeEqual(assert, evaluate('"abcdef"=\'abcdef\'').value,true,'"abcdef"=\'abcdef\'');

@@ -9137,7 +9137,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(new Decimal(n.value.toFixed(15)));
+            return new TDecimal(new Decimal(n.value.toFixed(14)));
         }
     }
 );
@@ -11383,6 +11383,7 @@ newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); }
 newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.floor(); });
 newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
 newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
+newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.toNumber(),b); });
 newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.cosh(); });
 newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.sinh(); });
 newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.tanh(); });
@@ -11397,6 +11398,7 @@ newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
 newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
 newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
+newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.toNumber(),b); });
 newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
 newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
     var m = a.mod(b);
