@@ -1653,10 +1653,11 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     }
 });
 
-newBuiltin('make_variables',[sig.dict(sig.type('expression'))],TDict,null, {
+newBuiltin('make_variables',[sig.dict(sig.type('expression')),TRange],TDict,null, {
     evaluate: function(args,scope) {
         var todo = {};
         var scope = new jme.Scope([scope]);
+        scope.setVariable('vrange',args[1]);
         for(var x in args[0].value) {
             scope.deleteVariable(x);
             var tree = args[0].value[x].tree;

@@ -126,7 +126,7 @@ default_value_generator:
 
 vset (The sets of variable values to test against):
     repeat(
-        make_variables(value_generators),
+        make_variables(value_generators,vrange),
         settings["vsetRangePoints"]
     )
 
