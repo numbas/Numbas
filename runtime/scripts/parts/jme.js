@@ -133,8 +133,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data, ['vsetRangePoints'], settings);
         var vsetRange = tryGet(data,'vsetRange');
         if(vsetRange) {
-            settings.vsetRangeStart = vsetRange[0];
-            settings.vsetRangeEnd = vsetRange[1];
+            settings.vsetRangeStart = util.parseNumber(vsetRange[0]);
+            settings.vsetRangeEnd = util.parseNumber(vsetRange[1]);
         }
         tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
