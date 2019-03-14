@@ -165,6 +165,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
         try {
+            if(minvalue.type=='number') {
+                minvalue.value -= 1e-12;
+            }
             minvalue = jme.castToType(minvalue,'decimal').value;
             settings.minvalue = minvalue;
         } catch(e) {
@@ -173,6 +176,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
         try {
+            if(maxvalue.type=='number') {
+                maxvalue.value += 1e-12;
+            }
             maxvalue = jme.castToType(maxvalue,'decimal').value;
             settings.maxvalue = maxvalue;
         } catch(e) {
