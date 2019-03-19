@@ -8241,12 +8241,13 @@ newBuiltin('latex',[TString],TString,null,{
 });
 newBuiltin('safe',[TString],TString,null, {
     evaluate: function(args,scope) {
-        var t = new TString(args[0].tok.value);
+        var s = args[0];
+        while(jme.isFunction(s.tok,'safe')) {
+            s = s.args[0];
+        }
+        var t = new TString(s.tok.value);
         t.safe = true;
         return t;
-    },
-    typecheck: function(variables) {
-        return variables.length==1 && variables[0].type=='string';
     }
 });
 Numbas.jme.lazyOps.push('safe');
@@ -10953,7 +10954,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 {
     if(!tree)
         return '';
-    settings = settings || {};
+    settings = util.copyobj(settings || {}, true);
     var args=tree.args, l;
     if(args!==undefined && ((l=args.length)>0))
     {
