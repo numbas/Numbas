@@ -360,6 +360,12 @@
 					closeEqual(assert, evaluate('x').type,'name','x');
 				});
 
+                QUnit.test('Safe strings',function(assert) {
+                    assert.equal(evaluate('safe("a")').value,'a','safe("a")');
+                    assert.ok(evaluate('safe("a")').safe,'safe("a") is safe');
+                    assert.equal(evaluate('safe(safe("a"))').value,'a','safe(safe("a"))');
+                });
+
 				QUnit.test('Operator precedence',function(assert) {
 					closeEqual(assert, evaluateNumber('2*3!'),12,'factorial highest: 2*3! = 2*(3!)');
 					closeEqual(assert, evaluateNumber('(2*3)!'),6*5*4*3*2,'brackets work: (2*3)! = 6!');

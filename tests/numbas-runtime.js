@@ -10017,7 +10017,11 @@ newBuiltin('latex',[TString],TString,null,{
 });
 newBuiltin('safe',[TString],TString,null, {
     evaluate: function(args,scope) {
-        var t = new TString(args[0].tok.value);
+        var s = args[0];
+        while(jme.isFunction(s.tok,'safe')) {
+            s = s.args[0];
+        }
+        var t = new TString(s.tok.value);
         t.safe = true;
         return t;
     }
