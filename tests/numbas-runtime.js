@@ -8107,13 +8107,13 @@ jme.registerType(
     TInt,
     'integer',
     {
+        'rational': function(n) {
+            return new TRational(new math.Fraction(n.value,1));
+        },
         'number': function(n) {
             var t = new TNum(n.value);
             t.originalValue = this.originalValue;
             return t;
-        },
-        'rational': function(n) {
-            return new TRational(new math.Fraction(n.value,1));
         },
         'decimal': function(n) {
             return new TDecimal(new Decimal(n.value));

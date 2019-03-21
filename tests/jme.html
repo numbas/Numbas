@@ -305,6 +305,7 @@
                     assert.equal(evaluate('1/2+dec(1)').type,'decimal','1/2+dec(1) is a decimal');
                     assert.equal(evaluate('1/6+1/6+1/6+1/6+1/6+1/6=1').value,true,'adding six sixths gives exactly 1');
                     assert.equal(evaluate('1/2=0.5').value,true,'1/2=0.5');
+                    assert.equal(evaluate('1+1/2').type,'rational','1+1/2 produces a rational');
 
                     assert.ok(evaluate('vector([1,dec(1),1/2])'),'vector([1,dec(1),1/2]) - automatic casting of list elements');
                 });
