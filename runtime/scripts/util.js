@@ -429,7 +429,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             d.innerHTML = html;
             return $(d).text().trim().length>0;
         } else {
-            return html.trim() != '';
+            return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
