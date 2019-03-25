@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+
+global.window = global;
+global.alert = function(m) { real_console.error(m); }
+require('./tests/numbas-runtime.js');
+require('./tests/locales.js');
+require('./tests/marking_scripts.js');
+
+Numbas.queueScript('base',[], function() {});
+var standard_reqs = ['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question']
+
+
+function die(e) {
+    console.error(e);
+    process.exit(1);
+}
+
+Numbas.runImmediately(standard_reqs,function() {
+    const expr = process.argv[2];
+    try {
+        const res = Numbas.jme.builtinScope.evaluate(expr);
+        console.log(Numbas.jme.display.treeToJME({tok: res}, {ignorestringattributes: true, wrapexpressions: true}));
+    } catch(e) {
+        die(e);
+    }
+});
+
