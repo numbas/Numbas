@@ -2896,61 +2896,63 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
  */
 var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAccuracy)
 {    // first checks both expressions are of same type, then uses given checking type to compare results
-    var v1 = r1.value, v2 = r2.value;
-    if(r1.type != r2.type)
-    {
+    var type = jme.findCompatibleType(r1.type,r2.type);
+    if(!type) {
         return false;
     }
-    switch(r1.type)
-    {
-    case 'number':
-        if(v1.complex || v2.complex)
-        {
-            if(!v1.complex)
-                v1 = {re:v1, im:0, complex:true};
-            if(!v2.complex)
-                v2 = {re:v2, im:0, complex:true};
-            return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
-        }
-        else
-        {
-            return checkingFunction( v1, v2, checkingAccuracy );
-        }
-        break;
-    case 'vector':
-        if(v1.length != v2.length)
-            return false;
-        for(var i=0;i<v1.length;i++)
-        {
-            if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
-                return false;
-        }
-        return true;
-        break;
-    case 'matrix':
-        if(v1.rows != v2.rows || v1.columns != v2.columns)
-            return false;
-        for(var i=0;i<v1.rows;i++)
-        {
-            for(var j=0;j<v1.columns;j++)
+    r1 = jme.castToType(r1,type);
+    r2 = jme.castToType(r2,type);
+    var v1 = r1.value, v2 = r2.value;
+
+    switch(type) {
+        case 'number':
+            if(v1.complex || v2.complex)
             {
-                if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
+                if(!v1.complex)
+                    v1 = {re:v1, im:0, complex:true};
+                if(!v2.complex)
+                    v2 = {re:v2, im:0, complex:true};
+                return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
+            }
+            else
+            {
+                return checkingFunction( v1, v2, checkingAccuracy );
+            }
+            break;
+        case 'vector':
+            if(v1.length != v2.length)
+                return false;
+            for(var i=0;i<v1.length;i++)
+            {
+                if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
                     return false;
             }
-        }
-        return true;
-        break;
-    case 'list':
-        if(v1.length != v2.length)
-            return false;
-        for(var i=0;i<v1.length;i++)
-        {
-            if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+            return true;
+            break;
+        case 'matrix':
+            if(v1.rows != v2.rows || v1.columns != v2.columns)
                 return false;
-        }
-        return true;
-    default:
-        return util.eq(r1,r2);
+            for(var i=0;i<v1.rows;i++)
+            {
+                for(var j=0;j<v1.columns;j++)
+                {
+                    if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
+                        return false;
+                }
+            }
+            return true;
+            break;
+        case 'list':
+            if(v1.length != v2.length)
+                return false;
+            for(var i=0;i<v1.length;i++)
+            {
+                if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+                    return false;
+            }
+            return true;
+        default:
+            return util.eq(r1,r2);
     }
 };
 
