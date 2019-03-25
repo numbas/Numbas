@@ -1221,7 +1221,7 @@ function jmeRealNumber(n,settings)
             im += '*i';
         else
             im += 'i';
-        if(n.im==0)
+        if(Math.abs(n.im)<1e-15)
             return re;
         else if(n.re==0)
         {
