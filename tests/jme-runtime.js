@@ -710,7 +710,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             d.innerHTML = html;
             return $(d).text().trim().length>0;
         } else {
-            return html.trim() != '';
+            return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
@@ -2210,17 +2210,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         return !math.eq(a,b);
     },
-    /** If `n` can be written in the form `a*pi^n`, return the biggest possible `n`, otherwise return `0`.
+    /** If `n` can be written in the form `a*pi^n`, with `a` an integer, return the biggest possible `n`, otherwise return `0`.
+     * Also returns `1` for `n` of the form `pi/a`, with `a` an integer.
      * @param {Number} n
      * @returns {Number}
      */
     piDegree: function(n)
     {
-        n=Math.abs(n);
+        n = Math.abs(n);
         if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         var degree,a;
-        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && Math.abs(a-math.round(a))>0.00000001; degree++) {}
+
+        /* Check for pi/k, where k is an integer */
+        a = Math.PI/n;
+        if(Math.abs(a-math.round(a))<0.0000000001) {
+            return 1;
+        }
+
+        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && (Math.abs(a-math.round(a))>0.00000001 && Math.abs(1/a-math.round(1/a))>0.00000001); degree++) {}
         return( a>=1 ? degree : 0 );
     },
     /** Add the given number of zero digits to a string representation of a number.
@@ -10009,61 +10017,63 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
  */
 var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAccuracy)
 {    // first checks both expressions are of same type, then uses given checking type to compare results
-    var v1 = r1.value, v2 = r2.value;
-    if(r1.type != r2.type)
-    {
+    var type = jme.findCompatibleType(r1.type,r2.type);
+    if(!type) {
         return false;
     }
-    switch(r1.type)
-    {
-    case 'number':
-        if(v1.complex || v2.complex)
-        {
-            if(!v1.complex)
-                v1 = {re:v1, im:0, complex:true};
-            if(!v2.complex)
-                v2 = {re:v2, im:0, complex:true};
-            return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
-        }
-        else
-        {
-            return checkingFunction( v1, v2, checkingAccuracy );
-        }
-        break;
-    case 'vector':
-        if(v1.length != v2.length)
-            return false;
-        for(var i=0;i<v1.length;i++)
-        {
-            if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
-                return false;
-        }
-        return true;
-        break;
-    case 'matrix':
-        if(v1.rows != v2.rows || v1.columns != v2.columns)
-            return false;
-        for(var i=0;i<v1.rows;i++)
-        {
-            for(var j=0;j<v1.columns;j++)
+    r1 = jme.castToType(r1,type);
+    r2 = jme.castToType(r2,type);
+    var v1 = r1.value, v2 = r2.value;
+
+    switch(type) {
+        case 'number':
+            if(v1.complex || v2.complex)
             {
-                if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
+                if(!v1.complex)
+                    v1 = {re:v1, im:0, complex:true};
+                if(!v2.complex)
+                    v2 = {re:v2, im:0, complex:true};
+                return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im,v2.im,checkingAccuracy);
+            }
+            else
+            {
+                return checkingFunction( v1, v2, checkingAccuracy );
+            }
+            break;
+        case 'vector':
+            if(v1.length != v2.length)
+                return false;
+            for(var i=0;i<v1.length;i++)
+            {
+                if(!resultsEqual(new TNum(v1[i]),new TNum(v2[i]),checkingFunction,checkingAccuracy))
                     return false;
             }
-        }
-        return true;
-        break;
-    case 'list':
-        if(v1.length != v2.length)
-            return false;
-        for(var i=0;i<v1.length;i++)
-        {
-            if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+            return true;
+            break;
+        case 'matrix':
+            if(v1.rows != v2.rows || v1.columns != v2.columns)
                 return false;
-        }
-        return true;
-    default:
-        return util.eq(r1,r2);
+            for(var i=0;i<v1.rows;i++)
+            {
+                for(var j=0;j<v1.columns;j++)
+                {
+                    if(!resultsEqual(new TNum(v1[i][j]||0),new TNum(v2[i][j]||0),checkingFunction,checkingAccuracy))
+                        return false;
+                }
+            }
+            return true;
+            break;
+        case 'list':
+            if(v1.length != v2.length)
+                return false;
+            for(var i=0;i<v1.length;i++)
+            {
+                if(!resultsEqual(v1[i],v2[i],checkingFunction,checkingAccuracy))
+                    return false;
+            }
+            return true;
+        default:
+            return util.eq(r1,r2);
     }
 };
 
@@ -11024,9 +11034,6 @@ newBuiltin('get',[TDict,TString,'?'],'?',null,{
 newBuiltin('in', [TString,TDict], TBool, function(s,d) {
     return d.hasOwnProperty(s);
 });
-newBuiltin('in',[TString, TString], TBool, function(sub,str) {
-    return str.indexOf(sub)>=0;
-});
 newBuiltin('json_decode', [TString], '?', null, {
     evaluate: function(args,scope) {
         var data = JSON.parse(args[0].value);
@@ -11040,14 +11047,13 @@ newBuiltin('json_encode', ['?'], TString, null, {
         return s;
     }
 });
-newBuiltin('lpad',[TString,TNum,TString],TString,util.lpad);
 newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
     return util.formatString.apply(util,[str].concat(extra.map(jme.tokenToDisplayString)));
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,function(html) { return $(html) });
-newBuiltin('nonemptyhtml',[TString],TBool,function(html) {
+newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
     return util.isNonemptyHTML(html);
 });
 newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); });
@@ -11287,11 +11293,13 @@ newBuiltin('formatnumber', [TNum,TString], TString, function(n,style) {return ma
 newBuiltin('string', [TNum], TString, math.niceNumber);
 newBuiltin('parsenumber', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,false,style,true);});
 newBuiltin('parsenumber', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,false,styles,true);}, {unwrapValues: true});
+newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.parseNumber(s,true,"plain-en",true);});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
 
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
+newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,"plain-en",true);});
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
@@ -11306,7 +11314,7 @@ newBuiltin('matchnumber',[TString,sig.listof(sig.type('string'))],TList,function
     var result = util.matchNotationStyle(s,styles,true);
     return [new TString(result.matched), new TNum(util.parseNumber(result.cleaned,false,['plain'],true))];
 },{unwrapValues:true});
-newBuiltin('cleannumber',[TString,sig.listof(sig.type('string'))],TString,util.cleanNumber,{unwrapValues:true});
+newBuiltin('cleannumber',[TString,sig.optional(sig.listof(sig.type('string')))],TString,util.cleanNumber,{unwrapValues:true});
 newBuiltin('isbool',[TString],TBool,util.isBool);
 newBuiltin('perm', [TNum,TNum], TNum, math.permutations );
 newBuiltin('comb', [TNum,TNum], TNum, math.combinations );
@@ -11325,7 +11333,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum,TNum], TNum, function(a,b) {    // take 
         return math.gcf(a,b);
 } );
 newBuiltin('coprime',[TNum,TNum], TBool, math.coprime);
-newBuiltin('lcm', [TNum,TNum], TNum, math.lcm );
+newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm );
 newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l){
         if(l.length==0) {
             return 1;
@@ -11351,10 +11359,10 @@ newBuiltin('-', [TInt,TInt], TInt, math.sub);
 newBuiltin('*', [TInt,TInt], TInt, math.mul );
 newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
 newBuiltin('^', [TInt,TInt], TDecimal, function(a,b) { return (new Decimal(a)).pow(b); });
+newBuiltin('mod', [TInt,TInt], TInt, math.mod );
 newBuiltin('string',[TInt], TString, function(a) { return a+''; });
 
 // Rational arithmetic
-newBuiltin('rational',[TNum],TRational,Fraction.fromFloat);
 newBuiltin('+u', [TRational], TRational, function(a){return a;});
 newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
 newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b); });
@@ -11398,8 +11406,8 @@ newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.acos(); });
 newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.acosh(); });
 newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.asinh(); });
 newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.atanh(); });
-newBuiltin('asin', [TDecimal], TDecimal, function(a){ return a.asin(); });
-newBuiltin('atan', [TDecimal], TDecimal, function(a){ return a.atan(); });
+newBuiltin('arcsin', [TDecimal], TDecimal, function(a){ return a.asin(); });
+newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.atan(); });
 newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
 newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
@@ -11407,6 +11415,7 @@ newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b);
 newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
 newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.toNumber(),b); });
 newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
+newBuiltin('log',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.log()/b.log(); })
 newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
     var m = a.mod(b);
     if(m.isNegative()) {
@@ -11424,7 +11433,6 @@ newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.tan(); });
 newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
 newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x); });
-newBuiltin('number',[TDecimal], TDecimal, function(a) {return a.toNumber(); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
 newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
 newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
@@ -11879,16 +11887,25 @@ newBuiltin('some',[sig.listof(sig.type('boolean'))],TBool,function(list) {
     return list.some(tok_is_true);
 });
 
-var let_sig_dict = sig.sequence(sig.type('dict'),sig.anything());
 var let_sig_names = sig.multiple(
                     sig.or(
                         sig.sequence(sig.type('name'),sig.anything()),
                         sig.sequence(sig.listof(sig.type('name')),sig.listof(sig.anything()))
                     )
                 );
-newBuiltin('let',[sig.or(let_sig_dict, let_sig_names),'?'],TList, null, {
+newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
     evaluate: function(args,scope) {
-        if(let_sig_dict(args)) {
+        var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a){
+            if(a.tok.type=='list') {
+                return new TList(a.args.map(function(aa){return aa.tok;}));
+            } else {
+                return a.tok
+            }
+        }));
+        if(!signature) {
+            throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'let'}));
+        }
+        if(signature[0].type=="dict") {
             var d = scope.evaluate(args[0]);
             var variables = d.value;
             var lambda = args[1];
@@ -12317,6 +12334,9 @@ newBuiltin('expression',[TString],TExpression,function(str) {
 });
 newBuiltin('args',[TExpression],TList,null, {
     evaluate: function(args, scope) {
+        if(!args[0].tree.args) {
+            return new TList([]);
+        }
         return new TList(args[0].tree.args.map(function(tree){ return new TExpression(tree); }));
     }
 });
@@ -12329,6 +12349,11 @@ newBuiltin('as',['?',TString],'?',null, {
 newBuiltin('type',[TExpression],TString,null, {
     evaluate: function(args,scope) {
         return new TString(args[0].tree.tok.type);
+    }
+});
+newBuiltin('type',['?'],TString,null, {
+    evaluate: function(args,scope) {
+        return new TString(args[0].type);
     }
 });
 newBuiltin('name',[TString],TName,function(name){ return name });
@@ -12442,11 +12467,13 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     }
 });
 
-newBuiltin('make_variables',[sig.dict(sig.type('expression')),TRange],TDict,null, {
+newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.type('vrange'))],TDict,null, {
     evaluate: function(args,scope) {
         var todo = {};
         var scope = new jme.Scope([scope]);
-        scope.setVariable('vrange',args[1]);
+        if(args.length>1) {
+            scope.setVariable('vrange',args[1]);
+        }
         for(var x in args[0].value) {
             scope.deleteVariable(x);
             var tree = args[0].value[x].tree;
@@ -13818,7 +13845,7 @@ function jmeRealNumber(n,settings)
             im += '*i';
         else
             im += 'i';
-        if(n.im==0)
+        if(Math.abs(n.im)<1e-15)
             return re;
         else if(n.re==0)
         {
@@ -13902,7 +13929,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'decimal': function(tree,tok,bits,settings) {
-        return settings.jmeNumber(tok.value.toNumber(),settings);
+        var n = settings.jmeNumber(tok.value.toNumber(),settings);
+        if(!settings.ignorestringattributes) {
+            return 'dec('+n+')';
+        } else {
+            return n;
+        }
     },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)
@@ -13924,9 +13956,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';
-        if(tok.latex) {
+        if(tok.latex && !settings.ignorestringattributes) {
             return 'latex('+str+')';
-        } else if(tok.safe) {
+        } else if(tok.safe && !settings.ignorestringattributes) {
             return 'safe('+str+')';
         } else {
             return str;
@@ -14103,6 +14135,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {Boolean} ignorestringattributes - don't wrap strings in functions for attributes like latex() and safe()
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
