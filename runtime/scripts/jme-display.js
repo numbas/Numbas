@@ -1305,7 +1305,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'decimal': function(tree,tok,bits,settings) {
-        return settings.jmeNumber(tok.value.toNumber(),settings);
+        var n = settings.jmeNumber(tok.value.toNumber(),settings);
+        if(!settings.ignorestringattributes) {
+            return 'dec('+n+')';
+        } else {
+            return n;
+        }
     },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)
@@ -1327,9 +1332,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';
-        if(tok.latex) {
+        if(tok.latex && !settings.ignorestringattributes) {
             return 'latex('+str+')';
-        } else if(tok.safe) {
+        } else if(tok.safe && !settings.ignorestringattributes) {
             return 'safe('+str+')';
         } else {
             return str;
@@ -1506,6 +1511,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {Boolean} ignorestringattributes - don't wrap strings in functions for attributes like latex() and safe()
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
