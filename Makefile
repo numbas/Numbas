@@ -1,8 +1,10 @@
 everything: update_tests docs
 
+NUMBAS_EDITOR_PATH ?= ../editor
+
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts locales
+update_tests: jme runtime marking_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
@@ -104,3 +106,9 @@ docs: docs/index.html
 eslint: $(ESLINT_SOURCES)
 	@eslint $^
 
+tests/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
+	@echo "var doc_tests = " > $@
+	@cat $^ | python3 tests/make_tests_from_docs.py >> $@
+	@echo "Made $@"
+
+doc_tests: tests/doc-tests.js

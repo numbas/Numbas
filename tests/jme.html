@@ -9,6 +9,7 @@
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="jme-runtime.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="locales.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="doc-tests.js" charset="utf-8"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
@@ -1473,6 +1474,24 @@
                     assert.equal(exprToLaTeX('e^(3x)','fractionNumbers'),'e^{ 3 x }','e^(3x) with fractionNumbers');
                     assert.equal(exprToLaTeX('e*i',''),'e i','e*i');
 				});
+
+                doc_tests.forEach(function(section) {
+                    QUnit.module('Docs: '+section.name);
+                    section.fns.forEach(function(fn) {
+                        if(fn.examples.length) {
+                            QUnit.test(fn.name,function(assert) {
+                                fn.examples.forEach(function(example) {
+                                    var res = Numbas.jme.builtinScope.evaluate(example.in);
+                                    var out = Numbas.jme.display.treeToJME({tok: res}, {ignorestringattributes: true, wrapexpressions: true});
+                                    function clean(expr) {
+                                        return expr.replace(/\s/g,'');
+                                    }
+                                    assert.equal(clean(out),clean(example.out),example.in);
+                                });
+                            });
+                        }
+                    });
+                });
 			});
 		</script>
 	</body>
