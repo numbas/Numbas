@@ -706,7 +706,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.questionList[i].revealAnswer(true);
         }
         //display the results
-        if(this.settings.showResultsPage) {
+        if(this.settings.showResultsPage || Numbas.is_instructor) {
             this.display.showInfoPage( 'result' );
         } else {
             this.exit();

@@ -145,7 +145,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showCorrectAnswer = Knockout.computed(function() {
-            return p.settings.showCorrectAnswer && pd.revealed();
+            return (p.settings.showCorrectAnswer || Numbas.is_instructor) && pd.revealed();
         });
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;

@@ -62,6 +62,7 @@ var SCORMStorage = scorm.SCORMStorage = function()
         var id = this.get('interactions.'+i+'.id');
         this.partIndices[id]=i;
     }
+    Numbas.is_instructor = pipwerks.SCORM.get('numbas.user_role') == 'instructor';
 };
 SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     /** Mode the session started in:
