@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-global.window = global;
-global.alert = function(m) { real_console.error(m); }
 require('./tests/numbas-runtime.js');
 require('./tests/locales.js');
 require('./tests/marking_scripts.js');
@@ -12,6 +10,7 @@ const stream = require('stream');
 
 var captured_log = '';
 const real_console = new Console(process.stdout,process.stderr);
+global.alert = function(m) { real_console.error(m); }
 const s = new stream.Writable({write: function(chunk,enc,next) {
     captured_log += chunk;
     next();
@@ -22,8 +21,6 @@ Object.keys(console).forEach(function(n) {
         console[n] = fake_console[n];
     }
 });
-
-Numbas.queueScript('base',[], function() {});
 
 var standard_reqs = ['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question']
 

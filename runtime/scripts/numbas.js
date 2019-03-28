@@ -15,6 +15,15 @@ Copyright 2011-14 Newcastle University
  * Creates the global {@link Numbas} object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
  */
 (function() {
+try {
+    window;
+} catch(e) {
+    try {
+        global.window = global;
+        global.alert = function(m) { console.error(m); }
+    } catch(e) {
+    }
+}
 if(!window.Numbas) { window.Numbas = {} }
 /** @namespace Numbas */
 /** Extensions should add objects to this so they can be accessed */
@@ -190,16 +199,13 @@ Numbas.tryInit = function()
 }
 
 Numbas.runImmediately = function(deps,fn) {
+    Numbas.queueScript('base',[], function() {});
     var missing_dependencies = deps.filter(function(r) {
         if(!scriptreqs[r]) {
-            //console.error("Dependency "+r+" does not exist");
             return true;
         } else if(!scriptreqs[r].loaded) {
-            //console.error("Dependency "+r+" has not been loaded");
             return true;
         } else if(!scriptreqs[r].executed) {
-            //console.error("Dependency "+r+" has not been executed");
-            //console.error(scriptreqs[r].fdeps.map(function(d){return d+': '+loadScript(d).executed}).join(', '));
             return true;
         }
     });
