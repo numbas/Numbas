@@ -55,8 +55,9 @@ correctVariables (Variables used in the correct answer):
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in correctVariables),x,list(studentVariables)),
-        assert(not settings["checkVariableNames"] or len(settings["expectedVariableNames"])=0 or len(uvars)=0,
-            warn(translate("part.jme.unexpected variable name",["name":uvars[0]]))
+        assert(not settings["checkVariableNames"] or len(uvars)=0,
+            warn(translate("part.jme.unexpected variable name",["name":uvars[0]]));
+            feedback(translate("part.jme.unexpected variable name",["name":uvars[0]]))
         );
         uvars
     )
