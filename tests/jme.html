@@ -1059,6 +1059,14 @@
 					function simplifyExpression(expr,rules) {
 						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
 					}
+                    assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: -Math.PI, re: 1}),'1 - pi*i','jmeRealNumber on 1 - pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRealNumber on -pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRealNumber on 1 + pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRealNumber on pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 1}),'1 - pi*i','jmeRationalNumber on 1 - pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRationalNumber on -pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRationalNumber on 1 + pi*i puts an asterisk in');
+                    assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRationalNumber on pi*i puts an asterisk in');
                     assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');

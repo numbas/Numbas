@@ -1070,7 +1070,8 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
     if(n.complex)
     {
         var re = jmeRationalNumber(n.re);
-        var im = jmeRationalNumber(n.im)+'i';
+        var im = jmeRationalNumber(n.im);
+        im += im.match(/\d$/) ? 'i' : '*i';
         if(n.im==0)
             return re;
         else if(n.re==0)
@@ -1084,10 +1085,11 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         }
         else if(n.im<0)
         {
-            if(n.im==-1)
+            if(n.im==-1) {
                 return re+' - i';
-            else
-                return re+' - '+jmeRationalNumber(-n.im)+'i';
+            } else {
+                return re+' - '+im.slice(1);
+            }
         }
         else
         {
@@ -1147,17 +1149,14 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
  * @returns {JME}
  */
-function jmeRealNumber(n,settings)
+var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
 {
     settings = settings || {};
     if(n.complex)
     {
         var re = jmeRealNumber(n.re);
         var im = jmeRealNumber(n.im);
-        if(im[im.length-1].match(/[a-zA-Z]/))
-            im += '*i';
-        else
-            im += 'i';
+        im += im.match(/\d$/) ? 'i' : '*i';
         if(n.im==0)
             return re;
         else if(n.re==0)
@@ -1174,7 +1173,7 @@ function jmeRealNumber(n,settings)
             if(n.im==-1)
                 return re+' - i';
             else
-                return re+' - '+jmeRealNumber(-n.im)+'i';
+                return re+' - '+im.slice(1);
         }
         else
         {
