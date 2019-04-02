@@ -12473,7 +12473,7 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     }
 });
 
-newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.type('vrange'))],TDict,null, {
+newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.type('range'))],TDict,null, {
     evaluate: function(args,scope) {
         var todo = {};
         var scope = new jme.Scope([scope]);

@@ -1,5 +1,6 @@
 from docutils.parsers import rst
 
+from collections import OrderedDict
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives, roles
 from docutils.parsers.rst.directives import body, misc
@@ -124,7 +125,7 @@ class ExampleVisitor(SimpleNodeVisitor):
         
     def depart_list_item(self, node):
         if self.expr and self.has_output and self.output and not self.notest:
-            self.examples.append({'in': self.expr, 'out': self.output})
+            self.examples.append(OrderedDict([('in', self.expr), ('out', self.output)]))
         
     def visit_literal(self, node):
         if not self.expr:
@@ -161,7 +162,7 @@ class MyVisitor(SimpleNodeVisitor):
     def depart_section(self,node):
         if self.fns:
             #print(self.section,len(self.fns))
-            self.sections.append({'name': self.section, 'fns': self.fns})
+            self.sections.append(OrderedDict([('name', self.section), ('fns', self.fns)]))
         self.section = None
         self.fns = []
 
@@ -187,10 +188,6 @@ class MyVisitor(SimpleNodeVisitor):
                 node.walkabout(ev)
                 self.examples += ev.examples
     
-source ="""
-a :no-test:`→` a
-"""
-
 import sys
 
 source = sys.stdin.read()

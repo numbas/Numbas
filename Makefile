@@ -109,6 +109,6 @@ eslint: $(ESLINT_SOURCES)
 tests/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "var doc_tests = " > $@
 	@cat $^ | python3 tests/make_tests_from_docs.py >> $@
-	@echo "Made $@"
+	$(created)
 
 doc_tests: tests/doc-tests.js
