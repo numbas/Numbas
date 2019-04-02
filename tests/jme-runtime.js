@@ -9005,23 +9005,35 @@ newBuiltin('let',['?'],TList, null, {
 });
 Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree,boundvars,scope) {
-    // find vars used in variable assignments
     var vars = [];
-    for(var i=0;i<tree.args.length-1;i+=2) {
-        vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
-    }
-    // find variable names assigned by let
+    var oboundvars = boundvars;
     boundvars = boundvars.slice();
-    for(var i=0;i<tree.args.length-1;i+=2) {
-        boundvars.push(tree.args[i].tok.name.toLowerCase());
+    if(tree.args[0].tok.type=='dict') {
+        tree.args[0].args.forEach(function(kp) {
+            boundvars.push(kp.tok.key);
+            vars = vars.merge(jme.findvars(kp.args[0],oboundvars,scope));
+        });
+    } else {
+        for(var i=0;i<tree.args.length-1;i+=2) {
+            var names = tree.args[i].tok.type=='list' ? tree.args[i].args : [tree.args[i]];
+            names.forEach(function(name) {
+                boundvars.push(name.tok.name.toLowerCase());
+            });
+            vars = vars.merge(jme.findvars(tree.args[i+1],oboundvars,scope));
+        }
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
     vars = vars.merge(jme.findvars(tree.args[tree.args.length-1],boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
-    for(var i=1;i<tree.args.length-1;i+=2) {
-        tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+    if(tree.args[0].tok.type=='dict') {
+        var d = tree.args[0];
+        d.args = d.args.map(function(da) { return jme.substituteTree(da,scope,allowUnbound) });
+    } else {
+        for(var i=1;i<tree.args.length-1;i+=2) {
+            tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+        }
     }
 }
 
@@ -11007,7 +11019,6 @@ function align(name,items) {
     
     var item_lines = items.map(function(item){return item.split('\n')});
     var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m,l){return Math.max(l.length,m)},0)});
-    console.log(item_widths);
     var num_lines = item_lines.reduce(function(t,ls){return Math.max(ls.length,t)},0);
     item_lines = item_lines.map(function(lines,i) {
         var w = item_widths[i];
@@ -11077,7 +11088,6 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'op':
         case 'function':
             var args = tree.args.map(function(arg){ return tree_diagram(arg); });
-            console.log(treeToJME(tree));
             return align(tree.tok.name, args);
         default:
             return treeToJME(tree);

@@ -83,6 +83,8 @@
 				QUnit.test('findvars',function(assert) {
 					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
 					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('map(x,x,x)')),['x'],'Can reassign vars used in map but they\'re still found by findvars');
+                    deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(["x":z],x+y)')),['y','z'],'findvars on let with a dictionary');
+                    deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
 				});
 
                 QUnit.test('util',function(assert) {
@@ -279,13 +281,21 @@
 				function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
 
 				QUnit.test('Variables',function(assert) {
-					var scope = {variables: {
+					var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {
 						x: new types.TNum(1),
 						name: new types.TString('Bob')
-					}};
+					}}]);
 					closeEqual(assert, evaluate('y',scope).type,'name','undefined variable remains a TName')
 					closeEqual(assert, evaluate('x',scope).value,1,'substitute variable x=1')
 					closeEqual(assert, evaluate('"hi {name}"',scope).value,'hi Bob','substitute into string');
+
+					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('let(["q":x+1],q+w)'),scope,true);
+					var s = Numbas.jme.display.treeToJME(tree);
+                    closeEqual(assert, s,'let([ "q": 1 + 1 ],q + w)','Substitute into let')
+
+					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('let([q,w],[x,x+1],z,x,q+w)'),scope,true);
+					var s = Numbas.jme.display.treeToJME(tree);
+                    closeEqual(assert, s,'let([ q, w ],[ 1, 1 + 1 ],z,1,q + w)','Substitute into let')
 
                     /*
                     // Removed while I think about how I want this to work
@@ -849,6 +859,7 @@
                     deepCloseEqual(assert, jme.unwrapValue(evaluate('["a":1,"b":2]+["a":4,"c":3]')),{a:4,b:2,c:3},'["a":1,"b":2]+["a":4,"c":3]');
                     deepCloseEqual(assert, jme.unwrapValue(evaluate('map(let(bits,x,["a":bits]),x,[1,2,3])')),[{a:1},{a:2},{a:3}],'map(let(bits,x,["a":bits]),x,[1,2,3])');
                     deepCloseEqual(assert, jme.unwrapValue(evaluate('dict([["a",1],["b",2]])')),{a:1,b:2},'dict([["a",1],["b",2]])');
+                    deepCloseEqual(assert, jme.unwrapValue(evaluate('let(["x":1],x)')), 1, 'let(["x":1],x)');
                 });
 
 				QUnit.test('Branching',function(assert) {

@@ -1490,7 +1490,6 @@ function align(name,items) {
     
     var item_lines = items.map(function(item){return item.split('\n')});
     var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m,l){return Math.max(l.length,m)},0)});
-    console.log(item_widths);
     var num_lines = item_lines.reduce(function(t,ls){return Math.max(ls.length,t)},0);
     item_lines = item_lines.map(function(lines,i) {
         var w = item_widths[i];
@@ -1560,7 +1559,6 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'op':
         case 'function':
             var args = tree.args.map(function(arg){ return tree_diagram(arg); });
-            console.log(treeToJME(tree));
             return align(tree.tok.name, args);
         default:
             return treeToJME(tree);
