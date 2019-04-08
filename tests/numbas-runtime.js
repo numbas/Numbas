@@ -10853,7 +10853,7 @@ newBuiltin('some',[sig.listof(sig.type('boolean'))],TBool,function(list) {
 var let_sig_names = sig.multiple(
                     sig.or(
                         sig.sequence(sig.type('name'),sig.anything()),
-                        sig.sequence(sig.listof(sig.type('name')),sig.listof(sig.anything()))
+                        sig.sequence(sig.listof(sig.type('name')),sig.anything())
                     )
                 );
 newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
@@ -10899,12 +10899,9 @@ Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree,boundvars,scope) {
     // find vars used in variable assignments
     var vars = [];
-    for(var i=0;i<tree.args.length-1;i+=2) {
-        vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
-    }
-    // find variable names assigned by let
     boundvars = boundvars.slice();
     for(var i=0;i<tree.args.length-1;i+=2) {
+        vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
         boundvars.push(tree.args[i].tok.name.toLowerCase());
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
