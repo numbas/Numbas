@@ -1947,7 +1947,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
                     var castargs = eargs.map(function(arg,i) { 
-                        return jme.castToType(arg,signature[i]); 
+                        if(signature[i]) {
+                            return jme.castToType(arg,signature[i]); 
+                        } else {
+                            return arg;
+                        }
                     });
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
@@ -2613,6 +2617,14 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @memberof Numbas.jme.funcObj
      */
     this.name = name;
+
+    /** A description of what the function does
+     * @name description
+     * @member {String}
+     * @memberof Numbas.jme.funcObj
+     */
+    this.description = options.description || '';
+
     /** Check the given list of arguments against this function's calling signature.
      *
      * @name intype
