@@ -2920,6 +2920,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         else
             return Math.round(x);
     },
+    /** Round to the nearest multiple of `a`;For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @param {Number} a
+     * @returns {Number}
+     * @see Numbas.math.round
+     */
+    toNearest: function(x,a) {
+        if(a.complex) {
+            throw(new Numbas.Error('math.toNearest.complex'));
+        }
+        if(a==0) {
+            return NaN;
+        }
+        if(x.complex) {
+            return math.complex(math.toNearest(x.re,a),math.toNearest(x.im,a));
+        } else {
+            return Math.round(x/a)*a;
+        }
+    },
     /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
      * @param {Number} x
      * @returns {Number}
@@ -9074,7 +9093,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
                     var castargs = eargs.map(function(arg,i) { 
-                        return jme.castToType(arg,signature[i]); 
+                        if(signature[i]) {
+                            return jme.castToType(arg,signature[i]); 
+                        } else {
+                            return arg;
+                        }
                     });
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
@@ -9740,6 +9763,14 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @memberof Numbas.jme.funcObj
      */
     this.name = name;
+
+    /** A description of what the function does
+     * @name description
+     * @member {String}
+     * @memberof Numbas.jme.funcObj
+     */
+    this.description = options.description || '';
+
     /** Check the given list of arguments against this function's calling signature.
      *
      * @name intype
@@ -11253,6 +11284,7 @@ newBuiltin('arctanh', [TNum], TNum, math.arctanh );
 newBuiltin('ceil', [TNum], TNum, math.ceil );
 newBuiltin('floor', [TNum], TNum, math.floor );
 newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
 newBuiltin('degrees', [TNum], TNum, math.degrees );
@@ -11283,6 +11315,7 @@ newBuiltin( 'random',['*?'],'?', null, {
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
+newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
 newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
 newBuiltin('precround', [TNum,TNum], TNum, math.precround );
@@ -11945,7 +11978,14 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     boundvars = boundvars.slice();
     for(var i=0;i<tree.args.length-1;i+=2) {
         vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
-        boundvars.push(tree.args[i].tok.name.toLowerCase());
+        switch(tree.args[i].tok.type) {
+            case 'name':
+                boundvars.push(tree.args[i].tok.name.toLowerCase());
+                break;
+            case 'list':
+                boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
+                break;
+        }
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
     vars = vars.merge(jme.findvars(tree.args[tree.args.length-1],boundvars,scope));

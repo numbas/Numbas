@@ -452,6 +452,7 @@ newBuiltin('arctanh', [TNum], TNum, math.arctanh );
 newBuiltin('ceil', [TNum], TNum, math.ceil );
 newBuiltin('floor', [TNum], TNum, math.floor );
 newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
 newBuiltin('degrees', [TNum], TNum, math.degrees );
@@ -482,6 +483,7 @@ newBuiltin( 'random',['*?'],'?', null, {
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
+newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
 newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
 newBuiltin('precround', [TNum,TNum], TNum, math.precround );
@@ -1144,7 +1146,14 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     boundvars = boundvars.slice();
     for(var i=0;i<tree.args.length-1;i+=2) {
         vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
-        boundvars.push(tree.args[i].tok.name.toLowerCase());
+        switch(tree.args[i].tok.type) {
+            case 'name':
+                boundvars.push(tree.args[i].tok.name.toLowerCase());
+                break;
+            case 'list':
+                boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
+                break;
+        }
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
     vars = vars.merge(jme.findvars(tree.args[tree.args.length-1],boundvars,scope));

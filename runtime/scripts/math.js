@@ -1229,6 +1229,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         else
             return Math.round(x);
     },
+    /** Round to the nearest multiple of `a`;For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @param {Number} a
+     * @returns {Number}
+     * @see Numbas.math.round
+     */
+    toNearest: function(x,a) {
+        if(a.complex) {
+            throw(new Numbas.Error('math.toNearest.complex'));
+        }
+        if(a==0) {
+            return NaN;
+        }
+        if(x.complex) {
+            return math.complex(math.toNearest(x.re,a),math.toNearest(x.im,a));
+        } else {
+            return Math.round(x/a)*a;
+        }
+    },
     /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
      * @param {Number} x
      * @returns {Number}
