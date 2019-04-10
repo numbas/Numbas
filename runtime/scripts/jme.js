@@ -3628,8 +3628,9 @@ jme.signature = {
             if(!jme.isType(args[0],'list')) {
                 return false;
             }
-            var items = seq(args[0].value);
-            if(items===false || items.length!=args[0].value.length) {
+            var arg = jme.castToType(args[0],'list');
+            var items = seq(arg.value);
+            if(items===false || items.length!=arg.value.length) {
                 return false;
             }
             return [{type: 'list', items: items}];
