@@ -9731,8 +9731,9 @@ jme.signature = {
             if(!jme.isType(args[0],'list')) {
                 return false;
             }
-            var items = seq(args[0].value);
-            if(items===false || items.length!=args[0].value.length) {
+            var arg = jme.castToType(args[0],'list');
+            var items = seq(arg.value);
+            if(items===false || items.length!=arg.value.length) {
                 return false;
             }
             return [{type: 'list', items: items}];
@@ -10892,7 +10893,7 @@ var let_sig_names = sig.multiple(
 newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
     evaluate: function(args,scope) {
         var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a){
-            if(a.tok.type=='list') {
+            if(a.tok.type=='list' && a.args) {
                 return new TList(a.args.map(function(aa){return aa.tok;}));
             } else {
                 return a.tok
@@ -10918,7 +10919,7 @@ newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
                     nscope.setVariable(name,value);
                 } else if(args[i].tok.type=='list') {
                     var names = args[i].args.map(function(t){return t.tok.name});
-                    var values = value.value;
+                    var values = jme.castToType(value,'list').value;
                     for(var j=0;j<names.length;j++) {
                         nscope.setVariable(names[j],values[j]);
                     }
@@ -11326,6 +11327,17 @@ newBuiltin('table',[TList],THTML,
         unwrapValues: true
     }
 );
+
+newBuiltin('max_width',[TNum,THTML],THTML,function(w,h) {
+    h[0].style['max-width'] = w+'em';
+    return h[0];
+});
+
+newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
+    h[0].style['max-height'] = w+'em';
+    return h[0];
+});
+
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
@@ -13113,6 +13125,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     }
 }
+
+jme.display.registerType = function(type, renderers) {
+    var name = type.prototype.type;
+    console.log(type,name);
+    if(renderers.tex) {
+        typeToTeX[name] = renderers.tex;
+    }
+    if(renderers.jme) {
+        typeToJME[name] = renderers.jme;
+    }
+    if(renderers.displayString) {
+        jme.tokenToDisplayString = renderers.displayString;
+    }
+}
+
 /** Define how to render function in JME, for special cases when the normal rendering `f(...)` isn't right.
  * @enum {function}
  * @memberof Numbas.jme.display

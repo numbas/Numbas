@@ -1489,6 +1489,21 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     }
 }
+
+jme.display.registerType = function(type, renderers) {
+    var name = type.prototype.type;
+    console.log(type,name);
+    if(renderers.tex) {
+        typeToTeX[name] = renderers.tex;
+    }
+    if(renderers.jme) {
+        typeToJME[name] = renderers.jme;
+    }
+    if(renderers.displayString) {
+        jme.tokenToDisplayString = renderers.displayString;
+    }
+}
+
 /** Define how to render function in JME, for special cases when the normal rendering `f(...)` isn't right.
  * @enum {function}
  * @memberof Numbas.jme.display
