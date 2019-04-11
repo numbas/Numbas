@@ -1537,6 +1537,17 @@ newBuiltin('table',[TList],THTML,
         unwrapValues: true
     }
 );
+
+newBuiltin('max_width',[TNum,THTML],THTML,function(w,h) {
+    h[0].style['max-width'] = w+'em';
+    return h[0];
+});
+
+newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
+    h[0].style['max-height'] = w+'em';
+    return h[0];
+});
+
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
