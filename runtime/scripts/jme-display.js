@@ -1492,7 +1492,6 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 
 jme.display.registerType = function(type, renderers) {
     var name = type.prototype.type;
-    console.log(type,name);
     if(renderers.tex) {
         typeToTeX[name] = renderers.tex;
     }
@@ -1500,7 +1499,7 @@ jme.display.registerType = function(type, renderers) {
         typeToJME[name] = renderers.jme;
     }
     if(renderers.displayString) {
-        jme.tokenToDisplayString = renderers.displayString;
+        jme.tokenToDisplayString[name] = renderers.displayString;
     }
 }
 
