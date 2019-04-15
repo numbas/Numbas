@@ -8822,6 +8822,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 throw(new Numbas.Error('jme.typecheck.op not defined',{op:op}));
             }
         }
+
         function type_difference(tok,typeDescription) {
             if(tok.type!=typeDescription.type) {
                 return [typeDescription.type];
@@ -8830,14 +8831,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             switch(typeDescription.type) {
                 case 'list':
                     if(typeDescription.items) {
+                        var items = sig_remove_missing(typeDescription.items);
                         for(var i=0;i<tok.value.length;i++) {
-                            out = out.concat(type_difference(tok.value[i],typeDescription.items[i]));
+                            out = out.concat(type_difference(tok.value[i],items[i]));
                         }
                     }
             }
             return out;
         }
+
         function compare_matches(m1,m2) {
+            m1 = sig_remove_missing(m1);
+            m2 = sig_remove_missing(m2);
             for(var i=0;i<args.length;i++) {
                 var d1 = type_difference(args[i],m1[i]);
                 var d2 = type_difference(args[i],m2[i]);
@@ -8883,7 +8888,16 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
-                if(match.every(function(m,i) { return args[i].type==m; })) {
+                var j = 0;
+                var exact_match = match.every(function(m,i) { 
+                    if(m.missing) {
+                        return;
+                    }
+                    var ok = args[j].type==m.type;
+                    j += 1;
+                    return ok; 
+                });
+                if(exact_match) {
                     return {fn: fn, signature: match};
                 }
                 var pcandidate = {fn: fn, signature: match};
@@ -9092,14 +9106,22 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
-                    var castargs = eargs.map(function(arg,i) { 
-                        if(signature[i]) {
-                            return jme.castToType(arg,signature[i]); 
-                        } else {
-                            return arg;
+                    var castargs = [];
+                    var j = 0;
+                    for(var i=0;i<signature.length;i++) {
+                        if(signature[i].missing) {
+                            castargs.push(new TNothing());
+                            continue;
                         }
-                    });
-                    return matchedFunction.fn.evaluate(castargs,scope);
+                        var arg = eargs[j];
+                        if(signature[i]) {
+                            castargs.push(jme.castToType(arg,signature[i])); 
+                        } else {
+                            castargs.push(arg);
+                        }
+                        j += 1;
+                    }
+                    return matchedFunction.fn.evaluate(castargs,scope,signature);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
                         if(eargs[i] && eargs[i].unboundName) {
@@ -9806,17 +9828,18 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     var check_signature = this.intype;
     this.typecheck = options.typecheck || function(variables) {
         var match = check_signature(variables);
-        return match!==false && match.length==variables.length;
+        return match!==false && sig_remove_missing(match).length==variables.length;
     }
     /** Evaluate this function on the given arguments, in the given scope.
      *
      * @function evaluate
      * @param {Numbas.jme.token[]} args
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.call_signature} signature
      * @returns {Numbas.jme.token}
      * @memberof Numbas.jme.funcObj
      */
-    this.evaluate = options.evaluate || function(args,scope)
+    this.evaluate = options.evaluate || function(args,scope,signature)
     {
         var nargs = [];
         for(var i=0; i<args.length; i++) {
@@ -9824,6 +9847,9 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
                 nargs.push(jme.unwrapValue(args[i]));
             else
                 nargs.push(args[i].value);
+        }
+        if(options.includeSignature) {
+            nargs.push(signature);
         }
         var result = this.fn.apply(null,nargs);
         if(options.unwrapValues) {
@@ -10688,6 +10714,10 @@ SignatureEnumerator.prototype = {
     }
 }
 
+function sig_remove_missing(items) {
+    return items.filter(function(d){return !d.missing});
+}
+
 jme.signature = {
     anything: function() {
         var f = function(args) {
@@ -10739,7 +10769,7 @@ jme.signature = {
             if(match) {
                 return match;
             } else {
-                return [];
+                return [{missing: true}];
             }
         }
         f.kind = 'optional';
@@ -10756,7 +10786,7 @@ jme.signature = {
                     return false;
                 }
                 match = match.concat(bitmatch);
-                args = args.slice(bitmatch.length);
+                args = args.slice(sig_remove_missing(bitmatch).length);
             }
             return match;
         }
@@ -14171,7 +14201,6 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 
 jme.display.registerType = function(type, renderers) {
     var name = type.prototype.type;
-    console.log(type,name);
     if(renderers.tex) {
         typeToTeX[name] = renderers.tex;
     }
@@ -14179,7 +14208,7 @@ jme.display.registerType = function(type, renderers) {
         typeToJME[name] = renderers.jme;
     }
     if(renderers.displayString) {
-        jme.tokenToDisplayString = renderers.displayString;
+        jme.tokenToDisplayString[name] = renderers.displayString;
     }
 }
 
