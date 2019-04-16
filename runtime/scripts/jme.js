@@ -1742,13 +1742,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
-                var j = 0;
+                var k = 0;
                 var exact_match = match.every(function(m,i) { 
                     if(m.missing) {
                         return;
                     }
-                    var ok = args[j].type==m.type;
-                    j += 1;
+                    var ok = args[k].type==m.type;
+                    k += 1;
                     return ok; 
                 });
                 if(exact_match) {
@@ -2701,9 +2701,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
                 nargs.push(jme.unwrapValue(args[i]));
             else
                 nargs.push(args[i].value);
-        }
-        if(options.includeSignature) {
-            nargs.push(signature);
         }
         var result = this.fn.apply(null,nargs);
         if(options.unwrapValues) {
