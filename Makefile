@@ -1,17 +1,21 @@
 everything: update_tests docs
 
+NUMBAS_EDITOR_PATH ?= ../editor
+
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts
+update_tests: jme runtime marking_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
-MINIMAL_SOURCES=numbas.js localisation.js util.js math.js i18next/i18next.js
+MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
+THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js decimal/decimal.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js schedule.js  marking.js json.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js schedule.js  marking.js json.js timing.js start-exam.js numbas.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
-ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
+ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
+ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
 
 
 define created
@@ -19,15 +23,15 @@ define created
 endef
 
 tests/numbas-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/%, $(ALL_SOURCES))
-	@echo "// Compiled using $(ALL_SOURCES)" > $@
+	@echo "// Compiled using $^" > $@
 	@printf "// From the Numbas compiler directory\n" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)
 
 runtime: tests/numbas-runtime.js
 
-tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(MINIMAL_SOURCES) $(JME_SOURCES))
-	@echo "// Compiled using $(ALL_SOURCES)" > $@
+tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(MINIMAL_SOURCES) $(THIRD_PARTY_SOURCES) $(JME_SOURCES))
+	@echo "// Compiled using $^" > $@
 	@printf "// From the Numbas compiler directory\n" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)
@@ -98,3 +102,13 @@ docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 	$(created)
 
 docs: docs/index.html
+
+eslint: $(ESLINT_SOURCES)
+	@eslint $^
+
+tests/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
+	@echo "var doc_tests = " > $@
+	@cat $^ | python3 tests/make_tests_from_docs.py >> $@
+	$(created)
+
+doc_tests: tests/doc-tests.js

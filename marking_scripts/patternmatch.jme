@@ -26,7 +26,10 @@ matches_case_insensitive (Does the student's answer match the correct answer, ig
      
 
 mark:
-  assert(len(studentAnswer)>0,fail(translate("part.marking.nothing entered")));
+  assert(len(studentAnswer)>0,
+    warn(translate("part.marking.nothing entered"));
+    fail(translate("part.marking.nothing entered"))
+  );
   if(settings["caseSensitive"],
     if(matches,
       correct(),

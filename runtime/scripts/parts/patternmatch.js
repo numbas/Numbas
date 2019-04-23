@@ -18,10 +18,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Text-entry part - student's answer must match the given regular expression
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var PatternMatchPart = Numbas.parts.PatternMatchPart = function(xml, path, question, parentPart, loading) {
+var PatternMatchPart = Numbas.parts.PatternMatchPart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(PatternMatchPart.prototype.settings,settings);
 }
@@ -41,7 +45,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
-        tryLoad(data, ['caseSensitive', 'partialCredit'], settings);
+        tryLoad(data, ['caseSensitive', 'partialCredit','matchMode'], settings);
     },
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());
@@ -98,6 +102,8 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         }
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
+     * @returns {String}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -108,6 +114,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
                 break;
         }
         settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+        return settings.displayAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

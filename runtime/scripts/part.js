@@ -112,6 +112,8 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store]
+ * @property {Boolean} isStep - is this part a step?
+ * @proeprty {Boolean} isGap - is this part a gap?
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -124,6 +126,11 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.parentPart = parentPart;
     //remember a path for this part, for stuff like marking and warnings
     this.path = path || 'p0';
+
+    this.name = util.capitalise(util.nicePartName(path));
+
+    this.label = '';
+
     if(this.question) {
     this.question.partDictionary[path] = this;
     }
@@ -134,12 +141,25 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.gaps = [];
     this.steps = [];
     this.isStep = false;
+    this.isGap = false;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
     this.markingFeedback = [];
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
+
+    Object.defineProperty(this,"credit", {
+        /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
+         * @type {Number}
+         */
+        get: function() {
+            return this.creditFraction.toFloat();
+        },
+        set: function(credit) {
+            this.creditFraction = math.Fraction.fromFloat(credit);
+        }
+    });
 }
 Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Storage engine
@@ -156,7 +176,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromXML: function(xml) {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this,this.xml,'.',['type','marks']);
+        tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
@@ -205,7 +225,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['marks'],this);
+        tryLoad(data,['marks','useCustomName','customName'],this);
         this.marks = parseFloat(this.marks);
         tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
@@ -216,8 +236,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         if('steps' in data) {
             data.steps.map(function(sd,i) {
-                var s = createPartFromJSON(sd, this.path+'s'+i, this.question, this, this.store);
-                p.addStep(sd,i);
+                var s = createPartFromJSON(sd, p.path+'s'+i, p.question, p, p.store);
+                p.addStep(s,i);
             });
         }
         var marking = {};
@@ -239,7 +259,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     finaliseLoad: function() {
         this.applyScripts();
         if(this.customConstructor) {
-            this.customConstructor.apply(this);
+            try {
+                this.customConstructor.apply(this);
+            } catch(e) {
+                throw(e);
+            }
         }
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
@@ -322,7 +346,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){Numbas.showError(new Numbas.Error(\'part.script.error\',{path:util.nicePartName(this.path),script:name,message:e.message}))}})');
+            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -338,6 +362,41 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Numbas.parts.partpath}
      */
     path: '',
+    /** A readable name for this part, to show to the student.
+     * Change it with {@link Numbas.parts.Part#setName}
+     * @type {String}
+     */
+    name: '',
+    /** Should a custom name be used?
+     * @type {Boolean}
+     */
+    useCustomName: false,
+    /** Custom name for this part, or null if none.
+     * Variables will be substituted into this string from the part's scope.
+     * @type {String}
+     */
+    customName: '',
+    /** Assign a name to this part
+     * @param {Number} index - the number of parts before this one that have names.
+     * @param {Number} siblings - the number of siblings this part has
+     * @returns {Boolean} true if this part has a name that should increment the label counter
+     */
+    assignName: function(index,siblings) {
+        if(this.useCustomName) {
+            this.name = jme.subvars(this.customName,this.getScope(),true);
+        } else if(siblings==0) {
+            return '';
+        } else if(this.isGap) {
+            this.name = util.capitalise(R('gap'))+' '+index;
+        } else if(this.isStep) {
+            this.name = util.capitalise(R('step'))+' '+index;
+        } else {
+            this.name = util.letterOrdinal(index)+')';
+        }
+
+        this.display && this.display.setName(this.name);
+        return this.name!='';
+    },
     /** This part's type, e.g. "jme", "numberentry", ...
      * @type {String}
      */
@@ -350,10 +409,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Number}
      */
     stepsMarks: 0,
-    /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
-     * @type {Number}
+    /** Credit as a fraction. Used to avoid simple floating point errors.
+     * @type {Numbas.math.Fraction}
      */
-    credit: 0,
+    creditFraction: new math.Fraction(0,1),
     /** Student's score on this part
      * @type {Number}
      */
@@ -436,12 +495,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
     /** Throw an error, with the part's identifier prepended to the message
      * @param {String} message
+     * @param {Object} args - arguments for the error message
+     * @param {Error} [originalError] - if this is a re-thrown error, the original error object
      * @throws {Numbas.Error}
      */
-    error: function(message) {
-        message = R.apply(this,arguments);
-        var niceName = Numbas.util.capitalise(util.nicePartName(this.path));
-        throw(new Numbas.Error('part.error',{path: niceName, message: message}));
+    error: function(message, args, originalError) {
+        var nmessage = R.apply(this,[message,args]);
+        if(nmessage!=message) {
+            originalError = new Error(nmessage);
+            originalError.originalMessages = [message].concat(originalError.originalMessages || []);
+        }
+        var niceName = this.name;
+        throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -558,11 +623,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
             if(stepsMarks!=0 && stepsScore!=0)
             {
                 if(this.credit==1)
@@ -579,11 +640,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         else
         {
             this.score = this.credit * this.marks;
-            if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
-                this.score = this.settings.minimumMarks;
-                this.credit = this.marks!=0 ? this.settings.minimumMarks/this.marks : 0;
-                this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
-            }
+            this.applyScoreLimits();
         }
         if(this.revealed) {
             this.score = 0;
@@ -592,6 +649,23 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.parentPart.calculateScore();
         this.display && this.display.showScore(this.answered);
     },
+
+    /** Make sure the awarded score is between the minimum and maximum available.
+     */
+    applyScoreLimits: function() {
+        if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+            this.score = this.settings.minimumMarks;
+            this.creditFraction = this.marks!=0 ? math.Fraction.fromFloat(this.settings.minimumMarks,this.marks) : 0;
+            this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
+        }
+        if(this.score>this.marks) {
+            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:this.marks})));
+            this.score = this.marks;
+            this.creditFraction = math.Fraction.one;
+            this.markingComment(R('part.marking.maximum score applied',{score:this.marks}));
+        }
+    },
+
     /** Update the stored answer from the student (called when the student changes their answer, but before submitting)
      * @param {*} answer
      * @see {Numbas.parts.Part.stagedAnswer}
@@ -599,7 +673,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     storeAnswer: function(answer) {
         this.stagedAnswer = answer;
         this.setDirty(true);
-        this.display && this.display.removeWarnings();
+        this.removeWarnings();
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
      * @param {Boolean} dirty
@@ -649,8 +723,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         this.setStudentAnswer();
         if(this.doesMarking) {
+            this.removeWarnings();
             if(this.hasStagedAnswer()) {
-                this.display && this.display.removeWarnings();
                 this.setDirty(false);
                 // save existing feedback
                 var existing_feedback = {
@@ -671,14 +745,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             var result_replacement = this.markAgainstScope(scope,existing_feedback);
                             if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                                 result = result_replacement;
-                                result.finalised_result.states.splice(0,0,{op: Numbas.marking.FeedbackOps.FEEDBACK, message: R('part.marking.used variable replacements')});
+                                result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
                                 result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
                             }
                         } catch(e) {
-                            try{
-                                this.error(e.message);
-                            } catch(pe) {
-                                console.error(pe.message);
+                            if(e.originalMessage=='part.marking.variable replacement part not answered') {
+                                this.markingComment(e.message);
+                            } else {
+                                try{
+                                    this.error(e.message,{},e);
+                                } catch(pe) {
+                                    console.error(pe.message);
+                                }
                             }
                         }
                     }
@@ -693,7 +771,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         this.answered = result.answered;
                     }
                 } catch(e) {
-                    throw(new Numbas.Error('part.marking.uncaught error',{part:util.nicePartName(this.path),message:e.message}));
+                    this.error('part.marking.uncaught error',{message:e.message},e);
                 }
             } else {
                 this.giveWarning(R('part.marking.not submitted'));
@@ -724,7 +802,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(this.answered && this.question) {
             for(var path in this.errorCarriedForwardBackReferences) {
                 var p2 = this.question.getPart(path);
-                p2.pleaseResubmit();
+                if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
+                    var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
+                    p2.display && p2.display.updateCorrectAnswer(answer);
+                }
+                if(p2.answered) {
+                    p2.pleaseResubmit();
+                }
             }
         }
     },
@@ -798,12 +882,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 new_variables[vr.variable] = p2.studentAnswerAsJME();
                 replaced.push(vr.variable);
             } else if(vr.must_go_first) {
-                throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:util.nicePartName(vr.part)}));
+                throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
-        }
-        for(var i=0;i<replace.length;i++) {
-            var p2 = this.question.getPart(replace[i].part);
-            p2.errorCarriedForwardBackReferences[this.path] = true;
         }
         var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
         // find dependent variables which need to be recomputed
@@ -909,14 +989,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     }
                     break;
                 case "start_lift":
-                    lifts.push({credit: this.credit,scale:scale});
+                    lifts.push({credit: this.credit, creditFraction: this.creditFraction, scale:scale});
                     this.credit = 0;
                     scale = state.scale;
                     break;
                 case 'end_lift':
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
-                    this.credit = last_lift.credit;
+                    this.creditFraction = last_lift.creditFraction;
                     this.addCredit(lift_credit*last_lift.scale);
                     scale = last_lift.scale;
                     break;
@@ -932,6 +1012,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         studentAnswer = jme.makeSafe(studentAnswer);
         return {
             path: jme.wrapValue(this.path),
+            name: jme.wrapValue(this.name),
             question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),
@@ -970,14 +1051,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     setCredit: function(credit,message,reason)
     {
-        var oCredit = this.credit;
-        this.credit = credit;
-        this.markingFeedback.push({
-            op: 'set_credit',
-            credit: this.credit - oCredit,
-            message: message,
-            reason: reason
-        });
+        var oCredit = this.creditFraction;
+        this.creditFraction = math.Fraction.fromFloat(credit);
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'set_credit',
+                credit: this.creditFraction.subtract(oCredit).toFloat(),
+                message: message,
+                reason: reason
+            });
+        }
     },
     /** Add an absolute value to `credit`
      * @param {Number} credit - amount to add
@@ -985,12 +1068,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addCredit: function(credit,message)
     {
-        this.credit += credit;
-        this.markingFeedback.push({
-            op: 'add_credit',
-            credit: credit,
-            message: message
-        });
+        var creditFraction = math.Fraction.fromFloat(credit);
+        this.creditFraction = this.creditFraction.add(creditFraction);
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'add_credit',
+                credit: credit,
+                message: message
+            });
+        }
     },
     /** Subtract an absolute value from `credit`
      * @param {Number} credit - amount to subtract
@@ -998,12 +1084,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     subCredit: function(credit,message)
     {
-        this.credit -= credit;
-        this.markingFeedback.push({
-            op: 'sub_credit',
-            credit: credit,
-            message: message
-        });
+        var creditFraction = math.Fraction.fromFloat(credit);
+        this.creditFraction = this.creditFraction.subtract(creditFraction);
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'sub_credit',
+                credit: credit,
+                message: message
+            });
+        }
     },
     /** Multiply `credit` by the given amount - use to apply penalties
      * @param {Number} factor
@@ -1011,14 +1100,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     multCredit: function(factor,message)
     {
-        var oCredit = this.credit
-        this.credit *= factor;
-        this.markingFeedback.push({
-            op: 'multiply_credit',
-            credit: this.credit - oCredit,
-            factor: factor,
-            message: message
-        });
+        var oCreditFraction = this.creditFraction;
+        this.creditFraction = this.creditFraction.multiply(math.Fraction.fromFloat(factor));
+        if(this.settings.showFeedbackIcon) {
+            this.markingFeedback.push({
+                op: 'multiply_credit',
+                credit: this.creditFraction.subtract(oCreditFraction).toFloat(),
+                factor: factor,
+                message: message
+            });
+        }
     },
     /** Add a comment to the marking feedback
      * @param {String} message
@@ -1089,4 +1180,5 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     }
 };
+
 });

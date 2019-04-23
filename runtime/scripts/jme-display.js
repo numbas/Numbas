@@ -31,9 +31,10 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {TeX}
      */
-    exprToLaTeX: function(expr,ruleset,scope)
+    exprToLaTeX: function(expr,ruleset,scope,parser)
     {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
@@ -41,7 +42,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         expr+='';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
-        var tree = jme.display.simplify(expr,ruleset,scope); //compile the expression to a tree and simplify it
+        var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
         var tex = texify(tree,ruleset.flags); //render the tree as TeX
         return tex;
     },
@@ -58,28 +59,30 @@ jme.display = /** @lends Numbas.jme.display */ {
     {
         if(expr.trim()=='')
             return '';
-        return treeToJME(jme.display.simplify(expr,ruleset,scope),ruleset.flags);
+        var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
+        return treeToJME(simplifiedTree,ruleset.flags);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
      *
      * @param {JME} expr
      * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr,ruleset,scope)
+    simplify: function(expr,ruleset,scope,parser)
     {
         if(expr.trim()=='')
             return;
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset,scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
-        try
-        {
-            var exprTree = jme.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        parser = parser || Numbas.jme.standardParser;
+        try {
+            var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
             return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
         }
         catch(e)
@@ -90,74 +93,34 @@ jme.display = /** @lends Numbas.jme.display */ {
     },
     /** Simplify a syntax tree according to the given ruleset
      *
+     * @see Numbas.jme.rules.Ruleset#simplify
      * @param {Numbas.jme.tree} exprTree
-     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
+     * @param {Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} allowUnbound
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyTree: function(exprTree,ruleset,scope,allowUnbound)
-    {
-        if(!exprTree) {
-            throw(new Numbas.Error('jme.display.simplifyTree.empty expression'));
-        }
-        if(!scope)
-            throw(new Numbas.Error('jme.display.simplifyTree.no scope given'));
-        scope = Numbas.util.copyobj(scope);
-        scope.variables = {};    //remove variables from the scope so they don't accidentally get substituted in
-        var applied = true;
-        var rules = ruleset.rules;
-        var depth = 0;
-        var seen = [];
-        // apply rules until nothing can be done
-        while( applied )
-        {
-            //the eval() function is a meta-function which, when used in the result of a rule, allows you to replace an expression with a single data value
-            if(exprTree.tok.type=='function' && exprTree.tok.name=='eval')
-            {
-                exprTree = {tok: Numbas.jme.evaluate(exprTree.args[0],scope)};
-            }
-            else
-            {
-                if(exprTree.args)    //if this token is an operation with arguments, try to simplify the arguments first
-                {
-                    for(var i=0;i<exprTree.args.length;i++)
-                    {
-                        exprTree.args[i] = jme.display.simplifyTree(exprTree.args[i],ruleset,scope,allowUnbound);
-                    }
-                }
-                applied = false;
-                for( var i=0; i<rules.length;i++)    //check each rule
-                {
-                    var match;
-                    if(match = rules[i].match(exprTree,scope))    //if rule can be applied, apply it!
-                    {
-                        exprTree = jme.substituteTree(Numbas.util.copyobj(rules[i].result,true),new jme.Scope([{variables:match}]),allowUnbound);
-                        applied = true;
-                        depth += 1;
-                        if(depth > 100) {
-                            var str = Numbas.jme.display.treeToJME(exprTree);
-                            if(seen.contains(str)) {
-                                throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop",{expr:str}));
-                            }
-                            seen.push(str);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        return exprTree
+    simplifyTree: function(exprTree,ruleset,scope,allowUnbound) {
+        return ruleset.simplify(exprTree,scope);
     }
 };
-/// all private methods below here
+
+/** Would texify put brackets around a given argument of an operator?
+ * @param {Numbas.jme.tree} thing
+ * @param {Number} i - the index of the argument
+ * @param {Numbas.jme.display.texify_settings} settings
+ * @returns {Boolean}
+ */
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
     var tok = thing.args[i].tok;
     var precedence = jme.precedence;
     if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
+        if(thing.args.length==1) {
+            return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
+        }
         var op1 = thing.args[i].tok.name;    //child op
         var op2 = thing.tok.name;            //parent op
         var p1 = precedence[op1];    //precedence of child op
@@ -169,7 +132,7 @@ function texifyWouldBracketOpArg(thing,i, settings) {
     else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
         var v = thing.args[i].tok.value;
         return !(v.re==0 || v.im==0);
-    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && tok.type=='number' && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
         return true;
     }
     return false;
@@ -196,7 +159,7 @@ function texifyOpArg(thing,texArgs,i)
  * @private
  *
  * @param {TeX} code - the TeX command for the operator
- * @returns {function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
+ * @returns {Function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
  */
 function infixTex(code)
 {
@@ -205,11 +168,12 @@ function infixTex(code)
         var arity = thing.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
-            return code+texArgs[0];
+            var arg = texifyOpArg(thing,texArgs,0);
+            return thing.tok.postfix ? arg+code : code+arg;
         }
         else if ( arity == 2 )    //if operation is binary, put code in between arguments
         {
-            return texArgs[0]+' '+code+' '+texArgs[1];
+            return texifyOpArg(thing,texArgs,0)+' '+code+' '+texifyOpArg(thing,texArgs,1);
         }
     }
 }
@@ -218,7 +182,7 @@ function infixTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which returns the appropriate (constant) TeX code
+ * @returns {Function} - a function which returns the appropriate (constant) TeX code
  */
 function nullaryTex(code)
 {
@@ -229,7 +193,7 @@ function nullaryTex(code)
  * @private
  *
  * @param {TeX} code - the TeX command for the function
- * @returns {function} - a function which converts a syntax tree to the appropriate TeX
+ * @returns {Function} - a function which converts a syntax tree to the appropriate TeX
  */
 function funcTex(code)
 {
@@ -239,16 +203,22 @@ function funcTex(code)
     f.code = code;
     return f;
 }
+
+/** TeX the name of a pattern-matching operator
+ * @param {TeX} code
+ * @returns {TeX}
+ */
+function patternName(code) {
+    return '\\operatorname{\\color{grey}{'+code+'}}';
+}
+
 /** Define how to texify each operation and function
  * @enum {function}
  * @memberof Numbas.jme.display
  */
 var texOps = jme.display.texOps = {
-    /** range definition. Should never really be seen */
     '#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
-    /** logical negation */
     'not': infixTex('\\neg '),
-    /** unary addition */
     '+u': function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' ) {
@@ -259,7 +229,6 @@ var texOps = jme.display.texOps = {
         }
         return '+'+tex;
     },
-    /** unary minus */
     '-u': (function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' )
@@ -278,7 +247,6 @@ var texOps = jme.display.texOps = {
         }
         return '-'+tex;
     }),
-    /** exponentiation */
     '^': (function(thing,texArgs,settings) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
@@ -286,7 +254,7 @@ var texOps = jme.display.texOps = {
             tex0 = '\\left ( ' +tex0+' \\right )';
         }
         var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
-        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && thing.args[1].tok.type=='number' && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
+        if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && jme.isType(thing.args[1].tok,'number') && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
             return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
         }
         return (tex0+'^{ '+texArgs[1]+' }');
@@ -305,29 +273,32 @@ var texOps = jme.display.texOps = {
                 if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 //anything times e^(something) or (not number)^(something)
-                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || right.args[0].tok.type!='number')) {
+                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || !jme.isType(right.args[0].tok,'number'))) {
                     use_symbol = false;
                 //real number times Pi or E
-                } else if (right.tok.type=='number' && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && left.tok.type=='number' && !(left.tok.value.complex)) {
+                } else if (jme.isType(right.tok,'number') && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && jme.isType(left.tok,'number') && !(left.tok.value.complex)) {
                     use_symbol = false
                 //number times a power of i
-                } else if (jme.isOp(right.tok,'^') && right.args[0].tok.type=='number' && math.eq(right.args[0].tok.value,math.complex(0,1)) && left.tok.type=='number') {
+                } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
                     use_symbol = true;
                 //(anything except i) times i
-                } else if ( !(left.tok.type=='number' && math.eq(left.tok.value,math.complex(0,1))) && right.tok.type=='number' && math.eq(right.tok.value,math.complex(0,1))) {
+                } else if ( !(jme.isType(left.tok,'number') && math.eq(left.tok.value,math.complex(0,1))) && jme.isType(right.tok,'number') && math.eq(right.tok.value,math.complex(0,1))) {
                     use_symbol = false;
+                // multiplication of two names, at least one of which has more than one letter
+                } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.name.length,right.tok.name.length)>1) {
+                    use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if ( right.tok.type=='number'
+                } else if ( jme.isType(right.tok,'number')
                         ||
                             jme.isOp(right.tok,'-u')
                         ||
                         (
                             !jme.isOp(right.tok,'-u')
                             && (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*']
-                                && (right.args[0].tok.type=='number'
+                                && (jme.isType(right.args[0].tok,'number')
                                 && right.args[0].tok.value!=Math.E)
                             )
                         )
@@ -378,7 +349,7 @@ var texOps = jme.display.texOps = {
     '>': infixTex('\\gt'),
     '<=': infixTex('\\leq'),
     '>=': infixTex('\\geq'),
-    '<>': infixTex('\neq'),
+    '<>': infixTex('\\neq'),
     '=': infixTex('='),
     'and': infixTex('\\wedge'),
     'or': infixTex('\\vee'),
@@ -404,12 +375,9 @@ var texOps = jme.display.texOps = {
     'exp': (function(thing,texArgs) { return ('e^{ '+texArgs[0]+' }'); }),
     'fact': (function(thing,texArgs)
             {
-                if(thing.args[0].tok.type=='number' || thing.args[0].tok.type=='name')
-                {
+                if(jme.isType(thing.args[0].tok,'number') || thing.args[0].tok.type=='name') {
                     return texArgs[0]+'!';
-                }
-                else
-                {
+                } else {
                     return '\\left ('+texArgs[0]+' \\right )!';
                 }
             }),
@@ -419,19 +387,16 @@ var texOps = jme.display.texOps = {
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'diff': (function(thing,texArgs)
             {
-                var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
-                if(thing.args[0].tok.type=='name')
-                {
+                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
+                if(thing.args[0].tok.type=='name') {
                     return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
-                }
-                else
-                {
+                } else {
                     return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
                 }
             }),
     'partialdiff': (function(thing,texArgs)
             {
-                var degree = (thing.args[2].tok.type=='number' && thing.args[2].tok.value==1) ? '' : '^{'+texArgs[2]+'}';
+                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name')
                 {
                     return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
@@ -535,13 +500,64 @@ var texOps = jme.display.texOps = {
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
+    },
+    '`+-': infixTex(patternName('\\pm')),
+    '`*/': infixTex(patternName('\\times \\atop \\div')),
+    '`|': infixTex(patternName('|')),
+    '`&': infixTex(patternName('\\wedge')),
+    '`!': infixTex(patternName('\\neg')),
+    '`where': infixTex(patternName('where')),
+    '`@': infixTex(patternName('@')),
+    '`?': unaryPatternTex(patternName('?')),
+    '`*': unaryPatternTex(patternName('\\ast')),
+    '`+': unaryPatternTex(patternName('+')),
+    '`:': infixTex(patternName(':')),
+    ';': function(thing,texArgs,settings) {
+        return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
+    },
+    ';=': function(thing,texArgs,settings) {
+        return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
+    },
+    'm_uses': funcTex(patternName('uses')),
+    'm_type': funcTex(patternName('type')),
+    'm_exactly': overbraceTex('exactly'),
+    'm_commutative': overbraceTex('commutative'),
+    'm_noncommutative': overbraceTex('non-commutative'),
+    'm_associative': overbraceTex('associative'),
+    'm_nonassociative': overbraceTex('non-associative'),
+    'm_strictplus': overbraceTex('strict-plus'),
+    'm_gather': overbraceTex('gather'),
+    'm_nogather': overbraceTex('no-gather'),
+    'm_func': funcTex(patternName('func')),
+    'm_op': funcTex(patternName('op')),
+    'm_numeric': overbraceTex('numeric ='),
+}
+
+/** Returns a function which puts the given label over the first arg of the op
+ * @param {String} label
+ * @returns {Function}
+ */
+function overbraceTex(label) {
+    return function(thing,texArgs) {
+        return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
     }
 }
+
+/** Produce LaTeX for a unary pattern-matching operator
+ * @param {String} code - TeX for the operator's name
+ * @returns {Function}
+ */
+function unaryPatternTex(code) {
+    return function(thing,texArgs) {
+        return '{'+texArgs[0]+'}^{'+code+'}';
+    }
+}
+
 /** Convert a special number to TeX, or return undefined if not a special number.
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
@@ -602,14 +618,10 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
         var piD;
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
-        var m;
         var out = math.niceNumber(n);
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+' \\times 10^{'+exponent+'}';
+        if(out.length>20) {
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
         if(f[1]==1) {
@@ -693,13 +705,9 @@ function texRealNumber(n, settings)
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
-        var m;
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+' \\times 10^{'+exponent+'}';
+        if(out.length>20) {
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+' \\times 10^{'+bits.exponent+'}';
         }
         switch(piD)
         {
@@ -816,6 +824,23 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     },
     matrix: function(name) {
         return '\\mathrm{'+name+'}';
+    },
+    complex: propertyAnnotation('complex'),
+    real: propertyAnnotation('real'),
+    positive: propertyAnnotation('positive'),
+    nonnegative: propertyAnnotation('non-negative'),
+    negative: propertyAnnotation('negative'),
+    integer: propertyAnnotation('integer'),
+    decimal: propertyAnnotation('decimal')
+}
+
+/** Return a function which TeXs an annotation which marks a property for pattern-matching
+ * @param {String} text
+ * @returns {Function}
+ */
+function propertyAnnotation(text) {
+    return function(name) {
+        return '\\text{'+text+' } '+name;
     }
 }
 texNameAnnotations.verb = texNameAnnotations.verbatim;
@@ -826,13 +851,17 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  *
  * @param {String} name
  * @param {Array.<String>} [annotations]
- * @param {function} [longNameMacro=texttt] - function which returns TeX for a long name
+ * @param {Function} [longNameMacro=texttt] - function which returns TeX for a long name
  * @returns {TeX}
  */
 var texName = jme.display.texName = function(name,annotations,longNameMacro)
 {
     longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
     var oname = name;
+    /** Apply annotations to the given name
+     * @param {TeX} name
+     * @returns {TeX}
+     */
     function applyAnnotations(name) {
         if(!annotations) {
             return name;
@@ -847,6 +876,9 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
             }
         }
         return name;
+    }
+    if(specialNames[name]) {
+        return applyAnnotations(specialNames[name]);
     }
     var num_subscripts = name.length - name.replace('_','').length;
     var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
@@ -872,6 +904,25 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
     }
     return name;
 }
+
+/** TeX a special name used in pattern-matching
+ * @param {TeX} display
+ * @returns {TeX}
+ */
+function texPatternName(display) {
+    return '\\text{'+display+'}';
+}
+
+/** Names with special renderings
+ * @memberof Numbas.jme.display
+ * @type {Object.<String>}
+ */
+var specialNames = jme.display.specialNames = {
+    '$z': texPatternName('nothing'),
+    '$n': texPatternName('number'),
+    '$v': texPatternName('name')
+}
+
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 /** Definition of a number with a special name
  * @typedef Numbas.jme.display.special_number_definition
@@ -897,6 +948,15 @@ jme.display.specialNumbers = [
 var typeToTeX = jme.display.typeToTeX = {
     'nothing': function(thing,tok,texArgs,settings) {
         return '\\text{nothing}';
+    },
+    'integer': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value, settings);
+    },
+    'rational': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value.toFloat(), settings);
+    },
+    'decimal': function(thing,tok,texArgs,settings) {
+        return settings.texNumber(tok.value.toNumber(), settings);
     },
     'number': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value, settings);
@@ -926,7 +986,7 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     keypair: function(thing,tok,texArgs,settings) {
         var key = '\\textrm{'+tok.key+'}';
-        return key+' \\colon '+texArgs[0];
+        return key+' \\operatorname{\\colon} '+texArgs[0];
     },
     dict: function(thing,tok,texArgs,settings) {
         if(!texArgs)
@@ -968,6 +1028,10 @@ var typeToTeX = jme.display.typeToTeX = {
             return texOps[lowerName](thing,texArgs,settings);
         }
         else {
+            /** long operators get wrapped in `\operatorname`
+             * @param {String} name
+             * @returns {TeX}
+             */
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
@@ -982,7 +1046,10 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     }
 }
-/** Take a nested application of a single op, e.g. ((1*2)*3)*4, and flatten it so that the tree has one op two or more arguments
+/** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
+ * @param {Numbas.jme.tree} tree
+ * @param {String} op
+ * @returns {Array.<Numbas.jme.tree>}
  */
 function flatten(tree,op) {
     if(!jme.isOp(tree.tok,op)) {
@@ -1043,7 +1110,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
  *  @memberof Numbas.jme.display
  *  @private
  *
- *  @param {Number} n
+ *  @param {Number} value
  *  @returns {TeX}
  */
 var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
@@ -1108,19 +1175,15 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         var piD;
         if((piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI,piD);
-        var m;
         var out;
         if(settings.niceNumber===false) {
             out = n+'';
         } else {
             out = math.niceNumber(n);
         }
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+'*10^('+exponent+')';
+        if(out.length>20) {
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+'*10^('+bits.exponent+')';
         }
         var f = math.rationalApproximation(Math.abs(n),settings.accuracy);
         if(f[1]==1)
@@ -1157,8 +1220,9 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
         var re = jmeRealNumber(n.re);
         var im = jmeRealNumber(n.im);
         im += im.match(/\d$/) ? 'i' : '*i';
-        if(n.im==0)
+        if(Math.abs(n.im)<1e-15) {
             return re;
+        } 
         else if(n.re==0)
         {
             if(n.im==1)
@@ -1195,16 +1259,18 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
         var out;
         if(settings.niceNumber===false) {
             out = n+'';
+            if(out.match(/e/)) {
+                out = math.unscientific(out);
+            }
         } else {
             out = math.niceNumber(n);
         }
-        var m;
-        if(m = out.match(math.re_scientificNumber)) {
-            var mantissa = m[1];
-            var exponent = m[2];
-            if(exponent[0]=='+')
-                exponent = exponent.slice(1);
-            return mantissa+'*10^('+exponent+')';
+        if(out.length>20) {
+            if(Math.abs(n)<1e-15) {
+                return '0';
+            }
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+'*10^('+bits.exponent+')';
         }
         switch(piD)
         {
@@ -1232,6 +1298,20 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     'nothing': function(tree,tok,bits,settings) {
         return 'nothing';
     },
+    'integer': function(tree,tok,bits,settings) {
+        return settings.jmeNumber(tok.value,settings);
+    },
+    'rational': function(tree,tok,bits,settings) {
+        return settings.jmeNumber(tok.value.toFloat(),settings);
+    },
+    'decimal': function(tree,tok,bits,settings) {
+        var n = settings.jmeNumber(tok.value.toNumber(),settings);
+        if(!settings.ignorestringattributes) {
+            return 'dec('+n+')';
+        } else {
+            return n;
+        }
+    },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)
         {
@@ -1244,13 +1324,17 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     name: function(tree,tok,bits,settings) {
-        return tok.name;
+        if(tok.annotation) {
+            return tok.annotation.join(':')+':'+tok.name;
+        } else {
+            return tok.name;
+        }
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';
-        if(tok.latex) {
+        if(tok.latex && !settings.ignorestringattributes) {
             return 'latex('+str+')';
-        } else if(tok.safe) {
+        } else if(tok.safe && !settings.ignorestringattributes) {
             return 'safe('+str+')';
         } else {
             return str;
@@ -1281,7 +1365,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     keypair: function(tree,tok,bits,settings) {
         var key = typeToJME['string'](null,{value:tok.key},[],settings);
-        return key+': '+bits[0];
+        var arg = bits[0];
+        if(tree.args[0].tok.type=='op') {
+            arg = '( '+arg+' )';
+        }
+        return key+': '+arg;
     },
     dict: function(tree,tok,bits,settings) {
         if(!bits)
@@ -1320,21 +1408,23 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var op = tok.name;
         var args = tree.args, l = args.length;
         for(var i=0;i<l;i++) {
-            var arg_type = args[i].tok.type;
-            var arg_value = args[i].tok.value;
+            var arg = args[i].tok;
+            var isNumber = jme.isType(arg,'number');
+            var arg_type = arg.type;
+            var arg_value = arg.value;
             var pd;
             var arg_op = null;
             if(arg_type=='op') {
                 arg_op = args[i].tok.name;
-            } else if(arg_type=='number' && arg_value.complex && arg_value.im!=0) {
+            } else if(isNumber && arg_value.complex && arg_value.im!=0) {
                 if(arg_value.re!=0) {
                     arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
                 } else if(arg_value.im!=1) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                 }
-            } else if(arg_type=='number' && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
+            } else if(isNumber && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
                 arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-            } else if(arg_type=='number' && bits[i].indexOf('/')>=0) {
+            } else if(isNumber && bits[i].indexOf('/')>=0) {
                 arg_op = '/';   // implied division because this number will be written in the form 'a/b'
             }
             var bracketArg = arg_op!=null && op in opBrackets && opBrackets[op][i][arg_op]==true;
@@ -1347,7 +1437,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         if(op=='*') {
             //number or brackets followed by name or brackets doesn't need a times symbol
             //except <anything>*(-<something>) does
-            if(!settings.alwaystimes && ((args[0].tok.type=='number' && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (args[1].tok.type == 'name' || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )
+            if(!settings.alwaystimes && ((jme.isType(args[0].tok,'number') && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )
             {
                 op = '';
             }
@@ -1368,12 +1458,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             op = ' - ';
             break;
-        case 'and':
-        case 'or':
-        case 'isa':
-        case 'except':
         case '+':
-        case 'in':
             op=' '+op+' ';
             break;
         case 'not':
@@ -1381,10 +1466,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         case 'fact':
             op = '!';
-            if(!(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name')) {
-                bits[0] = '('+bits[0]+')';
-            }
             break;
+        default:
+            if(op.length>1 && tok.vars==2) {
+                op = ' '+op+' ';
+            }
         }
         if(l==1) {
             return tok.postfix ? bits[0]+op : op+bits[0];
@@ -1403,6 +1489,20 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     }
 }
+
+jme.display.registerType = function(type, renderers) {
+    var name = type.prototype.type;
+    if(renderers.tex) {
+        typeToTeX[name] = renderers.tex;
+    }
+    if(renderers.jme) {
+        typeToJME[name] = renderers.jme;
+    }
+    if(renderers.displayString) {
+        jme.tokenToDisplayString[name] = renderers.displayString;
+    }
+}
+
 /** Define how to render function in JME, for special cases when the normal rendering `f(...)` isn't right.
  * @enum {function}
  * @memberof Numbas.jme.display
@@ -1410,11 +1510,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
 var jmeFunctions = jme.display.jmeFunctions = {
     'dict': typeToJME.dict,
     'fact': function(tree,tok,bits,settings) {
-        if(tree.args[0].tok.type=='number' || tree.args[0].tok.type=='name') {
+        if(jme.isType(tree.args[0].tok,'number') || tree.args[0].tok.type=='name') {
             return bits[0]+'!';
         } else {
             return '( '+bits[0]+' )!';
         }
+    },
+    'listval': function(tree,tok,bits,settings) {
+        return bits[0]+'['+bits[1]+']';
     }
 }
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
@@ -1422,6 +1525,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {Boolean} ignorestringattributes - don't wrap strings in functions for attributes like latex() and safe()
  * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 /** Turn a syntax tree back into a JME expression (used when an expression is simplified)
@@ -1462,16 +1566,27 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '-u':[{'+':true,'-':true}],
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
-    '*': [{'+u':true,'-u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
-    '/': [{'+u':true,'-u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+    '*': [{'+u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
+    '/': [{'+u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true, '^': true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
-    '=': [{},{}]
+    '=': [{},{}],
+    'fact': [{'+': true, '-': true}]
 };
 
-function align(name,items) {
+/** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
+ * @param {String} header
+ * @param {Array.<String>} items
+ * @returns {String}
+ */
+var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
+    /** Pad a lien of text so it's in the centre of a line of length `n`.
+     * @param {String} line
+     * @param {Number} n
+     * @returns {String}
+     */
     function centre(line,n) {
         if(line.length>=n) {
             return line;
@@ -1511,7 +1626,7 @@ function align(name,items) {
     var width = item_widths.reduce(function(t,w){return t+w},0)+2*(items.length-1);
     var ci = Math.floor(width/2-0.5);
     var top_line = '';
-    top_line = centre(name,width);
+    top_line = centre(header,width);
     var middle_line;
     if(items.length==1) {
         middle_line = '';
@@ -1544,8 +1659,8 @@ function align(name,items) {
     var mid = top_joins[middle_line[ci]];
     middle_line = middle_line.slice(0,ci)+mid+middle_line.slice(ci+1);
     if(top_line.length>bottom_line.length) {
-        middle_line = centre(middle_line,name.length);
-        bottom_line = centre(bottom_line,name.length);
+        middle_line = centre(middle_line,header.length);
+        bottom_line = centre(bottom_line,header.length);
     }
     return [top_line,middle_line,bottom_line].join('\n');
 }
@@ -1559,7 +1674,7 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'op':
         case 'function':
             var args = tree.args.map(function(arg){ return tree_diagram(arg); });
-            return align(tree.tok.name, args);
+            return align_text_blocks(tree.tok.name, args);
         default:
             return treeToJME(tree);
     }
@@ -1568,7 +1683,7 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 /** For backwards compatibility, copy references from some Numbas.jme.rules members to Numbas.jme.display.
  *  These used to belong to Numbas.jme.display, but were moved into a separate file.
  */
-['Rule','getCommutingTerms','matchTree','matchExpression','simplificationRules','compileRules'].forEach(function(name) {
+['Rule','getTerms','matchTree','matchExpression','simplificationRules','compileRules'].forEach(function(name) {
     jme.display[name] = jme.rules[name];
 });
 });

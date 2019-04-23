@@ -53,7 +53,11 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
                 var expr = this.GetArgument(name);
                 var scope = currentScope;
                 expr = jme.subvars(expr,scope);
-                var tex = jme.display.exprToLaTeX(expr,rules,scope);
+                try {
+                    var tex = jme.display.exprToLaTeX(expr,rules,scope);
+                }catch(e) {
+                    throw(new Numbas.Error('mathjax.math processing error',{message:e.message,expression:expr}));
+                }
                 var mml = TEX.Parse(tex,this.stack.env).mml();
                 this.Push(mml);
             }

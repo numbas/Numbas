@@ -105,23 +105,6 @@
 		<div class="toc-sections">
 			
 				<div class="toc-section">
-					<h4 class="subsection-title">Classes</h4>
-
-					<dl>
-						<dt class="name"><a href="Numbas.jme.funcObj.html">funcObj</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.Parser.html">Parser</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.Scope.html">Scope</a></dt>
-						<dd></dd>
-					</dl>
-				</div>
-			
-
-			
-				<div class="toc-section">
 					<h4 class="subsection-title">Namespaces</h4>
 
 					<dl>
@@ -142,10 +125,29 @@
 
 			
 				<div class="toc-section">
+					<h4 class="subsection-title">Classes</h4>
+
+					<dl>
+						<dt class="name"><a href="Numbas.jme.funcObj.html">funcObj</a></dt>
+						<dd></dd>
+					
+						<dt class="name"><a href="Numbas.jme.Parser.html">Parser</a></dt>
+						<dd></dd>
+					
+						<dt class="name"><a href="Numbas.jme.Scope.html">Scope</a></dt>
+						<dd></dd>
+					</dl>
+				</div>
+			
+
+			
+				<div class="toc-section">
 					<h4>Members</h4>
 					<ul>
 					
 						<li class="name"><a href="Numbas.jme.html#.arity">arity</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.associative">associative</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.builtinScope">builtinScope</a></li>
 					
@@ -155,13 +157,15 @@
 					
 						<li class="name"><a href="Numbas.jme.html#.constants">constants</a></li>
 					
+						<li class="name"><a href="Numbas.jme.html#.converseOps">converseOps</a></li>
+					
 						<li class="name"><a href="Numbas.jme.html#.findvarsOps">findvarsOps</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.funcSynonyms">funcSynonyms</a></li>
 					
-						<li class="name"><a href="Numbas.jme.html#.jme.mapFunctions">jme.mapFunctions</a></li>
-					
 						<li class="name"><a href="Numbas.jme.html#.lazyOps">lazyOps</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.mapFunctions">mapFunctions</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.opSynonyms">opSynonyms</a></li>
 					
@@ -171,7 +175,15 @@
 					
 						<li class="name"><a href="Numbas.jme.html#.prefixForm">prefixForm</a></li>
 					
+						<li class="name"><a href="Numbas.jme.html#.rightAssociative">rightAssociative</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.standardParser">standardParser</a></li>
+					
 						<li class="name"><a href="Numbas.jme.html#.substituteTreeOps">substituteTreeOps</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.tokenComparisons">tokenComparisons</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.treesSame">treesSame</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.typeToDisplayString">typeToDisplayString</a></li>
 					
@@ -191,6 +203,10 @@
 						<li class="name"><a href="Numbas.jme.html#.addPrefixOperator">addPrefixOperator</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.compare">compare</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.compareTokens">compareTokens</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.compareTokensByValue">compareTokensByValue</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.compareTrees">compareTrees</a></li>
 					
@@ -216,9 +232,9 @@
 					
 						<li class="name"><a href="Numbas.jme.html#.isRandom">isRandom</a></li>
 					
-						<li class="name"><a href="Numbas.jme.html#.resultsEqual">resultsEqual</a></li>
+						<li class="name"><a href="Numbas.jme.html#.makeSafe">makeSafe</a></li>
 					
-						<li class="name"><a href="Numbas.jme.html#.setOperatorProperties">setOperatorProperties</a></li>
+						<li class="name"><a href="Numbas.jme.html#.resultsEqual">resultsEqual</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.shunt">shunt</a></li>
 					
@@ -448,6 +464,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>"/u"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -483,7 +522,225 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1760">runtime/scripts/jme.js, line 1760</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2095">runtime/scripts/jme.js, line 2095</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".associative"><span class="type-signature">(static, readonly) </span>associative<span class="type-signature"> :Boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Operations which are associative, i.e. (a∘b)∘c = a∘(b∘c).</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>"*"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"+"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>and</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>or</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>xor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2224">runtime/scripts/jme.js, line 2224</a>
     </li></ul></dd>
     
 
@@ -752,7 +1009,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2068">runtime/scripts/jme.js, line 2068</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2456">runtime/scripts/jme.js, line 2456</a>
     </li></ul></dd>
     
 
@@ -912,6 +1169,29 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>xor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -947,7 +1227,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1869">runtime/scripts/jme.js, line 1869</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2210">runtime/scripts/jme.js, line 2210</a>
     </li></ul></dd>
     
 
@@ -1031,6 +1311,201 @@
         
             
 <div class="item member">
+<h4 class="name" id=".converseOps"><span class="type-signature">(static) </span>converseOps<span class="type-signature"> :String</span></h4>
+
+
+
+
+<div class="description">
+    <p>Binary operations which have an equivalent operation written the other way round.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>"<"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>">"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"<="</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>">="</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2237">runtime/scripts/jme.js, line 2237</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
 <h4 class="name" id=".findvarsOps"><span class="type-signature">(static) </span>findvarsOps<span class="type-signature"> :<a href="Numbas.jme.html#.findvars">Numbas.jme.findvars</a></span></h4>
 
 
@@ -1085,7 +1560,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2118">runtime/scripts/jme.js, line 2118</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2526">runtime/scripts/jme.js, line 2526</a>
     </li></ul></dd>
     
 
@@ -1333,226 +1808,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1844">runtime/scripts/jme.js, line 1844</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".jme.mapFunctions"><span class="type-signature">(static) </span>jme.mapFunctions<span class="type-signature"> :function</span></h4>
-
-
-
-
-<div class="description">
-    <p>Functions for 'map', by the type of the thing being mapped over.
-Functions take a JME expression lambda, a name or list of names to map, a value to map over, and a scope to evaluate against.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>list</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>set</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>range</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>matrix</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>vector</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-builtins.js#L787">runtime/scripts/jme-builtins.js, line 787</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2183">runtime/scripts/jme.js, line 2183</a>
     </li></ul></dd>
     
 
@@ -1616,7 +1872,82 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1855">runtime/scripts/jme.js, line 1855</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2194">runtime/scripts/jme.js, line 2194</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".mapFunctions"><span class="type-signature">(static) </span>mapFunctions<span class="type-signature"> :function</span></h4>
+
+
+
+
+<div class="description">
+    <p>Functions for 'map', by the type of the thing being mapped over.
+Functions take a JME expression lambda, a name or list of names to map, a value to map over, and a scope to evaluate against.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-builtins.js#L836">runtime/scripts/jme-builtins.js, line 836</a>
     </li></ul></dd>
     
 
@@ -2018,7 +2349,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1824">runtime/scripts/jme.js, line 1824</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2163">runtime/scripts/jme.js, line 2163</a>
     </li></ul></dd>
     
 
@@ -2144,7 +2475,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1782">runtime/scripts/jme.js, line 1782</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2120">runtime/scripts/jme.js, line 2120</a>
     </li></ul></dd>
     
 
@@ -2308,6 +2639,29 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
         <tr>
             
                 <td class="name"><code>"-u"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>"/u"</code></td>
             
 
             <td class="type">
@@ -2868,7 +3222,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1790">runtime/scripts/jme.js, line 1790</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2128">runtime/scripts/jme.js, line 2128</a>
     </li></ul></dd>
     
 
@@ -2985,7 +3339,53 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
 
         <tr>
             
+                <td class="name"><code>"/"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>"!"</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>not</code></td>
             
 
             <td class="type">
@@ -3040,7 +3440,145 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1772">runtime/scripts/jme.js, line 1772</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2108">runtime/scripts/jme.js, line 2108</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".rightAssociative"><span class="type-signature">(static) </span>rightAssociative<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Right-associative operations</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2199">runtime/scripts/jme.js, line 2199</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".standardParser"><span class="type-signature">(static) </span>standardParser<span class="type-signature"> :<a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>A standard parser for JME expressions</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2249">runtime/scripts/jme.js, line 2249</a>
     </li></ul></dd>
     
 
@@ -3115,7 +3653,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2111">runtime/scripts/jme.js, line 2111</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2519">runtime/scripts/jme.js, line 2519</a>
     </li></ul></dd>
     
 
@@ -3128,6 +3666,142 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
             <li><a href="Numbas.jme.html#.substituteTree">Numbas.jme.substituteTree</a></li>
         </ul>
     </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".tokenComparisons"><span class="type-signature">(static) </span>tokenComparisons<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Functions to compare two tokens of the same type.
+Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2720">runtime/scripts/jme.js, line 2720</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.jme.html#.compareTokens">Numbas.jme.compareTokens</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".treesSame"><span class="type-signature">(static) </span>treesSame<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    <p>Are the two given trees exactly the same?</p>
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2755">runtime/scripts/jme.js, line 2755</a>
+    </li></ul></dd>
+    
+
+    
+
     
 
     
@@ -3188,7 +3862,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L451">runtime/scripts/jme.js, line 451</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L444">runtime/scripts/jme.js, line 444</a>
     </li></ul></dd>
     
 
@@ -3228,7 +3902,7 @@ which convert a JME token to a string for display</p>
 
 
 <div class="description">
-    <p>Add a binary operator to the parser</p>
+    <p>Add a binary operator to the standard parser</p>
 </div>
 
 
@@ -3358,7 +4032,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L118">runtime/scripts/jme.js, line 118</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L91">runtime/scripts/jme.js, line 91</a>
     </li></ul></dd>
     
 
@@ -3542,7 +4216,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L140">runtime/scripts/jme.js, line 140</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L109">runtime/scripts/jme.js, line 109</a>
     </li></ul></dd>
     
 
@@ -3726,7 +4400,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L128">runtime/scripts/jme.js, line 128</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L100">runtime/scripts/jme.js, line 100</a>
     </li></ul></dd>
     
 
@@ -3750,7 +4424,7 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".compare"><span class="type-signature">(static) </span>compare<span class="signature">(expr1, expr2, settings, scope)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".compare"><span class="type-signature">(static) </span>compare<span class="signature">(tree1, tree2, settings, scope)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
@@ -3793,7 +4467,7 @@ which convert a JME token to a string for display</p>
 
         <tr>
             
-                <td class="name"><code>expr1</code></td>
+                <td class="name"><code>tree1</code></td>
             
 
             <td class="type">
@@ -3816,7 +4490,7 @@ which convert a JME token to a string for display</p>
 
         <tr>
             
-                <td class="name"><code>expr2</code></td>
+                <td class="name"><code>tree2</code></td>
             
 
             <td class="type">
@@ -3962,12 +4636,410 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L326">runtime/scripts/jme.js, line 326</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L291">runtime/scripts/jme.js, line 291</a>
     </li></ul></dd>
     
 
     
 
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id=".compareTokens"><span class="type-signature">(static) </span>compareTokens<span class="signature">(a, b)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Compare two tokens, for the purposes of sorting.
+Uses JavaScript comparison for numbers, strings and booleans, and <a href="Numbas.jme.html#.compareTrees"><code>Numbas.jme.compareTrees</code></a> for everything else, or when types differ.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>a</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>b</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+
+</td>
+<td class="description">
+
+    <p>-1 if <code>a &lt; b</code>, 1 if <code>a &gt; b</code>, else 0.</p>
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2736">runtime/scripts/jme.js, line 2736</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.jme.html#.tokenComparisons">Numbas.jme.tokenComparisons</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id=".compareTokensByValue"><span class="type-signature">(static) </span>compareTokensByValue<span class="signature">(a, b)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Use JS comparison operators to compare the <code>value</code> property of both tokens.
+Used when the token wraps a JS built-in type, such as string, number or boolean.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>a</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>b</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2711">runtime/scripts/jme.js, line 2711</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.jme.html#.tokenComparisons">Numbas.jme.tokenComparisons</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -4161,7 +5233,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2346">runtime/scripts/jme.js, line 2346</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2786">runtime/scripts/jme.js, line 2786</a>
     </li></ul></dd>
     
 
@@ -4502,7 +5574,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L267">runtime/scripts/jme.js, line 267</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L232">runtime/scripts/jme.js, line 232</a>
     </li></ul></dd>
     
 
@@ -4535,7 +5607,7 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".contentsubvars"><span class="type-signature">(static) </span>contentsubvars<span class="signature">(str, scope)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id=".contentsubvars"><span class="type-signature">(static) </span>contentsubvars<span class="signature">(str, scope, sub_tex<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
@@ -4566,7 +5638,11 @@ which convert a JME token to a string for display</p>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -4591,7 +5667,19 @@ which convert a JME token to a string for display</p>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
@@ -4614,10 +5702,61 @@ which convert a JME token to a string for display</p>
             </td>
 
             
+                <td class="attributes">
+                
 
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
             
 
             <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sub_tex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"><p>substitute into TeX? Normally this is left to MathJax</p></td>
         </tr>
 
     
@@ -4701,7 +5840,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L380">runtime/scripts/jme.js, line 380</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L350">runtime/scripts/jme.js, line 350</a>
     </li></ul></dd>
     
 
@@ -5068,7 +6207,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L254">runtime/scripts/jme.js, line 254</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L219">runtime/scripts/jme.js, line 219</a>
     </li></ul></dd>
     
 
@@ -5281,7 +6420,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2127">runtime/scripts/jme.js, line 2127</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2535">runtime/scripts/jme.js, line 2535</a>
     </li></ul></dd>
     
 
@@ -5305,14 +6444,14 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".isFunction"><span class="type-signature">(static) </span>isFunction<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".isFunction"><span class="type-signature">(static) </span>isFunction<span class="signature">(tok, name)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Is a token a TFunction?</p>
+    <p>Is a token a function with the given name?</p>
 </div>
 
 
@@ -5330,6 +6469,8 @@ which convert a JME token to a string for display</p>
     <thead>
     <tr>
         
+        <th>Name</th>
+        
 
         <th>Type</th>
 
@@ -5346,11 +6487,36 @@ which convert a JME token to a string for display</p>
 
         <tr>
             
+                <td class="name"><code>tok</code></td>
+            
 
             <td class="type">
             
                 
 <span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
 
 
             
@@ -5444,7 +6610,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L604">runtime/scripts/jme.js, line 604</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L634">runtime/scripts/jme.js, line 634</a>
     </li></ul></dd>
     
 
@@ -5468,7 +6634,7 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".isMonomial"><span class="type-signature">(static) </span>isMonomial<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id=".isMonomial"><span class="type-signature">(static) </span>isMonomial<span class="signature">(tree)</span><span class="type-signature"> &rarr; {Object}</span></h4>
 
     
 
@@ -5493,6 +6659,8 @@ which convert a JME token to a string for display</p>
     <thead>
     <tr>
         
+        <th>Name</th>
+        
 
         <th>Type</th>
 
@@ -5508,6 +6676,8 @@ which convert a JME token to a string for display</p>
     
 
         <tr>
+            
+                <td class="name"><code>tree</code></td>
             
 
             <td class="type">
@@ -5565,7 +6735,7 @@ which convert a JME token to a string for display</p>
 </td>
 <td class="description">
 
-    <p>the degree of the monomial</p>
+    <p>the base, degree and coefficient of the monomial, as trees.</p>
 
 </td>
 </tr>
@@ -5609,7 +6779,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L657">runtime/scripts/jme.js, line 657</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L687">runtime/scripts/jme.js, line 687</a>
     </li></ul></dd>
     
 
@@ -5633,14 +6803,14 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".isName"><span class="type-signature">(static) </span>isName<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".isName"><span class="type-signature">(static) </span>isName<span class="signature">(tok, name)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Is a token a TName?</p>
+    <p>Is a token the given name?</p>
 </div>
 
 
@@ -5658,6 +6828,8 @@ which convert a JME token to a string for display</p>
     <thead>
     <tr>
         
+        <th>Name</th>
+        
 
         <th>Type</th>
 
@@ -5674,11 +6846,36 @@ which convert a JME token to a string for display</p>
 
         <tr>
             
+                <td class="name"><code>tok</code></td>
+            
 
             <td class="type">
             
                 
 <span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
 
 
             
@@ -5772,7 +6969,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L595">runtime/scripts/jme.js, line 595</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L624">runtime/scripts/jme.js, line 624</a>
     </li></ul></dd>
     
 
@@ -5796,14 +6993,14 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".isOp"><span class="type-signature">(static) </span>isOp<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id=".isOp"><span class="type-signature">(static) </span>isOp<span class="signature">(tok, op)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Is a token a TOp?</p>
+    <p>Is a token an operator with the given name?</p>
 </div>
 
 
@@ -5821,6 +7018,8 @@ which convert a JME token to a string for display</p>
     <thead>
     <tr>
         
+        <th>Name</th>
+        
 
         <th>Type</th>
 
@@ -5837,11 +7036,36 @@ which convert a JME token to a string for display</p>
 
         <tr>
             
+                <td class="name"><code>tok</code></td>
+            
 
             <td class="type">
             
                 
 <span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>op</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
 
 
             
@@ -5935,7 +7159,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L586">runtime/scripts/jme.js, line 586</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L614">runtime/scripts/jme.js, line 614</a>
     </li></ul></dd>
     
 
@@ -6126,7 +7350,174 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L614">runtime/scripts/jme.js, line 614</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L644">runtime/scripts/jme.js, line 644</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id=".makeSafe"><span class="type-signature">(static) </span>makeSafe<span class="signature">(t)</span><span class="type-signature"> &rarr; {<a href="Numbas.jme.html#.token">Numbas.jme.token</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Mark a token as 'safe', so it doesn't have <a href="Numbas.jme.html#.subvars"><code>Numbas.jme.subvars</code></a> applied to it, or any strings it contains, when it's evaluated</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>t</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L532">runtime/scripts/jme.js, line 532</a>
     </li></ul></dd>
     
 
@@ -6362,168 +7753,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2208">runtime/scripts/jme.js, line 2208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-	</div>
-
-
-        
-            
-
-    
-	
-		<div class="item function">
-	
-
-    <h4 class="name" id=".setOperatorProperties"><span class="type-signature">(static) </span>setOperatorProperties<span class="signature">(name, options)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Set properties for a given operator.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the name of the operator</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L92">runtime/scripts/jme.js, line 92</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2616">runtime/scripts/jme.js, line 2616</a>
     </li></ul></dd>
     
 
@@ -6690,7 +7920,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L162">runtime/scripts/jme.js, line 162</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L128">runtime/scripts/jme.js, line 128</a>
     </li></ul></dd>
     
 
@@ -6954,7 +8184,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L202">runtime/scripts/jme.js, line 202</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L167">runtime/scripts/jme.js, line 167</a>
     </li></ul></dd>
     
 
@@ -6978,7 +8208,7 @@ which convert a JME token to a string for display</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id=".subvars"><span class="type-signature">(static) </span>subvars<span class="signature">(str, scope, display<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".subvars"><span class="type-signature">(static) </span>subvars<span class="signature">(str, scope, display<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
@@ -7147,6 +8377,35 @@ which convert a JME token to a string for display</p>
 
 
 
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
 
 
 
@@ -7182,7 +8441,7 @@ which convert a JME token to a string for display</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L476">runtime/scripts/jme.js, line 476</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L470">runtime/scripts/jme.js, line 470</a>
     </li></ul></dd>
     
 
@@ -7350,7 +8609,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L394">runtime/scripts/jme.js, line 394</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L387">runtime/scripts/jme.js, line 387</a>
     </li></ul></dd>
     
 
@@ -7517,7 +8776,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L152">runtime/scripts/jme.js, line 152</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L119">runtime/scripts/jme.js, line 119</a>
     </li></ul></dd>
     
 
@@ -7691,7 +8950,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L464">runtime/scripts/jme.js, line 464</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L457">runtime/scripts/jme.js, line 457</a>
     </li></ul></dd>
     
 
@@ -7865,7 +9124,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L172">runtime/scripts/jme.js, line 172</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L137">runtime/scripts/jme.js, line 137</a>
     </li></ul></dd>
     
 
@@ -8039,7 +9298,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L513">runtime/scripts/jme.js, line 513</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L507">runtime/scripts/jme.js, line 507</a>
     </li></ul></dd>
     
 
@@ -8207,7 +9466,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2277">runtime/scripts/jme.js, line 2277</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2685">runtime/scripts/jme.js, line 2685</a>
     </li></ul></dd>
     
 
@@ -8397,7 +9656,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L536">runtime/scripts/jme.js, line 536</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L563">runtime/scripts/jme.js, line 563</a>
     </li></ul></dd>
     
 
@@ -8620,7 +9879,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2056">runtime/scripts/jme.js, line 2056</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2444">runtime/scripts/jme.js, line 2444</a>
     </li></ul></dd>
     
 
@@ -8823,6 +10082,29 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>sameVars</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if true, then both expressions should have exactly the same free variables</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -8858,7 +10140,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L310">runtime/scripts/jme.js, line 310</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L274">runtime/scripts/jme.js, line 274</a>
     </li></ul></dd>
     
 
@@ -9052,7 +10334,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1881">runtime/scripts/jme.js, line 1881</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2258">runtime/scripts/jme.js, line 2258</a>
     </li></ul></dd>
     
 
@@ -9221,7 +10503,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1887">runtime/scripts/jme.js, line 1887</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2264">runtime/scripts/jme.js, line 2264</a>
     </li></ul></dd>
     
 
@@ -9416,7 +10698,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L80">runtime/scripts/jme.js, line 80</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L79">runtime/scripts/jme.js, line 79</a>
     </li></ul></dd>
     
 
@@ -9565,7 +10847,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L687">runtime/scripts/jme.js, line 687</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L721">runtime/scripts/jme.js, line 721</a>
     </li></ul></dd>
     
 
@@ -9737,7 +11019,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1066">runtime/scripts/jme.js, line 1066</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1392">runtime/scripts/jme.js, line 1392</a>
     </li></ul></dd>
     
 
@@ -9859,7 +11141,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1398">runtime/scripts/jme.js, line 1398</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1783">runtime/scripts/jme.js, line 1783</a>
     </li></ul></dd>
     
 
@@ -10177,7 +11459,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1876">runtime/scripts/jme.js, line 1876</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2253">runtime/scripts/jme.js, line 2253</a>
     </li></ul></dd>
     
 
@@ -10213,8 +11495,6 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="global"><a href="global.html">global</a></li>
 		
 			<li class="search-result" data-longname="complex"><a href="global.html#complex">complex</a></li>
-		
-			<li class="search-result" data-longname="complex.complexToString"><a href="global.html#complex#.complexToString">complex.complexToString</a></li>
 		
 			<li class="search-result" data-longname="fraction"><a href="global.html#fraction">fraction</a></li>
 		
@@ -10270,6 +11550,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.createQuestionFromXML"><a href="Numbas.html#.createQuestionFromXML">Numbas.createQuestionFromXML</a></li>
 		
+			<li class="search-result" data-longname="Numbas.custom_part_types"><a href="Numbas.html#.custom_part_types">Numbas.custom_part_types</a></li>
+		
 			<li class="search-result" data-longname="Numbas.debug"><a href="Numbas.html#.debug">Numbas.debug</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display"><a href="Numbas.display.html">Numbas.display</a></li>
@@ -10286,7 +11568,11 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.beginExam"><a href="Numbas.display.ExamDisplay.html#.beginExam">Numbas.display.ExamDisplay.beginExam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canAdvance"><a href="Numbas.display.ExamDisplay.html#.canAdvance">Numbas.display.ExamDisplay.canAdvance</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canBegin"><a href="Numbas.display.ExamDisplay.html#.canBegin">Numbas.display.ExamDisplay.canBegin</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canReverse"><a href="Numbas.display.ExamDisplay.html#.canReverse">Numbas.display.ExamDisplay.canReverse</a></li>
 		
@@ -10299,6 +11585,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.exam"><a href="Numbas.display.ExamDisplay.html#.exam">Numbas.display.ExamDisplay.exam</a></li>
 		
@@ -10319,6 +11607,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.mode"><a href="Numbas.display.ExamDisplay.html#.mode">Numbas.display.ExamDisplay.mode</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -10359,8 +11649,6 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.display.feedbackable"><a href="Numbas.display.html#.feedbackable">Numbas.display.feedbackable</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.getLocalisedAttribute"><a href="Numbas.display.html#.getLocalisedAttribute">Numbas.display.getLocalisedAttribute</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.inInput"><a href="Numbas.display.html#.inInput">Numbas.display.inInput</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.init"><a href="Numbas.display.html#.init">Numbas.display.init</a></li>
 		
@@ -10444,11 +11732,15 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.toggleFeedbackText"><a href="Numbas.display.PartDisplay.html#.toggleFeedbackText">Numbas.display.PartDisplay.toggleFeedbackText</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.updateCorrectAnswer">Numbas.display.PartDisplay.updateCorrectAnswer</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay"><a href="Numbas.display.QuestionDisplay.html">Numbas.display.QuestionDisplay</a></li>
 		
@@ -10526,7 +11818,11 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.Error"><a href="Numbas.Error.html">Numbas.Error</a></li>
 		
+			<li class="search-result" data-longname="Numbas.exam"><a href="Numbas.html#.exam">Numbas.exam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam"><a href="Numbas.Exam.html">Numbas.Exam</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#acceptPassword"><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#begin"><a href="Numbas.Exam.html#begin">Numbas.Exam#begin</a></li>
 		
@@ -10551,6 +11847,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.Exam#endTiming"><a href="Numbas.Exam.html#endTiming">Numbas.Exam#endTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#event:question list initialised"><a href="Numbas.Exam.html#event:questionlistinitialised">Numbas.Exam#event:question list initialised</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#event:ready"><a href="Numbas.Exam.html#event:ready">Numbas.Exam#event:ready</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
 		
@@ -10642,6 +11940,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.arity"><a href="Numbas.jme.html#.arity">Numbas.jme.arity</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.associative"><a href="Numbas.jme.html#.associative">Numbas.jme.associative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.checkingFunction"><a href="Numbas.jme.html#.checkingFunction">Numbas.jme.checkingFunction</a></li>
@@ -10654,6 +11954,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.compare_settings"><a href="Numbas.jme.html#.compare_settings">Numbas.jme.compare_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.compareTokens"><a href="Numbas.jme.html#.compareTokens">Numbas.jme.compareTokens</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.compareTokensByValue"><a href="Numbas.jme.html#.compareTokensByValue">Numbas.jme.compareTokensByValue</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.compareTrees"><a href="Numbas.jme.html#.compareTrees">Numbas.jme.compareTrees</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compile"><a href="Numbas.jme.html#.compile">Numbas.jme.compile</a></li>
@@ -10663,6 +11967,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.jme.constants"><a href="Numbas.jme.html#.constants">Numbas.jme.constants</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.contentsubvars"><a href="Numbas.jme.html#.contentsubvars">Numbas.jme.contentsubvars</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.converseOps"><a href="Numbas.jme.html#.converseOps">Numbas.jme.converseOps</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display"><a href="Numbas.jme.display.html">Numbas.jme.display</a></li>
 		
@@ -10694,6 +12000,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.and"><a href="Numbas.jme.display.opBrackets.html#.and">Numbas.jme.display.opBrackets.and</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.fact"><a href="Numbas.jme.display.opBrackets.html#.fact">Numbas.jme.display.opBrackets.fact</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.or"><a href="Numbas.jme.display.opBrackets.html#.or">Numbas.jme.display.opBrackets.or</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.xor"><a href="Numbas.jme.display.opBrackets.html#.xor">Numbas.jme.display.opBrackets.xor</a></li>
@@ -10705,6 +12013,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.jme.display.simplifyTree"><a href="Numbas.jme.display.html#.simplifyTree">Numbas.jme.display.simplifyTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.special_number_definition"><a href="Numbas.jme.display.html#.special_number_definition">Numbas.jme.display.special_number_definition</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.specialNames"><a href="Numbas.jme.display.html#.specialNames">Numbas.jme.display.specialNames</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.texify"><a href="Numbas.jme.display.html#.texify">Numbas.jme.display.texify</a></li>
 		
@@ -10796,19 +12106,11 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions"><a href="Numbas.jme.html#.jme.mapFunctions">Numbas.jme.jme.mapFunctions</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.list"><a href="Numbas.jme.html#.jme.mapFunctions#.list">Numbas.jme.jme.mapFunctions.list</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.matrix"><a href="Numbas.jme.html#.jme.mapFunctions#.matrix">Numbas.jme.jme.mapFunctions.matrix</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.range"><a href="Numbas.jme.html#.jme.mapFunctions#.range">Numbas.jme.jme.mapFunctions.range</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.set"><a href="Numbas.jme.html#.jme.mapFunctions#.set">Numbas.jme.jme.mapFunctions.set</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.vector"><a href="Numbas.jme.html#.jme.mapFunctions#.vector">Numbas.jme.jme.mapFunctions.vector</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.makeSafe"><a href="Numbas.jme.html#.makeSafe">Numbas.jme.makeSafe</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.mapFunctions"><a href="Numbas.jme.html#.mapFunctions">Numbas.jme.mapFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
 		
@@ -10816,63 +12118,143 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addBinaryOperator"><a href="Numbas.jme.Parser.html#addBinaryOperator">Numbas.jme.Parser#addBinaryOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addOperator"><a href="Numbas.jme.Parser.html#addOperator">Numbas.jme.Parser#addOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPostfixOperator"><a href="Numbas.jme.Parser.html#addPostfixOperator">Numbas.jme.Parser#addPostfixOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPrefixOperator"><a href="Numbas.jme.Parser.html#addPrefixOperator">Numbas.jme.Parser#addPrefixOperator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#compile"><a href="Numbas.jme.Parser.html#compile">Numbas.jme.Parser#compile</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#funcSynonym"><a href="Numbas.jme.Parser.html#funcSynonym">Numbas.jme.Parser#funcSynonym</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getArity"><a href="Numbas.jme.Parser.html#getArity">Numbas.jme.Parser#getArity</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getConstant"><a href="Numbas.jme.Parser.html#getConstant">Numbas.jme.Parser#getConstant</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPostfixForm"><a href="Numbas.jme.Parser.html#getPostfixForm">Numbas.jme.Parser#getPostfixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrecedence"><a href="Numbas.jme.Parser.html#getPrecedence">Numbas.jme.Parser#getPrecedence</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrefixForm"><a href="Numbas.jme.Parser.html#getPrefixForm">Numbas.jme.Parser#getPrefixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getSetting"><a href="Numbas.jme.Parser.html#getSetting">Numbas.jme.Parser#getSetting</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isAssociative"><a href="Numbas.jme.Parser.html#isAssociative">Numbas.jme.Parser#isAssociative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isCommutative"><a href="Numbas.jme.Parser.html#isCommutative">Numbas.jme.Parser#isCommutative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isRightAssociative"><a href="Numbas.jme.Parser.html#isRightAssociative">Numbas.jme.Parser#isRightAssociative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#option_defaults"><a href="Numbas.jme.Parser.html#option_defaults">Numbas.jme.Parser#option_defaults</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#re"><a href="Numbas.jme.Parser.html#re">Numbas.jme.Parser#re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#setOperatorProperties"><a href="Numbas.jme.Parser.html#setOperatorProperties">Numbas.jme.Parser#setOperatorProperties</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#shunt"><a href="Numbas.jme.Parser.html#shunt">Numbas.jme.Parser#shunt</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#shunt_type_actions.op"><a href="Numbas.jme.Parser_shunt_type_actions.op.html">Numbas.jme.Parser#shunt_type_actions.op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#tokenise"><a href="Numbas.jme.Parser.html#tokenise">Numbas.jme.Parser#tokenise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#tokeniser_types"><a href="Numbas.jme.Parser.html#tokeniser_types">Numbas.jme.Parser#tokeniser_types</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.parser_options"><a href="Numbas.jme.html#.parser_options">Numbas.jme.parser_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.postfixForm"><a href="Numbas.jme.html#.postfixForm">Numbas.jme.postfixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.postfixForm."!""><a href="Numbas.jme.html#.postfixForm#.%22!%22">Numbas.jme.postfixForm."!"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.precedence"><a href="Numbas.jme.html#.precedence">Numbas.jme.precedence</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.prefixForm"><a href="Numbas.jme.html#.prefixForm">Numbas.jme.prefixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."!""><a href="Numbas.jme.html#.prefixForm#.%22!%22">Numbas.jme.prefixForm."!"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."+""><a href="Numbas.jme.html#.prefixForm#.%22+%22">Numbas.jme.prefixForm."+"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."-""><a href="Numbas.jme.html#.prefixForm#.%22-%22">Numbas.jme.prefixForm."-"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.resultsEqual"><a href="Numbas.jme.html#.resultsEqual">Numbas.jme.resultsEqual</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rightAssociative"><a href="Numbas.jme.html#.rightAssociative">Numbas.jme.rightAssociative</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules"><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.applyPostReplacement"><a href="Numbas.jme.rules.html#.applyPostReplacement">Numbas.jme.rules.applyPostReplacement</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.collectRuleset"><a href="Numbas.jme.rules.html#.collectRuleset">Numbas.jme.rules.collectRuleset</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.compileRules"><a href="Numbas.jme.rules.html#.compileRules">Numbas.jme.rules.compileRules</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.displayFlags"><a href="Numbas.jme.rules.html#.displayFlags">Numbas.jme.rules.displayFlags</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.extend_options"><a href="Numbas.jme.rules.html#.extend_options">Numbas.jme.rules.extend_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch"><a href="Numbas.jme.rules.html#.findSequenceMatch">Numbas.jme.rules.findSequenceMatch</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch_options"><a href="Numbas.jme.rules.html#.findSequenceMatch_options">Numbas.jme.rules.findSequenceMatch_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms"><a href="Numbas.jme.rules.html#.getTerms">Numbas.jme.rules.getTerms</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms_options"><a href="Numbas.jme.rules.html#.getTerms_options">Numbas.jme.rules.getTerms_options</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.jme_pattern_match"><a href="Numbas.jme.rules.html#.jme_pattern_match">Numbas.jme.rules.jme_pattern_match</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchAllTree"><a href="Numbas.jme.rules.html#.matchAllTree">Numbas.jme.rules.matchAllTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchExpression"><a href="Numbas.jme.rules.html#.matchExpression">Numbas.jme.rules.matchExpression</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchTree"><a href="Numbas.jme.rules.html#.matchTree">Numbas.jme.rules.matchTree</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchTree_options"><a href="Numbas.jme.rules.html#.matchTree_options">Numbas.jme.rules.matchTree_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.number_conditions"><a href="Numbas.jme.rules.html#.number_conditions">Numbas.jme.rules.number_conditions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.patternParser"><a href="Numbas.jme.rules.html#.patternParser">Numbas.jme.rules.patternParser</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule"><a href="Numbas.jme.rules.Rule.html">Numbas.jme.rules.Rule</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#get_options"><a href="Numbas.jme.rules.Rule.html#get_options">Numbas.jme.rules.Rule#get_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule#match"><a href="Numbas.jme.rules.Rule.html#match">Numbas.jme.rules.Rule#match</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchConditions"><a href="Numbas.jme.rules.Rule.html#matchConditions">Numbas.jme.rules.Rule#matchConditions</a></li>
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchAll"><a href="Numbas.jme.rules.Rule.html#matchAll">Numbas.jme.rules.Rule#matchAll</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replace"><a href="Numbas.jme.rules.Rule.html#replace">Numbas.jme.rules.Rule#replace</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replaceAll"><a href="Numbas.jme.rules.Rule.html#replaceAll">Numbas.jme.rules.Rule#replaceAll</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset"><a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#flagSet"><a href="Numbas.jme.rules.Ruleset.html#flagSet">Numbas.jme.rules.Ruleset#flagSet</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#simplify"><a href="Numbas.jme.rules.Ruleset.html#simplify">Numbas.jme.rules.Ruleset#simplify</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.ruleset_flags"><a href="Numbas.jme.rules.html#.ruleset_flags">Numbas.jme.rules.ruleset_flags</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.simplificationRules"><a href="Numbas.jme.rules.html#.simplificationRules">Numbas.jme.rules.simplificationRules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchFunctions"><a href="Numbas.jme.rules.html#.specialMatchFunctions">Numbas.jme.rules.specialMatchFunctions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchNames"><a href="Numbas.jme.rules.html#.specialMatchNames">Numbas.jme.rules.specialMatchNames</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchOps"><a href="Numbas.jme.rules.html#.specialMatchOps">Numbas.jme.rules.specialMatchOps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.term"><a href="Numbas.jme.rules.html#.term">Numbas.jme.rules.term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Term"><a href="Numbas.jme.rules.Term.html">Numbas.jme.rules.Term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform"><a href="Numbas.jme.rules.html#.transform">Numbas.jme.rules.transform</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform_result"><a href="Numbas.jme.rules.html#.transform_result">Numbas.jme.rules.transform_result</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transformAll"><a href="Numbas.jme.rules.html#.transformAll">Numbas.jme.rules.transformAll</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#addFunction"><a href="Numbas.jme.Scope.html#addFunction">Numbas.jme.Scope#addFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#addRuleset"><a href="Numbas.jme.Scope.html#addRuleset">Numbas.jme.Scope#addRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allFunctions"><a href="Numbas.jme.Scope.html#allFunctions">Numbas.jme.Scope#allFunctions</a></li>
 		
@@ -10881,6 +12263,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.jme.Scope#allVariables"><a href="Numbas.jme.Scope.html#allVariables">Numbas.jme.Scope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#collect"><a href="Numbas.jme.Scope.html#collect">Numbas.jme.Scope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteFunction"><a href="Numbas.jme.Scope.html#deleteFunction">Numbas.jme.Scope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteRuleset"><a href="Numbas.jme.Scope.html#deleteRuleset">Numbas.jme.Scope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#deleteVariable"><a href="Numbas.jme.Scope.html#deleteVariable">Numbas.jme.Scope#deleteVariable</a></li>
 		
@@ -10900,11 +12286,13 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#setVariable"><a href="Numbas.jme.Scope.html#setVariable">Numbas.jme.Scope#setVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#unset"><a href="Numbas.jme.Scope.html#unset">Numbas.jme.Scope#unset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.setOperatorProperties"><a href="Numbas.jme.html#.setOperatorProperties">Numbas.jme.setOperatorProperties</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.shunt"><a href="Numbas.jme.html#.shunt">Numbas.jme.shunt</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.standardParser"><a href="Numbas.jme.html#.standardParser">Numbas.jme.standardParser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.substituteTree"><a href="Numbas.jme.html#.substituteTree">Numbas.jme.substituteTree</a></li>
 		
@@ -10916,11 +12304,15 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.token"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.tokenComparisons"><a href="Numbas.jme.html#.tokenComparisons">Numbas.jme.tokenComparisons</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.tokenise"><a href="Numbas.jme.html#.tokenise">Numbas.jme.tokenise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tokenToDisplayString"><a href="Numbas.jme.html#.tokenToDisplayString">Numbas.jme.tokenToDisplayString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tree"><a href="Numbas.jme.html#.tree">Numbas.jme.tree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.treesSame"><a href="Numbas.jme.html#.treesSame">Numbas.jme.treesSame</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typecheck_fn"><a href="Numbas.jme.html#.typecheck_fn">Numbas.jme.typecheck_fn</a></li>
 		
@@ -10970,6 +12362,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.computeVariable"><a href="Numbas.jme.variables.html#.computeVariable">Numbas.jme.variables.computeVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber"><a href="Numbas.jme.variables.DOMcontentsubber.html">Numbas.jme.variables.DOMcontentsubber</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber#sub_element"><a href="Numbas.jme.variables.DOMcontentsubber_sub_element.html">Numbas.jme.variables.DOMcontentsubber#sub_element</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubvars"><a href="Numbas.jme.variables.html#.DOMcontentsubvars">Numbas.jme.variables.DOMcontentsubvars</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.DOMsubvars"><a href="Numbas.jme.variables.html#.DOMsubvars">Numbas.jme.variables.DOMsubvars</a></li>
@@ -10998,6 +12394,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.JMEPart"><a href="Numbas.JMEPart.html">Numbas.JMEPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.JMEPart#addValueGenerator"><a href="Numbas.JMEPart.html#addValueGenerator">Numbas.JMEPart#addValueGenerator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.JMEPart#baseMarkingScript"><a href="Numbas.JMEPart.html#baseMarkingScript">Numbas.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.JMEPart#getCorrectAnswer"><a href="Numbas.JMEPart.html#getCorrectAnswer">Numbas.JMEPart#getCorrectAnswer</a></li>
@@ -11022,9 +12420,13 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.loadScript"><a href="Numbas.html#.loadScript">Numbas.loadScript</a></li>
 		
+			<li class="search-result" data-longname="Numbas.locale"><a href="Numbas.html#.locale">Numbas.locale</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking"><a href="Numbas.marking.html">Numbas.marking</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.compute_note"><a href="Numbas.marking.html#.compute_note">Numbas.marking.compute_note</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.feedback"><a href="Numbas.marking.html#.feedback">Numbas.marking.feedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.feedback_item"><a href="Numbas.marking.html#.feedback_item">Numbas.marking.feedback_item</a></li>
 		
@@ -11066,6 +12468,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addFunction"><a href="Numbas.marking.StatefulScope.html#addFunction">Numbas.marking.StatefulScope#addFunction</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addRuleset"><a href="Numbas.marking.StatefulScope.html#addRuleset">Numbas.marking.StatefulScope#addRuleset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allFunctions"><a href="Numbas.marking.StatefulScope.html#allFunctions">Numbas.marking.StatefulScope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allRulesets"><a href="Numbas.marking.StatefulScope.html#allRulesets">Numbas.marking.StatefulScope#allRulesets</a></li>
@@ -11073,6 +12477,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allVariables"><a href="Numbas.marking.StatefulScope.html#allVariables">Numbas.marking.StatefulScope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#collect"><a href="Numbas.marking.StatefulScope.html#collect">Numbas.marking.StatefulScope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteFunction"><a href="Numbas.marking.StatefulScope.html#deleteFunction">Numbas.marking.StatefulScope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteRuleset"><a href="Numbas.marking.StatefulScope.html#deleteRuleset">Numbas.marking.StatefulScope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteVariable"><a href="Numbas.marking.StatefulScope.html#deleteVariable">Numbas.marking.StatefulScope#deleteVariable</a></li>
 		
@@ -11091,6 +12499,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setRuleset"><a href="Numbas.marking.StatefulScope.html#setRuleset">Numbas.marking.StatefulScope#setRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setVariable"><a href="Numbas.marking.StatefulScope.html#setVariable">Numbas.marking.StatefulScope#setVariable</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#unset"><a href="Numbas.marking.StatefulScope.html#unset">Numbas.marking.StatefulScope#unset</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking_scripts"><a href="Numbas.html#.marking_scripts">Numbas.marking_scripts</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math"><a href="Numbas.math.html">Numbas.math</a></li>
 		
@@ -11123,6 +12535,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.math.combinations"><a href="Numbas.math.html#.combinations">Numbas.math.combinations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.complexToString"><a href="Numbas.math.html#.complexToString">Numbas.math.complexToString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
 		
@@ -11180,6 +12594,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.math.inverse"><a href="Numbas.math.html#.inverse">Numbas.math.inverse</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.isclose"><a href="Numbas.math.html#.isclose">Numbas.math.isclose</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.lcm"><a href="Numbas.math.html#.lcm">Numbas.math.lcm</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.leq"><a href="Numbas.math.html#.leq">Numbas.math.leq</a></li>
@@ -11206,15 +12622,21 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.math.negate"><a href="Numbas.math.html#.negate">Numbas.math.negate</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.negative"><a href="Numbas.math.html#.negative">Numbas.math.negative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.neq"><a href="Numbas.math.html#.neq">Numbas.math.neq</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber"><a href="Numbas.math.html#.niceNumber">Numbas.math.niceNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber_settings"><a href="Numbas.math.html#.niceNumber_settings">Numbas.math.niceNumber_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.nonnegative"><a href="Numbas.math.html#.nonnegative">Numbas.math.nonnegative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.permutations"><a href="Numbas.math.html#.permutations">Numbas.math.permutations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.piDegree"><a href="Numbas.math.html#.piDegree">Numbas.math.piDegree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.positive"><a href="Numbas.math.html#.positive">Numbas.math.positive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.pow"><a href="Numbas.math.html#.pow">Numbas.math.pow</a></li>
 		
@@ -11326,11 +12748,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#apply_feedback"><a href="Numbas.parts.CustomPart.html#apply_feedback">Numbas.parts.CustomPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#applyScoreLimits"><a href="Numbas.parts.CustomPart.html#applyScoreLimits">Numbas.parts.CustomPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#assignName"><a href="Numbas.parts.CustomPart.html#assignName">Numbas.parts.CustomPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#baseMarkingScript"><a href="Numbas.parts.CustomPart.html#baseMarkingScript">Numbas.parts.CustomPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#calculateScore"><a href="Numbas.parts.CustomPart.html#calculateScore">Numbas.parts.CustomPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#credit"><a href="Numbas.parts.CustomPart.html#credit">Numbas.parts.CustomPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#customName"><a href="Numbas.parts.CustomPart.html#customName">Numbas.parts.CustomPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#display"><a href="Numbas.parts.CustomPart.html#display">Numbas.parts.CustomPart#display</a></li>
 		
@@ -11381,6 +12809,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#marks"><a href="Numbas.parts.CustomPart.html#marks">Numbas.parts.CustomPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#multCredit"><a href="Numbas.parts.CustomPart.html#multCredit">Numbas.parts.CustomPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#name"><a href="Numbas.parts.CustomPart.html#name">Numbas.parts.CustomPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#openSteps"><a href="Numbas.parts.CustomPart.html#openSteps">Numbas.parts.CustomPart#openSteps</a></li>
 		
@@ -11442,6 +12872,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#type"><a href="Numbas.parts.CustomPart.html#type">Numbas.parts.CustomPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#useCustomName"><a href="Numbas.parts.CustomPart.html#useCustomName">Numbas.parts.CustomPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#warnings"><a href="Numbas.parts.CustomPart.html#warnings">Numbas.parts.CustomPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#xml"><a href="Numbas.parts.CustomPart.html#xml">Numbas.parts.CustomPart#xml</a></li>
@@ -11458,6 +12890,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#apply_feedback"><a href="Numbas.parts.ExtensionPart.html#apply_feedback">Numbas.parts.ExtensionPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#applyScoreLimits"><a href="Numbas.parts.ExtensionPart.html#applyScoreLimits">Numbas.parts.ExtensionPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#assignName"><a href="Numbas.parts.ExtensionPart.html#assignName">Numbas.parts.ExtensionPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#baseMarkingScript"><a href="Numbas.parts.ExtensionPart.html#baseMarkingScript">Numbas.parts.ExtensionPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#calculateScore"><a href="Numbas.parts.ExtensionPart.html#calculateScore">Numbas.parts.ExtensionPart#calculateScore</a></li>
@@ -11465,6 +12901,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#createSuspendData"><a href="Numbas.parts.ExtensionPart.html#createSuspendData">Numbas.parts.ExtensionPart#createSuspendData</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#credit"><a href="Numbas.parts.ExtensionPart.html#credit">Numbas.parts.ExtensionPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#customName"><a href="Numbas.parts.ExtensionPart.html#customName">Numbas.parts.ExtensionPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#display"><a href="Numbas.parts.ExtensionPart.html#display">Numbas.parts.ExtensionPart#display</a></li>
 		
@@ -11517,6 +12955,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#marks"><a href="Numbas.parts.ExtensionPart.html#marks">Numbas.parts.ExtensionPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#multCredit"><a href="Numbas.parts.ExtensionPart.html#multCredit">Numbas.parts.ExtensionPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#name"><a href="Numbas.parts.ExtensionPart.html#name">Numbas.parts.ExtensionPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#openSteps"><a href="Numbas.parts.ExtensionPart.html#openSteps">Numbas.parts.ExtensionPart#openSteps</a></li>
 		
@@ -11578,6 +13018,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#type"><a href="Numbas.parts.ExtensionPart.html#type">Numbas.parts.ExtensionPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#useCustomName"><a href="Numbas.parts.ExtensionPart.html#useCustomName">Numbas.parts.ExtensionPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#warnings"><a href="Numbas.parts.ExtensionPart.html#warnings">Numbas.parts.ExtensionPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#xml"><a href="Numbas.parts.ExtensionPart.html#xml">Numbas.parts.ExtensionPart#xml</a></li>
@@ -11598,11 +13040,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#apply_feedback"><a href="Numbas.parts.GapFillPart.html#apply_feedback">Numbas.parts.GapFillPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#applyScoreLimits"><a href="Numbas.parts.GapFillPart.html#applyScoreLimits">Numbas.parts.GapFillPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#assignName"><a href="Numbas.parts.GapFillPart.html#assignName">Numbas.parts.GapFillPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#baseMarkingScript"><a href="Numbas.parts.GapFillPart.html#baseMarkingScript">Numbas.parts.GapFillPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#calculateScore"><a href="Numbas.parts.GapFillPart.html#calculateScore">Numbas.parts.GapFillPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#credit"><a href="Numbas.parts.GapFillPart.html#credit">Numbas.parts.GapFillPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#customName"><a href="Numbas.parts.GapFillPart.html#customName">Numbas.parts.GapFillPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#display"><a href="Numbas.parts.GapFillPart.html#display">Numbas.parts.GapFillPart#display</a></li>
 		
@@ -11642,8 +13090,6 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -11655,6 +13101,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#marks"><a href="Numbas.parts.GapFillPart.html#marks">Numbas.parts.GapFillPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#multCredit"><a href="Numbas.parts.GapFillPart.html#multCredit">Numbas.parts.GapFillPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#name"><a href="Numbas.parts.GapFillPart.html#name">Numbas.parts.GapFillPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#openSteps"><a href="Numbas.parts.GapFillPart.html#openSteps">Numbas.parts.GapFillPart#openSteps</a></li>
 		
@@ -11716,6 +13164,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#type"><a href="Numbas.parts.GapFillPart.html#type">Numbas.parts.GapFillPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#useCustomName"><a href="Numbas.parts.GapFillPart.html#useCustomName">Numbas.parts.GapFillPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#warnings"><a href="Numbas.parts.GapFillPart.html#warnings">Numbas.parts.GapFillPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#xml"><a href="Numbas.parts.GapFillPart.html#xml">Numbas.parts.GapFillPart#xml</a></li>
@@ -11738,11 +13188,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#apply_feedback"><a href="Numbas.parts.InformationPart.html#apply_feedback">Numbas.parts.InformationPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#applyScoreLimits"><a href="Numbas.parts.InformationPart.html#applyScoreLimits">Numbas.parts.InformationPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#assignName"><a href="Numbas.parts.InformationPart.html#assignName">Numbas.parts.InformationPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#baseMarkingScript"><a href="Numbas.parts.InformationPart.html#baseMarkingScript">Numbas.parts.InformationPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#calculateScore"><a href="Numbas.parts.InformationPart.html#calculateScore">Numbas.parts.InformationPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#credit"><a href="Numbas.parts.InformationPart.html#credit">Numbas.parts.InformationPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#customName"><a href="Numbas.parts.InformationPart.html#customName">Numbas.parts.InformationPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#display"><a href="Numbas.parts.InformationPart.html#display">Numbas.parts.InformationPart#display</a></li>
 		
@@ -11793,6 +13249,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#marks"><a href="Numbas.parts.InformationPart.html#marks">Numbas.parts.InformationPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#multCredit"><a href="Numbas.parts.InformationPart.html#multCredit">Numbas.parts.InformationPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#name"><a href="Numbas.parts.InformationPart.html#name">Numbas.parts.InformationPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#openSteps"><a href="Numbas.parts.InformationPart.html#openSteps">Numbas.parts.InformationPart#openSteps</a></li>
 		
@@ -11854,6 +13312,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#type"><a href="Numbas.parts.InformationPart.html#type">Numbas.parts.InformationPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#useCustomName"><a href="Numbas.parts.InformationPart.html#useCustomName">Numbas.parts.InformationPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#warnings"><a href="Numbas.parts.InformationPart.html#warnings">Numbas.parts.InformationPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#xml"><a href="Numbas.parts.InformationPart.html#xml">Numbas.parts.InformationPart#xml</a></li>
@@ -11870,11 +13330,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#apply_feedback"><a href="Numbas.parts.JMEPart.html#apply_feedback">Numbas.parts.JMEPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#applyScoreLimits"><a href="Numbas.parts.JMEPart.html#applyScoreLimits">Numbas.parts.JMEPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#assignName"><a href="Numbas.parts.JMEPart.html#assignName">Numbas.parts.JMEPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#baseMarkingScript"><a href="Numbas.parts.JMEPart.html#baseMarkingScript">Numbas.parts.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#calculateScore"><a href="Numbas.parts.JMEPart.html#calculateScore">Numbas.parts.JMEPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#credit"><a href="Numbas.parts.JMEPart.html#credit">Numbas.parts.JMEPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#customName"><a href="Numbas.parts.JMEPart.html#customName">Numbas.parts.JMEPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#display"><a href="Numbas.parts.JMEPart.html#display">Numbas.parts.JMEPart#display</a></li>
 		
@@ -11925,6 +13391,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#marks"><a href="Numbas.parts.JMEPart.html#marks">Numbas.parts.JMEPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#multCredit"><a href="Numbas.parts.JMEPart.html#multCredit">Numbas.parts.JMEPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#name"><a href="Numbas.parts.JMEPart.html#name">Numbas.parts.JMEPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#openSteps"><a href="Numbas.parts.JMEPart.html#openSteps">Numbas.parts.JMEPart#openSteps</a></li>
 		
@@ -11986,6 +13454,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#type"><a href="Numbas.parts.JMEPart.html#type">Numbas.parts.JMEPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#useCustomName"><a href="Numbas.parts.JMEPart.html#useCustomName">Numbas.parts.JMEPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#warnings"><a href="Numbas.parts.JMEPart.html#warnings">Numbas.parts.JMEPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#xml"><a href="Numbas.parts.JMEPart.html#xml">Numbas.parts.JMEPart#xml</a></li>
@@ -12004,11 +13474,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#apply_feedback"><a href="Numbas.parts.MatrixEntryPart.html#apply_feedback">Numbas.parts.MatrixEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#applyScoreLimits"><a href="Numbas.parts.MatrixEntryPart.html#applyScoreLimits">Numbas.parts.MatrixEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#assignName"><a href="Numbas.parts.MatrixEntryPart.html#assignName">Numbas.parts.MatrixEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#baseMarkingScript"><a href="Numbas.parts.MatrixEntryPart.html#baseMarkingScript">Numbas.parts.MatrixEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#calculateScore"><a href="Numbas.parts.MatrixEntryPart.html#calculateScore">Numbas.parts.MatrixEntryPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#credit"><a href="Numbas.parts.MatrixEntryPart.html#credit">Numbas.parts.MatrixEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#customName"><a href="Numbas.parts.MatrixEntryPart.html#customName">Numbas.parts.MatrixEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#display"><a href="Numbas.parts.MatrixEntryPart.html#display">Numbas.parts.MatrixEntryPart#display</a></li>
 		
@@ -12059,6 +13535,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#marks"><a href="Numbas.parts.MatrixEntryPart.html#marks">Numbas.parts.MatrixEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#multCredit"><a href="Numbas.parts.MatrixEntryPart.html#multCredit">Numbas.parts.MatrixEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#name"><a href="Numbas.parts.MatrixEntryPart.html#name">Numbas.parts.MatrixEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#openSteps"><a href="Numbas.parts.MatrixEntryPart.html#openSteps">Numbas.parts.MatrixEntryPart#openSteps</a></li>
 		
@@ -12122,6 +13600,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#type"><a href="Numbas.parts.MatrixEntryPart.html#type">Numbas.parts.MatrixEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#useCustomName"><a href="Numbas.parts.MatrixEntryPart.html#useCustomName">Numbas.parts.MatrixEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#warnings"><a href="Numbas.parts.MatrixEntryPart.html#warnings">Numbas.parts.MatrixEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#xml"><a href="Numbas.parts.MatrixEntryPart.html#xml">Numbas.parts.MatrixEntryPart#xml</a></li>
@@ -12140,11 +13620,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#apply_feedback"><a href="Numbas.parts.MultipleResponsePart.html#apply_feedback">Numbas.parts.MultipleResponsePart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#applyScoreLimits"><a href="Numbas.parts.MultipleResponsePart.html#applyScoreLimits">Numbas.parts.MultipleResponsePart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#assignName"><a href="Numbas.parts.MultipleResponsePart.html#assignName">Numbas.parts.MultipleResponsePart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#baseMarkingScript"><a href="Numbas.parts.MultipleResponsePart.html#baseMarkingScript">Numbas.parts.MultipleResponsePart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#calculateScore"><a href="Numbas.parts.MultipleResponsePart.html#calculateScore">Numbas.parts.MultipleResponsePart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#credit"><a href="Numbas.parts.MultipleResponsePart.html#credit">Numbas.parts.MultipleResponsePart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#customName"><a href="Numbas.parts.MultipleResponsePart.html#customName">Numbas.parts.MultipleResponsePart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#display"><a href="Numbas.parts.MultipleResponsePart.html#display">Numbas.parts.MultipleResponsePart#display</a></li>
 		
@@ -12197,6 +13683,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#marks"><a href="Numbas.parts.MultipleResponsePart.html#marks">Numbas.parts.MultipleResponsePart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#multCredit"><a href="Numbas.parts.MultipleResponsePart.html#multCredit">Numbas.parts.MultipleResponsePart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#name"><a href="Numbas.parts.MultipleResponsePart.html#name">Numbas.parts.MultipleResponsePart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#numAnswers"><a href="Numbas.parts.MultipleResponsePart.html#numAnswers">Numbas.parts.MultipleResponsePart#numAnswers</a></li>
 		
@@ -12266,6 +13754,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#type"><a href="Numbas.parts.MultipleResponsePart.html#type">Numbas.parts.MultipleResponsePart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#useCustomName"><a href="Numbas.parts.MultipleResponsePart.html#useCustomName">Numbas.parts.MultipleResponsePart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#warnings"><a href="Numbas.parts.MultipleResponsePart.html#warnings">Numbas.parts.MultipleResponsePart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#xml"><a href="Numbas.parts.MultipleResponsePart.html#xml">Numbas.parts.MultipleResponsePart#xml</a></li>
@@ -12282,6 +13772,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#apply_feedback"><a href="Numbas.parts.NumberEntryPart.html#apply_feedback">Numbas.parts.NumberEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#applyScoreLimits"><a href="Numbas.parts.NumberEntryPart.html#applyScoreLimits">Numbas.parts.NumberEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#assignName"><a href="Numbas.parts.NumberEntryPart.html#assignName">Numbas.parts.NumberEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#baseMarkingScript"><a href="Numbas.parts.NumberEntryPart.html#baseMarkingScript">Numbas.parts.NumberEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#calculateScore"><a href="Numbas.parts.NumberEntryPart.html#calculateScore">Numbas.parts.NumberEntryPart#calculateScore</a></li>
@@ -12289,6 +13783,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#cleanAnswer"><a href="Numbas.parts.NumberEntryPart.html#cleanAnswer">Numbas.parts.NumberEntryPart#cleanAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#credit"><a href="Numbas.parts.NumberEntryPart.html#credit">Numbas.parts.NumberEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#customName"><a href="Numbas.parts.NumberEntryPart.html#customName">Numbas.parts.NumberEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#display"><a href="Numbas.parts.NumberEntryPart.html#display">Numbas.parts.NumberEntryPart#display</a></li>
 		
@@ -12339,6 +13835,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#marks"><a href="Numbas.parts.NumberEntryPart.html#marks">Numbas.parts.NumberEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#multCredit"><a href="Numbas.parts.NumberEntryPart.html#multCredit">Numbas.parts.NumberEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#name"><a href="Numbas.parts.NumberEntryPart.html#name">Numbas.parts.NumberEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#openSteps"><a href="Numbas.parts.NumberEntryPart.html#openSteps">Numbas.parts.NumberEntryPart#openSteps</a></li>
 		
@@ -12402,6 +13900,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#type"><a href="Numbas.parts.NumberEntryPart.html#type">Numbas.parts.NumberEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#useCustomName"><a href="Numbas.parts.NumberEntryPart.html#useCustomName">Numbas.parts.NumberEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#warnings"><a href="Numbas.parts.NumberEntryPart.html#warnings">Numbas.parts.NumberEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#xml"><a href="Numbas.parts.NumberEntryPart.html#xml">Numbas.parts.NumberEntryPart#xml</a></li>
@@ -12418,11 +13918,19 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#apply_feedback"><a href="Numbas.parts.Part.html#apply_feedback">Numbas.parts.Part#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScoreLimits"><a href="Numbas.parts.Part.html#applyScoreLimits">Numbas.parts.Part#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScripts"><a href="Numbas.parts.Part_applyScripts.html">Numbas.parts.Part#applyScripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#assignName"><a href="Numbas.parts.Part.html#assignName">Numbas.parts.Part#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#baseMarkingScript"><a href="Numbas.parts.Part.html#baseMarkingScript">Numbas.parts.Part#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#calculateScore"><a href="Numbas.parts.Part.html#calculateScore">Numbas.parts.Part#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#credit"><a href="Numbas.parts.Part.html#credit">Numbas.parts.Part#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#customName"><a href="Numbas.parts.Part.html#customName">Numbas.parts.Part#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#display"><a href="Numbas.parts.Part.html#display">Numbas.parts.Part#display</a></li>
 		
@@ -12473,6 +13981,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.Part#marks"><a href="Numbas.parts.Part.html#marks">Numbas.parts.Part#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#multCredit"><a href="Numbas.parts.Part.html#multCredit">Numbas.parts.Part#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#name"><a href="Numbas.parts.Part.html#name">Numbas.parts.Part#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#openSteps"><a href="Numbas.parts.Part.html#openSteps">Numbas.parts.Part#openSteps</a></li>
 		
@@ -12534,6 +14044,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#type"><a href="Numbas.parts.Part_.html#type">Numbas.parts.Part#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#useCustomName"><a href="Numbas.parts.Part_.html#useCustomName">Numbas.parts.Part#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#warnings"><a href="Numbas.parts.Part_.html#warnings">Numbas.parts.Part#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#xml"><a href="Numbas.parts.Part_.html#xml">Numbas.parts.Part#xml</a></li>
@@ -12552,11 +14064,17 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#apply_feedback"><a href="Numbas.parts.PatternMatchPart.html#apply_feedback">Numbas.parts.PatternMatchPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#applyScoreLimits"><a href="Numbas.parts.PatternMatchPart.html#applyScoreLimits">Numbas.parts.PatternMatchPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#assignName"><a href="Numbas.parts.PatternMatchPart.html#assignName">Numbas.parts.PatternMatchPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#baseMarkingScript"><a href="Numbas.parts.PatternMatchPart.html#baseMarkingScript">Numbas.parts.PatternMatchPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#calculateScore"><a href="Numbas.parts.PatternMatchPart.html#calculateScore">Numbas.parts.PatternMatchPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#credit"><a href="Numbas.parts.PatternMatchPart.html#credit">Numbas.parts.PatternMatchPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#customName"><a href="Numbas.parts.PatternMatchPart.html#customName">Numbas.parts.PatternMatchPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#display"><a href="Numbas.parts.PatternMatchPart.html#display">Numbas.parts.PatternMatchPart#display</a></li>
 		
@@ -12607,6 +14125,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#marks"><a href="Numbas.parts.PatternMatchPart.html#marks">Numbas.parts.PatternMatchPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#multCredit"><a href="Numbas.parts.PatternMatchPart.html#multCredit">Numbas.parts.PatternMatchPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#name"><a href="Numbas.parts.PatternMatchPart.html#name">Numbas.parts.PatternMatchPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#openSteps"><a href="Numbas.parts.PatternMatchPart.html#openSteps">Numbas.parts.PatternMatchPart#openSteps</a></li>
 		
@@ -12667,6 +14187,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#submit"><a href="Numbas.parts.PatternMatchPart.html#submit">Numbas.parts.PatternMatchPart#submit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#type"><a href="Numbas.parts.PatternMatchPart.html#type">Numbas.parts.PatternMatchPart#type</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#useCustomName"><a href="Numbas.parts.PatternMatchPart.html#useCustomName">Numbas.parts.PatternMatchPart#useCustomName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#warnings"><a href="Numbas.parts.PatternMatchPart.html#warnings">Numbas.parts.PatternMatchPart#warnings</a></li>
 		
@@ -12797,6 +14319,10 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.QuestionGroup#settings"><a href="Numbas.QuestionGroup.html#settings">Numbas.QuestionGroup#settings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.queueScript"><a href="Numbas.html#.queueScript">Numbas.queueScript</a></li>
+		
+			<li class="search-result" data-longname="Numbas.raw_marking_scripts"><a href="Numbas.html#.raw_marking_scripts">Numbas.raw_marking_scripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.rawxml"><a href="Numbas.html#.rawxml">Numbas.rawxml</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule"><a href="Numbas.schedule.html">Numbas.schedule</a></li>
 		
@@ -13022,6 +14548,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.timing.show"><a href="Numbas.timing.html#.show">Numbas.timing.show</a></li>
 		
+			<li class="search-result" data-longname="Numbas.timing.start"><a href="Numbas.timing.html#.start">Numbas.timing.start</a></li>
+		
 			<li class="search-result" data-longname="Numbas.timing.startacc"><a href="Numbas.timing.html#.startacc">Numbas.timing.startacc</a></li>
 		
 			<li class="search-result" data-longname="Numbas.timing.stress"><a href="Numbas.timing.html#.stress">Numbas.timing.stress</a></li>
@@ -13035,6 +14563,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.util.arraysEqual"><a href="Numbas.util.html#.arraysEqual">Numbas.util.arraysEqual</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
@@ -13098,6 +14628,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.util.numberNotationStyles"><a href="Numbas.util.html#.numberNotationStyles">Numbas.util.numberNotationStyles</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.objects_equal"><a href="Numbas.util.html#.objects_equal">Numbas.util.objects_equal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.parseBool"><a href="Numbas.util.html#.parseBool">Numbas.util.parseBool</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseFraction"><a href="Numbas.util.html#.parseFraction">Numbas.util.parseFraction</a></li>
@@ -13113,6 +14645,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.util.re_fraction"><a href="Numbas.util.html#.re_fraction">Numbas.util.re_fraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.rpad"><a href="Numbas.util.html#.rpad">Numbas.util.rpad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.separateThousands"><a href="Numbas.util.html#.separateThousands">Numbas.util.separateThousands</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.sortBy"><a href="Numbas.util.html#.sortBy">Numbas.util.sortBy</a></li>
 		
@@ -13144,6 +14678,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
 		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
+		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.matrixmul"><a href="Numbas.vectormath.html#.matrixmul">Numbas.vectormath.matrixmul</a></li>
@@ -13168,6 +14704,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="Numbas.xml"><a href="Numbas.xml.html">Numbas.xml</a></li>
 		
+			<li class="search-result" data-longname="Numbas.xml.examXML"><a href="Numbas.xml.html#.examXML">Numbas.xml.examXML</a></li>
+		
 			<li class="search-result" data-longname="Numbas.xml.getTextContent"><a href="Numbas.xml.html#.getTextContent">Numbas.xml.getTextContent</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.isEmpty"><a href="Numbas.xml.html#.isEmpty">Numbas.xml.isEmpty</a></li>
@@ -13185,6 +14723,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 			<li class="search-result" data-longname="Numbas.xml.serializeMessage"><a href="Numbas.xml.html#.serializeMessage">Numbas.xml.serializeMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.setTextContent"><a href="Numbas.xml.html#.setTextContent">Numbas.xml.setTextContent</a></li>
+		
+			<li class="search-result" data-longname="Numbas.xml.templates"><a href="Numbas.xml.html#.templates">Numbas.xml.templates</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.tryGetAttribute"><a href="Numbas.xml.html#.tryGetAttribute">Numbas.xml.tryGetAttribute</a></li>
 		
@@ -13258,6 +14798,8 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 			<li class="search-result" data-longname="vector"><a href="global.html#vector">vector</a></li>
 		
+			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
+		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -13286,7 +14828,7 @@ Returns an array [normal tex,var or simplify,options,argument,normal tex,...]a</
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

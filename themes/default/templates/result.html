@@ -2,31 +2,33 @@
 
 <p class="col-sm-6 col-sm-offset-3" data-localise="result.click a question to review"></p>
 <div class="row">
-    <table id="question-breakdown" class="col-sm-4 col-sm-offset-4">		
+    <table id="question-breakdown" class="col-sm-6 col-sm-offset-3">
         <thead>
-            <th class="qtd" data-localise="result.question number"></th>
-            <th class="qtd" colspan="3" data-localise="result.question score"></th>
-        </thead>		
+            <th data-localise="result.question number"></th>
+            <th colspan="3" data-localise="result.question score"></th>
+            <th></th>
+        </thead>
         <tbody>
             <!-- ko foreach: question_groups -->
             <tr class="question-group-header" data-bind="if: $root.showQuestionGroupNames">
                 <th data-bind="text: name, typeset: name"></th>
-                <th colspan="3"></th>
+                <th colspan="4"></th>
             </tr>
             <!-- ko foreach: questions -->
             <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
-                <td class="qtd" data-bind="text: question.number+1"></td>
-                <td class="qtd" data-bind="niceNumber: score"></td>
-                <td class="qtd">/</td>
-                <td class="qtd" data-bind="niceNumber: marks"></td>
+                <td data-bind="text: question.number+1"></td>
+                <td data-bind="niceNumber: score"></td>
+                <td>/</td>
+                <td data-bind="niceNumber: marks"></td>
+                <td><a href="#" data-localise="result.question review"></a></td>
             </tr>
             <!-- /ko -->
             <!-- /ko -->
             <tr>
-                <th class="qtd" data-localise="Total"></th>
-                <th class="qtd" data-bind="niceNumber: score"></th>
-                <th class="qtd">/</th>
-                <th class="qtd">
+                <th data-localise="Total"></th>
+                <th data-bind="niceNumber: score"></th>
+                <th>/</th>
+                <th colspan="2">
                     <span data-bind="niceNumber: marks"></span>
                     (<span data-bind="text: percentScore"></span>%)
                 </th>
@@ -38,31 +40,31 @@
 
 <h3 data-localise="result.performance summary"></h3>
 <div class="row">
-    <table class="summary col-sm-6 col-sm-offset-3">
+    <table id="performance-summary" class="summary col-sm-6 col-sm-offset-3">
         <tr>
             <th data-localise="exam.exam name"></th>
-            <td class="rtd" data-bind="html: exam.settings.name"></td>
+            <td data-bind="html: exam.settings.name"></td>
         </tr>
         <tr>
             <th data-localise="exam.random seed"></th>
-            <td class="rtd" data-bind="html: exam.seed"></td>
+            <td data-bind="html: exam.seed"></td>
         </tr>
         <tr data-bind="visible: exam.settings.showStudentName && exam.student_name">
             <th data-localise="exam.student name"></th>
-            <td class="rtd"><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
+            <td><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
         </tr>
         <tr>
             <th data-localise="result.exam start"></th>
-            <td class="rtd" data-bind="text: startTime"></td>	
-        </tr>	
+            <td data-bind="text: startTime"></td>
+        </tr>
         <tr>
             <th data-localise="result.exam stop"></th>
-            <td class="rtd" data-bind="text: endTime"></td>	
+            <td data-bind="text: endTime"></td>
         </tr>
         <tr>
             <th data-localise="result.time spent"></th>
-            <td class="rtd" data-bind="text: timeSpent"></td>
-        </tr> 
+            <td data-bind="text: timeSpent"></td>
+        </tr>
     </table>
 </div>
 

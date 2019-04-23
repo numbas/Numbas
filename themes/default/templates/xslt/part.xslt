@@ -49,16 +49,14 @@
             <xsl:when test="@type='1_n_2' and @displaytype='radiogroup'"><xsl:text> block</xsl:text></xsl:when>
         </xsl:choose>
     </xsl:variable>
-    <xsl:if test="parent::parts">
-        <xsl:if test="count(../part) &gt; 1">
-            <h4 class="partheader"><xsl:number count="part" format="a) "/></h4>
-        </xsl:if>
-    </xsl:if>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="$path" />').isDirty}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="$path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="$path" />').name()}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="$path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
+        <xsl:if test="parent::parts">
+            <h4 class="partheader" data-bind="visible: name, latex: name"></h4>
+        </xsl:if>
         <xsl:if test="not(ancestor::gaps)">
             <xsl:apply-templates select="prompt" />
         </xsl:if>
@@ -66,20 +64,21 @@
             <xsl:apply-templates select="steps"/>
         </xsl:if>
         <span class="student-answer">
-            <xsl:attribute name="data-bind">css: {answered: scoreFeedback.answered}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
+            <xsl:attribute name="data-bind">css: {answered: scoreFeedback.answered, 'has-warnings': hasWarnings}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
             <xsl:apply-templates select="." mode="typespecific"/>
-            <span class="warning-icon icon-exclamation-sign" data-bind="visible: warnings().length>0, hover: warningsShown, event: {{focus: showWarnings, blur: hideWarnings}}" tabindex="0"></span>
-            <span class="warnings alert alert-danger" data-bind="foreach: warnings, visible: warningsShown">
+            <span class="warnings alert alert-warning" data-bind="visible: warningsShown, css: {{shown: warningsShown}}">
+                <xsl:comment>ko foreach: warnings</xsl:comment>
                 <span class="warning" data-bind="latex: message"></span>
+                <xsl:comment>/ko</xsl:comment>
             </span>
         </span>
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
-            <div class="submit-and-feedback">
+            <div class="submit-and-feedback" data-bind="visible: doesMarking">
                 <xsl:if test="count(../part) &gt; 1 or ancestor::steps">
                     <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
                 </xsl:if>
-                <div class="feedbackMessages" data-bind="visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
+                <div class="feedbackMessages" data-bind="pulse: scoreFeedback.update, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>

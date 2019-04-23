@@ -43,15 +43,16 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','math'],function() {
+Numbas.queueScript('util',['base','es5-shim','math'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)
      *
      * B's prototype supercedes A's.
-     * @param {function} a - the constructor for the parent class
-     * @param {function} b - a constructor to be called after `a`'s constructor is done.
-     * @returns {function} a constructor for the derived class
+     * @param {Function} a - the constructor for the parent class
+     * @param {Function} b - a constructor to be called after `a`'s constructor is done.
+     * @param {Boolean} extendMethods - if `true`, the methods of the new type are constructed so that the method from type A is applied, then the method from type B. Nothing is returned.
+     * @returns {Function} a constructor for the derived class
      */
     extend: function(a,b,extendMethods)
     {
@@ -183,35 +184,68 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.eq
      */
     equalityTests: {
+        'boolean': function(a,b) {
+            return a.value==b.value;
+        },
+        'dict': function(a,b) {
+            var seen = {};
+            for(var x in a.value) {
+                seen[x] = true;
+                if(!util.eq(a.value[x],b.value[x])) {
+                    return false;
+                }
+            }
+            for(var x in a.value) {
+                if(seen[x]) {
+                    continue;
+                }
+                if(!util.eq(a.value[x],b.value[x])) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        'expression': function(a,b) {
+            return jme.treesSame(a.tree,b.tree);
+        },
+        'function': function(a,b) {
+            return a.name==b.name;
+        },
+        'html': function(a,b) {
+            return a.value[0] &amp;&amp; b.value[0] &amp;&amp; a.value[0].outerHTML == b.value[0].outerHTML;
+        },
+        'keypair': function(a,b) {
+            return a.key==b.key;
+        },
+        'list': function(a,b) {
+            return a.value.length==b.value.length &amp;&amp; a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+        },
+        'matrix': function(a,b) {
+            return Numbas.matrixmath.eq(a.value,b.value);
+        },
+        'name': function(a,b) {
+            return a.name.toLowerCase() == b.name.toLowerCase();
+        },
         'nothing': function(a,b) {
             return true;
         },
         'number': function(a,b) {
             return Numbas.math.eq(a.value,b.value);
         },
-        'vector': function(a,b) {
-            return Numbas.vectormath.eq(a.value,b.value);
-        },
-        'matrix': function(a,b) {
-            return Numbas.matrixmath.eq(a.value,b.value);
-        },
-        'list': function(a,b) {
-            return a.value.length==b.value.length &amp;&amp; a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
-        },
-        'set': function(a,b) {
-            return Numbas.setmath.eq(a.value,b.value);
+        'op': function(a,b) {
+            return a.name==b.name;
         },
         'range': function(a,b) {
             return a.value[0]==b.value[0] &amp;&amp; a.value[1]==b.value[1] &amp;&amp; a.value[2]==b.value[2];
         },
-        'name': function(a,b) {
-            return a.name.toLowerCase() == b.name.toLowerCase();
+        'set': function(a,b) {
+            return Numbas.setmath.eq(a.value,b.value);
         },
         'string': function(a,b) {
             return a.value==b.value;
         },
-        'boolean': function(a,b) {
-            return a.value==b.value;
+        'vector': function(a,b) {
+            return Numbas.vectormath.eq(a.value,b.value);
         }
     },
     /** Generic inequality test on {@link Numbas.jme.token}s
@@ -223,6 +257,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     neq: function(a,b) {
         return !util.eq(a,b);
     },
+
+    /** Are the given objects equal?
+     * False if they're of different types.
+     * If they're both arrays, uses {@link Numbas.util.arraysEqual}.
+     * If they're both objects, true if every key in `b` is also in `a`, and `a[k]` is equal to `b[k]` for every `k` in `a`.
+     * Otherwise, uses JavaScript's equality test.
+     * @param {*} a
+     * @param {*} b
+     * @returns {Boolean}
+     */
     objects_equal: function(a,b) {
         if(typeof(a)!=typeof(b)) {
             return false;
@@ -356,13 +400,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(n===undefined || n===null) {
             return false;
         }
+        if(allowFractions &amp;&amp; util.re_fraction.test(n)) {
+            return true;
+        }
         n = util.cleanNumber(n,styles,strictStyle);
         if(!isNaN(n)) {
             return true;
         }
         if(/-?infinity/i.test(n)) {
-            return true;
-        } else if(allowFractions &amp;&amp; util.re_fraction.test(n)) {
             return true;
         } else {
             return false;
@@ -395,9 +440,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     isNonemptyHTML: function(html) {
-        var d = document.createElement('div');
-        d.innerHTML = html;
-        return $(d).text().trim().length>0;
+        if(window.document) {
+            var d = document.createElement('div');
+            d.innerHTML = html;
+            return $(d).text().trim().length>0;
+        } else {
+            return html.trim() != '';
+        }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
      * @param {Object} b
@@ -410,13 +459,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         b = b.toString().toLowerCase();
         return( b=='true' || b=='yes' );
     },
-    /** Regular expression recognising a fraction */
+    /** Regular expression recognising a fraction 
+     * @type RegExp
+     */
     re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
+
     /** Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
      * @param {String} thousands - the string used to separate powers of 1000
      * @param {String} decimal_mark - the decimal mark character
      * @param {Boolean} separate_decimal=false - should the `thousands` separator be used to separate negative powers of 1000 (that is, groups of 3 digits after the decimal point)?
-     * @returns {function}
+     * @returns {Function}
      */
     standardNumberFormatter: function(thousands, decimal_mark, separate_decimal) {
         return function(integer,decimal) {
@@ -614,6 +666,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Number} n
      * @param {String} prefix - symbol to use in front of currency if abs(n) >= 1
      * @param {String} suffix - symbol to use after currency if abs(n) &lt;= 1
+     * @returns {String}
      */
     currency: function(n,prefix,suffix) {
         if(n&lt;0)
@@ -635,7 +688,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return s + suffix;
         }
     },
-    /* Write a number with every three digits separated by the given separator character
+
+    /** Write a number with every three digits separated by the given separator character
      * @example separateThousands(1234567.1234,',') => '1,234,567.1234'
      * @param {Number} n
      * @param {String} separator
@@ -698,7 +752,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * Strips out nested brackets
      * @example splitbrackets('a{{b}}c','{','}') => ['a','b','c']
-     * @param {String} t - string to split
+     * @param {String} str - string to split
      * @param {String} lb - left bracket string
      * @param {String} rb - right bracket string
      * @returns {Array.&lt;String>} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
@@ -775,8 +829,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         ;
     },
     /** Create a comparison function which sorts objects by a particular property
-     * @param {Array.&lt;String>|String} prop - name of the property (or list of names of properties) to sort by
-     * @returns {function}
+     * @param {Array.&lt;String>|String} props - name of the property (or list of names of properties) to sort by
+     * @returns {Function}
      */
     sortBy: function(props) {
         if(typeof props=='string') {
@@ -797,6 +851,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Hash a string into a string of digits
      *
      * From {@link http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/}
+     * @param {String} str
+     * @returns {String}
      */
     hashCode: function(str){
         var hash = 0, i, c;
@@ -850,6 +906,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return out;
     },
+
+    /** Cartesian product of list, repeated n times
+     * @param {Array} l
+     * @param {Number} n
+     * @returns {Array}
+     */
+    cartesian_power: function(l,n) {
+        var o = [[]];
+        for(var i=0;i&lt;n;i++) {
+            var no = [];
+            o.forEach(function(ol) {
+                l.forEach(function(x) {
+                    var nl = ol.slice();
+                    nl.push(x);
+                    no.push(nl);
+                })
+            });
+            o = no;
+        }
+        return o;
+    },
+
     /** Zip lists together: given lists [a,b,c,...], [x,y,z,...], return [[a,x],[b,y],[c,z], ...]
      * @param {Array} lists - list of arrays
      * @returns {Array}
@@ -874,6 +952,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** All combinations of r items from given array, without replacement
      * @param {Array} list
      * @param {Number} r
+     * @returns {Array.&lt;Array>}
      */
     combinations: function(list,r) {
         var indexes = [];
@@ -904,6 +983,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** All combinations of r items from given array, with replacement
      * @param {Array} list
      * @param {Number} r
+     * @returns {Array.&lt;Array>}
      */
     combinations_with_replacement: function(list,r) {
         var indexes = [];
@@ -934,6 +1014,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * Inspired by the algorithm in Python's itertools library
      * @param {Array} list - elements to choose and permute
      * @param {Number} r - number of elements to choose
+     * @returns {Array.&lt;Array>}
      */
     permutations: function(list,r) {
         var n = list.length;
@@ -1297,1032 +1378,6 @@ if(!String.prototype.split)
         return cbSplit(this, separator, limit);
     };
 }
-// es5-shim.min.js 24/09/2012
-//
-// -- kriskowal Kris Kowal Copyright (C) 2009-2011 MIT License
-// -- tlrobinson Tom Robinson Copyright (C) 2009-2010 MIT License (Narwhal Project)
-// -- dantman Daniel Friesen Copyright (C) 2010 XXX TODO License or CLA
-// -- fschaefer Florian Schäfer Copyright (C) 2010 MIT License
-// -- Gozala Irakli Gozalishvili Copyright (C) 2010 MIT License
-// -- kitcambridge Kit Cambridge Copyright (C) 2011 MIT License
-// -- kossnocorp Sasha Koss XXX TODO License or CLA
-// -- bryanforbes Bryan Forbes XXX TODO License or CLA
-// -- killdream Quildreen Motta Copyright (C) 2011 MIT Licence
-// -- michaelficarra Michael Ficarra Copyright (C) 2011 3-clause BSD License
-// -- sharkbrainguy Gerard Paapu Copyright (C) 2011 MIT License
-// -- bbqsrc Brendan Molloy (C) 2011 Creative Commons Zero (public domain)
-// -- iwyg XXX TODO License or CLA
-// -- DomenicDenicola Domenic Denicola Copyright (C) 2011 MIT License
-// -- xavierm02 Montillet Xavier Copyright (C) 2011 MIT License
-// -- Raynos Jake Verbaten Copyright (C) 2011 MIT Licence
-// -- samsonjs Sami Samhuri Copyright (C) 2010 MIT License
-// -- rwldrn Rick Waldron Copyright (C) 2011 MIT License
-// -- lexer Alexey Zakharov XXX TODO License or CLA
-/*!
-    Copyright (c) 2009, 280 North Inc. http://280north.com/
-    MIT License. http://github.com/280north/narwhal/blob/master/README.md
-*/
-// Module systems magic dance
-(function (definition) {
-    // RequireJS
-    if (typeof define == "function") {
-        define(definition);
-    // CommonJS and &lt;script>
-    } else {
-        definition();
-    }
-})(function () {
-/**
- * Brings an environment as close to ECMAScript 5 compliance
- * as is possible with the facilities of erstwhile engines.
- *
- * Annotated ES5: http://es5.github.com/ (specific links below)
- * ES5 Spec: http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf
- * Required reading: http://javascriptweblog.wordpress.com/2011/12/05/extending-javascript-natives/
- */
-//
-// Function
-// ========
-//
-// ES-5 15.3.4.5
-// http://es5.github.com/#x15.3.4.5
-if (!Function.prototype.bind) {
-    Function.prototype.bind = function bind(that) { // .length is 1
-        // 1. Let Target be the this value.
-        var target = this;
-        // 2. If IsCallable(Target) is false, throw a TypeError exception.
-        if (typeof target != "function") {
-            throw new TypeError("Function.prototype.bind called on incompatible " + target);
-        }
-        // 3. Let A be a new (possibly empty) internal list of all of the
-        //   argument values provided after thisArg (arg1, arg2 etc), in order.
-        // XXX slicedArgs will stand in for "A" if used
-        var args = slice.call(arguments, 1); // for normal call
-        // 4. Let F be a new native ECMAScript object.
-        // 11. Set the [[Prototype]] internal property of F to the standard
-        //   built-in Function prototype object as specified in 15.3.3.1.
-        // 12. Set the [[Call]] internal property of F as described in
-        //   15.3.4.5.1.
-        // 13. Set the [[Construct]] internal property of F as described in
-        //   15.3.4.5.2.
-        // 14. Set the [[HasInstance]] internal property of F as described in
-        //   15.3.4.5.3.
-        var bound = function () {
-            if (this instanceof bound) {
-                // 15.3.4.5.2 [[Construct]]
-                // When the [[Construct]] internal method of a function object,
-                // F that was created using the bind function is called with a
-                // list of arguments ExtraArgs, the following steps are taken:
-                // 1. Let target be the value of F's [[TargetFunction]]
-                //   internal property.
-                // 2. If target has no [[Construct]] internal method, a
-                //   TypeError exception is thrown.
-                // 3. Let boundArgs be the value of F's [[BoundArgs]] internal
-                //   property.
-                // 4. Let args be a new list containing the same values as the
-                //   list boundArgs in the same order followed by the same
-                //   values as the list ExtraArgs in the same order.
-                // 5. Return the result of calling the [[Construct]] internal
-                //   method of target providing args as the arguments.
-                var F = function(){};
-                F.prototype = target.prototype;
-                var self = new F;
-                var result = target.apply(
-                    self,
-                    args.concat(slice.call(arguments))
-                );
-                if (Object(result) === result) {
-                    return result;
-                }
-                return self;
-            } else {
-                // 15.3.4.5.1 [[Call]]
-                // When the [[Call]] internal method of a function object, F,
-                // which was created using the bind function is called with a
-                // this value and a list of arguments ExtraArgs, the following
-                // steps are taken:
-                // 1. Let boundArgs be the value of F's [[BoundArgs]] internal
-                //   property.
-                // 2. Let boundThis be the value of F's [[BoundThis]] internal
-                //   property.
-                // 3. Let target be the value of F's [[TargetFunction]] internal
-                //   property.
-                // 4. Let args be a new list containing the same values as the
-                //   list boundArgs in the same order followed by the same
-                //   values as the list ExtraArgs in the same order.
-                // 5. Return the result of calling the [[Call]] internal method
-                //   of target providing boundThis as the this value and
-                //   providing args as the arguments.
-                // equiv: target.call(this, ...boundArgs, ...args)
-                return target.apply(
-                    that,
-                    args.concat(slice.call(arguments))
-                );
-            }
-        };
-        // XXX bound.length is never writable, so don't even try
-        //
-        // 15. If the [[Class]] internal property of Target is "Function", then
-        //     a. Let L be the length property of Target minus the length of A.
-        //     b. Set the length own property of F to either 0 or L, whichever is
-        //       larger.
-        // 16. Else set the length own property of F to 0.
-        // 17. Set the attributes of the length own property of F to the values
-        //   specified in 15.3.5.1.
-        // TODO
-        // 18. Set the [[Extensible]] internal property of F to true.
-        // TODO
-        // 19. Let thrower be the [[ThrowTypeError]] function Object (13.2.3).
-        // 20. Call the [[DefineOwnProperty]] internal method of F with
-        //   arguments "caller", PropertyDescriptor {[[Get]]: thrower, [[Set]]:
-        //   thrower, [[Enumerable]]: false, [[Configurable]]: false}, and
-        //   false.
-        // 21. Call the [[DefineOwnProperty]] internal method of F with
-        //   arguments "arguments", PropertyDescriptor {[[Get]]: thrower,
-        //   [[Set]]: thrower, [[Enumerable]]: false, [[Configurable]]: false},
-        //   and false.
-        // TODO
-        // NOTE Function objects created using Function.prototype.bind do not
-        // have a prototype property or the [[Code]], [[FormalParameters]], and
-        // [[Scope]] internal properties.
-        // XXX can't delete prototype in pure-js.
-        // 22. Return F.
-        return bound;
-    };
-}
-// Shortcut to an often accessed properties, in order to avoid multiple
-// dereference that costs universally.
-// _Please note: Shortcuts are defined after `Function.prototype.bind` as we
-// us it in defining shortcuts.
-var call = Function.prototype.call;
-var prototypeOfArray = Array.prototype;
-var prototypeOfObject = Object.prototype;
-var slice = prototypeOfArray.slice;
-// Having a toString local variable name breaks in Opera so use _toString.
-var _toString = call.bind(prototypeOfObject.toString);
-var owns = call.bind(prototypeOfObject.hasOwnProperty);
-// If JS engine supports accessors creating shortcuts.
-var defineGetter;
-var defineSetter;
-var lookupGetter;
-var lookupSetter;
-var supportsAccessors;
-if ((supportsAccessors = owns(prototypeOfObject, "__defineGetter__"))) {
-    defineGetter = call.bind(prototypeOfObject.__defineGetter__);
-    defineSetter = call.bind(prototypeOfObject.__defineSetter__);
-    lookupGetter = call.bind(prototypeOfObject.__lookupGetter__);
-    lookupSetter = call.bind(prototypeOfObject.__lookupSetter__);
-}
-//
-// Array
-// =====
-//
-// ES5 15.4.3.2
-// http://es5.github.com/#x15.4.3.2
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
-if (!Array.isArray) {
-    Array.isArray = function isArray(obj) {
-        return _toString(obj) == "[object Array]";
-    };
-}
-// The IsCallable() check in the Array functions
-// has been replaced with a strict check on the
-// internal class of the object to trap cases where
-// the provided function was actually a regular
-// expression literal, which in V8 and
-// JavaScriptCore is a typeof "function".  Only in
-// V8 are regular expression literals permitted as
-// reduce parameters, so it is desirable in the
-// general case for the shim to match the more
-// strict and common behavior of rejecting regular
-// expressions.
-// ES5 15.4.4.18
-// http://es5.github.com/#x15.4.4.18
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/forEach
-if (!Array.prototype.forEach) {
-    Array.prototype.forEach = function forEach(fun /*, thisp*/) {
-        var self = toObject(this),
-            thisp = arguments[1],
-            i = -1,
-            length = self.length >>> 0;
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(); // TODO message
-        }
-        while (++i &lt; length) {
-            if (i in self) {
-                // Invoke the callback function with call, passing arguments:
-                // context, property value, property key, thisArg object context
-                fun.call(thisp, self[i], i, self);
-            }
-        }
-    };
-}
-// ES5 15.4.4.19
-// http://es5.github.com/#x15.4.4.19
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
-if (!Array.prototype.map) {
-    Array.prototype.map = function map(fun /*, thisp*/) {
-        var self = toObject(this),
-            length = self.length >>> 0,
-            result = Array(length),
-            thisp = arguments[1];
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        for (var i = 0; i &lt; length; i++) {
-            if (i in self)
-                result[i] = fun.call(thisp, self[i], i, self);
-        }
-        return result;
-    };
-}
-// ES5 15.4.4.20
-// http://es5.github.com/#x15.4.4.20
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/filter
-if (!Array.prototype.filter) {
-    Array.prototype.filter = function filter(fun /*, thisp */) {
-        var self = toObject(this),
-            length = self.length >>> 0,
-            result = [],
-            value,
-            thisp = arguments[1];
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        for (var i = 0; i &lt; length; i++) {
-            if (i in self) {
-                value = self[i];
-                if (fun.call(thisp, value, i, self)) {
-                    result.push(value);
-                }
-            }
-        }
-        return result;
-    };
-}
-// ES5 15.4.4.16
-// http://es5.github.com/#x15.4.4.16
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
-if (!Array.prototype.every) {
-    Array.prototype.every = function every(fun /*, thisp */) {
-        var self = toObject(this),
-            length = self.length >>> 0,
-            thisp = arguments[1];
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        for (var i = 0; i &lt; length; i++) {
-            if (i in self &amp;&amp; !fun.call(thisp, self[i], i, self)) {
-                return false;
-            }
-        }
-        return true;
-    };
-}
-// ES5 15.4.4.17
-// http://es5.github.com/#x15.4.4.17
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/some
-if (!Array.prototype.some) {
-    Array.prototype.some = function some(fun /*, thisp */) {
-        var self = toObject(this),
-            length = self.length >>> 0,
-            thisp = arguments[1];
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        for (var i = 0; i &lt; length; i++) {
-            if (i in self &amp;&amp; fun.call(thisp, self[i], i, self)) {
-                return true;
-            }
-        }
-        return false;
-    };
-}
-// ES5 15.4.4.21
-// http://es5.github.com/#x15.4.4.21
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduce
-if (!Array.prototype.reduce) {
-    Array.prototype.reduce = function reduce(fun /*, initial*/) {
-        var self = toObject(this),
-            length = self.length >>> 0;
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        // no value to return if no initial value and an empty array
-        if (!length &amp;&amp; arguments.length == 1) {
-            throw new TypeError('reduce of empty array with no initial value');
-        }
-        var i = 0;
-        var result;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i++];
-                    break;
-                }
-                // if array contains no values, no initial value to return
-                if (++i >= length) {
-                    throw new TypeError('reduce of empty array with no initial value');
-                }
-            } while (true);
-        }
-        for (; i &lt; length; i++) {
-            if (i in self) {
-                result = fun.call(void 0, result, self[i], i, self);
-            }
-        }
-        return result;
-    };
-}
-// ES5 15.4.4.22
-// http://es5.github.com/#x15.4.4.22
-// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight
-if (!Array.prototype.reduceRight) {
-    Array.prototype.reduceRight = function reduceRight(fun /*, initial*/) {
-        var self = toObject(this),
-            length = self.length >>> 0;
-        // If no callback function or if callback is not a callable function
-        if (_toString(fun) != "[object Function]") {
-            throw new TypeError(fun + " is not a function");
-        }
-        // no value to return if no initial value, empty array
-        if (!length &amp;&amp; arguments.length == 1) {
-            throw new TypeError('reduceRight of empty array with no initial value');
-        }
-        var result, i = length - 1;
-        if (arguments.length >= 2) {
-            result = arguments[1];
-        } else {
-            do {
-                if (i in self) {
-                    result = self[i--];
-                    break;
-                }
-                // if array contains no values, no initial value to return
-                if (--i &lt; 0) {
-                    throw new TypeError('reduceRight of empty array with no initial value');
-                }
-            } while (true);
-        }
-        do {
-            if (i in this) {
-                result = fun.call(void 0, result, self[i], i, self);
-            }
-        } while (i--);
-        return result;
-    };
-}
-// ES5 15.4.4.14
-// http://es5.github.com/#x15.4.4.14
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function indexOf(sought /*, fromIndex */ ) {
-        var self = toObject(this),
-            length = self.length >>> 0;
-        if (!length) {
-            return -1;
-        }
-        var i = 0;
-        if (arguments.length > 1) {
-            i = toInteger(arguments[1]);
-        }
-        // handle negative indices
-        i = i >= 0 ? i : Math.max(0, length + i);
-        for (; i &lt; length; i++) {
-            if (i in self &amp;&amp; self[i] === sought) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
-// ES5 15.4.4.15
-// http://es5.github.com/#x15.4.4.15
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
-if (!Array.prototype.lastIndexOf) {
-    Array.prototype.lastIndexOf = function lastIndexOf(sought /*, fromIndex */) {
-        var self = toObject(this),
-            length = self.length >>> 0;
-        if (!length) {
-            return -1;
-        }
-        var i = length - 1;
-        if (arguments.length > 1) {
-            i = Math.min(i, toInteger(arguments[1]));
-        }
-        // handle negative indices
-        i = i >= 0 ? i : length - Math.abs(i);
-        for (; i >= 0; i--) {
-            if (i in self &amp;&amp; sought === self[i]) {
-                return i;
-            }
-        }
-        return -1;
-    };
-}
-//
-// Object
-// ======
-//
-// ES5 15.2.3.2
-// http://es5.github.com/#x15.2.3.2
-if (!Object.getPrototypeOf) {
-    // https://github.com/kriskowal/es5-shim/issues#issue/2
-    // http://ejohn.org/blog/objectgetprototypeof/
-    // recommended by fschaefer on github
-    Object.getPrototypeOf = function getPrototypeOf(object) {
-        return object.__proto__ || (
-            object.constructor
-                ? object.constructor.prototype
-                : prototypeOfObject
-        );
-    };
-}
-// ES5 15.2.3.3
-// http://es5.github.com/#x15.2.3.3
-if (!Object.getOwnPropertyDescriptor) {
-    var ERR_NON_OBJECT = "Object.getOwnPropertyDescriptor called on a non-object: ";
-    Object.getOwnPropertyDescriptor = function getOwnPropertyDescriptor(object, property) {
-        if ((typeof object != "object" &amp;&amp; typeof object != "function") || object === null) {
-            throw new TypeError(ERR_NON_OBJECT + object);
-        }
-        // If object does not owns property return undefined immediately.
-        if (!owns(object, property)) {
-            return;
-        }
-        // If object has a property then it's for sure both `enumerable` and
-        // `configurable`.
-        var descriptor =  { enumerable: true, configurable: true };
-        // If JS engine supports accessor properties then property may be a
-        // getter or setter.
-        if (supportsAccessors) {
-            // Unfortunately `__lookupGetter__` will return a getter even
-            // if object has own non getter property along with a same named
-            // inherited getter. To avoid misbehavior we temporary remove
-            // `__proto__` so that `__lookupGetter__` will return getter only
-            // if it's owned by an object.
-            var prototype = object.__proto__;
-            object.__proto__ = prototypeOfObject;
-            var getter = lookupGetter(object, property);
-            var setter = lookupSetter(object, property);
-            // Once we have getter and setter we can put values back.
-            object.__proto__ = prototype;
-            if (getter || setter) {
-                if (getter) {
-                    descriptor.get = getter;
-                }
-                if (setter) {
-                    descriptor.set = setter;
-                }
-                // If it was accessor property we're done and return here
-                // in order to avoid adding `value` to the descriptor.
-                return descriptor;
-            }
-        }
-        // If we got this far we know that object has an own property that is
-        // not an accessor so we set it as a value and return descriptor.
-        descriptor.value = object[property];
-        return descriptor;
-    };
-}
-// ES5 15.2.3.4
-// http://es5.github.com/#x15.2.3.4
-if (!Object.getOwnPropertyNames) {
-    Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
-        return Object.keys(object);
-    };
-}
-// ES5 15.2.3.5
-// http://es5.github.com/#x15.2.3.5
-if (!Object.create) {
-    Object.create = function create(prototype, properties) {
-        var object;
-        if (prototype === null) {
-            object = { "__proto__": null };
-        } else {
-            if (typeof prototype != "object") {
-                throw new TypeError("typeof prototype["+(typeof prototype)+"] != 'object'");
-            }
-            var Type = function () {};
-            Type.prototype = prototype;
-            object = new Type();
-            // IE has no built-in implementation of `Object.getPrototypeOf`
-            // neither `__proto__`, but this manually setting `__proto__` will
-            // guarantee that `Object.getPrototypeOf` will work as expected with
-            // objects created using `Object.create`
-            object.__proto__ = prototype;
-        }
-        if (properties !== void 0) {
-            Object.defineProperties(object, properties);
-        }
-        return object;
-    };
-}
-// ES5 15.2.3.6
-// http://es5.github.com/#x15.2.3.6
-// Patch for WebKit and IE8 standard mode
-// Designed by hax &lt;hax.github.com>
-// related issue: https://github.com/kriskowal/es5-shim/issues#issue/5
-// IE8 Reference:
-//     http://msdn.microsoft.com/en-us/library/dd282900.aspx
-//     http://msdn.microsoft.com/en-us/library/dd229916.aspx
-// WebKit Bugs:
-//     https://bugs.webkit.org/show_bug.cgi?id=36423
-function doesDefinePropertyWork(object) {
-    try {
-        Object.defineProperty(object, "sentinel", {});
-        return "sentinel" in object;
-    } catch (exception) {
-        // returns falsy
-    }
-}
-// check whether defineProperty works if it's given. Otherwise,
-// shim partially.
-if (Object.defineProperty) {
-    var definePropertyWorksOnObject = doesDefinePropertyWork({});
-    var definePropertyWorksOnDom = typeof document == "undefined" ||
-        doesDefinePropertyWork(document.createElement("div"));
-    if (!definePropertyWorksOnObject || !definePropertyWorksOnDom) {
-        var definePropertyFallback = Object.defineProperty;
-    }
-}
-if (!Object.defineProperty || definePropertyFallback) {
-    var ERR_NON_OBJECT_DESCRIPTOR = "Property description must be an object: ";
-    var ERR_NON_OBJECT_TARGET = "Object.defineProperty called on non-object: "
-    var ERR_ACCESSORS_NOT_SUPPORTED = "getters &amp; setters can not be defined " +
-                                      "on this javascript engine";
-    Object.defineProperty = function defineProperty(object, property, descriptor) {
-        if ((typeof object != "object" &amp;&amp; typeof object != "function") || object === null) {
-            throw new TypeError(ERR_NON_OBJECT_TARGET + object);
-        }
-        if ((typeof descriptor != "object" &amp;&amp; typeof descriptor != "function") || descriptor === null) {
-            throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR + descriptor);
-        }
-        // make a valiant attempt to use the real defineProperty
-        // for I8's DOM elements.
-        if (definePropertyFallback) {
-            try {
-                return definePropertyFallback.call(Object, object, property, descriptor);
-            } catch (exception) {
-                // try the shim if the real one doesn't work
-            }
-        }
-        // If it's a data property.
-        if (owns(descriptor, "value")) {
-            // fail silently if "writable", "enumerable", or "configurable"
-            // are requested but not supported
-            /*
-            // alternate approach:
-            if ( // can't implement these features; allow false but not true
-                !(owns(descriptor, "writable") ? descriptor.writable : true) ||
-                !(owns(descriptor, "enumerable") ? descriptor.enumerable : true) ||
-                !(owns(descriptor, "configurable") ? descriptor.configurable : true)
-            )
-                throw new RangeError(
-                    "This implementation of Object.defineProperty does not " +
-                    "support configurable, enumerable, or writable."
-                );
-            */
-            if (supportsAccessors &amp;&amp; (lookupGetter(object, property) ||
-                                      lookupSetter(object, property)))
-            {
-                // As accessors are supported only on engines implementing
-                // `__proto__` we can safely override `__proto__` while defining
-                // a property to make sure that we don't hit an inherited
-                // accessor.
-                var prototype = object.__proto__;
-                object.__proto__ = prototypeOfObject;
-                // Deleting a property anyway since getter / setter may be
-                // defined on object itself.
-                delete object[property];
-                object[property] = descriptor.value;
-                // Setting original `__proto__` back now.
-                object.__proto__ = prototype;
-            } else {
-                object[property] = descriptor.value;
-            }
-        } else {
-            if (!supportsAccessors) {
-                throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
-            }
-            // If we got that far then getters and setters can be defined !!
-            if (owns(descriptor, "get")) {
-                defineGetter(object, property, descriptor.get);
-            }
-            if (owns(descriptor, "set")) {
-                defineSetter(object, property, descriptor.set);
-            }
-        }
-        return object;
-    };
-}
-// ES5 15.2.3.7
-// http://es5.github.com/#x15.2.3.7
-if (!Object.defineProperties) {
-    Object.defineProperties = function defineProperties(object, properties) {
-        for (var property in properties) {
-            if (owns(properties, property) &amp;&amp; property != "__proto__") {
-                Object.defineProperty(object, property, properties[property]);
-            }
-        }
-        return object;
-    };
-}
-// ES5 15.2.3.8
-// http://es5.github.com/#x15.2.3.8
-if (!Object.seal) {
-    Object.seal = function seal(object) {
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-// ES5 15.2.3.9
-// http://es5.github.com/#x15.2.3.9
-if (!Object.freeze) {
-    Object.freeze = function freeze(object) {
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-// detect a Rhino bug and patch it
-try {
-    Object.freeze(function () {});
-} catch (exception) {
-    Object.freeze = (function freeze(freezeObject) {
-        return function freeze(object) {
-            if (typeof object == "function") {
-                return object;
-            } else {
-                return freezeObject(object);
-            }
-        };
-    })(Object.freeze);
-}
-// ES5 15.2.3.10
-// http://es5.github.com/#x15.2.3.10
-if (!Object.preventExtensions) {
-    Object.preventExtensions = function preventExtensions(object) {
-        // this is misleading and breaks feature-detection, but
-        // allows "securable" code to "gracefully" degrade to working
-        // but insecure code.
-        return object;
-    };
-}
-// ES5 15.2.3.11
-// http://es5.github.com/#x15.2.3.11
-if (!Object.isSealed) {
-    Object.isSealed = function isSealed(object) {
-        return false;
-    };
-}
-// ES5 15.2.3.12
-// http://es5.github.com/#x15.2.3.12
-if (!Object.isFrozen) {
-    Object.isFrozen = function isFrozen(object) {
-        return false;
-    };
-}
-// ES5 15.2.3.13
-// http://es5.github.com/#x15.2.3.13
-if (!Object.isExtensible) {
-    Object.isExtensible = function isExtensible(object) {
-        // 1. If Type(O) is not Object throw a TypeError exception.
-        if (Object(object) !== object) {
-            throw new TypeError(); // TODO message
-        }
-        // 2. Return the Boolean value of the [[Extensible]] internal property of O.
-        var name = '';
-        while (owns(object, name)) {
-            name += '?';
-        }
-        object[name] = true;
-        var returnValue = owns(object, name);
-        delete object[name];
-        return returnValue;
-    };
-}
-// ES5 15.2.3.14
-// http://es5.github.com/#x15.2.3.14
-if (!Object.keys) {
-    // http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
-    var hasDontEnumBug = true,
-        dontEnums = [
-            "toString",
-            "toLocaleString",
-            "valueOf",
-            "hasOwnProperty",
-            "isPrototypeOf",
-            "propertyIsEnumerable",
-            "constructor"
-        ],
-        dontEnumsLength = dontEnums.length;
-    for (var key in {"toString": null}) {
-        hasDontEnumBug = false;
-    }
-    Object.keys = function keys(object) {
-        if ((typeof object != "object" &amp;&amp; typeof object != "function") || object === null) {
-            throw new TypeError("Object.keys called on a non-object");
-        }
-        var keys = [];
-        for (var name in object) {
-            if (owns(object, name)) {
-                keys.push(name);
-            }
-        }
-        if (hasDontEnumBug) {
-            for (var i = 0, ii = dontEnumsLength; i &lt; ii; i++) {
-                var dontEnum = dontEnums[i];
-                if (owns(object, dontEnum)) {
-                    keys.push(dontEnum);
-                }
-            }
-        }
-        return keys;
-    };
-}
-//
-// Date
-// ====
-//
-// ES5 15.9.5.43
-// http://es5.github.com/#x15.9.5.43
-// This function returns a String value represent the instance in time
-// represented by this Date object. The format of the String is the Date Time
-// string format defined in 15.9.1.15. All fields are present in the String.
-// The time zone is always UTC, denoted by the suffix Z. If the time value of
-// this object is not a finite Number a RangeError exception is thrown.
-if (!Date.prototype.toISOString ||
-    (new Date(-1).toISOString() !== '1969-12-31T23:59:59.999Z') ||
-    (new Date(-62198755200000).toISOString().indexOf('-000001') === -1)) {
-    Date.prototype.toISOString = function toISOString() {
-        var result, length, value, year, month;
-        if (!isFinite(this)) {
-            throw new RangeError("Date.prototype.toISOString called on non-finite value.");
-        }
-        year = this.getUTCFullYear();
-        month = this.getUTCMonth();
-        // see https://github.com/kriskowal/es5-shim/issues/111
-        year += Math.floor(month / 12);
-        month = (month % 12 + 12) % 12;
-        // the date time string format is specified in 15.9.1.15.
-        result = [month + 1, this.getUTCDate(),
-            this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds()];
-        year = (year &lt; 0 ? '-' : (year > 9999 ? '+' : '')) + ('00000' + Math.abs(year)).slice(0 &lt;= year &amp;&amp; year &lt;= 9999 ? -4 : -6);
-        length = result.length;
-        while (length--) {
-            value = result[length];
-            // pad months, days, hours, minutes, and seconds to have two digits.
-            if (value &lt; 10) {
-                result[length] = "0" + value;
-            }
-        }
-        // pad milliseconds to have three digits.
-        return year + "-" + result.slice(0, 2).join("-") + "T" + result.slice(2).join(":") + "." +
-            ("000" + this.getUTCMilliseconds()).slice(-3) + "Z";
-    }
-}
-// ES5 15.9.4.4
-// http://es5.github.com/#x15.9.4.4
-if (!Date.now) {
-    Date.now = function now() {
-        return new Date().getTime();
-    };
-}
-// ES5 15.9.5.44
-// http://es5.github.com/#x15.9.5.44
-// This function provides a String representation of a Date object for use by
-// JSON.stringify (15.12.3).
-function isPrimitive(input) {
-    var t = typeof input;
-    return input === null || t === "undefined" || t === "boolean" || t === "number" || t === "string";
-}
-function ToPrimitive(input) {
-    var val, valueOf, toString;
-    if (isPrimitive(input)) {
-        return input;
-    }
-    valueOf = input.valueOf;
-    if (typeof valueOf === "function") {
-        val = valueOf.call(input);
-        if (isPrimitive(val)) {
-            return val;
-        }
-    }
-    toString = input.toString;
-    if (typeof toString === "function") {
-        val = toString.call(input);
-        if (isPrimitive(val)) {
-            return val;
-        }
-    }
-    throw new TypeError();
-}
-var dateToJSONIsSupported = false;
-try {
-    dateToJSONIsSupported = Date.prototype.toJSON &amp;&amp; new Date(NaN).toJSON() === null;
-} catch (e) {}
-if (!dateToJSONIsSupported) {
-    Date.prototype.toJSON = function toJSON(key) {
-        // When the toJSON method is called with argument key, the following
-        // steps are taken:
-        // 1.  Let O be the result of calling ToObject, giving it the this
-        // value as its argument.
-        // 2. Let tv be ToPrimitive(O, hint Number).
-        var o = Object(this),
-            tv = ToPrimitive(o),
-            toISO;
-        // 3. If tv is a Number and is not finite, return null.
-        if (typeof tv === 'number' &amp;&amp; !isFinite(tv)) {
-            return null;
-        }
-        // 4. Let toISO be the result of calling the [[Get]] internal method of
-        // O with argument "toISOString".
-        toISO = o.toISOString;
-        // 5. If IsCallable(toISO) is false, throw a TypeError exception.
-        if (typeof toISO != "function") {
-            throw new TypeError('toISOString property is not callable');
-        }
-        // 6. Return the result of calling the [[Call]] internal method of
-        //  toISO with O as the this value and an empty argument list.
-        return toISO.call(o);
-        // NOTE 1 The argument is ignored.
-        // NOTE 2 The toJSON function is intentionally generic; it does not
-        // require that its this value be a Date object. Therefore, it can be
-        // transferred to other kinds of objects for use as a method. However,
-        // it does require that any such object have a toISOString method. An
-        // object is free to use the argument key to filter its
-        // stringification.
-    };
-}
-// ES5 15.9.4.2
-// http://es5.github.com/#x15.9.4.2
-// based on work shared by Daniel Friesen (dantman)
-// http://gist.github.com/303249
-if (!Date.parse || "Date.parse is buggy") {
-    // XXX global assignment won't work in embeddings that use
-    // an alternate object for the context.
-    Date = (function(NativeDate) {
-        // Date.length === 7
-        var Date = function Date(Y, M, D, h, m, s, ms) {
-            var length = arguments.length;
-            if (this instanceof NativeDate) {
-                var date = length == 1 &amp;&amp; String(Y) === Y ? // isString(Y)
-                    // We explicitly pass it through parse:
-                    new NativeDate(Date.parse(Y)) :
-                    // We have to manually make calls depending on argument
-                    // length here
-                    length >= 7 ? new NativeDate(Y, M, D, h, m, s, ms) :
-                    length >= 6 ? new NativeDate(Y, M, D, h, m, s) :
-                    length >= 5 ? new NativeDate(Y, M, D, h, m) :
-                    length >= 4 ? new NativeDate(Y, M, D, h) :
-                    length >= 3 ? new NativeDate(Y, M, D) :
-                    length >= 2 ? new NativeDate(Y, M) :
-                    length >= 1 ? new NativeDate(Y) :
-                                  new NativeDate();
-                // Prevent mixups with unfixed Date object
-                date.constructor = Date;
-                return date;
-            }
-            return NativeDate.apply(this, arguments);
-        };
-        // 15.9.1.15 Date Time String Format.
-        var isoDateExpression = new RegExp("^" +
-            "(\\d{4}|[\+\-]\\d{6})" + // four-digit year capture or sign + 6-digit extended year
-            "(?:-(\\d{2})" + // optional month capture
-            "(?:-(\\d{2})" + // optional day capture
-            "(?:" + // capture hours:minutes:seconds.milliseconds
-                "T(\\d{2})" + // hours capture
-                ":(\\d{2})" + // minutes capture
-                "(?:" + // optional :seconds.milliseconds
-                    ":(\\d{2})" + // seconds capture
-                    "(?:\\.(\\d{3}))?" + // milliseconds capture
-                ")?" +
-            "(" + // capture UTC offset component
-                "Z|" + // UTC capture
-                "(?:" + // offset specifier +/-hours:minutes
-                    "([-+])" + // sign capture
-                    "(\\d{2})" + // hours offset capture
-                    ":(\\d{2})" + // minutes offset capture
-                ")" +
-            ")?)?)?)?" +
-        "$");
-        var monthes = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
-        function dayFromMonth(year, month) {
-            var t = month > 1 ? 1 : 0;
-            return monthes[month] + Math.floor((year - 1969 + t) / 4) - Math.floor((year - 1901 + t) / 100) + Math.floor((year - 1601 + t) / 400) + 365 * (year - 1970);
-        }
-        // Copy any custom methods a 3rd party library may have added
-        for (var key in NativeDate) {
-            Date[key] = NativeDate[key];
-        }
-        // Copy "native" methods explicitly; they may be non-enumerable
-        Date.now = NativeDate.now;
-        Date.UTC = NativeDate.UTC;
-        Date.prototype = NativeDate.prototype;
-        Date.prototype.constructor = Date;
-        // Upgrade Date.parse to handle simplified ISO 8601 strings
-        Date.parse = function parse(string) {
-            var match = isoDateExpression.exec(string);
-            if (match) {
-                // parse months, days, hours, minutes, seconds, and milliseconds
-                // provide default values if necessary
-                // parse the UTC offset component
-                var year = Number(match[1]),
-                    month = Number(match[2] || 1) - 1,
-                    day = Number(match[3] || 1) - 1,
-                    hour = Number(match[4] || 0),
-                    minute = Number(match[5] || 0),
-                    second = Number(match[6] || 0),
-                    millisecond = Number(match[7] || 0),
-                    // When time zone is missed, local offset should be used (ES 5.1 bug)
-                    // see https://bugs.ecmascript.org/show_bug.cgi?id=112
-                    offset = !match[4] || match[8] ? 0 : Number(new Date(1970, 0)),
-                    signOffset = match[9] === "-" ? 1 : -1,
-                    hourOffset = Number(match[10] || 0),
-                    minuteOffset = Number(match[11] || 0),
-                    result;
-                if (hour &lt; (minute > 0 || second > 0 || millisecond > 0 ? 24 : 25) &amp;&amp;
-                    minute &lt; 60 &amp;&amp; second &lt; 60 &amp;&amp; millisecond &lt; 1000 &amp;&amp;
-                    month > -1 &amp;&amp; month &lt; 12 &amp;&amp; hourOffset &lt; 24 &amp;&amp; minuteOffset &lt; 60 &amp;&amp; // detect invalid offsets
-                    day > -1 &amp;&amp; day &lt; dayFromMonth(year, month + 1) - dayFromMonth(year, month)) {
-                    result = ((dayFromMonth(year, month) + day) * 24 + hour + hourOffset * signOffset) * 60;
-                    result = ((result + minute + minuteOffset * signOffset) * 60 + second) * 1000 + millisecond + offset;
-                    if (-8.64e15 &lt;= result &amp;&amp; result &lt;= 8.64e15) {
-                        return result;
-                    }
-                }
-                return NaN;
-            }
-            return NativeDate.parse.apply(this, arguments);
-        };
-        return Date;
-    })(Date);
-}
-//
-// String
-// ======
-//
-// ES5 15.5.4.20
-// http://es5.github.com/#x15.5.4.20
-var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
-    "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
-    "\u2029\uFEFF";
-if (!String.prototype.trim || ws.trim()) {
-    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
-    // http://perfectionkills.com/whitespace-deviations/
-    ws = "[" + ws + "]";
-    var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
-        trimEndRegexp = new RegExp(ws + ws + "*$");
-    String.prototype.trim = function trim() {
-        if (this === undefined || this === null) {
-            throw new TypeError("can't convert "+this+" to object");
-        }
-        return String(this).replace(trimBeginRegexp, "").replace(trimEndRegexp, "");
-    };
-}
-//
-// Util
-// ======
-//
-// ES5 9.4
-// http://es5.github.com/#x9.4
-// http://jsperf.com/to-integer
-var toInteger = function (n) {
-    n = +n;
-    if (n !== n) { // isNaN
-        n = 0;
-    } else if (n !== 0 &amp;&amp; n !== (1/0) &amp;&amp; n !== -(1/0)) {
-        n = (n > 0 || -1) * Math.floor(Math.abs(n));
-    }
-    return n;
-};
-var prepareString = "a"[0] != "a";
-    // ES5 9.9
-    // http://es5.github.com/#x9.9
-var toObject = function (o) {
-    if (o == null) { // this matches both null and undefined
-        throw new TypeError("can't convert "+o+" to object");
-    }
-    // If the implementation doesn't support by-index access of
-    // string characters (ex. IE &lt; 9), split the string
-    if (prepareString &amp;&amp; typeof o == "string" &amp;&amp; o) {
-        return o.split("");
-    }
-    return Object(o);
-};
-});
 });
 </code></pre>
         </article>
@@ -2341,8 +1396,6 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="global"><a href="global.html">global</a></li>
 		
 			<li class="search-result" data-longname="complex"><a href="global.html#complex">complex</a></li>
-		
-			<li class="search-result" data-longname="complex.complexToString"><a href="global.html#complex#.complexToString">complex.complexToString</a></li>
 		
 			<li class="search-result" data-longname="fraction"><a href="global.html#fraction">fraction</a></li>
 		
@@ -2398,6 +1451,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.createQuestionFromXML"><a href="Numbas.html#.createQuestionFromXML">Numbas.createQuestionFromXML</a></li>
 		
+			<li class="search-result" data-longname="Numbas.custom_part_types"><a href="Numbas.html#.custom_part_types">Numbas.custom_part_types</a></li>
+		
 			<li class="search-result" data-longname="Numbas.debug"><a href="Numbas.html#.debug">Numbas.debug</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display"><a href="Numbas.display.html">Numbas.display</a></li>
@@ -2414,7 +1469,11 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.beginExam"><a href="Numbas.display.ExamDisplay.html#.beginExam">Numbas.display.ExamDisplay.beginExam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canAdvance"><a href="Numbas.display.ExamDisplay.html#.canAdvance">Numbas.display.ExamDisplay.canAdvance</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canBegin"><a href="Numbas.display.ExamDisplay.html#.canBegin">Numbas.display.ExamDisplay.canBegin</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.canReverse"><a href="Numbas.display.ExamDisplay.html#.canReverse">Numbas.display.ExamDisplay.canReverse</a></li>
 		
@@ -2427,6 +1486,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.exam"><a href="Numbas.display.ExamDisplay.html#.exam">Numbas.display.ExamDisplay.exam</a></li>
 		
@@ -2447,6 +1508,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.mode"><a href="Numbas.display.ExamDisplay.html#.mode">Numbas.display.ExamDisplay.mode</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -2487,8 +1550,6 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.display.feedbackable"><a href="Numbas.display.html#.feedbackable">Numbas.display.feedbackable</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.getLocalisedAttribute"><a href="Numbas.display.html#.getLocalisedAttribute">Numbas.display.getLocalisedAttribute</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.inInput"><a href="Numbas.display.html#.inInput">Numbas.display.inInput</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.init"><a href="Numbas.display.html#.init">Numbas.display.init</a></li>
 		
@@ -2572,11 +1633,15 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.toggleFeedbackText"><a href="Numbas.display.PartDisplay.html#.toggleFeedbackText">Numbas.display.PartDisplay.toggleFeedbackText</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.updateCorrectAnswer">Numbas.display.PartDisplay.updateCorrectAnswer</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay"><a href="Numbas.display.QuestionDisplay.html">Numbas.display.QuestionDisplay</a></li>
 		
@@ -2654,7 +1719,11 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.Error"><a href="Numbas.Error.html">Numbas.Error</a></li>
 		
+			<li class="search-result" data-longname="Numbas.exam"><a href="Numbas.html#.exam">Numbas.exam</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam"><a href="Numbas.Exam.html">Numbas.Exam</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#acceptPassword"><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#begin"><a href="Numbas.Exam.html#begin">Numbas.Exam#begin</a></li>
 		
@@ -2679,6 +1748,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.Exam#endTiming"><a href="Numbas.Exam.html#endTiming">Numbas.Exam#endTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#event:question list initialised"><a href="Numbas.Exam.html#event:questionlistinitialised">Numbas.Exam#event:question list initialised</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#event:ready"><a href="Numbas.Exam.html#event:ready">Numbas.Exam#event:ready</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
 		
@@ -2770,6 +1841,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.arity"><a href="Numbas.jme.html#.arity">Numbas.jme.arity</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.associative"><a href="Numbas.jme.html#.associative">Numbas.jme.associative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.checkingFunction"><a href="Numbas.jme.html#.checkingFunction">Numbas.jme.checkingFunction</a></li>
@@ -2782,6 +1855,10 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.compare_settings"><a href="Numbas.jme.html#.compare_settings">Numbas.jme.compare_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.compareTokens"><a href="Numbas.jme.html#.compareTokens">Numbas.jme.compareTokens</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.compareTokensByValue"><a href="Numbas.jme.html#.compareTokensByValue">Numbas.jme.compareTokensByValue</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.compareTrees"><a href="Numbas.jme.html#.compareTrees">Numbas.jme.compareTrees</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.compile"><a href="Numbas.jme.html#.compile">Numbas.jme.compile</a></li>
@@ -2791,6 +1868,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.jme.constants"><a href="Numbas.jme.html#.constants">Numbas.jme.constants</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.contentsubvars"><a href="Numbas.jme.html#.contentsubvars">Numbas.jme.contentsubvars</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.converseOps"><a href="Numbas.jme.html#.converseOps">Numbas.jme.converseOps</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display"><a href="Numbas.jme.display.html">Numbas.jme.display</a></li>
 		
@@ -2822,6 +1901,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.and"><a href="Numbas.jme.display.opBrackets.html#.and">Numbas.jme.display.opBrackets.and</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.fact"><a href="Numbas.jme.display.opBrackets.html#.fact">Numbas.jme.display.opBrackets.fact</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.or"><a href="Numbas.jme.display.opBrackets.html#.or">Numbas.jme.display.opBrackets.or</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets.xor"><a href="Numbas.jme.display.opBrackets.html#.xor">Numbas.jme.display.opBrackets.xor</a></li>
@@ -2833,6 +1914,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.jme.display.simplifyTree"><a href="Numbas.jme.display.html#.simplifyTree">Numbas.jme.display.simplifyTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.special_number_definition"><a href="Numbas.jme.display.html#.special_number_definition">Numbas.jme.display.special_number_definition</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.specialNames"><a href="Numbas.jme.display.html#.specialNames">Numbas.jme.display.specialNames</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.texify"><a href="Numbas.jme.display.html#.texify">Numbas.jme.display.texify</a></li>
 		
@@ -2924,19 +2007,11 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions"><a href="Numbas.jme.html#.jme.mapFunctions">Numbas.jme.jme.mapFunctions</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.list"><a href="Numbas.jme.html#.jme.mapFunctions#.list">Numbas.jme.jme.mapFunctions.list</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.matrix"><a href="Numbas.jme.html#.jme.mapFunctions#.matrix">Numbas.jme.jme.mapFunctions.matrix</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.range"><a href="Numbas.jme.html#.jme.mapFunctions#.range">Numbas.jme.jme.mapFunctions.range</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.set"><a href="Numbas.jme.html#.jme.mapFunctions#.set">Numbas.jme.jme.mapFunctions.set</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.jme.mapFunctions.vector"><a href="Numbas.jme.html#.jme.mapFunctions#.vector">Numbas.jme.jme.mapFunctions.vector</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.makeSafe"><a href="Numbas.jme.html#.makeSafe">Numbas.jme.makeSafe</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.mapFunctions"><a href="Numbas.jme.html#.mapFunctions">Numbas.jme.mapFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
 		
@@ -2944,63 +2019,143 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser"><a href="Numbas.jme.Parser.html">Numbas.jme.Parser</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addBinaryOperator"><a href="Numbas.jme.Parser.html#addBinaryOperator">Numbas.jme.Parser#addBinaryOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addOperator"><a href="Numbas.jme.Parser.html#addOperator">Numbas.jme.Parser#addOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPostfixOperator"><a href="Numbas.jme.Parser.html#addPostfixOperator">Numbas.jme.Parser#addPostfixOperator</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addPrefixOperator"><a href="Numbas.jme.Parser.html#addPrefixOperator">Numbas.jme.Parser#addPrefixOperator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#compile"><a href="Numbas.jme.Parser.html#compile">Numbas.jme.Parser#compile</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#funcSynonym"><a href="Numbas.jme.Parser.html#funcSynonym">Numbas.jme.Parser#funcSynonym</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getArity"><a href="Numbas.jme.Parser.html#getArity">Numbas.jme.Parser#getArity</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getConstant"><a href="Numbas.jme.Parser.html#getConstant">Numbas.jme.Parser#getConstant</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPostfixForm"><a href="Numbas.jme.Parser.html#getPostfixForm">Numbas.jme.Parser#getPostfixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrecedence"><a href="Numbas.jme.Parser.html#getPrecedence">Numbas.jme.Parser#getPrecedence</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getPrefixForm"><a href="Numbas.jme.Parser.html#getPrefixForm">Numbas.jme.Parser#getPrefixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#getSetting"><a href="Numbas.jme.Parser.html#getSetting">Numbas.jme.Parser#getSetting</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isAssociative"><a href="Numbas.jme.Parser.html#isAssociative">Numbas.jme.Parser#isAssociative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isCommutative"><a href="Numbas.jme.Parser.html#isCommutative">Numbas.jme.Parser#isCommutative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isRightAssociative"><a href="Numbas.jme.Parser.html#isRightAssociative">Numbas.jme.Parser#isRightAssociative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#option_defaults"><a href="Numbas.jme.Parser.html#option_defaults">Numbas.jme.Parser#option_defaults</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#re"><a href="Numbas.jme.Parser.html#re">Numbas.jme.Parser#re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#setOperatorProperties"><a href="Numbas.jme.Parser.html#setOperatorProperties">Numbas.jme.Parser#setOperatorProperties</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#shunt"><a href="Numbas.jme.Parser.html#shunt">Numbas.jme.Parser#shunt</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#shunt_type_actions.op"><a href="Numbas.jme.Parser_shunt_type_actions.op.html">Numbas.jme.Parser#shunt_type_actions.op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#tokenise"><a href="Numbas.jme.Parser.html#tokenise">Numbas.jme.Parser#tokenise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#tokeniser_types"><a href="Numbas.jme.Parser.html#tokeniser_types">Numbas.jme.Parser#tokeniser_types</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.parser_options"><a href="Numbas.jme.html#.parser_options">Numbas.jme.parser_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.postfixForm"><a href="Numbas.jme.html#.postfixForm">Numbas.jme.postfixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.postfixForm."!""><a href="Numbas.jme.html#.postfixForm#.%22!%22">Numbas.jme.postfixForm."!"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.precedence"><a href="Numbas.jme.html#.precedence">Numbas.jme.precedence</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.prefixForm"><a href="Numbas.jme.html#.prefixForm">Numbas.jme.prefixForm</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."!""><a href="Numbas.jme.html#.prefixForm#.%22!%22">Numbas.jme.prefixForm."!"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."+""><a href="Numbas.jme.html#.prefixForm#.%22+%22">Numbas.jme.prefixForm."+"</a></li>
-		
-			<li class="search-result" data-longname="Numbas.jme.prefixForm."-""><a href="Numbas.jme.html#.prefixForm#.%22-%22">Numbas.jme.prefixForm."-"</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.resultsEqual"><a href="Numbas.jme.html#.resultsEqual">Numbas.jme.resultsEqual</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rightAssociative"><a href="Numbas.jme.html#.rightAssociative">Numbas.jme.rightAssociative</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules"><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.applyPostReplacement"><a href="Numbas.jme.rules.html#.applyPostReplacement">Numbas.jme.rules.applyPostReplacement</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.collectRuleset"><a href="Numbas.jme.rules.html#.collectRuleset">Numbas.jme.rules.collectRuleset</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.compileRules"><a href="Numbas.jme.rules.html#.compileRules">Numbas.jme.rules.compileRules</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.displayFlags"><a href="Numbas.jme.rules.html#.displayFlags">Numbas.jme.rules.displayFlags</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.extend_options"><a href="Numbas.jme.rules.html#.extend_options">Numbas.jme.rules.extend_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch"><a href="Numbas.jme.rules.html#.findSequenceMatch">Numbas.jme.rules.findSequenceMatch</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.findSequenceMatch_options"><a href="Numbas.jme.rules.html#.findSequenceMatch_options">Numbas.jme.rules.findSequenceMatch_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms"><a href="Numbas.jme.rules.html#.getTerms">Numbas.jme.rules.getTerms</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.getTerms_options"><a href="Numbas.jme.rules.html#.getTerms_options">Numbas.jme.rules.getTerms_options</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.jme_pattern_match"><a href="Numbas.jme.rules.html#.jme_pattern_match">Numbas.jme.rules.jme_pattern_match</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchAllTree"><a href="Numbas.jme.rules.html#.matchAllTree">Numbas.jme.rules.matchAllTree</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchExpression"><a href="Numbas.jme.rules.html#.matchExpression">Numbas.jme.rules.matchExpression</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.matchTree"><a href="Numbas.jme.rules.html#.matchTree">Numbas.jme.rules.matchTree</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.matchTree_options"><a href="Numbas.jme.rules.html#.matchTree_options">Numbas.jme.rules.matchTree_options</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.number_conditions"><a href="Numbas.jme.rules.html#.number_conditions">Numbas.jme.rules.number_conditions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.patternParser"><a href="Numbas.jme.rules.html#.patternParser">Numbas.jme.rules.patternParser</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule"><a href="Numbas.jme.rules.Rule.html">Numbas.jme.rules.Rule</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#get_options"><a href="Numbas.jme.rules.Rule.html#get_options">Numbas.jme.rules.Rule#get_options</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Rule#match"><a href="Numbas.jme.rules.Rule.html#match">Numbas.jme.rules.Rule#match</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchConditions"><a href="Numbas.jme.rules.Rule.html#matchConditions">Numbas.jme.rules.Rule#matchConditions</a></li>
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#matchAll"><a href="Numbas.jme.rules.Rule.html#matchAll">Numbas.jme.rules.Rule#matchAll</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replace"><a href="Numbas.jme.rules.Rule.html#replace">Numbas.jme.rules.Rule#replace</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Rule#replaceAll"><a href="Numbas.jme.rules.Rule.html#replaceAll">Numbas.jme.rules.Rule#replaceAll</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset"><a href="Numbas.jme.rules.Ruleset.html">Numbas.jme.rules.Ruleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#flagSet"><a href="Numbas.jme.rules.Ruleset.html#flagSet">Numbas.jme.rules.Ruleset#flagSet</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.Ruleset#simplify"><a href="Numbas.jme.rules.Ruleset.html#simplify">Numbas.jme.rules.Ruleset#simplify</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.rules.ruleset_flags"><a href="Numbas.jme.rules.html#.ruleset_flags">Numbas.jme.rules.ruleset_flags</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.rules.simplificationRules"><a href="Numbas.jme.rules.html#.simplificationRules">Numbas.jme.rules.simplificationRules</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchFunctions"><a href="Numbas.jme.rules.html#.specialMatchFunctions">Numbas.jme.rules.specialMatchFunctions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchNames"><a href="Numbas.jme.rules.html#.specialMatchNames">Numbas.jme.rules.specialMatchNames</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.specialMatchOps"><a href="Numbas.jme.rules.html#.specialMatchOps">Numbas.jme.rules.specialMatchOps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.term"><a href="Numbas.jme.rules.html#.term">Numbas.jme.rules.term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.Term"><a href="Numbas.jme.rules.Term.html">Numbas.jme.rules.Term</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform"><a href="Numbas.jme.rules.html#.transform">Numbas.jme.rules.transform</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transform_result"><a href="Numbas.jme.rules.html#.transform_result">Numbas.jme.rules.transform_result</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.rules.transformAll"><a href="Numbas.jme.rules.html#.transformAll">Numbas.jme.rules.transformAll</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#addFunction"><a href="Numbas.jme.Scope.html#addFunction">Numbas.jme.Scope#addFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#addRuleset"><a href="Numbas.jme.Scope.html#addRuleset">Numbas.jme.Scope#addRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allFunctions"><a href="Numbas.jme.Scope.html#allFunctions">Numbas.jme.Scope#allFunctions</a></li>
 		
@@ -3009,6 +2164,10 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.jme.Scope#allVariables"><a href="Numbas.jme.Scope.html#allVariables">Numbas.jme.Scope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#collect"><a href="Numbas.jme.Scope.html#collect">Numbas.jme.Scope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteFunction"><a href="Numbas.jme.Scope.html#deleteFunction">Numbas.jme.Scope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteRuleset"><a href="Numbas.jme.Scope.html#deleteRuleset">Numbas.jme.Scope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#deleteVariable"><a href="Numbas.jme.Scope.html#deleteVariable">Numbas.jme.Scope#deleteVariable</a></li>
 		
@@ -3028,11 +2187,13 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#setVariable"><a href="Numbas.jme.Scope.html#setVariable">Numbas.jme.Scope#setVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#unset"><a href="Numbas.jme.Scope.html#unset">Numbas.jme.Scope#unset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.setOperatorProperties"><a href="Numbas.jme.html#.setOperatorProperties">Numbas.jme.setOperatorProperties</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.shunt"><a href="Numbas.jme.html#.shunt">Numbas.jme.shunt</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.standardParser"><a href="Numbas.jme.html#.standardParser">Numbas.jme.standardParser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.substituteTree"><a href="Numbas.jme.html#.substituteTree">Numbas.jme.substituteTree</a></li>
 		
@@ -3044,11 +2205,15 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.token"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.tokenComparisons"><a href="Numbas.jme.html#.tokenComparisons">Numbas.jme.tokenComparisons</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.tokenise"><a href="Numbas.jme.html#.tokenise">Numbas.jme.tokenise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tokenToDisplayString"><a href="Numbas.jme.html#.tokenToDisplayString">Numbas.jme.tokenToDisplayString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.tree"><a href="Numbas.jme.html#.tree">Numbas.jme.tree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.treesSame"><a href="Numbas.jme.html#.treesSame">Numbas.jme.treesSame</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typecheck_fn"><a href="Numbas.jme.html#.typecheck_fn">Numbas.jme.typecheck_fn</a></li>
 		
@@ -3098,6 +2263,10 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.computeVariable"><a href="Numbas.jme.variables.html#.computeVariable">Numbas.jme.variables.computeVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber"><a href="Numbas.jme.variables.DOMcontentsubber.html">Numbas.jme.variables.DOMcontentsubber</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubber#sub_element"><a href="Numbas.jme.variables.DOMcontentsubber_sub_element.html">Numbas.jme.variables.DOMcontentsubber#sub_element</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.variables.DOMcontentsubvars"><a href="Numbas.jme.variables.html#.DOMcontentsubvars">Numbas.jme.variables.DOMcontentsubvars</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.DOMsubvars"><a href="Numbas.jme.variables.html#.DOMsubvars">Numbas.jme.variables.DOMsubvars</a></li>
@@ -3126,6 +2295,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.JMEPart"><a href="Numbas.JMEPart.html">Numbas.JMEPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.JMEPart#addValueGenerator"><a href="Numbas.JMEPart.html#addValueGenerator">Numbas.JMEPart#addValueGenerator</a></li>
+		
 			<li class="search-result" data-longname="Numbas.JMEPart#baseMarkingScript"><a href="Numbas.JMEPart.html#baseMarkingScript">Numbas.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.JMEPart#getCorrectAnswer"><a href="Numbas.JMEPart.html#getCorrectAnswer">Numbas.JMEPart#getCorrectAnswer</a></li>
@@ -3150,9 +2321,13 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.loadScript"><a href="Numbas.html#.loadScript">Numbas.loadScript</a></li>
 		
+			<li class="search-result" data-longname="Numbas.locale"><a href="Numbas.html#.locale">Numbas.locale</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking"><a href="Numbas.marking.html">Numbas.marking</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.compute_note"><a href="Numbas.marking.html#.compute_note">Numbas.marking.compute_note</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.feedback"><a href="Numbas.marking.html#.feedback">Numbas.marking.feedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.feedback_item"><a href="Numbas.marking.html#.feedback_item">Numbas.marking.feedback_item</a></li>
 		
@@ -3194,6 +2369,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addFunction"><a href="Numbas.marking.StatefulScope.html#addFunction">Numbas.marking.StatefulScope#addFunction</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addRuleset"><a href="Numbas.marking.StatefulScope.html#addRuleset">Numbas.marking.StatefulScope#addRuleset</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allFunctions"><a href="Numbas.marking.StatefulScope.html#allFunctions">Numbas.marking.StatefulScope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allRulesets"><a href="Numbas.marking.StatefulScope.html#allRulesets">Numbas.marking.StatefulScope#allRulesets</a></li>
@@ -3201,6 +2378,10 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allVariables"><a href="Numbas.marking.StatefulScope.html#allVariables">Numbas.marking.StatefulScope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#collect"><a href="Numbas.marking.StatefulScope.html#collect">Numbas.marking.StatefulScope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteFunction"><a href="Numbas.marking.StatefulScope.html#deleteFunction">Numbas.marking.StatefulScope#deleteFunction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteRuleset"><a href="Numbas.marking.StatefulScope.html#deleteRuleset">Numbas.marking.StatefulScope#deleteRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteVariable"><a href="Numbas.marking.StatefulScope.html#deleteVariable">Numbas.marking.StatefulScope#deleteVariable</a></li>
 		
@@ -3219,6 +2400,10 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setRuleset"><a href="Numbas.marking.StatefulScope.html#setRuleset">Numbas.marking.StatefulScope#setRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setVariable"><a href="Numbas.marking.StatefulScope.html#setVariable">Numbas.marking.StatefulScope#setVariable</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#unset"><a href="Numbas.marking.StatefulScope.html#unset">Numbas.marking.StatefulScope#unset</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking_scripts"><a href="Numbas.html#.marking_scripts">Numbas.marking_scripts</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math"><a href="Numbas.math.html">Numbas.math</a></li>
 		
@@ -3251,6 +2436,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.math.combinations"><a href="Numbas.math.html#.combinations">Numbas.math.combinations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.complex"><a href="Numbas.math.html#.complex">Numbas.math.complex</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.complexToString"><a href="Numbas.math.html#.complexToString">Numbas.math.complexToString</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.conjugate"><a href="Numbas.math.html#.conjugate">Numbas.math.conjugate</a></li>
 		
@@ -3308,6 +2495,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.math.inverse"><a href="Numbas.math.html#.inverse">Numbas.math.inverse</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.isclose"><a href="Numbas.math.html#.isclose">Numbas.math.isclose</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.lcm"><a href="Numbas.math.html#.lcm">Numbas.math.lcm</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.leq"><a href="Numbas.math.html#.leq">Numbas.math.leq</a></li>
@@ -3334,15 +2523,21 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.math.negate"><a href="Numbas.math.html#.negate">Numbas.math.negate</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.negative"><a href="Numbas.math.html#.negative">Numbas.math.negative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.neq"><a href="Numbas.math.html#.neq">Numbas.math.neq</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber"><a href="Numbas.math.html#.niceNumber">Numbas.math.niceNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber_settings"><a href="Numbas.math.html#.niceNumber_settings">Numbas.math.niceNumber_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.nonnegative"><a href="Numbas.math.html#.nonnegative">Numbas.math.nonnegative</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.permutations"><a href="Numbas.math.html#.permutations">Numbas.math.permutations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.piDegree"><a href="Numbas.math.html#.piDegree">Numbas.math.piDegree</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.positive"><a href="Numbas.math.html#.positive">Numbas.math.positive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.pow"><a href="Numbas.math.html#.pow">Numbas.math.pow</a></li>
 		
@@ -3454,11 +2649,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#apply_feedback"><a href="Numbas.parts.CustomPart.html#apply_feedback">Numbas.parts.CustomPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#applyScoreLimits"><a href="Numbas.parts.CustomPart.html#applyScoreLimits">Numbas.parts.CustomPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#assignName"><a href="Numbas.parts.CustomPart.html#assignName">Numbas.parts.CustomPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#baseMarkingScript"><a href="Numbas.parts.CustomPart.html#baseMarkingScript">Numbas.parts.CustomPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#calculateScore"><a href="Numbas.parts.CustomPart.html#calculateScore">Numbas.parts.CustomPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#credit"><a href="Numbas.parts.CustomPart.html#credit">Numbas.parts.CustomPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#customName"><a href="Numbas.parts.CustomPart.html#customName">Numbas.parts.CustomPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#display"><a href="Numbas.parts.CustomPart.html#display">Numbas.parts.CustomPart#display</a></li>
 		
@@ -3509,6 +2710,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#marks"><a href="Numbas.parts.CustomPart.html#marks">Numbas.parts.CustomPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#multCredit"><a href="Numbas.parts.CustomPart.html#multCredit">Numbas.parts.CustomPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#name"><a href="Numbas.parts.CustomPart.html#name">Numbas.parts.CustomPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#openSteps"><a href="Numbas.parts.CustomPart.html#openSteps">Numbas.parts.CustomPart#openSteps</a></li>
 		
@@ -3570,6 +2773,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#type"><a href="Numbas.parts.CustomPart.html#type">Numbas.parts.CustomPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#useCustomName"><a href="Numbas.parts.CustomPart.html#useCustomName">Numbas.parts.CustomPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#warnings"><a href="Numbas.parts.CustomPart.html#warnings">Numbas.parts.CustomPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#xml"><a href="Numbas.parts.CustomPart.html#xml">Numbas.parts.CustomPart#xml</a></li>
@@ -3586,6 +2791,10 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#apply_feedback"><a href="Numbas.parts.ExtensionPart.html#apply_feedback">Numbas.parts.ExtensionPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#applyScoreLimits"><a href="Numbas.parts.ExtensionPart.html#applyScoreLimits">Numbas.parts.ExtensionPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#assignName"><a href="Numbas.parts.ExtensionPart.html#assignName">Numbas.parts.ExtensionPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#baseMarkingScript"><a href="Numbas.parts.ExtensionPart.html#baseMarkingScript">Numbas.parts.ExtensionPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#calculateScore"><a href="Numbas.parts.ExtensionPart.html#calculateScore">Numbas.parts.ExtensionPart#calculateScore</a></li>
@@ -3593,6 +2802,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#createSuspendData"><a href="Numbas.parts.ExtensionPart.html#createSuspendData">Numbas.parts.ExtensionPart#createSuspendData</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#credit"><a href="Numbas.parts.ExtensionPart.html#credit">Numbas.parts.ExtensionPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#customName"><a href="Numbas.parts.ExtensionPart.html#customName">Numbas.parts.ExtensionPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#display"><a href="Numbas.parts.ExtensionPart.html#display">Numbas.parts.ExtensionPart#display</a></li>
 		
@@ -3645,6 +2856,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#marks"><a href="Numbas.parts.ExtensionPart.html#marks">Numbas.parts.ExtensionPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#multCredit"><a href="Numbas.parts.ExtensionPart.html#multCredit">Numbas.parts.ExtensionPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#name"><a href="Numbas.parts.ExtensionPart.html#name">Numbas.parts.ExtensionPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#openSteps"><a href="Numbas.parts.ExtensionPart.html#openSteps">Numbas.parts.ExtensionPart#openSteps</a></li>
 		
@@ -3706,6 +2919,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#type"><a href="Numbas.parts.ExtensionPart.html#type">Numbas.parts.ExtensionPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#useCustomName"><a href="Numbas.parts.ExtensionPart.html#useCustomName">Numbas.parts.ExtensionPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#warnings"><a href="Numbas.parts.ExtensionPart.html#warnings">Numbas.parts.ExtensionPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#xml"><a href="Numbas.parts.ExtensionPart.html#xml">Numbas.parts.ExtensionPart#xml</a></li>
@@ -3726,11 +2941,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#apply_feedback"><a href="Numbas.parts.GapFillPart.html#apply_feedback">Numbas.parts.GapFillPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#applyScoreLimits"><a href="Numbas.parts.GapFillPart.html#applyScoreLimits">Numbas.parts.GapFillPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#assignName"><a href="Numbas.parts.GapFillPart.html#assignName">Numbas.parts.GapFillPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#baseMarkingScript"><a href="Numbas.parts.GapFillPart.html#baseMarkingScript">Numbas.parts.GapFillPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#calculateScore"><a href="Numbas.parts.GapFillPart.html#calculateScore">Numbas.parts.GapFillPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#credit"><a href="Numbas.parts.GapFillPart.html#credit">Numbas.parts.GapFillPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#customName"><a href="Numbas.parts.GapFillPart.html#customName">Numbas.parts.GapFillPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#display"><a href="Numbas.parts.GapFillPart.html#display">Numbas.parts.GapFillPart#display</a></li>
 		
@@ -3770,8 +2991,6 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_old"><a href="Numbas.parts.GapFillPart.html#mark_old">Numbas.parts.GapFillPart#mark_old</a></li>
-		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
@@ -3783,6 +3002,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#marks"><a href="Numbas.parts.GapFillPart.html#marks">Numbas.parts.GapFillPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#multCredit"><a href="Numbas.parts.GapFillPart.html#multCredit">Numbas.parts.GapFillPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#name"><a href="Numbas.parts.GapFillPart.html#name">Numbas.parts.GapFillPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#openSteps"><a href="Numbas.parts.GapFillPart.html#openSteps">Numbas.parts.GapFillPart#openSteps</a></li>
 		
@@ -3844,6 +3065,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#type"><a href="Numbas.parts.GapFillPart.html#type">Numbas.parts.GapFillPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#useCustomName"><a href="Numbas.parts.GapFillPart.html#useCustomName">Numbas.parts.GapFillPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#warnings"><a href="Numbas.parts.GapFillPart.html#warnings">Numbas.parts.GapFillPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#xml"><a href="Numbas.parts.GapFillPart.html#xml">Numbas.parts.GapFillPart#xml</a></li>
@@ -3866,11 +3089,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#apply_feedback"><a href="Numbas.parts.InformationPart.html#apply_feedback">Numbas.parts.InformationPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#applyScoreLimits"><a href="Numbas.parts.InformationPart.html#applyScoreLimits">Numbas.parts.InformationPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#assignName"><a href="Numbas.parts.InformationPart.html#assignName">Numbas.parts.InformationPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#baseMarkingScript"><a href="Numbas.parts.InformationPart.html#baseMarkingScript">Numbas.parts.InformationPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#calculateScore"><a href="Numbas.parts.InformationPart.html#calculateScore">Numbas.parts.InformationPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#credit"><a href="Numbas.parts.InformationPart.html#credit">Numbas.parts.InformationPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#customName"><a href="Numbas.parts.InformationPart.html#customName">Numbas.parts.InformationPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#display"><a href="Numbas.parts.InformationPart.html#display">Numbas.parts.InformationPart#display</a></li>
 		
@@ -3921,6 +3150,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#marks"><a href="Numbas.parts.InformationPart.html#marks">Numbas.parts.InformationPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#multCredit"><a href="Numbas.parts.InformationPart.html#multCredit">Numbas.parts.InformationPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#name"><a href="Numbas.parts.InformationPart.html#name">Numbas.parts.InformationPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#openSteps"><a href="Numbas.parts.InformationPart.html#openSteps">Numbas.parts.InformationPart#openSteps</a></li>
 		
@@ -3982,6 +3213,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#type"><a href="Numbas.parts.InformationPart.html#type">Numbas.parts.InformationPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#useCustomName"><a href="Numbas.parts.InformationPart.html#useCustomName">Numbas.parts.InformationPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#warnings"><a href="Numbas.parts.InformationPart.html#warnings">Numbas.parts.InformationPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#xml"><a href="Numbas.parts.InformationPart.html#xml">Numbas.parts.InformationPart#xml</a></li>
@@ -3998,11 +3231,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#apply_feedback"><a href="Numbas.parts.JMEPart.html#apply_feedback">Numbas.parts.JMEPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#applyScoreLimits"><a href="Numbas.parts.JMEPart.html#applyScoreLimits">Numbas.parts.JMEPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#assignName"><a href="Numbas.parts.JMEPart.html#assignName">Numbas.parts.JMEPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#baseMarkingScript"><a href="Numbas.parts.JMEPart.html#baseMarkingScript">Numbas.parts.JMEPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#calculateScore"><a href="Numbas.parts.JMEPart.html#calculateScore">Numbas.parts.JMEPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#credit"><a href="Numbas.parts.JMEPart.html#credit">Numbas.parts.JMEPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#customName"><a href="Numbas.parts.JMEPart.html#customName">Numbas.parts.JMEPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#display"><a href="Numbas.parts.JMEPart.html#display">Numbas.parts.JMEPart#display</a></li>
 		
@@ -4053,6 +3292,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#marks"><a href="Numbas.parts.JMEPart.html#marks">Numbas.parts.JMEPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#multCredit"><a href="Numbas.parts.JMEPart.html#multCredit">Numbas.parts.JMEPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#name"><a href="Numbas.parts.JMEPart.html#name">Numbas.parts.JMEPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#openSteps"><a href="Numbas.parts.JMEPart.html#openSteps">Numbas.parts.JMEPart#openSteps</a></li>
 		
@@ -4114,6 +3355,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#type"><a href="Numbas.parts.JMEPart.html#type">Numbas.parts.JMEPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#useCustomName"><a href="Numbas.parts.JMEPart.html#useCustomName">Numbas.parts.JMEPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#warnings"><a href="Numbas.parts.JMEPart.html#warnings">Numbas.parts.JMEPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#xml"><a href="Numbas.parts.JMEPart.html#xml">Numbas.parts.JMEPart#xml</a></li>
@@ -4132,11 +3375,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#apply_feedback"><a href="Numbas.parts.MatrixEntryPart.html#apply_feedback">Numbas.parts.MatrixEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#applyScoreLimits"><a href="Numbas.parts.MatrixEntryPart.html#applyScoreLimits">Numbas.parts.MatrixEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#assignName"><a href="Numbas.parts.MatrixEntryPart.html#assignName">Numbas.parts.MatrixEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#baseMarkingScript"><a href="Numbas.parts.MatrixEntryPart.html#baseMarkingScript">Numbas.parts.MatrixEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#calculateScore"><a href="Numbas.parts.MatrixEntryPart.html#calculateScore">Numbas.parts.MatrixEntryPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#credit"><a href="Numbas.parts.MatrixEntryPart.html#credit">Numbas.parts.MatrixEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#customName"><a href="Numbas.parts.MatrixEntryPart.html#customName">Numbas.parts.MatrixEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#display"><a href="Numbas.parts.MatrixEntryPart.html#display">Numbas.parts.MatrixEntryPart#display</a></li>
 		
@@ -4187,6 +3436,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#marks"><a href="Numbas.parts.MatrixEntryPart.html#marks">Numbas.parts.MatrixEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#multCredit"><a href="Numbas.parts.MatrixEntryPart.html#multCredit">Numbas.parts.MatrixEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#name"><a href="Numbas.parts.MatrixEntryPart.html#name">Numbas.parts.MatrixEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#openSteps"><a href="Numbas.parts.MatrixEntryPart.html#openSteps">Numbas.parts.MatrixEntryPart#openSteps</a></li>
 		
@@ -4250,6 +3501,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#type"><a href="Numbas.parts.MatrixEntryPart.html#type">Numbas.parts.MatrixEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#useCustomName"><a href="Numbas.parts.MatrixEntryPart.html#useCustomName">Numbas.parts.MatrixEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#warnings"><a href="Numbas.parts.MatrixEntryPart.html#warnings">Numbas.parts.MatrixEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#xml"><a href="Numbas.parts.MatrixEntryPart.html#xml">Numbas.parts.MatrixEntryPart#xml</a></li>
@@ -4268,11 +3521,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#apply_feedback"><a href="Numbas.parts.MultipleResponsePart.html#apply_feedback">Numbas.parts.MultipleResponsePart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#applyScoreLimits"><a href="Numbas.parts.MultipleResponsePart.html#applyScoreLimits">Numbas.parts.MultipleResponsePart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#assignName"><a href="Numbas.parts.MultipleResponsePart.html#assignName">Numbas.parts.MultipleResponsePart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#baseMarkingScript"><a href="Numbas.parts.MultipleResponsePart.html#baseMarkingScript">Numbas.parts.MultipleResponsePart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#calculateScore"><a href="Numbas.parts.MultipleResponsePart.html#calculateScore">Numbas.parts.MultipleResponsePart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#credit"><a href="Numbas.parts.MultipleResponsePart.html#credit">Numbas.parts.MultipleResponsePart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#customName"><a href="Numbas.parts.MultipleResponsePart.html#customName">Numbas.parts.MultipleResponsePart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#display"><a href="Numbas.parts.MultipleResponsePart.html#display">Numbas.parts.MultipleResponsePart#display</a></li>
 		
@@ -4325,6 +3584,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#marks"><a href="Numbas.parts.MultipleResponsePart.html#marks">Numbas.parts.MultipleResponsePart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#multCredit"><a href="Numbas.parts.MultipleResponsePart.html#multCredit">Numbas.parts.MultipleResponsePart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#name"><a href="Numbas.parts.MultipleResponsePart.html#name">Numbas.parts.MultipleResponsePart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#numAnswers"><a href="Numbas.parts.MultipleResponsePart.html#numAnswers">Numbas.parts.MultipleResponsePart#numAnswers</a></li>
 		
@@ -4394,6 +3655,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#type"><a href="Numbas.parts.MultipleResponsePart.html#type">Numbas.parts.MultipleResponsePart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#useCustomName"><a href="Numbas.parts.MultipleResponsePart.html#useCustomName">Numbas.parts.MultipleResponsePart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#warnings"><a href="Numbas.parts.MultipleResponsePart.html#warnings">Numbas.parts.MultipleResponsePart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#xml"><a href="Numbas.parts.MultipleResponsePart.html#xml">Numbas.parts.MultipleResponsePart#xml</a></li>
@@ -4410,6 +3673,10 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#apply_feedback"><a href="Numbas.parts.NumberEntryPart.html#apply_feedback">Numbas.parts.NumberEntryPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#applyScoreLimits"><a href="Numbas.parts.NumberEntryPart.html#applyScoreLimits">Numbas.parts.NumberEntryPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#assignName"><a href="Numbas.parts.NumberEntryPart.html#assignName">Numbas.parts.NumberEntryPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#baseMarkingScript"><a href="Numbas.parts.NumberEntryPart.html#baseMarkingScript">Numbas.parts.NumberEntryPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#calculateScore"><a href="Numbas.parts.NumberEntryPart.html#calculateScore">Numbas.parts.NumberEntryPart#calculateScore</a></li>
@@ -4417,6 +3684,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#cleanAnswer"><a href="Numbas.parts.NumberEntryPart.html#cleanAnswer">Numbas.parts.NumberEntryPart#cleanAnswer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#credit"><a href="Numbas.parts.NumberEntryPart.html#credit">Numbas.parts.NumberEntryPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#customName"><a href="Numbas.parts.NumberEntryPart.html#customName">Numbas.parts.NumberEntryPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#display"><a href="Numbas.parts.NumberEntryPart.html#display">Numbas.parts.NumberEntryPart#display</a></li>
 		
@@ -4467,6 +3736,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#marks"><a href="Numbas.parts.NumberEntryPart.html#marks">Numbas.parts.NumberEntryPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#multCredit"><a href="Numbas.parts.NumberEntryPart.html#multCredit">Numbas.parts.NumberEntryPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#name"><a href="Numbas.parts.NumberEntryPart.html#name">Numbas.parts.NumberEntryPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#openSteps"><a href="Numbas.parts.NumberEntryPart.html#openSteps">Numbas.parts.NumberEntryPart#openSteps</a></li>
 		
@@ -4530,6 +3801,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#type"><a href="Numbas.parts.NumberEntryPart.html#type">Numbas.parts.NumberEntryPart#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#useCustomName"><a href="Numbas.parts.NumberEntryPart.html#useCustomName">Numbas.parts.NumberEntryPart#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#warnings"><a href="Numbas.parts.NumberEntryPart.html#warnings">Numbas.parts.NumberEntryPart#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#xml"><a href="Numbas.parts.NumberEntryPart.html#xml">Numbas.parts.NumberEntryPart#xml</a></li>
@@ -4546,11 +3819,19 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#apply_feedback"><a href="Numbas.parts.Part.html#apply_feedback">Numbas.parts.Part#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScoreLimits"><a href="Numbas.parts.Part.html#applyScoreLimits">Numbas.parts.Part#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#applyScripts"><a href="Numbas.parts.Part_applyScripts.html">Numbas.parts.Part#applyScripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#assignName"><a href="Numbas.parts.Part.html#assignName">Numbas.parts.Part#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#baseMarkingScript"><a href="Numbas.parts.Part.html#baseMarkingScript">Numbas.parts.Part#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#calculateScore"><a href="Numbas.parts.Part.html#calculateScore">Numbas.parts.Part#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#credit"><a href="Numbas.parts.Part.html#credit">Numbas.parts.Part#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#customName"><a href="Numbas.parts.Part.html#customName">Numbas.parts.Part#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#display"><a href="Numbas.parts.Part.html#display">Numbas.parts.Part#display</a></li>
 		
@@ -4601,6 +3882,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.Part#marks"><a href="Numbas.parts.Part.html#marks">Numbas.parts.Part#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#multCredit"><a href="Numbas.parts.Part.html#multCredit">Numbas.parts.Part#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#name"><a href="Numbas.parts.Part.html#name">Numbas.parts.Part#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#openSteps"><a href="Numbas.parts.Part.html#openSteps">Numbas.parts.Part#openSteps</a></li>
 		
@@ -4662,6 +3945,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#type"><a href="Numbas.parts.Part_.html#type">Numbas.parts.Part#type</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#useCustomName"><a href="Numbas.parts.Part_.html#useCustomName">Numbas.parts.Part#useCustomName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#warnings"><a href="Numbas.parts.Part_.html#warnings">Numbas.parts.Part#warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#xml"><a href="Numbas.parts.Part_.html#xml">Numbas.parts.Part#xml</a></li>
@@ -4680,11 +3965,17 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#apply_feedback"><a href="Numbas.parts.PatternMatchPart.html#apply_feedback">Numbas.parts.PatternMatchPart#apply_feedback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#applyScoreLimits"><a href="Numbas.parts.PatternMatchPart.html#applyScoreLimits">Numbas.parts.PatternMatchPart#applyScoreLimits</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#assignName"><a href="Numbas.parts.PatternMatchPart.html#assignName">Numbas.parts.PatternMatchPart#assignName</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#baseMarkingScript"><a href="Numbas.parts.PatternMatchPart.html#baseMarkingScript">Numbas.parts.PatternMatchPart#baseMarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#calculateScore"><a href="Numbas.parts.PatternMatchPart.html#calculateScore">Numbas.parts.PatternMatchPart#calculateScore</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#credit"><a href="Numbas.parts.PatternMatchPart.html#credit">Numbas.parts.PatternMatchPart#credit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#customName"><a href="Numbas.parts.PatternMatchPart.html#customName">Numbas.parts.PatternMatchPart#customName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#display"><a href="Numbas.parts.PatternMatchPart.html#display">Numbas.parts.PatternMatchPart#display</a></li>
 		
@@ -4735,6 +4026,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#marks"><a href="Numbas.parts.PatternMatchPart.html#marks">Numbas.parts.PatternMatchPart#marks</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#multCredit"><a href="Numbas.parts.PatternMatchPart.html#multCredit">Numbas.parts.PatternMatchPart#multCredit</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#name"><a href="Numbas.parts.PatternMatchPart.html#name">Numbas.parts.PatternMatchPart#name</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#openSteps"><a href="Numbas.parts.PatternMatchPart.html#openSteps">Numbas.parts.PatternMatchPart#openSteps</a></li>
 		
@@ -4795,6 +4088,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#submit"><a href="Numbas.parts.PatternMatchPart.html#submit">Numbas.parts.PatternMatchPart#submit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#type"><a href="Numbas.parts.PatternMatchPart.html#type">Numbas.parts.PatternMatchPart#type</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#useCustomName"><a href="Numbas.parts.PatternMatchPart.html#useCustomName">Numbas.parts.PatternMatchPart#useCustomName</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#warnings"><a href="Numbas.parts.PatternMatchPart.html#warnings">Numbas.parts.PatternMatchPart#warnings</a></li>
 		
@@ -4925,6 +4220,10 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.QuestionGroup#settings"><a href="Numbas.QuestionGroup.html#settings">Numbas.QuestionGroup#settings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.queueScript"><a href="Numbas.html#.queueScript">Numbas.queueScript</a></li>
+		
+			<li class="search-result" data-longname="Numbas.raw_marking_scripts"><a href="Numbas.html#.raw_marking_scripts">Numbas.raw_marking_scripts</a></li>
+		
+			<li class="search-result" data-longname="Numbas.rawxml"><a href="Numbas.html#.rawxml">Numbas.rawxml</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule"><a href="Numbas.schedule.html">Numbas.schedule</a></li>
 		
@@ -5150,6 +4449,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.timing.show"><a href="Numbas.timing.html#.show">Numbas.timing.show</a></li>
 		
+			<li class="search-result" data-longname="Numbas.timing.start"><a href="Numbas.timing.html#.start">Numbas.timing.start</a></li>
+		
 			<li class="search-result" data-longname="Numbas.timing.startacc"><a href="Numbas.timing.html#.startacc">Numbas.timing.startacc</a></li>
 		
 			<li class="search-result" data-longname="Numbas.timing.stress"><a href="Numbas.timing.html#.stress">Numbas.timing.stress</a></li>
@@ -5163,6 +4464,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.util.arraysEqual"><a href="Numbas.util.html#.arraysEqual">Numbas.util.arraysEqual</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.capitalise"><a href="Numbas.util.html#.capitalise">Numbas.util.capitalise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.cartesian_power"><a href="Numbas.util.html#.cartesian_power">Numbas.util.cartesian_power</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.cleanNumber"><a href="Numbas.util.html#.cleanNumber">Numbas.util.cleanNumber</a></li>
 		
@@ -5226,6 +4529,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.util.numberNotationStyles"><a href="Numbas.util.html#.numberNotationStyles">Numbas.util.numberNotationStyles</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.objects_equal"><a href="Numbas.util.html#.objects_equal">Numbas.util.objects_equal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.parseBool"><a href="Numbas.util.html#.parseBool">Numbas.util.parseBool</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseFraction"><a href="Numbas.util.html#.parseFraction">Numbas.util.parseFraction</a></li>
@@ -5241,6 +4546,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.util.re_fraction"><a href="Numbas.util.html#.re_fraction">Numbas.util.re_fraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.rpad"><a href="Numbas.util.html#.rpad">Numbas.util.rpad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.separateThousands"><a href="Numbas.util.html#.separateThousands">Numbas.util.separateThousands</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.sortBy"><a href="Numbas.util.html#.sortBy">Numbas.util.sortBy</a></li>
 		
@@ -5272,6 +4579,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.vectormath.eq"><a href="Numbas.vectormath.html#.eq">Numbas.vectormath.eq</a></li>
 		
+			<li class="search-result" data-longname="Numbas.vectormath.is_zero"><a href="Numbas.vectormath.html#.is_zero">Numbas.vectormath.is_zero</a></li>
+		
 			<li class="search-result" data-longname="Numbas.vectormath.map"><a href="Numbas.vectormath.html#.map">Numbas.vectormath.map</a></li>
 		
 			<li class="search-result" data-longname="Numbas.vectormath.matrixmul"><a href="Numbas.vectormath.html#.matrixmul">Numbas.vectormath.matrixmul</a></li>
@@ -5296,6 +4605,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="Numbas.xml"><a href="Numbas.xml.html">Numbas.xml</a></li>
 		
+			<li class="search-result" data-longname="Numbas.xml.examXML"><a href="Numbas.xml.html#.examXML">Numbas.xml.examXML</a></li>
+		
 			<li class="search-result" data-longname="Numbas.xml.getTextContent"><a href="Numbas.xml.html#.getTextContent">Numbas.xml.getTextContent</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.isEmpty"><a href="Numbas.xml.html#.isEmpty">Numbas.xml.isEmpty</a></li>
@@ -5313,6 +4624,8 @@ var toObject = function (o) {
 			<li class="search-result" data-longname="Numbas.xml.serializeMessage"><a href="Numbas.xml.html#.serializeMessage">Numbas.xml.serializeMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.setTextContent"><a href="Numbas.xml.html#.setTextContent">Numbas.xml.setTextContent</a></li>
+		
+			<li class="search-result" data-longname="Numbas.xml.templates"><a href="Numbas.xml.html#.templates">Numbas.xml.templates</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.tryGetAttribute"><a href="Numbas.xml.html#.tryGetAttribute">Numbas.xml.tryGetAttribute</a></li>
 		
@@ -5386,6 +4699,8 @@ var toObject = function (o) {
 		
 			<li class="search-result" data-longname="vector"><a href="global.html#vector">vector</a></li>
 		
+			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
+		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -5414,7 +4729,7 @@ var toObject = function (o) {
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
 	</nav>
 </div>
 

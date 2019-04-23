@@ -9,6 +9,7 @@
 		<!-- numbas stuff -->
 		<script charset="UTF-8" type="text/javascript" src="jme-runtime.js" charset="utf-8"></script>
 		<script charset="UTF-8" type="text/javascript" src="locales.js" charset="utf-8"></script>
+		<script charset="UTF-8" type="text/javascript" src="doc-tests.js" charset="utf-8"></script>
 
 		<!--JQuery scripts-->
 		<script charset="UTF-8" type="text/javascript" src="../runtime/scripts/jquery/jquery.js"></script>
@@ -83,6 +84,7 @@
 				QUnit.test('findvars',function(assert) {
 					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
 					deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('map(x,x,x)')),['x'],'Can reassign vars used in map but they\'re still found by findvars');
+                    deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(x,z,x+y)')),['y','z'],'findvars on let');
                     deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(["x":z],x+y)')),['y','z'],'findvars on let with a dictionary');
                     deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
 				});
@@ -118,11 +120,11 @@
                 QUnit.test('Numbers', function(assert) {
                     function checkNumber(str,expected) {
                         var n = tokenise(str);
-                        assert.ok(n.length==1);
+                        assert.ok(n.length==1,str+' is one token');
                         n = n[0];
-                        expected = new types.TNum(expected);
-                        assert.equal(n.type,expected.type);
-                        deepCloseEqual(assert, n.value,expected.value);
+                        expected = /^[0-9]+(?!\x2E)/.exec(str) ? new types.TInt(expected) : new types.TNum(expected);
+                        assert.equal(n.type,expected.type,str+' is a '+expected.type);
+                        deepCloseEqual(assert, n.value,expected.value,str+' has the right value');
                     }
                     checkNumber('0',0);
                     checkNumber('0.0',0);
@@ -159,15 +161,15 @@
 				});
 
                 QUnit.test('Whitespace',function(assert) {
-                    var one = new types.TNum(1);
+                    var one = new types.TInt(1);
                     one.originalValue = '1';
                     one.pos = 1;
 					deepCloseEqual(assert, tokenise('\u00A01'),[one],'\\u00A01');
-                    var one = new types.TNum(1);
+                    var one = new types.TInt(1);
                     one.originalValue = '1';
                     one.pos = 0;
 					deepCloseEqual(assert, tokenise('1        '),[one],'1       (whitespace at end of expression)');
-					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[tokWithPos(new types.TName('a'),0),tokWithPos(new types.TOp('+'),9),tokWithPos(new types.TName('b'),11)],'a &nbsp; + b (html-escaped space)');
+					deepCloseEqual(assert, tokenise('a &nbsp; + b'),[tokWithPos(new types.TName('a'),0),tokWithPos(new types.TOp('+',false,false,2,true,true),9),tokWithPos(new types.TName('b'),11)],'a &nbsp; + b (html-escaped space)');
 				});
 
 				QUnit.test('Operators', function(assert) {
@@ -176,21 +178,21 @@
 					deepCloseEqual(assert, tokenise('<='),[tokWithPos(new types.TOp('<='),0)],'<=');
 					deepCloseEqual(assert, tokenise('>='),[tokWithPos(new types.TOp('>='),0)],'>=');
 					deepCloseEqual(assert, tokenise('<>'),[tokWithPos(new types.TOp('<>'),0)],'<>');
-					deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and'),0)],'^^');
-					deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or'),0)],'||');
+					deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'&&');
+					deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'||');
 					deepCloseEqual(assert, tokenise('|'),[tokWithPos(new types.TOp('|'),0)],'|');
-					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*'),0)],'*');
-					deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true),0)],'+');
-					deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true),0)],'-');
-					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/'),0)],'/');
+					deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*',false,false,2,true,true),0)],'*');
+					deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true,1),0)],'+');
+					deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true,1),0)],'-');
+					deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/u',false,true,1),0)],'/');
 					deepCloseEqual(assert, tokenise('^'),[tokWithPos(new types.TOp('^'),0)],'^');
 					deepCloseEqual(assert, tokenise('<'),[tokWithPos(new types.TOp('<'),0)],'<');
 					deepCloseEqual(assert, tokenise('>'),[tokWithPos(new types.TOp('>'),0)],'>');
-					deepCloseEqual(assert, tokenise('='),[tokWithPos(new types.TOp('='),0)],'=');
-					deepCloseEqual(assert, tokenise('!'),[tokWithPos(new types.TOp('not',false,true),0)],'!');
-					deepCloseEqual(assert, tokenise('not'),[tokWithPos(new types.TOp('not'),0)],'not');
-					deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and'),0)],'and');
-					deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or'),0)],'or');
+					deepCloseEqual(assert, tokenise('='),[tokWithPos(new types.TOp('=',false,false,2,true),0)],'=');
+					deepCloseEqual(assert, tokenise('!'),[tokWithPos(new types.TOp('not',false,true,1),0)],'!');
+					deepCloseEqual(assert, tokenise('not'),[tokWithPos(new types.TOp('not',false,true,1),0)],'not');
+					deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'and');
+					deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'or');
 					deepCloseEqual(assert, tokenise('isa'),[tokWithPos(new types.TOp('isa'),0)],'isa');
 					deepCloseEqual(assert, tokenise('except'),[tokWithPos(new types.TOp('except'),0)],'except');
 				});
@@ -264,7 +266,7 @@
                     assert.notOk(Numbas.math.eq({complex:true,re:1,im:1},{complex:true,re:1,im:2}));
 				});
 
-                var evaluate = function(t,scope) { 
+                var evaluate = function(t,scope) {
                     scope = scope || Numbas.jme.builtinScope;
                     if(scope.__proto__!=Numbas.jme.Scope.prototype) {
                         scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,scope]);
@@ -272,13 +274,58 @@
                     return jme.evaluate(t,scope)
                 };
 
+                function evaluateNumber(t,scope) {
+                    var v = evaluate(t,scope);
+                    return jme.castToType(v,'number').value;
+                }
+
 				QUnit.test('jme.typecheck',function(assert) {
 					raisesNumbasError(assert, function(){ evaluate('x()') },'jme.typecheck.function not defined','function not defined: x()');
 					raisesNumbasError(assert, function(){ evaluate('x+y',new jme.Scope()) },'jme.typecheck.op not defined','op not defined with empty scope: x+y');
 					raisesNumbasError(assert, function(){ evaluate('gcd(2)') },'jme.typecheck.no right type definition','no right type definition: gcd(2)');
 				});
 
+                QUnit.test('jme.findCompatibleType', function(assert) {
+                    assert.equal(jme.findCompatibleType('number','number'),'number','number,number -> number');
+                    assert.equal(jme.findCompatibleType('integer','number'),'number','integer,number -> number');
+                    assert.equal(jme.findCompatibleType('number','integer'),'number','number,integer -> number');
+                    assert.equal(jme.findCompatibleType('integer','integer'),'integer','integer,integer -> integer');
+                    assert.equal(jme.findCompatibleType('number','decimal'),'decimal','number,decimal -> decimal');
+                    assert.equal(jme.findCompatibleType('integer','decimal'),'decimal','integer,decimal -> decimal');
+                    assert.equal(jme.findCompatibleType('number','string'),undefined,'number,string -> undefined');
+                });
+
 				function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
+
+                QUnit.test('Number-like types', function(assert) {
+                    assert.equal(evaluate('1').type,'integer','1 is an integer');
+                    assert.equal(evaluate('1.0').type,'number','1.0 is a number');
+                    assert.equal(evaluate('1/2').type,'rational','1/2 is a rational');
+                    assert.equal(evaluate('1^1').type,'decimal','1^1 is a decimal');
+
+                    assert.equal(evaluate('1+1.0').type,'number','1+1.0 is a number');
+                    assert.equal(evaluate('1+dec(1)').type,'decimal','1+dec(1) is a decimal');
+                    assert.equal(evaluate('dec(1)+dec(1)').type,'decimal','dec(1)+dec(1) is a decimal');
+                    assert.equal(evaluate('1/2+dec(1)').type,'decimal','1/2+dec(1) is a decimal');
+                    assert.equal(evaluate('1/6+1/6+1/6+1/6+1/6+1/6=1').value,true,'adding six sixths gives exactly 1');
+                    assert.equal(evaluate('1/2=0.5').value,true,'1/2=0.5');
+                    assert.equal(evaluate('1+1/2').type,'rational','1+1/2 produces a rational');
+
+                    assert.ok(evaluate('vector([1,dec(1),1/2])'),'vector([1,dec(1),1/2]) - automatic casting of list elements');
+                });
+
+                QUnit.test('jme.inferVariableTypes', function(assert) {
+                    function inferVariableTypes(expr) {
+                        return jme.inferVariableTypes(jme.compile(expr), jme.builtinScope);
+                    }
+
+                    deepCloseEqual(assert, inferVariableTypes('x'),{},'x gives nothing');
+                    deepCloseEqual(assert, inferVariableTypes('1'),{},'1 gives nothing');
+                    deepCloseEqual(assert, inferVariableTypes('x+x'),{x:'number'},'x+x gives x number');
+                    deepCloseEqual(assert, inferVariableTypes('x+sin(x)'),{x:'number'},'x+sin(x) gives x number');
+                    deepCloseEqual(assert, inferVariableTypes('k*det(x)'),{x:'matrix', k:'number'},'k*det(x) gives {x:\'matrix\',k:\'number\'}');
+                    deepCloseEqual(assert, inferVariableTypes('dot(vector(1,2,3),a)'),{a:'vector'},'dot(vector(1,2,3),a) gives {a:\'vector\'}');
+                });
 
 				QUnit.test('Variables',function(assert) {
 					var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {
@@ -291,7 +338,7 @@
 
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('let(["q":x+1],q+w)'),scope,true);
 					var s = Numbas.jme.display.treeToJME(tree);
-                    closeEqual(assert, s,'let([ "q": 1 + 1 ],q + w)','Substitute into let')
+                    closeEqual(assert, s,'let([ "q": ( 1 + 1 ) ],q + w)','Substitute into let')
 
 					var tree = Numbas.jme.substituteTree(Numbas.jme.compile('let([q,w],[x,x+1],z,x,q+w)'),scope,true);
 					var s = Numbas.jme.display.treeToJME(tree);
@@ -333,20 +380,20 @@
                 });
 
 				QUnit.test('Operator precedence',function(assert) {
-					closeEqual(assert, evaluate('2*3!').value,12,'factorial highest: 2*3! = 2*(3!)');
-					closeEqual(assert, evaluate('(2*3)!').value,6*5*4*3*2,'brackets work: (2*3)! = 6!');
-					closeEqual(assert, evaluate('2^1^2').value,2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
-					closeEqual(assert, evaluate('2*3^2').value,18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
-					closeEqual(assert, evaluate('5*4+3*2').value,26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
-					closeEqual(assert, evaluate('5/4+3/2').value,2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
-					closeEqual(assert, evaluate('5*4/3-5/3*4').value,0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
-					closeEqual(assert, evaluate('1/2/3').value,1/6,'division is left-associative: 1/2/3 = (1/2)/3');
-					closeEqual(assert, evaluate('5-+2').value,3,'unary addition: 5-+2 = 5-2');
-					closeEqual(assert, evaluate('5--2').value,7,'unary minus: 5--2 = 5+2');
-					closeEqual(assert, evaluate('3*2^-1').value,1.5,'unary minus with power');
-					closeEqual(assert, evaluate('3+--2').value,5,'lots of unary minus in a chain');
-					closeEqual(assert, evaluate('-2^2').value,-4,'unary minus before a power');
-					closeEqual(assert, evaluate('-2+3').value,1,'unary minus before addition');
+					closeEqual(assert, evaluateNumber('2*3!'),12,'factorial highest: 2*3! = 2*(3!)');
+					closeEqual(assert, evaluateNumber('(2*3)!'),6*5*4*3*2,'brackets work: (2*3)! = 6!');
+					closeEqual(assert, evaluateNumber('2^1^2'),2,'exponentiation is right-associative: 2^1^2 = 2^(1^2)');
+					closeEqual(assert, evaluateNumber('2*3^2'),18,'exponentation before multiplication: 2*3^2 = 2*(3^2)');
+					closeEqual(assert, evaluateNumber('5*4+3*2'),26,'multiplication before addition: 5*4+3*2 = (5*4)+(3*2)');
+					closeEqual(assert, evaluateNumber('5/4+3/2'),2.75,'division before addition: 5/4+3/2 = (5/4)+(3/2)');
+					closeEqual(assert, evaluateNumber('5*4/3-5/3*4'),0,'multiplication and division equal precedence: 5*4/3 = 5/3*4');
+					closeEqual(assert, evaluateNumber('1/2/3'),1/6,'division is left-associative: 1/2/3 = (1/2)/3');
+					closeEqual(assert, evaluateNumber('5-+2'),3,'unary addition: 5-+2 = 5-2');
+					closeEqual(assert, evaluateNumber('5--2'),7,'unary minus: 5--2 = 5+2');
+					closeEqual(assert, evaluateNumber('3*2^-1'),1.5,'unary minus with power');
+					closeEqual(assert, evaluateNumber('3+--2'),5,'lots of unary minus in a chain');
+					closeEqual(assert, evaluateNumber('-2^2'),-4,'unary minus before a power');
+					closeEqual(assert, evaluateNumber('-2+3'),1,'unary minus before addition');
 					deepCloseEqual(assert, evaluate('-vector(1,2,-3.3)').value,[-1,-2,3.3],'unary minus: -vector(1,2,-3.3)==vector(-1,-2,3.3)');
 					deepCloseEqual(assert, evaluate('-matrix([1,0],[2,3])').value,[[-1,0],[-2,-3]],'unary minus: -matrix([1,0],[2,3])==matrix([-1,0],[-2,-3]))');
 					assert.ok(evaluate('1+2*3|7^2'),'"divides" after arithmetic');
@@ -387,10 +434,10 @@
 				});
 
 				QUnit.test('Arithmetic',function(assert) {
-					closeEqual(assert, evaluate('+2').value,2,'+2');
-					closeEqual(assert, evaluate('-2').value,-2,'-2');
-					closeEqual(assert, evaluate('1+2').value,3,'1+2');
-					deepCloseEqual(assert, evaluate('i+1').value,math.complex(1,1),'i+1');
+					closeEqual(assert, evaluateNumber('+2'),2,'+2');
+					closeEqual(assert, evaluateNumber('-2'),-2,'-2');
+					closeEqual(assert, evaluateNumber('1+2'),3,'1+2');
+					deepCloseEqual(assert, evaluateNumber('i+1'),math.complex(1,1),'i+1');
 					deepCloseEqual(assert, evaluate('[1,2]+[3,4]').value.map(getValue),[1,2,3,4],'[1,2]+[3,4]');
 					deepCloseEqual(assert, evaluate('[1,2]+3').value.map(getValue),[1,2,3],'[1,2]+3');
 					deepCloseEqual(assert, evaluate('["x","y"]+"z"').value.map(getValue),['x','y','z'],'["x","y"]+"z"');
@@ -399,29 +446,29 @@
 					closeEqual(assert, evaluate('2+" things"').value,'2 things','2+" things"');
 					deepCloseEqual(assert, evaluate('vector(1,2)+vector(2,3)').value,[3,5],'vector(1,2)+vector(2,3)');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])+matrix([0,1],[1,0])').value,[[1,1],[1,1]],'matrix([1,0],[0,1])+matrix([0,1],[1,0])');
-					closeEqual(assert, evaluate('3-13').value,-10,'3-13');
+					closeEqual(assert, evaluateNumber('3-13'),-10,'3-13');
 					deepCloseEqual(assert, evaluate('vector(1,2)-vector(5,5)').value,[-4,-3],'vector(1,2)-vector(5,5)');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])-matrix([2,1],[2,1])').value,[[-1,-1],[-2,0]],'matrix([1,0],[0,1])-matrix([2,1],[2,1])');
-					closeEqual(assert, evaluate('5*4').value,20,'5*4');
-					closeEqual(assert, evaluate('i*i').value,-1,'i*i');
+					closeEqual(assert, evaluateNumber('5*4'),20,'5*4');
+					closeEqual(assert, evaluateNumber('i*i'),-1,'i*i');
 					deepCloseEqual(assert, evaluate('5*vector(1,2)').value,[5,10],'5*vector(1,2)');
 					deepCloseEqual(assert, evaluate('vector(1,2)*5').value,[5,10],'vector(1,2)*5');
 					deepCloseEqual(assert, evaluate('matrix([1,1],[3,2])*vector(1,2)').value,[3,7],'matrix([1,1],[3,2])*vector(1,2)');
 					deepCloseEqual(assert, evaluate('5*matrix([1,0],[0,1])').value,[[5,0],[0,5]],'5*matrix([1,0],[0,1])');
 					deepCloseEqual(assert, evaluate('matrix([1,0],[0,1])*5').value,[[5,0],[0,5]],'matrix([1,0],[0,1])*5');
 					deepCloseEqual(assert, evaluate('matrix([1,2],[1,1])*matrix([2,3],[4,5])').value,[[10,13],[6,8]],'matrix([1,2],[1,1])*matrix([2,3],[4,5])');
-					closeEqual(assert, evaluate('5/2').value,2.5,'5/2');
-					deepCloseEqual(assert, evaluate('5/(1+i)').value,math.complex(2.5,-2.5),'5/(1+i)');
-					deepCloseEqual(assert, evaluate('(1+i)/5').value,math.complex(0.2,0.2),'(1+i)/5');
-					deepCloseEqual(assert, evaluate('(1+i)/(2-i)').value,math.complex(0.2,0.6),'(1+i)/(2+i)');
-					closeEqual(assert, evaluate('2^4').value,16,'2^4');
-					closeEqual(assert, evaluate('(-6)^2').value,36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
-					deepCloseEqual(assert, evaluate('(1+i)^0').value,1,'(1+i)^0');
-					deepCloseEqual(assert, evaluate('(1+i)^5').value,math.complex(-4,-4),'(1+i)^5');
-					deepCloseEqual(assert, evaluate('(1+i)^6').value,math.complex(0,-8),'(1+i)^6');
-					deepCloseEqual(assert, evaluate('(1+i)^(-2)').value,math.complex(0,-0.5),'(1+i)^(-2)');
-					deepCloseEqual(assert, evaluate('(1+i)^(-3)').value,math.complex(-0.25,-0.25),'(1+i)^(-3)');
-					deepCloseEqual(assert, evaluate('2^i').value,math.complex(0.7692389013639721,0.6389612763136348),'2^i');
+					closeEqual(assert, evaluateNumber('5/2'),2.5,'5/2');
+					deepCloseEqual(assert, evaluateNumber('5/(1+i)'),math.complex(2.5,-2.5),'5/(1+i)');
+					deepCloseEqual(assert, evaluateNumber('(1+i)/5'),math.complex(0.2,0.2),'(1+i)/5');
+					deepCloseEqual(assert, evaluateNumber('(1+i)/(2-i)'),math.complex(0.2,0.6),'(1+i)/(2+i)');
+					closeEqual(assert, evaluateNumber('2^4'),16,'2^4');
+					closeEqual(assert, evaluateNumber('(-6)^2'),36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^0'),1,'(1+i)^0');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^5'),math.complex(-4,-4),'(1+i)^5');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^6'),math.complex(0,-8),'(1+i)^6');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^(-2)'),math.complex(0,-0.5),'(1+i)^(-2)');
+					deepCloseEqual(assert, evaluateNumber('(1+i)^(-3)'),math.complex(-0.25,-0.25),'(1+i)^(-3)');
+					deepCloseEqual(assert, evaluateNumber('2^i'),math.complex(0.7692389013639721,0.6389612763136348),'2^i');
 				});
 
 				QUnit.test('Logic',function(assert) {
@@ -436,6 +483,9 @@
 					raisesNumbasError(assert, function(){ evaluate('i>1') },'math.order complex numbers',"can't order complex numbers");
 					raisesNumbasError(assert, function(){ evaluate('i<=1') },'math.order complex numbers',"can't order complex numbers");
 					raisesNumbasError(assert, function(){ evaluate('1>=i') },'math.order complex numbers',"can't order complex numbers");
+
+                    assert.equal(evaluate('dec(1005.31)>=1005.31').value,true,'dec(1005.31)>=1005.31');
+                    assert.equal(evaluate('dec(1005.31)<=1005.31').value,true,'dec(1005.31)<=1005.31');
 
 					closeEqual(assert, evaluate('1=1').value,true,'1=1');
 					closeEqual(assert, evaluate('1/5=0.2').value,true,'1/5=0.2');
@@ -679,6 +729,9 @@
 					}
 					assert.equal(acc,true,'random(1,2,"a") in [1,2,"a"]');
 
+                    var x = evaluate('random(1..3#0)').value;
+                    assert.ok(x>=1 && x<=3,'random(1..3#0)')
+
 					raisesNumbasError(assert, function(){ evaluate('random()') },'math.choose.empty selection','empty selection: random()');
 
 					deepCloseEqual(assert, evaluate('deal(4)').value.map(getValue).sort(),[0,1,2,3],'deal(4)');
@@ -821,7 +874,6 @@
                     assert.equal(evaluate("all([])").value,true,"all([])");
                     assert.equal(evaluate("all([true])").value,true,"all([true])");
                     assert.equal(evaluate("all([false])").value,false,"all([false])");
-                    assert.equal(evaluate("all([1])").value,false,"all([1])");
                     assert.equal(evaluate("all([true,false])").value,false,"all([true,false])");
                     assert.equal(evaluate("all([false,true])").value,false,"all([false,true])");
                     assert.equal(evaluate("all([true,true])").value,true,"all([true,true])");
@@ -829,7 +881,6 @@
                     assert.equal(evaluate("some([])").value,false,"some([])");
                     assert.equal(evaluate("some([true])").value,true,"some([true])");
                     assert.equal(evaluate("some([false])").value,false,"some([false])");
-                    assert.equal(evaluate("some([1])").value,false,"some([1])");
                     assert.equal(evaluate("some([true,false])").value,true,"some([true,false])");
                     assert.equal(evaluate("some([false,true])").value,true,"some([false,true])");
                     assert.equal(evaluate("some([true,true])").value,true,"some([true,true])");
@@ -842,8 +893,20 @@
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([1,2,3])")),[0,1,2],"sort_destinations([1,2,3])");
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([2,1,3])")),[1,0,2],"sort_destinations([2,1,3])");
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([expression('5'),expression('3')])")),[1,0],"sort_destinations([expression('5'),expression('3')])");
+
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by(0,[[0,5], [1,3]])")),[[0,5], [1,3]],"sort_by(0,[[0,5],[1,3]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by(1,[[0,5], [1,3]])")),[[1,3], [0,5]],"sort_by(1,[[0,5],[1,3]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by(2,[[0,5], [1,3]])")),[[0,5], [1,3]],"sort_by(2,[[0,5],[1,3]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by(2,[[0,5], [1,3,2]])")),[[1,3,2], [0,5]],"sort_by(2,[[0,5],[1,3,2]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by('a',[['a':0,'b':5], ['a':1,'b':3]])")),[{a:0,b:5}, {a:1,b:3}],"sort_by('a',[['a':0,'b':5],['a':1,'b':3]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by('b',[['a':0,'b':5], ['a':1,'b':3]])")),[{a:1,b:3}, {a:0,b:5}],"sort_by('b',[['a':0,'b':5],['a':1,'b':3]])");
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_by('c',[['a':0,'b':5], ['c':1,'b':3]])")),[{c:1,b:3}, {a:0,b:5}],"sort_by('c',[['a':0,'b':5],['a':1,'b':3]])");
+
                     raisesNumbasError(assert, function() { evaluate("dict(2)"); }, 'jme.typecheck.no right type definition','dict(2)');
                     raisesNumbasError(assert, function() { evaluate('dict(["a",1])'); }, 'jme.typecheck.no right type definition','dict(["a",1])');
+
+                    assert.equal(evaluate('sum([1,2,3])').value,6,'sum([1,2,3])');
+                    raisesNumbasError(assert, function() { evaluate('sum(["a","b"])') },'jme.typecheck.no right type definition','sum(["a","b"])');
                 });
 
                 QUnit.test('Dictionaries',function(assert) {
@@ -948,6 +1011,197 @@
 				});
 
 
+				QUnit.module('Pattern-matching');
+                QUnit.test('matchExpression', function(assert) {
+                    function matchExpression(rule,expr,options) {
+                        return Numbas.jme.rules.matchExpression(rule,expr,Numbas.jme.rules.extend_options(options,{scope:Numbas.jme.builtinScope}));
+                    }
+                    function matchTree(pattern,exprTree) {
+                        var r = new Numbas.jme.rules.Rule(pattern,null);
+                        return r.match(exprTree,Numbas.jme.builtinScope);
+                    }
+                    function matchCapturedNames(pattern,namePatterns,expr,options) {
+                        options = Numbas.jme.rules.extend_options(options,{scope: Numbas.jme.builtinScope});
+                        var m = matchExpression(pattern,expr,options);
+                        return Object.entries(namePatterns).every(function(kv) {
+                            var name = kv[0];
+                            var namePattern = kv[1];
+                            var r = new Numbas.jme.rules.Rule(namePattern,null,options);
+                            return r.match(m[name],Numbas.jme.builtinScope);
+                        })
+                    }
+
+                    var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
+                    assert.ok(Numbas.jme.isOp(tokens[0],'`+-'),'first token of `+-x is `+-');
+
+                    // names
+                    assert.ok(matchExpression('?','x'),'? matches x');
+                    assert.ok(matchExpression('?','1+sin(x)'),'? matches 1+sin(x)');
+                    assert.ok(matchExpression('?;x','1'),'?;x matches 1');
+                    assert.ok(matchExpression('?;x','1').x,'?;x captures a group called x');
+                    assert.ok(matchExpression('$n','5'),'$n matches 5');
+                    assert.notOk(matchExpression('$n','true'),'$n does not match true');
+                    assert.ok(matchTree('complex:$n',{tok:Numbas.jme.builtinScope.evaluate('2+i')}),'complex:$n matches 2+i');
+                    assert.ok(matchExpression('complex:$n','i'),'complex:$n matches i');
+                    assert.notOk(matchExpression('complex:$n','2'),'complex:$n does not match 2');
+                    assert.ok(matchExpression('imaginary:$n','i'),'imaginary:$n matches i');
+                    assert.notOk(matchExpression('imaginary:$n','2'),'imaginary:$n does not match 2');
+                    assert.notOk(matchTree('imaginary:$n',{tok:Numbas.jme.builtinScope.evaluate('2+i')}),'imaginary:$n does not match 2+i');
+                    assert.ok(matchExpression('real:$n','2'),'real:$n matches 2');
+                    assert.notOk(matchExpression('real:$n','i'),'real:$n does not match i');
+                    assert.ok(matchExpression('positive:$n','2'),'positive:$n matches 2');
+                    assert.notOk(matchTree('positive:$n',{tok:Numbas.jme.builtinScope.evaluate('-2')}),'positive:$n does not match -2');
+                    assert.notOk(matchExpression('positive:$n','i'),'positive:$n does not match i');
+                    assert.ok(matchTree('negative:$n',{tok:Numbas.jme.builtinScope.evaluate('-2')}),'negative:$n matches -2');
+                    assert.notOk(matchExpression('negative:$n','5'),'negative:$n does not match 5');
+                    assert.ok(matchExpression('nonnegative:$n','0'),'nonnegative:$n matches 0');
+                    assert.ok(matchExpression('nonnegative:$n','15'),'nonnegative:$n matches 0');
+                    assert.ok(matchExpression('nonnegative:$n','i'),'nonnegative:$n matches i');
+                    assert.ok(matchExpression('integer:$n','5'),'integer:$n matches 5');
+                    assert.notOk(matchExpression('integer:$n','1.5'),'integer:$n does not match 1.5');
+                    assert.ok(matchExpression('$v','x'),'$v matches x');
+                    assert.notOk(matchExpression('$v','5'),'$v does not match 5');
+                    assert.ok(matchExpression('?+$z','x'),'?+$z matches x');
+
+
+                    // functions
+                    assert.ok(matchExpression('sin(?)','sin(5)'),'sin(?) matches sin(5)');
+                    assert.notOk(matchExpression('sin(0)','0'),'sin(0) does not match 0');
+                    assert.ok(matchExpression('m_uses(x,y)','x+y'),'m_uses(x,y) matches x+y');
+                    assert.notOk(matchExpression('m_uses(x,y)','x^2'),'m_uses(x,y) does not match x^2');
+                    assert.ok(matchExpression('m_exactly(?+?)','x+y'),'m_exactly(?+?) matches x+y');
+                    assert.notOk(matchExpression('m_exactly(?+?)','x+y+z',{associative:true}),'m_exactly(?+?) does not match x+y+z');
+                    assert.ok(matchExpression('m_commutative(1+2)','2+1',{commutative:false}),'m_commutative(1+2) matches 2+1');
+                    assert.ok(matchExpression('m_noncommutative(1+2)','1+2',{commutative:true}),'m_noncommutative(1+2) matches 1+2');
+                    assert.notOk(matchExpression('m_noncommutative(1+2)','2+1',{commutative:true}),'m_noncommutative(1+2) does not match 2+1');
+                    assert.ok(matchExpression('m_noncommutative(1*2)+3','3+1*2',{commutative:true}),'m_noncommutative(1*2)+3 matches 3+1*2');
+                    assert.notOk(matchExpression('m_noncommutative(1*2)+3','3+2*1',{commutative:true}),'m_noncommutative(1*2)+3 does not match 3+2*1');
+                    assert.ok(matchExpression('m_associative(1+2+3)','1+2+3',{associative:false}),'m_associative(1+2+3) matches 1+2+3');
+                    assert.notOk(matchExpression('m_associative(1+2+3)','3+2+1',{associative:false,commutative:false}),'m_associative(1+2+3) does not match 3+2+1');
+                    assert.ok(matchExpression('m_nonassociative(1+2+3)','(1+2)+3',{associative:true}),'m_nonassociative(1+2+3) matches (1+2)+3');
+                    assert.notOk(matchExpression('m_nonassociative(1+2+3)','1+(2+3)',{associative:true}),'m_nonassociative(1+2+3) does not match 1+(2+3)');
+                    assert.ok(matchExpression('m_nonassociative(1*2*3)+4+5','(1*2)*3+(4+5)',{associative:true}),'m_nonassociative(1*2*3)+4+5 matches (1*2)*3+(4+5)');
+                    assert.ok(matchExpression('?+?','x-y'),'?+? matches x-y');
+                    assert.notOk(matchExpression('m_strictplus(?+?)','x-y'),'m_strictplus(?+?) does not match x-y');
+                    assert.ok(matchExpression('m_type("boolean")','true'),'m_type("boolean") matches true');
+                    assert.notOk(matchExpression('m_type("boolean")','x=y'),'m_type("boolean") does not match x=y');
+                    assert.ok(matchExpression('m_func("sum",[$n`*])','sum(1,2,3)'),'m_func("sum",[$n`*]) matches sum(1,2,3)');
+                    assert.notOk(matchExpression('m_func("sum",[$n`*])','mean(1,2,3)'),'m_func("sum",[$n`*]) does not match mean(1,2,3)');
+                    assert.notOk(matchExpression('m_func("sum",[$n`*])','sum(x)'),'m_func("sum",[$n`*]) does not match sum(x)');
+                    assert.ok(matchExpression('m_op("+",[$n,x])','1+x'),'m_func("+",[$n,x]) matches 1+x');
+                    assert.notOk(matchExpression('m_op("+",[$n,x])','1-x'),'m_func("+",[$n,x]) does not match 1-x');
+                    assert.notOk(matchExpression('m_op("+",[$n,x])','x+1'),'m_func("+",[$n,x]) does not match x+1');
+                    assert.ok(matchExpression('m_anywhere(?*?)','x+2z'),'m_anywhere(?*?) matches x+2z');
+                    assert.notOk(matchExpression('m_anywhere(?*?)','x+2'),'m_anywhere(?*?) does not match x+2');
+
+
+                    // ops
+                    assert.ok(matchExpression('x+y','x+y'),'x+y matches x+y');
+                    assert.ok(matchExpression('x+y','y+x'),'x+y matches y+x (+ is commutative)');
+                    assert.notOk(matchExpression('x-y','y-x'),'x+y does not match y-x');
+                    assert.ok(matchExpression('-?','-2'),'-? matches -2');
+                    assert.notOk(matchExpression('-?','0-2'),'-? does not match 0-2');
+
+                    assert.ok(matchExpression('x+y`?','x+y'),'x+y`? matches x+y');
+                    assert.ok(matchExpression('x+y`?','x'),'x+y`? matches x');
+                    assert.notOk(matchExpression('x+y`?','x+y+y',{allowOtherTerms:false}),'x+y`? does not match x+y+y');
+
+                    assert.ok(matchExpression('x+y`*','x+y'),'x+y`* matches x+y');
+                    assert.ok(matchExpression('x+y`*','x'),'x+y`* matches x');
+                    assert.ok(matchExpression('x+y`*','x+y+y',{allowOtherTerms:false}),'x+y`* matches x+y+y');
+
+                    assert.ok(matchExpression('x+y`+','x+y'),'x+y`+ matches x+y');
+                    assert.notOk(matchExpression('x+y`+','x'),'x+y`+ does not match x');
+                    assert.ok(matchExpression('x+y`+','x+y+y',{allowOtherTerms:false}),'x+y`+ matches x+y+y');
+
+                    assert.ok(matchExpression('x `| y','x'),'x `| y matches x');
+                    assert.ok(matchExpression('x `| y','y'),'x `| y matches y');
+                    assert.notOk(matchExpression('x `| y','z'),'x `| y does not match z');
+
+                    assert.ok(matchExpression('x+(y `: 1)','x'),'x+(y `: 1) matches x');
+                    assert.ok(matchExpression('x+(y `: 1)','x+y'),'x+(y `: 1) matches x+y');
+                    assert.ok(matchExpression('x+(y `: 1)','x+z'),'x+(y `: 1) does not match x+z');
+                    assert.ok(Numbas.jme.isName(matchExpression('x+(y `: 1);rhs','x+y').rhs.tok,'y'),'x+(y `: 1);rhs matches x+y with rhs as y');
+                    var res = matchExpression('x+(y `: 1);rhs','x').rhs.tok;
+                    assert.ok(res.type=='integer' && res.value==1,'x+(y `: 1);rhs matches x with rhs as 1');
+
+                    assert.ok(matchExpression('`+- x','x'),'`+- x matches x');
+                    assert.ok(matchExpression('`+- x','-x'),'`+- x matches -x');
+                    assert.ok(matchExpression('x + (`+- y)','x+y'),'`x + (+- y) matches x+y');
+                    assert.ok(matchExpression('x + (`+- y)','x-y'),'`x + (+- y) matches x-y');
+                    assert.notOk(matchExpression('x + y','x-y'),'`x + y does not match x-y');
+
+                    assert.ok(matchExpression('`! x','y'),'`! x matches y');
+                    assert.notOk(matchExpression('`! x','x'),'`! x does not match x');
+                    assert.ok(matchExpression('`! m_uses(x)','y+sin(z)'),'`! m_uses(x) matches y+sin(z)');
+
+                    assert.ok(matchExpression('m_uses(x) `& `! m_uses(y)','x+z'),'m_uses(x) `& `! m_uses(y) matches x+z');
+                    assert.notOk(matchExpression('m_uses(x) `& `! m_uses(y)','x+y'),'m_uses(x) `& `! m_uses(y) does not match x+y');
+
+                    assert.ok(matchExpression('$n;x + $n;y `where x+y=4','1+3'),'$n;x + $n;y `where x+y=4 matches 1+3');
+                    assert.ok(matchExpression('$n;x + $n;y `where x+y=4','0.5+3.5'),'$n;x + $n;y `where x+y=4 matches 0.5+3.5');
+                    assert.notOk(matchExpression('$n;x + $n;y `where x+y=4','2+3'),'$n;x + $n;y `where x+y=4 does not match 2+3');
+
+                    assert.ok(matchExpression('["f": $n/$n] `@ f + f','1/2 + 3/4'),'["f": $n/$n] `@ f + f matches 1/2 + 3/4');
+
+                    assert.notOk(matchExpression('$n`+/$n`?','3pi/4',{allowOtherTerms:true,strictInverse:true}),'$n`+/$n`? does not match 3pi/4 with strictInverse');
+
+                    assert.ok(matchExpression('((`*/ `+- $n)`*;x)*i','-(1/2)*pi*i'),'deal with unary minus amongst factors');
+
+                    // lists
+                    assert.ok(matchExpression('[]','[]'),'[] matches []');
+                    assert.ok(matchExpression('[1,2,3]','[1,2,3]'),'[1,2,3] matches [1,2,3]');
+                    assert.notOk(matchExpression('[1,2,3]','[3,2,1]'),'[1,2,3] does not match [3,2,1]');
+                    assert.notOk(matchExpression('[1,2,3]','[1,2]'),'[1,2,3] does not match [1,2]');
+                    assert.ok(matchExpression('[$n`+]','[1,2,3]'),'[$n`+] matches [1,2,3]');
+                    assert.ok(matchExpression('[$n`+,3]','[1,2,3]'),'[$n`+,3] matches [1,2,3]');
+                    assert.notOk(matchExpression('[$n`+,2]','[1,2,3]'),'[$n`+,2] does not match [1,2,3]');
+                    assert.ok(matchExpression('[$n`+,2`?]','[1,2,3]'),'[$n`+,2`?] matches [1,2,3]');
+
+                    // named groups
+                    assert.ok(matchCapturedNames('?;x',{x:'1'},'1'),'?;x on 1 captures x as 1');
+                    assert.ok(matchCapturedNames('?;x',{x:'sin(pi+3)'},'sin(pi+3)'),'?;x on sin(pi+3) captures x as sin(pi+3)');
+                    assert.ok(matchCapturedNames('?`+;x+?;y',{x:'1',y:'2'},'1+2'),'?;x+?;y on 1+2 captures x as 1 and y as 2');
+                    assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+2+y'),'?`+;x+y on x+2+y captures x as x+2');
+                    assert.ok(matchCapturedNames('?`+;x+y',{x:'x+2'},'x+y+2'),'?`+;x+y on x+y+2 captures x as x+2');
+                    assert.ok(matchCapturedNames('2^(-?;x)',{x:'1'},'2^-1'),'2^(-?;x) on 2^-1 captures x as 1');
+                    assert.ok(matchCapturedNames('sin(?;x)',{x:'1'},'sin(1)'),'sin(?;x) on sin(1) captures x as 1');
+                    assert.ok(matchCapturedNames('f(?;x,?;x)',{x:'[1,2]'},'f(1,2)'),'f(?;x,?;x) on f(1,2) captures x as [1,2]');
+
+                    // identified names
+                    assert.ok(matchExpression('$n*?;=x + $n*?;=x','2y+3y'),'$n*?;=x + $n*?;=x matches 2y+3y');
+                    assert.ok(matchExpression('$n*?;=x + $n*?;=x','2(x+1)+3(x+1)'),'$n*?;=x + $n*?;=x matches 2(x+1)+3(x+1)');
+                    assert.notOk(matchExpression('$n*?;=x + $n*?;=x','2(x+1)+3z'),'$n*?;=x + $n*?;=x does not match 2(x+1)+3z');
+
+                    assert.ok(matchExpression('($n `| ?;=x)`* + $z','1+x+x+2',{allowOtherTerms:false}),'($n `| ?;=x)`* + $z matches 1+x+x+2 : cope with a term optionally not matching an identified name');
+                    assert.notOk(matchExpression('($n `| ?;=x)`* + $z','1+x+y+2',{allowOtherTerms:false}),'($n `| ?;=x)`* + $z does not match 1+x+y+2 : cope with a term optionally not matching an identified name');
+                });
+
+                QUnit.test('replace', function(assert) {
+                    function replace(pattern,repl,options,expr) {
+                        var rule = new Numbas.jme.rules.Rule(pattern,repl,options);
+                        return rule.replace(Numbas.jme.compile(expr), Numbas.jme.builtinScope);
+                    }
+                    function replaceAll(pattern,repl,options,expr) {
+                        var rule = new Numbas.jme.rules.Rule(pattern,repl,options);
+                        return rule.replaceAll(Numbas.jme.compile(expr), Numbas.jme.builtinScope);
+                    }
+                    
+                    var res = replace('?;x+?;y','x*y','acg','1+2');
+                    assert.ok(res.changed);
+                    var treeToJME = Numbas.jme.display.treeToJME;
+                    assert.equal(treeToJME(res.expression),'1*2');
+
+                    var res = replace('?;x+?;y','x*y','acg','1*2');
+                    assert.notOk(res.changed);
+
+                    var res = replace('?;x*?;y','x+y','acg','1*2+3*4');
+                    assert.notOk(res.changed);
+
+                    var res = replaceAll('?;x*?;y','x+y','acg','1*2+3*4');
+                    assert.ok(res.changed);
+                    assert.equal(treeToJME(res.expression),'1 + 2 + 3 + 4');
+                });
 				QUnit.module('Display');
 
 				QUnit.test('niceNumber',function(assert) {
@@ -961,6 +1215,7 @@
                     assert.equal(Numbas.math.niceNumber(2.2e-10,{precisionType:'sigfig',precision:3}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(2e-10,{precisionType:'dp',precision:12}),'0.000000000200','niceNumber adds digits to exponential-form numbers correctly');
                     assert.equal(Numbas.math.niceNumber(2.2e-10,{precisionType:'dp',precision:12}),'0.000000000220','niceNumber adds digits to exponential-form numbers correctly');
+                    assert.equal(Numbas.math.niceNumber(1.234e5,{style:'scientific',precisionType:'dp',precision:1}),'1.2e+5','precision formatting on a scientific form number');
                     assert.equal(Numbas.math.niceNumber(0.0002663,{precisionType:'sigfig',precision:1}),'0.0003','sigfig precision doesn\'t add unwanted floating point error digits')
 				});
 
@@ -1034,6 +1289,14 @@
                             ['-1,234.0','-1234.0',-1234,'-1,234'],
                             ['1,2,3','1,2,3',NaN]
                         ],
+                        scientific: [
+                            ['0e+0','0',0,],
+                            ['1e+2','100',100],
+                            ['1.23e+2','123',123],
+                            ['1.23e-2','0.0123',0.0123],
+                            ['-9.1e+2','-910',-910],
+                            ['1.234 567e+6','1234567',1.234567e+6]
+                        ]
                     }
                     for(var style in tests) {
                         tests[style].forEach(function(t) {
@@ -1064,6 +1327,7 @@
 
 				QUnit.test('subvars',function(assert) {
 					assert.ok(Numbas.jme.texsplit('boo\r\\simplify{}'),'texsplit copes with \\r characters OK.');
+                    assert.equal(Numbas.jme.subvars('{1-0.9-0.1}',Numbas.jme.builtinScope),'(0)','numbers very close to zero rounded to zero');
 				});
 
 				QUnit.test('tree to JME', function(assert) {
@@ -1078,29 +1342,28 @@
                     assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRationalNumber on -pi*i puts an asterisk in');
                     assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRationalNumber on 1 + pi*i puts an asterisk in');
                     assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRationalNumber on pi*i puts an asterisk in');
+                    assert.equal(simplifyExpression('-1*x*3'),'-1*x*3','pull minus to left of product');
                     assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
 					assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
 					assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
 					assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
-					assert.equal(simplifyExpression('(1-i)+(-2+2i)',''),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
-					assert.equal(simplifyExpression('(1-i)-(-2+2i)',''),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
-					assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*e^25');
-					assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*e^25');
-					assert.equal(simplifyExpression('x+(-10+2)','basic,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
-					assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
+					assert.equal(simplifyExpression('(1-i)+(-2+2i)','collectComplex'),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
+					assert.equal(simplifyExpression('(1-i)-(-2+2i)','collectComplex'),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
+					assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*10^25');
+					assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
+					assert.equal(simplifyExpression('x+(-10+2)','all,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
+					assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)',"4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.");
 					assert.equal(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
-					assert.equal(simplifyExpression('pi*i',['all']),'pi*i','pi*i - don\'t lose multiplication symbol.');
+					assert.equal(simplifyExpression('pi*i',['all']),'pi*i',"pi*i - don\'t lose multiplication symbol.");
 					assert.equal(Numbas.jme.compile(Numbas.jme.display.treeToJME(Numbas.jme.compile('"\\\\textrm{hi}\\nso"'))).tok.value,"\\textrm{hi}\nso",'treeToJME escapes backslashes');
-					assert.equal(simplifyExpression('-3x-4',['all']),'-3x - 4','-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers');
+					assert.equal(simplifyExpression('-3x-4',['all']),'-3x - 4',"-3x-4 doesn\'t get rearranged to -(3x+4) by collectNumbers");
 					assert.equal(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
-                    assert.equal(simplifyExpression('3i/5','basic'),'3i/5','don\'t put brackets on imaginary numerator');
+                    assert.equal(simplifyExpression('3i/5','basic,collectComplex'),'3i/5','don\'t put brackets on imaginary numerator');
                     assert.equal(simplifyExpression('-3/5','basic'),'-3/5','don\'t put brackets on single number numerator');
-                    assert.equal(simplifyExpression('3/4i','basic'),'(3/4)*i','put brackets round a fraction preceding i');
+                    assert.equal(simplifyExpression('3/4i','basic,collectComplex'),'(3/4)*i','put brackets round a fraction preceding i');
                     assert.equal(simplifyExpression('(e^t)^2'),'(e^t)^2','put brackets around power taken to a power');
-
 					assert.equal(simplifyExpression('3!',[]),'3!','3!');
-					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','3!');
-
+					assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','(3+1)! is bracketed');
 					assert.equal(simplifyExpression('pi*x',['all']),'pi*x','pi*x doesn\t omit the *');
 					assert.equal(simplifyExpression('e*x',['all']),'e*x','e*x doesn\t omit the *');
 					assert.equal(simplifyExpression('1*pi/4',['all']),'pi/4','1*pi/4 cancels the 1');
@@ -1114,30 +1377,35 @@
 					assert.equal(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
 					assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
                     assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
-
                     assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
                     assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
-
                     assert.equal(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
-
+                    assert.equal(simplifyExpression('(x+2)(x+3)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^2 + 5x + 6','Small product expanded and collected');
                     assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
-                    assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 2*x^3 - 13*x^2 - 26x - 24','Large product with a negative term expanded and collected');
+                    assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+2x+1)','all'),'(x^2 + 4x + 1)(x^2 + 2x + 1)','cancelFactors on polynomials differing only by coefficients');
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
-
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
-
-                    var r = new Numbas.jme.rules.Rule('?;m*?;n',['m isa "number"'],'eval(m*n)');
+                    var r = new Numbas.jme.rules.Rule('$n;m*?;n','eval(m*n)');
                     var s = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
                     var m = r.match(Numbas.jme.compile('x*2'),s);
                     assert.equal(m,false,"don't sub variables from the scope when checking simplification rule conditions");
-
                     assert.equal(Numbas.jme.display.simplifyExpression('4x+2','all',s),'4x + 2','x is defined in the scope as a number');
+                    assert.equal(simplifyExpression('3x^(-5)+6x^4',['all']),'3*x^(-5) + 6*x^4','canonical_compare compares negative powers properly');
+                    assert.equal(simplifyExpression('-6x - 20x',['all']),'-26x','collect two negatives together');
+                    assert.equal(simplifyExpression('2x*(3/5)',['all']),'6(x/5)','2x*(3/5) doesn\'t get stuck in a loop');
+                    assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
+                    assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
+                    assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096*(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
+                });
 
-                    assert.equal(simplifyExpression('3x^(-5)+6x^4','all'),'3*x^(-5) + 6*x^4','canonical_compare compares negative powers properly');
-                    assert.equal(simplifyExpression('-6x - 20x','all'),'-26x','collect two negatives together');
-				});
+                QUnit.test('large product',function(assert) {
+                    function simplifyExpression(expr,rules) {
+                        return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
+                    }
+                    assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
+                })
 
 				QUnit.test('texName', function(assert) {
 					var names = [
@@ -1182,9 +1450,9 @@
 					function exprToLaTeX(expr,rules) {
 						return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
 					}
-					assert.equal(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');	
-					assert.equal(exprToLaTeX('1+i +(-2+2i)'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
-					assert.equal(exprToLaTeX('1-i +(-2+2i)'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');	
+					assert.equal(exprToLaTeX('-2+i'),'-2 + i','-2+i -- interaction of unary minus with complex number');
+					assert.equal(exprToLaTeX('1+i +(-2+2i)','collectComplex'),'1 + i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');
+					assert.equal(exprToLaTeX('1-i +(-2+2i)','collectComplex'),'1 - i - 2 + 2 i','1+i +(-2+2i) -- interaction of minus with complex number');
 					assert.equal(exprToLaTeX('10000000000000000000000000'),'1 \\times 10^{25}','scientific notation - 1*e^25');
 					assert.equal(exprToLaTeX('47652000000000000000000000'),'4.7652 \\times 10^{25}','scientific notation - 4.7652*e^25');
 					assert.equal(exprToLaTeX('ln(abs(x))'),'\\ln \\left | x \\right |','ln(abs(x)) - ln of absolute value has no parentheses');
@@ -1226,6 +1494,24 @@
                     assert.equal(exprToLaTeX('e^(3x)','fractionNumbers'),'e^{ 3 x }','e^(3x) with fractionNumbers');
                     assert.equal(exprToLaTeX('e*i',''),'e i','e*i');
 				});
+
+                doc_tests.forEach(function(section) {
+                    QUnit.module('Docs: '+section.name);
+                    section.fns.forEach(function(fn) {
+                        if(fn.examples.length) {
+                            QUnit.test(fn.name,function(assert) {
+                                fn.examples.forEach(function(example) {
+                                    var res = Numbas.jme.builtinScope.evaluate(example.in);
+                                    var out = Numbas.jme.display.treeToJME({tok: res}, {ignorestringattributes: true, wrapexpressions: true});
+                                    function clean(expr) {
+                                        return expr.replace(/\s/g,'');
+                                    }
+                                    assert.equal(clean(out),clean(example.out),example.in);
+                                });
+                            });
+                        }
+                    });
+                });
 			});
 		</script>
 	</body>

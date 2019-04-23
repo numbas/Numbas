@@ -24,10 +24,14 @@ var Part = Numbas.parts.Part;
  * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
  *
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @augments Numbas.parts.Part
  * @memberof Numbas.parts
  */
-var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart)
+var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store)
 {
     var p = this;
     var settings = this.settings;
@@ -93,12 +97,19 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var def;
+        /** Load the definition of the choice or answer labels.
+         * @param {JME} def
+         * @param {Numbas.jme.Scope} scope
+         * @param {Element} topNode - parent element of the list of labels
+         * @param {String} nodeName - 'choice' or 'answer'
+         * @returns {Number} - the number of items
+         */
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
-            if(values.type!='list') {
+            if(!jme.isType(values,'list')) {
                 p.error('part.mcq.options def not a list',{properties: nodeName});
             }
-            var numValues = values.value.length;
+            var numValues = jme.castToType(values,'list').value.length;
             values.value.map(function(value) {
                 var node = xml.ownerDocument.createElement(nodeName);
                 var content = xml.ownerDocument.createElement('content');
@@ -106,24 +117,26 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 content.appendChild(span);
                 node.appendChild(content);
                 topNode.appendChild(node);
-                switch(value.type) {
-                case 'string':
-                case 'number':
+                function load_string(str) {
                     var d = document.createElement('d');
-                    d.innerHTML = value.type == 'string' ? value.value : Numbas.math.niceNumber(value.value);
+                    d.innerHTML = str;
                     var newNode;
                     try {
                         newNode = xml.ownerDocument.importNode(d,true);
                     } catch(e) {
-                        d = Numbas.xml.dp.parseFromString('<d>'+value.value.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
+                        d = Numbas.xml.dp.parseFromString('<d>'+str.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
                         newNode = xml.ownerDocument.importNode(d,true);
                     }
                     while(newNode.childNodes.length) {
                         span.appendChild(newNode.childNodes[0]);
                     }
-                    break;
-                case 'html':
-                    var selection = $(value.value);
+                }
+                if(jme.isType(value,'string')) {
+                    load_string(jme.castToType(value,'string').value);
+                } else if(jme.isType(value,'number')) {
+                    load_string(Numbas.math.niceNumber(jme.castToType(value,'string')));
+                } else if(jme.isType(value,'html')) {
+                    var selection = $(jme.castToType(value,'html').value);
                     for(var i=0;i<selection.length;i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i],true));
@@ -135,8 +148,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                             }
                         }
                     }
-                    break;
-                default:
+                } else {
                     span.appendChild(xml.ownerDocument.createTextNode(value));
                 }
             });
@@ -227,7 +239,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.flipped = false;
         }
-        tryLoad(data, ['maxMarks'], this, ['marks']);
+        if(this.type!='1_n_2') {
+            tryLoad(data, ['maxMarks'], this, ['marks']);
+        }
         tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns']);
         tryLoad(data, ['warningType'], settings);
@@ -235,10 +249,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
                 choices = jme.evaluate(data.choices, scope);
-                if(settings.choices.type!='list') {
+                if(!choices || !jme.isType(choices,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }
-                settings.choices = jme.unwrapValue(choices);
+                settings.choices = jme.unwrapValue(jme.castToType(choices,'list'));
             } else {
                 settings.choices = data.choices;
             }
@@ -247,10 +261,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
                 answers = jme.evaluate(data.answers, scope);
-                if(settings.answers.type!='list') {
+                if(!answers || !jme.isType(answers,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
-                settings.answers = jme.unwrapValue(answers);
+                settings.answers = jme.unwrapValue(jme.castToType(answers,'list'));
             } else {
                 settings.answers = data.answers;
             }
@@ -331,16 +345,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         settings.minimumMarks = util.parseNumber(settings.minimumMarks) || 0;
         var minAnswers = jme.subvars(settings.minAnswersString, scope);
         minAnswers = jme.evaluate(minAnswers, scope);
-        if(minAnswers && minAnswers.type=='number') {
-            settings.minAnswers = minAnswers.value;
-        } else {
+        try {
+            settings.minAnswers = jme.castToType(minAnswers,'number').value;
+        } catch(e) {
             this.error('part.setting not present',{property: 'minimum answers'});
         }
         var maxAnswers = jme.subvars(settings.maxAnswersString, scope);
         maxAnswers = jme.evaluate(maxAnswers, scope);
-        if(maxAnswers && maxAnswers.type=='number') {
-            settings.maxAnswers = maxAnswers.value;
-        } else {
+        try {
+            settings.maxAnswers = jme.castToType(maxAnswers,'number').value;
+        } catch(e) {
             this.error('part.setting not present',{property: 'maximum answers'});
         }
         // fill layout matrix
@@ -478,8 +492,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         shuffleChoices: false,
         shuffleAnswers: false,
         matrix: [],                    //marks matrix
-        displayType: '',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
-        warningType: '',                //what to do if wrong number of responses
+        displayType: 'radiogroup',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
+        warningType: 'none',                //what to do if wrong number of responses
         layoutType: 'all',
         layoutExpression: ''
     },
@@ -511,47 +525,32 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             answerAsArray: true
         };
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope - a matrix filled with 1 for choices that should be selected, and 0 otherwise.
+     * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         var matrix = [];
         if(settings.markingMatrixString) {
             matrix = jme.evaluate(settings.markingMatrixString,scope);
-            switch(matrix.type) {
-            case 'list':
-                var numLists = 0;
-                var numNumbers = 0;
-                for(var i=0;i<matrix.value.length;i++) {
-                    switch(matrix.value[i].type) {
-                    case 'list':
-                        numLists++;
-                        break;
-                    case 'number':
-                        numNumbers++;
-                        break;
-                    default:
-                        this.error('part.mcq.matrix wrong type',{type: matrix.value[i].type});
-                    }
-                }
-                if(numLists == matrix.value.length) {
-                    matrix = matrix.value.map(function(row){    //convert TNums to javascript numbers
-                        return row.value.map(function(e){return e.value;});
-                    });
-                } else if(numNumbers == matrix.value.length) {
-                    matrix = matrix.value.map(function(e) {
-                        return [e.value];
-                    });
-                } else {
-                    this.error('part.mcq.matrix mix of numbers and lists');
-                }
+            var sig = Numbas.jme.signature;
+            var m;
+            if(m=sig.type('matrix')([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value;
+            } else if(m=sig.listof(sig.type('number'))([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value.map(function(e) {
+                    return [e.value];
+                });
                 matrix.rows = matrix.length;
                 matrix.columns = matrix[0].length;
-                break;
-            case 'matrix':
-                matrix = matrix.value;
-                break;
-            default:
+            } else if(m=sig.listof(sig.listof(sig.type('number')))([matrix])) {
+                matrix = jme.castToType(matrix,m[0]).value.map(function(row) {
+                    return row.value.map(function(e){return e.value;});
+                });
+                matrix.rows = matrix.length;
+                matrix.columns = matrix[0].length;
+            } else {
                 this.error('part.mcq.matrix not a list');
             }
             if(this.flipped) {
@@ -620,12 +619,33 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxMatrix = matrix.map(function(r){ return [r[0]>0]; });
             break;
         case 'm_n_x':
-            settings.maxMatrix = matrix.map(function(r){ return r.map(function(c){return c>0; }) });
+            switch(this.settings.displayType) {
+                case 'radiogroup':
+                    var correctTicks = [];
+                    for(var i=0; i<this.numChoices; i++) {
+                        var maxj=-1,max=0;
+                        for(var j=0;j<this.numAnswers; j++) {
+                            if(maxj==-1 || matrix[j][i]>max) {
+                                maxj = j;
+                                max = matrix[j][i];
+                            }
+                        }
+                        correctTicks.push(maxj);
+                    }
+                    settings.maxMatrix = matrix.map(function(r,j) { return r.map(function(c,i) { return j==correctTicks[i]; }) });
+                    break;
+                case 'checkbox':
+                    settings.maxMatrix = matrix.map(function(r) { return r.map(function(c){ return c>0; }) });
+                    break;
+            }
             break;
         }
         settings.matrix = matrix;
+        return settings.maxMatrix;
     },
-    /** Store the student's choices */
+    /** Store the student's choices 
+     * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
+     * */
     storeTick: function(answer)
     {
         this.setDirty(true);

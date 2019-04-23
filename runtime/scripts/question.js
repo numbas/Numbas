@@ -24,11 +24,11 @@ var math = Numbas.math;
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, gscope, store) {
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromXML(xml);
         q.finaliseLoad();
     } catch(e) {
@@ -44,15 +44,15 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
  * @param {Numbas.jme.Scope} [scope] - the global JME scope
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @returns Numbas.Question
+ * @returns {Numbas.Question}
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, gscope, store) {
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store) {
     try {
-        var q = new Question(number, exam, group, gscope, store);
+        var q = new Question(number, exam, group, scope, store);
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message},e));
     }
     return q;
 }
@@ -74,6 +74,9 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
         e.message = R('question.error',{'number':q.number+1,message:e.message});
         throw(e);
     });
+    q.signals.on('partsGenerated',function() {
+        q.setErrorCarriedForwardBackReferences();
+    })
     q.exam = exam;
     q.group = group;
     q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
@@ -274,13 +277,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(variables) {
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
+                var definition = vd.definition+'';
+                if(definition=='') {
+                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+                }
                 try {
-                    var tree = Numbas.jme.compile(vd.definition);
+                    var tree = Numbas.jme.compile(definition);
                 } catch(e) {
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
                 var vars = Numbas.jme.findvars(tree);
-                q.variablesTodo[name] = {
+                q.variablesTodo[name.toLowerCase()] = {
                     tree: tree,
                     vars: vars
                 }
@@ -298,10 +305,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
                     q.addPart(p,i);
                 });
-                q.signals.trigger('partsGenerated');
             }
+            q.signals.trigger('partsGenerated');
         });
     },
+
+    setErrorCarriedForwardBackReferences: function() {
+        var q = this;
+        this.allParts().forEach(function(p) {
+            p.settings.errorCarriedForwardReplacements.forEach(function(r) {
+                var p2 = q.getPart(r.part);
+                p2.errorCarriedForwardBackReferences[p.path] = true;
+            });
+        });
+    },
+
+    allParts: function() {
+        return this.parts.reduce(function(out, p) {
+            return out.concat([p],p.gaps,p.steps);
+        },[]);
+    },
+
     /** Add a part to the question
      * @param {Numbas.parts.Part} part
      * @param {Number} index
@@ -381,6 +405,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(Numbas.display) {
             q.display = new Numbas.display.QuestionDisplay(q);
         }
+        q.signals.on('partsGenerated', function() {
+            var i = 0;
+            q.parts.forEach(function(p) {
+                var hasName = p.assignName(i,q.parts.length-1);
+                i += hasName ? 1 : 0;
+                if(p.gaps) {
+                    var gi = 0;
+                    p.gaps.forEach(function(g) {
+                        var hasName = g.assignName(gi,p.gaps.length-1);
+                        gi += hasName ? 1 : 0;
+                    });
+                }
+                if(p.steps) {
+                    var si = 0;
+                    p.steps.forEach(function(s) {
+                        var hasName = s.assignName(si,p.steps.length-1);
+                        si += hasName ? 1 : 0;
+                    });
+                }
+            });
+        });
         q.signals.on(['variablesGenerated','partsGenerated'], function() {
             //initialise display - get question HTML, make menu item, etc.
             q.display && q.display.makeHTML();
@@ -644,13 +689,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //keep track of how many times question successfully submitted
         if(this.answered)
             this.submitted += 1;
-        //display message about success or failure
-        if(! this.answered ) {
-            if(this.display) {
-                Numbas.display.showAlert(R('question.can not submit'));
-                this.display.scrollToError();
-            }
-        }
         this.updateScore();
         if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
             this.getAdvice();
@@ -671,7 +709,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Add a callback function to run when the question's HTML is attached to the page
      *
-     * @param {function} fn
+     * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
      * @listens Numbas.Question#event:HTMLAttached
      */
@@ -680,7 +718,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
      *
-     * @param {function} fn
+     * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
      * @listens Numbas.Question#event:variablesGenerated
      */

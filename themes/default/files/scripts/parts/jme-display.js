@@ -1,6 +1,7 @@
 Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jme-display','jme'],function() {
     var display = Numbas.display;
     var extend = Numbas.util.extend;
+    var jme = Numbas.jme;
     /** Display code for a {@link Numbas.parts.JMEPart}
      * @constructor
      * @augments Numbas.display.PartDisplay
@@ -15,24 +16,26 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.studentAnswer = Knockout.observable('');
-        /** The correct answer
-         * @member {observable|JME} correctAnswer
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.correctAnswer = p.settings.correctAnswer;
+        Knockout.computed(function() {
+            p.storeAnswer(this.studentAnswer());
+        },this);
         /** Should the LaTeX rendering of the student's answer be shown?
          * @member {boolean} showPreview
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.showPreview = p.settings.showPreview;
+        /** The correct answer
+         * @member {observable|JME} correctAnswer
+         * @memberof Numbas.display.JMEPartDisplay
+         */
+        this.correctAnswer = Knockout.observable('');
         /** The correct answer, in LaTeX form
          * @member {observable|TeX} correctAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.correctAnswerLaTeX = Numbas.jme.display.exprToLaTeX(this.correctAnswer,p.settings.answerSimplification,p.question.scope);
-        ko.computed(function() {
-            p.storeAnswer(this.studentAnswer());
-        },this);
+        this.correctAnswerLaTeX = Knockout.observable('');
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
+
         /** The student's answer, in LaTeX form
          * @member {observable|TeX} studentAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
@@ -43,7 +46,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             this.removeWarnings();
             try {
-                var tex = Numbas.jme.display.exprToLaTeX(studentAnswer,'',p.question.scope);
+                var tex = jme.display.exprToLaTeX(studentAnswer,'',p.question.scope);
                 if(tex===undefined)
                     throw(new Numbas.Error('display.part.jme.error making maths'));
             }
@@ -52,19 +55,20 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             }
             if(p.settings.checkVariableNames) {
-                var tree = Numbas.jme.compile(studentAnswer,p.question.scope);
-                var usedvars = Numbas.jme.findvars(tree);
+                var tree = jme.compile(studentAnswer,p.question.scope);
+                var usedvars = jme.findvars(tree);
                 var failExpectedVariableNames = false;
+                var expectedVariableNames = jme.findvars(jme.compile(this.correctAnswer()));
                 var unexpectedVariableName;
                 for(var i=0;i<usedvars.length;i++) {
-                    if(!p.settings.expectedVariableNames.contains(usedvars[i])) {
+                    if(!expectedVariableNames.contains(usedvars[i])) {
                         failExpectedVariableNames = true;
                         unexpectedVariableName = usedvars[i];
                         break;
                     }
                 }
                 if( failExpectedVariableNames ) {
-                    var suggestedNames = unexpectedVariableName.split(Numbas.jme.re.re_short_name);
+                    var suggestedNames = unexpectedVariableName.split(jme.re.re_short_name);
                     if(suggestedNames.length>3) {
                         var suggestion = [];
                         for(var i=1;i<suggestedNames.length;i+=2) {
@@ -95,6 +99,11 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
     }
     display.JMEPartDisplay.prototype =
     {
+        updateCorrectAnswer: function(answer) {
+            var p = this.part;
+            this.correctAnswer(answer);
+            this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.question.scope));
+        },
         restoreAnswer: function()
         {
             this.studentAnswer(this.part.studentAnswer);

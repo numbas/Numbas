@@ -1,8 +1,8 @@
 studentNumber (The student's answer, parsed as a number):
     if(settings["allowFractions"],
-        parseNumber_or_fraction(studentAnswer,settings["notationStyles"])
+        parsedecimal_or_fraction(studentAnswer,settings["notationStyles"])
     ,
-        parseNumber(studentAnswer,settings["notationStyles"])
+        parsedecimal(studentAnswer,settings["notationStyles"])
     )
 
 isInteger (Is the student's answer an integer?):
@@ -43,19 +43,23 @@ studentPrecision:
         0
     )
 
-minvalue:
+raw_minvalue:
     switch(
         settings["precisionType"]="dp", precround(settings["minvalue"],studentPrecision),
         settings["precisionType"]="sigfig", siground(settings["minvalue"],studentPrecision),
         settings["minvalue"]
     )
 
-maxvalue:
+raw_maxvalue:
     switch(
         settings["precisionType"]="dp", precround(settings["maxvalue"],studentPrecision),
         settings["precisionType"]="sigfig", siground(settings["maxvalue"],studentPrecision),
         settings["maxvalue"]
     )
+
+minvalue: min(raw_minvalue,raw_maxvalue)
+
+maxvalue: max(raw_minvalue,raw_maxvalue)
 
 validNumber (Is the student's answer a valid number?):
     if(isNaN(studentNumber),

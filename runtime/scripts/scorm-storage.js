@@ -433,7 +433,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             }
             return pobj;
         } catch(e) {
-            throw(new Numbas.Error('scorm.error loading part',{part:Numbas.util.nicePartName(part.path),message:e.message}));
+            throw(new Numbas.Error('scorm.error loading part',{part:part.name,message:e.message}));
         }
     },
     /** Record duration of the current session

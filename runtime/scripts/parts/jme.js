@@ -15,12 +15,15 @@ Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','mark
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-var nicePartName = util.nicePartName;
 var Part = Numbas.parts.Part;
 /** Judged Mathematical Expression
  *
  * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
@@ -28,9 +31,9 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
 {
     var settings = this.settings;
     util.copyinto(JMEPart.prototype.settings,settings);
+    settings.valueGenerators = {};
     settings.mustHave = [];
     settings.notAllowed = [];
-    settings.expectedVariableNames = [];
 }
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 {
@@ -48,6 +51,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var parametersPath = 'answer';
         tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
         tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
+        
+        var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
+        if(valueGeneratorsNode) {
+            var valueGenerators = valueGeneratorsNode.selectNodes('generator');
+            for(var i=0;i<valueGenerators.length;i++) {
+                var generator = {};
+                tryGetAttribute(generator,xml,valueGenerators[i],['name','value']);
+                this.addValueGenerator(generator.name, generator.value);
+            }
+        }
+
         //max length and min length
         tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
         var messageNode = xml.selectSingleNode('answer/maxlength/message');
@@ -96,25 +110,44 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             if(messageNode)
                 settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
         }
-        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
-        var expectedVariableNamesNode = xml.selectSingleNode('answer/expectedvariablenames');
-        if(expectedVariableNamesNode)
-        {
-            var nameNodes = expectedVariableNamesNode.selectNodes('string');
-            for(var i=0; i<nameNodes.length; i++)
-                settings.expectedVariableNames.push(Numbas.xml.getTextContent(nameNodes[i]).toLowerCase().trim());
+        //get pattern the student's answer must match
+        var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
+        if(mustMatchNode) {
+            //partial credit for failing not-allowed test
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
+            var messageNode = mustMatchNode.selectSingleNode('message');
+            if(messageNode) {
+                settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            }
         }
+
+        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
     },
     loadFromJSON: function(data) {
+        var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['vsetRangePoints'], settings);
+        var vsetRange = tryGet(data,'vsetRange');
+        if(vsetRange) {
+            settings.vsetRangeStart = util.parseNumber(vsetRange[0]);
+            settings.vsetRangeEnd = util.parseNumber(vsetRange[1]);
+        }
         tryLoad(data.maxlength, ['length', 'partialCredit', 'message'], settings, ['maxLength', 'maxLengthPC', 'maxLengthMessage']);
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+        var valuegenerators = tryGet(data,'valuegenerators');
+        if(valuegenerators) {
+            valuegenerators.forEach(function(g) {
+                p.addValueGenerator(g.name,g.value);
+            });
+        }
     },
     resume: function() {
         if(!this.store) {
@@ -165,6 +198,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
      * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
      * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+     * @property {String} mustMatchPattern - A pattern that the student's answer must match
+     * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
+     * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
+     * @property {String} nameToCompare - the name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
      */
     settings:
     {
@@ -191,7 +228,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowed: [],
         notAllowedPC: 0,
         notAllowedMessage: '',
-        notAllowedShowStrings: false
+        notAllowedShowStrings: false,
+        mustMatchPattern: '',
+        mustMatchPC: 0,
+        mustMatchMessage: '',
+        nameToCompare: ''
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -209,14 +250,16 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
+     * @returns {JME}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        settings.answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
+        var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var expr = jme.subvars(settings.correctAnswerString,scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
-            settings.answerSimplification,
+            answerSimplification,
             scope
         );
         if(settings.correctAnswer == '' && this.marks>0) {
@@ -224,6 +267,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
+        return settings.correctAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -236,6 +280,21 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TString(this.studentAnswer);
+    },
+
+    /** Add a value generator expression to the list in this part's settings.
+     * @param {String} name
+     * @param {JME} expr
+     */
+    addValueGenerator: function(name, expr) {
+        try {
+            var expression = new jme.types.TExpression(expr);
+            if(expression.tree) {
+                this.settings.valueGenerators[name] = expression;
+            }
+        } catch(e) {
+            this.error('part.jme.invalid value generator expression',{name: name, expr: expr, message: e.message}, e);
+        }
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

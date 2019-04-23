@@ -35,11 +35,13 @@ studentPrecision (Maximum precision student used, or the required precision, whi
 
 allowFractions: settings["allowFractions"]
 
+allowedNotationStyles: ["plain","en","si-en"]
+
 studentNumbers:
     if(settings["allowFractions"],
-        map(map(parseNumber_or_fraction(c, "en"), c, row), row, studentAnswer)
+        map(map(parseNumber_or_fraction(c, allowedNotationStyles), c, row), row, studentAnswer)
     ,
-        map(map(parseNumber(c, "en"), c, row), row, studentAnswer)
+        map(map(parseNumber(c, allowedNotationStyles), c, row), row, studentAnswer)
     )
 
 studentMatrix (The student's answer, with each cell parsed to numbers): 

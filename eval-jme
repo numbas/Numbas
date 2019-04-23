@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+/** Evaluate a JME expression and print its result 
+ *
+ * Example:
+ *      ./eval-jme "1+2"
+ * produces
+ *      3
+ *
+ */
+
+require('./tests/numbas-runtime.js');
+require('./tests/locales.js');
+require('./tests/marking_scripts.js');
+
+function die(e) {
+    console.error(e.message);
+    process.exit(1);
+}
+
+Numbas.runImmediately(['jme','localisation'],function() {
+    const expr = process.argv[2];
+    try {
+        const res = Numbas.jme.builtinScope.evaluate(expr);
+        console.log(Numbas.jme.display.treeToJME({tok: res}, {ignorestringattributes: true, wrapexpressions: true}));
+    } catch(e) {
+        die(e);
+    }
+});
+

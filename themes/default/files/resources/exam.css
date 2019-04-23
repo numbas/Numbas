@@ -288,6 +288,13 @@ input.jme {
     border-bottom-color: #34444f;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
+.student-answer.has-warnings input {
+    border-top-style: dashed;
+    border-left-style: dashed;
+    border-right-style: dashed;
+    border-color: hsl(30,20%,50%);
+    background: hsl(30,20%,95%);
+}
 .part:not(.dirty) > .student-answer.answered input {
     border: 1px solid;
     border-color: hsl(204,72%,50%);
@@ -393,15 +400,20 @@ input.jme {
 	margin-top: 1em;
 }
 .menuButtons button {
-	min-width: 6em;
+	min-width: 90%;
+}
+
+#pauseBtn {
+    min-width: 6em;
+    margin-bottom: 1em;
 }
 
 /* front/exit pages */
 
-#infoDisplay table .rtd {
+#performance-summary td {
 	text-align: right;
 }
-#infoDisplay table .qtd {
+#question-breakdown td {
 	text-align: center;
 }
 #frontpage table {
@@ -413,6 +425,25 @@ input.jme {
 
 #frontpage td {
 	padding-left: 1em;
+}
+
+#frontpage .password {
+    margin: 1em 0;
+    display: flex;
+    line-height: 2em;
+}
+#frontpage .password input {
+    flex-grow: 1;
+    margin: 0 0.5em;
+    text-transform: uppercase;
+}
+#frontpage .password-feedback {
+  text-align: center;
+  line-height: 1.666em;
+}
+
+.input-group-addon.invisible {
+    display: none;
 }
 
 #infoDisplay .info-buttons {
@@ -469,8 +500,6 @@ table {
 
 .statement {
 	margin: 1em 0;
-	padding-left: 1em;
-	background: #cfc;
 }
 .part {
 	margin: .5em 0;
@@ -481,15 +510,11 @@ table {
     margin-bottom: 0;
 }
 
-.question > .parts {
+.parts > .part.has-name {
 	margin-left: 1em;
 }
 .partheader {
 	margin-left: -1em;
-}
-
-.question .parts {
-	margin-left: 1em;
 }
 
 .part.type-gapfill > .prompt .part {
@@ -614,6 +639,16 @@ table {
 	z-index: 1;
 	max-width: 20em;
 	display: inline-block;
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-color: hsl(30, 20%, 50%);
+    background-color: hsl(30, 20%, 95%);
+    color: #333;
+}
+.warnings.shown {
+    opacity: 1;
+}
+.warnings.alert-warning {
 }
 .warning {
 	margin: 0.1em;
@@ -629,6 +664,7 @@ table {
 
 .part .partFeedback {
     margin-top: 1em;
+    text-align: right;
 }
 
 .part .feedbackMessages {
@@ -696,6 +732,44 @@ table {
 input[type=text], input[type=number] {
 	width: 60px;
 	text-align: center;
+}
+
+#lightbox {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: hsla(0,0%,50%,95%);
+    z-index: 1000;
+    padding: 1em;
+}
+#lightbox:not(.shown) {
+    display: none;
+    opacity: 0;
+}
+#lightbox.shown {
+    animation: lightbox-fade-in 0.5s;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+}
+@keyframes lightbox-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+#lightbox img {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    box-shadow: 0em 0em 0.2em 0.2em hsla(0,0%,0%,30%);
+    cursor: pointer;
 }
 
 .monospace {

@@ -41,7 +41,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     /** Make a new function, whose definition is written in JME.
      * @param {Object} fn - contains `definition` and `paramNames`.
      * @param {Numbas.jme.Scope} scope
-     * @returns {function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
+     * @returns {Function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
      */
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
@@ -61,7 +61,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Object} fn - contains `definition` and `paramNames`.
      * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
+     * @returns {Function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
      */
     makeJavascriptFunction: function(fn,withEnv) {
         var paramNames = fn.paramNames.slice();
@@ -101,7 +101,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Object} tmpfn - contains `definition`, `name`, `language`, `parameters`
      * @param {Numbas.jme.Scope} scope
      * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {Object} - contains `outcons`, `intype`, `evaluate`
+     * @returns {Numbas.jme.funcObj}
      */
     makeFunction: function(tmpfn,scope,withEnv) {
         var intype = [],
@@ -112,11 +112,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         });
         var outcons = jme.types[tmpfn.outtype];
         var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
-        fn.outcons = outcons;
-        fn.intype = intype;
         fn.paramNames = paramNames;
         fn.definition = tmpfn.definition;
-        fn.name = tmpfn.name;
+        fn.name = tmpfn.name.toLowerCase();
         fn.language = tmpfn.language;
         try {
             switch(fn.language)
@@ -148,9 +146,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         for(var i=0;i<tmpFunctions.length;i++)
         {
             var cfn = jme.variables.makeFunction(tmpFunctions[i],scope,withEnv);
-            if(functions[cfn.name]===undefined)
-                functions[cfn.name] = [];
-            functions[cfn.name].push(cfn);
+            scope.addFunction(cfn);
         }
         return functions;
     },
@@ -159,6 +155,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables still to evaluate
      * @param {Numbas.jme.Scope} scope
      * @param {String[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
+     * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - a function to call when a dependency needs to be computed.
      * @returns {Numbas.jme.token}
      */
     computeVariable: function(name,todo,scope,path,computeFn)
@@ -190,7 +187,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
-                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message}));
+                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message},e));
                     }
                 }
             }
@@ -202,7 +199,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var value = jme.evaluate(v.tree,scope);
             scope.setVariable(name,value);
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message}));
+            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message},e));
         }
         return value;
     },
@@ -210,7 +207,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
-     * @param {function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
+     * @param {Function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
      * @returns {Object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
      */
     makeVariables: function(todo,scope,condition,computeFn)
@@ -283,6 +280,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     variableDependants: function(todo,ancestors) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
+        /** Find the names of the variables this variable depends on
+         * @param {String} name - the name of the variable to consider
+         * @param {Array.<String>} path - the chain of variables that have led to the one being considered, used to detect circular references
+         * @returns {Array.<String>} - the names of the variables this one depends on
+         */
         function findDependants(name,path) {
             path = path || [];
             // stop at circular references
@@ -332,10 +334,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * Ignores iframes and elements with the attribute `nosubvars`.
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
+     * @see Numbas.jme.variables.DOMcontentsubber
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
-        return subber.subvars(element);
+        subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
      * @param {String} str - the contents of the text node
@@ -346,8 +349,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str,'{','}');
-        if(bits.length==1)
+        if(bits.length==1) {
             return [doc.createTextNode(str)];
+        }
+        /** Get HTML content for a given JME token
+         * @param {Numbas.jme.token} token
+         * @returns {Element|String}
+         */
         function doToken(token) {
             switch(token.type){
             case 'html':
@@ -389,43 +397,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
-                d = importNode(doc,d,true);
+                d = doc.importNode(d,true);
                 out[i] = $(d).contents();
             }
         }
         return out;
     }
 };
-// cross-browser importNode from http://www.alistapart.com/articles/crossbrowserscripting/
-// because IE8 is completely mentile and won't let you copy nodes between documents in anything approaching a reasonable way
-function importNode(doc,node,allChildren) {
-    var ELEMENT_NODE = 1;
-    var TEXT_NODE = 3;
-    var CDATA_SECTION_NODE = 4;
-    var COMMENT_NODE = 8;
-    switch (node.nodeType) {
-        case ELEMENT_NODE:
-            var newNode = doc.createElement(node.nodeName);
-            var il;
-            /* does the node have any attributes to add? */
-            if (node.attributes && (il=node.attributes.length) > 0) {
-                for (var i = 0; i < il; i++)
-                    newNode.setAttribute(node.attributes[i].nodeName, node.getAttribute(node.attributes[i].nodeName));
-            }
-            /* are we going after children too, and does the node have any? */
-            if (allChildren && node.childNodes && (il=node.childNodes.length) > 0) {
-                for (var i = 0; i<il; i++)
-                    newNode.appendChild(importNode(doc,node.childNodes[i], allChildren));
-            }
-            return newNode;
-        case TEXT_NODE:
-        case CDATA_SECTION_NODE:
-            return doc.createTextNode(node.nodeValue);
-        case COMMENT_NODE:
-            return doc.createComment(node.nodeValue);
-    }
-};
-function DOMcontentsubber(scope) {
+
+/** An object which substitutes JME values into HTML.
+ * JME expressions found inside text nodes are evaluated with respect to the given scope.
+ * @param {Numbas.jme.Scope} scope
+ * @memberof Numbas.jme.variables
+ * @constructor
+ */
+var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
 }
@@ -450,6 +436,8 @@ DOMcontentsubber.prototype = {
         } else if(element.hasAttribute('nosubvars')) {
             return element;
         } else if($.nodeName(element,'object')) {
+            /** Substitute content into the object's root element
+             */
             function go() {
                 jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
             }

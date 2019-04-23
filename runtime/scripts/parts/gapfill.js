@@ -18,11 +18,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart)
-{
+var GapFillPart = Numbas.parts.GapFillPart = function(path, question, parentPart, store) {
     util.copyinto(GapFillPart.prototype.settings,this.settings);
 }
 GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
@@ -88,7 +91,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
     /** Reveal the answers to all of the child gaps
-     * Extends {@link Numbas.parts.Part.revealAnswer}
+     * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+     * @extends Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -122,6 +126,10 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     studentAnswerAsJME: function() {
         return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
+    },
+
+    getCorrectAnswer: function(scope) {
+        return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {

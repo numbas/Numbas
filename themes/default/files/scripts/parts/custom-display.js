@@ -23,9 +23,10 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.CustomPartDisplay
          */
-        this.studentAnswer = ko.observable({valid: false, value: this.part.studentAnswer});
-        this.correctAnswer = ko.observable({valid: true, value: this.input_options.correctAnswer});
-        ko.computed(function() {
+        this.studentAnswer = Knockout.observable({valid: false, value: this.part.studentAnswer});
+        this.correctAnswer = Knockout.observable({});
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
+        Knockout.computed(function() {
             var answer = this.studentAnswer();
             if(Numbas.util.objects_equal(answer.value, p.stagedAnswer) || !answer.valid && p.stagedAnswer===undefined) {
                 return;
@@ -39,8 +40,12 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
                 answer.warnings.forEach(function(warning){ p.giveWarning(warning); });
             }
         },this);
+        this.alwaysShowWarnings = {radios: true, checkboxes: true, dropdown: true}[this.input_widget] || false;
     };
     display.CustomPartDisplay.prototype = {
+        updateCorrectAnswer: function(answer) {
+            this.correctAnswer({valid: true, value: answer});
+        },
         restoreAnswer: function() {
             this.studentAnswer({valid: this.part.studentAnswer!==undefined, value: this.part.studentAnswer});
         }

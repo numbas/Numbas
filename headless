@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+
+require('./tests/numbas-runtime.js');
+require('./tests/locales.js');
+require('./tests/marking_scripts.js');
+const fs = require('fs');
+const path = require('path');
+const {Console} = require('console');
+const stream = require('stream');
+
+var captured_log = '';
+const real_console = new Console(process.stdout,process.stderr);
+global.alert = function(m) { real_console.error(m); }
+const s = new stream.Writable({write: function(chunk,enc,next) {
+    captured_log += chunk;
+    next();
+}});
+const fake_console = new Console(s,process.stderr);
+Object.keys(console).forEach(function(n) {
+    if(typeof console[n] == 'function' && typeof fake_console[n] == 'function') {
+        console[n] = fake_console[n];
+    }
+});
+
+var standard_reqs = ['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question']
+
+class PartCreditError extends Error {
+}
+PartCreditError.prototype.originalMessages = ['headless.not full credit'];
+
+function tick(correct) {
+    return correct ? '✔' : '✖';
+}
+
+function die(e) {
+    process.stdout.write(JSON.stringify({success:false, message: e.message, originalMessages: e.originalMessages || []}));
+    end();
+}
+function succeed() {
+    process.stdout.write(JSON.stringify({success:true}));
+    end();
+}
+function end(code) {
+    if(captured_log) {
+        process.stderr.write(`------------\nConsole log:\n${captured_log}\n----------`);
+    }
+    process.exit(code);
+}
+
+function parse_numbasobject(data) {
+    var re_header = /^\/\/ Numbas version: [^\n]*\n/;
+    if(!data.match(re_header)) {
+        throw(new Error("Not a valid .exam file"));
+    }
+    data = data.replace(re_header,'');
+    return JSON.parse(data);
+}
+
+function test_question(q) {
+    q.generateVariables();
+    var promise = q.signals.on('ready').then(function() {
+        q.parts.forEach(p=>{
+            test_part(p);
+        });
+    }).catch(e=>{
+        die(e);
+    });
+    return promise;
+}
+
+function test_part(p) {
+    if(p.type=='information') {
+        return;
+    }
+    if(p.type=='gapfill' && p.gaps.length==0) {
+        return;
+    }
+    var answer = p.getCorrectAnswer(p.getScope());
+    p.storeAnswer(answer);
+    p.setStudentAnswer();
+    p.mark(p.getScope());
+    if(Numbas.math.precround(p.credit,5)!=1) {
+        const niceName = Numbas.util.capitalise(Numbas.util.nicePartName(p.path));
+        real_console.error(`✖ ${niceName}: ${p.type}`);
+        real_console.error(`Answer: ${JSON.stringify(answer)}`);
+        real_console.error(`Credit: ${p.credit}`);
+        p.markingFeedback.filter(m=>m.message).forEach(m=>real_console.error(`* ${m.message}`));
+        throw(new PartCreditError(`${niceName} got ${p.credit} credit`));
+    }
+}
+
+function run(numbasobject) {
+    try {
+        Numbas.debug = function() {};
+        var data = parse_numbasobject(numbasobject);
+        Numbas.custom_part_types = {};
+        data.custom_part_types.forEach(d=>Numbas.custom_part_types[d.short_name] = d);
+        var extensions = data.extensions.map(p=>{
+            var abspath = path.resolve(p);
+            var location = path.basename(abspath);
+            fs.readdirSync(abspath).forEach(f=>{
+                if(path.extname(f)=='.js') {
+                    const fname = path.resolve(abspath,f);
+                    const obj = require(fname);
+                }
+            });
+            return `extensions/${location}/${location}.js`;
+        });
+        var reqs = standard_reqs.concat(extensions);
+        Numbas.runImmediately(reqs,function() {
+            for(var name in Numbas.custom_part_types) {
+                Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+            };
+            var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
+            for(var extension in Numbas.extensions) {
+                if('scope' in Numbas.extensions[extension]) {
+                    scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
+                }
+            }
+            var promises = [];
+            data.question_groups.forEach(group=>{
+                group.questions.forEach(q_data=>{
+                    var q = Numbas.createQuestionFromJSON(q_data, 0, null, null, scope);
+                    var promise = test_question(q);
+                    promises.push(promise);
+                });
+            });
+            Promise.all(promises).then(function(e) {
+                succeed();
+            }).catch(function(e) {
+                die(e);
+            });
+        });
+    } catch(e) {
+        die(e);
+    }
+}
+
+if(process.stdin.isTTY) {
+    real_console.error("You must pipe a question definition into this command.");
+    process.exit(1);
+}
+
+var data = '';
+process.stdin.setEncoding('utf-8');
+process.stdin.on('readable', function() {
+    var chunk;
+    while (chunk = process.stdin.read()) {
+        data += chunk;
+    }
+});
+
+process.stdin.on('end', function () {
+    run(data);
+});

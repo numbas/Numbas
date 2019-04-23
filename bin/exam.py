@@ -147,6 +147,7 @@ class Exam(object):
                 'showresultspage': True,
                 'onleave': Event('onleave','none','You have not finished the current question'),
                 'preventleave': True,
+                'startpassword': '',
             }
 
         self.timing = { 
@@ -173,7 +174,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave'],exam.navigation)
+            tryLoad(nav,['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -248,7 +249,8 @@ class Exam(object):
             'browse': strcons_fix(self.navigation['browse']),
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
             'showresultspage': strcons_fix(self.navigation['showresultspage']),
-            'preventleave': strcons_fix(self.navigation['preventleave'])
+            'preventleave': strcons_fix(self.navigation['preventleave']),
+            'startpassword': strcons_fix(self.navigation['startpassword'])
         }
 
         nav.append(self.navigation['onleave'].toxml())
@@ -592,6 +594,8 @@ class VariableReplacement(object):
         return replacement
 
 class Part(object):
+    useCustomName = False
+    customName = ''
     prompt = ''
     kind = ''
     stepsPenalty = 0
@@ -611,7 +615,7 @@ class Part(object):
         self.variable_replacements = []
 
     def loadDATA(self, builder, data):
-        tryLoad(data,['stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
+        tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
 
         if haskey(data,'marks'):
             self.marks = data['marks']
@@ -643,6 +647,8 @@ class Part(object):
                         ])
 
         part.attrib = {
+            'usecustomname': strcons_fix(self.useCustomName),
+            'customName': strcons_fix(self.customName),
             'type': strcons(self.kind), 
             'marks': strcons_fix(self.marks), 
             'stepspenalty': strcons_fix(self.stepsPenalty), 
@@ -696,17 +702,18 @@ class JMEPart(Part):
     vsetRangeEnd = 1
     vsetRangePoints = 5
     checkVariableNames = False
+    valueGenerators = []
 
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
 
-        self.maxLength = Restriction('maxlength',0,'Your answer is too long.')
+        self.maxLength = LengthRestriction('maxlength',0,'Your answer is too long.')
         self.maxLength.length = 0
-        self.minLength = Restriction('minlength',0,'Your answer is too short.')
+        self.minLength = LengthRestriction('minlength',0,'Your answer is too short.')
         self.minLength.length = 0
-        self.mustHave = Restriction('musthave',0,'Your answer does not contain all required elements.')
-        self.notAllowed = Restriction('notallowed',0,'Your answer contains elements which are not allowed.')
-        self.expectedVariableNames = Restriction('expectedvariablenames')
+        self.mustHave = StringRestriction('musthave',0,'Your answer does not contain all required elements.')
+        self.notAllowed = StringRestriction('notallowed',0,'Your answer contains elements which are not allowed.')
+        self.mustMatchPattern = PatternRestriction('mustmatchpattern')
     
     def loadDATA(self, builder, data):
         super(JMEPart,self).loadDATA(builder, data)
@@ -722,19 +729,15 @@ class JMEPart(Part):
         tryLoad(data,'checkingAccuracy',self)
 
         if haskey(data,'maxlength'):
-            self.maxLength = builder.restriction('maxlength',data['maxlength'],self.maxLength)
+            self.maxLength = builder.length_restriction('maxlength',data['maxlength'],self.maxLength)
         if haskey(data,'minlength'):
-            self.minLength = builder.restriction('minlength',data['minlength'],self.minLength)
+            self.minLength = builder.length_restriction('minlength',data['minlength'],self.minLength)
         if haskey(data,'musthave'):
-            self.mustHave = builder.restriction('musthave',data['musthave'],self.mustHave)
+            self.mustHave = builder.string_restriction('musthave',data['musthave'],self.mustHave)
         if haskey(data,'notallowed'):
-            self.notAllowed = builder.restriction('notallowed',data['notallowed'],self.notAllowed)
-        if haskey(data,'expectedvariablenames'):
-            self.expectedVariableNames = Restriction('expectedvariablenames')
-            try:
-                self.expectedVariableNames.strings = list(case_insensitive_get(data,'expectedvariablenames'))
-            except TypeError:
-                raise ExamError('expected variable names setting %s is not a list' % data['expectedvariablenames'])
+            self.notAllowed = builder.string_restriction('notallowed',data['notallowed'],self.notAllowed)
+        if haskey(data,'mustmatchpattern'):
+            self.mustMatchPattern = builder.pattern_restriction('mustmatchpattern',data['mustmatchpattern'],self.mustMatchPattern)
 
         if haskey(data,'vsetrange'):
             vsetrange = case_insensitive_get(data,'vsetrange')
@@ -742,12 +745,16 @@ class JMEPart(Part):
                 self.vsetRangeStart = vsetrange[0]
                 self.vsetRangeEnd = vsetrange[1]
 
+        if haskey(data,'valuegenerators'):
+            self.valueGenerators = case_insensitive_get(data,'valuegenerators')
+
     def toxml(self):
         part = super(JMEPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['correctanswer',['math']],
                                 ['checking',
-                                        ['range']
+                                        ['range'],
+                                        ['valuegenerators'],
                                 ]
                             ]))
 
@@ -767,18 +774,23 @@ class JMEPart(Part):
                 'failurerate': strcons_fix(self.failureRate)
         }
         checking.find('range').attrib = {'start': strcons_fix(self.vsetRangeStart), 'end': strcons_fix(self.vsetRangeEnd),  'points': strcons_fix(self.vsetRangePoints)}
+
+        valueGenerators = checking.find('valuegenerators')
+        for g in self.valueGenerators:
+            generator = etree.Element('generator')
+            generator.attrib = {'name': g['name'], 'value': g['value']}
+            valueGenerators.append(generator)
+
         answer.append(self.maxLength.toxml())
         answer.append(self.minLength.toxml())
         answer.append(self.mustHave.toxml())
         answer.append(self.notAllowed.toxml())
-        answer.append(self.expectedVariableNames.toxml())
-        
+        answer.append(self.mustMatchPattern.toxml())
+
         return part
 
 class Restriction:
     message = ''
-    length = -1
-    showStrings = False
 
     def __init__(self,name='',partialCredit=0,message=''):
         self.name = name
@@ -786,33 +798,83 @@ class Restriction:
         self.partialCredit = partialCredit
         self.message = message
     
-    @staticmethod
-    def fromDATA(builder, name, data, restriction=None):
+    @classmethod
+    def fromDATA(cls, builder, name, data, restriction=None):
         if restriction==None:
-            restriction = Restriction(name)
-        tryLoad(data,['showStrings','partialCredit','message','length'],restriction)
-        if haskey(data,'strings'):
-            for string in data['strings']:
-                restriction.strings.append(string)
+            restriction = cls(name)
+        tryLoad(data,['partialCredit','message'],restriction)
 
         return restriction
 
     def toxml(self):
         restriction = makeTree([self.name,'message'])
 
-        restriction.attrib = {'partialcredit': strcons_fix(self.partialCredit)+'%', 'showstrings': strcons_fix(self.showStrings)}
+        restriction.attrib = {'partialcredit': strcons_fix(self.partialCredit)+'%'}
+
+        restriction.find('message').append(makeContentNode(self.message))
+
+        return restriction
+
+class LengthRestriction(Restriction):
+    length = -1
+
+    @classmethod
+    def fromDATA(cls, builder, name, data, restriction=None):
+        restriction = super().fromDATA(builder,name,data,restriction)
+        tryLoad(data,['length'],restriction)
+        return restriction
+
+    def toxml(self):
+        restriction = super().toxml()
         if int(self.length)>=0:
             restriction.attrib['length'] = strcons_fix(self.length)
+
+        return restriction
+
+class StringRestriction(Restriction):
+    showStrings = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        self.strings = []
+
+    @classmethod
+    def fromDATA(cls, builder, name, data, restriction=None):
+        restriction = super().fromDATA(builder,name,data,restriction)
+        tryLoad(data,['showStrings'],restriction)
+        if haskey(data,'strings'):
+            for string in data['strings']:
+                restriction.strings.append(string)
+        return restriction
+
+    def toxml(self):
+        restriction = super().toxml()
+
+        restriction.attrib['showstrings'] = strcons_fix(self.showStrings)
 
         for s in self.strings:
             string = etree.Element('string')
             string.text = strcons(s)
             restriction.append(string)
 
-        restriction.find('message').append(makeContentNode(self.message))
-
         return restriction
 
+class PatternRestriction(Restriction):
+    pattern = ''
+    nameToCompare = ''
+
+    @classmethod
+    def fromDATA(cls, builder, name, data, restriction=None):
+        restriction = super().fromDATA(builder,name,data,restriction)
+        tryLoad(data,['pattern','nameToCompare'],restriction)
+        return restriction
+
+    def toxml(self):
+        restriction = super().toxml()
+        restriction.attrib['pattern'] = strcons_fix(self.pattern)
+        restriction.attrib['nameToCompare'] = strcons_fix(self.nameToCompare)
+
+        return restriction
 
 class PatternMatchPart(Part):
     kind = 'patternmatch'
@@ -864,6 +926,7 @@ class NumberEntryPart(Part):
     precisionPartialCredit = 0
     precisionMessage = ''
     showPrecisionHint = True
+    showFractionHint = True
     strictPrecision = True
 
     def __init__(self,marks=0,prompt=''):
@@ -872,7 +935,7 @@ class NumberEntryPart(Part):
     def loadDATA(self, builder, data):
         super(NumberEntryPart,self).loadDATA(builder, data)
 
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint'],self)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint','showFractionHint'],self)
         if self.checkingType == 'range':
             if haskey(data,'answer'):
                 self.maxvalue = self.minvalue = data['answer']
@@ -893,6 +956,7 @@ class NumberEntryPart(Part):
             'checkingType': strcons(self.checkingType),
             'inputstep': strcons_fix(self.inputStep),
             'allowfractions': strcons_fix(self.allowFractions),
+            'showfractionhint': strcons_fix(self.showFractionHint),
             'notationstyles': strcons_fix(','.join(self.notationStyles)),
             'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
             'correctanswerstyle': strcons_fix(self.correctAnswerStyle),
@@ -1250,8 +1314,15 @@ class ExamBuilder(object):
     def function(self, name, data):
         return Function.fromDATA(self, name, data)
 
-    def restriction(self, name, data, restriction=None):
-        return Restriction.fromDATA(self, name, data, restriction)
+    def string_restriction(self, name, data, restriction=None):
+        return StringRestriction.fromDATA(self, name, data, restriction)
+
+    def length_restriction(self, name, data, restriction=None):
+        return LengthRestriction.fromDATA(self, name, data, restriction)
+
+    def pattern_restriction(self, name, data, restriction=None):
+        return PatternRestriction.fromDATA(self, name, data, restriction)
+
 
     def variable_replacement(self, data):
         return VariableReplacement.fromDATA(self, data)

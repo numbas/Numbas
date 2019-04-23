@@ -18,10 +18,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Number entry part - student's answer must be within given range, and written to required precision.
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var NumberEntryPart = Numbas.parts.NumberEntryPart = function(xml, path, question, parentPart, loading)
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store)
 {
     var settings = this.settings;
     util.copyinto(NumberEntryPart.prototype.settings,settings);
@@ -32,7 +36,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions'],['correctAnswerFraction','correctAnswerStyle','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
         var answerNode = xml.selectSingleNode('answer');
         var notationStyles = answerNode.getAttribute('notationstyles');
@@ -49,11 +53,14 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
+        if('answer' in data) {
+            settings.minvalueString = settings.maxvalueString = data.answer+'';
+        }
         tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
         settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
@@ -64,7 +71,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message);
+            this.error(e.message,{},e);
         }
         this.stagedAnswer = '';
         if(Numbas.display) {
@@ -102,6 +109,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
      * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
      * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
+     * @property {Boolean} showPrecisionHint - show a hint about the required precision next to the input?
+     * @property {Boolean} showFractionHint - show a hint that the answer should be a fraction next to the input?
      */
     settings:
     {
@@ -121,7 +130,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         mustBeReduced: false,
         mustBeReducedPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
-        showPrecisionHint: true
+        showPrecisionHint: true,
+        showFractionHint: true
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}
@@ -139,6 +149,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
+     * @returns {String}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -152,29 +164,34 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         }
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
-        if(minvalue && minvalue.type=='number') {
-            minvalue = minvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('minimum value')}));
+        try {
+            if(minvalue.type=='number') {
+                minvalue.value -= 1e-12;
+            }
+            minvalue = jme.castToType(minvalue,'decimal').value;
+            settings.minvalue = minvalue;
+        } catch(e) {
+            this.error('part.setting not present',{property:R('minimum value')});
         }
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
-        if(maxvalue && maxvalue.type=='number') {
-            maxvalue = maxvalue.value;
-        } else {
-            throw(new Numbas.Error('part.setting not present',{property:R('maximum value')}));
+        try {
+            if(maxvalue.type=='number') {
+                maxvalue.value += 1e-12;
+            }
+            maxvalue = jme.castToType(maxvalue,'decimal').value;
+            settings.maxvalue = maxvalue;
+        } catch(e) {
+            this.error('part.setting not present',{property:R('maximum value')});
         }
-        var displayAnswer = (minvalue + maxvalue)/2;
+        var displayAnswer = minvalue.add(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {
-            var diff = Math.abs(maxvalue-minvalue)/2;
-            var accuracy = Math.max(15,Math.ceil(-Math.log(diff)));
-            settings.displayAnswer = jme.display.jmeRationalNumber(displayAnswer,{accuracy:accuracy});
+            var frac = math.Fraction.fromDecimal(displayAnswer);
+            settings.displayAnswer = frac.toString();
         } else {
-            settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
-        var fudge = 0.00000000001;
-        settings.minvalue = minvalue - fudge;
-        settings.maxvalue = maxvalue + fudge;
+        return settings.displayAnswer;
     },
     /** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.

@@ -16,6 +16,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.part = p;
+        /** The display name of this part
+         * @see Numbas.parts.Part#name
+         */
+        this.name = Knockout.observable('');
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay
@@ -57,11 +61,50 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = Knockout.observableArray([]);
-        /** Are the warnings visible?
+        /** Does the part have any warnings to show?
+         * Changes to false immediately.
+         * Only changes to true after a delay if the part is dirty, but immediately if the part is not (i.e. it's just been submitted)
+         * @member {observable|Boolean} hasWarnings
+         */
+        this.hasWarnings = Knockout.observable(false);
+        var lastWarningReset;
+        Knockout.computed(function() {
+            if(this.warnings().length==0) {
+                this.hasWarnings(false);
+                if(lastWarningReset) {
+                    clearTimeout(lastWarningReset);
+                    lastWarningReset = null;
+                }
+            }
+        },this);
+        Knockout.computed(function() {
+            if(this.warnings().length>0) {
+                if(lastWarningReset) {
+                    clearTimeout(lastWarningReset);
+                }
+                if(this.isDirty()) {
+                    lastWarningReset = setTimeout(function() {
+                        pd.hasWarnings(true);
+                    },500);
+                } else {
+                    pd.hasWarnings(true);
+                }
+            }
+        },this);
+
+        var _warningsShown = Knockout.observable(false);
+        /** Should the warning box be shown?
          * @member {observable|Boolean} warningsShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.warningsShown = Knockout.observable(false);
+        this.warningsShown = Knockout.computed({
+            read: function() {
+                return this.hasWarnings() && (_warningsShown() || this.alwaysShowWarnings);
+            },
+            write: function(v) {
+                return _warningsShown(v);
+            }
+        },this);
         /** Show the warnings
          * @member {function} showWarnings
          * @method
@@ -162,7 +205,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showFeedbackIcon
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackIcon = ko.observable(feedback_settings.showFeedbackIcon);
+        this.showFeedbackIcon = Knockout.observable(feedback_settings.showFeedbackIcon);
         /** Show the marks feedback?
          * @member {observable|Boolean} showMarks
          * @memberof Numbas.display.PartDisplay
@@ -203,10 +246,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 while(np.isGap)
                     np = np.parentPart;
                 np.submit();
-                if(!np.answered)
-                {
-                    Numbas.display.showAlert(R('question.can not submit'));
-                }
                 Numbas.store.save();
             },
             showSteps: function() {
@@ -227,6 +266,12 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 }
                 else
                     return true;
+            },
+            blur: function() {
+                pd.hideWarnings();
+            },
+            focus: function() {
+                pd.showWarnings();
             }
         }
         var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';
@@ -235,6 +280,12 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
+        /** Set this part's name
+         * @param {String} name
+         */
+        setName: function(name) {
+            this.name(name);
+        },
         /** Show a warning message about this part
          * @param {String} warning
          * @memberof Numbas.display.PartDisplay
@@ -267,6 +318,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             this.feedbackShown(false);
             this.showScore(this.part.answered,true);
         },
+        /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking)
+         * The displayed correct answer should update.
+         * @memberof Numbas.display.PartDisplay
+         * @param answer
+         * @abstract
+         */
+        updateCorrectAnswer: function(answer) {},
         /** Show/update the student's score and answer status on this part
          * @memberof Numbas.display.PartDisplay
          */

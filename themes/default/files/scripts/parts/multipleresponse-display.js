@@ -12,8 +12,8 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     {
         var p = this.part;
         function makeTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeTick({answer:answer, choice:choice, ticked:obs()});
             },p);
             return obs;
@@ -31,15 +31,15 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             return obs;
         }
         function makeCheckboxTicker(answer,choice) {
-            var obs = ko.observable(p.ticks[answer][choice]);
-            ko.computed(function() {
+            var obs = Knockout.observable(p.ticks[answer][choice]);
+            Knockout.computed(function() {
                 p.storeTick({answer:answer, choice:choice, ticked:obs()});
             });
             return obs;
         }
         this.layout = util.copyarray(p.layout);
-        this.showCellAnswerState = ko.observable(p.settings.showCellAnswerState);
-        this.displayColumns = ko.observable(p.settings.displayColumns);
+        this.showCellAnswerState = Knockout.observable(p.settings.showCellAnswerState);
+        this.displayColumns = Knockout.observable(p.settings.displayColumns);
         switch(p.type) {
         case '1_n_2':
             /** Index of student's current answer choice (not necessarily submitted)
@@ -63,18 +63,11 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                     oldAnswer = i;
                 }
             },this);
-            var max = 0, maxi = -1;
-            for(var i=0;i<p.numAnswers;i++) {
-                if(p.settings.matrix[i][0]>max || maxi==-1) {
-                    max = p.settings.matrix[i][0];
-                    maxi = i;
-                }
-            }
             /** Index of the answer which gains the most marks
              * @member {observable|number} correctAnswer
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.correctAnswer = Knockout.observable(maxi+'');
+            this.correctAnswer = Knockout.observable();
             break;
         case 'm_n_2':
             /** For each choice, has the student selected it?
@@ -90,10 +83,9 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
              * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
-            this.correctTicks = [];
+            this.correctTicks = Knockout.observableArray([]);
             for(var i=0; i<p.numAnswers; i++) {
                 this.ticks[i] = makeTicker(i,0);
-                this.correctTicks[i] = p.settings.matrix[i][0]>0;
             }
             if(p.settings.warningType!='none') {
                 Knockout.computed(function() {
@@ -109,10 +101,10 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             break;
         case 'm_n_x':
+            this.correctTicks = Knockout.observableArray([]);
             switch(p.settings.displayType) {
             case 'radiogroup':
                 this.ticks = [];
-                this.correctTicks = [];
                 for(var i=0; i<p.numChoices; i++) {
                     this.ticks.push(makeRadioTicker(i));
                     var maxj=-1,max=0;
@@ -127,7 +119,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 break;
             case 'checkbox':
                 this.ticks = [];
-                this.correctTicks = [];
                 for(var i=0; i<p.numAnswers; i++) {
                     var row = [];
                     this.ticks.push(row);
@@ -156,9 +147,48 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             break;
         }
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
     }
     display.MultipleResponsePartDisplay.prototype =
     {
+        alwaysShowWarnings: true,
+        updateCorrectAnswer: function(answer) {
+            var p = this.part;
+            switch(p.type) {
+            case '1_n_2':
+                var maxi;
+                for(var i=0;i<p.numAnswers;i++) {
+                    if(answer[i][0]) {
+                        maxi = i;
+                        break;
+                    }
+                }
+                this.correctAnswer(maxi+'');
+                break;
+            case 'm_n_2':
+                this.correctTicks(answer.map((function(x){ return x[0]; })));
+                break;
+            case 'm_n_x':
+                switch(p.settings.displayType) {
+                case 'radiogroup':
+                    var ticks = [];
+                    for(var i=0; i<p.numChoices; i++) {
+                        for(var j=0;j<p.numAnswers;j++) {
+                            if(answer[j][i]) {
+                                ticks.push(j);
+                                break;
+                            }
+                        }
+                    }
+                    this.correctTicks(ticks);
+                    break;
+                case 'checkbox':
+                    this.correctTicks(answer);
+                    break;
+                }
+            }
+        },
+
         restoreAnswer: function()
         {
             var part = this.part;

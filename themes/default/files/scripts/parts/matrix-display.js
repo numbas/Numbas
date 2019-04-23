@@ -17,21 +17,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
         /** The correct answer
-         * @member {observable|number} correctAnswer
+         * @member {observable|matrix} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
-        var correctInput = p.settings.correctAnswer.map(function(row) {
-            return row.map(function(c) {
-                if(p.settings.allowFractions) {
-                    return c;
-                }
-                return Numbas.math.niceNumber(c,{precisionType: p.settings.precisionType, precision: p.settings.precision, style: p.settings.correctAnswerStyle});
-            });
-        });
-        correctInput.rows = p.settings.correctAnswer.rows;
-        correctInput.columns = p.settings.correctAnswer.columns;
-
-        this.correctAnswer = Knockout.observable(correctInput);
+        this.correctAnswer = Knockout.observable();
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
         this.correctAnswerLaTeX = Knockout.computed(function() {
             var correctAnswer = this.correctAnswer();
             var m = new Numbas.jme.types.TMatrix(correctAnswer);
@@ -70,6 +60,9 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
     }
     display.MatrixEntryPartDisplay.prototype =
     {
+        updateCorrectAnswer: function(answer) {
+            this.correctAnswer(answer);
+        },
         restoreAnswer: function()
         {
             var studentAnswer = this.part.studentAnswer;

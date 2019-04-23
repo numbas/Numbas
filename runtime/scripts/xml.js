@@ -12,6 +12,25 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
 Numbas.queueScript('xml',['base','jme'],function() {
+
+/** Raw XML of the exam definition
+ * @name rawxml 
+ * @memberof Numbas
+ * @type {Object.<String>}
+ */
+
+/** XML for the current exam
+ * @name examXML
+ * @memberof Numbas.xml
+ * @type {XMLDocument}
+ */
+
+/** XSLT stylesheets
+ * @name templates
+ * @memberof Numbas.xml
+ * @type {Object.<XMLDocument>}
+ */
+
 /** @namespace Numbas.xml */
 var xml = Numbas.xml = {
     /** DOM parser to use to parse XML
@@ -108,7 +127,7 @@ var xml = Numbas.xml = {
     },
     /** Load variable definitions from an XML node
      * @param {Element} xml
-     * @param {Numbas.jme.Scope} - scope to compile relative to
+     * @param {Numbas.jme.Scope} scope - scope to compile relative to
      * @returns {Numbas.jme.variables.variable_data_dict[]}
      */
     loadVariables: function(xml,scope) {
@@ -248,6 +267,7 @@ var xml = Numbas.xml = {
     },
     /** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
      * @param {Element} template
+     * @returns {Element}
      */
     localise: function(template) {
         $(template).find('localise').each(function() {

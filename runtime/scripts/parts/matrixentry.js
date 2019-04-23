@@ -18,10 +18,14 @@ var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Matrix entry part - student enters a matrix of numbers
  * @constructor
+ * @param {Numbas.parts.partpath} [path='p0']
+ * @param {Numbas.Question} question
+ * @param {Numbas.parts.Part} parentPart
+ * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(xml, path, question, parentPart, loading) {
+var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(MatrixEntryPart.prototype.settings,settings);
 }
@@ -145,6 +149,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         };
     },
     /** Compute the correct answer, based on the given scope
+     * @param {Numbas.jme.Scope} scope
+     * @returns {matrix}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -159,6 +165,21 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
         settings.precision = jme.evaluate(settings.precision,scope).value;
+
+        var correctInput = settings.correctAnswer.map(function(row) {
+            return row.map(function(c) {
+                if(settings.allowFractions) {
+                    var f = math.rationalApproximation(c);
+                    if(f[1]!=1) {
+                        return f[0]+'/'+f[1];
+                    }
+                }
+                return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            });
+        });
+        correctInput.rows = settings.correctAnswer.rows;
+        correctInput.columns = settings.correctAnswer.columns;
+        return correctInput;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
