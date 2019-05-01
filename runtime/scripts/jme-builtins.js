@@ -585,66 +585,59 @@ newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
 newBuiltin('+', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.plus(b); });
-newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).plus(b); });
+newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new math.ComplexDecimal(new Decimal(a))).plus(b); });
 newBuiltin('-', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.minus(b); });
-newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).minus(b); });
+newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new math.ComplexDecimal(new Decimal(a))).minus(b); });
 newBuiltin('*', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.times(b); });
-var sig_number = sig.type('number');
-function sig_non_complex_number(args) {
-    return sig_number(args) && !args[0].value.complex ? [{type:'number'}] : false;
-}
-sig_non_complex_number.kind = 'type';
-sig_non_complex_number.type = 'number';
-newBuiltin('*', [sig_non_complex_number,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).times(b); });
 newBuiltin('/', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.dividedBy(b); });
-newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new Decimal(a)).dividedBy(b); });
+newBuiltin('/', [TNum,TDecimal], TDecimal, function(a,b){ return (new math.ComplexDecimal(new Decimal(a))).dividedBy(b); });
 newBuiltin('abs', [TDecimal], TDecimal, function(a){ return a.absoluteValue(); });
-newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.ceil(); });
-newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.cos(); });
+newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.re.ceil(); });
+newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.re.cos(); });
 newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
-newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.floor(); });
-newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
-newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
-newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.toNumber(),b); });
-newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.cosh(); });
-newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.sinh(); });
-newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.tanh(); });
-newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.acos(); });
-newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.acosh(); });
-newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.asinh(); });
-newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.atanh(); });
-newBuiltin('arcsin', [TDecimal], TDecimal, function(a){ return a.asin(); });
-newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.atan(); });
+newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.re.floor(); });
+newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThan(b.re); });
+newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThanOrEqualTo(b.re); });
+newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.re.toNumber(),b); });
+newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.re.cosh(); });
+newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.re.sinh(); });
+newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.re.tanh(); });
+newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.re.acos(); });
+newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.re.acosh(); });
+newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.re.asinh(); });
+newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.re.atanh(); });
+newBuiltin('arcsin', [TDecimal], TDecimal, function(a){ return a.re.asin(); });
+newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.re.atan(); });
 newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
 newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
-newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
-newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
-newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.toNumber(),b); });
-newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.log(); })
-newBuiltin('log',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.log()/b.log(); })
-newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b){ 
-    var m = a.mod(b);
+newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThan(b.re); });
+newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThanOrEqualTo(b.re); });
+newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.re.toNumber(),b); });
+newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.re.log(); })
+newBuiltin('log',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.re.log()/b.re.log(); })
+newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b) {
+    var m = a.re.mod(b.re);
     if(m.isNegative()) {
-        m = m.plus(b);
+        m = m.plus(b.re);
     }
     return m;
 });
-newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.exp(); });
-newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.ln(); });
-newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.countSigFigs(); });
+newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.re.exp(); });
+newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.re.ln(); });
+newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.re.countSigFigs(); });
 newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
-newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.sin(); });
-newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.sqrt(); });
-newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.tan(); });
+newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
+newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.re.sqrt(); });
+newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
 newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
 newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
-newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x); });
+newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
 newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
 newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
-newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.trunc(); });
-newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.minus(a.trunc()); });
+newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.re.trunc(); });
+newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
 
 
 

@@ -357,6 +357,9 @@ var texOps = jme.display.texOps = {
     'implies': infixTex('\\to'),
     'in': infixTex('\\in'),
     '|': infixTex('|'),
+    'decimal': function(thing,texArgs,settings) {
+        return texArgs[0];
+    },
     'abs': (function(thing,texArgs,settings) {
         var arg;
         if(thing.args[0].tok.type=='vector')
@@ -956,7 +959,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return settings.texNumber(tok.value.toFloat(), settings);
     },
     'decimal': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value.toNumber(), settings);
+        return settings.texNumber(tok.value.toComplexNumber(), settings);
     },
     'number': function(thing,tok,texArgs,settings) {
         return settings.texNumber(tok.value, settings);
@@ -1305,7 +1308,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'decimal': function(tree,tok,bits,settings) {
-        var n = settings.jmeNumber(tok.value.toNumber(),settings);
+        var n = settings.jmeNumber(tok.value.toComplexNumber(),settings);
         if(!settings.ignorestringattributes) {
             return 'dec('+n+')';
         } else {

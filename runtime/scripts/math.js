@@ -1767,6 +1767,140 @@ Fraction.fromDecimal = function(n) {
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
+/** A complex number with components stored as `Decimal` objects.
+ * @param {Decimal} re
+ * @param {Decimal} [im]
+ * @property {Decimal} re
+ * @property {Decimal} im
+ */
+var ComplexDecimal = math.ComplexDecimal = function(re,im) {
+    this.re = re;
+    if(im===undefined) {
+        im = new Decimal(0);
+    }
+    this.im = im;
+}
+ComplexDecimal.prototype = {
+    toString: function() {
+        var re = this.re.toString();
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toString();
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toComplexNumber: function() {
+        if(this.isReal()) {
+            return this.re.toNumber();
+        } else {
+            return {complex: true, re: this.re.toNumber(), im: this.im.toNumber()};
+        }
+    },
+
+    isReal: function() {
+        return this.im.isZero();
+    },
+
+    equals: function(b) {
+        return this.re.equals(b.re) && this.im.equals(b.im);
+    },
+
+    negated: function() {
+        return new ComplexDecimal(this.re.negated(), this.im.negated());
+    },
+
+    plus: function(b) {
+        return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
+    },
+
+    minus: function(b) {
+        return new ComplexDecimal(this.re.minus(b.re), this.im.minus(b.im));
+    },
+    times: function(b) {
+        var re = this.re.times(b.re).minus(this.im.times(b.im));
+        var im = this.re.times(b.im).plus(this.im.times(b.re));
+        return new ComplexDecimal(re,im);
+    },
+
+    dividedBy: function(b) {
+        var q = b.re.times(b.re).plus(b.re.times(b.im));
+        var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
+        var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
+        console.log(q+' '+re+' '+im);
+        return new ComplexDecimal(re,im);
+    },
+
+    pow: function(b) {
+        if(this.isReal() && b.isReal()) {
+            return new ComplexDecimal(this.re.pow(b.re),this.im);
+        } else {
+            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var arg1 = Decimal.atan2(this.im,this.re);
+            var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
+            var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
+            return new ComplexDecimal(mag.times(arg.cos()), mag.times(arg.sin()));
+        }
+    },
+
+    absoluteValue: function() {
+        return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)));
+    },
+
+    isInt: function() {
+        return this.re.isInt() && this.im.isInt();
+    },
+
+    isNaN: function() {
+        return this.re.isNaN() || this.im.isNaN();
+    },
+
+    isZero: function() {
+        return this.re.isZero() && this.im.isZero();
+    },
+
+    round: function() {
+        return new ComplexDecimal(this.re.round(), this.im.round());
+    },
+
+    toDecimalPlaces: function(dp) {
+        return new ComplexDecimal(this.re.toDecimalPlaces(dp), this.im.toDecimalPlaces(dp));
+    },
+
+    toFixed: function(dp) {
+        var re = this.re.toFixed(dp);
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toFixed(dp);
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toNearest: function(n) {
+        return new ComplexDecimal(this.re.toNearest(n), this.im.toNearest(n));
+    },
+
+    toPrecision: function(sf) {
+        var re = this.re.toPrecision(dp);
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toPrecision(dp);
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toSignificantDigits: function(sf) {
+        return new ComplexDecimal(this.re.toSignificantDigits(dp), this.im.toSignificantDigits(dp));
+    }
+}
+
+
 /** A list of a vector's components.
  * @typedef vector
  *  @type {Array.<Number>}

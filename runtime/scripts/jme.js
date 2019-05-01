@@ -2050,7 +2050,16 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(new Decimal(n.value.toFixed(14)));
+            var dp = 14;
+            var re,im;
+            if(n.value.complex) {
+                var re = n.value.re.toFixed(dp);
+                var im = n.value.im.toFixed(dp);
+            } else {
+                re = n.value.toFixed(dp);
+                im = 0;
+            }
+            return new TDecimal(new math.ComplexDecimal(new Decimal(re), new Decimal(im)));
         }
     }
 );
@@ -2095,8 +2104,13 @@ jme.registerType(
 
 /** A Decimal number.
  *  Powered by [decimal.js](http://mikemcl.github.io/decimal.js/)
+ *  @param {Numbas.math.ComplexDecimal|Decimal} value - if just a `Decimal` is given, it's turned into a `ComplexDecimal` with zero imaginary part.
+ *  @property {Numbas.jme.ComplexDecimal} value
  */
 var TDecimal = types.TDecimal = function(value) {
+    if(value instanceof Decimal) {
+        value = new math.ComplexDecimal(value,new Decimal(0));
+    }
     this.value = value;
 }
 jme.registerType(
@@ -2104,7 +2118,11 @@ jme.registerType(
     'decimal',
     {
         'number': function(n) {
-            return new TNum(n.value.toNumber());
+            if(n.value.im.isZero()) {
+                return new TNum(n.value.re.toNumber());
+            } else {
+                return new TNum({complex: true, re: n.value.re.toNumber(), im: n.value.im.toNumber()});
+            }
         }
     }
 );
