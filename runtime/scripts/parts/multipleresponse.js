@@ -117,6 +117,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 content.appendChild(span);
                 node.appendChild(content);
                 topNode.appendChild(node);
+                /** Load a string representing the text of a label into the `span` element for this label
+                 * @param {String} str
+                 */
                 function load_string(str) {
                     var d = document.createElement('d');
                     d.innerHTML = str;

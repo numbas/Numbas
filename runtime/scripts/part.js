@@ -152,6 +152,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     Object.defineProperty(this,"credit", {
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
          * @type {Number}
+         * @returns {Number}
          */
         get: function() {
             return this.creditFraction.toFloat();

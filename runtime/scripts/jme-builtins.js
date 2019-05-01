@@ -1488,6 +1488,11 @@ newBuiltin('list',[TMatrix],TList,null, {
         return new TList(value);
     }
 });
+/** Set the content of an HTML element to something corresponding to the value of the given token.
+ * If the token is not of type HTML, use {@link jme.typeToDisplayString}.
+ * @param {Element} element
+ * @param {Numbas.jme.token} tok
+ */
 function set_html_content(element,tok) {
     if(tok.type!='html') {
         element.innerHTML = jme.typeToDisplayString(tok);

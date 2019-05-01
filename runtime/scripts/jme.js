@@ -1656,7 +1656,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Get the definition of the function with the given name which matches the types of the given arguments
      * @param {Numbas.jme.token} tok - the token of the function or operator
-     * @param {Array.<Numbas.jme.token} args
+     * @param {Array.<Numbas.jme.token>} args
      * @returns {Numbas.jme.funcObj}
      */
     matchFunctionToArguments: function(tok,args) {
@@ -1677,6 +1677,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             }
         }
 
+        /** Represent the difference between an input token and the description of the desired type returned by a signature checker.
+         * @param {Numbas.jme.token} tok
+         * @param {Numbas.jme.signature_result_argument} typeDescription
+         * @returns {Array.<String>} - the difference between the input argument and any of its child tokens, and the type described by `typeDescription`.
+         */
         function type_difference(tok,typeDescription) {
             if(tok.type!=typeDescription.type) {
                 return [typeDescription.type];
@@ -1694,6 +1699,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             return out;
         }
 
+        /** Compare two function matches. A match is sorted earlier if, considering each argument in turn:
+         * * it's more specific about a argument whose type is a collection
+         * * it matches the type of the corresponding argument exactly
+         * * the type it casts to is preferred over the other match's (occurs earlier in the input token's list of casts)
+         * @param {Numbas.jme.signature_result} m1
+         * @param {Numbas.jme.signature_result} m2
+         * @returns {Number}
+         */
         function compare_matches(m1,m2) {
             m1 = sig_remove_missing(m1);
             m2 = sig_remove_missing(m2);
@@ -2631,6 +2644,10 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     this.id = funcObjAcc++;
     options = options || {};
 
+    /** Parse a signature definition. 
+     * @param {String|Function} sig - either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+     * @returns {Numbas.jme.signature}
+     */
     function parse_signature(sig) {
         if(typeof(sig)=='function') {
             if(sig.kind!==undefined) {
@@ -3260,6 +3277,7 @@ var compareTrees = jme.compareTrees = function(a,b) {
  */
 jme.inferVariableTypes = function(tree,scope) {
     /** Create an annotated copy of the tree, fetching definitions for functions, and storing state to enumerate function definitions
+     * @param {Numbas.jme.tree} tree
      */
     function AnnotatedTree(tree) {
         this.tok = tree.tok;
@@ -3277,7 +3295,7 @@ jme.inferVariableTypes = function(tree,scope) {
                 break;
         }
     }
-    AnnotatedTree.prototype = {
+    AnnotatedTree.prototype = /** @lends AnnotatedTree.prototype */ {
 
         toString: function() {
             var args;
@@ -3314,18 +3332,27 @@ jme.inferVariableTypes = function(tree,scope) {
         },
 
         /** Find an assignment of types to variables in this tree which produces the given output type
+         * @param {String} outtype - the name of the desired type of this tree
+         * @param {Object} assignments - assignments of variables that have already been made.
+         * @returns {Object} - a dictionary of assignments
          */
         assign: function(outtype,assignments) {
             if(outtype=='?') {
                 outtype = undefined;
             }
+            /** Find a type which can be cast to all of the desired types
+             * @param {Array.<String>} types - the names of the desired types
+             * @returns {String}
+             */
             function mutually_compatible_type(types) {
                 var preferred_types = ['number','decimal'];
+                /** Can the given type be cast to all of the desired types?
+                 * @param {String} x - the name of a type
+                 * @returns {Boolean}
+                 */
                 function mutually_compatible(x) {
                     var casts = jme.types[x].prototype.casts || {};
-                    if(types.every(function(t) { return t==x || casts[t]; })) {
-                        return true;
-                    }
+                    return types.every(function(t) { return t==x || casts[t]; });
                 }
                 for(var i=0;i<preferred_types.length;i++) {
                     var type = preferred_types[i];
@@ -3391,6 +3418,9 @@ jme.inferVariableTypes = function(tree,scope) {
         },
 
         /** Find an assignment based on this tree's arguments, with optional specified types for each of the arguments.
+         * @param {Object} assignments - the data types of names that have been assigned.
+         * @param {Numbas.jme.signature_result} [signature]
+         * @returns {Object} - a dictionary of assignments
          */
         assign_args: function(assignments,signature) {
             if(!this.args) {
@@ -3443,7 +3473,6 @@ jme.inferVariableTypes = function(tree,scope) {
 
     var at = new AnnotatedTree(tree);
     do {
-        //console.log(at+'');
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
@@ -3583,10 +3612,38 @@ SignatureEnumerator.prototype = {
     }
 }
 
+/** Remove "missing" arguments from a signature-checker result.
+ * @param {Numbas.jme.signature_result} items
+ * @returns {Numbas.jme.signature_result}
+ */
 function sig_remove_missing(items) {
     return items.filter(function(d){return !d.missing});
 }
 
+/** A signature-checker function. Takes a list of {@link Numbas.jme.token} objects, and returns a {@link Numbas.jme.signature_result} representing the matched arguments, or `false` if the signature doesn't match.
+ * @typedef Numbas.jme.signature
+ * @type {Function}
+ * @property {String} kind - the kind of this signature checker, e.g. "type", "anything", "multiple". Used by the type inference routine, among other things.
+ */
+
+/** A list of arguments matched by a signature checker. At most one per argument passed in.
+ * @typedef Numbas.jme.signature_result
+ * @type {Array.<Numbas.jme.signature_result_argument>}
+ */
+
+/** Information about an argument matched by a signature checker.
+ * The main purpose is to specify the desired type of the argument, but there are other properties for certain types.
+ * @typedef Numbas.jme.signature_result_argument
+ * @type {Object}
+ * @property {String} type - the data type that the argument should be cast to.
+ * @property {Boolean} missing - does this represent an optional argument that wasn't given?
+ * @property {Boolean} nonspecific - does this represent an argument matched with an 'anything' signature? If so, don't use it when comparing two signature results.
+ */
+
+/** Signature-checking function constructors
+ * @see {Numbas.jme.signature}
+ * @enum {Function}
+ */
 jme.signature = {
     anything: function() {
         var f = function(args) {
