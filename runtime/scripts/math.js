@@ -1656,6 +1656,18 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             total = math.add(total,list[i]);
         }
         return total;
+    },
+    /** Multiplies the elements in the given list
+     *
+     * @param {Array.<Number>} list
+     * @returns {Number}
+     */
+    prod: function(list)  {
+        let product = 1;
+        for (let i = 0; i < list.length; i++){
+            product = math.mul(product, list[i]);
+        }
+        return product;
     }
 };
 math.gcf = math.gcd;
