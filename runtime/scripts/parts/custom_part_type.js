@@ -68,11 +68,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var pobj = this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
-    finaliseLoad: function() {
+
+    evaluateSettings: function(scope) {
         var p = this;
         var settings = this.settings;
         var raw_settings = this.raw_settings;
-        var scope = this.getScope();
         this.definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
@@ -80,11 +80,18 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }
             try {
-                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value);
+                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value, scope);
             } catch(e) {
                 p.error('part.custom.error evaluating setting',{setting: name, error: e.message});
             }
         });
+    },
+
+    finaliseLoad: function() {
+        var p = this;
+        var settings = this.settings;
+        var scope = this.getScope();
+        this.evaluateSettings(scope);
         var settings_scope = new jme.Scope([scope,{variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
         ['correctAnswer','hint'].forEach(function(option) {
@@ -120,6 +127,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
     },
     getCorrectAnswer: function(scope) {
+        this.evaluateSettings(scope);
         var settings = this.settings;
         this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
     },
@@ -166,15 +174,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
     },
     setting_evaluators: {
-        'string': function(def, value) {
-            var scope = this.getScope();
+        'string': function(def, value, scope) {
             if(def.subvars) {
                 value = jme.subvars(value, scope, true);
             }
             return new jme.types.TString(value);
         },
-        'mathematical_expression': function(def, value) {
-            var scope = this.getScope();
+        'mathematical_expression': function(def, value, scope) {
             if(!value.trim()) {
                 throw(new Numbas.Error("part.custom.empty setting"));
             }
@@ -190,8 +196,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         'dropdown': function(def, value) {
             return new jme.types.TString(value);
         },
-        'code': function(def, value) {
-            var scope = this.getScope();
+        'code': function(def, value, scope) {
             if(!value.trim()) {
                 throw(new Numbas.Error('part.custom.empty setting'));
             }
@@ -204,15 +209,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         'percent': function(def, value) {
             return new jme.types.TNum(value/100);
         },
-        'html': function(def, value) {
-            var scope = this.getScope();
+        'html': function(def, value, scope) {
             if(def.subvars) {
                 value = jme.contentsubvars(value, scope);
             }
             return new jme.types.TString(value);
         },
-        'list_of_strings': function(def, value) {
-            var scope = this.getScope();
+        'list_of_strings': function(def, value, scope) {
             return new jme.types.TList(value.map(function(s){
                 if(def.subvars) {
                     s = jme.subvars(s, scope);
