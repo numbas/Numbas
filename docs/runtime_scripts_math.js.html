@@ -46,7 +46,13 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
  */
-Numbas.queueScript('math',['base'],function() {
+Numbas.queueScript('math',['base','decimal'],function() {
+    
+    Decimal.set({ 
+        precision: 40,
+        modulo: Decimal.EUCLID 
+    });
+
 /** Mathematical functions, providing stuff that the built-in `Math` object doesn't
  * @namespace Numbas.math */
 /** A complex number.
@@ -551,17 +557,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         return !math.eq(a,b);
     },
-    /** If `n` can be written in the form `a*pi^n`, return the biggest possible `n`, otherwise return `0`.
+    /** If `n` can be written in the form `a*pi^n`, with `a` an integer, return the biggest possible `n`, otherwise return `0`.
+     * Also returns `1` for `n` of the form `pi/a`, with `a` an integer.
      * @param {Number} n
      * @returns {Number}
      */
     piDegree: function(n)
     {
-        n=Math.abs(n);
+        n = Math.abs(n);
         if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         var degree,a;
-        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 &amp;&amp; Math.abs(a-math.round(a))>0.00000001; degree++) {}
+
+        /* Check for pi/k, where k is an integer */
+        a = Math.PI/n;
+        if(Math.abs(a-math.round(a))&lt;0.0000000001) {
+            return 1;
+        }
+
+        for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 &amp;&amp; (Math.abs(a-math.round(a))>0.00000001 &amp;&amp; Math.abs(1/a-math.round(1/a))>0.00000001); degree++) {}
         return( a>=1 ? degree : 0 );
     },
     /** Add the given number of zero digits to a string representation of a number.
@@ -643,41 +657,53 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.precisionType === undefined &amp;&amp; (piD = math.piDegree(n)) > 0)
                 n /= Math.pow(Math.PI,piD);
             var out;
-            switch(options.precisionType) {
-            case 'sigfig':
-                var precision = options.precision;
-                out = math.siground(n,precision)+'';
-                var sigFigs = math.countSigFigs(out,true);
-                if(sigFigs&lt;precision) {
-                    out = math.addDigits(out,precision-sigFigs);
+            if(options.style=='scientific') {
+                var s = n.toExponential();
+                var bits = math.parseScientific(s);
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: 'si-en'};
+                var significand = math.niceNumber(bits.significand,noptions);
+                var exponent = bits.exponent;
+                if(exponent>=0) {
+                    exponent = '+'+exponent;
                 }
-                break;
-            case 'dp':
-                var precision = options.precision;
-                out = math.precround(n,precision)+'';
-                var dp = math.countDP(out);
-                if(dp&lt;precision) {
-                    out = math.addDigits(out,precision-dp);
+                return significand+'e'+exponent;
+            } else {
+                switch(options.precisionType) {
+                case 'sigfig':
+                    var precision = options.precision;
+                    out = math.siground(n,precision)+'';
+                    var sigFigs = math.countSigFigs(out,true);
+                    if(sigFigs&lt;precision) {
+                        out = math.addDigits(out,precision-sigFigs);
+                    }
+                    break;
+                case 'dp':
+                    var precision = options.precision;
+                    out = math.precround(n,precision)+'';
+                    var dp = math.countDP(out);
+                    if(dp&lt;precision) {
+                        out = math.addDigits(out,precision-dp);
+                    }
+                    break;
+                default:
+                    var a = Math.abs(n);
+                    if(a&lt;1e-15) {
+                        out = '0';
+                    } else if(Math.abs(n)&lt;1e-8) {
+                        out = n+'';
+                    } else {
+                        out = math.precround(n,10)+'';
+                    }
                 }
-                break;
-            default:
-                var a = Math.abs(n);
-                if(a&lt;1e-15) {
-                    out = '0';
-                } else if(Math.abs(n)&lt;1e-8) {
-                    out = n+'';
-                } else {
-                    out = math.precround(n,10)+'';
+                out = math.unscientific(out);
+                if(options.style &amp;&amp; Numbas.util.numberNotationStyles[options.style]) {
+                    var match_neg = /^(-)?(.*)/.exec(out);
+                    var minus = match_neg[1] || '';
+                    var bits = match_neg[2].split('.');
+                    var integer = bits[0];
+                    var decimal = bits[1];
+                    out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
                 }
-            }
-            out = math.unscientific(out);
-            if(options.style &amp;&amp; Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
             }
             switch(piD)
             {
@@ -803,19 +829,29 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             }
         }
     },
+
+    /** Get the significand and exponent of a number written in exponential form
+     * @param {String} str
+     * @returns {{significand: Number, exponent: Number}}
+     */
+    parseScientific: function(str) {
+        var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
+        return {significand: parseFloat(m[1].replace(' ','')), exponent: parseInt(m[2].replace(' ',''))};
+    },
+
     /** If the given string is scientific notation representing a number, return a string of the form \d+\.\d+
      * For example, '1.23e-5' is returned as '0.0000123'
      * @param {String} str
      * @returns {String}
      */
     unscientific: function(str) {
-        var m = /(-)?(\d+)(?:\.(\d+))?e(-?\d+)/i.exec(str);
+        var m = /(-)?([ \d]+)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
         if(!m) {
             return str;
         }
         var minus = m[1] || '';
-        var digits = m[2]+(m[3] || '');
-        var pow = parseInt(m[4]);
+        var digits = (m[2]+(m[3] || '')).replace(' ','');
+        var pow = parseInt(m[4].replace(' ',''));
         var l = digits.length;
         var out;
         if(pow>=l-1) {
@@ -847,22 +883,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
         } else {
-            var s = math.sign(a);
-            if(a==0) { return 0; }
-            if(a==Infinity || a==-Infinity) { return a; }
-            var bp = Math.pow(10, b-Math.ceil(math.log10(s*a)));
-            var ibp = Math.pow(10, Math.ceil(math.log10(s*a))-b);
-            //test to allow a bit of leeway to account for floating point errors
-            //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = a*bp*10 % 1;
-            var d = (a>0 ? Math.floor : Math.ceil)(a*bp*10 % 10);
-            var out = a*bp;
-            if(d==4 &amp;&amp; 1-v&lt;1e-9) {
-                out += 1;
-            } else if(d==-5 &amp;&amp; v>-1e-9 &amp;&amp; v&lt;0) {
-                out += 1;
-            }
-            return Math.round(out)*ibp;
+            return parseFloat(a.toPrecision(b))
         }
     },
     /** Count the number of decimal places used in the string representation of a number.
@@ -1240,6 +1261,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         else
             return Math.round(x);
     },
+    /** Round to the nearest multiple of `a`;For complex numbers, real and imaginary parts are rounded independently.
+     * @param {Number} x
+     * @param {Number} a
+     * @returns {Number}
+     * @see Numbas.math.round
+     */
+    toNearest: function(x,a) {
+        if(a.complex) {
+            throw(new Numbas.Error('math.toNearest.complex'));
+        }
+        if(a==0) {
+            return NaN;
+        }
+        if(x.complex) {
+            return math.complex(math.toNearest(x.re,a),math.toNearest(x.im,a));
+        } else {
+            return Math.round(x/a)*a;
+        }
+    },
     /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
      * @param {Number} x
      * @returns {Number}
@@ -1543,46 +1583,69 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * If `accuracy` is given, the returned answer will be within `Math.exp(-accuracy)` of the original number
      *
+     * Based on frap.c by David Eppstein - https://www.ics.uci.edu/~eppstein/numth/frap.c
+     *
      * @param {Number} n
      * @param {Number} [accuracy]
      * @returns {Array.&lt;Number>} - [numerator,denominator]
      */
-    rationalApproximation: function(n,accuracy)
-    {
-        if(accuracy===undefined) {
-            accuracy = 15;
-        }
-        if(accuracy>30) {
-            accuracy = 30;
-        }
-        accuracy = Math.exp(-accuracy);
-        var on = n;
-        var e = Math.floor(n);
-        if(e==n)
-            return [n,1];
-        var l = 0;
-        var frac = [];
-        while(l&lt;100 &amp;&amp; Math.abs(on-e)>accuracy)
-        {
-            l+=1;
-            var i = Math.floor(n);
-            frac.push(i);
-            n = 1/(n-i);
-            var e = Infinity;
-            for(var j=l-1;j>=0;j--)
-            {
-                e = frac[j]+1/e;
+    rationalApproximation: function(n, accuracy) {
+        /** Find a rational approximation to `t` with maximum denominator `limit`.
+         * @param {Number} limit
+         * @param {Number} t
+         * @returns {Array.&lt;Number>} `[error,numerator,denominator]`
+         */
+        function rat_to_limit(limit,t) {
+            limit = Math.max(limit,1);
+            if(t==0) {
+                return [0,t,1,0];
+            }
+            var m00 = 1, m01 = 0;
+            var m10 = 0, m11 = 1;
+
+            var x = t;
+            var ai = Math.floor(x);
+            while((m10*ai + m11) &lt;= limit) {
+                var tmp = m00*ai+m01;
+                m01 = m00;
+                m00 = tmp;
+                tmp = m10*ai+m11;
+                m11 = m10;
+                m10 = tmp;
+                if(x==ai) {
+                    break;
+                }
+                x = 1/(x-ai);
+                ai = Math.floor(x);
+            }
+
+            var n1 = m00;
+            var d1 = m10;
+            var err1 = (t-n1/d1);
+
+            ai = Math.floor((limit-m11)/m10);
+            var n2 = m00*ai + m01;
+            var d2 = m10*ai+m11;
+            var err2 = (t-n2/d2);
+            if(Math.abs(err1)&lt;=Math.abs(err2)) {
+                return [err1,n1,d1];
+            } else {
+                return [err2,n2,d2];
             }
         }
-        if(l==0) {
-            return [e,1];
+
+        if(accuracy==undefined) {
+            accuracy = 15;
         }
-        var f = [1,0];
-        for(j=l-1;j>=0;j--)
-        {
-            f = [frac[j]*f[0]+f[1],f[0]];
+        var err_in = Math.exp(-accuracy);
+        var limit = 100000000000;
+        var l_curr = 1;
+        var res = rat_to_limit(l_curr,n);
+        while(Math.abs(res[0])>err_in &amp;&amp; l_curr&lt;limit) {
+            l_curr *= 10;
+            res = rat_to_limit(l_curr,n);
         }
-        return f;
+        return [res[1],res[2]];
     },
     /** The first 1000 primes */
     primes: [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997,1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571,3581,3583,3593,3607,3613,3617,3623,3631,3637,3643,3659,3671,3673,3677,3691,3697,3701,3709,3719,3727,3733,3739,3761,3767,3769,3779,3793,3797,3803,3821,3823,3833,3847,3851,3853,3863,3877,3881,3889,3907,3911,3917,3919,3923,3929,3931,3943,3947,3967,3989,4001,4003,4007,4013,4019,4021,4027,4049,4051,4057,4073,4079,4091,4093,4099,4111,4127,4129,4133,4139,4153,4157,4159,4177,4201,4211,4217,4219,4229,4231,4241,4243,4253,4259,4261,4271,4273,4283,4289,4297,4327,4337,4339,4349,4357,4363,4373,4391,4397,4409,4421,4423,4441,4447,4451,4457,4463,4481,4483,4493,4507,4513,4517,4519,4523,4547,4549,4561,4567,4583,4591,4597,4603,4621,4637,4639,4643,4649,4651,4657,4663,4673,4679,4691,4703,4721,4723,4729,4733,4751,4759,4783,4787,4789,4793,4799,4801,4813,4817,4831,4861,4871,4877,4889,4903,4909,4919,4931,4933,4937,4943,4951,4957,4967,4969,4973,4987,4993,4999,5003,5009,5011,5021,5023,5039,5051,5059,5077,5081,5087,5099,5101,5107,5113,5119,5147,5153,5167,5171,5179,5189,5197,5209,5227,5231,5233,5237,5261,5273,5279,5281,5297,5303,5309,5323,5333,5347,5351,5381,5387,5393,5399,5407,5413,5417,5419,5431,5437,5441,5443,5449,5471,5477,5479,5483,5501,5503,5507,5519,5521,5527,5531,5557,5563,5569,5573,5581,5591,5623,5639,5641,5647,5651,5653,5657,5659,5669,5683,5689,5693,5701,5711,5717,5737,5741,5743,5749,5779,5783,5791,5801,5807,5813,5821,5827,5839,5843,5849,5851,5857,5861,5867,5869,5879,5881,5897,5903,5923,5927,5939,5953,5981,5987,6007,6011,6029,6037,6043,6047,6053,6067,6073,6079,6089,6091,6101,6113,6121,6131,6133,6143,6151,6163,6173,6197,6199,6203,6211,6217,6221,6229,6247,6257,6263,6269,6271,6277,6287,6299,6301,6311,6317,6323,6329,6337,6343,6353,6359,6361,6367,6373,6379,6389,6397,6421,6427,6449,6451,6469,6473,6481,6491,6521,6529,6547,6551,6553,6563,6569,6571,6577,6581,6599,6607,6619,6637,6653,6659,6661,6673,6679,6689,6691,6701,6703,6709,6719,6733,6737,6761,6763,6779,6781,6791,6793,6803,6823,6827,6829,6833,6841,6857,6863,6869,6871,6883,6899,6907,6911,6917,6947,6949,6959,6961,6967,6971,6977,6983,6991,6997,7001,7013,7019,7027,7039,7043,7057,7069,7079,7103,7109,7121,7127,7129,7151,7159,7177,7187,7193,72077211,7213,7219,7229,7237,7243,7247,7253,7283,7297,7307,7309,7321,7331,7333,7349,7351,7369,7393,7411,7417,7433,7451,7457,7459,7477,7481,7487,7489,7499,7507,7517,7523,7529,7537,7541,7547,7549,7559,7561,7573,7577,7583,7589,7591,7603,7607,7621,7639,7643,7649,7669,7673,7681,7687,7691,7699,7703,7717,7723,7727,7741,7753,7757,7759,7789,7793,7817,7823,7829,7841,7853,7867,7873,7877,7879,7883,7901,7907,7919],
@@ -1629,6 +1692,247 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 };
 math.gcf = math.gcd;
 var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
+
+
+/** A rational number.
+ * @constructor
+ * @param {Number} numerator
+ * @param {Number} denominator
+ *
+ * @property {Number} numerator
+ * @property {Number} denominator
+ */
+var Fraction = math.Fraction = function(numerator,denominator) {
+    this.numerator = Math.round(numerator);
+    this.denominator = Math.round(denominator);
+}
+Fraction.prototype = {
+    toString: function() {
+        return this.numerator+'/'+this.denominator;
+    },
+    toFloat: function() {
+        return this.numerator / this.denominator;
+    },
+    reduce: function() {
+        if(this.denominator==0) {
+            return;
+        }
+        if(this.denominator&lt;0) {
+            this.numerator = -this.numerator;
+            this.denominator = -this.denominator;
+        }
+        var g = math.gcd(this.numerator,this.denominator);
+        this.numerator /= g;
+        this.denominator /= g;
+    },
+    add: function(b) {
+        if(typeof(b)==='number') {
+            b = Fraction.fromFloat(b);
+        }
+        var numerator, denominator;
+        if(this.denominator == b.denominator) {
+            numerator = this.numerator + b.numerator;
+            denominator = this.denominator;
+        } else {
+            numerator = this.numerator*b.denominator + b.numerator*this.denominator;
+            denominator = this.denominator * b.denominator;
+        }
+        var f = new Fraction(numerator, denominator);
+        f.reduce();
+        return f;
+    },
+    subtract: function(b) {
+        if(typeof(b)==='number') {
+            b = Fraction.fromFloat(b);
+        }
+        var numerator;
+        var numerator, denominator;
+        if(this.denominator == b.denominator) {
+            numerator = this.numerator - b.numerator;
+            denominator = this.denominator;
+        } else {
+            numerator = this.numerator*b.denominator - b.numerator*this.denominator;
+            denominator = this.denominator * b.denominator;
+        }
+        var f = new Fraction(numerator, denominator);
+        f.reduce();
+        return f;
+    },
+    multiply: function(b) {
+        if(typeof(b)==='number') {
+            b = Fraction.fromFloat(b);
+        }
+        var numerator = this.numerator * b.numerator;
+        var denominator = this.denominator * b.denominator;
+        var f = new Fraction(numerator, denominator);
+        f.reduce();
+        return f;
+    },
+    divide: function(b) {
+        if(typeof(b)==='number') {
+            b = Fraction.fromFloat(b);
+        }
+        var numerator = this.numerator * b.denominator;
+        var denominator = this.denominator * b.numerator;
+        var f = new Fraction(numerator, denominator);
+        f.reduce();
+        return f;
+    },
+    reciprocal: function() {
+        return new Fraction(this.denominator, this.numerator);
+    },
+    negate: function() {
+        return new Fraction(-this.numerator, this.denominator);
+    },
+    equals: function(b) {
+        return this.subtract(b).numerator==0;
+    }
+}
+Fraction.zero = new Fraction(0,1);
+Fraction.one = new Fraction(1,1);
+Fraction.fromFloat = function(n) {
+    var approx = math.rationalApproximation(n);
+    return new Fraction(approx[0],approx[1]);
+}
+Fraction.fromDecimal = function(n) {
+    var approx = n.toFraction(1e15);
+    return new Fraction(approx[0].toNumber(),approx[1].toNumber());
+}
+
+/** A complex number with components stored as `Decimal` objects.
+ * @param {Decimal} re
+ * @param {Decimal} [im]
+ * @property {Decimal} re
+ * @property {Decimal} im
+ */
+var ComplexDecimal = math.ComplexDecimal = function(re,im) {
+    this.re = re;
+    if(im===undefined) {
+        im = new Decimal(0);
+    }
+    this.im = im;
+}
+ComplexDecimal.prototype = {
+    toString: function() {
+        var re = this.re.toString();
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toString();
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toComplexNumber: function() {
+        if(this.isReal()) {
+            return this.re.toNumber();
+        } else {
+            return {complex: true, re: this.re.toNumber(), im: this.im.toNumber()};
+        }
+    },
+
+    isReal: function() {
+        return this.im.isZero();
+    },
+
+    equals: function(b) {
+        return this.re.equals(b.re) &amp;&amp; this.im.equals(b.im);
+    },
+
+    negated: function() {
+        return new ComplexDecimal(this.re.negated(), this.im.negated());
+    },
+
+    plus: function(b) {
+        return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
+    },
+
+    minus: function(b) {
+        return new ComplexDecimal(this.re.minus(b.re), this.im.minus(b.im));
+    },
+    times: function(b) {
+        var re = this.re.times(b.re).minus(this.im.times(b.im));
+        var im = this.re.times(b.im).plus(this.im.times(b.re));
+        return new ComplexDecimal(re,im);
+    },
+
+    dividedBy: function(b) {
+        var q = b.re.times(b.re).plus(b.re.times(b.im));
+        var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
+        var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
+        console.log(q+' '+re+' '+im);
+        return new ComplexDecimal(re,im);
+    },
+
+    pow: function(b) {
+        if(this.isReal() &amp;&amp; b.isReal()) {
+            return new ComplexDecimal(this.re.pow(b.re),this.im);
+        } else {
+            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var arg1 = Decimal.atan2(this.im,this.re);
+            var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
+            var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
+            return new ComplexDecimal(mag.times(arg.cos()), mag.times(arg.sin()));
+        }
+    },
+
+    absoluteValue: function() {
+        return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)));
+    },
+
+    isInt: function() {
+        return this.re.isInt() &amp;&amp; this.im.isInt();
+    },
+
+    isNaN: function() {
+        return this.re.isNaN() || this.im.isNaN();
+    },
+
+    isZero: function() {
+        return this.re.isZero() &amp;&amp; this.im.isZero();
+    },
+
+    round: function() {
+        return new ComplexDecimal(this.re.round(), this.im.round());
+    },
+
+    toDecimalPlaces: function(dp) {
+        return new ComplexDecimal(this.re.toDecimalPlaces(dp), this.im.toDecimalPlaces(dp));
+    },
+
+    toFixed: function(dp) {
+        var re = this.re.toFixed(dp);
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toFixed(dp);
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toNearest: function(n) {
+        return new ComplexDecimal(this.re.toNearest(n), this.im.toNearest(n));
+    },
+
+    toPrecision: function(sf) {
+        var re = this.re.toPrecision(dp);
+        if(this.isReal()) {
+            return re;
+        } else {
+            var symbol = this.im.isNegative() ? '-' : '+';
+            var im = this.im.absoluteValue().toPrecision(dp);
+            return re+' '+symbol+' '+im+'i';
+        }
+    },
+
+    toSignificantDigits: function(sf) {
+        return new ComplexDecimal(this.re.toSignificantDigits(dp), this.im.toSignificantDigits(dp));
+    }
+}
+
+
 /** A list of a vector's components.
  * @typedef vector
  *  @type {Array.&lt;Number>}
@@ -2234,9 +2538,23 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="global"><a href="global.html">global</a></li>
 		
+			<li class="search-result" data-longname="AnnotatedTree"><a href="AnnotatedTree.html">AnnotatedTree</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#assign"><a href="AnnotatedTree.html#assign">AnnotatedTree#assign</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#assign_args"><a href="AnnotatedTree.html#assign_args">AnnotatedTree#assign_args</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
+		
 			<li class="search-result" data-longname="complex"><a href="global.html#complex">complex</a></li>
 		
 			<li class="search-result" data-longname="fraction"><a href="global.html#fraction">fraction</a></li>
+		
+			<li class="search-result" data-longname="get"><a href="global.html#get">get</a></li>
+		
+			<li class="search-result" data-longname="hasWarnings"><a href="global.html#hasWarnings">hasWarnings</a></li>
 		
 			<li class="search-result" data-longname="JME"><a href="global.html#JME">JME</a></li>
 		
@@ -2684,6 +3002,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.castToType"><a href="Numbas.jme.html#.castToType">Numbas.jme.castToType</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.checkingFunction"><a href="Numbas.jme.html#.checkingFunction">Numbas.jme.checkingFunction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.checkingFunctions"><a href="Numbas.jme.html#.checkingFunctions">Numbas.jme.checkingFunctions</a></li>
@@ -2772,6 +3092,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.boolean"><a href="Numbas.jme.display.html#.typeToJME#.boolean">Numbas.jme.display.typeToJME.boolean</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.decimal"><a href="Numbas.jme.display.html#.typeToJME#.decimal">Numbas.jme.display.typeToJME.decimal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.dict"><a href="Numbas.jme.display.html#.typeToJME#.dict">Numbas.jme.display.typeToJME.dict</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.expression"><a href="Numbas.jme.display.html#.typeToJME#.expression">Numbas.jme.display.typeToJME.expression</a></li>
@@ -2779,6 +3101,8 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.function"><a href="Numbas.jme.display.html#.typeToJME#.function">Numbas.jme.display.typeToJME.function</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.html"><a href="Numbas.jme.display.html#.typeToJME#.html">Numbas.jme.display.typeToJME.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.integer"><a href="Numbas.jme.display.html#.typeToJME#.integer">Numbas.jme.display.typeToJME.integer</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.keypair"><a href="Numbas.jme.display.html#.typeToJME#.keypair">Numbas.jme.display.typeToJME.keypair</a></li>
 		
@@ -2796,6 +3120,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.range"><a href="Numbas.jme.display.html#.typeToJME#.range">Numbas.jme.display.typeToJME.range</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.rational"><a href="Numbas.jme.display.html#.typeToJME#.rational">Numbas.jme.display.typeToJME.rational</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.set"><a href="Numbas.jme.display.html#.typeToJME#.set">Numbas.jme.display.typeToJME.set</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.typeToJME.string"><a href="Numbas.jme.display.html#.typeToJME#.string">Numbas.jme.display.typeToJME.string</a></li>
@@ -2810,11 +3136,15 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.jme.evaluate_fn"><a href="Numbas.jme.html#.evaluate_fn">Numbas.jme.evaluate_fn</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.findCompatibleType"><a href="Numbas.jme.html#.findCompatibleType">Numbas.jme.findCompatibleType</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.findvars"><a href="Numbas.jme.html#.findvars">Numbas.jme.findvars</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.findvarsOps"><a href="Numbas.jme.html#.findvarsOps">Numbas.jme.findvarsOps</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.funcObj"><a href="Numbas.jme.funcObj.html">Numbas.jme.funcObj</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.funcObj.description"><a href="Numbas.jme.funcObj.html#.description">Numbas.jme.funcObj.description</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.funcObj.evaluate"><a href="Numbas.jme.funcObj.html#.evaluate">Numbas.jme.funcObj.evaluate</a></li>
 		
@@ -2845,6 +3175,10 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.jme.isOp"><a href="Numbas.jme.html#.isOp">Numbas.jme.isOp</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.lazyOps"><a href="Numbas.jme.html#.lazyOps">Numbas.jme.lazyOps</a></li>
 		
@@ -3020,6 +3354,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#getVariable"><a href="Numbas.jme.Scope.html#getVariable">Numbas.jme.Scope#getVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#matchFunctionToArguments"><a href="Numbas.jme.Scope.html#matchFunctionToArguments">Numbas.jme.Scope#matchFunctionToArguments</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope#resolve"><a href="Numbas.jme.Scope.html#resolve">Numbas.jme.Scope#resolve</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#setRuleset"><a href="Numbas.jme.Scope.html#setRuleset">Numbas.jme.Scope#setRuleset</a></li>
@@ -3031,6 +3367,12 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.jme.scope_deletions"><a href="Numbas.jme.html#.scope_deletions">Numbas.jme.scope_deletions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.shunt"><a href="Numbas.jme.html#.shunt">Numbas.jme.shunt</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.signature"><a href="Numbas.jme.html#.signature">Numbas.jme.signature</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.signature_result"><a href="Numbas.jme.html#.signature_result">Numbas.jme.signature_result</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.signature_result_argument"><a href="Numbas.jme.html#.signature_result_argument">Numbas.jme.signature_result_argument</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.standardParser"><a href="Numbas.jme.html#.standardParser">Numbas.jme.standardParser</a></li>
 		
@@ -3061,6 +3403,8 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.jme.types.TBool"><a href="Numbas.jme.types.TBool.html">Numbas.jme.types.TBool</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.types.TDict"><a href="Numbas.jme.types.TDict.html">Numbas.jme.types.TDict</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.types.TExpression"><a href="Numbas.jme.types.TExpression.html">Numbas.jme.types.TExpression</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.types.TFunc"><a href="Numbas.jme.types.TFunc.html">Numbas.jme.types.TFunc</a></li>
 		
@@ -3234,6 +3578,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#getVariable"><a href="Numbas.marking.StatefulScope.html#getVariable">Numbas.marking.StatefulScope#getVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#matchFunctionToArguments"><a href="Numbas.marking.StatefulScope.html#matchFunctionToArguments">Numbas.marking.StatefulScope#matchFunctionToArguments</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#resolve"><a href="Numbas.marking.StatefulScope.html#resolve">Numbas.marking.StatefulScope#resolve</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setRuleset"><a href="Numbas.marking.StatefulScope.html#setRuleset">Numbas.marking.StatefulScope#setRuleset</a></li>
@@ -3372,6 +3718,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.math.nonnegative"><a href="Numbas.math.html#.nonnegative">Numbas.math.nonnegative</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.parseScientific"><a href="Numbas.math.html#.parseScientific">Numbas.math.parseScientific</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.permutations"><a href="Numbas.math.html#.permutations">Numbas.math.permutations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.piDegree"><a href="Numbas.math.html#.piDegree">Numbas.math.piDegree</a></li>
@@ -3433,6 +3781,8 @@ var setmath = Numbas.setmath = {
 			<li class="search-result" data-longname="Numbas.math.tanh"><a href="Numbas.math.html#.tanh">Numbas.math.tanh</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.toGivenPrecision"><a href="Numbas.math.html#.toGivenPrecision">Numbas.math.toGivenPrecision</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.toNearest"><a href="Numbas.math.html#.toNearest">Numbas.math.toNearest</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.trunc"><a href="Numbas.math.html#.trunc">Numbas.math.trunc</a></li>
 		
@@ -3496,7 +3846,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#calculateScore"><a href="Numbas.parts.CustomPart.html#calculateScore">Numbas.parts.CustomPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.CustomPart#credit"><a href="Numbas.parts.CustomPart.html#credit">Numbas.parts.CustomPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#creditFraction"><a href="Numbas.parts.CustomPart.html#creditFraction">Numbas.parts.CustomPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#customName"><a href="Numbas.parts.CustomPart.html#customName">Numbas.parts.CustomPart#customName</a></li>
 		
@@ -3640,7 +3990,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#createSuspendData"><a href="Numbas.parts.ExtensionPart.html#createSuspendData">Numbas.parts.ExtensionPart#createSuspendData</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#credit"><a href="Numbas.parts.ExtensionPart.html#credit">Numbas.parts.ExtensionPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#creditFraction"><a href="Numbas.parts.ExtensionPart.html#creditFraction">Numbas.parts.ExtensionPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#customName"><a href="Numbas.parts.ExtensionPart.html#customName">Numbas.parts.ExtensionPart#customName</a></li>
 		
@@ -3788,7 +4138,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#calculateScore"><a href="Numbas.parts.GapFillPart.html#calculateScore">Numbas.parts.GapFillPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.GapFillPart#credit"><a href="Numbas.parts.GapFillPart.html#credit">Numbas.parts.GapFillPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#creditFraction"><a href="Numbas.parts.GapFillPart.html#creditFraction">Numbas.parts.GapFillPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#customName"><a href="Numbas.parts.GapFillPart.html#customName">Numbas.parts.GapFillPart#customName</a></li>
 		
@@ -3936,7 +4286,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#calculateScore"><a href="Numbas.parts.InformationPart.html#calculateScore">Numbas.parts.InformationPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.InformationPart#credit"><a href="Numbas.parts.InformationPart.html#credit">Numbas.parts.InformationPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#creditFraction"><a href="Numbas.parts.InformationPart.html#creditFraction">Numbas.parts.InformationPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#customName"><a href="Numbas.parts.InformationPart.html#customName">Numbas.parts.InformationPart#customName</a></li>
 		
@@ -4078,7 +4428,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#calculateScore"><a href="Numbas.parts.JMEPart.html#calculateScore">Numbas.parts.JMEPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.JMEPart#credit"><a href="Numbas.parts.JMEPart.html#credit">Numbas.parts.JMEPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#creditFraction"><a href="Numbas.parts.JMEPart.html#creditFraction">Numbas.parts.JMEPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#customName"><a href="Numbas.parts.JMEPart.html#customName">Numbas.parts.JMEPart#customName</a></li>
 		
@@ -4222,7 +4572,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#calculateScore"><a href="Numbas.parts.MatrixEntryPart.html#calculateScore">Numbas.parts.MatrixEntryPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#credit"><a href="Numbas.parts.MatrixEntryPart.html#credit">Numbas.parts.MatrixEntryPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#creditFraction"><a href="Numbas.parts.MatrixEntryPart.html#creditFraction">Numbas.parts.MatrixEntryPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#customName"><a href="Numbas.parts.MatrixEntryPart.html#customName">Numbas.parts.MatrixEntryPart#customName</a></li>
 		
@@ -4368,7 +4718,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#calculateScore"><a href="Numbas.parts.MultipleResponsePart.html#calculateScore">Numbas.parts.MultipleResponsePart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#credit"><a href="Numbas.parts.MultipleResponsePart.html#credit">Numbas.parts.MultipleResponsePart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#creditFraction"><a href="Numbas.parts.MultipleResponsePart.html#creditFraction">Numbas.parts.MultipleResponsePart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#customName"><a href="Numbas.parts.MultipleResponsePart.html#customName">Numbas.parts.MultipleResponsePart#customName</a></li>
 		
@@ -4522,7 +4872,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#cleanAnswer"><a href="Numbas.parts.NumberEntryPart.html#cleanAnswer">Numbas.parts.NumberEntryPart#cleanAnswer</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#credit"><a href="Numbas.parts.NumberEntryPart.html#credit">Numbas.parts.NumberEntryPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#creditFraction"><a href="Numbas.parts.NumberEntryPart.html#creditFraction">Numbas.parts.NumberEntryPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#customName"><a href="Numbas.parts.NumberEntryPart.html#customName">Numbas.parts.NumberEntryPart#customName</a></li>
 		
@@ -4668,7 +5018,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#calculateScore"><a href="Numbas.parts.Part.html#calculateScore">Numbas.parts.Part#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.Part#credit"><a href="Numbas.parts.Part.html#credit">Numbas.parts.Part#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.Part#creditFraction"><a href="Numbas.parts.Part.html#creditFraction">Numbas.parts.Part#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#customName"><a href="Numbas.parts.Part.html#customName">Numbas.parts.Part#customName</a></li>
 		
@@ -4812,7 +5162,7 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#calculateScore"><a href="Numbas.parts.PatternMatchPart.html#calculateScore">Numbas.parts.PatternMatchPart#calculateScore</a></li>
 		
-			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#credit"><a href="Numbas.parts.PatternMatchPart.html#credit">Numbas.parts.PatternMatchPart#credit</a></li>
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#creditFraction"><a href="Numbas.parts.PatternMatchPart.html#creditFraction">Numbas.parts.PatternMatchPart#creditFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#customName"><a href="Numbas.parts.PatternMatchPart.html#customName">Numbas.parts.PatternMatchPart#customName</a></li>
 		
@@ -5372,6 +5722,8 @@ var setmath = Numbas.setmath = {
 		
 			<li class="search-result" data-longname="Numbas.util.parseBool"><a href="Numbas.util.html#.parseBool">Numbas.util.parseBool</a></li>
 		
+			<li class="search-result" data-longname="Numbas.util.parseDecimal"><a href="Numbas.util.html#.parseDecimal">Numbas.util.parseDecimal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.util.parseFraction"><a href="Numbas.util.html#.parseFraction">Numbas.util.parseFraction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseNumber"><a href="Numbas.util.html#.parseNumber">Numbas.util.parseNumber</a></li>
@@ -5568,7 +5920,7 @@ var setmath = Numbas.setmath = {
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3><a href="global.html">Global variables</a></h3>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part_.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 
