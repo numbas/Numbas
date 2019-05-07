@@ -1398,6 +1398,10 @@
                     assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
                     assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
                     assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096*(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
+                    assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(-4)')}),'-4','dec(-4) rendered as -4');
+                    assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(4.56)*10^1000')}),'dec("4.56e+1000")','dec(4.56)*10^1000');
+                    assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^1000')}),'dec("1e+1000")','10^1000');
+                    assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
                 });
 
                 QUnit.test('large product',function(assert) {

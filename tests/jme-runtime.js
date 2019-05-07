@@ -3520,7 +3520,6 @@ ComplexDecimal.prototype = {
         var q = b.re.times(b.re).plus(b.re.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
-        console.log(q+' '+re+' '+im);
         return new ComplexDecimal(re,im);
     },
 
@@ -11649,7 +11648,13 @@ newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
-newBuiltin('decimal',[TNum],TDecimal,function(x){return new Decimal(x)});
+newBuiltin('decimal',[TNum],TDecimal,function(x){
+    if(x.complex) {
+        return new math.ComplexDecimal(new Decimal(x.re), new Decimal(x.im));
+    } else {
+        return new Decimal(x);
+    }
+});
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
@@ -14215,6 +14220,57 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
         }
     }
 }
+
+/** Write a {@link Numbas.jme.math.ComplexDecimal} in JME syntax.
+ *
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {Numbas.math.ComplexDecimal|Decimal} n
+ * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @returns {JME}
+ */
+var jmeDecimal = jme.display.jmeDecimal = function(n,settings)
+{
+    settings = settings || {};
+    if(n instanceof Numbas.math.ComplexDecimal) {
+        var re = jmeDecimal(n.re);
+        if(n.isReal()) {
+            return re;
+        } 
+        var im = jmeDecimal(n.im)+'*i';
+        if(n.re.isZero()) {
+            if(n.im.eq(1))
+                return 'i';
+            else if(n.im.eq(-1))
+                return '-i';
+            else
+                return im;
+        } else if(n.im.lt(0)) {
+            if(n.im.eq(-1))
+                return re+' - i';
+            else
+                return re+' - '+im.slice(1);
+        } else {
+            if(n.im.eq(1))
+                return re+' + i';
+            else
+                return re+' + '+im;
+        }
+    } else if(n instanceof Decimal) {
+        var out = n.toString();
+        if(n.absoluteValue().toNumber()<Infinity && ((n.isInteger() && n.absoluteValue().lt(Number.MAX_SAFE_INTEGER)) || n.decimalPlaces()<10)) {
+            return out;
+        }
+        if(out.length>20) {
+            out = n.toExponential();
+        }
+        return 'dec("'+out+'")';
+    } else {
+        return jmeRealNumber(n, settings);
+    }
+}
+
 /** Dictionary of functions to turn {@link Numbas.jme.types} objects into JME strings
  *
  * @enum
@@ -14231,12 +14287,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value.toFloat(),settings);
     },
     'decimal': function(tree,tok,bits,settings) {
-        var n = settings.jmeNumber(tok.value.toComplexNumber(),settings);
-        if(!settings.ignorestringattributes) {
-            return 'dec('+n+')';
-        } else {
-            return n;
-        }
+        return jmeDecimal(tok.value,settings);
     },
     'number': function(tree,tok,bits,settings) {
         switch(tok.value)

@@ -1829,7 +1829,6 @@ ComplexDecimal.prototype = {
         var q = b.re.times(b.re).plus(b.re.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
-        console.log(q+' '+re+' '+im);
         return new ComplexDecimal(re,im);
     },
 

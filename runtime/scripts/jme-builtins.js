@@ -580,7 +580,13 @@ newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
-newBuiltin('decimal',[TNum],TDecimal,function(x){return new Decimal(x)});
+newBuiltin('decimal',[TNum],TDecimal,function(x){
+    if(x.complex) {
+        return new math.ComplexDecimal(new Decimal(x.re), new Decimal(x.im));
+    } else {
+        return new Decimal(x);
+    }
+});
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
