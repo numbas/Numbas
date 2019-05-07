@@ -457,7 +457,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     isclose: function(a,b,rel_tol,abs_tol) {
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
-        abs_tol = abs_tol===undefined ? 0 : rel_tol;
+        abs_tol = abs_tol===undefined ? 1e-15: rel_tol;
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
     },
 
