@@ -24,13 +24,13 @@ score_ticks (The score for each choice/answer pair):
       let(distractor,settings["distractors"][x][y], credit, if(marks=0,0,settings["matrix"][x][y]/marks),
         switch(
           credit<>0,
-            if(not nonemptyhtml(distractor),
+            if(not isnonemptyhtml(distractor),
               add_credit(credit,translate(if(credit>0,'part.mcq.correct choice','part.mcq.incorrect choice')))
             ,
               add_credit(credit,distractor)
             )
           ,
-            if(nonemptyhtml(distractor),feedback(distractor),if(marks<>0,feedback(translate('part.mcq.incorrect choice')),false))
+            if(isnonemptyhtml(distractor),feedback(distractor),if(marks<>0,feedback(translate('part.mcq.incorrect choice')),false))
         );credit
       )
     ,
