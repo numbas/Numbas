@@ -12682,7 +12682,7 @@ newBuiltin('list',[TMatrix],TList,null, {
  */
 function set_html_content(element,tok) {
     if(tok.type!='html') {
-        element.innerHTML = jme.typeToDisplayString(tok);
+        element.innerHTML = jme.tokenToDisplayString(tok);
     } else {
         element.appendChild(tok.value);
     }
