@@ -11667,6 +11667,9 @@ newBuiltin('table',[TList,TList],THTML,
             }
         }
         return new THTML(table);
+    },
+    {
+        unwrapValues: true
     }
 );
 newBuiltin('table',[TList],THTML,
