@@ -15295,7 +15295,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.creditFraction = math.Fraction.fromFloat(credit);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
-                op: 'set_credit',
+                op: 'add_credit',
                 credit: this.creditFraction.subtract(oCredit).toFloat(),
                 message: message,
                 reason: reason
