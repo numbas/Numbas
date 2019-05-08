@@ -636,12 +636,12 @@ newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
 newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
 newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.re.sqrt(); });
 newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
-newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
-newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
+newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
+newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
-newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
-newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
+newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
+newBuiltin('siground',[TDecimal,TNum], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
 newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.re.trunc(); });
 newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
 

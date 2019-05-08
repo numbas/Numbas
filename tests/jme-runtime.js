@@ -3458,6 +3458,16 @@ Fraction.fromDecimal = function(n) {
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
+
+function ensure_decimal(n) {
+    if(n instanceof ComplexDecimal) {
+        return n;
+    }
+    if(n instanceof Decimal) {
+        return new ComplexDecimal(n);
+    }
+    return new ComplexDecimal(new Decimal(n));
+}
 /** A complex number with components stored as `Decimal` objects.
  * @param {Decimal} re
  * @param {Decimal} [im]
@@ -3483,6 +3493,10 @@ ComplexDecimal.prototype = {
         }
     },
 
+    toNumber: function() {
+        return this.re.toNumber();
+    },
+
     toComplexNumber: function() {
         if(this.isReal()) {
             return this.re.toNumber();
@@ -3496,6 +3510,7 @@ ComplexDecimal.prototype = {
     },
 
     equals: function(b) {
+        b = ensure_decimal(b);
         return this.re.equals(b.re) && this.im.equals(b.im);
     },
 
@@ -3504,19 +3519,23 @@ ComplexDecimal.prototype = {
     },
 
     plus: function(b) {
+        b = ensure_decimal(b);
         return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
     },
 
     minus: function(b) {
+        b = ensure_decimal(b);
         return new ComplexDecimal(this.re.minus(b.re), this.im.minus(b.im));
     },
     times: function(b) {
+        b = ensure_decimal(b);
         var re = this.re.times(b.re).minus(this.im.times(b.im));
         var im = this.re.times(b.im).plus(this.im.times(b.re));
         return new ComplexDecimal(re,im);
     },
 
     dividedBy: function(b) {
+        b = ensure_decimal(b);
         var q = b.re.times(b.re).plus(b.re.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
@@ -3524,6 +3543,7 @@ ComplexDecimal.prototype = {
     },
 
     pow: function(b) {
+        b = ensure_decimal(b);
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
@@ -3586,7 +3606,7 @@ ComplexDecimal.prototype = {
     },
 
     toSignificantDigits: function(sf) {
-        return new ComplexDecimal(this.re.toSignificantDigits(dp), this.im.toSignificantDigits(dp));
+        return new ComplexDecimal(this.re.toSignificantDigits(sf), this.im.toSignificantDigits(sf));
     }
 }
 
@@ -7873,6 +7893,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                             v = v.map(jme.wrapValue);
                             return new jme.types.TList(v);
                         }
+                    } else if(v instanceof math.ComplexDecimal) {
+                        return new jme.types.TDecimal(v);
                     } else if(v instanceof Decimal) {
                         return new jme.types.TDecimal(v);
                     } else if(v instanceof math.Fraction) {
@@ -11704,12 +11726,12 @@ newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
 newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
 newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.re.sqrt(); });
 newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
-newBuiltin('precround',[TDecimal,TInt], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
-newBuiltin('dpformat',[TDecimal,TInt], TString, function(a,dp) {return a.toFixed(dp); });
+newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
+newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
-newBuiltin('sigformat',[TDecimal,TInt], TString, function(a,sf) {return a.toPrecision(sf); });
-newBuiltin('siground',[TDecimal,TInt], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
+newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
+newBuiltin('siground',[TDecimal,TNum], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
 newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.re.trunc(); });
 newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
 

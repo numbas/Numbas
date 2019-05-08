@@ -1767,6 +1767,16 @@ Fraction.fromDecimal = function(n) {
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
+
+function ensure_decimal(n) {
+    if(n instanceof ComplexDecimal) {
+        return n;
+    }
+    if(n instanceof Decimal) {
+        return new ComplexDecimal(n);
+    }
+    return new ComplexDecimal(new Decimal(n));
+}
 /** A complex number with components stored as `Decimal` objects.
  * @param {Decimal} re
  * @param {Decimal} [im]
@@ -1792,6 +1802,10 @@ ComplexDecimal.prototype = {
         }
     },
 
+    toNumber: function() {
+        return this.re.toNumber();
+    },
+
     toComplexNumber: function() {
         if(this.isReal()) {
             return this.re.toNumber();
@@ -1805,6 +1819,7 @@ ComplexDecimal.prototype = {
     },
 
     equals: function(b) {
+        b = ensure_decimal(b);
         return this.re.equals(b.re) && this.im.equals(b.im);
     },
 
@@ -1813,19 +1828,23 @@ ComplexDecimal.prototype = {
     },
 
     plus: function(b) {
+        b = ensure_decimal(b);
         return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
     },
 
     minus: function(b) {
+        b = ensure_decimal(b);
         return new ComplexDecimal(this.re.minus(b.re), this.im.minus(b.im));
     },
     times: function(b) {
+        b = ensure_decimal(b);
         var re = this.re.times(b.re).minus(this.im.times(b.im));
         var im = this.re.times(b.im).plus(this.im.times(b.re));
         return new ComplexDecimal(re,im);
     },
 
     dividedBy: function(b) {
+        b = ensure_decimal(b);
         var q = b.re.times(b.re).plus(b.re.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
@@ -1833,6 +1852,7 @@ ComplexDecimal.prototype = {
     },
 
     pow: function(b) {
+        b = ensure_decimal(b);
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
@@ -1895,7 +1915,7 @@ ComplexDecimal.prototype = {
     },
 
     toSignificantDigits: function(sf) {
-        return new ComplexDecimal(this.re.toSignificantDigits(dp), this.im.toSignificantDigits(dp));
+        return new ComplexDecimal(this.re.toSignificantDigits(sf), this.im.toSignificantDigits(sf));
     }
 }
 

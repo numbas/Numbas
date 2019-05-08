@@ -594,6 +594,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                             v = v.map(jme.wrapValue);
                             return new jme.types.TList(v);
                         }
+                    } else if(v instanceof math.ComplexDecimal) {
+                        return new jme.types.TDecimal(v);
                     } else if(v instanceof Decimal) {
                         return new jme.types.TDecimal(v);
                     } else if(v instanceof math.Fraction) {

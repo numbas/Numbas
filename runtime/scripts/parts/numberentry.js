@@ -184,7 +184,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         } catch(e) {
             this.error('part.setting not present',{property:R('maximum value')});
         }
-        var displayAnswer = minvalue.add(maxvalue).dividedBy(2);
+        var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {
             var frac = math.Fraction.fromDecimal(displayAnswer);
             settings.displayAnswer = frac.toString();
