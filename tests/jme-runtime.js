@@ -3540,9 +3540,10 @@ Fraction.fromDecimal = function(n) {
 function ensure_decimal(n) {
     if(n instanceof ComplexDecimal) {
         return n;
-    }
-    if(n instanceof Decimal) {
+    } else if(n instanceof Decimal) {
         return new ComplexDecimal(n);
+    } else if(n.complex) {
+        return new ComplexDecimal(new Decimal(n.re), new Decimal(n.im));
     }
     return new ComplexDecimal(new Decimal(n));
 }
@@ -3630,6 +3631,20 @@ ComplexDecimal.prototype = {
             var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
             var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
             return new ComplexDecimal(mag.times(arg.cos()), mag.times(arg.sin()));
+        }
+    },
+
+    squareRoot: function() {
+        if(!this.isReal()) {
+            var r = this.re.times(this.re).plus(this.im.times(this.im)).squareRoot();
+            var re = r.plus(this.re).dividedBy(2).squareRoot();
+            var im = (new Decimal(this.im.lessThan(0) ? -1 : 1)).times(r.minus(this.re).dividedBy(2).squareRoot());
+            return new ComplexDecimal(re,im);
+        }
+        if(this.re.lessThan(0)) {
+            return new ComplexDecimal(new Decimal(0),this.re.absoluteValue().squareRoot());
+        } else {
+            return new ComplexDecimal(this.re.squareRoot());
         }
     },
 
@@ -11815,7 +11830,7 @@ newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.re.ln(); });
 newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.re.countSigFigs(); });
 newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
 newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
-newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.re.sqrt(); });
+newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.squareRoot(); });
 newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
 newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
