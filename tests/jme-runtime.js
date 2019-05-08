@@ -12687,7 +12687,7 @@ function set_html_content(element,tok) {
         element.appendChild(tok.value);
     }
 }
-newBuiltin('table',[TList,sig.listof(sig.type('list'))],THTML,
+newBuiltin('table',[TList,TList],THTML,
     function(data,headers) {
         var table = document.createElement('table');
         var thead = document.createElement('thead');
