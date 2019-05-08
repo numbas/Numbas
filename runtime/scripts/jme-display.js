@@ -1548,7 +1548,7 @@ jme.display.registerType = function(type, renderers) {
         typeToJME[name] = renderers.jme;
     }
     if(renderers.displayString) {
-        jme.tokenToDisplayString[name] = renderers.displayString;
+        jme.typeToDisplayString[name] = renderers.displayString;
     }
 }
 

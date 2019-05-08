@@ -18,7 +18,9 @@ Numbas.queueScript('math',['base','decimal'],function() {
     
     Decimal.set({ 
         precision: 40,
-        modulo: Decimal.EUCLID 
+        modulo: Decimal.EUCLID,
+        toExpPos: 1000,
+        toExpNeg: -1000
     });
 
 /** Mathematical functions, providing stuff that the built-in `Math` object doesn't
@@ -566,15 +568,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return n;
         }
     },
+
     /** Settings for {@link Numbas.math.niceNumber}
      * @typedef Numbas.math.niceNumber_settings
      * @property {String} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {Number} precision - number of decimal places or significant figures to show.
      * @property {String} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
      */
+
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed
      * @param {Number} n
-     * @param {Numbas.math.niceNumber_settings} options - `precisionType` is either "dp" or "sigfig". `style` is an optional notation style to use.
+     * @param {Numbas.math.niceNumber_settings} options
      * @see Numbas.util.numberNotationStyles
      * @returns {String}
      */
@@ -692,6 +696,77 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 else
                     return out+'*pi'+piD;
             }
+        }
+    },
+
+    /** Display a {@link Numbas.math.ComplexDecimal} as a string
+     * @param {Numbas.math.ComplexDecimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @see Numbas.util.numberNotationStyles
+     * @returns {String}
+     */
+    niceComplexDecimal: function(n,options) {
+        options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
+        var re = math.niceDecimal(n.re,options);
+        if(n.isReal()) {
+            return re;
+        } else {
+            var im = math.niceDecimal(n.im.absoluteValue(),options);
+            if(options.style=='scientific') {
+                im = '('+im+')*i';
+            } else {
+                im = n.im.absoluteValue().equals(1) ? 'i' : im+'*i';
+            }
+            if(n.re.isZero()) {
+                return (n.im.lessThan(0) ? '-' : '') + im;
+            }
+            var symbol = n.im.lessThan(0) ? '-' : '+';
+            return re + ' ' + symbol + ' ' + im;
+        }
+    },
+
+    /** Display a Decimal as a string
+     * @param {Decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @see Numbas.util.numberNotationStyles
+     * @returns {String}
+     */
+    niceDecimal: function(n,options) {
+        options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
+        if(!n.isFinite()) {
+            return n.lessThan(0) ? '-infinity' : 'infinity';
+        }
+
+        var precision = options.precision;
+        if(options.style=='scientific') {
+            return n.toExponential(options.precision);
+        } else {
+            var out;
+            switch(options.precisionType) {
+            case 'sigfig':
+                out = n.toPrecision(precision);
+                break;
+            case 'dp':
+                out = n.toFixed(precision);
+                break;
+            default:
+                out = n.toString();
+            }
+            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                var match_neg = /^(-)?(.*)/.exec(out);
+                var minus = match_neg[1] || '';
+                var bits = match_neg[2].split('.');
+                var integer = bits[0];
+                var decimal = bits[1];
+                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            }
+            return out;
         }
     },
     /** Get a random number in range `[0..n-1]`

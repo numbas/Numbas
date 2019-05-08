@@ -552,7 +552,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var result = util.matchNotationStyle(s,styles,strictStyle,true);
         return result.cleaned;
     },
-    /** Parse a number - either parseFloat, or parse a fraction.
+    /** Parse a number - either as a `Decimal`, or parse a fraction.
      * @param {String} s
      * @param {Boolean} allowFractions - are fractions of the form `a/b` (`a` and `b` integers without punctuation) allowed?
      * @param {String|String[]} styles - styles of notation to allow.
@@ -708,10 +708,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {String}
      */
     separateThousands: function(n,separator) {
-        if(n<0) {
-            return '-'+util.separateThousands(-n,separator);
+        var s = n;
+        if(typeof n=='number') {
+            if(n<0) {
+                return '-'+util.separateThousands(-n,separator);
+            }
+            s = Numbas.math.niceNumber(n);
         }
-        var s = Numbas.math.niceNumber(n);
         var bits = s.split('.');
         var whole = bits[0];
         var frac = bits[1];

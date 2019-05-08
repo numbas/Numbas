@@ -186,7 +186,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         }
         var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {
-            var frac = math.Fraction.fromDecimal(displayAnswer);
+            var frac = math.Fraction.fromDecimal(displayAnswer.re);
             settings.displayAnswer = frac.toString();
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});

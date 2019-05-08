@@ -445,6 +445,19 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         'number': function(v) {
             return ''+Numbas.math.niceNumber(v.value)+'';
         },
+        'decimal': function(v) {
+            var d = v.value;
+            var re = d.re.toString();
+            if(d.isReal()) {
+                return re;
+            }
+            var im = d.im.absoluteValue().toString();
+            if(d.im.lessThan(0)) {
+                return re + ' - '+im+'i';
+            } else {
+                return re + ' + '+im+'i';
+            }
+        },
         'string': function(v,display) {
             return v.value;
         },

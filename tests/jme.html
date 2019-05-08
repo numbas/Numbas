@@ -1219,6 +1219,37 @@
                     assert.equal(Numbas.math.niceNumber(0.0002663,{precisionType:'sigfig',precision:1}),'0.0003','sigfig precision doesn\'t add unwanted floating point error digits')
 				});
 
+                QUnit.test('niceDecimal',function(assert) {
+                    var niceDecimal = Numbas.math.niceDecimal;
+                    assert.equal(niceDecimal(new Decimal(0)),'0','0');
+                    assert.equal(niceDecimal(new Decimal(1)),'1','1');
+                    assert.equal(niceDecimal(new Decimal(-1)),'-1','-1');
+                    assert.equal(niceDecimal((new Decimal(2)).squareRoot()),'1.41421356237309504880168872420969807857','sqrt(2)');
+                    assert.equal(niceDecimal((new Decimal(2)).squareRoot(),{precisionType: 'dp', precision: 3}),'1.414','sqrt(2) to 3 dp');
+                    assert.equal(niceDecimal((new Decimal(2)).squareRoot(),{precisionType: 'sigfig', precision: 3}),'1.41','sqrt(2) to 3 sig figs');
+                    assert.equal(niceDecimal(new Decimal("123456789.12345"),{style:'eu'}),'123.456.789,12345','123456789.12345 in eu style');
+                    assert.equal(niceDecimal(new Decimal("123456789123456789123456789123456789.12345"),{style:'eu'}),'123.456.789.123.456.789.123.456.789.123.456.789,12345','123456789123456789123456789123456789.12345 in eu style');
+                    assert.equal(niceDecimal((new Decimal(2)).pow(100.5),{style:'scientific'}),'1.792728671193156477399422023278661496394e+30','2^100.5');
+                    assert.equal(niceDecimal((new Decimal(2)).pow(100.5),{style:'scientific', precision: 4}),'1.7927e+30','2^100.5');
+                });
+
+                QUnit.test('niceComplexDecimal',function(assert) {
+                    var niceComplexDecimal = Numbas.math.niceComplexDecimal;
+                    function c(a,b) {
+                        return new Numbas.math.ComplexDecimal(new Decimal(a),new Decimal(b));
+                    }
+                    assert.equal(niceComplexDecimal(c(1,0)),'1','1');
+                    assert.equal(niceComplexDecimal(c(0,0)),'0','0');
+                    assert.equal(niceComplexDecimal(c(-1,0)),'-1','-1');
+                    assert.equal(niceComplexDecimal(c(0,1)),'i','i');
+                    assert.equal(niceComplexDecimal(c(0,-1)),'-i','-i');
+                    assert.equal(niceComplexDecimal(c(1,1)),'1 + i','1 + i');
+                    assert.equal(niceComplexDecimal(c(1,-1)),'1 - i','1 - i');
+                    assert.equal(niceComplexDecimal(c(2,2)),'2 + 2*i','2 + 2*i');
+                    assert.equal(niceComplexDecimal(c(2,-2)),'2 - 2*i','2 - 2*i');
+                    assert.equal(niceComplexDecimal(c(4,5),{style:'scientific'}),'4e+0 + (5e+0)*i','4 + 5i in scientific style');
+                });
+
                 QUnit.test('Number notation styles',function(assert) {
                     var tests = {
                         en: [
