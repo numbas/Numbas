@@ -1299,6 +1299,12 @@ newBuiltin('indices',[TList,'?'],TList,null, {
 newBuiltin('set',[TList],TSet,function(l) {
     return util.distinct(l);
 });
+newBuiltin('set',[TRange],TSet,null, {
+    evaluate: function(args,scope) {
+        var l = jme.castToType(args[0],'list');
+        return new TSet(util.distinct(l.value));
+    }
+});
 newBuiltin('set', ['*?'], TSet, null, {
     evaluate: function(args,scope) {
         return new TSet(util.distinct(args));
