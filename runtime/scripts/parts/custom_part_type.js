@@ -46,11 +46,12 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.getDefinition();
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var settingNodes = xml.selectNodes('settings/setting');
-        settingNodes.forEach(function(settingNode) {
+        for(var i=0;i<settingNodes.length;i++) {
+            var settingNode = settingNodes[i];
             var name = settingNode.getAttribute('name');
             var value = settingNode.getAttribute('value');
             raw_settings[name] = JSON.parse(value);
-        });
+        }
     },
     loadFromJSON: function(data) {
         var definition = this.getDefinition();
