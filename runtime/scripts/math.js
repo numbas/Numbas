@@ -1899,6 +1899,38 @@ ComplexDecimal.prototype = {
         return this.re.equals(b.re) && this.im.equals(b.im);
     },
 
+    lessThan: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.lessThan(b.re);
+    },
+
+    lessThanOrEqualTo: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.lessThanOrEqualTo(b.re);
+    },
+
+    greaterThan: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.greaterThan(b.re);
+    },
+
+    greaterThanOrEqualTo: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.greaterThanOrEqualTo(b.re);
+    },
+
     negated: function() {
         return new ComplexDecimal(this.re.negated(), this.im.negated());
     },

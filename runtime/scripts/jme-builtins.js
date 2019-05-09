@@ -602,8 +602,8 @@ newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.re.ceil(); });
 newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.re.cos(); });
 newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
 newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.re.floor(); });
-newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThan(b.re); });
-newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThanOrEqualTo(b.re); });
+newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
+newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
 newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.re.toNumber(),b); });
 newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.re.cosh(); });
 newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.re.sinh(); });
@@ -617,8 +617,8 @@ newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.re.atan(); });
 newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
 newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
-newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThan(b.re); });
-newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThanOrEqualTo(b.re); });
+newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
+newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
 newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.re.toNumber(),b); });
 newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.re.log(); })
 newBuiltin('log',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.re.log()/b.re.log(); })
