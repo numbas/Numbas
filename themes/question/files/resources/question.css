@@ -6,15 +6,34 @@
 .question-nav .navmenu-brand {
 	display: inline-block;
 	margin: 0;
+    padding: 0;
+    align-self: center;
 }
 #questionContainer {
 	margin-top: 0 !important;
 	margin-left: auto !important;
 }
+.question-nav .navmenu-header {
+    display: flex;
+    padding: 0.5em;
+}
 .question-nav .navbar {
 	margin-bottom: 0;
 	text-align: right;
+    min-height: none;
 }
 .question-nav .logo {
-	float: left;
+    margin-right: 2em;
+}
+.question-nav .exam-name {
+    flex-grow: 1;
+}
+
+@media screen and (max-width: 991px) {
+    .question-nav .logo img {
+        max-height: 1em;
+    }
+    .question-nav .exam-name {
+        font-size: 1em;
+    }
 }
