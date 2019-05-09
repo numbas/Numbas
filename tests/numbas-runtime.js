@@ -10718,7 +10718,7 @@ newBuiltin('+', [TInt,TInt], TInt, math.add);
 newBuiltin('-', [TInt,TInt], TInt, math.sub);
 newBuiltin('*', [TInt,TInt], TInt, math.mul );
 newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
-newBuiltin('^', [TInt,TInt], TDecimal, function(a,b) { return (new Decimal(a)).pow(b); });
+newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
 newBuiltin('string',[TInt], TString, function(a) { return a+''; });
 
