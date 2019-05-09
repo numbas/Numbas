@@ -1744,6 +1744,7 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
  *
  * @property {Number} numerator
  * @property {Number} denominator
+ * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator,denominator) {
     this.numerator = Math.round(numerator);
@@ -1843,6 +1844,10 @@ Fraction.fromDecimal = function(n) {
 }
 
 
+/** Coerce the given number to a {@link Numbas.math.ComplexDecimal} value
+ * @param {Number|Decimal|Numbas.math.ComplexDecimal} n
+ * @returns {Numbas.math.ComplexDecimal}
+ */
 function ensure_decimal(n) {
     if(n instanceof ComplexDecimal) {
         return n;
@@ -1858,6 +1863,8 @@ function ensure_decimal(n) {
  * @param {Decimal} [im]
  * @property {Decimal} re
  * @property {Decimal} im
+ * @constructor
+ * @memberof Numbas.math
  */
 var ComplexDecimal = math.ComplexDecimal = function(re,im) {
     this.re = re;
