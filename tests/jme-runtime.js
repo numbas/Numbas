@@ -3593,6 +3593,38 @@ ComplexDecimal.prototype = {
         return this.re.equals(b.re) && this.im.equals(b.im);
     },
 
+    lessThan: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.lessThan(b.re);
+    },
+
+    lessThanOrEqualTo: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.lessThanOrEqualTo(b.re);
+    },
+
+    greaterThan: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.greaterThan(b.re);
+    },
+
+    greaterThanOrEqualTo: function(b) {
+        b = ensure_decimal(b);
+        if(!(this.isReal() && b.isReal())) {
+            throw(new Numbas.Error('math.order complex numbers'));
+        }
+        return this.re.greaterThanOrEqualTo(b.re);
+    },
+
     negated: function() {
         return new ComplexDecimal(this.re.negated(), this.im.negated());
     },
@@ -5327,6 +5359,19 @@ var toObject = function (o) {
     return Object(o);
 };
 });
+
+if (!Object.entries) {
+  Object.entries = function( obj ){
+    var ownProps = Object.keys( obj ),
+        i = ownProps.length,
+        resArray = new Array(i); // preallocate the Array
+    while (i--)
+      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+    
+    return resArray;
+  };
+}
+
 });
 
 Numbas.queueScript('decimal',[],function() {
@@ -11798,8 +11843,8 @@ newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.re.ceil(); });
 newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.re.cos(); });
 newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
 newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.re.floor(); });
-newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThan(b.re); });
-newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.greaterThanOrEqualTo(b.re); });
+newBuiltin('>', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThan(b); });
+newBuiltin('>=', [TDecimal,TDecimal], TBool, function(a,b){ return a.greaterThanOrEqualTo(b); });
 newBuiltin('>=', [TDecimal,TNum], TBool, function(a,b){ return math.geq(a.re.toNumber(),b); });
 newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.re.cosh(); });
 newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.re.sinh(); });
@@ -11813,8 +11858,8 @@ newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.re.atan(); });
 newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
 newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })
-newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThan(b.re); });
-newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.re.lessThanOrEqualTo(b.re); });
+newBuiltin('<', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThan(b); });
+newBuiltin('<=', [TDecimal,TDecimal], TBool, function(a,b){ return a.lessThanOrEqualTo(b); });
 newBuiltin('<=', [TDecimal,TNum], TBool, function(a,b){ return math.leq(a.re.toNumber(),b); });
 newBuiltin('log',[TDecimal], TDecimal, function(a) {return a.re.log(); })
 newBuiltin('log',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.re.log()/b.re.log(); })

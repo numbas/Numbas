@@ -162,28 +162,40 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         if(settings.precisionType=='dp' && settings.precision<0) {
             throw(new Numbas.Error('part.numberentry.negative decimal places'));
         }
+
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
-        try {
-            if(minvalue.type=='number') {
-                minvalue.value -= 1e-12;
-            }
-            minvalue = jme.castToType(minvalue,'decimal').value;
-            settings.minvalue = minvalue;
-        } catch(e) {
+        if(!minvalue) {
             this.error('part.setting not present',{property:R('minimum value')});
         }
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
-        try {
-            if(maxvalue.type=='number') {
-                maxvalue.value += 1e-12;
-            }
-            maxvalue = jme.castToType(maxvalue,'decimal').value;
-            settings.maxvalue = maxvalue;
-        } catch(e) {
+        if(!maxvalue) {
             this.error('part.setting not present',{property:R('maximum value')});
         }
+
+        var dmin = jme.castToType(minvalue,'decimal').value;
+        var dmax = jme.castToType(maxvalue,'decimal').value;
+        if(dmax.lessThan(dmin)) {
+            var tmp = dmin;
+            dmin = dmax;
+            dmax = tmp;
+            tmp = minvalue;
+            minvalue = maxvalue;
+            maxvalue = tmp;
+        }
+
+        if(minvalue.type=='number') {
+            minvalue.value -= 1e-12;
+        }
+        minvalue = jme.castToType(minvalue,'decimal').value;
+        settings.minvalue = minvalue;
+        if(maxvalue.type=='number') {
+            maxvalue.value += 1e-12;
+        }
+        maxvalue = jme.castToType(maxvalue,'decimal').value;
+        settings.maxvalue = maxvalue;
+
         var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {
             var frac = math.Fraction.fromDecimal(displayAnswer.re);
