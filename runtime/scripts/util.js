@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','es5-shim','math'],function() {
+Numbas.queueScript('util',['base','es5-shim','es6-shim','math'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)

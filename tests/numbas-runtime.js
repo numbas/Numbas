@@ -298,7 +298,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','es5-shim','math'],function() {
+Numbas.queueScript('util',['base','es5-shim','es6-shim','math'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)
@@ -19272,37 +19272,6 @@ if (!Object.entries) {
     return resArray;
   };
 }
-
-if (typeof Object.assign != 'function') {
-  // Must be writable: true, enumerable: false, configurable: true
-  Object.defineProperty(Object, "assign", {
-    value: function assign(target, varArgs) { // .length of function is 2
-      'use strict';
-      if (target == null) { // TypeError if undefined or null
-        throw new TypeError('Cannot convert undefined or null to object');
-      }
-
-      var to = Object(target);
-
-      for (var index = 1; index < arguments.length; index++) {
-        var nextSource = arguments[index];
-
-        if (nextSource != null) { // Skip over if undefined or null
-          for (var nextKey in nextSource) {
-            // Avoid bugs when hasOwnProperty is shadowed
-            if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-              to[nextKey] = nextSource[nextKey];
-            }
-          }
-        }
-      }
-      return to;
-    },
-    writable: true,
-    configurable: true
-  });
-}
-
 
 });
 
