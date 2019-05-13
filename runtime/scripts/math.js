@@ -1994,7 +1994,7 @@ ComplexDecimal.prototype = {
     },
 
     absoluteValue: function() {
-        return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)));
+        return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)).squareRoot());
     },
 
     isInt: function() {

@@ -534,6 +534,7 @@
 					closeEqual(assert, evaluate('abs(1..5)').value,5,'abs(1..5)');
 					closeEqual(assert, evaluate('abs(1..5#1.2)').value,4,'abs(1..5#1.2)');
 					closeEqual(assert, evaluate('abs(1..4#0)').value,3,'abs(1..4#0)');
+                    closeEqual(assert, evaluate('abs(dec(3))').value.toNumber(),3,'abs(dec(3))')
 					closeEqual(assert, evaluate('abs(vector(3,4))').value,5,'abs(vector(3,4))');
 					closeEqual(assert, evaluate('abs(vector(3,4,5,5,5))').value,10,'abs(vector(3,4,5,5,5))');
 					closeEqual(assert, evaluate('arg(1+i)').value,Math.PI/4,'arg(1+i)');
