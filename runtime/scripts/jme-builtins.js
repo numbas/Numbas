@@ -649,6 +649,8 @@ newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.tru
 
 newBuiltin('sum',[sig.listof(sig.type('number'))],TNum,math.sum,{unwrapValues: true});
 newBuiltin('sum',[TVector],TNum,math.sum);
+newBuiltin('prod',[sig.listof(sig.type('number'))],TNum,math.prod,{unwrapValues: true});
+newBuiltin('prod',[TVector],TNum,math.prod);
 newBuiltin('deal',[TNum],TList,
     function(n) {
         return math.deal(n).map(function(i) {
