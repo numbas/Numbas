@@ -906,7 +906,10 @@
                     raisesNumbasError(assert, function() { evaluate("dict(2)"); }, 'jme.typecheck.no right type definition','dict(2)');
                     raisesNumbasError(assert, function() { evaluate('dict(["a",1])'); }, 'jme.typecheck.no right type definition','dict(["a",1])');
 
+                    assert.equal(evaluate('sum([])').value,0,'sum([])');
                     assert.equal(evaluate('sum([1,2,3])').value,6,'sum([1,2,3])');
+                    assert.equal(evaluate('prod([])').value,1,'prod([])');
+                    assert.equal(evaluate('prod([2,3,4])').value,24,'prod([2,3,4])');
                     raisesNumbasError(assert, function() { evaluate('sum(["a","b"])') },'jme.typecheck.no right type definition','sum(["a","b"])');
                 });
 
