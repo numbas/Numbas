@@ -2147,13 +2147,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** Is `a` close to `b`?
      * @param {Number} a
      * @param {Number} b
-     * @param {Number} [rel_tol=1e-12] - relative tolerance: amount of error relative to `max(abs(a),abs(b))`.
-     * @param {Number} [abs_tol=0] - absolute tolerance: maximum absolute difference between `a` and `b`.
+     * @param {Number} [rel_tol=1e-15] - relative tolerance: amount of error relative to `max(abs(a),abs(b))`.
+     * @param {Number} [abs_tol=1e-15] - absolute tolerance: maximum absolute difference between `a` and `b`.
      * @returns {Boolean}
      */
     isclose: function(a,b,rel_tol,abs_tol) {
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
-        abs_tol = abs_tol===undefined ? 1e-15: rel_tol;
+        abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
     },
 
@@ -15558,7 +15558,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
         return new TBool(util.eq(args[0],args[1]));
     }
 });
-newBuiltin('isclose', [TNum,TNum,TNum,TNum], TBool, math.isclose);
+newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );

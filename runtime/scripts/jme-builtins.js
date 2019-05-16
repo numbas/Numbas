@@ -401,7 +401,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
         return new TBool(util.eq(args[0],args[1]));
     }
 });
-newBuiltin('isclose', [TNum,TNum,TNum,TNum], TBool, math.isclose);
+newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
