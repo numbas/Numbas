@@ -93,9 +93,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var elem = e.target.cloneNode();
             elem.removeAttribute('width');
             elem.removeAttribute('height');
-            console.log(elem.height, elem.width);
             var box = e.target.getBoundingClientRect();
-            console.log(box.width,box.height);
             if(elem.width>box.width || elem.height>box.height) {
                 lightbox.innerHTML = '';
                 lightbox.appendChild(elem);

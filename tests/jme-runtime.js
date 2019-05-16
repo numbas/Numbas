@@ -9378,6 +9378,10 @@ var Rule = jme.rules.Rule = function(pattern,result,options,name) {
     this.result = jme.compile(result);
 }
 Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
+    toString: function() {
+        return this.patternString+' -> '+this.resultString;
+    },
+
     /** Extend this rule's default options with the given options
      * @param {Numbas.jme.rules.matchTree_options} options
      * @returns {Numbas.jme.rules.matchTree_options}
@@ -11278,7 +11282,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;=x^(? `: 1);n * ?;=x^(? `: 1);m','acg','x^(m+n)'],
     ],
     collectLikeFractions: [
-        ['?;a/?;=d + `+- ?;b/?;=d','acg','(a+b)/d']
+        ['(?`+);a/?;=d + `+- (?`+);b/?;=d','acg','(a+b)/d']
     ]
     /*
         // x/y or rest*x/y
