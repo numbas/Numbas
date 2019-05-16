@@ -1553,10 +1553,7 @@ newBuiltin('table',[TList],THTML,
                 row.appendChild(td);
             }
         }
-        return new THTML(table);
-    },
-    {
-        unwrapValues: true
+        return table;
     }
 );
 

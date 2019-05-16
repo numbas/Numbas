@@ -978,6 +978,10 @@
                     check('f(random(1,2))',true);
                 });
 
+                QUnit.test('HTML',function(assert) {
+                    assert.equal(evaluate('table([["x","y"],["3",1]])').value.html(),"<tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table');
+                    assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').value.html(),"<thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table with headers');
+                });
 				
 				QUnit.module('Scopes');
 
