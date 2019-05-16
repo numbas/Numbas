@@ -186,15 +186,16 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         }
 
         if(minvalue.type=='number') {
-            minvalue.value -= 1e-12;
+            minvalue = new jme.types.TNum(minvalue.value - 1e-12);
         }
         minvalue = jme.castToType(minvalue,'decimal').value;
         settings.minvalue = minvalue;
         if(maxvalue.type=='number') {
-            maxvalue.value += 1e-12;
+            maxvalue = new jme.types.TNum(maxvalue.value + 1e-12);
         }
         maxvalue = jme.castToType(maxvalue,'decimal').value;
         settings.maxvalue = maxvalue;
+
 
         var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
         if(settings.correctAnswerFraction) {

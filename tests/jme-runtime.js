@@ -3458,7 +3458,11 @@ var Fraction = math.Fraction = function(numerator,denominator) {
 }
 Fraction.prototype = {
     toString: function() {
-        return this.numerator+'/'+this.denominator;
+        if(this.denominator==1) {
+            return this.numerator+'';
+        } else {
+            return this.numerator+'/'+this.denominator;
+        }
     },
     toFloat: function() {
         return this.numerator / this.denominator;
