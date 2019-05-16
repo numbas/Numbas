@@ -210,7 +210,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     trigger: function(name) {
         var callback = this.getCallback(name);
         if(this.error) {
-            callback.reject(error);
+            callback.reject(this.error);
         }
         callback.resolved = true;
         callback.resolve();
