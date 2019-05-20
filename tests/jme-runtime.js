@@ -14446,8 +14446,8 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
     'number': compareTokensByValue,
     'integer': compareTokensByValue,
     'rational': function(a,b) {
-        a = a.toFloat();
-        b = b.toFloat();
+        a = a.value.toFloat();
+        b = b.value.toFloat();
         return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
     },
     'string': compareTokensByValue,
