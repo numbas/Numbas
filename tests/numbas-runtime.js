@@ -24154,7 +24154,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 
         var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
-        if(settings.correctAnswerFraction) {
+        if(settings.allowFractions && settings.correctAnswerFraction) {
             var frac = math.Fraction.fromDecimal(displayAnswer.re);
             settings.displayAnswer = frac.toString();
         } else {
