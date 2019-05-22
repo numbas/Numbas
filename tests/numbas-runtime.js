@@ -16879,7 +16879,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
         e.display.startRegen();
-        var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope);
+        var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
         q.generateVariables();
         q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;

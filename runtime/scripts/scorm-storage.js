@@ -176,9 +176,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     initQuestion: function(q)
     {
         var id = this.getQuestionId(q);
-        var index = this.get('objectives._count');
-        this.questionIndices[id] = index;
-        var prepath = 'objectives.'+index+'.';
+        if(this.questionIndices[id]===undefined) {
+            var index = this.get('objectives._count');
+            this.questionIndices[id] = index;
+        }
+        var prepath = 'objectives.'+this.questionIndices[id]+'.';
         this.set(prepath+'id', id);
         this.set(prepath+'score.min',0);
         this.set(prepath+'score.max',q.marks);
@@ -205,9 +207,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     initPart: function(p)
     {
         var id = this.getPartId(p);
-        var index = this.get('interactions._count');
-        this.partIndices[id] = index;
-        var prepath = 'interactions.'+index+'.';
+        if(this.partIndices[id]===undefined) {
+            var index = this.get('interactions._count');
+            this.partIndices[id] = index;
+        }
+        var prepath = 'interactions.'+this.partIndices[id]+'.';
         this.set(prepath+'id',id);
         this.set(prepath+'objectives.0.id',this.getQuestionId(p.question));
         this.set(prepath+'weighting',p.marks);
