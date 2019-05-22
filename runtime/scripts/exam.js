@@ -650,6 +650,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
+            e.updateScore();
         });
         q.signals.on(['ready','HTMLAttached'], function() {
             e.currentQuestion.display.init();
