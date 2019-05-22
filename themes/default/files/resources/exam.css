@@ -572,6 +572,10 @@ table {
     display: flex;
     flex-wrap: wrap;
 }
+select.multiplechoice {
+    display: inline-block;
+}
+
 .multiplechoice.columns {
     display: grid;
     grid-gap: 0.2em 1em;
