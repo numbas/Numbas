@@ -131,5 +131,7 @@ def exam_question_groups(data):
 
 @migration(version_from='exam_question_groups')
 def exam_results_page_options(data):
+    if data['type'] != 'exam':
+        return
     showresultspage = 'oncompletion' if data['navigation'].get('showresultspage') else 'never'
     data['navigation']['showresultspage'] = showresultspage
