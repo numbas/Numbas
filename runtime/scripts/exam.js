@@ -146,6 +146,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
+
+    /** How was the exam started? 
+     * One of: `ab-initio`, `resume`, or `review`
+     * @type {String}
+     */
+    entry: 'ab-initio',
+
     /** Settings
      * @property {String} name - Title of exam
      * @property {Number} percentPass - Percentage of max. score student must achieve to pass
@@ -181,7 +188,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         navigateReverse: false,
         navigateBrowse: false,
         showFrontPage: true,
-        showResultsPage: true,
+        showResultsPage: 'oncompletion',
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
@@ -722,7 +729,19 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.questionList[i].revealAnswer(true);
         }
         //display the results
-        if(this.settings.showResultsPage || Numbas.is_instructor) {
+        var showResultsPage = false;
+        switch(this.settings.showResultsPage) {
+            case 'oncompletion':
+                showResultsPage = true;
+                break;
+            case 'review':
+                showResultsPage = this.entry == 'review';
+                break;
+            default:
+                showResultsPage = false;
+                break;
+        }
+        if(showResultsPage || Numbas.is_instructor) {
             this.display.showInfoPage( 'result' );
         } else {
             this.exit();

@@ -144,7 +144,7 @@ class Exam(object):
                 'reverse': True,
                 'browse': True,
                 'showfrontpage': True,
-                'showresultspage': True,
+                'showresultspage': 'oncompletion',
                 'onleave': Event('onleave','none','You have not finished the current question'),
                 'preventleave': True,
                 'startpassword': '',

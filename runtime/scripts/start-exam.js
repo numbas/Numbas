@@ -38,64 +38,56 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      * @memberof Numbas
      * @method
      */
-    var init = Numbas.init = function()
-    {
-    $(document).ready(function() {
-        var seed = Math.seedrandom(new Date().getTime());
-        var job = Numbas.schedule.add;
-        job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files
-        job(Numbas.display.localisePage);
-        job(function()
-        {
-            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();    //The storage object manages communication between the LMS and the exam
-            var exam = Numbas.exam = new Numbas.Exam(store);                    //create the exam object, and load in everything from the XML
-            exam.seed = Numbas.util.hashCode(seed);
-            var entry = store.getEntry();
-            if(store.getMode() == 'review')
-                entry = 'review';
-            switch(entry)
-            {
-            case 'ab-initio':
-                job(exam.init,exam);
-                exam.signals.on('ready', function() {
-                    job(function() {
-                            Numbas.display.init();
-                    });
-                    job(function() {
-                        if(exam.settings.showFrontPage)
-                        {
-                            exam.display.showInfoPage('frontpage');
-                        }
-                        else
-                        {
-                            exam.begin();
-                        }
-                    });
-                })
-                break;
-            case 'resume':
-            case 'review':
-                job(exam.load,exam);
-                exam.signals.on('ready', function() {
-                    job(Numbas.display.init);
-                    job(function() {
-                        if(entry == 'review')
-                        {
-                            job(exam.end,exam,false);
-                        }
-                        else if(exam.currentQuestion !== undefined)
-                        {
-                            job(exam.display.showInfoPage,exam.display,'suspend');
-                        }
-                        else
-                        {
-                            job(exam.display.showInfoPage,exam.display,'frontpage');
-                        }
-                    });
-                });
-                break;
-            }
+    var init = Numbas.init = function() {
+        $(document).ready(function() {
+            var seed = Math.seedrandom(new Date().getTime());
+            var job = Numbas.schedule.add;
+            job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files
+            job(Numbas.display.localisePage);
+            job(function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();    //The storage object manages communication between the LMS and the exam
+                var exam = Numbas.exam = new Numbas.Exam(store);                    //create the exam object, and load in everything from the XML
+                exam.seed = Numbas.util.hashCode(seed);
+                var entry = store.getEntry();
+                if(store.getMode() == 'review') {
+                    entry = 'review';
+                }
+                exam.entry = entry;
+
+                switch(entry) {
+                    case 'ab-initio':
+                        job(exam.init,exam);
+                        exam.signals.on('ready', function() {
+                            job(function() {
+                                    Numbas.display.init();
+                            });
+                            job(function() {
+                                if(exam.settings.showFrontPage) {
+                                    exam.display.showInfoPage('frontpage');
+                                } else {
+                                    exam.begin();
+                                }
+                            });
+                        })
+                        break;
+                    case 'resume':
+                    case 'review':
+                        job(exam.load,exam);
+                        exam.signals.on('ready', function() {
+                            job(Numbas.display.init);
+                            job(function() {
+                                if(entry == 'review') {
+                                    job(exam.end,exam,false);
+                                } else if(exam.currentQuestion !== undefined) {
+                                    job(exam.display.showInfoPage,exam.display,'suspend');
+                                } else {
+                                    job(exam.display.showInfoPage,exam.display,'frontpage');
+                                }
+                            });
+                        });
+                        break;
+                }
+            });
         });
-    });
     }
 });

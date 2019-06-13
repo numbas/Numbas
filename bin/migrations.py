@@ -128,3 +128,8 @@ def exam_question_groups(data):
         'pickQuestions': pickQuestions,
         'questions': data.get('questions',[]),
     }]
+
+@migration(version_from='exam_question_groups')
+def exam_results_page_options(data):
+    showresultspage = 'oncompletion' if data['navigation'].get('showresultspage') else 'never'
+    data['navigation']['showresultspage'] = showresultspage
