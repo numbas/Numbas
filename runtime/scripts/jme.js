@@ -1371,13 +1371,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'keypair': function(tok) {
             var pairmode = null;
             for(var i=this.stack.length-1;i>=0;i--) {
-                if(this.stack[i].type=='[') {
+                if(this.stack[i].type=='[' || jme.isFunction(this.stack[i],'dict')) {
                     pairmode = 'dict';
                     break;
                 } else if(jme.isOp(this.stack[i],';')) {
                     pairmode = 'match';
                     break;
-                } else if(this.stack[i].type=='(') {
+                } else if(this.stack[i].type=='(' && (this.stack.length==1 || !jme.isFunction(this.stack[i-1],'dict'))) {
                     break;
                 }
             }

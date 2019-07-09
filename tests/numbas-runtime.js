@@ -7779,13 +7779,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'keypair': function(tok) {
             var pairmode = null;
             for(var i=this.stack.length-1;i>=0;i--) {
-                if(this.stack[i].type=='[') {
+                if(this.stack[i].type=='[' || jme.isFunction(this.stack[i],'dict')) {
                     pairmode = 'dict';
                     break;
                 } else if(jme.isOp(this.stack[i],';')) {
                     pairmode = 'match';
                     break;
-                } else if(this.stack[i].type=='(') {
+                } else if(this.stack[i].type=='(' && (this.stack.length==1 || !jme.isFunction(this.stack[i-1],'dict'))) {
                     break;
                 }
             }
@@ -16380,6 +16380,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
+
+    /** How was the exam started? 
+     * One of: `ab-initio`, `resume`, or `review`
+     * @type {String}
+     */
+    entry: 'ab-initio',
+
     /** Settings
      * @property {String} name - Title of exam
      * @property {Number} percentPass - Percentage of max. score student must achieve to pass
@@ -16415,7 +16422,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         navigateReverse: false,
         navigateBrowse: false,
         showFrontPage: true,
-        showResultsPage: true,
+        showResultsPage: 'oncompletion',
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
@@ -16884,6 +16891,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
+            e.updateScore();
         });
         q.signals.on(['ready','HTMLAttached'], function() {
             e.currentQuestion.display.init();
@@ -16955,7 +16963,19 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.questionList[i].revealAnswer(true);
         }
         //display the results
-        if(this.settings.showResultsPage || Numbas.is_instructor) {
+        var showResultsPage = false;
+        switch(this.settings.showResultsPage) {
+            case 'oncompletion':
+                showResultsPage = true;
+                break;
+            case 'review':
+                showResultsPage = this.entry == 'review';
+                break;
+            default:
+                showResultsPage = false;
+                break;
+        }
+        if(showResultsPage || Numbas.is_instructor) {
             this.display.showInfoPage( 'result' );
         } else {
             this.exit();
@@ -18191,65 +18211,57 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      * @memberof Numbas
      * @method
      */
-    var init = Numbas.init = function()
-    {
-    $(document).ready(function() {
-        var seed = Math.seedrandom(new Date().getTime());
-        var job = Numbas.schedule.add;
-        job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files
-        job(Numbas.display.localisePage);
-        job(function()
-        {
-            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();    //The storage object manages communication between the LMS and the exam
-            var exam = Numbas.exam = new Numbas.Exam(store);                    //create the exam object, and load in everything from the XML
-            exam.seed = Numbas.util.hashCode(seed);
-            var entry = store.getEntry();
-            if(store.getMode() == 'review')
-                entry = 'review';
-            switch(entry)
-            {
-            case 'ab-initio':
-                job(exam.init,exam);
-                exam.signals.on('ready', function() {
-                    job(function() {
-                            Numbas.display.init();
-                    });
-                    job(function() {
-                        if(exam.settings.showFrontPage)
-                        {
-                            exam.display.showInfoPage('frontpage');
-                        }
-                        else
-                        {
-                            exam.begin();
-                        }
-                    });
-                })
-                break;
-            case 'resume':
-            case 'review':
-                job(exam.load,exam);
-                exam.signals.on('ready', function() {
-                    job(Numbas.display.init);
-                    job(function() {
-                        if(entry == 'review')
-                        {
-                            job(exam.end,exam,false);
-                        }
-                        else if(exam.currentQuestion !== undefined)
-                        {
-                            job(exam.display.showInfoPage,exam.display,'suspend');
-                        }
-                        else
-                        {
-                            job(exam.display.showInfoPage,exam.display,'frontpage');
-                        }
-                    });
-                });
-                break;
-            }
+    var init = Numbas.init = function() {
+        $(document).ready(function() {
+            var seed = Math.seedrandom(new Date().getTime());
+            var job = Numbas.schedule.add;
+            job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files
+            job(Numbas.display.localisePage);
+            job(function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();    //The storage object manages communication between the LMS and the exam
+                var exam = Numbas.exam = new Numbas.Exam(store);                    //create the exam object, and load in everything from the XML
+                exam.seed = Numbas.util.hashCode(seed);
+                var entry = store.getEntry();
+                if(store.getMode() == 'review') {
+                    entry = 'review';
+                }
+                exam.entry = entry;
+
+                switch(entry) {
+                    case 'ab-initio':
+                        job(exam.init,exam);
+                        exam.signals.on('ready', function() {
+                            job(function() {
+                                    Numbas.display.init();
+                            });
+                            job(function() {
+                                if(exam.settings.showFrontPage) {
+                                    exam.display.showInfoPage('frontpage');
+                                } else {
+                                    exam.begin();
+                                }
+                            });
+                        })
+                        break;
+                    case 'resume':
+                    case 'review':
+                        job(exam.load,exam);
+                        exam.signals.on('ready', function() {
+                            job(Numbas.display.init);
+                            job(function() {
+                                if(entry == 'review') {
+                                    job(exam.end,exam,false);
+                                } else if(exam.currentQuestion !== undefined) {
+                                    job(exam.display.showInfoPage,exam.display,'suspend');
+                                } else {
+                                    job(exam.display.showInfoPage,exam.display,'frontpage');
+                                }
+                            });
+                        });
+                        break;
+                }
+            });
         });
-    });
     }
 });
 

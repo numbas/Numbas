@@ -916,6 +916,7 @@
                 QUnit.test('Dictionaries',function(assert) {
                     assert.ok(compile('["a": -1]','prefix operation as value of dictionary item'));
                     deepCloseEqual(assert, evaluate('["a": 1]["a"]').value,1,'["a": 1]["a"] = 1');
+                    deepCloseEqual(assert, evaluate('dict("a": 1, "b": 2)["a"]').value,1,'dict("a": 1, "b": 2)["a"] = 1');
                     raisesNumbasError(assert, function() { evaluate('["a": 1]["b"]') }, 'jme.func.listval.key not in dict', '["a": 1]["b"]');
                     deepCloseEqual(assert, evaluate('keys( ["a": 1, "b": 2] )').value.map(getValue), ['a','b'],'keys( ["a":1,"b": 2] )');
                     deepCloseEqual(assert, evaluate('values( ["a": 1, "b": 2] )').value.map(getValue), [1,2],'values( ["a":1,"b": 2] )');
