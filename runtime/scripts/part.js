@@ -385,12 +385,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     assignName: function(index,siblings) {
         if(this.useCustomName) {
             this.name = jme.subvars(this.customName,this.getScope(),true);
-        } else if(siblings==0) {
-            return '';
         } else if(this.isGap) {
             this.name = util.capitalise(R('gap'))+' '+index;
         } else if(this.isStep) {
             this.name = util.capitalise(R('step'))+' '+index;
+        } else if(siblings==0) {
+            return '';
         } else {
             this.name = util.letterOrdinal(index)+')';
         }
