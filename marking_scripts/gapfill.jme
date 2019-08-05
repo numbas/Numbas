@@ -28,16 +28,20 @@ gap_order:
 
 gap_feedback (Feedback on each of the gaps):
     map(
-        let(
-            result, submit_part(gaps[gap_number]["path"],answer),
-            gap, gaps[gap_number],
-            name, gap["name"],
-            noFeedbackIcon, not gap["settings"]["showFeedbackIcon"],
-                assert(noFeedbackIcon,
-                    assert(name="" or len(gaps)=1,feedback(translate('part.gapfill.feedback header',["name": name])))
-                );
-                concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1), noFeedbackIcon);
-                result
+        try(
+            let(
+                result, submit_part(gaps[gap_number]["path"],answer),
+                gap, gaps[gap_number],
+                name, gap["name"],
+                noFeedbackIcon, not gap["settings"]["showFeedbackIcon"],
+                    assert(noFeedbackIcon,
+                        assert(name="" or len(gaps)=1,feedback(translate('part.gapfill.feedback header',["name": name])))
+                    );
+                    concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1), noFeedbackIcon);
+                    result
+            ),
+            err,
+            fail(translate("part.gapfill.error marking gap",["name": gaps[gap_number]["name"], "message": err]))
         ),
         [gap_number,answer,index],
         zip(gap_order,studentAnswer,list(1..len(gaps)))

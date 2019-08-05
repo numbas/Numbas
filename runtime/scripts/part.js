@@ -804,8 +804,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             for(var path in this.errorCarriedForwardBackReferences) {
                 var p2 = this.question.getPart(path);
                 if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
-                    var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
-                    p2.display && p2.display.updateCorrectAnswer(answer);
+                    try {
+                        var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
+                        p2.display && p2.display.updateCorrectAnswer(answer);
+                    } catch(e) {
+                    }
                 }
                 if(p2.answered) {
                     p2.pleaseResubmit();
