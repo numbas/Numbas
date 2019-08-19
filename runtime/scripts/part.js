@@ -1002,7 +1002,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
                     this.creditFraction = last_lift.creditFraction;
-                    this.addCredit(lift_credit * scale);
+                    this.addCredit(lift_credit);
                     scale = last_lift.scale;
                     break;
             }
