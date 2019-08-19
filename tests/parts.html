@@ -392,6 +392,19 @@
                     });
                 });
 
+                QUnit.test("Multiply credit in a gap",function(assert) {
+                    var data = {"type":"gapfill","useCustomName":false,"customName":"","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>[[0]]</p>\n<p>[[1]]</p>","gaps":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1.2","maxValue":"1.2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"1","precisionPartialCredit":"25","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1.2","maxValue":"1.2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"1","precisionPartialCredit":"50","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"sortAnswers":false};
+                    var p = createPartFromJSON(data);
+                    var scope = p.getScope();
+                    scope.question = {getPart: function(path){ return p.gaps.filter(function(p){return p.path==path})[0]; }};
+                    var res = mark_part(p,['1.20','1.20'],scope);
+                    assert.equal(res.credit,0.375,'apply penalty to both gaps');
+                    var res = mark_part(p,['1.2','1.20'],scope);
+                    assert.equal(res.credit,0.75,'apply 50% penalty to second gap');
+                    var res = mark_part(p,['1.20','1.2'],scope);
+                    assert.equal(res.credit,0.625,'apply 25% penalty to first gap');
+                });
+
                 QUnit.module('Custom marking script');
                 QUnit.test('Mark constants of integration',function(assert) {
                     var done = assert.async();

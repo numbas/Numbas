@@ -1,4 +1,4 @@
-Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables'],function() {
+Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math'],function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
 
@@ -14,6 +14,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables'],func
     var TNum = jme.types.TNum;
     var TBool = jme.types.TBool;
     var TDict = jme.types.TDict;
+
+    var Fraction = math.Fraction;
 
     /** A line of feedback to give to the student, produced while marking their answer.
      * Can modify the credit awarded.
@@ -598,27 +600,29 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables'],func
     var finalise_state = marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
-        var credit = 0;
+        var credit = Fraction.zero;
         var out_states = [];
         var num_lifts = 0;
+        var lifts = [];
+        var scale = 1;
         for(var i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
                     out_states.push(state);
-                    credit = state.credit;
+                    credit = Fraction.fromFloat(state.credit);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
                     out_states.push(state);
-                    credit *= state.factor;
+                    credit = credit.multiply(Fraction.fromFloat(state.factor));
                     break;
                 case FeedbackOps.ADD_CREDIT:
                     out_states.push(state);
-                    credit += state.credit;
+                    credit = credit.add(Fraction.fromFloat(state.credit));
                     break;
                 case FeedbackOps.SUB_CREDIT:
                     out_states.push(state);
-                    credit -= state.credit;
+                    credit = credit.subtract(Fraction.fromFloat(state.credit));
                     break;
                 case FeedbackOps.END:
                     if(num_lifts) {
@@ -642,10 +646,18 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables'],func
                     break;
                 case "start_lift":
                     num_lifts += 1;
+                    lifts.push({credit: credit, scale: scale});
+                    credit = Fraction.zero;
+                    scale = state.scale;
                     out_states.push(state);
                     break;
                 case "end_lift":
                     num_lifts -= 1;
+                    var last_lift = lifts.pop();
+                    var lift_credit = credit;
+                    credit = last_lift.credit;
+                    credit = credit.add(lift_credit.multiply(Fraction.fromFloat(scale)));
+                    scale = last_lift.scale;
                     out_states.push(state);
                     break;
                 default:
@@ -657,7 +669,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables'],func
         }
         return {
             valid: valid,
-            credit: credit,
+            credit: credit.toFloat(),
             states: out_states
         }
     }

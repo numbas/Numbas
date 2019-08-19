@@ -2405,6 +2405,7 @@ Numbas.locale = {
     "part.matrix.empty cell": "One or more of the cells in your answer is empty.",
     "part.matrix.size mismatch": "The question author hasn't allowed the student to decide the dimensions of their answer, but the correct answer is {{correct_dimensions}} while the answer input is {{input_dimensions}}",
     "part.gapfill.feedback header": "<strong>{{name}}</strong>",
+    "part.gapfill.error marking gap": "Error marking {{name}}: {{-message}}",
     "part.extension.not implemented": "Part hasn't implemented the <code>{{name}}</code> method.",
     "part.custom.empty setting": "No value given.",
     "part.custom.unrecognised input type": "Unrecognised setting type <code>{{input_type}}</code>",

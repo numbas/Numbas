@@ -14703,12 +14703,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     assignName: function(index,siblings) {
         if(this.useCustomName) {
             this.name = jme.subvars(this.customName,this.getScope(),true);
-        } else if(siblings==0) {
-            return '';
         } else if(this.isGap) {
             this.name = util.capitalise(R('gap'))+' '+index;
         } else if(this.isStep) {
             this.name = util.capitalise(R('step'))+' '+index;
+        } else if(siblings==0) {
+            return '';
         } else {
             this.name = util.letterOrdinal(index)+')';
         }
@@ -15122,8 +15122,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             for(var path in this.errorCarriedForwardBackReferences) {
                 var p2 = this.question.getPart(path);
                 if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
-                    var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
-                    p2.display && p2.display.updateCorrectAnswer(answer);
+                    try {
+                        var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
+                        p2.display && p2.display.updateCorrectAnswer(answer);
+                    } catch(e) {
+                    }
                 }
                 if(p2.answered) {
                     p2.pleaseResubmit();
@@ -15256,7 +15259,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             return;
         }
         var result = this.mark_answer(studentAnswer,scope);
-        var finalised_result = marking.finalise_state(result.states.mark)
+        var finalised_result = marking.finalise_state(result.states.mark);
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
         return finalised_result;
@@ -15281,7 +15284,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
-                    part.multCredit(scale*state.factor, state.message);
+                    part.multCredit(state.factor, state.message);
                     break;
                 case FeedbackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
@@ -15310,13 +15313,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 case "start_lift":
                     lifts.push({credit: this.credit, creditFraction: this.creditFraction, scale:scale});
                     this.credit = 0;
+                    this.creditFraction = math.Fraction.zero;
                     scale = state.scale;
                     break;
                 case 'end_lift':
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
                     this.creditFraction = last_lift.creditFraction;
-                    this.addCredit(lift_credit*last_lift.scale);
+                    this.addCredit(lift_credit * scale);
                     scale = last_lift.scale;
                     break;
             }
@@ -17305,13 +17309,14 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 }
 });
 
-Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
+Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math'],function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
 
     marking.ignore_note_errors = true;
 
     var jme = Numbas.jme;
+    var sig = jme.signature;
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
     var TString = jme.types.TString;
@@ -17320,6 +17325,8 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var TNum = jme.types.TNum;
     var TBool = jme.types.TBool;
     var TDict = jme.types.TDict;
+
+    var Fraction = math.Fraction;
 
     /** A line of feedback to give to the student, produced while marking their answer.
      * Can modify the credit awarded.
@@ -17640,7 +17647,12 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
             });
         }
     }));
-    state_functions.push(state_fn('concat_feedback',[TList,TNum],TList,function(messages, scale) {
+    state_functions.push(state_fn('concat_feedback',[TList,TNum, sig.optional(sig.type('boolean'))],TList,function(messages, scale, strip_messages) {
+        if(strip_messages) {
+            messages = messages.map(function(m) {
+                return Numbas.util.extend_object({}, m, {message: ''});
+            });
+        }
         return {
             return: messages,
             state: [feedback.concat(messages, scale)]
@@ -17899,27 +17911,29 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
     var finalise_state = marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
-        var credit = 0;
+        var credit = Fraction.zero;
         var out_states = [];
         var num_lifts = 0;
+        var lifts = [];
+        var scale = 1;
         for(var i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
                     out_states.push(state);
-                    credit = state.credit;
+                    credit = Fraction.fromFloat(state.credit);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
                     out_states.push(state);
-                    credit *= state.factor;
+                    credit = credit.multiply(Fraction.fromFloat(state.factor));
                     break;
                 case FeedbackOps.ADD_CREDIT:
                     out_states.push(state);
-                    credit += state.credit;
+                    credit = credit.add(Fraction.fromFloat(state.credit));
                     break;
                 case FeedbackOps.SUB_CREDIT:
                     out_states.push(state);
-                    credit -= state.credit;
+                    credit = credit.subtract(Fraction.fromFloat(state.credit));
                     break;
                 case FeedbackOps.END:
                     if(num_lifts) {
@@ -17943,10 +17957,18 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
                     break;
                 case "start_lift":
                     num_lifts += 1;
+                    lifts.push({credit: credit, scale: scale});
+                    credit = Fraction.zero;
+                    scale = state.scale;
                     out_states.push(state);
                     break;
                 case "end_lift":
                     num_lifts -= 1;
+                    var last_lift = lifts.pop();
+                    var lift_credit = credit;
+                    credit = last_lift.credit;
+                    credit = credit.add(lift_credit.multiply(Fraction.fromFloat(scale)));
+                    scale = last_lift.scale;
                     out_states.push(state);
                     break;
                 default:
@@ -17958,7 +17980,7 @@ Numbas.queueScript('marking',['jme','localisation','jme-variables'],function() {
         }
         return {
             valid: valid,
-            credit: credit,
+            credit: credit.toFloat(),
             states: out_states
         }
     }

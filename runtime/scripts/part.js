@@ -941,7 +941,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             return;
         }
         var result = this.mark_answer(studentAnswer,scope);
-        var finalised_result = marking.finalise_state(result.states.mark)
+        var finalised_result = marking.finalise_state(result.states.mark);
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
         return finalised_result;
@@ -966,7 +966,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     part.setCredit(scale*state.credit, state.message, state.reason);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
-                    part.multCredit(scale*state.factor, state.message);
+                    part.multCredit(state.factor, state.message);
                     break;
                 case FeedbackOps.ADD_CREDIT:
                     part.addCredit(scale*state.credit, state.message);
@@ -995,13 +995,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 case "start_lift":
                     lifts.push({credit: this.credit, creditFraction: this.creditFraction, scale:scale});
                     this.credit = 0;
+                    this.creditFraction = math.Fraction.zero;
                     scale = state.scale;
                     break;
                 case 'end_lift':
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
                     this.creditFraction = last_lift.creditFraction;
-                    this.addCredit(lift_credit*last_lift.scale);
+                    this.addCredit(lift_credit * scale);
                     scale = last_lift.scale;
                     break;
             }
