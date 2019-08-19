@@ -372,8 +372,8 @@
                     var q = Numbas.createQuestionFromJSON({
                         name: 'q',
                         parts: [
-                            {type: 'gapfill', gaps: [{type:'numberentry', minValue: '1', maxValue: '1'},{type:'numberentry', minValue: '2', maxValue: '2'}]},
-                            {type: 'gapfill', sortAnswers: true, gaps: [{type:'numberentry', minValue: '1', maxValue: '1'},{type:'numberentry', minValue: '2', maxValue: '2'}]}
+                            {type: 'gapfill', gaps: [{type:'numberentry', minValue: '1', maxValue: '1', marks: 1},{type:'numberentry', minValue: '2', maxValue: '2', marks: 1}]},
+                            {type: 'gapfill', sortAnswers: true, gaps: [{type:'numberentry', minValue: '1', maxValue: '1', marks: 1},{type:'numberentry', minValue: '2', maxValue: '2', marks: 1}]}
                         ]
                     });
                     q.generateVariables();
