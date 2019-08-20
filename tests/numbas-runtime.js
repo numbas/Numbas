@@ -7947,6 +7947,7 @@ var fnSort = util.sortBy('id');
  * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in this scope
  */
 var Scope = jme.Scope = function(scopes) {
+    var s = this;
     this.variables = {};
     this.functions = {};
     this._resolved_functions = {};
@@ -7976,8 +7977,18 @@ var Scope = jme.Scope = function(scopes) {
                 this.setVariable(x,extras.variables[x]);
             }
         }
-        this.rulesets = extras.rulesets || this.rulesets;
-        this.functions = extras.functions || this.functions;
+        if(extras.rulesets) {
+            for(var x in extras.rulesets) {
+                this.addRuleset(x,extras.rulesets[x]);
+            }
+        }
+        if(extras.functions) {
+            for(var x in extras.functions) {
+                extras.functions[x].forEach(function(fn) {
+                    s.addFunction(fn);
+                });
+            }
+        }
     }
     return;
 }

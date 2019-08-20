@@ -1011,6 +1011,19 @@
 					}]);
 					closeEqual(assert, scope.getFunction('+').length,jme.builtinScope.getFunction('+').length+1,'add overloaded function to old scope');
 					closeEqual(assert, new Numbas.jme.Scope([scope,jme.builtinScope]).getFunction('+').length,scope.getFunction('+').length,"don't duplicate functions when extending scope");
+
+
+                    var fn = jme.variables.makeFunction({
+                        name: 'testfn',
+                        definition: 'return 1',
+                        language: 'javascript',
+                        outtype: 'number',
+                        parameters: []
+                    });
+                    var s = new jme.Scope();
+                    var s2 = new jme.Scope([Numbas.jme.builtinScope,s]);
+                    s2.addFunction(fn);
+                    assert.notOk(s.functions.testfn,'Extending one scope with another doesn\'t affect the older scope.')
 				});
 
 				QUnit.test('Rulesets',function(assert) {
