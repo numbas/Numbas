@@ -1012,7 +1012,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\left ( '+texMatrix(tok.value,settings)+' \\right )';
     },
     name: function(thing,tok,texArgs,settings) {
-        return texName(tok.name,tok.annotation);
+        return texName(tok.nameWithoutAnnotation,tok.annotation);
     },
     special: function(thing,tok,texArgs,settings) {
         return tok.value;
@@ -1038,7 +1038,7 @@ var typeToTeX = jme.display.typeToTeX = {
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
-            return texName(tok.name,tok.annotation,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
+            return texName(tok.nameWithoutAnnotation,tok.annotation,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
         }
     },
     set: function(thing,tok,texArgs,settings) {
@@ -1373,11 +1373,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     name: function(tree,tok,bits,settings) {
-        if(tok.annotation) {
-            return tok.annotation.join(':')+':'+tok.name;
-        } else {
-            return tok.name;
-        }
+        return tok.name;
     },
     'string': function(tree,tok,bits,settings) {
         var str = '"'+jme.escape(tok.value)+'"';

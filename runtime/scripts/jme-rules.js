@@ -618,8 +618,8 @@ function matchName(ruleTree,exprTree,options) {
     if(ruleTok.type!='name') {
         return false;
     }
-    if(ruleTok.name in specialMatchNames) {
-        return specialMatchNames[ruleTok.name](ruleTree,exprTree,options);
+    if(ruleTok.nameWithoutAnnotation in specialMatchNames) {
+        return specialMatchNames[ruleTok.nameWithoutAnnotation](ruleTree,exprTree,options);
     } else {
         if(exprTok.type!='name') {
             return false;
@@ -706,8 +706,8 @@ function matchFunction(ruleTree,exprTree,options) {
     if(ruleTok.type!='function') {
         return false;
     }
-    if(ruleTok.name in specialMatchFunctions) {
-        return specialMatchFunctions[ruleTok.name](ruleTree,exprTree,options);
+    if(ruleTok.nameWithoutAnnotation in specialMatchFunctions) {
+        return specialMatchFunctions[ruleTok.nameWithoutAnnotation](ruleTree,exprTree,options);
     } else { 
         return matchOrdinaryFunction(ruleTree,exprTree,options);
     }
