@@ -9555,9 +9555,8 @@ jme.sortTokensBy = function(fn) {
  * @returns {Boolean}
  */
 var treesSame = jme.treesSame = function(a,b) {
-    if(a.tok.type!=b.tok.type) {
-        return false;
-    }
+    var ta = a.tok;
+    var tb = b.tok;
     if(a.args || b.args) {
         if(!(a.args && b.args && a.args.length==b.args.length)) {
             return false;
@@ -9566,6 +9565,14 @@ var treesSame = jme.treesSame = function(a,b) {
             if(!treesSame(a.args[i],b.args[i])) {
                 return false;
             }
+        }
+    } else {
+        var type = jme.findCompatibleType(ta.type,tb.type);
+        if(!type) {
+            return false;
+        } else {
+            ta = jme.castToType(ta,type);
+            tb = jme.castToType(tb,type);
         }
     }
     return util.eq(a.tok,b.tok);

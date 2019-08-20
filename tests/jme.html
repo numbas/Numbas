@@ -1427,6 +1427,7 @@
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
                     assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers'),'(49 - 63i)/130',"(49)/(130)-(63)/(130)*i");
                     assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers,!collectLikeFractions'),'49/130 - (63/130)*i',"(49)/(130)-(63)/(130)*i");
+                    assert.equal(simplifyExpression("0(1/(9x))",'all'),'0(1/(9x))','0(1/(9x)) doesn\'t get stuck in a loop');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
 					assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
