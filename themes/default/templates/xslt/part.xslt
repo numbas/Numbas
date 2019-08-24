@@ -1,33 +1,9 @@
 {% raw %}
-<xsl:template match="parts">
-    <div class="parts">
-        <xsl:apply-templates />
-    </div>
-</xsl:template>
-<xsl:template match="part" mode="path">
-    <xsl:choose>
-        <xsl:when test="parent::gaps">
-            <xsl:apply-templates select="../.." mode="path" />
-            <xsl:text>g</xsl:text>
-        </xsl:when>
-        <xsl:when test="parent::steps">
-            <xsl:apply-templates select="../.." mode="path" />
-            <xsl:text>s</xsl:text>
-        </xsl:when>
-        <xsl:when test="parent::parts">
-            <xsl:text>p</xsl:text>
-        </xsl:when>
-    </xsl:choose>
-    <xsl:value-of select="count(preceding-sibling::part)" />
-</xsl:template>
 <xsl:template match="part">
-    <xsl:variable name="path">
-        <xsl:apply-templates select="." mode="path"/>
-    </xsl:variable>
     <xsl:variable name="inline">
         <xsl:choose>
-            <xsl:when test="ancestor::gaps and @type='1_n_2' and choices/@displaytype='dropdownlist'"><xsl:text>true</xsl:text></xsl:when>
-            <xsl:when test="ancestor::gaps and not (choices)"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:when test="@isgap='true' and @type='1_n_2' and choices/@displaytype='dropdownlist'"><xsl:text>true</xsl:text></xsl:when>
+            <xsl:when test="@isgap='true' and not (choices)"><xsl:text>true</xsl:text></xsl:when>
             <xsl:otherwise></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -39,7 +15,7 @@
     </xsl:variable>
     <xsl:variable name="clear">
         <xsl:choose>
-            <xsl:when test="ancestor::gaps"></xsl:when>
+            <xsl:when test="@isgap='true'"></xsl:when>
             <xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
@@ -51,12 +27,10 @@
     </xsl:variable>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="$path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="$path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="$path" />').name()}</xsl:attribute>
-        <xsl:attribute name="data-part-path"><xsl:value-of select="$path" /></xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName()}</xsl:attribute>
+        <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
-        <xsl:if test="parent::parts">
-            <h4 class="partheader" data-bind="visible: name, latex: name"></h4>
-        </xsl:if>
+        <h4 class="partheader" data-bind="visible: showName(), latex: name"></h4>
         <xsl:if test="not(ancestor::gaps)">
             <xsl:apply-templates select="prompt" />
         </xsl:if>
@@ -91,6 +65,14 @@
                     </div>
                     <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
                 </div>
+            </div>
+            <div class="next-parts" data-bind="visible: showNextParts">
+                <p class="what-next"><localise>part.choose next part</localise></p>
+                <ul data-bind="foreach: nextParts">
+                    <li class="next-part">
+                        <button class="btn btn-link next-part-option" type="button" data-bind="latex: label, click: make, disable: disabled"></button>
+                    </li>
+                </ul>
             </div>
         </xsl:if>
     </xsl:element>

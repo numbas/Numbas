@@ -155,6 +155,7 @@
     "part.with steps answer prompt": "Answer: ",
     "part.prompt": "prompt",
     "part.feedback": "feedback",
+    "part.choose next part": "What do you want to do next?",
     "part.script.error": "Error in part {{path}} custom script {{script}}: {{-message}}",
     "part.marking.steps no matter": "Because you received full marks for the part, your answers to the steps aren't counted.",
     "part.marking.steps change": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark) for your answers to the steps.",

@@ -17,9 +17,18 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          */
         this.part = p;
         /** The display name of this part
+         * @member {observable|String} name
+         * @memberof Numbas.display.PartDisplay
          * @see Numbas.parts.Part#name
          */
         this.name = Knockout.observable('');
+        /** Should the name of this part be displayed?
+         * @member {observable|Boolean} showName
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.showName = ko.computed(function() {
+            return this.name() && this.part.question.partsMode=='all';
+        },this);
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay
@@ -229,6 +238,20 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;            
         },this);
 
+        /** Options for the next part
+         * @member {observable} nextParts
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.nextParts = ko.observableArray([]);
+        this.updateNextParts();
+
+        this.showNextParts = ko.computed(function() {
+            if(this.nextParts().length==0) {
+                return false;
+            }
+            return this.answered() || !this.doesMarking();
+        },this);
+
         /** Control functions
          * @member {Object} controls
          * @memberof Numbas.display.PartDisplay
@@ -277,6 +300,9 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';
         var index = p.isStep || p.isGap ? p.index : util.letterOrdinal(p.index);
         p.xml.setAttribute('jme-context-description',R(label)+' '+index);
+        p.xml.setAttribute('path',p.path);
+        p.xml.setAttribute('isgap',p.isGap);
+        p.xml.setAttribute('isstep',p.isStep);
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
@@ -424,6 +450,20 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             this.removeWarnings();
             this.showScore();
         },
+
+        updateNextParts: function() {
+            var p = this.part;
+            this.nextParts(p.nextParts.map(function(np) {
+                return {
+                    label: np.label,
+                    disabled: np.instances.length>0,
+                    make: function() {
+                        p.makeNextPart(np);
+                    }
+                };
+            }));
+        },
+
         /** Initialise this part's display
          * @see Numbas.display.QuestionDisplay.init
          * @memberof Numbas.display.PartDisplay

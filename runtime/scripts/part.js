@@ -47,16 +47,17 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
-var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store) {
+var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store, scope) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
     var type = tryGetAttribute(null,xml,'.','type',[]);
     if(type==null) {
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
-    var part = createPart(type, path, question, parentPart, store);
+    var part = createPart(type, path, question, parentPart, store, scope);
     part.loadFromXML(xml);
     part.finaliseLoad();
     return part;
@@ -87,17 +88,19 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(type, path, question, parentPart, store)
+var createPart = Numbas.createPart = function(type, path, question, parentPart, store, scope)
 {
     if(partConstructors[type])
     {
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
+        part.scope = scope;
         return part;
     }
     else {
@@ -132,11 +135,12 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.label = '';
 
     if(this.question) {
-    this.question.partDictionary[path] = this;
+        this.question.partDictionary[path] = this;
     }
     this.index = parseInt(this.path.match(/\d+$/));
     //initialise settings object
     this.settings = util.copyobj(Part.prototype.settings);
+
     //initialise gap and step arrays
     this.gaps = [];
     this.steps = [];
@@ -144,6 +148,9 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.isGap = false;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
+
+    this.nextParts = [];
+
     this.markingFeedback = [];
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
@@ -197,6 +204,25 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
             this.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
         }
+
+        var nextPartsNode = this.xml.selectSingleNode('nextparts');
+        var nextPartNodes = nextPartsNode.selectNodes('nextpart');
+        for(var i=0;i<nextPartNodes.length;i++) {
+            var nextPartNode = nextPartNodes[i];
+            var np = {variableReplacements: [], instances: []};
+            tryGetAttribute(np,nextPartNode,'.',['index','label']);
+            var replacementNodes = nextPartNode.selectNodes('variablereplacements/replacement');
+            for(var j=0;j<replacementNodes.length;j++) {
+                var replacement = {};
+                tryGetAttribute(replacement,replacementNodes[j],'.',['variable','definition']);
+                np.variableReplacements.push(replacement);
+            }
+            var otherPartNode = this.question.xml.selectNodes('parts/part')[np.index];
+            np.label = np.label || otherPartNode.getAttribute('customname');
+            np.xml = otherPartNode;
+            this.nextParts.push(np);
+        }
+
         // create the JME marking script for the part
         var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
         var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
@@ -768,6 +794,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         this.setWarnings(result.warnings);
                         this.markingFeedback = result.markingFeedback;
                         this.finalised_result = result.finalised_result;
+                        this.marking_values = result.values;
                         this.credit = result.credit;
                         this.answered = result.answered;
                     }
@@ -853,16 +880,22 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markAgainstScope: function(scope,feedback) {
         this.setWarnings(feedback.warnings.slice());
         this.markingFeedback = feedback.markingFeedback.slice();
+        var values;
         var finalised_result = {states: [], valid: false, credit: 0};
         try {
-            finalised_result = this.mark(scope);
+            var result = this.mark(scope);
+            finalised_result = result.finalised_result;
+            console.log(result);
+            values = result.values;
         } catch(e) {
             this.giveWarning(e.message);
         }
+        console.log(values);
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
             finalised_result: finalised_result,
+            values: values,
             credit: this.credit,
             answered: this.answered
         }
@@ -889,19 +922,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
         }
-        var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
-        // find dependent variables which need to be recomputed
-        var todo = Numbas.jme.variables.variableDependants(this.question.variablesTodo,replaced);
-        for(var name in todo) {
-            if(name in new_variables) {
-                delete todo[name];
-            } else {
-                scope.deleteVariable(name);
-            }
-        }
-        // compute those variables
-        var nv = Numbas.jme.variables.makeVariables(todo,scope);
-        scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+        scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
         return scope;
     },
     /** Compute the correct answer, based on the given scope.
@@ -944,7 +965,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var finalised_result = marking.finalise_state(result.states.mark);
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
-        return finalised_result;
+        return {finalised_result: finalised_result, values: result.values};
     },
     /** Apply a finalised list of feedback states to this part.
      * @param {Numbas.marking.feedback_item[]} feedback
@@ -1167,6 +1188,29 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.display.hideSteps();
         this.store && this.store.stepsHidden(this);
     },
+    
+    /** Make an instance of the selected next part
+     * @param {Numbas.parts.nextpart} np
+     */
+    makeNextPart: function(np) {
+        var p = this;
+        var scope = this.getScope();
+
+        var values = {};
+        if(np.variableReplacements.length && p.marking_values) {
+            np.variableReplacements.forEach(function(vr) {
+                values[vr.variable] = p.marking_values[vr.definition];
+            });
+        }
+
+        if(np.xml) {
+            np.instances.push(this.question.addExtraPartFromXML(np.index,scope,values));
+        }
+        if(this.display) {
+            this.display.updateNextParts();
+        }
+    },
+
     /** Reveal the correct answer to this part
      * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
      */
