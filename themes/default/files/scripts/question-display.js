@@ -147,32 +147,44 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         makeHTML: function() {
             var q = this.question;
             var qd = this;
-            var html = this.html = $($.xsl.transform(Numbas.xml.templates.question, q.xml).string);
-            html.addClass('jme-scope').data('jme-scope',q.scope);
-            html.attr('data-jme-context-description',R('question.header',{number:q.number+1}));
-            html.find('table').wrap('<div class="table-responsive">');    // wrap tables so they have a scrollbar when they overflow
-            $('#questionDisplay').append(html);
-            qd.css = document.createElement('style');
-            qd.css.setAttribute('type','text/css');
-            if(qd.css.styleSheet) {
-                qd.css.styleSheet.cssText = q.preamble.css;
-            } else {
-                qd.css.appendChild(document.createTextNode(q.preamble.css));
-            }
-            Numbas.schedule.add(function()
-            {
-                html.each(function(e) {
-                    Numbas.jme.variables.DOMcontentsubvars(this,q.scope);
-                })
-                // trigger a signal that the question HTML is attached
-                // DEPRECATED: use question.onHTMLAttached(fn) instead
-                $('body').trigger('question-html-attached',q,qd);
-                $('body').unbind('question-html-attached');
-                // make mathjax process the question text (render the maths)
-                Numbas.display.typeset(qd.html,qd.postTypesetF);
+
+            var promise = display.makeHTMLFromXML(
+                q.xml, 
+                Numbas.xml.templates.question, 
+                q.scope,
+                R('question.header',{number:q.number+1}),
+                $('#questionDisplay')
+            );
+
+            promise.then(function(html) {
+                qd.html = html;
+                qd.css = document.createElement('style');
+                qd.css.setAttribute('type','text/css');
+                
+                if(qd.css.styleSheet) {
+                    qd.css.styleSheet.cssText = q.preamble.css;
+                } else {
+                    qd.css.appendChild(document.createTextNode(q.preamble.css));
+                }
                 q.signals.trigger('HTMLAttached');
             });
         },
+
+        addExtraPart: function(p) {
+            var qd = this;
+            this.question.signals.on('HTMLAttached',function() {
+                var promise = display.makeHTMLFromXML(
+                    p.xml, 
+                    Numbas.xml.templates.part, 
+                    p.getScope(), 
+                    p.display.name(),
+                    qd.html.find('.parts'),
+                    p.display
+                );
+            });
+            this.marks(this.question.marks);
+        },
+
         /** Show the question
          * @memberof Numbas.display.QuestionDisplay
          */

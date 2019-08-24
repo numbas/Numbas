@@ -152,6 +152,47 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         };
     },
+
+    /** Make HTML from an XML node and bind it to the given scope and display object.
+     * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
+     * @param {Element} xml
+     * @param {XMLDocument} template
+     * @param {Numbas.jme.Scope} scope
+     * @param {String} contextDescription - description of the JME context, for error messages
+     * @param {Element} parentElement - element to append the generated HTML to
+     * @param {Object} [viewModel]
+     * @returns {Promise} - resolves to the produced HTML element after it's been added to the parent element, variables have been substituted and knockout bindings applied.
+     */
+    makeHTMLFromXML: function(xml, template, scope, contextDescription, parentElement, viewModel) {
+        var html = $($.xsl.transform(template, xml).string);
+        html.addClass('jme-scope').data('jme-scope',scope);
+        html.attr('data-jme-context-description',contextDescription);
+        html.find('table').wrap('<div class="table-responsive">');    // wrap tables so they have a scrollbar when they overflow
+        var promise = new Promise(function(resolve, reject) {
+            Numbas.schedule.add(function() {
+                try {
+                    html.each(function(e) {
+                        Numbas.jme.variables.DOMcontentsubvars(this,scope);
+                    })
+                } catch(e) {
+                    throw(new Error(contextDescription+': '+e.message));
+                }
+                if(parentElement) {
+                    $(parentElement).append(html);
+                }
+                if(viewModel) {
+                    Knockout.applyBindings(viewModel, html[0]);
+                }
+                // make mathjax process the question text (render the maths)
+                Numbas.display.typeset(html);
+                resolve(html);
+            });
+        });
+
+        return promise;
+    },
+
+
     /** The Numbas exam has failed so much it can't continue - show an error message and the error
      * @param {Error} e
      */

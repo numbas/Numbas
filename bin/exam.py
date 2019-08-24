@@ -595,6 +595,44 @@ class VariableReplacement(object):
         }
         return replacement
 
+class NextPart(object):
+    other_part = ''
+    label = ''
+
+    def __init__(self):
+        self.variable_replacements = []
+
+    @staticmethod
+    def fromDATA(builder, data):
+        np = NextPart()
+        tryLoad(data,'otherPart',np,'other_part')
+        tryLoad(data,'label',np)
+        if 'variableReplacements' in data:
+            for vrd in data['variableReplacements']:
+                vr = {}
+                tryLoad(vrd,['variable','definition'],vr)
+                np.variable_replacements.append(vr)
+        return np
+
+    def toxml(self):
+        nextpart = makeTree(['nextpart',
+            ['variablereplacements'],
+        ])
+        nextpart.attrib = {
+            'index': strcons(self.other_part),
+            'label': strcons(self.label),
+        }
+        variable_replacements = nextpart.find('variablereplacements')
+        for vr in self.variable_replacements:
+            vre = etree.Element('replacement')
+            vre.attrib = {
+                'variable': vr['variable'],
+                'definition': vr['definition'],
+            }
+            variable_replacements.append(vre)
+        return nextpart
+
+
 class Part(object):
     useCustomName = False
     customName = ''
@@ -616,6 +654,7 @@ class Part(object):
         self.steps = []
         self.scripts = {}
         self.variable_replacements = []
+        self.next_parts = []
 
     def loadDATA(self, builder, data):
         tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','adaptiveMarkingPenalty','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
@@ -637,6 +676,9 @@ class Part(object):
 
         if haskey(data,'variableReplacements'):
             self.variable_replacements = [builder.variable_replacement(vr) for vr in data['variableReplacements']]
+
+        if haskey(data,'nextParts'):
+            self.next_parts = [builder.next_part(np) for np in data['nextParts']]
     
     def toxml(self):
         part = makeTree(['part',
@@ -647,6 +689,7 @@ class Part(object):
                                 ['variablereplacements'],
                             ],
                             ['markingalgorithm'],
+                            ['nextparts'],
                         ])
 
         part.attrib = {
@@ -692,6 +735,9 @@ class Part(object):
         for vr in self.variable_replacements:
             replacement = vr.toxml()
             variable_replacements.append(replacement)
+        next_parts = part.find('nextparts')
+        for np in self.next_parts:
+            next_parts.append(np.toxml())
 
         return part
 
@@ -1331,6 +1377,9 @@ class ExamBuilder(object):
 
     def variable_replacement(self, data):
         return VariableReplacement.fromDATA(self, data)
+
+    def next_part(self, data):
+        return NextPart.fromDATA(self, data)
 
     def part(self, data):
         kind = data['type'].lower()

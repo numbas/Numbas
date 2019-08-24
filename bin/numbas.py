@@ -242,17 +242,10 @@ class NumbasCompiler(object):
             Write the javascript representation of the XML files (theme XSLT and exam XML)
         """
         xslts = {}
-        for themedir in self.themepaths:
-            xsltdir = os.path.join(themedir,'xslt')
-
-            if os.path.exists(xsltdir):
-                files = filter(lambda x: x[-5:]=='.xslt', os.listdir(xsltdir))
-                for file in files:
-                    name, ext = os.path.splitext(file)
-                    xslts[name] = xml2js.encode(open(os.path.join(xsltdir,file),encoding='utf-8').read())
-
-        if 'question' not in xslts and self.question_xslt is not None:
+        if self.question_xslt is not None:
             xslts['question'] = xml2js.encode(self.question_xslt)
+        if self.part_xslt is not None:
+            xslts['part'] = xml2js.encode(self.part_xslt)
 
         xslts_js = ',\n\t\t'.join('{}: "{}"'.format(name,body) for name,body in xslts.items())
 
@@ -290,6 +283,7 @@ class NumbasCompiler(object):
                 if self.options.expect_index_html:
                     raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
         self.question_xslt = self.render_template('question.xslt')
+        self.part_xslt = self.render_template('part.xslt')
 
     def render_template(self,name):
         try:

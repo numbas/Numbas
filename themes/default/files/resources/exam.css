@@ -735,6 +735,18 @@ select.multiplechoice {
 	font-weight: bold;
 }
 
+.next-parts > ul {
+    list-style: none;
+    display: flex;
+    padding-left: 0;
+}
+.next-part-option {
+    padding: 0;
+}
+.next-parts > ul > li ~ li {
+    margin-left: 2em;
+}
+
 .question td, .adviceDisplay td {
 	text-align: right;
 }

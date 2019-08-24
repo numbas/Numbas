@@ -97,6 +97,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     };
     q.parts = [];
     q.partDictionary = {};
+    q.extraPartOrder = [];
 }
 
 /** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
@@ -152,6 +153,14 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
 
 Question.prototype = /** @lends Numbas.Question.prototype */
 {
+    /** How should parts be shown? 
+     *
+     * * `all`: all available parts are generated straight away
+     * * `adaptive`: parts are only generated when required
+     * @type {String}
+     */
+    partsMode: 'adaptive',
+
     /** Signals produced while loading this question.
      * @type {Numbas.schedule.SignalBox} 
      * */
@@ -222,15 +231,48 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.xml.setAttribute('number',q.number);
         });
         q.signals.on('variablesGenerated', function() {
-            //load parts
             var partNodes = q.xml.selectNodes('parts/part');
-            for(var j = 0; j<partNodes.length; j++) {
-                var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
-                q.addPart(part,j);
-            }
+            switch(q.partsMode) {
+                case 'all':
+                    //load parts
+                    for(var j = 0; j<partNodes.length; j++) {
+                        var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
+                        q.addPart(part,j);
+                    }
+                    break;
+                case 'adaptive':
+                    var partNode = q.xml.selectSingleNode('parts/part');
+                    q.addExtraPartFromXML(0);
+                    break;
+           }
             q.signals.trigger('partsGenerated');
         });
     },
+
+    /** Create a part with the given XML definition, using the given scope, and add it to this question.
+     *  The question's variables are remade using the given dictionary of changed variables
+     *  @param {Number} xml_index - the index of the part's definition in the XML
+     *  @param {Numbas.jme.Scope} scope
+     *  @param {Object.<Numbas.jme.token>} variables
+     *  @returns {Numbas.parts.Part}
+     */
+    addExtraPartFromXML: function(xml_index,scope,variables) {
+        this.extraPartOrder.push(xml_index);
+        var xml = this.xml.selectNodes('parts/part')[xml_index];
+        scope = scope || this.scope;
+        var j = this.parts.length;
+        variables = variables || {};
+        var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
+        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, pscope);
+        var index = this.parts.length;
+        this.addPart(p,index);
+        p.assignName(index,this.parts.length-1);
+        if(this.display) {
+            this.display.addExtraPart(p);
+        }
+        return p;
+    },
+
     /** Load the question's settings from a JSON object
      * @param {Object} data
      * @fires Numbas.Question#preambleLoaded
@@ -551,6 +593,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @type {Object.<Numbas.parts.Part>}
      */
     partDictionary: {},
+    /** The indices in the definition of the extra parts that have been added to this question
+     * @type {Array.<Number>}
+     */
+    extraPartOrder: [],
     /** Associated display object
      * @type {Numbas.display.QuestionDisplay}
      */
