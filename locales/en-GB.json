@@ -292,6 +292,7 @@
     "question.score feedback.partial": "Your answer is partially correct",
     "question.score feedback.wrong": "Your answer is incorrect",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
+    "question.back to previous part": "Go back to the previous part",
     "ruleset.circular reference": "Circular reference in definition of ruleset <code>{{name}}</code>",
     "ruleset.set not defined": "Ruleset {{name}} has not been defined",
     "timing.no accumulator": "no timing accumulator {{name}}",

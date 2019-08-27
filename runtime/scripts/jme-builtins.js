@@ -1894,6 +1894,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         return new TExpression(nexpr);
     }
 });
+
 newBuiltin('canonical_compare',['?','?'],TNum,null, {
     evaluate: function(args,scope) {
         var cmp = jme.compareTrees(args[0],args[1]);

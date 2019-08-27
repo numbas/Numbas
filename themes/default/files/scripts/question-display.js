@@ -64,6 +64,25 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.numParts = Knockout.observable(q.parts.length);
+
+        /** The currently visible part, in adaptive mode
+         * @member {observable|Numbas.display.PartDisplay} currentPart
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.currentPart = ko.observable(null);
+
+        /** The part that created the current part
+         * @member {observable|Numbas.display.PartDisplay} previousPart
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.previousPart = ko.computed(function() {
+            var p = this.currentPart();
+            if(!(p && p.part.previousPart)) {
+                return null;
+            }
+            return p.part.previousPart.display;
+        },this);
+
         /** Student's current score ({@link Numbas.Question#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.QuestionDisplay
@@ -170,6 +189,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             });
         },
 
+        /** Add a new part to the display
+         * @param {Numbas.parts.Part} p
+         */
         addExtraPart: function(p) {
             var qd = this;
             this.question.signals.on('HTMLAttached',function() {
@@ -183,6 +205,16 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 );
             });
             this.marks(this.question.marks);
+        },
+
+        /** Set the current part to the previous part, if it's defined.
+         * @see Numbas.display.QuestionDisplay.currentPart
+         */
+        goToPreviousPart: function() {
+            var p = this.previousPart();
+            if(p) {
+                this.question.setCurrentPart(p.part);
+            }
         },
 
         /** Show the question

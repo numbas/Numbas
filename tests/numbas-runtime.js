@@ -737,6 +737,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     isNonemptyHTML: function(html) {
+        if(html===undefined || html===null) {
+            return false;
+        }
         if(window.document) {
             var d = document.createElement('div');
             d.innerHTML = html;
@@ -12332,6 +12335,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         return new TExpression(nexpr);
     }
 });
+
 newBuiltin('canonical_compare',['?','?'],TNum,null, {
     evaluate: function(args,scope) {
         var cmp = jme.compareTrees(args[0],args[1]);
@@ -14361,6 +14365,32 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
+
+    /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
+     * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
+     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
+     * @param {Object.<Numbas.jme.token>} changed_variables - dictionary of changed variables
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbas.jme.Scope}
+     */
+    remakeVariables: function(todo,changed_variables,scope) {
+        var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
+        var replaced = Object.keys(changed_variables);
+        // find dependent variables which need to be recomputed
+        dependents_todo = jme.variables.variableDependants(todo,replaced);
+        for(var name in dependents_todo) {
+            if(name in changed_variables) {
+                delete dependents_todo[name];
+            } else {
+                scope.deleteVariable(name);
+            }
+        }
+        // compute those variables
+        var nv = jme.variables.makeVariables(dependents_todo,scope);
+        scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+        return scope;
+    },
+
     /** Collect together a ruleset, evaluating all its dependencies first.
      * @param {String} name - the name of the ruleset to evaluate
      * @param {Object.<String[]>} todo - dictionary of rulesets still to evaluate
@@ -14794,16 +14824,17 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
-var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store) {
+var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store, scope) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
     var type = tryGetAttribute(null,xml,'.','type',[]);
     if(type==null) {
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
-    var part = createPart(type, path, question, parentPart, store);
+    var part = createPart(type, path, question, parentPart, store, scope);
     part.loadFromXML(xml);
     part.finaliseLoad();
     return part;
@@ -14834,17 +14865,19 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(type, path, question, parentPart, store)
+var createPart = Numbas.createPart = function(type, path, question, parentPart, store, scope)
 {
     if(partConstructors[type])
     {
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
+        part.scope = scope;
         return part;
     }
     else {
@@ -14879,11 +14912,12 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.label = '';
 
     if(this.question) {
-    this.question.partDictionary[path] = this;
+        this.question.partDictionary[path] = this;
     }
     this.index = parseInt(this.path.match(/\d+$/));
     //initialise settings object
     this.settings = util.copyobj(Part.prototype.settings);
+
     //initialise gap and step arrays
     this.gaps = [];
     this.steps = [];
@@ -14891,6 +14925,9 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.isGap = false;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
+
+    this.nextParts = [];
+
     this.markingFeedback = [];
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
@@ -14954,6 +14991,25 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
             this.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
         }
+
+        var nextPartsNode = this.xml.selectSingleNode('nextparts');
+        var nextPartNodes = nextPartsNode.selectNodes('nextpart');
+        for(var i=0;i<nextPartNodes.length;i++) {
+            var nextPartNode = nextPartNodes[i];
+            var np = {variableReplacements: [], instance: null};
+            tryGetAttribute(np,nextPartNode,'.',['index','label','availabilityCondition']);
+            var replacementNodes = nextPartNode.selectNodes('variablereplacements/replacement');
+            for(var j=0;j<replacementNodes.length;j++) {
+                var replacement = {};
+                tryGetAttribute(replacement,replacementNodes[j],'.',['variable','definition']);
+                np.variableReplacements.push(replacement);
+            }
+            var otherPartNode = this.question.xml.selectNodes('parts/part')[np.index];
+            np.label = np.label || otherPartNode.getAttribute('customname');
+            np.xml = otherPartNode;
+            this.nextParts.push(np);
+        }
+
         // create the JME marking script for the part
         var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
         var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
@@ -15538,6 +15594,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         this.markingFeedback = result.markingFeedback;
                         this.finalised_result = result.finalised_result;
                         this.adaptiveMarkingUsed = adaptiveMarkingUsed;
+                        this.marking_values = result.values;
                         this.credit = result.credit;
                         this.answered = result.answered;
                     }
@@ -15585,7 +15642,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     R('part.marking.total score',{count:this.score})
                 );
             }
-            this.display && this.display.showScore(this.answered);
+            if(this.display) {
+                this.display.showScore(this.answered);
+                this.display.updateNextParts();
+            }
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;
@@ -15642,9 +15702,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markAgainstScope: function(scope,feedback) {
         this.setWarnings(feedback.warnings.slice());
         this.markingFeedback = feedback.markingFeedback.slice();
+        var values;
         var finalised_result = {states: [], valid: false, credit: 0};
         try {
-            finalised_result = this.mark(scope);
+            var result = this.mark(scope);
+            finalised_result = result.finalised_result;
+            values = result.values;
         } catch(e) {
             this.giveWarning(e.message);
         }
@@ -15652,6 +15715,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
             finalised_result: finalised_result,
+            values: values,
             credit: this.credit,
             answered: this.answered
         }
@@ -15678,19 +15742,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
         }
-        var scope = new Numbas.jme.Scope([this.question.scope,{variables: new_variables}])
-        // find dependent variables which need to be recomputed
-        var todo = Numbas.jme.variables.variableDependants(this.question.variablesTodo,replaced);
-        for(var name in todo) {
-            if(name in new_variables) {
-                delete todo[name];
-            } else {
-                scope.deleteVariable(name);
-            }
-        }
-        // compute those variables
-        var nv = Numbas.jme.variables.makeVariables(todo,scope);
-        scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+        scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
         return scope;
     },
     /** Compute the correct answer, based on the given scope.
@@ -15733,7 +15785,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var finalised_result = marking.finalise_state(result.states.mark);
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
-        return finalised_result;
+        return {finalised_result: finalised_result, values: result.values};
     },
     /** Apply a finalised list of feedback states to this part.
      * @param {Numbas.marking.feedback_item[]} feedback
@@ -15815,13 +15867,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             t += change;
             t = Math.max(0,t);
             change = t-ot;
-            var message = action.message || '';
-            if(util.isNonemptyHTML(message)) {
+            if(change!=0) {
+                if(util.isNonemptyHTML(action.message)) {
+                    action.message += '\n\n';
+                }
                 var marks = Math.abs(change);
                 if(change>0) {
-                    action.message += '\n\n'+R('feedback.you were awarded',{count:marks});
+                    action.message += R('feedback.you were awarded',{count:marks});
                 } else if(change<0) {
-                    action.message += '\n\n'+R('feedback.taken away',{count:marks});
+                    action.message += R('feedback.taken away',{count:marks});
                 }
             }
             var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
@@ -15994,6 +16048,50 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.display.hideSteps();
         this.store && this.store.stepsHidden(this);
     },
+
+    /** Currently available next parts
+     * @returns {Array.<Numbas.parts.NextPart>}
+     */
+    availableNextParts: function() {
+        var scope = new jme.Scope([this.getScope(),{variables: this.marking_values}]);
+        scope.setVariable('credit',new jme.types.TNum(this.credit));
+        return this.nextParts.filter(function(np) {
+            var condition = np.availabilityCondition;
+            if(condition=='') {
+                return true;
+            }
+            try {
+                var res = scope.evaluate(condition);
+                return res.type=='boolean' && res.value;
+            } catch(e) {
+                return false;
+            }
+        });
+    },
+    
+    /** Make an instance of the selected next part
+     * @param {Numbas.parts.nextpart} np
+     */
+    makeNextPart: function(np) {
+        var p = this;
+        var scope = this.getScope();
+
+        var values = {};
+        var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
+        if(np.variableReplacements.length) {
+            np.variableReplacements.forEach(function(vr) {
+                values[vr.variable] = replaceScope.evaluate(vr.definition);
+            });
+        }
+
+        if(np.xml) {
+            np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p);
+        }
+        if(this.display) {
+            this.display.updateNextParts();
+        }
+    },
+
     /** Reveal the correct answer to this part
      * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
      */
@@ -16114,6 +16212,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     };
     q.parts = [];
     q.partDictionary = {};
+    q.extraPartOrder = [];
 }
 
 /** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
@@ -16169,6 +16268,19 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
 
 Question.prototype = /** @lends Numbas.Question.prototype */
 {
+    /** How should parts be shown? 
+     *
+     * * `all`: all available parts are generated straight away
+     * * `adaptive`: parts are only generated when required
+     * @type {String}
+     */
+    partsMode: 'adaptive',
+
+    /** In adaptive mode, the part that the student is currently looking at.
+     * @type {Numbas.parts.Part}
+     */
+    currentPart: null,
+
     /** Signals produced while loading this question.
      * @type {Numbas.schedule.SignalBox} 
      * */
@@ -16239,15 +16351,62 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.xml.setAttribute('number',q.number);
         });
         q.signals.on('variablesGenerated', function() {
-            //load parts
             var partNodes = q.xml.selectNodes('parts/part');
-            for(var j = 0; j<partNodes.length; j++) {
-                var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
-                q.addPart(part,j);
-            }
+            switch(q.partsMode) {
+                case 'all':
+                    //load parts
+                    for(var j = 0; j<partNodes.length; j++) {
+                        var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
+                        q.addPart(part,j);
+                    }
+                    break;
+                case 'adaptive':
+                    var partNode = q.xml.selectSingleNode('parts/part');
+                    q.addExtraPartFromXML(0);
+                    break;
+           }
             q.signals.trigger('partsGenerated');
         });
     },
+
+    /** Create a part with the given XML definition, using the given scope, and add it to this question.
+     *  The question's variables are remade using the given dictionary of changed variables
+     *  @param {Number} xml_index - the index of the part's definition in the XML
+     *  @param {Numbas.jme.Scope} scope
+     *  @param {Object.<Numbas.jme.token>} variables
+     *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
+     *  @returns {Numbas.parts.Part}
+     */
+    addExtraPartFromXML: function(xml_index,scope,variables,previousPart) {
+        this.extraPartOrder.push(xml_index);
+        var xml = this.xml.selectNodes('parts/part')[xml_index];
+        scope = scope || this.scope;
+        var j = this.parts.length;
+        variables = variables || {};
+        var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
+        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, pscope);
+        var index = this.parts.length;
+        this.addPart(p,index);
+        p.assignName(index,this.parts.length-1);
+        p.previousPart = previousPart;
+        if(this.display) {
+            this.display.addExtraPart(p);
+        }
+        this.setCurrentPart(p);
+        this.updateScore();
+        return p;
+    },
+
+    /** Set the currently displayed part
+     * @param {Numbas.parts.Part} part
+     */
+    setCurrentPart: function(part) {
+        this.currentPart = part;
+        if(this.display) {
+            this.display.currentPart(part.display);
+        }
+    },
+
     /** Load the question's settings from a JSON object
      * @param {Object} data
      * @fires Numbas.Question#preambleLoaded
@@ -16349,7 +16508,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
-        this.marks += part.marks;
+        this.updateScore();
     },
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
      * @fires Numbas.Question#functionsMade
@@ -16512,6 +16671,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             } else if(q.adviceDisplayed) {
                 q.getAdvice(true);
             }
+            q.display && q.display.resume();
             q.updateScore();
         });
     },
@@ -16567,6 +16727,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @type {Object.<Numbas.parts.Part>}
      */
     partDictionary: {},
+    /** The indices in the definition of the extra parts that have been added to this question
+     * @type {Array.<Number>}
+     */
+    extraPartOrder: [],
     /** Associated display object
      * @type {Numbas.display.QuestionDisplay}
      */
@@ -16615,7 +16779,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     getAdvice: function(dontStore)
     {
         this.adviceDisplayed = true;
-    this.display && this.display.showAdvice(true);
+        this.display && this.display.showAdvice(true);
         if(this.store && !dontStore) {
             this.store.adviceDisplayed(this);
         }
@@ -16683,12 +16847,28 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     calculateScore: function()
     {
-        var tmpScore=0;
-        for(var i=0; i<this.parts.length; i++)
-        {
-            tmpScore += this.parts[i].score;
+        var score = 0;
+        var marks = 0;
+
+        switch(this.partsMode) {
+            case 'all':
+                for(var i=0; i<this.parts.length; i++) {
+                    var part = this.parts[i];
+                    score += part.score;
+                    marks += part.marks;
+                }
+                break;
+            case 'adaptive':
+                var part = this.currentPart;
+                while(part) {
+                    score += part.score;
+                    marks += part.marks;
+                    part = part.previousPart;
+                }
+                break;
         }
-        this.score = tmpScore;
+        this.score = score;
+        this.marks = marks;
         this.answered = this.validate();
     },
     /** Submit every part in the question */
@@ -16715,8 +16895,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Recalculate the student's score, update the display, and notify storage. */
     updateScore: function()
     {
-        //calculate score - if warning is uiPrevent then score is 0
-        this.calculateScore('uwNone');
+        //calculate score
+        this.calculateScore();
         //update total exam score
         this.exam && this.exam.updateScore();
     //display score - ticks and crosses etc.
@@ -17321,9 +17501,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     tryChangeQuestion: function(i)
     {
-        if(i<0 || i>=this.settings.numQuestions)
+        if(i<0 || i>=this.settings.numQuestions) {
             return;
-        if( ! (this.settings.navigateBrowse     // is browse navigation enabled?
+        }
+        if( ! (
+               this.mode=='review' 
+            || this.settings.navigateBrowse     // is browse navigation enabled?
             || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
             || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
         ))
@@ -25160,7 +25343,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
-                settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                var mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                if(util.isNonemptyHTML(mustMatchMessage)) {
+                    settings.mustMatchMessage = mustMatchMessage;
+                }
             }
         }
 
@@ -25275,7 +25461,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: '',
+        mustMatchMessage: R('part.jme.must-match.failed'),
         nameToCompare: ''
     },
     /** The name of the input widget this part uses, if any.
