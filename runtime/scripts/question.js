@@ -161,6 +161,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     partsMode: 'adaptive',
 
+    /** In adaptive mode, the part that the student is currently looking at.
+     * @type {Numbas.parts.Part}
+     */
+    currentPart: null,
+
     /** Signals produced while loading this question.
      * @type {Numbas.schedule.SignalBox} 
      * */
@@ -254,9 +259,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *  @param {Number} xml_index - the index of the part's definition in the XML
      *  @param {Numbas.jme.Scope} scope
      *  @param {Object.<Numbas.jme.token>} variables
+     *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
      *  @returns {Numbas.parts.Part}
      */
-    addExtraPartFromXML: function(xml_index,scope,variables) {
+    addExtraPartFromXML: function(xml_index,scope,variables,previousPart) {
         this.extraPartOrder.push(xml_index);
         var xml = this.xml.selectNodes('parts/part')[xml_index];
         scope = scope || this.scope;
@@ -267,10 +273,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var index = this.parts.length;
         this.addPart(p,index);
         p.assignName(index,this.parts.length-1);
+        p.previousPart = previousPart;
         if(this.display) {
             this.display.addExtraPart(p);
         }
+        this.setCurrentPart(p);
+        this.updateScore();
         return p;
+    },
+
+    /** Set the currently displayed part
+     * @param {Numbas.parts.Part} part
+     */
+    setCurrentPart: function(part) {
+        this.currentPart = part;
+        if(this.display) {
+            this.display.currentPart(part.display);
+        }
     },
 
     /** Load the question's settings from a JSON object
@@ -374,7 +393,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
-        this.marks += part.marks;
+        this.updateScore();
     },
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
      * @fires Numbas.Question#functionsMade
@@ -712,12 +731,28 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     calculateScore: function()
     {
-        var tmpScore=0;
-        for(var i=0; i<this.parts.length; i++)
-        {
-            tmpScore += this.parts[i].score;
+        var score = 0;
+        var marks = 0;
+
+        switch(this.partsMode) {
+            case 'all':
+                for(var i=0; i<this.parts.length; i++) {
+                    var part = this.parts[i];
+                    score += part.score;
+                    marks += part.marks;
+                }
+                break;
+            case 'adaptive':
+                var part = this.currentPart;
+                while(part) {
+                    score += part.score;
+                    marks += part.marks;
+                    part = part.previousPart;
+                }
+                break;
         }
-        this.score = tmpScore;
+        this.score = score;
+        this.marks = marks;
         this.answered = this.validate();
     },
     /** Submit every part in the question */
@@ -744,8 +779,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Recalculate the student's score, update the display, and notify storage. */
     updateScore: function()
     {
-        //calculate score - if warning is uiPrevent then score is 0
-        this.calculateScore('uwNone');
+        //calculate score
+        this.calculateScore();
         //update total exam score
         this.exam && this.exam.updateScore();
     //display score - ticks and crosses etc.

@@ -1837,6 +1837,16 @@ newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
         return replace_expression(pattern,repl,expr,options,scope);
     }
 });
+newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
+    evaluate: function(args,scope) {
+        var substitutions = args[0].value;
+        var expr = args[1].tree;
+        scope = new Scope({variables: substitutions});
+        var nexpr = jme.substituteTree(expr,scope,true);
+        return new TExpression(nexpr);
+    }
+});
+
 newBuiltin('canonical_compare',['?','?'],TNum,null, {
     evaluate: function(args,scope) {
         var cmp = jme.compareTrees(args[0],args[1]);

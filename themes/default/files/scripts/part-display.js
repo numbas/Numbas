@@ -34,6 +34,20 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.question = p.question;
+
+        /** Should this part be shown?
+         * @member {Boolean} visible
+         * @memeberof Numbas.display.PartDisplay
+         */
+        this.visible = ko.computed(function() {
+            switch(this.question.partsMode) {
+                case 'all':
+                    return true;
+                case 'adaptive':
+                    return this.question.display.currentPart()==this || this.question.display.revealed();
+            }
+        },this);
+
         /** The student's current score ({@link Numbas.parts.Part#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.PartDisplay
@@ -249,6 +263,9 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             if(this.nextParts().length==0) {
                 return false;
             }
+            if(this.revealed()) {
+                return false;
+            }
             return this.answered() || !this.doesMarking();
         },this);
 
@@ -453,12 +470,16 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
 
         updateNextParts: function() {
             var p = this.part;
-            this.nextParts(p.nextParts.map(function(np) {
+            this.nextParts(p.availableNextParts().map(function(np) {
                 return {
                     label: np.label,
-                    disabled: np.instances.length>0,
-                    make: function() {
-                        p.makeNextPart(np);
+                    made: np.instance !== null,
+                    select: function() {
+                        if(np.instance) {
+                            p.question.setCurrentPart(np.instance)
+                        } else {
+                            p.makeNextPart(np);
+                        }
                     }
                 };
             }));

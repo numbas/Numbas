@@ -596,6 +596,7 @@ class VariableReplacement(object):
 class NextPart(object):
     other_part = ''
     label = ''
+    availability_condition = ''
 
     def __init__(self):
         self.variable_replacements = []
@@ -604,7 +605,7 @@ class NextPart(object):
     def fromDATA(builder, data):
         np = NextPart()
         tryLoad(data,'otherPart',np,'other_part')
-        tryLoad(data,'label',np)
+        tryLoad(data,['label','availabilityCondition'],np)
         if 'variableReplacements' in data:
             for vrd in data['variableReplacements']:
                 vr = {}
@@ -619,6 +620,7 @@ class NextPart(object):
         nextpart.attrib = {
             'index': strcons(self.other_part),
             'label': strcons(self.label),
+            'availabilityCondition': strcons(self.availabilityCondition),
         }
         variable_replacements = nextpart.find('variablereplacements')
         for vr in self.variable_replacements:

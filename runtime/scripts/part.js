@@ -209,8 +209,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var nextPartNodes = nextPartsNode.selectNodes('nextpart');
         for(var i=0;i<nextPartNodes.length;i++) {
             var nextPartNode = nextPartNodes[i];
-            var np = {variableReplacements: [], instances: []};
-            tryGetAttribute(np,nextPartNode,'.',['index','label']);
+            var np = {variableReplacements: [], instance: null};
+            tryGetAttribute(np,nextPartNode,'.',['index','label','availabilityCondition']);
             var replacementNodes = nextPartNode.selectNodes('variablereplacements/replacement');
             for(var j=0;j<replacementNodes.length;j++) {
                 var replacement = {};
@@ -823,7 +823,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     R('part.marking.total score',{count:this.score})
                 );
             }
-            this.display && this.display.showScore(this.answered);
+            if(this.display) {
+                this.display.showScore(this.answered);
+                this.display.updateNextParts();
+            }
         }
         this.store && this.store.partAnswered(this);
         this.submitting = false;
@@ -885,12 +888,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         try {
             var result = this.mark(scope);
             finalised_result = result.finalised_result;
-            console.log(result);
             values = result.values;
         } catch(e) {
             this.giveWarning(e.message);
         }
-        console.log(values);
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
@@ -1188,6 +1189,26 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.display.hideSteps();
         this.store && this.store.stepsHidden(this);
     },
+
+    /** Currently available next parts
+     * @returns {Array.<Numbas.parts.NextPart>}
+     */
+    availableNextParts: function() {
+        var scope = new jme.Scope([this.getScope(),{variables: this.marking_values}]);
+        scope.setVariable('credit',new jme.types.TNum(this.credit));
+        return this.nextParts.filter(function(np) {
+            var condition = np.availabilityCondition;
+            if(condition=='') {
+                return true;
+            }
+            try {
+                var res = scope.evaluate(condition);
+                return res.type=='boolean' && res.value;
+            } catch(e) {
+                return false;
+            }
+        });
+    },
     
     /** Make an instance of the selected next part
      * @param {Numbas.parts.nextpart} np
@@ -1197,14 +1218,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var scope = this.getScope();
 
         var values = {};
-        if(np.variableReplacements.length && p.marking_values) {
+        var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
+        if(np.variableReplacements.length) {
             np.variableReplacements.forEach(function(vr) {
-                values[vr.variable] = p.marking_values[vr.definition];
+                values[vr.variable] = replaceScope.evaluate(vr.definition);
             });
         }
 
         if(np.xml) {
-            np.instances.push(this.question.addExtraPartFromXML(np.index,scope,values));
+            np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p);
         }
         if(this.display) {
             this.display.updateNextParts();

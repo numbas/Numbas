@@ -34,6 +34,9 @@ Copyright 2011-16 Newcastle University
         </xsl:copy>
     </xsl:template>
     <xsl:template match="parts">
+        <div data-bind="visible: previousPart">
+            <button type="button" class="btn btn-link previous-part" data-bind="click: goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
+        </div>
         <div class="parts" data-bind="stopbinding: true">
             <xsl:apply-templates />
         </div>

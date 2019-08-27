@@ -17026,6 +17026,16 @@ newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
         return replace_expression(pattern,repl,expr,options,scope);
     }
 });
+newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
+    evaluate: function(args,scope) {
+        var substitutions = args[0].value;
+        var expr = args[1].tree;
+        scope = new Scope({variables: substitutions});
+        var nexpr = jme.substituteTree(expr,scope,true);
+        return new TExpression(nexpr);
+    }
+});
+
 newBuiltin('canonical_compare',['?','?'],TNum,null, {
     evaluate: function(args,scope) {
         var cmp = jme.compareTrees(args[0],args[1]);
@@ -19018,6 +19028,32 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
+
+    /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
+     * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
+     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
+     * @param {Object.<Numbas.jme.token>} changed_variables - dictionary of changed variables
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbas.jme.Scope}
+     */
+    remakeVariables: function(todo,changed_variables,scope) {
+        var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
+        var replaced = Object.keys(changed_variables);
+        // find dependent variables which need to be recomputed
+        dependents_todo = jme.variables.variableDependants(todo,replaced);
+        for(var name in dependents_todo) {
+            if(name in changed_variables) {
+                delete dependents_todo[name];
+            } else {
+                scope.deleteVariable(name);
+            }
+        }
+        // compute those variables
+        var nv = jme.variables.makeVariables(dependents_todo,scope);
+        scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+        return scope;
+    },
+
     /** Collect together a ruleset, evaluating all its dependencies first.
      * @param {String} name - the name of the ruleset to evaluate
      * @param {Object.<String[]>} todo - dictionary of rulesets still to evaluate
