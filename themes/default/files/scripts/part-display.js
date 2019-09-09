@@ -344,7 +344,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             if(this.part.markingFeedback.length && !this.part.question.revealed)
             {
                 var messages = [];
-                var maxMarks = this.part.marks - (this.part.stepsShown ? this.part.settings.stepsPenalty : 0);
+                var maxMarks = this.part.availableMarks();
                 var t = 0;
                 for(var i=0;i<this.part.markingFeedback.length;i++)
                 {

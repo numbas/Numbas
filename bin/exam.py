@@ -604,6 +604,7 @@ class Part(object):
     showCorrectAnswer = True
     showFeedbackIcon = True
     variableReplacementStrategy = 'originalfirst'
+    adaptiveMarkingPenalty = 0
     customMarkingAlgorithm = ''
     extendBaseMarkingAlgorithm = True
 
@@ -615,7 +616,7 @@ class Part(object):
         self.variable_replacements = []
 
     def loadDATA(self, builder, data):
-        tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
+        tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','adaptiveMarkingPenalty','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
 
         if haskey(data,'marks'):
             self.marks = data['marks']
@@ -680,10 +681,12 @@ class Part(object):
             'extend': strcons_fix(self.extendBaseMarkingAlgorithm),
         }
 
-        variable_replacements = part.find('adaptivemarking/variablereplacements')
-        variable_replacements.attrib = {
+        adaptivemarking = part.find('adaptivemarking')
+        adaptivemarking.attrib = {
+            'penalty': strcons_fix(self.adaptiveMarkingPenalty),
             'strategy': self.variableReplacementStrategy
         }
+        variable_replacements = part.find('adaptivemarking/variablereplacements')
         for vr in self.variable_replacements:
             replacement = vr.toxml()
             variable_replacements.append(replacement)
