@@ -189,7 +189,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
-        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
+        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','adaptiveObjective'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -219,8 +219,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var nextPartNodes = nextPartsNode.selectNodes('nextpart');
         for(var i=0;i<nextPartNodes.length;i++) {
             var nextPartNode = nextPartNodes[i];
-            var np = {variableReplacements: [], instance: null};
-            tryGetAttribute(np,nextPartNode,'.',['index','label','availabilityCondition']);
+            var np = {variableReplacements: [], instance: null, penalty: null, penaltyAmount: 0};
+            tryGetAttribute(np,nextPartNode,'.',['index','label','availabilityCondition','penalty']);
+            tryGetAttribute(np,nextPartNode,'.',['penaltyAmount'],['penaltyAmountString']);
+            np.penaltyAmountString += '';
             var replacementNodes = nextPartNode.selectNodes('variablereplacements/replacement');
             for(var j=0;j<replacementNodes.length;j++) {
                 var replacement = {};
@@ -303,6 +305,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 throw(e);
             }
         }
+        var scope = this.getScope();
+        this.nextParts.forEach(function(np) {
+            if(np.penaltyAmountString!='') {
+                np.penaltyAmount = scope.evaluate(np.penaltyAmountString).value;
+            }
+        });
         if(Numbas.display) {
             this.display = new Numbas.display.PartDisplay(this);
         }
@@ -515,6 +523,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
      * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
+     * @property {String} adaptiveObjective - objective that this part's score counts towards
      */
     settings:
     {
@@ -526,6 +535,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
         adaptiveMarkingPenalty: 0
+        adaptiveObjective: ''
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -1313,6 +1323,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(this.display) {
             this.display.updateNextParts();
         }
+        this.question.updateScore();
     },
 
     /** Reveal the correct answer to this part

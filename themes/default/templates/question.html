@@ -2,6 +2,9 @@
     <div class="contentArea ">
         <div id="questionDisplay" data-bind="stopbinding: true">
         </div>
-        {% include 'question-nav.html' %}
+        <div data-bind="with: currentQuestion">
+            {% include 'question-adaptive-breakdown.html' %}
+            {% include 'question-nav.html' %}
+        </div>
     </div>
 </div>

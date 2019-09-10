@@ -409,6 +409,8 @@ class Question(object):
     name = 'Untitled Question'
     statement =''
     advice = ''
+    parts_mode = 'all'
+    maxMarks = 0
 
     def __init__(self,name='Untitled Question'):
         self.name = name
@@ -422,6 +424,9 @@ class Question(object):
         self.functions = []
         self.rulesets = {}
 
+        self.objectives = []
+        self.penalties = []
+
         self.preamble = {
             'js': '',
             'css': ''
@@ -430,7 +435,8 @@ class Question(object):
     @staticmethod
     def fromDATA(builder, data):
         question = Question()
-        tryLoad(data,['name','statement','advice'],question)
+        tryLoad(data,['name','statement','advice','maxMarks'],question)
+        tryLoad(data,'partsMode',question,'parts_mode')
 
         if haskey(data,'parts'):
             parts = data['parts']
@@ -464,6 +470,14 @@ class Question(object):
                         l.append(builder.simplification_rule(rule))
                 question.rulesets[name] = l
 
+        if haskey(data,'objectives'):
+            for objdata in data['objectives']:
+                question.objectives.append(builder.scorebin(objdata))
+
+        if haskey(data,'penalties'):
+            for objdata in data['penalties']:
+                question.penalties.append(builder.scorebin(objdata))
+
         return question
 
     def toxml(self):
@@ -475,10 +489,16 @@ class Question(object):
                                 ['variables'],
                                 ['functions'],
                                 ['preambles'],
-                                ['rulesets']
+                                ['rulesets'],
+                                ['objectives'],
+                                ['penalties'],
                             ])
 
-        question.attrib = {'name': strcons(self.name)}
+        question.attrib = {
+            'name': strcons(self.name), 
+            'partsMode': strcons(self.parts_mode),
+            'maxMarks': strcons_fix(self.maxMarks),
+        }
         question.find('statement').append(makeContentNode(self.statement))
         question.find('advice').append(makeContentNode(self.advice))
 
@@ -524,6 +544,14 @@ class Question(object):
         preambles.attrib = {
             'nosubvars': 'true'
         }
+
+        objectives = question.find('objectives')
+        for objective in self.objectives:
+            objectives.append(objective.toxml())
+
+        penalties = question.find('penalties')
+        for penalty in self.penalties:
+            penalties.append(penalty.toxml())
 
         return question
 
@@ -599,6 +627,8 @@ class NextPart(object):
     other_part = ''
     label = ''
     availability_condition = ''
+    penalty = ''
+    penalty_amount = ''
 
     def __init__(self):
         self.variable_replacements = []
@@ -607,7 +637,8 @@ class NextPart(object):
     def fromDATA(builder, data):
         np = NextPart()
         tryLoad(data,'otherPart',np,'other_part')
-        tryLoad(data,['label','availabilityCondition'],np)
+        tryLoad(data,['label','availabilityCondition','penalty'],np)
+        tryLoad(data,'penaltyAmount',np,'penalty_amount')
         if 'variableReplacements' in data:
             for vrd in data['variableReplacements']:
                 vr = {}
@@ -623,6 +654,8 @@ class NextPart(object):
             'index': strcons(self.other_part),
             'label': strcons(self.label),
             'availabilityCondition': strcons(self.availabilityCondition),
+            'penalty': strcons(self.penalty),
+            'penaltyamount': strcons_fix(self.penalty_amount),
         }
         variable_replacements = nextpart.find('variablereplacements')
         for vr in self.variable_replacements:
@@ -634,6 +667,28 @@ class NextPart(object):
             variable_replacements.append(vre)
         return nextpart
 
+class ScoreBin(object):
+    name = ''
+    limit = 0
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def fromDATA(builder, data):
+        sb = ScoreBin()
+
+        tryLoad(data, ['name','limit'],sb)
+
+        return sb
+
+    def toxml(self):
+        scorebin = makeTree(['scorebin'])
+        scorebin.attrib = {
+            'name': strcons_fix(self.name),
+            'limit': strcons_fix(self.limit),
+        }
+        return scorebin
 
 class Part(object):
     useCustomName = False
@@ -649,6 +704,7 @@ class Part(object):
     adaptiveMarkingPenalty = 0
     customMarkingAlgorithm = ''
     extendBaseMarkingAlgorithm = True
+    adaptiveObjective = None
 
     def __init__(self,marks,prompt=''):
         self.marks = marks
@@ -659,7 +715,24 @@ class Part(object):
         self.next_parts = []
 
     def loadDATA(self, builder, data):
-        tryLoad(data,['useCustomName','customName','stepsPenalty','minimumMarks','enableMinimumMarks','showCorrectAnswer','showFeedbackIcon','variableReplacementStrategy','adaptiveMarkingPenalty','customMarkingAlgorithm','extendBaseMarkingAlgorithm'],self);
+        tryLoad(
+            data,
+            [
+                'useCustomName',
+                'customName',
+                'stepsPenalty',
+                'minimumMarks',
+                'enableMinimumMarks',
+                'showCorrectAnswer',
+                'showFeedbackIcon',
+                'variableReplacementStrategy',
+                'adaptiveMarkingPenalty',
+                'customMarkingAlgorithm',
+                'extendBaseMarkingAlgorithm',
+                'adaptiveObjective',
+            ],
+            self
+        )
 
         if haskey(data,'marks'):
             self.marks = data['marks']
@@ -703,7 +776,8 @@ class Part(object):
             'enableminimummarks': strcons_fix(self.enableMinimumMarks), 
             'minimummarks': strcons_fix(self.minimumMarks), 
             'showcorrectanswer': strcons_fix(self.showCorrectAnswer),
-            'showfeedbackicon': strcons_fix(self.showFeedbackIcon)
+            'showfeedbackicon': strcons_fix(self.showFeedbackIcon),
+            'adaptiveobjective': strcons_fix(self.adaptiveObjective) if self.adaptiveObjective is not None else '',
         }
 
         part.find('prompt').append(makeContentNode(self.prompt))
@@ -1398,6 +1472,9 @@ class ExamBuilder(object):
         part = constructors[kind]()
         part.loadDATA(self, data)
         return part
+
+    def scorebin(self, data):
+        return ScoreBin.fromDATA(self, data)
 
 if __name__ == '__main__':
     if len(sys.argv)>1:

@@ -281,6 +281,9 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.updateNextParts();
 
         this.showNextParts = ko.computed(function() {
+            if(this.part.question.partsMode!='adaptive') {
+                return false;
+            }
             if(this.nextParts().length==0) {
                 return false;
             }
@@ -456,9 +459,14 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         updateNextParts: function() {
             var p = this.part;
             this.nextParts(p.availableNextParts().map(function(np) {
+                var label = np.label;
+                if(!np.instance && np.penaltyAmount!=0) {
+                    label += ' '+R('part.next part.penalty amount',{count:np.penaltyAmount});
+                }
                 return {
-                    label: np.label,
+                    label: label,
                     made: np.instance !== null,
+                    penaltyAmount: np.penaltyAmount,
                     select: function() {
                         if(np.instance) {
                             p.question.setCurrentPart(np.instance)

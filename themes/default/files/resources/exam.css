@@ -735,16 +735,27 @@ select.multiplechoice {
 	font-weight: bold;
 }
 
+.next-parts {
+    text-align: center;
+    margin-top: 3rem;
+}
+.next-parts > .what-next {
+    font-weight: bold;
+}
 .next-parts > ul {
     list-style: none;
     display: flex;
+    flex-wrap: wrap;
     padding-left: 0;
+    justify-content: center;
 }
-.next-part-option {
-    padding: 0;
-}
-.next-parts > ul > li ~ li {
+.next-parts > ul > .next-part ~ .next-part {
     margin-left: 2em;
+}
+
+.next-part-option.made {
+    font-style: italic;
+    border-color: #333;
 }
 
 .question td, .adviceDisplay td {
