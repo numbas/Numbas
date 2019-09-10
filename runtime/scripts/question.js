@@ -159,7 +159,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * * `adaptive`: parts are only generated when required
      * @type {String}
      */
-    partsMode: 'adaptive',
+    partsMode: 'all',
+
+    /** Maximum available marks in adaptive mode.
+     * @type {Number}
+     */
+    maxMarks: 0,
 
     /** In adaptive mode, the part that the student is currently looking at.
      * @type {Numbas.parts.Part}
@@ -189,16 +194,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         q.xml = xml;
         q.originalXML = q.xml;
-        //get question's name
-        tryGetAttribute(q,q.xml,'.','name');
+
+        tryGetAttribute(q,q.xml,'.',['name','partsMode','maxMarks']);
+
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
         for(var i = 0; i<preambleNodes.length; i++) {
             var lang = preambleNodes[i].getAttribute('language');
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
         q.signals.trigger('preambleLoaded');
+
         q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
         q.signals.trigger('functionsLoaded');
+
         //make rulesets
         var rulesetNodes = q.xml.selectNodes('rulesets/set');
         q.rulesets = {};
@@ -226,6 +234,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.rulesets[name] = set;
         }
         q.signals.trigger('rulesetsLoaded');
+
+        var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
+        q.objectives = [];
+        for(var i=0; i<objectiveNodes.length; i++) {
+            var objective = {name: '', limit: 0, score: 0};
+            tryGetAttribute(objective, objectiveNodes[i], '.', ['name', 'limit']);
+            q.objectives.push(objective);
+        }
+
+        var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
+        q.penalties = [];
+        for(var i=0; i<penaltyNodes.length; i++) {
+            var penalty = {name: '', limit: 0, score: 0};
+            tryGetAttribute(penalty, penaltyNodes[i], '.', ['name', 'limit']);
+            q.penalties.push(penalty);
+        }
+
         q.variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
         tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
         q.signals.trigger('variableDefinitionsLoaded');
@@ -274,9 +299,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.addPart(p,index);
         p.assignName(index,this.parts.length-1);
         p.previousPart = previousPart;
-        if(this.display) {
-            this.display.addExtraPart(p);
-        }
         this.setCurrentPart(p);
         this.updateScore();
         return p;
@@ -393,6 +415,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
+        if(this.display) {
+            this.display.addPart(part);
+        }
         this.updateScore();
     },
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
@@ -657,13 +682,30 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     {
         return this.partDictionary[path];
     },
+
+    /** Get the adaptive mode objective with the given name
+     * @param {String} name
+     * @returns {Object}
+     */
+    getObjective: function(name) {
+        return this.objectives.find(function(o){ return o.name==name; });
+    },
+
+    /** Get the adaptive mode penalty with the given name
+     * @param {String} name
+     * @returns {Object}
+     */
+    getPenalty: function(name) {
+        return this.penalties.find(function(p){ return p.name==name; });
+    },
+
     /** Show the question's advice
      * @param {Boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      */
     getAdvice: function(dontStore)
     {
         this.adviceDisplayed = true;
-    this.display && this.display.showAdvice(true);
+        this.display && this.display.showAdvice(true);
         if(this.store && !dontStore) {
             this.store.adviceDisplayed(this);
         }
@@ -727,10 +769,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             return true;
         }
     },
-    /** Calculate the student's total score for this questoin - adds up all part scores
+    /** Calculate the student's total score for this question - adds up all part scores
      */
     calculateScore: function()
     {
+        var q = this;
         var score = 0;
         var marks = 0;
 
@@ -743,12 +786,38 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
                 break;
             case 'adaptive':
-                var part = this.currentPart;
-                while(part) {
-                    score += part.score;
-                    marks += part.marks;
-                    part = part.previousPart;
+                marks = this.maxMarks;
+                this.objectives.forEach(function(o) {
+                    o.score = 0;
+                });
+                this.penalties.forEach(function(p) {
+                    p.score = 0;
+                });
+                for(var i=0; i<this.parts.length; i++) {
+                    var part = this.parts[i];
+                    var objective = this.getObjective(part.settings.adaptiveObjective);
+                    if(objective) {
+                        objective.score += part.score;
+                    }
+
+                    part.nextParts.forEach(function(np) {
+                        if(np.instance) {
+                            var penalty = q.getPenalty(np.penalty);
+                            if(penalty) {
+                                penalty.score += np.penaltyAmount;
+                            }
+                        }
+                    });
                 }
+                this.objectives.forEach(function(o) {
+                    o.score = Math.min(o.limit,o.score);
+                    score += o.score;
+                });
+                this.penalties.forEach(function(p) {
+                    p.score = Math.min(p.limit,p.score);
+                    score -= p.score;
+                });
+                score = Math.min(this.maxMarks, Math.max(0,score));
                 break;
         }
         this.score = score;
@@ -783,7 +852,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.calculateScore();
         //update total exam score
         this.exam && this.exam.updateScore();
-    //display score - ticks and crosses etc.
+        //display score - ticks and crosses etc.
         this.display && this.display.showScore();
         //notify storage
         this.store && this.store.saveQuestion(this);

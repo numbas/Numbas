@@ -1,7 +1,7 @@
 <!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 <div class="question-nav question-bottom-nav navbar navbar-default">
-    <div class="nav navbar-nav" data-bind="with: currentQuestion">
-        <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
+    <div class="nav navbar-nav">
+        <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.partsMode=='all' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
         <p class="marks navbar-text">
             <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>

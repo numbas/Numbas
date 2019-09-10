@@ -70,7 +70,7 @@
                 <p class="what-next"><localise>part.choose next part</localise></p>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
-                        <button class="btn btn-link next-part-option" type="button" data-bind="latex: label, click: select, css: {{made: made}}"></button>
+                        <button class="btn btn-primary next-part-option" type="button" data-bind="latex: label, click: select, css: {{made: made}}"></button>
                     </li>
                 </ul>
             </div>

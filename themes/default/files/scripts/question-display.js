@@ -137,6 +137,40 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.scoreFeedback = display.showScoreFeedback(this,q.exam.settings);
+
+        /** Adaptive mode objectives
+         * @member {Array.<Object>} objectives
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.objectives = q.objectives.map(function(o) {
+            var od = {
+                objective: o,
+                name: o.name,
+                limit: o.limit,
+                score: ko.observable(o.score)
+            }
+            od.scoreDisplay = ko.computed(function() {
+                return od.score()+'/'+od.limit;
+            });
+            return od;
+        });
+        /** Adaptive mode objectives
+         * @member {Array.<Object>} objectives
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.penalties = q.penalties.map(function(p) {
+            var pd = {
+                penalty: p,
+                name: p.name,
+                limit: p.limit,
+                score: ko.observable(p.score)
+            };
+            pd.scoreDisplay = ko.computed(function() {
+                return (-pd.score())+'/'+pd.limit;
+            });
+            return pd;
+        });
+
         /** Show this question in review mode
          * @member {function} review
          * @method
@@ -190,7 +224,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         /** Add a new part to the display
          * @param {Numbas.parts.Part} p
          */
-        addExtraPart: function(p) {
+        addPart: function(p) {
             var qd = this;
             this.question.signals.on('HTMLAttached',function() {
                 var promise = display.makeHTMLFromXML(
@@ -293,6 +327,12 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 anyAnswered = anyAnswered || (q.parts[i].doesMarking && q.parts[i].answered);
             }
             this.anyAnswered(anyAnswered);
+            this.objectives.forEach(function(o) {
+                o.score(o.objective.score);
+            });
+            this.penalties.forEach(function(p) {
+                p.score(p.penalty.score);
+            });
         },
         /** Scroll to the first part submission error
          * @memberof Numbas.display.QuestionDisplay
