@@ -67,6 +67,26 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             this.display = new Numbas.display.GapFillPartDisplay(this);
         }
     },
+
+    /** The total marks available for this part, after applying adaptive marking and steps penalties
+     * @returns {Number}
+     */
+    availableMarks: function() {
+        var marks = 0;
+        for(var i=0;i<this.gaps.length;i++) {
+            marks += this.gaps[i].availableMarks();
+        }
+        if(this.adaptiveMarkingUsed) {
+            marks -= this.settings.adaptiveMarkingPenalty;
+        }
+        if(this.steps.length && this.stepsShown) {
+            marks  -= this.settings.stepsPenalty;
+        }
+        marks = Math.max(Math.min(this.marks,marks),0);
+        return marks;
+    },
+
+
     /** Add a gap to this part
      * @param {Numbas.parts.Part} gap
      * @param {Number} index - the position of the gap
