@@ -201,8 +201,78 @@
                     var p = createPartFromJSON(data);
                     var res = mark_part(p,'x(x+1)');
                     assert.notOk(res.valid,"x(x+1) not valid");
-                    var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Operation <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Operation <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"}];
+                    var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"}];
                     assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
+                });
+
+                QUnit.test('Student doesn\'t use all the variables in the correct answer', function(assert) {
+                    var data = {
+                        "type": "jme",
+                        "useCustomName": false,
+                        "customName": "",
+                        "marks": 1,
+                        "showCorrectAnswer": true,
+                        "showFeedbackIcon": true,
+                        "scripts": {},
+                        "variableReplacements": [],
+                        "variableReplacementStrategy": "originalfirst",
+                        "adaptiveMarkingPenalty": 0,
+                        "customMarkingAlgorithm": "",
+                        "extendBaseMarkingAlgorithm": true,
+                        "unitTests": [],
+                        "prompt": "<p>$\\simplify[]{x + 0*y^t}$</p>",
+                        "answer": "x +  0*y^t",
+                        "answerSimplification": "basic",
+                        "showPreview": true,
+                        "checkingType": "absdiff",
+                        "checkingAccuracy": 0.001,
+                        "failureRate": 1,
+                        "vsetRangePoints": 5,
+                        "vsetRange": [
+                            0,
+                            1
+                        ],
+                        "checkVariableNames": false,
+                        "mustmatchpattern": {
+                            "pattern": "? + ?*?^?",
+                            "partialCredit": "50",
+                            "message": "Pattern",
+                            "nameToCompare": ""
+                        },
+                        "valuegenerators": [
+                            {
+                                "name": "t",
+                                "value": ""
+                            },
+                            {
+                                "name": "x",
+                                "value": ""
+                            },
+                            {
+                                "name": "y",
+                                "value": ""
+                            }
+                        ]
+                    };
+                    var p = createPartFromJSON(data);
+                    var res = mark_part(p,'x');
+                    assert.ok(res.valid,"x is valid");
+                    var expectedFeedback = [
+                        {
+                            "op": "set_credit",
+                            "credit": 1,
+                            "reason": "correct",
+                            "message": "Your answer is numerically correct.",
+                            "note": "numericallycorrect"
+                        },
+                        {
+                            "op": "multiply_credit",
+                            "factor": 0.5,
+                            "message": "Pattern",
+                            "note": "failmatchpattern"
+                        }
+                    ];
+                    assert.deepEqual(res.states, expectedFeedback,"x is marked correct");
                 });
 
                 QUnit.test('Variables defined by the question aren\'t used in evaluating student\'s expression', function(assert) {
