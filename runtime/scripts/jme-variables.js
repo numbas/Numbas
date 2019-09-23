@@ -435,6 +435,22 @@ DOMcontentsubber.prototype = {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
+        } else if($.nodeName(element,'img')) {
+            if(element.getAttribute('src').match(/.svg$/i)) {
+                element.parentElement
+                var object = element.ownerDocument.createElement('object');
+                for(var i=0;i<element.attributes.length;i++) {
+                    var attr = element.attributes[i];
+                    if(attr.name!='src') {
+                        object.setAttribute(attr.name,attr.value);
+                    }
+                }
+                object.setAttribute('type','image/svg+xml');
+                object.setAttribute('data',element.getAttribute('src'));
+                element.parentElement.replaceChild(object,element);
+                subber.sub_element(object);
+                return;
+            }
         } else if($.nodeName(element,'object')) {
             /** Substitute content into the object's root element
              */
