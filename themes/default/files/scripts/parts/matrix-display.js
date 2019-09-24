@@ -46,18 +46,6 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                 p.storeAnswer(m);
             }
         },this);
-        /** Show a LaTeX rendering of the answer?
-         * @member {boolean} showPreview
-         * @memberof Numbas.display.MatrixEntryPartDisplay
-         */
-        this.showPreview = false;
-        /** TeX version of student's answer
-         * @member {observable|TeX} studentAnswerLaTeX
-         * @memberof Numbas.display.MatrixEntryPartDisplay
-         */
-        this.studentAnswerLaTeX = Knockout.computed(function() {
-            return 'student answer latex';
-        },this);
     }
     display.MatrixEntryPartDisplay.prototype =
     {
