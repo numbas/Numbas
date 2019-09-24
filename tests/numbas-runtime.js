@@ -23624,15 +23624,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             var vm = this;
             this.allowResize = params.allowResize ? params.allowResize : Knockout.observable(false);
+            this.numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
             if(typeof params.rows=='function') {
-                this.numRows = params.rows;
-            } else {
-                this.numRows = Knockout.observable(params.rows || 2);
+                params.rows.subscribe(function(v) { vm.numRows(v); });
             }
+            this.numColumns = Knockout.observable(Knockout.unwrap(params.columns) || 2);
             if(typeof params.columns=='function') {
-                this.numColumns = params.columns;
-            } else {
-                this.numColumns = Knockout.observable(params.columns || 2);
+                params.columns.subscribe(function(v) { vm.numColumns(v); });
             }
             this.value = Knockout.observableArray([]);
             var v = params.value();
@@ -26084,10 +26082,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var correctInput = settings.correctAnswer.map(function(row) {
             return row.map(function(c) {
                 if(settings.allowFractions) {
-                    var f = math.rationalApproximation(c);
-                    if(f[1]!=1) {
-                        return f[0]+'/'+f[1];
-                    }
+                    var f = math.Fraction.fromFloat(c);
+                    return f.toString();
                 }
                 return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });

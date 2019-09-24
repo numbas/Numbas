@@ -22,10 +22,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          */
         this.correctAnswer = Knockout.observable();
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-        this.correctAnswerLaTeX = Knockout.computed(function() {
-            var correctAnswer = this.correctAnswer();
-            var m = new Numbas.jme.types.TMatrix(correctAnswer);
-            return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
+        this.correctAnswerRows = ko.computed(function() {
+            return this.correctAnswer().rows;
+        },this);
+        this.correctAnswerColumns = ko.computed(function() {
+            return this.correctAnswer().columns;
         },this);
         this.studentAnswerRows = Knockout.observable(p.settings.numRows);
         this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);

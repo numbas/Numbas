@@ -169,10 +169,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var correctInput = settings.correctAnswer.map(function(row) {
             return row.map(function(c) {
                 if(settings.allowFractions) {
-                    var f = math.rationalApproximation(c);
-                    if(f[1]!=1) {
-                        return f[0]+'/'+f[1];
-                    }
+                    var f = math.Fraction.fromFloat(c);
+                    return f.toString();
                 }
                 return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });

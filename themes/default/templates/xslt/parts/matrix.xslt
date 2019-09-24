@@ -8,7 +8,7 @@
 <xsl:template match="part[@type='matrix']" mode="correctanswer">
     <span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
         <localise>part.correct answer</localise>
-        <span data-bind="maths: correctAnswerLaTeX"></span>
+        <span><matrix-input params="rows: correctAnswerRows, columns: correctAnswerColumns, value: correctAnswer, allowResize: false, disable: true"></matrix-input></span>
     </span>
 </xsl:template>
 {% endraw %}
