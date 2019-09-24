@@ -1,5 +1,10 @@
 <h1 class="text-center" data-bind="html: exam.settings.name"></h1>
-<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage"></div>
-<div class="info-buttons col-sm-6 col-sm-offset-3">
-    <button class="btn btn-success" id="startBtn" data-bind="click: Numbas.controls.beginExam" data-localise="frontpage.start"></button>
-</div>
+<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+<form data-bind="submit: beginExam" class="info-buttons col-sm-6 col-sm-offset-3">
+    <div class="password" data-bind="visible: needsPassword, css: {'has-error': enteredPassword().length && !canBegin(), 'has-success': canBegin()}">
+        <label for="begin-exam-password" data-localise="exam.enter password"></label>
+        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: enteredPassword">
+        <span class="password-feedback feedback-icon" data-bind="css: passwordFeedback().iconClass, attr: {title: passwordFeedback().title}"></span>
+    </div>
+    <button class="btn" id="startBtn" type="submit" data-bind="disable: !canBegin(), css: passwordFeedback().buttonClass" data-localise="frontpage.start"></button>
+</form>
