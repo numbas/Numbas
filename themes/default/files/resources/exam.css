@@ -703,6 +703,7 @@ select.multiplechoice {
 
 .part .feedbackMessage .feedback-icon {
     width: 1em;
+    flex-shrink: 0;
     margin-right: 0.5em;
 }
 
