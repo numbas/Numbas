@@ -10699,11 +10699,11 @@ newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
 newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
-    return math.rationalApproximation(n);
-},{unwrapValues:true});
+    return math.rationalApproximation(n).map(function(x) { return new TInt(x); });
+});
 newBuiltin('rational_approximation',[TNum,TNum],TList,function(n,accuracy) {
-    return math.rationalApproximation(n,accuracy);
-},{unwrapValues:true});
+    return math.rationalApproximation(n,accuracy).map(function(x) { return new TInt(x); });
+});
 newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
@@ -14275,6 +14275,22 @@ DOMcontentsubber.prototype = {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
+        } else if($.nodeName(element,'img')) {
+            if(element.getAttribute('src').match(/.svg$/i)) {
+                element.parentElement
+                var object = element.ownerDocument.createElement('object');
+                for(var i=0;i<element.attributes.length;i++) {
+                    var attr = element.attributes[i];
+                    if(attr.name!='src') {
+                        object.setAttribute(attr.name,attr.value);
+                    }
+                }
+                object.setAttribute('type','image/svg+xml');
+                object.setAttribute('data',element.getAttribute('src'));
+                element.parentElement.replaceChild(object,element);
+                subber.sub_element(object);
+                return;
+            }
         } else if($.nodeName(element,'object')) {
             /** Substitute content into the object's root element
              */
