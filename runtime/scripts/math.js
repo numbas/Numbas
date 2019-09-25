@@ -1738,8 +1738,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Number}
      */
     prod: function(list)  {
-        let product = 1;
-        for (let i = 0; i < list.length; i++){
+        var product = 1;
+        for (var i = 0; i < list.length; i++){
             product = math.mul(product, list[i]);
         }
         return product;
