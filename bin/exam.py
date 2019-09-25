@@ -143,6 +143,7 @@ class Exam(object):
                 'allowregen': False,                #allow student to re-randomise a question?
                 'reverse': True,
                 'browse': True,
+                'allowsteps': True,
                 'showfrontpage': True,
                 'showresultspage': 'oncompletion',
                 'onleave': Event('onleave','none','You have not finished the current question'),
@@ -174,7 +175,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
+            tryLoad(nav,['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -247,6 +248,7 @@ class Exam(object):
             'allowregen': strcons_fix(self.navigation['allowregen']),
             'reverse': strcons_fix(self.navigation['reverse']), 
             'browse': strcons_fix(self.navigation['browse']),
+            'allowsteps': strcons_fix(self.navigation['allowsteps']),
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
             'showresultspage': strcons_fix(self.navigation['showresultspage']),
             'preventleave': strcons_fix(self.navigation['preventleave']),

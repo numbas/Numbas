@@ -181,10 +181,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
-        for(var i=0; i<stepNodes.length; i++)
-        {
-            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
-            this.addStep(step,i);
+        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
+            for(var i=0; i<stepNodes.length; i++) {
+                var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
+                this.addStep(step,i);
+            }
+        } else {
+            for(var i=0; i<stepNodes.length; i++) {
+                stepNodes[i].parentElement.removeChild(stepNodes[i]);
+            }
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');

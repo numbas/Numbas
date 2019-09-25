@@ -14539,10 +14539,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
-        for(var i=0; i<stepNodes.length; i++)
-        {
-            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
-            this.addStep(step,i);
+        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
+            for(var i=0; i<stepNodes.length; i++) {
+                var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
+                this.addStep(step,i);
+            }
+        } else {
+            for(var i=0; i<stepNodes.length; i++) {
+                stepNodes[i].parentElement.removeChild(stepNodes[i]);
+            }
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
@@ -16337,7 +16342,7 @@ function Exam(store)
     //load settings from XML
     tryGetAttribute(settings,xml,'.',['name','percentPass']);
     tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-    tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','showFrontPage','showResultsPage','preventLeave','startPassword']);
+    tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
     //get navigation events and actions
     settings.navigationEvents = {};
     var navigationEventNodes = xml.selectNodes('settings/navigation/event');
@@ -16464,6 +16469,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {Boolean} allowRegen -can student re-randomise a question?
      * @property {Boolean} navigateReverse - can student navigate to previous question?
      * @property {Boolean} navigateBrowse - can student jump to any question they like?
+     * @property {Boolean} allowSteps - are steps enabled?
      * @property {Boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {Boolean} showResultsPage - show the results page after finishing the exam?
      * @property {Array.<Object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
@@ -16488,6 +16494,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         allowRegen: false,
         navigateReverse: false,
         navigateBrowse: false,
+        allowSteps: true,
         showFrontPage: true,
         showResultsPage: 'oncompletion',
         navigationEvents: {},
