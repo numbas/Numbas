@@ -60,6 +60,21 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 || (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())    // or you can always move to the next question
             )
         },this);
+
+        /** Display objects for all parts in this question
+         * @member {observable.<Array.<Numbas.display.PartDisplay>>} parts
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.parts = ko.observableArray(this.question.parts.map(function(p){ return p.display; }));
+
+        /** The first part in the question
+         * @member {observable.<Numbas.display.PartDisplay>} firstPart
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.firstPart = ko.computed(function() {
+            return this.parts()[0];
+        },this);
+
         /** Number of parts in this question
          * @member {observable|Number} numParts
          * @memberof Numbas.display.QuestionDisplay
@@ -239,6 +254,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         addPart: function(p) {
             var qd = this;
             this.question.signals.on('HTMLAttached',function() {
+                qd.parts(qd.question.parts.map(function(p){ return p.display; }));
                 var promise = display.makeHTMLFromXML(
                     p.xml, 
                     Numbas.xml.templates.part, 

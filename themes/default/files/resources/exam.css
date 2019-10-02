@@ -759,6 +759,37 @@ select.multiplechoice {
     border-color: #333;
 }
 
+.parts-tree {
+    font-size: 0.8em;
+    overflow-x: auto;
+    padding: 1rem;
+    display: flex;
+    min-height: 0;
+}
+.parts-tree > .part-progress {
+    margin-right: 0.5em;
+}
+.parts-tree .part {
+    display: flex;
+    margin: 0;
+}
+.parts-tree ul {
+    list-style: '→';
+    padding-left: 1.2em;
+    margin: 0;
+}
+.parts-tree a {
+    flex-shrink: 0;
+    color: #333;
+}
+.parts-tree .part .part a {
+    margin-left: 0.2em;
+}
+.parts-tree .current {
+    font-weight: bold;
+    font-style: italic;
+}
+
 #explore-breakdown {
     margin: 1rem;
 }

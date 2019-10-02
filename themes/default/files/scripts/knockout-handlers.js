@@ -197,4 +197,58 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             }
         }
     }
+
+
+    Knockout.bindingHandlers.treeView = {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            var trees = (bindingContext.$trees || []).slice();
+            trees.push({
+                element: element,
+                context: bindingContext
+            })
+            var innerBindingContext = bindingContext.extend(valueAccessor).extend({
+                '$trees': trees
+            });
+          
+            var options = {
+              templateEngine: Knockout.nativeTemplateEngine.instance
+            };
+          
+            return Knockout.bindingHandlers.template.init(element, function() { return options }, allBindings, viewModel, innerBindingContext);
+
+        },
+        'update': function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            console.log('update treeView');
+            var trees = (bindingContext.$trees || []).slice();
+            var innerBindingContext = bindingContext.createChildContext(valueAccessor).extend({
+                '$trees': trees,
+            });
+            trees.push({
+                element: element,
+                context: bindingContext.extend({'$trees':trees})
+            })
+            var options = {
+                templateEngine: Knockout.nativeTemplateEngine.instance
+            }
+            return Knockout.bindingHandlers.template.update(element, function() { return options }, allBindings, viewModel, innerBindingContext)
+        }
+    };
+
+    Knockout.bindingHandlers.treeNode = {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+          return {controlsDescendantBindings: true};
+        },
+      
+        update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            var trees = bindingContext.$trees;
+            var tree = trees[trees.length - 1];
+            var innerBindingContext = tree.context.createChildContext(valueAccessor);
+            var options = {
+              name: tree.element,
+                templateEngine: Knockout.nativeTemplateEngine.instance
+            }
+            return Knockout.bindingHandlers.template.update(element, function() { return options }, allBindings, viewModel, innerBindingContext)
+        }
+    }
+
 });

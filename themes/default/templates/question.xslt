@@ -34,9 +34,19 @@ Copyright 2011-16 Newcastle University
         </xsl:copy>
     </xsl:template>
     <xsl:template match="parts">
-        <div data-bind="visible: previousPart() &amp;&amp; !revealed()">
-            <button type="button" class="btn btn-link previous-part" data-bind="click: goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
-        </div>
+        <nav class="parts-tree navbar navbar-default">
+            <span class="part-progress"><localise>question.progress</localise></span>
+            <div class="part" data-bind="treeView: firstPart">
+                <div>
+                    <a class="name" href="#" data-bind="latex: name, click: $parent.currentPart, css: partTreeCSS"></a>
+                </div>
+                <ul data-bind="foreach: madeNextParts">
+                    <li>
+                        <div class="part" data-bind="treeNode: $data"></div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
         <div class="parts" data-bind="stopbinding: true">
             <xsl:apply-templates />
         </div>
