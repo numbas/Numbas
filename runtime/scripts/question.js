@@ -156,17 +156,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** How should parts be shown? 
      *
      * * `all`: all available parts are generated straight away
-     * * `adaptive`: parts are only generated when required
+     * * `explore`: parts are only generated when required
      * @type {String}
      */
     partsMode: 'all',
 
-    /** Maximum available marks in adaptive mode.
+    /** Maximum available marks in explore mode.
      * @type {Number}
      */
     maxMarks: 0,
 
-    /** In adaptive mode, the part that the student is currently looking at.
+    /** In explore mode, the part that the student is currently looking at.
      * @type {Numbas.parts.Part}
      */
     currentPart: null,
@@ -270,7 +270,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         q.addPart(part,j);
                     }
                     break;
-                case 'adaptive':
+                case 'explore':
                     var partNode = q.xml.selectSingleNode('parts/part');
                     q.addExtraPartFromXML(0);
                     break;
@@ -684,7 +684,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return this.partDictionary[path];
     },
 
-    /** Get the adaptive mode objective with the given name
+    /** Get the explore mode objective with the given name
      * @param {String} name
      * @returns {Object}
      */
@@ -692,7 +692,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return this.objectives.find(function(o){ return o.name==name; });
     },
 
-    /** Get the adaptive mode penalty with the given name
+    /** Get the explore mode penalty with the given name
      * @param {String} name
      * @returns {Object}
      */
@@ -786,7 +786,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     marks += part.marks;
                 }
                 break;
-            case 'adaptive':
+            case 'explore':
                 marks = this.maxMarks;
                 this.objectives.forEach(function(o) {
                     o.score = 0;
@@ -796,7 +796,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
                 for(var i=0; i<this.parts.length; i++) {
                     var part = this.parts[i];
-                    var objective = this.getObjective(part.settings.adaptiveObjective);
+                    var objective = this.getObjective(part.settings.exploreObjective);
                     if(objective) {
                         objective.score += part.score;
                     }

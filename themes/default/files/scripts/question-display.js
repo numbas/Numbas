@@ -65,7 +65,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         this.numParts = Knockout.observable(q.parts.length);
 
-        /** The currently visible part, in adaptive mode
+        /** The currently visible part, in explore mode
          * @member {observable|Numbas.display.PartDisplay} currentPart
          * @memberof Numbas.display.QuestionDisplay
          */
