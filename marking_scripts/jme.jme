@@ -157,13 +157,8 @@ numericallyCorrect (Is the student's answer numerically correct?):
     )
 
 sameVars (Does the student use the same variables as the correct answer?):
-    if(studentVariables=correctVariables,
-        true
-    ,
-        incorrect();
-        end();
-        false
-    )
+    // Removed, but still defined so that older questions with custom marking algorithms don't break
+    nothing
 
 failMatchPattern (Does the student's answer not match the required pattern?):
     assert(settings["mustMatchPattern"]="",

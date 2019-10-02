@@ -383,7 +383,7 @@ class NumbasCompiler(object):
         javascripts.remove(numbas_loader_path)
 
         javascripts.insert(0,numbas_loader_path)
-        javascripts = '\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
+        javascripts = ';\n'.join(open(src,encoding='utf-8').read() if isinstance(src,basestring) else src.read() for src in javascripts)
         self.files[os.path.join('.','scripts.js')] = io.StringIO(javascripts)
 
     def add_source(self):

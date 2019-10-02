@@ -14,6 +14,13 @@ body, .btn {
 .warning-icon, .questionSelector .dirty-message .warning-icon {
     font-size: 1.5rem;
 }
+.questionSelector .info {
+    flex-wrap: wrap;
+}
+.questionSelector .score {
+    font-size: 0.8em;
+    flex-basis: 100%;
+}
 #questionDisplay .question {
     padding-top: 1em;
 }

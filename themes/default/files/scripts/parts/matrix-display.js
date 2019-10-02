@@ -22,10 +22,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          */
         this.correctAnswer = Knockout.observable();
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-        this.correctAnswerLaTeX = Knockout.computed(function() {
-            var correctAnswer = this.correctAnswer();
-            var m = new Numbas.jme.types.TMatrix(correctAnswer);
-            return Numbas.jme.display.texify({tok:m},{fractionnumbers: p.settings.correctAnswerFractions});
+        this.correctAnswerRows = ko.computed(function() {
+            return this.correctAnswer().rows;
+        },this);
+        this.correctAnswerColumns = ko.computed(function() {
+            return this.correctAnswer().columns;
         },this);
         this.studentAnswerRows = Knockout.observable(p.settings.numRows);
         this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
@@ -44,18 +45,6 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                 m.columns = this.studentAnswerColumns();
                 p.storeAnswer(m);
             }
-        },this);
-        /** Show a LaTeX rendering of the answer?
-         * @member {boolean} showPreview
-         * @memberof Numbas.display.MatrixEntryPartDisplay
-         */
-        this.showPreview = false;
-        /** TeX version of student's answer
-         * @member {observable|TeX} studentAnswerLaTeX
-         * @memberof Numbas.display.MatrixEntryPartDisplay
-         */
-        this.studentAnswerLaTeX = Knockout.computed(function() {
-            return 'student answer latex';
         },this);
     }
     display.MatrixEntryPartDisplay.prototype =

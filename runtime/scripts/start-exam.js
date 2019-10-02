@@ -40,6 +40,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      */
     var init = Numbas.init = function() {
         $(document).ready(function() {
+            for(var x in Numbas.extensions) {
+                Numbas.activateExtension(x);
+            }
             var seed = Math.seedrandom(new Date().getTime());
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files

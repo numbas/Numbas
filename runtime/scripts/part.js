@@ -188,14 +188,20 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','adaptiveObjective'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
-        for(var i=0; i<stepNodes.length; i++)
-        {
-            var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
-            this.addStep(step,i);
+        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
+            for(var i=0; i<stepNodes.length; i++) {
+                var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
+                this.addStep(step,i);
+            }
+        } else {
+            for(var i=0; i<stepNodes.length; i++) {
+                stepNodes[i].parentElement.removeChild(stepNodes[i]);
+            }
         }
         // set variable replacements
+        var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
+        tryGetAttribute(this.settings,this.xml,adaptiveMarkingNode,['penalty','strategy'],['adaptiveMarkingPenalty','variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
-        tryGetAttribute(this.settings,this.xml,variableReplacementsNode,['strategy'],['variableReplacementStrategy'])
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
         this.settings.hasVariableReplacements = replacementNodes.length>0;
         for(var i=0;i<replacementNodes.length;i++) {
@@ -256,7 +262,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['marks','useCustomName','customName'],this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy'],this.settings);
+        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -512,6 +518,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
      * @property {String} adaptiveObjective - objective that this part's score counts towards
+     * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
      */
     settings:
     {
@@ -522,7 +529,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         showFeedbackIcon: true,
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
-        adaptiveObjective: ''
+        adaptiveObjective: '',
+        adaptiveMarkingPenalty: 0
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -642,24 +650,39 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     removeWarnings: function() {
         this.setWarnings([]);
     },
+
+    /** The total marks available for this part, after applying adaptive marking and steps penalties
+     * @returns {Number}
+     */
+    availableMarks: function() {
+        var marks = this.marks;
+        if(this.adaptiveMarkingUsed) {
+            marks -= this.settings.adaptiveMarkingPenalty;
+        }
+        if(this.steps.length && this.stepsShown) {
+            marks  -= this.settings.stepsPenalty;
+        }
+        marks = Math.max(Math.min(this.marks,marks),0);
+        return marks;
+    },
+
     /** Calculate the student's score based on their submitted answers
      *
      * Calls the parent part's `calculateScore` method at the end.
      */
     calculateScore: function()
     {
-        if(this.steps.length && this.stepsShown)
-        {
-            var oScore = this.score = (this.marks - this.settings.stepsPenalty) * this.credit;     //score for main keypart
+        var marks = this.availableMarks();
+        if(this.steps.length && this.stepsShown) {
+            var oScore = this.score = marks * this.credit;     //score for main keypart
             var stepsScore = 0, stepsMarks=0;
             for(var i=0; i<this.steps.length; i++)
             {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;
             }
-            var stepsFraction = Math.max(Math.min(1-this.credit,1),0);    //any credit not earned in main part can be earned back in steps
             this.score += stepsScore;                        //add score from steps to total score
-            this.score = Math.min(this.score,this.marks - this.settings.stepsPenalty)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
+            this.score = Math.min(this.score,marks)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             this.applyScoreLimits();
             if(stepsMarks!=0 && stepsScore!=0)
             {
@@ -676,7 +699,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         else
         {
-            this.score = this.credit * this.marks;
+            this.score = this.credit * marks;
             this.applyScoreLimits();
         }
         if(this.revealed) {
@@ -690,16 +713,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Make sure the awarded score is between the minimum and maximum available.
      */
     applyScoreLimits: function() {
+        var marks = this.availableMarks();
         if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
             this.score = this.settings.minimumMarks;
-            this.creditFraction = this.marks!=0 ? math.Fraction.fromFloat(this.settings.minimumMarks,this.marks) : 0;
+            this.creditFraction = marks!=0 ? math.Fraction.fromFloat(this.settings.minimumMarks,marks) : 0;
             this.markingComment(R('part.marking.minimum score applied',{score:this.settings.minimumMarks}));
         }
-        if(this.score>this.marks) {
-            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:this.marks})));
-            this.score = this.marks;
+        if(this.score>marks) {
+            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied',{score:marks})));
+            this.score = marks;
             this.creditFraction = math.Fraction.one;
-            this.markingComment(R('part.marking.maximum score applied',{score:this.marks}));
+            this.markingComment(R('part.marking.maximum score applied',{score:marks}));
         }
     },
 
@@ -750,14 +774,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.setDirty(true);
         }
-        if(this.stepsShown)
-        {
-            var stepsMax = this.marks - this.settings.stepsPenalty;
-            this.markingComment(
-                this.settings.stepsPenalty>0
-                    ? R('part.marking.revealed steps with penalty',{count:stepsMax})
-                    : R('part.marking.revealed steps no penalty'));
-        }
         this.setStudentAnswer();
         if(this.doesMarking) {
             this.removeWarnings();
@@ -770,6 +786,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 };
                 var result;
                 var try_replacement;
+                var adaptiveMarkingUsed = false;
                 try{
                     if(this.settings.variableReplacementStrategy=='originalfirst') {
                         var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
@@ -783,7 +800,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                                 result = result_replacement;
                                 result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
-                                result.markingFeedback.splice(0,0,{op: 'comment', message: R('part.marking.used variable replacements')});
+                                adaptiveMarkingUsed = true;
                             }
                         } catch(e) {
                             if(e.originalMessage=='part.marking.variable replacement part not answered') {
@@ -805,6 +822,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                         this.markingFeedback = result.markingFeedback;
                         this.finalised_result = result.finalised_result;
                         this.marking_values = result.values;
+                        this.adaptiveMarkingUsed = adaptiveMarkingUsed;
                         this.credit = result.credit;
                         this.answered = result.answered;
                     }
@@ -823,6 +841,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     this.steps[i].submit();
                 }
             }
+        }
+        var availableMarks = this.availableMarks();
+        if(availableMarks < this.marks) {
+            this.markingFeedback.splice(0,0,{op: 'feedback', message: R('part.marking.maximum scaled down',{count: availableMarks})});
+        }
+        if(this.stepsShown) {
+            this.markingFeedback.splice(0,0,{op: 'feedback', message: R('part.marking.revealed steps')});
+        }
+        if(this.adaptiveMarkingUsed && this.settings.adaptiveMarkingPenalty>0) {
+            this.markingFeedback.splice(0,0,{op: 'feedback', message: R('part.marking.used variable replacements')});
         }
         this.calculateScore();
         this.question && this.question.updateScore();

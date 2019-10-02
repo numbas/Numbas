@@ -217,19 +217,36 @@ Numbas.runImmediately = function(deps,fn) {
 }
 
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
+ * The extension is not run immediately - call {@link Numbas.activateExtension} to run the extension.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
  * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
+var extension_callbacks = {};
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
     Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
-        callback(extension);
+        extension_callbacks[name] = {
+            callback: callback,
+            extension: extension,
+            activated: false
+        }
     });
 }
+
+/** Run the extension with the given name. The extension must have already been registered with {@link Numbas.addExtension}
+ * @param {String} name
+ */
+Numbas.activateExtension = function(name) {
+    var cb = extension_callbacks[name];
+    if(!cb.activated) {
+        cb.callback(cb.extension);
+    }
+}
+
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {

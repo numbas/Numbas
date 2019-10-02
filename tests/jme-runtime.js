@@ -219,19 +219,36 @@ Numbas.runImmediately = function(deps,fn) {
 }
 
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
+ * The extension is not run immediately - call {@link Numbas.activateExtension} to run the extension.
  * @param {String} name - unique name of the extension
  * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
  * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
+var extension_callbacks = {};
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
     Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
-        callback(extension);
+        extension_callbacks[name] = {
+            callback: callback,
+            extension: extension,
+            activated: false
+        }
     });
 }
+
+/** Run the extension with the given name. The extension must have already been registered with {@link Numbas.addExtension}
+ * @param {String} name
+ */
+Numbas.activateExtension = function(name) {
+    var cb = extension_callbacks[name];
+    if(!cb.activated) {
+        cb.callback(cb.extension);
+    }
+}
+
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
@@ -3432,8 +3449,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Number}
      */
     prod: function(list)  {
-        let product = 1;
-        for (let i = 0; i < list.length; i++){
+        var product = 1;
+        for (var i = 0; i < list.length; i++){
             product = math.mul(product, list[i]);
         }
         return product;
@@ -15648,11 +15665,11 @@ newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
 newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
-    return math.rationalApproximation(n);
-},{unwrapValues:true});
+    return math.rationalApproximation(n).map(function(x) { return new TInt(x); });
+});
 newBuiltin('rational_approximation',[TNum,TNum],TList,function(n,accuracy) {
-    return math.rationalApproximation(n,accuracy);
-},{unwrapValues:true});
+    return math.rationalApproximation(n,accuracy).map(function(x) { return new TInt(x); });
+});
 newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
@@ -19260,6 +19277,22 @@ DOMcontentsubber.prototype = {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
+        } else if($.nodeName(element,'img')) {
+            if(element.getAttribute('src').match(/.svg$/i)) {
+                element.parentElement
+                var object = element.ownerDocument.createElement('object');
+                for(var i=0;i<element.attributes.length;i++) {
+                    var attr = element.attributes[i];
+                    if(attr.name!='src') {
+                        object.setAttribute(attr.name,attr.value);
+                    }
+                }
+                object.setAttribute('type','image/svg+xml');
+                object.setAttribute('data',element.getAttribute('src'));
+                element.parentElement.replaceChild(object,element);
+                subber.sub_element(object);
+                return;
+            }
         } else if($.nodeName(element,'object')) {
             /** Substitute content into the object's root element
              */

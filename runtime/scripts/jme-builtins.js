@@ -459,11 +459,11 @@ newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
 newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation',[TNum],TList,function(n) {
-    return math.rationalApproximation(n);
-},{unwrapValues:true});
+    return math.rationalApproximation(n).map(function(x) { return new TInt(x); });
+});
 newBuiltin('rational_approximation',[TNum,TNum],TList,function(n,accuracy) {
-    return math.rationalApproximation(n,accuracy);
-},{unwrapValues:true});
+    return math.rationalApproximation(n,accuracy).map(function(x) { return new TInt(x); });
+});
 newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
