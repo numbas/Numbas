@@ -259,6 +259,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.nextParts = ko.observableArray([]);
         this.updateNextParts();
 
+        /** Should the list of next parts be shown?
+         * @member {observable.<Boolean>} showNextParts
+         * @memberof Numbas.display.PartDisplay
+         */
         this.showNextParts = ko.computed(function() {
             if(this.part.question.partsMode!='explore') {
                 return false;
@@ -270,6 +274,21 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 return false;
             }
             return this.answered() || !this.doesMarking();
+        },this);
+
+        this.partTreeCSS = ko.computed(function() {
+            return {
+                current: this==this.question.display.currentPart()
+            };
+        },this);
+
+        /** Next parts that have been made
+         * @member {observableArray.<Numbas.display.PartDisplay>} madeNextParts
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.madeNextParts = ko.computed(function() {
+            var parts = this.nextParts().filter(function(np){ return np.made; }).map(function(np) { return np.instance; });
+            return parts.sort(function(a,b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});
         },this);
 
         /** Control functions
@@ -481,6 +500,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 return {
                     label: label,
                     made: np.instance !== null,
+                    instance: np.instance !== null ? np.instance.display : null,
                     penaltyAmount: np.penaltyAmount,
                     select: function() {
                         if(np.instance) {
