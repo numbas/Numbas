@@ -170,6 +170,7 @@
     "part.marking.not submitted": "No answer submitted.",
     "part.marking.did not answer": "You did not answer this question.",
     "part.marking.total score": "You scored <strong>{{count,niceNumber}}</strong> $t(mark) for this part.",
+    "part.marking.counts towards objective": "This part counts towards the objective <strong>{{objective}}</strong>.",
     "part.marking.minimum score applied": "The minimum score for this part is <strong>{{score,niceNumber}}</strong>.",
     "part.marking.maximum score applied": "The maximum score for this part is <strong>{{score,niceNumber}}</strong>.",
     "part.marking.nothing entered": "You did not enter an answer.",

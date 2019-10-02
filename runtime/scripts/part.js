@@ -774,6 +774,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
+        if(this.question.partsMode=='explore' && this.settings.exploreObjective) {
+            this.markingComment(
+                R('part.marking.counts towards objective',{objective: this.settings.exploreObjective})
+            );
+        }
         this.finalised_result = {valid: false, credit: 0, states: []};
         this.submitting = true;
         if(this.parentPart && !this.parentPart.submitting) {
