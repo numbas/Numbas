@@ -727,8 +727,9 @@ select.multiplechoice {
 }
 
 .next-parts {
-    text-align: center;
-    margin-top: 3rem;
+    text-align: left;
+    margin-top: 5rem;
+    margin-bottom: 5rem;
 }
 .next-parts > .what-next {
     font-weight: bold;
@@ -738,7 +739,7 @@ select.multiplechoice {
     display: flex;
     flex-wrap: wrap;
     padding-left: 0;
-    justify-content: center;
+    justify-content: flex-start;
 }
 .next-parts > ul > .next-part ~ .next-part {
     margin-left: 2em;
@@ -747,6 +748,22 @@ select.multiplechoice {
 .next-part-option.made {
     font-style: italic;
     border-color: #333;
+}
+
+#explore-breakdown {
+    margin: 1rem;
+}
+
+#explore-breakdown th, #explore-breakdown td {
+    background: none;
+    line-height: 1.5em;
+}
+
+#explore-breakdown .total th, #explore-breakdown .total td {
+    border-top: 2px solid white;
+}
+#explore-breakdown .name {
+    text-align: left;
 }
 
 .question td, .adviceDisplay td {

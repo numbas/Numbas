@@ -2,10 +2,47 @@
 <div class="question-nav question-bottom-nav navbar navbar-default">
     <div class="nav navbar-nav">
         <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.partsMode=='all' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
-        <p class="marks navbar-text">
+        <p class="marks navbar-text" data-bind="visible: !showScoreBreakdown()">
             <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
         </p>
+
+        <div id="explore-breakdown" data-bind="visible: showScoreBreakdown()">
+            <table>
+                <tbody>
+                    <!-- ko foreach: objectives -->
+                    <tr>
+                        <td class="name" data-bind="text: name"></td>
+                        <td class="message"><span data-bind="text: feedback.message, pulse: feedback.update"></span></td>
+                        <td>
+                            <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr, pulse: feedback.update"></span>
+                        </td>
+                    </tr>
+                    <!-- /ko -->
+
+                    <!-- ko if: penalties.length -->
+                    <!-- ko foreach: penalties -->
+                    <tr>
+                        <td class="name" data-bind="text: name"></td>
+                        <td class="message"><span data-bind="text: feedback.message, pulse: feedback.update"></span></td>
+                        <td></td>
+                    </tr>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                    <tr class="total">
+                        <th data-localise="control.total"></th>
+                        <td>
+                            <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
+                        </td>
+                        <td>
+                            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
         <button class="btn btn-primary navbar-btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.mode()=='normal' && $root.exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
         <button class="btn btn-primary navbar-btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
     </div>
