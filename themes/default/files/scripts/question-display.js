@@ -8,6 +8,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
      */
     display.QuestionDisplay = function(q)
     {
+        var qd = this;
         this.question = q;
         var exam = q.exam;
         /** Has the advice been shown?
@@ -148,12 +149,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var od = {
                 objective: o,
                 name: o.name,
-                limit: o.limit,
-                score: ko.observable(o.score)
+                marks: ko.observable(o.limit),
+                score: ko.observable(o.score),
+                doesMarking: ko.observable(true),
+                revealed: qd.revealed,
+                answered: ko.observable(false)
             }
-            od.scoreDisplay = ko.computed(function() {
-                return od.score()+'/'+od.limit;
-            });
+            od.feedback = display.showScoreFeedback(od,q.exam.settings);
             return od;
         });
         /** Adaptive mode objectives
@@ -172,6 +174,14 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             });
             return pd;
         });
+
+        /** Should the score breakdown table be shown?
+         * @member {Observable.<Boolean>} showScoreBreakdown
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.showScoreBreakdown = ko.computed(function() {
+            return q.partsMode=='explore' && q.objectives.length>0;
+        },this);
 
         /** Show this question in review mode
          * @member {function} review
@@ -331,6 +341,8 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             this.anyAnswered(anyAnswered);
             this.objectives.forEach(function(o) {
                 o.score(o.objective.score);
+                o.answered(o.objective.answered);
+                o.feedback.update(true);
             });
             this.penalties.forEach(function(p) {
                 p.score(p.penalty.score);
