@@ -704,7 +704,7 @@ class Part(object):
     adaptiveMarkingPenalty = 0
     customMarkingAlgorithm = ''
     extendBaseMarkingAlgorithm = True
-    adaptiveObjective = None
+    exploreObjective = None
 
     def __init__(self,marks,prompt=''):
         self.marks = marks
@@ -729,7 +729,7 @@ class Part(object):
                 'adaptiveMarkingPenalty',
                 'customMarkingAlgorithm',
                 'extendBaseMarkingAlgorithm',
-                'adaptiveObjective',
+                'exploreObjective',
             ],
             self
         )
@@ -777,7 +777,7 @@ class Part(object):
             'minimummarks': strcons_fix(self.minimumMarks), 
             'showcorrectanswer': strcons_fix(self.showCorrectAnswer),
             'showfeedbackicon': strcons_fix(self.showFeedbackIcon),
-            'adaptiveobjective': strcons_fix(self.adaptiveObjective) if self.adaptiveObjective is not None else '',
+            'exploreobjective': strcons_fix(self.exploreObjective) if self.exploreObjective is not None else '',
         }
 
         part.find('prompt').append(makeContentNode(self.prompt))

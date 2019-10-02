@@ -43,7 +43,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             switch(this.question.partsMode) {
                 case 'all':
                     return true;
-                case 'adaptive':
+                case 'explore':
                     return this.question.display.currentPart()==this || this.question.display.revealed();
             }
         },this);
@@ -260,7 +260,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.updateNextParts();
 
         this.showNextParts = ko.computed(function() {
-            if(this.part.question.partsMode!='adaptive') {
+            if(this.part.question.partsMode!='explore') {
                 return false;
             }
             if(this.nextParts().length==0) {

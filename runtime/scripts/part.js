@@ -185,7 +185,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
-        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','adaptiveObjective'],[]);
+        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','exploreObjective'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -517,7 +517,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {Boolean} showFeedbackIcon - Show the tick/cross feedback symbol after this part is submitted?
      * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
-     * @property {String} adaptiveObjective - objective that this part's score counts towards
+     * @property {String} exploreObjective - objective that this part's score counts towards
      * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
      */
     settings:
@@ -529,7 +529,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         showFeedbackIcon: true,
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
-        adaptiveObjective: '',
+        exploreObjective: '',
         adaptiveMarkingPenalty: 0
     },
 
