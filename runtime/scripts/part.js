@@ -144,8 +144,8 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     //initialise gap and step arrays
     this.gaps = [];
     this.steps = [];
-    this.isStep = false;
-    this.isGap = false;
+    this.isStep = this.path.match(/s\d+$/)!==null;
+    this.isGap = this.path.match(/g\d+$/)!==null;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
 

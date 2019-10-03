@@ -30,7 +30,7 @@
         <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName()}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
-        <h4 class="partheader" data-bind="visible: showName(), latex: name"></h4>
+        <xsl:if test="$inline='false'"><h4 class="partheader" data-bind="visible: showName(), latex: name"></h4></xsl:if>
         <xsl:if test="not(ancestor::gaps)">
             <xsl:apply-templates select="prompt" />
         </xsl:if>

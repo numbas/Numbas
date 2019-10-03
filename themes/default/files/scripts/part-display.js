@@ -44,7 +44,11 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 case 'all':
                     return true;
                 case 'explore':
-                    return this.question.display.currentPart()==this || this.question.display.revealed();
+                    var part = this.part;
+                    while(part.parentPart) {
+                        part = part.parentPart;
+                    }
+                    return this.question.display.currentPart()==part.display || this.question.display.revealed();
             }
         },this);
 
@@ -336,9 +340,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 pd.showWarnings();
             }
         }
-        var label = p.isStep ? 'step' : p.isGap ? 'gap' : 'part';
-        var index = p.isStep || p.isGap ? p.index : util.letterOrdinal(p.index);
-        p.xml.setAttribute('jme-context-description',R(label)+' '+index);
+        p.xml.setAttribute('jme-context-description',p.name);
         p.xml.setAttribute('path',p.path);
         p.xml.setAttribute('isgap',p.isGap);
         p.xml.setAttribute('isstep',p.isStep);
