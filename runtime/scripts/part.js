@@ -1161,7 +1161,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'sub_credit',
-                credit: credit,
+                credit: -credit,
                 message: message
             });
         }

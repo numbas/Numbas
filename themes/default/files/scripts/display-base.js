@@ -261,6 +261,7 @@ $.textMetrics = function(el) {
  *  @property {observable.<Number>} credit - proportion of available marks awarded
  *  @property {observable.<Boolean>} doesMarking - does the object do any marking?
  *	@property {observable.<Boolean>} revealed - have the correct answers been revealed?
+ *	@property {Boolean} plainScore - Show the score without the "Score: " prefix?
  */
 /** Settings for {@link Numbas.display.showScoreFeedback}
  * @typedef {Object} Numbas.display.showScoreFeedback_settings
@@ -321,6 +322,35 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
             return 'none';
         }
     });
+    var messageIngredients = ko.computed(function() {
+        var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks();
+        var scoreobj = {
+            marks: marks,
+            score: score,
+            marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
+            scoreString: niceNumber(score)+' '+R('mark',{count:score}),
+        };
+        var messageKey;
+        if(marks==0) {
+            messageKey = 'question.score feedback.not marked';
+        } else if(!revealed) {
+            if(settings.showActualMark) {
+                if(settings.showTotalMark) {
+                    messageKey = 'question.score feedback.score total actual';
+                } else {
+                    messageKey = 'question.score feedback.score actual';
+                }
+            } else if(settings.showTotalMark) {
+                messageKey = 'question.score feedback.score total';
+            } else {
+                var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
+                messageKey = 'question.score feedback.'+key;
+            }
+        } else {
+            messageKey = 'question.score feedback.score total actual';
+        }
+        return {key: messageKey, scoreobj: scoreobj};
+    });
     return {
         update: Knockout.computed({
             read: function() {
@@ -341,32 +371,16 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
             return R('question.score feedback.'+key);
         },this),
         message: Knockout.computed(function() {
-            var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks();
-            var scoreobj = {
-                marks: marks,
-                score: score,
-                marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
-                scoreString: niceNumber(score)+' '+R('mark',{count:score}),
-            };
-            if(marks==0) {
-                return R('question.score feedback.not marked');
+            var ingredients = messageIngredients();
+            return R(ingredients.key,ingredients.scoreobj);
+        }),
+        plainMessage: Knockout.computed(function() {
+            var ingredients = messageIngredients();
+            var key = ingredients.key;
+            if(key=='question.score feedback.score total actual' || key=='question.score feedback.score actual') {
+                key += '.plain';
             }
-            if(!revealed) {
-                if(settings.showActualMark) {
-                    if(settings.showTotalMark) {
-                        return R('question.score feedback.score total actual',scoreobj);
-                    } else {
-                        return R('question.score feedback.score actual',scoreobj);
-                    }
-                } else if(settings.showTotalMark) {
-                    return R('question.score feedback.score total',scoreobj);
-                } else {
-                    var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
-                    return R('question.score feedback.'+key);
-                }
-            } else {
-                return R('question.score feedback.score total actual',scoreobj);
-            }
+            return R(key,ingredients.scoreobj);
         }),
         iconClass: Knockout.computed(function() {
             if (!showFeedbackIcon) {

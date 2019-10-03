@@ -181,6 +181,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             od.credit = ko.computed(function() {
                 return od.score()/od.marks();
             });
+            od.visible = ko.computed(function() {
+                return q.objectiveVisibility=='always' || od.answered() || od.revealed();
+            },this);
             od.feedback = display.showScoreFeedback(od,q.exam.settings);
             return od;
         });
@@ -193,10 +196,15 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 penalty: p,
                 name: p.name,
                 limit: p.limit,
-                score: ko.observable(p.score)
+                score: ko.observable(p.score),
+                revealed: qd.revealed,
+                applied: ko.observable(false),
             };
+            pd.visible = ko.computed(function() {
+                return q.penaltyVisibility=='always' || pd.applied() || pd.revealed();
+            })
             pd.scoreDisplay = ko.computed(function() {
-                return (-pd.score())+'/'+pd.limit;
+                return Numbas.math.niceNumber(pd.score());
             });
             return pd;
         });
@@ -362,7 +370,8 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 o.feedback.update(true);
             });
             this.penalties.forEach(function(p) {
-                p.score(p.penalty.score);
+                p.score(-p.penalty.score);
+                p.applied(p.penalty.applied);
             });
         },
         /** Scroll to the first part submission error

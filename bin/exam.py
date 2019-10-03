@@ -411,6 +411,8 @@ class Question(object):
     advice = ''
     parts_mode = 'all'
     maxMarks = 0
+    objectiveVisibility = 'always'
+    penaltyVisibility = 'always'
 
     def __init__(self,name='Untitled Question'):
         self.name = name
@@ -435,7 +437,7 @@ class Question(object):
     @staticmethod
     def fromDATA(builder, data):
         question = Question()
-        tryLoad(data,['name','statement','advice','maxMarks'],question)
+        tryLoad(data,['name','statement','advice','maxMarks','objectiveVisibility','penaltyVisibility'],question)
         tryLoad(data,'partsMode',question,'parts_mode')
 
         if haskey(data,'parts'):
@@ -498,6 +500,8 @@ class Question(object):
             'name': strcons(self.name), 
             'partsMode': strcons(self.parts_mode),
             'maxMarks': strcons_fix(self.maxMarks),
+            'objectiveVisibility': strcons_fix(self.objectiveVisibility),
+            'penaltyVisibility': strcons_fix(self.objectiveVisibility),
         }
         question.find('statement').append(makeContentNode(self.statement))
         question.find('advice').append(makeContentNode(self.advice))
