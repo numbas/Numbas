@@ -799,7 +799,7 @@ select.multiplechoice {
     line-height: 1.5em;
 }
 
-#explore-breakdown .total th, #explore-breakdown .total td {
+#explore-breakdown .total:not(:first-child) th, #explore-breakdown .total:not(:first-child) td {
     border-top: 2px solid white;
 }
 #explore-breakdown .name {

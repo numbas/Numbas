@@ -166,6 +166,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     maxMarks: 0,
 
+    /** When should information about objectives be shown to the student? ``'always'`` or ``'when-active'``.
+     * @type {String}
+     */
+    objectiveVisibility: 'always',
+
+    /** When should information about penalties be shown to the student? ``'always'`` or ``'when-active'``.
+     * @type {String}
+     */
+    penaltyVisibility: 'always',
+
     /** In explore mode, the part that the student is currently looking at.
      * @type {Numbas.parts.Part}
      */
@@ -195,7 +205,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
-        tryGetAttribute(q,q.xml,'.',['name','partsMode','maxMarks']);
+        tryGetAttribute(q,q.xml,'.',['name','partsMode','maxMarks','objectiveVisibility','penaltyVisibility']);
 
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
         for(var i = 0; i<preambleNodes.length; i++) {
@@ -238,7 +248,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
         q.objectives = [];
         for(var i=0; i<objectiveNodes.length; i++) {
-            var objective = {name: '', limit: 0, score: 0};
+            var objective = {
+                name: '',
+                limit: 0,
+                score: 0,
+                answered: false
+            };
             tryGetAttribute(objective, objectiveNodes[i], '.', ['name', 'limit']);
             q.objectives.push(objective);
         }
@@ -246,7 +261,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
         q.penalties = [];
         for(var i=0; i<penaltyNodes.length; i++) {
-            var penalty = {name: '', limit: 0, score: 0};
+            var penalty = {
+                name: '',
+                limit: 0,
+                score: 0,
+                applied: false
+            };
             tryGetAttribute(penalty, penaltyNodes[i], '.', ['name', 'limit']);
             q.penalties.push(penalty);
         }
@@ -794,6 +814,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
                 this.penalties.forEach(function(p) {
                     p.score = 0;
+                    p.applied = false;
                 });
                 var defaultObjective = {score: 0, answered: false, limit: this.maxMarks};
                 for(var i=0; i<this.parts.length; i++) {
@@ -807,6 +828,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                             var penalty = q.getPenalty(np.penalty);
                             if(penalty) {
                                 penalty.score += np.penaltyAmount;
+                                penalty.applied = true;
                             }
                         }
                     });
