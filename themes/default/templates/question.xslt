@@ -19,6 +19,19 @@ Copyright 2011-16 Newcastle University
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <h3 data-bind="text: displayName" class="print-only"></h3>
+                <nav class="parts-tree navbar navbar-default">
+                    <span class="part-progress"><localise>question.progress</localise></span>
+                    <div class="part" data-bind="treeView: firstPart">
+                        <div>
+                            <a class="name" href="#" data-bind="latex: name, click: $parent.currentPart, css: partTreeCSS"></a>
+                        </div>
+                        <ul data-bind="foreach: madeNextParts">
+                            <li>
+                                <div class="part" data-bind="treeNode: $data"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
@@ -34,19 +47,6 @@ Copyright 2011-16 Newcastle University
         </xsl:copy>
     </xsl:template>
     <xsl:template match="parts">
-        <nav class="parts-tree navbar navbar-default">
-            <span class="part-progress"><localise>question.progress</localise></span>
-            <div class="part" data-bind="treeView: firstPart">
-                <div>
-                    <a class="name" href="#" data-bind="latex: name, click: $parent.currentPart, css: partTreeCSS"></a>
-                </div>
-                <ul data-bind="foreach: madeNextParts">
-                    <li>
-                        <div class="part" data-bind="treeNode: $data"></div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
         <div class="parts" data-bind="stopbinding: true">
             <xsl:apply-templates />
         </div>

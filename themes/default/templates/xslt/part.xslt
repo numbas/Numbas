@@ -69,11 +69,15 @@
             </div>
             <div class="next-parts" data-bind="visible: showNextParts">
                 <p class="what-next"><localise>part.choose next part</localise></p>
+                <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
                         <button class="btn btn-primary next-part-option" type="button" data-bind="latex: label, click: select, css: {{made: made}}"></button>
                     </li>
                 </ul>
+            </div>
+            <div class="dead-end" data-bind="visible: reachedDeadEnd">
+                <p><localise>part.reached dead end</localise></p>
             </div>
         </xsl:if>
     </xsl:element>

@@ -292,13 +292,17 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             if(this.part.question.partsMode!='explore') {
                 return false;
             }
-            if(this.nextParts().length==0) {
+            if(!(this.part.settings.suggestGoingBack || this.nextParts().length>0)) {
                 return false;
             }
             if(this.revealed()) {
                 return false;
             }
             return this.answered() || !this.doesMarking();
+        },this);
+
+        this.reachedDeadEnd = ko.computed(function() {
+            return (this.answered() || !this.doesMarking()) && !this.showNextParts();
         },this);
 
         this.partTreeCSS = ko.computed(function() {

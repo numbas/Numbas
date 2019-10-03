@@ -740,7 +740,7 @@ select.multiplechoice {
     margin-top: 5rem;
     margin-bottom: 5rem;
 }
-.next-parts > .what-next {
+.next-parts > .what-next, .dead-end {
     font-weight: bold;
 }
 .next-parts > ul {
@@ -881,6 +881,9 @@ input[type=text], input[type=number] {
 	.print-only {
 		display: inherit;
 	}
+    .parts-tree {
+        display: none;
+    }
 
 	.question {
 		overflow-y: hidden;	/* Fixes the fact that Chrome draws a scrollbar in questions, for some reason */
