@@ -16189,19 +16189,7 @@ newBuiltin('filter',['?',TName,'?'],TList,null, {
     evaluate: function(args,scope) {
         var lambda = args[0];
         var list = jme.evaluate(args[2],scope);
-        switch(list.type) {
-        case 'list':
-            list = list.value;
-            break;
-        case 'range':
-            list = math.rangeToList(list.value);
-            for(var i=0;i<list.length;i++) {
-                list[i] = new TNum(list[i]);
-            }
-            break;
-        default:
-            throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
-        }
+        list = jme.castToType(list,'list').value;
         scope = new Scope(scope);
         var name = args[1].tok.name;
         var value = list.filter(function(v) {
