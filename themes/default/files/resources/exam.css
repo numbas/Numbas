@@ -756,6 +756,7 @@ select.multiplechoice {
     padding: 1rem;
     display: flex;
     min-height: 0;
+    margin: 0.5em 0;
 }
 .parts-tree > .part-progress {
     margin-right: 0.5em;
