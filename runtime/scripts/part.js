@@ -185,7 +185,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
-        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','exploreObjective'],[]);
+        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','exploreObjective','suggestGoingBack'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -518,6 +518,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
      * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
      * @property {String} exploreObjective - objective that this part's score counts towards
+     * @property {String} suggestGoingBack - in explore mode, suggest to the student to go back to the previous part after completing this one?
      * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
      */
     settings:
@@ -530,6 +531,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
         exploreObjective: '',
+        suggestGoingBack: false,
         adaptiveMarkingPenalty: 0
     },
 
@@ -1240,6 +1242,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var scope = new jme.Scope([this.getScope(),{variables: this.marking_values}]);
         scope.setVariable('credit',new jme.types.TNum(this.credit));
         return this.nextParts.filter(function(np) {
+            if(np.instance) {
+                return true;
+            }
             var condition = np.availabilityCondition;
             if(condition=='') {
                 return true;

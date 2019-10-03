@@ -97,6 +97,16 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             return p.part.previousPart.display;
         },this);
 
+        /** Set the current part to the previous part, if it's defined.
+         * @see Numbas.display.QuestionDisplay.currentPart
+         */
+        this.goToPreviousPart = function() {
+            var p = qd.previousPart();
+            if(p) {
+                q.setCurrentPart(p.part);
+            }
+        };
+
         /** Student's current score ({@link Numbas.Question#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.QuestionDisplay
@@ -168,6 +178,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 revealed: qd.revealed,
                 answered: ko.observable(false)
             }
+            od.credit = ko.computed(function() {
+                return od.score()/od.marks();
+            });
             od.feedback = display.showScoreFeedback(od,q.exam.settings);
             return od;
         });
@@ -263,16 +276,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 );
             });
             this.marks(this.question.marks);
-        },
-
-        /** Set the current part to the previous part, if it's defined.
-         * @see Numbas.display.QuestionDisplay.currentPart
-         */
-        goToPreviousPart: function() {
-            var p = this.previousPart();
-            if(p) {
-                this.question.setCurrentPart(p.part);
-            }
         },
 
         /** Show the question

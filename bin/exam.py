@@ -705,6 +705,7 @@ class Part(object):
     customMarkingAlgorithm = ''
     extendBaseMarkingAlgorithm = True
     exploreObjective = None
+    suggestGoingBack = False
 
     def __init__(self,marks,prompt=''):
         self.marks = marks
@@ -730,6 +731,7 @@ class Part(object):
                 'customMarkingAlgorithm',
                 'extendBaseMarkingAlgorithm',
                 'exploreObjective',
+                'suggestGoingBack',
             ],
             self
         )
@@ -778,6 +780,7 @@ class Part(object):
             'showcorrectanswer': strcons_fix(self.showCorrectAnswer),
             'showfeedbackicon': strcons_fix(self.showFeedbackIcon),
             'exploreobjective': strcons_fix(self.exploreObjective) if self.exploreObjective is not None else '',
+            'suggestgoingback': strcons_fix(self.suggestGoingBack),
         }
 
         part.find('prompt').append(makeContentNode(self.prompt))
