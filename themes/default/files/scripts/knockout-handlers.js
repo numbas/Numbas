@@ -218,7 +218,6 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
 
         },
         'update': function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-            console.log('update treeView');
             var trees = (bindingContext.$trees || []).slice();
             var innerBindingContext = bindingContext.createChildContext(valueAccessor).extend({
                 '$trees': trees,
