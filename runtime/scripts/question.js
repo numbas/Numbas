@@ -305,9 +305,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *  @param {Numbas.jme.Scope} scope
      *  @param {Object.<Numbas.jme.token>} variables
      *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
+     *  @param {Number} [index] - the position of the part in the parts list (added to the end if not given)
      *  @returns {Numbas.parts.Part}
      */
-    addExtraPartFromXML: function(xml_index,scope,variables,previousPart) {
+    addExtraPartFromXML: function(xml_index,scope,variables,previousPart,index) {
         this.extraPartOrder.push(xml_index);
         var xml = this.xml.selectNodes('parts/part')[xml_index];
         scope = scope || this.scope;
@@ -315,7 +316,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         variables = variables || {};
         var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
         var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, pscope);
-        var index = this.parts.length;
+        var index = index!==undefined ? index : this.parts.length;
         this.addPart(p,index);
         p.assignName(index,this.parts.length-1);
         p.previousPart = previousPart;
@@ -602,6 +603,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.getAdvice(true);
             }
             q.updateScore();
+            if(q.partsMode=='explore') {
+                q.setCurrentPart(q.getPart(qobj.currentPart));
+            }
         });
     },
     /** XML definition of this question

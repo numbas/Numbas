@@ -323,6 +323,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
         this.steps.forEach(function(s){ s.resume() });
+        var scope = this.getScope();
+        this.nextParts.forEach(function(np,i) {
+            var npobj = pobj.nextParts[i];
+            if(npobj.instance !== null) {
+                np.instanceVariables = part.store.loadVariables(npobj.instanceVariables,scope);
+                np.instance = part.question.addExtraPartFromXML(np.index,scope,np.instanceVariables,part,npobj.index);
+                np.instance.resume();
+            }
+        });
+        this.display && this.display.updateNextParts();
         this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer();
         })
@@ -1265,7 +1275,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var p = this;
         var scope = this.getScope();
 
-        var values = {};
+        var values = np.instanceVariables = {};
         var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
         if(np.variableReplacements.length) {
             np.variableReplacements.forEach(function(vr) {
@@ -1276,6 +1286,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(np.xml) {
             np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p);
         }
+        this.store && this.store.initPart(np.instance);
         if(this.display) {
             this.display.updateNextParts();
         }

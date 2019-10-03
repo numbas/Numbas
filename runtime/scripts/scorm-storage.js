@@ -259,13 +259,26 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.setSessionTime();
         this.suspendData = eobj;
     },
+
+    /** Create suspend data object for a dictionary of JME variables
+     * @param {Object.<Numbas.jme.token>} variables
+     * @returns {Object.<JME>}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    variablesSuspendData: function(variables) {
+        var vobj = {};
+        for(var name in variables) {
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{niceNumber:false, wrapexpressions: true})
+        }
+        return vobj;
+    },
+
     /** Create suspend data object for a question
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    questionSuspendData: function(question)
-    {
+    questionSuspendData: function(question) {
         var qobj =
         {
             name: question.name,
@@ -275,12 +288,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             adviceDisplayed: question.adviceDisplayed,
             revealed: question.revealed
         };
-        qobj.variables = {};
-        var all_variables = question.scope.allVariables();
-        for(var name in all_variables)
-        {
-            qobj.variables[name] = Numbas.jme.display.treeToJME({tok: all_variables[name]},{niceNumber:false, wrapexpressions: true});
+        if(question.partsMode=='explore') {
+            qobj.currentPart = question.currentPart.path;
         }
+        qobj.variables = this.variablesSuspendData(question.scope.allVariables());
+
         qobj.parts = [];
         for(var i=0;i<question.parts.length;i++)
         {
@@ -311,6 +323,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         for(var i=0;i<part.steps.length;i++)
         {
             pobj.steps.push(this.partSuspendData(part.steps[i]));
+        }
+        pobj.nextParts = [];
+        for(var i=0;i<part.nextParts.length;i++) {
+            var np = part.nextParts[i];
+            pobj.nextParts.push({
+                instance: np.instance ? np.instance.path : null,
+                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables) : null,
+                index: np.instance ? np.instance.index : null
+            });
         }
         return pobj;
     },
@@ -361,6 +382,20 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             currentQuestion: currentQuestion
         };
     },
+
+    /** Load a dictionary of JME variables
+     * @param {Object.<JME>} vobj
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Object.<Numbas.jme.token>}
+     */
+    loadVariables: function(vobj, scope) {
+        var variables = {};
+        for(var name in vobj) {
+            variables[name] = scope.evaluate(vobj[name]);
+        }
+        return variables;
+    },
+
     /** Get suspended info for a question
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
@@ -375,20 +410,17 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             }
             var id = this.getQuestionId(question);
             var index = this.questionIndices[id];
-            var variables = {};
-            for(var name in qobj.variables)
-            {
-                variables[name] = question.scope.evaluate(qobj.variables[name]);
-            }
+            var variables = this.loadVariables(qobj.variables, question.scope);
             return {
-                    name: qobj.name,
-                    score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
-                    visited: qobj.visited,
-                    answered: qobj.answered,
-                    submitted: qobj.submitted,
-                    adviceDisplayed: qobj.adviceDisplayed,
-                    revealed: qobj.revealed,
-                    variables: variables
+                name: qobj.name,
+                score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+                visited: qobj.visited,
+                answered: qobj.answered,
+                submitted: qobj.submitted,
+                adviceDisplayed: qobj.adviceDisplayed,
+                revealed: qobj.revealed,
+                variables: variables,
+                currentPart: qobj.currentPart
             };
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading question',{'number':question.number,message:e.message}));
