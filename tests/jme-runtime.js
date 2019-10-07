@@ -12230,6 +12230,7 @@ var Parser = jme.Parser = function(options) {
     this.funcSynonyms = {};
     this.opSynonyms = {};
     this.rightAssociative = {};
+    this.make_re();
 }
 jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Default options for new parsers
@@ -12321,7 +12322,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     /** Binary operations
      * @type {Array.<String>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','⟹','≠','≥','≤'],
 
     /** Regular expressions to match tokens 
      * @type {Object.<RegExp>}
@@ -12331,7 +12332,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_integer: /^[0-9]+(?!\x2E|[0-9])/,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
-        re_op: /^(?:\.\.|#|<=|>=|<>|&&|\|\||[\|*+\-\/\^<>=!&÷×∈∧∨⟹≠≥≤]|__OTHER_OPS__)/i,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
@@ -12379,6 +12379,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             return;
         }
         this.ops.push(name);
+        this.make_re();
     },
 
     /** Add a binary operator to the parser
@@ -12565,6 +12566,31 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     ],
 
 
+    /** Update regular expressions for matching tokens
+     * @see Numbas.jme.Parser.re
+     */
+    make_re: function() {
+        /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
+         * @param {Array.<String>} ops
+         * @returns {Array.<String>} ops
+         */
+        function clean_ops(ops) {
+            return ops.sort().reverse().map(function(op) {
+                return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+            });
+        };
+        var word_ops = clean_ops(this.ops.filter(function(o){return o.match(/[a-zA-Z0-9_']$/); }));
+        var other_ops = clean_ops(this.ops.filter(function(o){return !o.match(/[a-zA-Z0-9_']$/); }));
+        var any_op_bits = [];
+        if(word_ops.length) {
+            any_op_bits.push('(?:'+word_ops.join('|')+')(?![a-zA-Z0-9_\'])');
+        }
+        if(other_ops.length) {
+            any_op_bits.push('(?:'+other_ops.join('|')+')');
+        }
+        var re_op_source = '^(?:'+any_op_bits.join('|')+')';
+        this.re.re_op = new RegExp(re_op_source,'i');
+    },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
      * @param {JME} expr
@@ -12577,32 +12603,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
-        /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
-         * @param {Array.<String>} ops
-         * @returns {Array.<String>} ops
-         */
-        function clean_ops(ops) {
-            return ops.sort().reverse().map(function(op) {
-                return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-            });
-        };
-        var word_ops = clean_ops(this.ops.filter(function(o){return o.match(/[a-zA-Z0-9_']$/); }));
-        var other_ops = clean_ops(this.ops.filter(function(o){return !o.match(/[a-zA-Z0-9_']$/); }));
-        var re_op_source = this.re.re_op.source;
-        var any_op = '';
-        if(word_ops.length) {
-            any_op += '|(?:'+word_ops.join('|')+')(?![a-zA-Z0-9_\'])';
-        }
-        if(other_ops.length) {
-            any_op += '|(?:'+other_ops.join('|')+')';
-        }
-        re_op_source = re_op_source.replace('|__OTHER_OPS__', any_op ? any_op : '');
-        var re_op = new RegExp(re_op_source,'i');
         while( pos<expr.length ) {
             var got = false;
             for(var i=0;i<this.tokeniser_types.length;i++) {
                 var tt = this.tokeniser_types[i];
-                var regex = (tt.re instanceof RegExp) ? tt.re : (tt.re=='re_op' ? re_op : this.re[tt.re]);
+                var regex = (tt.re instanceof RegExp) ? tt.re : this.re[tt.re];
                 var m = expr.slice(pos).match(regex);
                 if(m) {
                     var result = tt.parse.apply(this,[m,tokens,expr,pos]);
@@ -12914,6 +12919,7 @@ var fnSort = util.sortBy('id');
  */
 var Scope = jme.Scope = function(scopes) {
     var s = this;
+    this.parser = jme.standardParser;
     this.variables = {};
     this.functions = {};
     this._resolved_functions = {};
@@ -12935,6 +12941,7 @@ var Scope = jme.Scope = function(scopes) {
         extras = scopes[0];
     } else {
         this.parent = scopes[0];
+        this.parser = this.parent.parser;
         extras = scopes[1] || {};
     }
     if(extras) {
@@ -12959,6 +12966,11 @@ var Scope = jme.Scope = function(scopes) {
     return;
 }
 Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
+    /** Parser to use when compiling expressions
+     * @type {Numbas.jme.Parser}
+     */
+    parser: jme.standardParser,
+
     /** Set the given variable name
      * @param {String} name
      * @param {Numbas.jme.token} value
@@ -13300,7 +13312,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         //if a string is given instead of an expression tree, compile it to a tree
         var tree;
         if( typeof(expr)=='string' ) {
-            tree = jme.compile(expr,scope);
+            tree = this.parser.compile(expr,scope);
         } else {
             tree = expr;
         }

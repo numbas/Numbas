@@ -1854,8 +1854,9 @@ Fraction.fromFloat = function(n) {
     var approx = math.rationalApproximation(n);
     return new Fraction(approx[0],approx[1]);
 }
-Fraction.fromDecimal = function(n) {
-    var approx = n.toFraction(1e15);
+Fraction.fromDecimal = function(n,accuracy) {
+    accuracy = accuracy===undefined ? 1e15 : accuracy;
+    var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
