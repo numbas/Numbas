@@ -294,7 +294,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     var partNode = q.xml.selectSingleNode('parts/part');
                     q.addExtraPartFromXML(0);
                     break;
-           }
+            }
             q.signals.trigger('partsGenerated');
         });
     },
@@ -543,7 +543,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('ready',function() {
             q.updateScore();
         });
-        q.signals.on(['variablesGenerated','partsGenerated','HTMLAttached'], function() {
+        q.signals.on(['ready','HTMLAttached'], function() {
             q.display && q.display.showScore();
         });
     },
