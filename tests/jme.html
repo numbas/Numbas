@@ -1038,6 +1038,19 @@
 					assert.ok(scope.getRuleset('basic'),'extend scope with some rulesets');
 				});
 
+                QUnit.test('Custom parser', function(assert) {
+                    var parser = new Numbas.jme.Parser();
+                    parser.addOperator('!!',{commutative: true, precedence: 5});
+                    var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+                    var TNum = Numbas.jme.types.TNum;
+                    scope.addFunction(new Numbas.jme.funcObj('!!',[TNum,TNum],TNum,function(a,b) {
+                        return 1/(1/a+1/b);
+                    }));
+                    scope.parser = parser;
+                    deepCloseEqual(assert, scope.evaluate('1 !! 2').value, 2/3,'1 !! 2 = 2/3');
+                });
+
+
 
 				QUnit.module('Pattern-matching');
                 QUnit.test('matchExpression', function(assert) {
