@@ -60,6 +60,14 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @param {Numbas.Exam} exam
      */
     init: function(exam) {},
+    /** Initialise a question.
+     * @param {Numbas.Question} q
+     */
+    initQuestion: function() {},
+    /** Initialise a part.
+     * @param {Numbas.parts.Part} part
+     */
+    initPart: function(p) {},
     /** Get suspended exam info
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
@@ -68,6 +76,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
     /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store */
     save: function() {
     },
+    /** Load student's name and ID
+     */
+    get_student_name: function() {},
     /** Get suspended info for a question
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
