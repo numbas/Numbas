@@ -19,7 +19,7 @@ Copyright 2011-16 Newcastle University
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <h3 data-bind="text: displayName" class="print-only"></h3>
-                <nav class="parts-tree navbar navbar-default">
+                <nav class="parts-tree navbar navbar-default" data-bind="visible: question.partsMode=='explore'">
                     <span class="part-progress"><localise>question.progress</localise></span>
                     <div class="part" data-bind="treeView: firstPart">
                         <div>
