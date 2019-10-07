@@ -218,6 +218,10 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
 
         },
         'update': function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            var v = Knockout.unwrap(valueAccessor());
+            if(v===undefined) {
+                return;
+            }
             var trees = (bindingContext.$trees || []).slice();
             var innerBindingContext = bindingContext.createChildContext(valueAccessor).extend({
                 '$trees': trees,
@@ -235,7 +239,7 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
 
     Knockout.bindingHandlers.treeNode = {
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-          return {controlsDescendantBindings: true};
+            return {controlsDescendantBindings: true};
         },
       
         update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {

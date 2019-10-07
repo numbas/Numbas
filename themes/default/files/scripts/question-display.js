@@ -217,6 +217,14 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             return q.partsMode=='explore' && q.objectives.length>0;
         },this);
 
+        /** Show the tree of parts for navigation?
+         * @member {Observable.<Boolean>} showPartsTree
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.showPartsTree = ko.computed(function() {
+            return q.partsMode=='explore';
+        },this);
+
         /** Show this question in review mode
          * @member {function} review
          * @method
