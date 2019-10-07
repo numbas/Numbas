@@ -194,6 +194,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initPart(q.parts[i]);
         }
     },
+    /** Get the relevant part storage methods for the given part
+     * @param {Numbas.parts.Part} p
+     * @returns {Numbas.storage.scorm.partTypeStorage}
+     */
     getPartStorage: function(p) {
         if(p.is_custom_part_type) {
             return scorm.partTypeStorage['custom'];
