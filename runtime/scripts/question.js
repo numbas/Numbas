@@ -310,7 +310,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addExtraPartFromXML: function(xml_index,scope,variables,previousPart,index) {
         this.extraPartOrder.push(xml_index);
-        var xml = this.xml.selectNodes('parts/part')[xml_index];
+        var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
+        this.xml.selectSingleNode('parts').appendChild(xml);
         scope = scope || this.scope;
         var j = this.parts.length;
         variables = variables || {};
