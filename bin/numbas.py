@@ -378,9 +378,17 @@ class NumbasCompiler(object):
         """
             Collect together all Javascript files and compile them into a single file, scripts.js
         """
-        javascripts = [(dst,src) for dst,src in self.files.items() if os.path.splitext(dst)[1]=='.js']
+        javascripts = []
+        resource_scripts = []
+        for dst,src in self.files.items():
+            if os.path.splitext(dst)[1]!='.js':
+                continue
+            if not dst.startswith('./standalone_scripts'):
+                javascripts.append((dst,src))
+
         for dst,src in javascripts:
             del self.files[dst]
+
 
         javascripts.sort(key=lambda x:x[0])
 
