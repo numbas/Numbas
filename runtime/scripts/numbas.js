@@ -40,7 +40,7 @@ Numbas.debug = function(msg,noStack)
         if(e.stack && !noStack)
         {
             var words= e.stack.split('\n')[2];
-            console.log(msg," "+words);
+            console.error(msg," "+words);
         }
         else
         {
@@ -191,7 +191,7 @@ Numbas.tryInit = function()
             scriptreqs[x].tryRun();
         } catch(e) {
             alert(e+'');
-            Numbas.debug(e.stack);
+            console.error(e);
             Numbas.dead = true;
             return;
         }
@@ -244,6 +244,7 @@ Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
     if(!cb.activated) {
         cb.callback(cb.extension);
+        cb.activated = true;
     }
 }
 
