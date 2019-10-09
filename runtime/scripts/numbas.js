@@ -244,6 +244,7 @@ Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
     if(!cb.activated) {
         cb.callback(cb.extension);
+        cb.activated = true;
     }
 }
 
