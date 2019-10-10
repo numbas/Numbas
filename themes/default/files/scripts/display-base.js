@@ -153,6 +153,14 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         };
     },
 
+    /** Associate a JME scope with the given element
+     * @param {Element} element
+     * @param {Numbas.jme.Scope} scope
+     */
+    setJMEScope: function(element, scope) {
+        $(element).addClass('jme-scope').data('jme-scope',scope);
+    },
+
     /** Make HTML from an XML node and bind it to the given scope and display object.
      * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
      * @param {Element} xml
@@ -165,7 +173,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     makeHTMLFromXML: function(xml, template, scope, contextDescription, parentElement, viewModel) {
         var html = $($.xsl.transform(template, xml).string);
-        html.addClass('jme-scope').data('jme-scope',scope);
+        display.setJMEScope(html,scope);
         html.attr('data-jme-context-description',contextDescription);
         html.find('table').wrap('<div class="table-responsive">');    // wrap tables so they have a scrollbar when they overflow
         var promise = new Promise(function(resolve, reject) {
