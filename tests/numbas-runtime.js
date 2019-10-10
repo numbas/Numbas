@@ -42,7 +42,7 @@ Numbas.debug = function(msg,noStack)
         if(e.stack && !noStack)
         {
             var words= e.stack.split('\n')[2];
-            console.log(msg," "+words);
+            console.error(msg," "+words);
         }
         else
         {
@@ -193,7 +193,7 @@ Numbas.tryInit = function()
             scriptreqs[x].tryRun();
         } catch(e) {
             alert(e+'');
-            Numbas.debug(e.stack);
+            console.error(e);
             Numbas.dead = true;
             return;
         }
@@ -246,6 +246,7 @@ Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
     if(!cb.activated) {
         cb.callback(cb.extension);
+        cb.activated = true;
     }
 }
 
@@ -3565,8 +3566,9 @@ Fraction.fromFloat = function(n) {
     var approx = math.rationalApproximation(n);
     return new Fraction(approx[0],approx[1]);
 }
-Fraction.fromDecimal = function(n) {
-    var approx = n.toFraction(1e15);
+Fraction.fromDecimal = function(n,accuracy) {
+    accuracy = accuracy===undefined ? 1e15 : accuracy;
+    var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
 }
 
@@ -9767,9 +9769,41 @@ jme.inferVariableTypes = function(tree,scope) {
         switch(tree.tok.type) {
             case 'op':
             case 'function':
-                this.fns = scope.getFunction(tree.tok.name);
+                var fns = scope.getFunction(tree.tok.name);
+                this.fns = [];
+                this.signature_enumerators = [];
+                for(var i=0;i<fns.length;i++) {
+                    var fn = fns[i];
+                    var se = new SignatureEnumerator(fn.intype);
+                    if(se.is_static()) {
+                        if(se.length() != tree.args.length) {
+                            continue;
+                        }
+                        var sig = se.signature();
+                        var constants_ok = this.args.every(function(arg,j) {
+                            switch(arg.tok.type) {
+                                case 'op':
+                                case 'function':
+                                    for(var i=0;i<arg.fns.length;i++) {
+                                        if(jme.findCompatibleType(arg.fns[i].outtype,sig[j])!==undefined) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                case 'name':
+                                    return true;
+                                default:
+                                    return jme.findCompatibleType(arg.tok.type,sig[j])!==undefined;
+                            }
+                        });
+                        if(!constants_ok) {
+                            continue;
+                        }
+                    }
+                    this.fns.push(fn);
+                    this.signature_enumerators.push(se);
+                }
                 this.pos = 0;
-                this.signature_enumerators = this.fns.map(function(fn){ return new SignatureEnumerator(fn.intype) });
                 break;
             default:
                 break;
@@ -9990,6 +10024,21 @@ var SignatureEnumerator = jme.SignatureEnumerator = function(sig) {
     }
 }
 SignatureEnumerator.prototype = {
+    /** Does this signature only have one possible realisation?
+     * @returns {Boolean}
+     */
+    is_static: function() {
+        switch(this.sig.kind) {
+            case 'type':
+            case 'anything':
+                return true;
+            case 'sequence':
+                return this.children.every(function(c){ return c.is_static(); });
+            default:
+                return false;
+        }
+    },
+
     /** The length of the signature corresponding to the current state of the enumerator
      * @returns {Number}
      */
@@ -24555,11 +24604,13 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         var minvalue = jme.subvars(settings.minvalueString,scope);
         minvalue = scope.evaluate(minvalue);
+        var ominvalue = minvalue;
         if(!minvalue) {
             this.error('part.setting not present',{property:R('minimum value')});
         }
         var maxvalue = jme.subvars(settings.maxvalueString,scope);
         maxvalue = scope.evaluate(maxvalue);
+        var omaxvalue = maxvalue;
         if(!maxvalue) {
             this.error('part.setting not present',{property:R('maximum value')});
         }
@@ -24575,6 +24626,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             maxvalue = tmp;
         }
 
+        var isNumber = ominvalue.type=='number' || omaxvalue.type=='number';
+
         if(minvalue.type=='number') {
             minvalue = new jme.types.TNum(minvalue.value - 1e-12);
         }
@@ -24589,7 +24642,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
         if(settings.allowFractions && settings.correctAnswerFraction) {
-            var frac = math.Fraction.fromDecimal(displayAnswer.re);
+            var frac = math.Fraction.fromDecimal(displayAnswer.re, isNumber ? 1e12 : undefined);
             settings.displayAnswer = frac.toString();
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});

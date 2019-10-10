@@ -325,6 +325,7 @@
                     deepCloseEqual(assert, inferVariableTypes('x+sin(x)'),{x:'number'},'x+sin(x) gives x number');
                     deepCloseEqual(assert, inferVariableTypes('k*det(x)'),{x:'matrix', k:'number'},'k*det(x) gives {x:\'matrix\',k:\'number\'}');
                     deepCloseEqual(assert, inferVariableTypes('dot(vector(1,2,3),a)'),{a:'vector'},'dot(vector(1,2,3),a) gives {a:\'vector\'}');
+                    deepCloseEqual(assert, inferVariableTypes('log(abs(x+1),e) + log(abs(x-1),e)'),{x:'number'},'log(abs(x+1),e) + log(abs(x-1),e) gives x number');
                 });
 
 				QUnit.test('Variables',function(assert) {

@@ -3342,9 +3342,41 @@ jme.inferVariableTypes = function(tree,scope) {
         switch(tree.tok.type) {
             case 'op':
             case 'function':
-                this.fns = scope.getFunction(tree.tok.name);
+                var fns = scope.getFunction(tree.tok.name);
+                this.fns = [];
+                this.signature_enumerators = [];
+                for(var i=0;i<fns.length;i++) {
+                    var fn = fns[i];
+                    var se = new SignatureEnumerator(fn.intype);
+                    if(se.is_static()) {
+                        if(se.length() != tree.args.length) {
+                            continue;
+                        }
+                        var sig = se.signature();
+                        var constants_ok = this.args.every(function(arg,j) {
+                            switch(arg.tok.type) {
+                                case 'op':
+                                case 'function':
+                                    for(var i=0;i<arg.fns.length;i++) {
+                                        if(jme.findCompatibleType(arg.fns[i].outtype,sig[j])!==undefined) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                case 'name':
+                                    return true;
+                                default:
+                                    return jme.findCompatibleType(arg.tok.type,sig[j])!==undefined;
+                            }
+                        });
+                        if(!constants_ok) {
+                            continue;
+                        }
+                    }
+                    this.fns.push(fn);
+                    this.signature_enumerators.push(se);
+                }
                 this.pos = 0;
-                this.signature_enumerators = this.fns.map(function(fn){ return new SignatureEnumerator(fn.intype) });
                 break;
             default:
                 break;
@@ -3565,6 +3597,21 @@ var SignatureEnumerator = jme.SignatureEnumerator = function(sig) {
     }
 }
 SignatureEnumerator.prototype = {
+    /** Does this signature only have one possible realisation?
+     * @returns {Boolean}
+     */
+    is_static: function() {
+        switch(this.sig.kind) {
+            case 'type':
+            case 'anything':
+                return true;
+            case 'sequence':
+                return this.children.every(function(c){ return c.is_static(); });
+            default:
+                return false;
+        }
+    },
+
     /** The length of the signature corresponding to the current state of the enumerator
      * @returns {Number}
      */
