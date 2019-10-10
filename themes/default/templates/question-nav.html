@@ -1,5 +1,5 @@
 <!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
-<div class="question-nav question-bottom-nav navbar navbar-default">
+<div class="question-nav question-bottom-nav navbar navbar-default" data-bind="jmescope: question.scope">
     <div class="nav navbar-nav">
         <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.mode()=='normal' && question.partsMode=='all' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
         <p class="marks navbar-text" data-bind="visible: !showScoreBreakdown()">
@@ -13,7 +13,7 @@
                     <!-- ko foreach: objectives -->
                     <!-- ko if: visible -->
                     <tr>
-                        <td class="name" data-bind="text: name"></td>
+                        <td class="name" data-bind="latex: name"></td>
                         <td class="message"><span data-bind="text: feedback.plainMessage, pulse: feedback.update"></span></td>
                         <td>
                             <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr, pulse: feedback.update"></span>
@@ -25,7 +25,7 @@
                     <!-- ko foreach: penalties -->
                     <!-- ko if: visible -->
                     <tr>
-                        <td class="name" data-bind="text: name"></td>
+                        <td class="name" data-bind="latex: name"></td>
                         <td class="message"><span data-bind="text: scoreDisplay"></span></td>
                         <td></td>
                     </tr>
