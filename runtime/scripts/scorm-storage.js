@@ -252,7 +252,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             duration: exam.settings.duration || 0,
             questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
             start: exam.start-0,
-            stop: exam.stop ? exam.stop-0 : null
+            stop: exam.stop ? exam.stop-0 : null,
+            randomSeed: exam && exam.seed
         };
         eobj.questions = [];
         for(var i=0;i<exam.settings.numQuestions;i++)
