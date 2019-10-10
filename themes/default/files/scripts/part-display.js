@@ -302,7 +302,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         this.reachedDeadEnd = ko.computed(function() {
-            return (this.answered() || !this.doesMarking()) && !this.showNextParts();
+            return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts();
         },this);
 
         this.partTreeCSS = ko.computed(function() {
