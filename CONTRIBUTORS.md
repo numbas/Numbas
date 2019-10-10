@@ -50,4 +50,5 @@
 * [RingoKid](https://github.com/RingoKid) ([issue #576](https://github.com/numbas/Numbas/issues/573))
 * [Johan Forslund](https://github.com/johanforslund) ([issue #599](https://github.com/numbas/Numbas/issues/599))
 * [Grant Gollier](https://github.com/gragollier) ([issue #605](https://github.com/numbas/Numbas/issues/605))
+* [Danil Sergeev](https://github.com/yungcatx) - ([issue #642](https://github.com/numbas/Numbas/issues/634))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
