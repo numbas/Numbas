@@ -9780,10 +9780,16 @@ jme.inferVariableTypes = function(tree,scope) {
                             continue;
                         }
                         var sig = se.signature();
-                        var constants_ok = tree.args.every(function(arg,j) {
+                        var constants_ok = this.args.every(function(arg,j) {
                             switch(arg.tok.type) {
                                 case 'op':
                                 case 'function':
+                                    for(var i=0;i<arg.fns.length;i++) {
+                                        if(jme.findCompatibleType(arg.fns[i].outtype,sig[j])!==undefined) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
                                 case 'name':
                                     return true;
                                 default:
