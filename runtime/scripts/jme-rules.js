@@ -1751,7 +1751,8 @@ var displayFlags = jme.rules.displayFlags = {
     fractionnumbers: undefined,
     rowvector: undefined,
     alwaystimes: undefined,
-    mixedfractions: undefined
+    mixedfractions: undefined,
+    flatfractions: undefined
 };
 /** Flags used in JME simplification rulesets
  * @type Object.<Boolean>
@@ -1759,6 +1760,7 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {Boolean} fractionnumbers - Show all numbers as fractions?
  * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {Boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
+ * @property {Boolean} flatfractions - Display fractions horizontally?
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules
