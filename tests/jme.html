@@ -1575,6 +1575,8 @@
                     assert.equal(exprToLaTeX('pi','fractionNumbers'),'\\pi','pi with fractionNumbers');
                     assert.equal(exprToLaTeX('e^(3x)','fractionNumbers'),'e^{ 3 x }','e^(3x) with fractionNumbers');
                     assert.equal(exprToLaTeX('e*i',''),'e i','e*i');
+                    assert.equal(exprToLaTeX('2/4','flatFractions'),'\\left. 2 \\middle/ 4 \\right.','');
+                    assert.equal(exprToLaTeX('(2 + 3)/(a + b)','flatFractions'),'\\left. (2 + 3) \\middle/ (a + b) \\right.','');
 				});
 
                 doc_tests.forEach(function(section) {
