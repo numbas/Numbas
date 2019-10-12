@@ -1225,7 +1225,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
         im += im.match(/\d$/) ? 'i' : '*i';
         if(Math.abs(n.im)<1e-15) {
             return re;
-        } 
+        }
         else if(n.re==0)
         {
             if(n.im==1)
@@ -1309,7 +1309,7 @@ var jmeDecimal = jme.display.jmeDecimal = function(n,settings)
         var re = jmeDecimal(n.re);
         if(n.isReal()) {
             return re;
-        } 
+        }
         var im = jmeDecimal(n.im)+'*i';
         if(n.re.isZero()) {
             if(n.im.eq(1))
@@ -1647,7 +1647,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
         }
         return line;
     }
-    
+
     var item_lines = items.map(function(item){return item.split('\n')});
     var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m,l){return Math.max(l.length,m)},0)});
     var num_lines = item_lines.reduce(function(t,ls){return Math.max(ls.length,t)},0);

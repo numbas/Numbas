@@ -250,8 +250,8 @@
                     raisesNumbasError(assert, function(){ compile('[2,"a":1]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: [2,"a":1]');
                     assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
 				})
-			
-				
+
+
 				QUnit.module('Evaluating');
 
 				QUnit.test('Numbas.math',function(assert) {
@@ -990,7 +990,7 @@
                     assert.equal(evaluate('table([["x","y"],["3",1]])').value.html(),"<tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table');
                     assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').value.html(),"<thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table with headers');
                 });
-				
+
 				QUnit.module('Scopes');
 
 				QUnit.test('Variables',function(assert) {
@@ -1228,7 +1228,7 @@
                         var rule = new Numbas.jme.rules.Rule(pattern,repl,options);
                         return rule.replaceAll(Numbas.jme.compile(expr), Numbas.jme.builtinScope);
                     }
-                    
+
                     var res = replace('?;x+?;y','x*y','acg','1+2');
                     assert.ok(res.changed);
                     var treeToJME = Numbas.jme.display.treeToJME;
