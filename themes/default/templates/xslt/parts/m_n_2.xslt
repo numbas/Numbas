@@ -5,7 +5,6 @@
 </xsl:template>
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
     <div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
-        <localise>part.correct answer</localise>
         <xsl:apply-templates select="choices" mode="correctanswer"/>
     </div>
 </xsl:template>

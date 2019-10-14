@@ -10,9 +10,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
             this.events = params.events;
+            this.title = params.title || '';
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {
@@ -24,6 +25,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.disable = params.disable;
             this.options = params.options;
             this.events = params.events;
+            this.title = params.title || '';
             this.allowEmpty = this.options.allowEmpty;
             var lastValue = this.input();
             this.subscriptions = [
@@ -46,7 +48,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
+            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-number', {
@@ -59,6 +61,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
             this.events = params.events;
+            this.title = params.title || '';
             var init = Knockout.unwrap(this.answerJSON);
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
@@ -111,7 +114,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events">\
+            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-jme', {
@@ -123,6 +126,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.returnString = this.options.returnString || false;
             this.disable = params.disable;
             this.events = params.events;
+            this.title = params.title || '';
             var init = Knockout.unwrap(this.answerJSON);
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
@@ -202,7 +206,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed)">\
+            <input type="text" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), attr: {title: title}">\
             <span class="jme-preview" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
@@ -241,6 +245,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answerJSON;
             this.options = params.options;
             this.disable = params.disable;
+            this.title = params.title || '';
             this.events = params.events;
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
@@ -316,13 +321,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, events: events"></matrix-input>\
+            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, events: events, title: title"></matrix-input>\
         '
     });
     Knockout.components.register('matrix-input',{
         viewModel: function(params) {
             var vm = this;
             this.allowResize = params.allowResize ? params.allowResize : Knockout.observable(false);
+            this.title = params.title || '';
             this.numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
             if(typeof params.rows=='function') {
                 params.rows.subscribe(function(v) { vm.numRows(v); });
@@ -473,12 +479,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template:
-         '<div class="matrix-input">'
+         '<div class="matrix-input" data-bind="attr: {title: title}">'
         +'    <!-- ko if: allowResize --><div class="matrix-size">'
+        +'        <fieldset><legend aria-label="'+R('matrix input.size control legend')+'"></legend>'
         +'        <label class="num-rows">Rows: <input type="number" min="1" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
         +'        <label class="num-columns">Columns: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable"/></label>'
+        +'        </fieldset>'
         +'    </div><!-- /ko -->'
         +'    <div class="matrix-wrapper">'
+        +'        <fieldset><legend data-bind="attr: {\'aria-label\': title}"></legend>'
         +'        <span class="left-bracket"></span>'
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
@@ -488,6 +497,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'            </tbody>'
         +'        </table>'
         +'        <span class="right-bracket"></span>'
+        +'        </fieldset>'
         +'    </div>'
         +'</div>'
         }
@@ -554,6 +564,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.disable = params.disable;
             this.options = params.options;
+            this.title = params.title || '';
             this.events = params.events;
             this.choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
             this.choices.splice(0,0,{label: '', index: null});
@@ -606,7 +617,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable, event: events"></select>\
+            <select data-bind="options: choices, optionsText: \'label\', value: choice, disable: disable, event: events, attr: {title: title}"></select>\
         '
     });
     Knockout.components.register('answer-widget-checkboxes', {

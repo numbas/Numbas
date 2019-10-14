@@ -2,44 +2,50 @@
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <form autocomplete="nope">
-        <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
-            <thead localise-data-jme-context-description="part.mcq.answers">
-                <td/>
-                <xsl:for-each select="answers/answer">
-                    <th><xsl:apply-templates select="content"/></th>
-                </xsl:for-each>
-            </thead>
-            <tbody>
-                <xsl:for-each select="choices/choice">
-                    <xsl:apply-templates select="." mode="m_n_x">
-                        <xsl:with-param name="displaytype" select="$displaytype"/>
-                    </xsl:apply-templates>
-                </xsl:for-each>
-            </tbody>
-        </table>
+        <fieldset>
+            <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+            <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
+                <thead localise-data-jme-context-description="part.mcq.answers">
+                    <td/>
+                    <xsl:for-each select="answers/answer">
+                        <th><xsl:apply-templates select="content"/></th>
+                    </xsl:for-each>
+                </thead>
+                <tbody>
+                    <xsl:for-each select="choices/choice">
+                        <xsl:apply-templates select="." mode="m_n_x">
+                            <xsl:with-param name="displaytype" select="$displaytype"/>
+                        </xsl:apply-templates>
+                    </xsl:for-each>
+                </tbody>
+            </table>
+        </fieldset>
     </form>
     <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
 </xsl:template>
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
-        <localise>part.correct answer</localise>
         <form autocomplete="nope">
-        <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
-            <thead>
-                <td/>
-                <xsl:for-each select="answers/answer">
-                    <th><xsl:apply-templates select="content"/></th>
-                </xsl:for-each>
-            </thead>
-            <tbody>
-                <xsl:for-each select="choices/choice">
-                    <xsl:apply-templates select="." mode="m_n_x-correctanswer">
-                        <xsl:with-param name="displaytype" select="$displaytype"/>
-                    </xsl:apply-templates>
-                </xsl:for-each>
-            </tbody>
-        </table>
+            <legend><localise>part.correct answer</localise></legend>
+            <fieldset>
+                <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+                <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
+                    <thead>
+                        <td/>
+                        <xsl:for-each select="answers/answer">
+                            <th><xsl:apply-templates select="content"/></th>
+                        </xsl:for-each>
+                    </thead>
+                    <tbody>
+                        <xsl:for-each select="choices/choice">
+                            <xsl:apply-templates select="." mode="m_n_x-correctanswer">
+                                <xsl:with-param name="displaytype" select="$displaytype"/>
+                            </xsl:apply-templates>
+                        </xsl:for-each>
+                    </tbody>
+                </table>
+            </fieldset>
         </form>
     </div>
 </xsl:template>

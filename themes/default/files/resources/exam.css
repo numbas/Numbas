@@ -295,6 +295,11 @@ input.jme {
     border-color: hsl(30,20%,50%);
     background: hsl(30,20%,95%);
 }
+.student-answer fieldset > legend {
+    border: none;
+    margin: 0;
+}
+
 .part:not(.dirty) > .student-answer.answered input {
     border: 1px solid;
     border-color: hsl(204,72%,50%);
@@ -332,7 +337,6 @@ input.jme {
 #everything .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .choices-grid.show-cell-answer-state td.checked:not(.correct) {
     background: hsl(0,50%,95%);
 }
-
 .exam-name {
 	font-weight: bold;
 }
