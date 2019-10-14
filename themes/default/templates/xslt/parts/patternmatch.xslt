@@ -2,7 +2,9 @@
 <xsl:template match="part[@type='patternmatch']" mode="typespecific">
     <xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
     <input type="text" spellcheck="false" class="patternmatch" size="12.5" data-bind="event: inputEvents, textInput: studentAnswer, autosize: true, disable: revealed, attr: {{title: input_title}}"></input>
-    <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+{% endraw %}
+    {% include 'xslt/feedback_icon.xslt' %}
+{% raw %}
 </xsl:template>
 <xsl:template match="part[@type='patternmatch']" mode="correctanswer">
     <span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">

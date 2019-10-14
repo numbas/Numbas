@@ -21,7 +21,9 @@
             </table>
         </fieldset>
     </form>
-    <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+{% endraw %}
+    {% include 'xslt/feedback_icon.xslt' %}
+{% raw %}
 </xsl:template>
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>

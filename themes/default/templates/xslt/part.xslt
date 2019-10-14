@@ -81,13 +81,14 @@
                 <div class="feedbackMessages" data-bind="pulse: scoreFeedback.update, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <span data-bind="latex: message"></span></li>
                     </ol>
                 </div>
                 <div class="partFeedback" data-bind="visible: showFeedbackBox">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
-                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                     <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
                 </div>
