@@ -458,6 +458,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Boolean}
      */
     isclose: function(a,b,rel_tol,abs_tol) {
+        if(a===Infinity || b===Infinity || a==-Infinity || b==-Infinity) {
+            return a===b;
+        }
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
         abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
@@ -2064,6 +2067,20 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(this.re.toSignificantDigits(sf), this.im.toSignificantDigits(sf));
     }
 }
+
+ComplexDecimal.min = function(a,b) {
+    if(!(a.isReal() && b.isReal())) {
+        throw(new Numbas.Error('math.order complex numbers'));
+    }
+    return Decimal.min(a.re,b.re);
+}
+ComplexDecimal.max = function(a,b) {
+    if(!(a.isReal() && b.isReal())) {
+        throw(new Numbas.Error('math.order complex numbers'));
+    }
+    return Decimal.max(a.re,b.re);
+}
+
 
 
 /** A list of a vector's components.

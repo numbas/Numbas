@@ -2170,6 +2170,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Boolean}
      */
     isclose: function(a,b,rel_tol,abs_tol) {
+        if(a===Infinity || b===Infinity || a==-Infinity || b==-Infinity) {
+            return a===b;
+        }
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
         abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
@@ -3776,6 +3779,20 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(this.re.toSignificantDigits(sf), this.im.toSignificantDigits(sf));
     }
 }
+
+ComplexDecimal.min = function(a,b) {
+    if(!(a.isReal() && b.isReal())) {
+        throw(new Numbas.Error('math.order complex numbers'));
+    }
+    return Decimal.min(a.re,b.re);
+}
+ComplexDecimal.max = function(a,b) {
+    if(!(a.isReal() && b.isReal())) {
+        throw(new Numbas.Error('math.order complex numbers'));
+    }
+    return Decimal.max(a.re,b.re);
+}
+
 
 
 /** A list of a vector's components.
@@ -15904,6 +15921,8 @@ newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
 newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.squareRoot(); });
 newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
 newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
+newBuiltin('min', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.min );
+newBuiltin('max', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.max );
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
