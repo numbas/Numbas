@@ -19,12 +19,12 @@ Copyright 2011-16 Newcastle University
         {% include 'head.html' %}
 	</head>
 	
-    <body>
+    <body data-bind="css: {'show-nav': viewType()=='question'}">
         {% include 'modals.html' %}
         {% include 'die.html' %}
         {% include 'loading.html' %}
 
-		<main id="everything" style="display:none" data-bind="css: {'show-nav': viewType()=='question'}" role="main">
+		<main id="everything" style="display:none" role="main">
             {% include 'nav.html' %}
 
             <!-- main content area - info pages or questions go in here -->
