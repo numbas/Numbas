@@ -12,7 +12,7 @@
         <label>
             <localise>part.correct answer</localise>
             <input type="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true"/>
-            <span class="jme-preview" data-bind="maths: '\\displaystyle{{'+correctAnswerLaTeX()+'}}'"></span>
+            <span class="jme-preview" aria-live="polite" data-bind="maths: '\\displaystyle{{'+correctAnswerLaTeX()+'}}'"></span>
         </label>
     </span>
 </xsl:template>
