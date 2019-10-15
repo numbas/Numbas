@@ -66,8 +66,6 @@ Click outside the image or press the Escape key to return to the main interface.
 
 In most browsers, pressing the Tab key will move focus between interactive elements in the display.
 
-The left and right arrow keys move to the previous and next question, when you're not focused on an input box.
-
 Numbas uses the [MathJax accessibility extensions](http://docs.mathjax.org/en/latest/basic/a11y-extensions.html#interactive-exploration) to provide interactive exploration of mathematical notation.
 
 ### Printing a Numbas exam

@@ -46,21 +46,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         for(var i=0;i<Numbas.exam.questionList.length;i++) {
             Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
         }
-        $(document).keydown( function(e)
-        {
-            if(!Numbas.exam.inProgress) { return; }
-            if($('input:focus').length || $('#jqibox').is(':visible'))
-                return;
-            switch(e.keyCode)
-            {
-            case 37:
-                Numbas.controls.previousQuestion();
-                break;
-            case 39:
-                Numbas.controls.nextQuestion();
-                break;
-            }
-        });
         Numbas.exam.display.questions().map(function(q) {
             q.init();
         });
