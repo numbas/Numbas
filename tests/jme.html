@@ -264,6 +264,8 @@
                     assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
                     assert.ok(Numbas.math.eq(NaN,NaN),'NaN = NaN');
                     assert.notOk(Numbas.math.eq({complex:true,re:1,im:1},{complex:true,re:1,im:2}));
+                    assert.notOk(Numbas.math.eq(Infinity,1));
+                    assert.notOk(Numbas.math.eq(1,-Infinity));
 				});
 
                 var evaluate = function(t,scope) {

@@ -480,6 +480,12 @@
   -webkit-transition: top 0.35s, left 0.35s, bottom 0.35s, right 0.35s;
   transition: top 0.35s, left 0.35s, bottom 0.35s, right 0.35s;
 }
+@media (prefers-reduced-motion: reduce) {
+  .canvas-sliding {
+    -webkit-transition: top 0s, left 0s, bottom 0s, right 0s;
+    transition: top 0s, left 0s, bottom 0s, right 0s;
+  }
+}
 .offcanvas-clone {
   height: 0px !important;
   width: 0px !important;

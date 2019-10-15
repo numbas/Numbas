@@ -56,6 +56,18 @@ img, object[type*="image"] {
     height: auto;
 }
 
+.btn-success {
+    color: black;
+    background-color: white;
+    border-color: #4cae4c;
+    border-width: 3px;
+}
+.btn-danger {
+    color: #ffffff;
+    background-color: hsl(1.7, 64.5%, 28%);
+    border-color: hsl(1.7, 64.5%, 18%);
+}
+
 .table-responsive {
     overflow-y: hidden;
 }
@@ -133,7 +145,7 @@ img, object[type*="image"] {
 		display: inherit;
 	}
 
-	.show-nav #questionContainer, .show-nav .copyright-footer {
+	.show-nav #questionContainer, .show-nav > footer {
 		margin-left: 300px;
 		max-width: 1170px;
 	}
@@ -146,7 +158,7 @@ img, object[type*="image"] {
 	#questionContainer {
 		margin-top: 51px;
 	}
-	.show-nav #questionContainer, .show-nav .copyright-footer {
+	.show-nav #questionContainer, .show-nav > footer {
 		margin-left: auto;
 	}
 }
@@ -244,14 +256,11 @@ input.jme {
 }
 
 .copyright-footer {
-    margin-top: 5em;
-	margin-bottom: 1em;
+    margin: 5em 2em 1em 2em;
     text-align: center;
     font-size: small;
-    color: #aaa;
-}
-.copyright-footer a {
-	color: #333;
+    border-top: 1px solid #ccc;
+    padding-top: 1em;
 }
 
 .mainDisplay {
@@ -295,6 +304,11 @@ input.jme {
     border-color: hsl(30,20%,50%);
     background: hsl(30,20%,95%);
 }
+.student-answer fieldset > legend {
+    border: none;
+    margin: 0;
+}
+
 .part:not(.dirty) > .student-answer.answered input {
     border: 1px solid;
     border-color: hsl(204,72%,50%);
@@ -332,7 +346,6 @@ input.jme {
 #everything .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .choices-grid.show-cell-answer-state td.checked:not(.correct) {
     background: hsl(0,50%,95%);
 }
-
 .exam-name {
 	font-weight: bold;
 }
@@ -648,6 +661,11 @@ select.multiplechoice {
     border-color: hsl(30, 20%, 50%);
     background-color: hsl(30, 20%, 95%);
     color: #333;
+}
+@media (prefers-reduced-motion: reduce) {
+    .warnings {
+        transition: opacity 0s;
+    }
 }
 .warnings.shown {
     opacity: 1;

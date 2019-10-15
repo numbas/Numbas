@@ -40,7 +40,7 @@
         <span class="student-answer">
             <xsl:attribute name="data-bind">css: {answered: scoreFeedback.answered, 'has-warnings': hasWarnings}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
             <xsl:apply-templates select="." mode="typespecific"/>
-            <span class="warnings alert alert-warning" role="alert" data-bind="visible: warningsShown, css: {{shown: warningsShown}}">
+            <span class="warnings alert alert-warning" aria-live="assertive" role="alert" data-bind="visible: warningsShown, css: {{shown: warningsShown}}">
                 <xsl:comment>ko foreach: warnings</xsl:comment>
                 <span class="warning" data-bind="latex: message"></span>
                 <xsl:comment>/ko</xsl:comment>
@@ -52,16 +52,17 @@
                 <xsl:if test="count(../part) &gt; 1 or ancestor::steps">
                     <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
                 </xsl:if>
-                <div class="feedbackMessages" data-bind="pulse: scoreFeedback.update, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
+                <div class="feedbackMessages" aria-live="polite" role="log" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon"></span> <span data-bind="latex: message"></span></li>
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <span data-bind="latex: message"></span></li>
                     </ol>
                 </div>
-                <div class="partFeedback" data-bind="visible: showFeedbackBox">
+                <div class="partFeedback" aria-live="polite" role="status" data-bind="visible: showFeedbackBox">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
-                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                     <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
                 </div>

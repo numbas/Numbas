@@ -182,6 +182,14 @@
                     assert.equal(res.credit,1,'"13000" correct');
                 });
 
+                QUnit.test('Don\'t mark infinity correct', function(assert) {
+                    var p = createPartFromJSON({"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","adaptiveMarkingPenalty":0,"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"});
+                    var res = mark_part(p,'1');
+                    assert.equal(res.credit,1,'"1" is correct');
+                    var res = mark_part(p,'infinity');
+                    assert.equal(res.credit,0,'"infinity" is incorrect');
+                });
+
                 QUnit.module('JME')
                 QUnit.test('Answer is "x+2"', function(assert) {
                     var p = createPartFromJSON({type:'jme', answer: 'x+2'});

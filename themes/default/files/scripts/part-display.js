@@ -29,6 +29,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         this.showName = ko.computed(function() {
             return this.name() && this.part.question.partsMode=='all';
         },this);
+
+        /** Title text for this part's answer input
+         * @member {observable.<String>} input_title
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.input_title = ko.computed(function() {
+            return R('part.input title',{name: this.name()});
+        },this);
+
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay

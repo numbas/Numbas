@@ -18,8 +18,9 @@
             <li class="questionSelector" data-bind="visible: visible, css: {active: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
                 <a href="#" class="clearfix">
                     <div class="info">
-                        <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+                        <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                         <span class="name" data-bind="text: displayName"></span>
+                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
                     </div>
                     <div class="messages">
@@ -68,6 +69,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span> 	
             <span class="icon-bar"></span>
+            <span class="sr-only"><localise>control.toggle navigation menu</localise></span>
         </button>
 
         <ul class="nav">
