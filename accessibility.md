@@ -71,16 +71,16 @@ Numbas uses the [MathJax accessibility extensions](http://docs.mathjax.org/en/la
 ### Printing a Numbas exam
 
 The default Numbas theme contains a print stylesheet which your browser can use to produce a printed version of an exam.
-After starting a Numbas exam, use your browser's _Print_ feature
+After starting a Numbas exam, use your browser's _Print_ feature.
 
 ### Using a screenreader
 
 A screenreader such as JAWS or [NVDA](https://www.nvaccess.org/) will read all of the content in a Numbas exam.
 We've tested Numbas with NVDA.
 
-Mathematical notation is made accessible to a screenreader by the [MathJax accessibility extensions](http://docs.mathjax.org/en/latest/basic/a11y-extensions.html#speech-braille-support).
+When you submit an answer, the score and any feedback messages will be read out.
 
-**Known limitation:** There are a few dynamically-updated areas of the Numbas interface, such as dialog boxes and live preview of mathematical expressions. These do not currently trigger screen readers to read out the new content.
+Mathematical notation is made accessible to a screenreader by the [MathJax accessibility extensions](http://docs.mathjax.org/en/latest/basic/a11y-extensions.html#speech-braille-support).
 
 ## Who to contact if you have problems or want to give feedback
 
