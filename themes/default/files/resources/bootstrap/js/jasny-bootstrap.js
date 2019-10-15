@@ -139,7 +139,9 @@ if (typeof jQuery === 'undefined') { throw new Error('Jasny Bootstrap\'s JavaScr
   }
   OffCanvas.prototype.slide = function (elements, offset, callback) {
     // Use jQuery animation if CSS transitions aren't supported
+    console.log('slide');
     if (!$.support.transition) {
+        console.log('no transition');
       var anim = {}
       anim[this.placement] = "+=" + offset
       return elements.animate(anim, 350, callback)

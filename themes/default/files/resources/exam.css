@@ -653,6 +653,11 @@ select.multiplechoice {
     background-color: hsl(30, 20%, 95%);
     color: #333;
 }
+@media (prefers-reduced-motion: reduce) {
+    .warnings {
+        transition: opacity 0s;
+    }
+}
 .warnings.shown {
     opacity: 1;
 }

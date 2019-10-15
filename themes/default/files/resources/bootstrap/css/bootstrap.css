@@ -1131,6 +1131,11 @@ img {
   max-width: 100%;
   height: auto;
 }
+@media (prefers-reduced-motion: reduce) {
+  .img-thumbnail {
+    transition: all 0s;
+  }
+}
 .img-circle {
   border-radius: 50%;
 }
@@ -2633,6 +2638,11 @@ output {
   -o-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
+@media (prefers-reduced-motion: reduce) {
+  .form-control {
+    transition: border-color 0s, box-shadow 0s;
+  }
+}
 .form-control:focus {
   border-color: #66afe9;
   outline: 0;
@@ -3454,6 +3464,11 @@ input[type="button"].btn-block {
   -o-transition: opacity 0.15s linear;
   transition: opacity 0.15s linear;
 }
+@media (prefers-reduced-motion: reduce) {
+  .fade {
+    transition: opacity 0s linear;
+  }
+}
 .fade.in {
   opacity: 1;
 }
@@ -3479,6 +3494,11 @@ tbody.collapse.in {
   transition-duration: 0.35s;
   -webkit-transition-timing-function: ease;
   transition-timing-function: ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .collapsing {
+    transition-duration; 0s;
+  }
 }
 .caret {
   display: inline-block;
@@ -4969,6 +4989,11 @@ a.badge:focus {
   -o-transition: border 0.2s ease-in-out;
   transition: border 0.2s ease-in-out;
 }
+@media (prefers-reduced-motion: reduce) {
+  .thumbnail {
+    transition: border 0s;
+  }
+}
 .thumbnail > img,
 .thumbnail a > img {
   margin-left: auto;
@@ -5097,6 +5122,11 @@ a.thumbnail.active {
   -webkit-transition: width 0.6s ease;
   -o-transition: width 0.6s ease;
   transition: width 0.6s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .progress-bar {
+    transition: width 0s;
+  }
 }
 .progress-striped .progress-bar,
 .progress-bar-striped {
@@ -5793,6 +5823,11 @@ button.close {
   -o-transition: -o-transform 0.3s ease-out;
   transition: transform 0.3s ease-out;
 }
+@media (prefers-reduced-motion: reduce) {
+  .modal.fade .modal-dialog {
+    transition: transform 0s;
+  }
+}
 .modal.in .modal-dialog {
   -webkit-transform: translate(0, 0);
   -ms-transform: translate(0, 0);
@@ -6129,6 +6164,11 @@ button.close {
   -webkit-transition: 0.6s ease-in-out left;
   -o-transition: 0.6s ease-in-out left;
   transition: 0.6s ease-in-out left;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-inner > .item {
+    transition: 0s;
+  }
 }
 .carousel-inner > .item > img,
 .carousel-inner > .item > a > img {
