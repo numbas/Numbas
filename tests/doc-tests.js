@@ -1980,6 +1980,19 @@ var doc_tests =
                 ]
             },
             {
+                "name": "substitute(variables,expression)",
+                "examples": [
+                    {
+                        "in": "substitute([\"x\": 1], expression(\"x + y\"))",
+                        "out": "expression(\"1 + y\")"
+                    },
+                    {
+                        "in": "substitute([\"x\": 1, \"y\": expression(\"sqrt(z+2)\")], expression(\"x + y\"))",
+                        "out": "expression(\"1 + sqrt(z + 2)\")"
+                    }
+                ]
+            },
+            {
                 "name": "simplify(expression,rules)",
                 "examples": [
                     {
@@ -2136,6 +2149,23 @@ var doc_tests =
                     {
                         "in": "infer_variable_types(expression(\"k*det(a)\"))",
                         "out": "[ \"k\": \"number\", \"a\": \"matrix\" ]"
+                    }
+                ]
+            },
+            {
+                "name": "infer_type(expression)",
+                "examples": [
+                    {
+                        "in": "infer_type(expression(\"x+2\"))",
+                        "out": "\"number\""
+                    },
+                    {
+                        "in": "infer_type(expression(\"id(n)\"))",
+                        "out": "\"matrix\""
+                    },
+                    {
+                        "in": "infer_type(expression(\"random(2,true)\"))",
+                        "out": "\"?\""
                     }
                 ]
             }

@@ -1695,7 +1695,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Get the definition of the function with the given name which matches the types of the given arguments
      * @param {Numbas.jme.token} tok - the token of the function or operator
      * @param {Array.<Numbas.jme.token>} args
-     * @returns {Numbas.jme.funcObj}
+     * @returns {Object} - {fn: Numbas.jme.funcObj, signature: Numbas.jme.signature}
      */
     matchFunctionToArguments: function(tok,args) {
         var op = tok.name.toLowerCase();
@@ -3712,6 +3712,57 @@ SignatureEnumerator.prototype = {
                 break;
         }
     }
+}
+
+/** Infer the type of an expression by inferring the types of free variables, then finding definitions of operators and functions which work
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.Scope} scope
+ * @returns {String}
+ */
+jme.inferExpressionType = function(tree,scope) {
+    var assignments = jme.inferVariableTypes(tree,scope);
+
+    function fake_token(type) {
+        var tok = {type: type};
+        if(jme.types[type]) {
+            tok.__proto__ = jme.types[type].prototype;
+        }
+        return tok;
+    }
+    for(var x in assignments) {
+        assignments[x] = fake_token(assignments[x]);
+    }
+    console.log(assignments);
+    function infer_type(tree) {
+        var tok = tree.tok;
+        switch(tok.type) {
+            case 'name':
+                return (assignments[tok.name] || tok).type;
+            case 'op':
+            case 'function':
+                var op = tok.name.toLowerCase();
+                if(lazyOps.indexOf(op)>=0) {
+                    return scope.getFunction(op)[0].outtype;
+                }
+                else {
+                    var eargs = [];
+                    for(var i=0;i<tree.args.length;i++) {
+                        eargs.push(fake_token(infer_type(tree.args[i])));
+                    }
+                    console.log(op,eargs);
+                    var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
+                    if(matchedFunction) {
+                        return matchedFunction.fn.outtype;
+                    } else {
+                        return '?';
+                    }
+                }
+            default:
+                return tok.type;
+        }
+    }
+
+    return infer_type(tree);
 }
 
 /** Remove "missing" arguments from a signature-checker result.

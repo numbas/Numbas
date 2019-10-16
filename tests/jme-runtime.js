@@ -13088,7 +13088,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Get the definition of the function with the given name which matches the types of the given arguments
      * @param {Numbas.jme.token} tok - the token of the function or operator
      * @param {Array.<Numbas.jme.token>} args
-     * @returns {Numbas.jme.funcObj}
+     * @returns {Object} - {fn: Numbas.jme.funcObj, signature: Numbas.jme.signature}
      */
     matchFunctionToArguments: function(tok,args) {
         var op = tok.name.toLowerCase();
@@ -15107,6 +15107,57 @@ SignatureEnumerator.prototype = {
     }
 }
 
+/** Infer the type of an expression by inferring the types of free variables, then finding definitions of operators and functions which work
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.Scope} scope
+ * @returns {String}
+ */
+jme.inferExpressionType = function(tree,scope) {
+    var assignments = jme.inferVariableTypes(tree,scope);
+
+    function fake_token(type) {
+        var tok = {type: type};
+        if(jme.types[type]) {
+            tok.__proto__ = jme.types[type].prototype;
+        }
+        return tok;
+    }
+    for(var x in assignments) {
+        assignments[x] = fake_token(assignments[x]);
+    }
+    console.log(assignments);
+    function infer_type(tree) {
+        var tok = tree.tok;
+        switch(tok.type) {
+            case 'name':
+                return (assignments[tok.name] || tok).type;
+            case 'op':
+            case 'function':
+                var op = tok.name.toLowerCase();
+                if(lazyOps.indexOf(op)>=0) {
+                    return scope.getFunction(op)[0].outtype;
+                }
+                else {
+                    var eargs = [];
+                    for(var i=0;i<tree.args.length;i++) {
+                        eargs.push(fake_token(infer_type(tree.args[i])));
+                    }
+                    console.log(op,eargs);
+                    var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
+                    if(matchedFunction) {
+                        return matchedFunction.fn.outtype;
+                    } else {
+                        return '?';
+                    }
+                }
+            default:
+                return tok.type;
+        }
+    }
+
+    return infer_type(tree);
+}
+
 /** Remove "missing" arguments from a signature-checker result.
  * @param {Numbas.jme.signature_result} items
  * @returns {Numbas.jme.signature_result}
@@ -15327,6 +15378,7 @@ var TSet = types.TSet;
 var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
+var TFunc = types.TFunc;
 
 var sig = jme.signature;
 
@@ -16874,6 +16926,7 @@ newBuiltin('type',['?'],TString,null, {
 newBuiltin('name',[TString],TName,function(name){ return name });
 newBuiltin('string',[TName],TString,function(name){ return name });
 newBuiltin('op',[TString],TOp,function(name){ return name });
+newBuiltin('function',[TString],TFunc,function(name){ return name });
 newBuiltin('assert',[TBool,'?'],'?',null,{
     evaluate: function(args, scope) {
         var result = scope.evaluate(args[0]).value;
@@ -16906,6 +16959,19 @@ jme.findvarsOps.try = function(tree,boundvars,scope) {
     return vars;
 }
 newBuiltin('exec',[TOp,TList],TExpression,null, {
+    evaluate: function(args, scope) {
+        var tok = args[0];
+        var eargs = args[1].value.map(function(a) {
+            if(a.type!='expression') {
+                return {tok:a};
+            } else {
+                return a.tree;
+            }
+        });
+        return new TExpression({tok: tok, args: eargs});
+    }
+});
+newBuiltin('exec',[TFunc,TList],TExpression,null, {
     evaluate: function(args, scope) {
         var tok = args[0];
         var eargs = args[1].value.map(function(a) {
@@ -16979,6 +17045,13 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
         var expr = args[0];
         var assignments = jme.inferVariableTypes(expr.tree,scope);
         return jme.wrapValue(assignments);
+    }
+});
+
+newBuiltin('infer_type',[TExpression],TString,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0];
+        return jme.wrapValue(jme.inferExpressionType(expr.tree,scope));
     }
 });
 

@@ -106,9 +106,35 @@ vRange (The range to pick variable values from):
 answerVariables (Variables used in either the correct answer or the student's answer):
     correctVariables or studentVariables
 
+formula_match:
+  match(correctexpr,"$v;lhs = ?;rhs")
+
+is_formula (Is the correct answer a formula of the form name = expression?):
+  formula_match["match"]
+
+formula_variable:
+  try(string(formula_match["groups"]["lhs"]),err,"")
+
+formula_expression:
+  formula_match["groups"]["rhs"]
+
+formula_type:
+  infer_type(formula_expression)
+
 value_generators (Expressions which generate values for each variable in the answer):
     dict(map(
-        [name, get(settings["valueGenerators"],name,default_value_generator[get(variable_types,name,"number")])],
+        [
+          name,
+          get(
+            settings["valueGenerators"],
+            name,
+            if(is_formula and name=formula_variable,
+              exec(function("random"),[formula_expression,default_value_generator[formula_type]])
+            ,
+              default_value_generator[get(variable_types,name,"number")]
+            )
+          )
+        ],
         name,
         answerVariables
     ))
