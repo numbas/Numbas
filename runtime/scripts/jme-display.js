@@ -592,7 +592,7 @@ var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
         }
     }
 }
-/** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
+/** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}
  * @memberof Numbas.jme.display
  * @private
  *
