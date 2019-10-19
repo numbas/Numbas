@@ -399,25 +399,39 @@ var texOps = jme.display.texOps = {
     'floor': (function(thing,texArgs) { return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';}),
     'int': (function(thing,texArgs) { return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
-    'diff': (function(thing,texArgs)
+    'diff': (function(thing,texArgs,settings)
             {
                 var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name') {
-                    return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                    }
                 } else {
-                    return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    }
                 }
             }),
-    'partialdiff': (function(thing,texArgs)
+    'partialdiff': (function(thing,texArgs,settings)
             {
                 var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name')
-                {
-                    return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
-                }
+                    if (settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
+                    }
                 else
                 {
-                    return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    }
                 }
             }),
     'sub': (function(thing,texArgs) {
@@ -644,10 +658,19 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
             if(settings.mixedfractions && f[0] > f[1]) {
                 var properNumerator = math.mod(f[0], f[1]);
                 var mixedInteger = (f[0]-properNumerator)/f[1];
-                out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                if (settings.flatfractions) {
+                    out = mixedInteger+' (\\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.)';
+                } else {
+                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                }
             }
             else {
-                out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                if (settings.flatfractions) {
+                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                }
+                else {
+                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                }
             }
         }
         if(n<0)
