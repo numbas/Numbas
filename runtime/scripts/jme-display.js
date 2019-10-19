@@ -313,12 +313,7 @@ var texOps = jme.display.texOps = {
     }),
     '/': (function(thing,texArgs,settings) {
         if (settings.flatfractions) {
-            for (var i=0; i<2; i++) {
-                // identifying if the numerator and denominator need brackets around them by
-                // checking whether they contain whitespaces
-                if (texArgs[i].includes(' ')) texArgs[i] = '(' + texArgs[i] + ')'
-            }
-            return ('\\left. '+texArgs[0]+' \\middle/ '+texArgs[1]+' \\right.');
+            return '\\left. ' + texifyOpArg(thing,texArgs,0) + ' \\middle/ ' + texifyOpArg(thing,texArgs,1) + ' \\right.'
         } else {
             return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }');
         }
