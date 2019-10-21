@@ -654,7 +654,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
                 var properNumerator = math.mod(f[0], f[1]);
                 var mixedInteger = (f[0]-properNumerator)/f[1];
                 if (settings.flatfractions) {
-                    out = mixedInteger+' (\\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.)';
+                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
                 } else {
                     out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
                 }
