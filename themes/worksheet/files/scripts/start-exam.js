@@ -9,6 +9,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
     };
 
 	Numbas.init = function() {
+        for(var x in Numbas.extensions) {
+            Numbas.activateExtension(x);
+        }
 		var job = Numbas.schedule.add;
 
 		job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
