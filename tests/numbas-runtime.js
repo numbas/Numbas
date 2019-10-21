@@ -12517,12 +12517,7 @@ var texOps = jme.display.texOps = {
     }),
     '/': (function(thing,texArgs,settings) {
         if (settings.flatfractions) {
-            for (var i=0; i<2; i++) {
-                // identifying if the numerator and denominator need brackets around them by
-                // checking whether they contain whitespaces
-                if (texArgs[i].includes(' ')) texArgs[i] = '(' + texArgs[i] + ')'
-            }
-            return ('\\left. '+texArgs[0]+' \\middle/ '+texArgs[1]+' \\right.');
+            return '\\left. ' + texifyOpArg(thing,texArgs,0) + ' \\middle/ ' + texifyOpArg(thing,texArgs,1) + ' \\right.'
         } else {
             return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }');
         }
@@ -12603,25 +12598,39 @@ var texOps = jme.display.texOps = {
     'floor': (function(thing,texArgs) { return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';}),
     'int': (function(thing,texArgs) { return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
-    'diff': (function(thing,texArgs)
+    'diff': (function(thing,texArgs,settings)
             {
                 var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name') {
-                    return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                    }
                 } else {
-                    return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    }
                 }
             }),
-    'partialdiff': (function(thing,texArgs)
+    'partialdiff': (function(thing,texArgs,settings)
             {
                 var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
                 if(thing.args[0].tok.type=='name')
-                {
-                    return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
-                }
+                    if (settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
+                    }
                 else
                 {
-                    return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    if (settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    } else {
+                        return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                    }
                 }
             }),
     'sub': (function(thing,texArgs) {
@@ -12787,7 +12796,7 @@ var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
         }
     }
 }
-/** Convert a number to TeX, displaying it as a fractionm using {@link Numbas.math.rationalApproximation}
+/** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}
  * @memberof Numbas.jme.display
  * @private
  *
@@ -12848,10 +12857,19 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
             if(settings.mixedfractions && f[0] > f[1]) {
                 var properNumerator = math.mod(f[0], f[1]);
                 var mixedInteger = (f[0]-properNumerator)/f[1];
-                out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                if (settings.flatfractions) {
+                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                } else {
+                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                }
             }
             else {
-                out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                if (settings.flatfractions) {
+                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                }
+                else {
+                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                }
             }
         }
         if(n<0)
@@ -16978,7 +16996,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.score=0;
         for(var i=0; i<this.questionList.length; i++)
             this.score += this.questionList[i].score;
-        this.percentScore = this.mark>0 ? Math.round(100*this.score/this.mark) : 0;
+        this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
     },
     /**
      * Call this when student wants to move between questions.
@@ -17125,7 +17143,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         //work out summary info
         this.passed = (this.percentScore >= this.settings.percentPass*100);
         this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-        var percentScore = this.percentScore;
+        var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
         this.feedbackMessage = null;
         for(var i=0;i<this.feedbackMessages.length;i++) {
             if(percentScore>=this.feedbackMessages[i].threshold) {
@@ -23628,7 +23646,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: '\
             <input type="text" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), attr: {title: title}">\
-            <span class="jme-preview" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
+            <span class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
     Knockout.components.register('answer-widget-gapfill', {
