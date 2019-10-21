@@ -562,7 +562,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.score=0;
         for(var i=0; i<this.questionList.length; i++)
             this.score += this.questionList[i].score;
-        this.percentScore = this.mark>0 ? Math.round(100*this.score/this.mark) : 0;
+        this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
     },
     /**
      * Call this when student wants to move between questions.
@@ -709,7 +709,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         //work out summary info
         this.passed = (this.percentScore >= this.settings.percentPass*100);
         this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-        var percentScore = this.percentScore;
+        var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
         this.feedbackMessage = null;
         for(var i=0;i<this.feedbackMessages.length;i++) {
             if(percentScore>=this.feedbackMessages[i].threshold) {
