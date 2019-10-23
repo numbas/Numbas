@@ -10664,6 +10664,13 @@ newBuiltin('match_regex',[TString,TString,TString],TList,function(pattern,str,fl
     var m = re.exec(str);
     return m || [];
 },{unwrapValues: true});
+
+newBuiltin('split_regex',[TString,TString],TList, function(str,delimiter) {
+    return str.split(new RegExp(delimiter)).map(function(s){return new TString(s)});
+});
+newBuiltin('split_regex',[TString,TString,TString],TList, function(str,delimiter,flags) {
+    return str.split(new RegExp(delimiter,flags)).map(function(s){return new TString(s)});
+});
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange,TRange], TList,
