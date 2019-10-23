@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="part[@custom='true']" mode="typespecific">
     <xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
-    <span data-bind="event: inputEvents, component: {{name: 'answer-widget', params: {{answer: studentAnswer, widget: input_widget, widget_options: input_options, part: part, events: part.display.inputEvents, title: input_title}}}}"></span>
+    <span data-bind="event: inputEvents, component: {{name: 'answer-widget', params: {{answer: studentAnswer, widget: input_widget, widget_options: input_options, part: part, disable: revealed, events: part.display.inputEvents, title: input_title}}}}"></span>
     <span class="help-block hint" data-bind="visible: input_options.hint, html: input_options.hint, typeset: input_options.hint"></span>
 {% endraw %}
     {% include 'xslt/feedback_icon.xslt' %}
