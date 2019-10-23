@@ -43,6 +43,7 @@ var TSet = types.TSet;
 var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
+var TFunc = types.TFunc;
 
 var sig = jme.signature;
 
@@ -1609,6 +1610,7 @@ newBuiltin('type',['?'],TString,null, {
 newBuiltin('name',[TString],TName,function(name){ return name });
 newBuiltin('string',[TName],TString,function(name){ return name });
 newBuiltin('op',[TString],TOp,function(name){ return name });
+newBuiltin('function',[TString],TFunc,function(name){ return name });
 newBuiltin('assert',[TBool,'?'],'?',null,{
     evaluate: function(args, scope) {
         var result = scope.evaluate(args[0]).value;
@@ -1641,6 +1643,19 @@ jme.findvarsOps.try = function(tree,boundvars,scope) {
     return vars;
 }
 newBuiltin('exec',[TOp,TList],TExpression,null, {
+    evaluate: function(args, scope) {
+        var tok = args[0];
+        var eargs = args[1].value.map(function(a) {
+            if(a.type!='expression') {
+                return {tok:a};
+            } else {
+                return a.tree;
+            }
+        });
+        return new TExpression({tok: tok, args: eargs});
+    }
+});
+newBuiltin('exec',[TFunc,TList],TExpression,null, {
     evaluate: function(args, scope) {
         var tok = args[0];
         var eargs = args[1].value.map(function(a) {
@@ -1714,6 +1729,13 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
         var expr = args[0];
         var assignments = jme.inferVariableTypes(expr.tree,scope);
         return jme.wrapValue(assignments);
+    }
+});
+
+newBuiltin('infer_type',[TExpression],TString,null, {
+    evaluate: function(args, scope) {
+        var expr = args[0];
+        return jme.wrapValue(jme.inferExpressionType(expr.tree,scope));
     }
 });
 

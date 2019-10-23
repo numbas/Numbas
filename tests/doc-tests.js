@@ -1088,6 +1088,19 @@ var doc_tests =
                 ]
             },
             {
+                "name": "split_regex(string,pattern,flags)",
+                "examples": [
+                    {
+                        "in": "split_regex(\"a, b,c, d \",\", *\")",
+                        "out": "[\"a\",\"b\",\"c\",\"d\"]"
+                    },
+                    {
+                        "in": "split_regex(\"this and that AND THIS\",\" and \",\"i\")",
+                        "out": "[\"this\",\"that\",\"THIS\"]"
+                    }
+                ]
+            },
+            {
                 "name": "trim(str)",
                 "examples": [
                     {
@@ -1950,6 +1963,10 @@ var doc_tests =
                 "examples": []
             },
             {
+                "name": "function(name)",
+                "examples": []
+            },
+            {
                 "name": "exec(op, arguments)",
                 "examples": [
                     {
@@ -1976,6 +1993,19 @@ var doc_tests =
                     {
                         "in": "findvars(expression(\"map(x+2, x, [1,2,3])\"))",
                         "out": "[]"
+                    }
+                ]
+            },
+            {
+                "name": "substitute(variables,expression)",
+                "examples": [
+                    {
+                        "in": "substitute([\"x\": 1], expression(\"x + y\"))",
+                        "out": "expression(\"1 + y\")"
+                    },
+                    {
+                        "in": "substitute([\"x\": 1, \"y\": expression(\"sqrt(z+2)\")], expression(\"x + y\"))",
+                        "out": "expression(\"1 + sqrt(z + 2)\")"
                     }
                 ]
             },
@@ -2136,6 +2166,23 @@ var doc_tests =
                     {
                         "in": "infer_variable_types(expression(\"k*det(a)\"))",
                         "out": "[ \"k\": \"number\", \"a\": \"matrix\" ]"
+                    }
+                ]
+            },
+            {
+                "name": "infer_type(expression)",
+                "examples": [
+                    {
+                        "in": "infer_type(expression(\"x+2\"))",
+                        "out": "\"number\""
+                    },
+                    {
+                        "in": "infer_type(expression(\"id(n)\"))",
+                        "out": "\"matrix\""
+                    },
+                    {
+                        "in": "infer_type(expression(\"random(2,true)\"))",
+                        "out": "\"?\""
                     }
                 ]
             }
