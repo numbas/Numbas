@@ -829,6 +829,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         out.push(str.slice(end));
         return out;
     },
+
     /** Because XML doesn't like having ampersands hanging about, replace them with escape codes
      * @param {String} str - XML string
      * @returns {String}

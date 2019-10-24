@@ -89,6 +89,15 @@
                     deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
 				});
 
+                QUnit.test('findvars in HTML',function(assert) {
+                    var s = new Numbas.jme.variables.DOMcontentsubber(Numbas.jme.builtinScope);
+                    var d = document.createElement('div');
+                    d.innerHTML = '<p>$\\var{x} + \\simplify{f(y)-{y}}$</p><div eval-style="s">{f(c)}</div>';
+                    var vars = s.findvars(d);
+                    vars.sort();
+                    deepCloseEqual(assert, vars,['c','s','x','y']);
+                });
+
                 QUnit.test('util',function(assert) {
                     deepCloseEqual(assert, Numbas.util.separateThousands(0,','),'0','0');
                     deepCloseEqual(assert, Numbas.util.separateThousands(123,','),'123','123');
