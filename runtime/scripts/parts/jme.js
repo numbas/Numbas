@@ -263,6 +263,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             answerSimplification,
             scope
         );
+        console.info(settings.correctAnswer);
         if(settings.correctAnswer == '' && this.marks>0) {
             this.error('part.jme.answer missing');
         }

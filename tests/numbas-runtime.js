@@ -13511,7 +13511,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         else
             out = f[0]+'/'+f[1];
         if(n<0)
-            out=' - '+out;
+            out='-'+out;
         switch(piD)
         {
         case 0:
@@ -25119,6 +25119,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             answerSimplification,
             scope
         );
+        console.info(settings.correctAnswer);
         if(settings.correctAnswer == '' && this.marks>0) {
             this.error('part.jme.answer missing');
         }

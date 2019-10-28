@@ -18460,7 +18460,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         else
             out = f[0]+'/'+f[1];
         if(n<0)
-            out=' - '+out;
+            out='-'+out;
         switch(piD)
         {
         case 0:
