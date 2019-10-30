@@ -350,52 +350,16 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             if(valid===undefined)
                 valid = this.part.answered;
             this.answered(valid);
-            if(this.part.markingFeedback.length && !this.part.question.revealed)
-            {
-                var messages = [];
-                var maxMarks = this.part.availableMarks();
-                var t = 0;
-                for(var i=0;i<this.part.markingFeedback.length;i++)
-                {
-                    var action = this.part.markingFeedback[i];
-                    var change = action.credit*maxMarks;
-                    var credit_change = action.credit;
-                    if(action.gap!=undefined) {
-                        change *= this.part.gaps[action.gap].marks/this.part.marks;
-                        credit_change *= this.part.marks>0 ? this.part.gaps[action.gap].marks/this.part.marks : 1/this.part.gaps.length;
-                    }
-                    t += change;
-                    var message = action.message || '';
-                    if(util.isNonemptyHTML(message))
-                    {
-                        var marks = Math.abs(change);
-                        if(change>0)
-                            message+='\n\n'+R('feedback.you were awarded',{count:marks});
-                        else if(change<0)
-                            message+='\n\n'+R('feedback.taken away',{count:marks});
-                    }
-                    var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
-                    switch(action.reason) {
-                        case 'correct':
-                            change_desc = 'positive';
-                            break;
-                        case 'incorrect':
-                            change_desc = 'negative';
-                            break;
-                        case 'invalid':
-                            change_desc = 'invalid';
-                            break;
-                    }
+            if(this.part.markingFeedback.length && !this.part.question.revealed) {
+                var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message); }).map(function(action) {
                     var icons = {
                         'positive': 'icon-ok',
                         'negative': 'icon-remove',
                         'neutral': '',
                         'invalid': 'icon-exclamation-sign'
                     }
-                    if(util.isNonemptyHTML(message)) {
-                        messages.push({credit_change: change_desc, message: message, icon: icons[change_desc]});
-                    }
-                }
+                    return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change]};
+                });
                 this.feedbackMessages(messages);
             }
         },

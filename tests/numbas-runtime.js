@@ -253,17 +253,18 @@ Numbas.activateExtension = function(name) {
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
-    for(var file in scriptreqs) {
-        var req = scriptreqs[file];
+    var fails = [];
+    Object.values(scriptreqs).forEach(function(req) {
         if(req.executed) {
-            continue;
+            return;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            var err = new Numbas.Error('die.script not loaded',{file:file});
+            var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
-            break;
         }
-    }
+        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
+    });
+    return fails;
 }
 })();
 
@@ -14838,6 +14839,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Element}
      */
     xml: '',
+    /** JSON defining this part
+     * @type {Object}
+     */
+    json: null,
     /** Load the part's settings from an XML <part> node
      * @param {Element} xml
      */
@@ -14895,6 +14900,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {Object} data
      */
     loadFromJSON: function(data) {
+        this.json = data;
         var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -15707,6 +15713,41 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         }
         part.answered = valid;
+
+        var t = 0;
+        for(var i=0;i<part.markingFeedback.length;i++) {
+            var action = part.markingFeedback[i];
+            var change = action.credit*part.marks;
+            var credit_change = action.credit;
+            if(action.gap!=undefined) {
+                change *= part.gaps[action.gap].marks/part.marks;
+                credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
+            }
+            t += change;
+            var message = action.message || '';
+            if(util.isNonemptyHTML(message)) {
+                var marks = Math.abs(change);
+                if(change>0) {
+                    action.message += '\n\n'+R('feedback.you were awarded',{count:marks});
+                } else if(change<0) {
+                    action.message += '\n\n'+R('feedback.taken away',{count:marks});
+                }
+            }
+            var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
+            switch(action.reason) {
+                case 'correct':
+                    change_desc = 'positive';
+                    break;
+                case 'incorrect':
+                    change_desc = 'negative';
+                    break;
+                case 'invalid':
+                    change_desc = 'invalid';
+                    break;
+            }
+            action.credit_change = change_desc;
+        }
+
     },
     marking_parameters: function(studentAnswer) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -23633,7 +23674,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.title = params.title || '';
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget(), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+Knockout.unwrap(widget), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {
