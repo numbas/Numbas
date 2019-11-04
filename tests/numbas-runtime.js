@@ -6335,6 +6335,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0','','0']
     ],
     collectNumbers: [
+        ['$n;a / $n;b / $n;c','acg','a/eval(b*c)'],
         ['$n;a * 1/$n;b','ag','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
