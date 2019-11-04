@@ -1134,6 +1134,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         out.push(str.slice(end));
         return out;
     },
+
     /** Because XML doesn't like having ampersands hanging about, replace them with escape codes
      * @param {String} str - XML string
      * @returns {String}
@@ -13510,7 +13511,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         else
             out = f[0]+'/'+f[1];
         if(n<0)
-            out=' - '+out;
+            out='-'+out;
         switch(piD)
         {
         case 0:
@@ -14467,6 +14468,9 @@ var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.re_end = undefined;
 }
 DOMcontentsubber.prototype = {
+    /** Substitute JME values into the given element and any children
+     * @param {Element} element
+     */
     subvars: function(element) {
         switch(element.nodeType) {
             case 1: //element
@@ -14563,6 +14567,100 @@ DOMcontentsubber.prototype = {
             selector.before(n);
         }
         selector.remove();
+    },
+
+    /** Find all variables which would be used when substituting into the given element
+     * @param {Element} element
+     * @returns {Array.<String>}
+     */
+    findvars: function(element) {
+        switch(element.nodeType) {
+            case 1: //element
+                return this.findvars_element(element);
+            case 3: //text
+                return this.findvars_text(element);
+            default:
+                return [];
+        }
+    },
+
+    findvars_element: function(element) {
+        var subber = this;
+        var scope = this.scope;
+        if($.nodeName(element,'iframe')) {
+            return [];
+        } else if(element.hasAttribute('nosubvars')) {
+            return [];
+        } else if($.nodeName(element,'img')) {
+            return [];
+        } else if($.nodeName(element,'object')) {
+            if(element.contentDocument && element.contentDocument.rootElement) {
+                return this.findvars_element(element.contentDocument.rootElement);
+            }
+            return;
+        }
+        var foundvars = [];
+        if(element.hasAttribute('data-jme-visible')) {
+            var condition = element.getAttribute('data-jme-visible');
+            try {
+                var tree = scope.parser.compile(condition);
+            } catch(e) {
+                return [];
+            }
+            foundvars = foundvars.merge(jme.findvars(tree));
+        }
+        for(var i=0;i<element.attributes.length;i++) {
+            var m;
+            var attr = element.attributes[i];
+            if(m = attr.name.match(/^eval-(.*)/)) {
+                try {
+                    var tree = scope.parser.compile(attr.value);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+        }
+        var subber = this;
+        var o_re_end = this.re_end;
+        $(element).contents().each(function() {
+            var vars = subber.findvars(this);
+            if(vars.length) {
+                foundvars = foundvars.merge(vars);
+            }
+        });
+        this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
+        return foundvars;
+    },
+
+    findvars_text: function(node) {
+        var scope = this.scope;
+        var foundvars = [];
+        var str = node.nodeValue;
+        var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+        this.re_end = bits.re_end;
+        for(var i=0; i<bits.length; i+=4) {
+            var tbits = util.splitbrackets(bits[i],'{','}');
+            for(var j=1;j<tbits.length;j+=2) {
+                try {
+                    var tree = scope.parser.compile(tbits[j]);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+            var tex = bits[i+2] || '';
+            var texbits = jme.texsplit(tex);
+            for(var j=3;j<texbits.length;j+=4) {
+                try {
+                    var tree = scope.parser.compile(texbits[j]);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+        }
+        return foundvars;
     }
 }
 });
@@ -14919,7 +15017,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function() {'+script+'\n}).apply(this); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
+            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
         }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
@@ -23525,17 +23623,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
     Knockout.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
-            this.part = Knockout.unwrap(params.part);
+            this.part = params.part;
             this.disable = params.disable;
-            this.widget = params.widget || this.part.input_widget();
-            this.widget_options = params.widget_options || this.part.input_options();
+            this.widget = params.widget || Knockout.computed(function() { return this.part() && this.part().input_widget();},this);
+            this.widget_options = params.widget_options || Knockout.computed(function() { return this.part() && this.part().input_options()},this);
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
             this.events = params.events;
             this.title = params.title || '';
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget, params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget(), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {
@@ -23545,7 +23643,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.input = Knockout.observable(init.valid ? init.value || '' : '');
             this.part = params.part;
             this.disable = params.disable;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.title = params.title || '';
             this.allowEmpty = this.options.allowEmpty;
@@ -23578,7 +23676,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var vm = this;
             this.answerJSON = params.answerJSON;
             this.part = params.part;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
             this.disable = params.disable;
@@ -23643,7 +23741,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
             this.disable = params.disable;
@@ -23765,7 +23863,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             var vm = this;
             this.answerJSON = params.answerJSON;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.disable = params.disable;
             this.title = params.title || '';
             this.events = params.events;
@@ -24028,7 +24126,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.part = params.part;
             this.disable = params.disable;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answerAsArray = this.options.answerAsArray;
@@ -24085,7 +24183,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.part = params.part;
             this.disable = params.disable;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.title = params.title || '';
             this.events = params.events;
             this.choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
@@ -24147,7 +24245,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var vm = this;
             this.part = params.part;
             this.disable = params.disable;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON);
@@ -24208,7 +24306,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.part = params.part;
             this.answerJSON = params.answerJSON;
             this.disable = params.disable;
-            this.options = params.options;
+            this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);

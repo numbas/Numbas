@@ -416,6 +416,9 @@ var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.re_end = undefined;
 }
 DOMcontentsubber.prototype = {
+    /** Substitute JME values into the given element and any children
+     * @param {Element} element
+     */
     subvars: function(element) {
         switch(element.nodeType) {
             case 1: //element
@@ -512,6 +515,100 @@ DOMcontentsubber.prototype = {
             selector.before(n);
         }
         selector.remove();
+    },
+
+    /** Find all variables which would be used when substituting into the given element
+     * @param {Element} element
+     * @returns {Array.<String>}
+     */
+    findvars: function(element) {
+        switch(element.nodeType) {
+            case 1: //element
+                return this.findvars_element(element);
+            case 3: //text
+                return this.findvars_text(element);
+            default:
+                return [];
+        }
+    },
+
+    findvars_element: function(element) {
+        var subber = this;
+        var scope = this.scope;
+        if($.nodeName(element,'iframe')) {
+            return [];
+        } else if(element.hasAttribute('nosubvars')) {
+            return [];
+        } else if($.nodeName(element,'img')) {
+            return [];
+        } else if($.nodeName(element,'object')) {
+            if(element.contentDocument && element.contentDocument.rootElement) {
+                return this.findvars_element(element.contentDocument.rootElement);
+            }
+            return;
+        }
+        var foundvars = [];
+        if(element.hasAttribute('data-jme-visible')) {
+            var condition = element.getAttribute('data-jme-visible');
+            try {
+                var tree = scope.parser.compile(condition);
+            } catch(e) {
+                return [];
+            }
+            foundvars = foundvars.merge(jme.findvars(tree));
+        }
+        for(var i=0;i<element.attributes.length;i++) {
+            var m;
+            var attr = element.attributes[i];
+            if(m = attr.name.match(/^eval-(.*)/)) {
+                try {
+                    var tree = scope.parser.compile(attr.value);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+        }
+        var subber = this;
+        var o_re_end = this.re_end;
+        $(element).contents().each(function() {
+            var vars = subber.findvars(this);
+            if(vars.length) {
+                foundvars = foundvars.merge(vars);
+            }
+        });
+        this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
+        return foundvars;
+    },
+
+    findvars_text: function(node) {
+        var scope = this.scope;
+        var foundvars = [];
+        var str = node.nodeValue;
+        var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+        this.re_end = bits.re_end;
+        for(var i=0; i<bits.length; i+=4) {
+            var tbits = util.splitbrackets(bits[i],'{','}');
+            for(var j=1;j<tbits.length;j+=2) {
+                try {
+                    var tree = scope.parser.compile(tbits[j]);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+            var tex = bits[i+2] || '';
+            var texbits = jme.texsplit(tex);
+            for(var j=3;j<texbits.length;j+=4) {
+                try {
+                    var tree = scope.parser.compile(texbits[j]);
+                } catch(e) {
+                    continue;
+                }
+                foundvars = foundvars.merge(jme.findvars(tree));
+            }
+        }
+        return foundvars;
     }
 }
 });
