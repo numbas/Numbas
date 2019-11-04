@@ -244,6 +244,9 @@ Numbas.addExtension = function(name,deps,callback) {
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
+    if(!cb) {
+        throw(new Numbas.Error("extension.not found",{name: name}));
+    }
     if(!cb.activated) {
         cb.callback(cb.extension);
         cb.activated = true;
@@ -9589,7 +9592,14 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
  */
 var compareTokens = jme.compareTokens = function(a,b) {
     if(a.type!=b.type) {
-        return jme.compareTrees({tok:a},{tok:b});
+        var type = jme.findCompatibleType(a.type,b.type);
+        if(type) {
+            var ca = jme.castToType(a,type);
+            var cb = jme.castToType(b,type);
+            return compareTokens(ca,cb);
+        } else {
+            return jme.compareTrees({tok:a},{tok:b});
+        }
     } else {
         var compare = tokenComparisons[a.type];
         if(compare) {
@@ -23633,7 +23643,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.title = params.title || '';
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget(), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+Knockout.unwrap(widget), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {

@@ -3142,7 +3142,14 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
  */
 var compareTokens = jme.compareTokens = function(a,b) {
     if(a.type!=b.type) {
-        return jme.compareTrees({tok:a},{tok:b});
+        var type = jme.findCompatibleType(a.type,b.type);
+        if(type) {
+            var ca = jme.castToType(a,type);
+            var cb = jme.castToType(b,type);
+            return compareTokens(ca,cb);
+        } else {
+            return jme.compareTrees({tok:a},{tok:b});
+        }
     } else {
         var compare = tokenComparisons[a.type];
         if(compare) {
