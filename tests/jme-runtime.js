@@ -11288,7 +11288,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['$n;a * (1/?;b)','ags','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! $n)`+;x * real:$n;n','acgs','n*x']            //shift numbers to left hand side
+        ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']            //shift numbers to left hand side
     ],
     simplifyFractions: [
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
