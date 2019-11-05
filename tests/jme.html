@@ -356,6 +356,10 @@
 					var s = Numbas.jme.display.treeToJME(tree);
                     closeEqual(assert, s,'let([ q, w ],[ 1, 1 + 1 ],z,1,q + w)','Substitute into let')
 
+                    deepCloseEqual(assert, evaluate('let(a,1,let(a,2,b,a,b))').value, 2, 'let(a,1,let(a,2,b,a,b))');
+                    deepCloseEqual(assert, evaluate('let(b,1,let(a,b,b,a+1,b))').value, 2, 'let(b,1,let(a,b,b,a+1,b))');
+                    deepCloseEqual(assert, evaluate('let(a,1,let(["a":2,"b":a],b))').value, 1, 'let(a,1,let(["a":2,"b":a],b))');
+
                     /*
                     // Removed while I think about how I want this to work
 

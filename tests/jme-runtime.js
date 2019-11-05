@@ -16519,12 +16519,29 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     return vars;
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
+    var nscope = new Scope([scope]);
     if(tree.args[0].tok.type=='dict') {
         var d = tree.args[0];
-        d.args = d.args.map(function(da) { return jme.substituteTree(da,scope,allowUnbound) });
+        var names = d.args.map(function(da) { return da.tok.key; });
+        for(var i=0;i<names.length;i++) {
+            nscope.deleteVariable(names[i]);
+        }
+        d.args = d.args.map(function(da) { return jme.substituteTree(da,nscope,allowUnbound) });
     } else {
         for(var i=1;i<tree.args.length-1;i+=2) {
-            tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+            switch(tree.args[i-1].tok.type) {
+                case 'name':
+                    var name = tree.args[i-1].tok.name;
+                    nscope.deleteVariable(name);
+                    break;
+                case 'list':
+                    var names = tree.args[i-1].args;
+                    for(var j=0;j<names.length;j++) {
+                        nscope.deleteVariable(names[j].tok.name);
+                    }
+                    break;
+            }
+            tree.args[i] = jme.substituteTree(tree.args[i],nscope,allowUnbound);
         }
     }
 }
