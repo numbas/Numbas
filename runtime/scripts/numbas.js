@@ -242,6 +242,9 @@ Numbas.addExtension = function(name,deps,callback) {
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
+    if(!cb) {
+        throw(new Numbas.Error("extension.not found",{name: name}));
+    }
     if(!cb.activated) {
         cb.callback(cb.extension);
         cb.activated = true;

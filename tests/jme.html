@@ -356,6 +356,10 @@
 					var s = Numbas.jme.display.treeToJME(tree);
                     closeEqual(assert, s,'let([ q, w ],[ 1, 1 + 1 ],z,1,q + w)','Substitute into let')
 
+                    deepCloseEqual(assert, evaluate('let(a,1,let(a,2,b,a,b))').value, 2, 'let(a,1,let(a,2,b,a,b))');
+                    deepCloseEqual(assert, evaluate('let(b,1,let(a,b,b,a+1,b))').value, 2, 'let(b,1,let(a,b,b,a+1,b))');
+                    deepCloseEqual(assert, evaluate('let(a,1,let(["a":2,"b":a],b))').value, 1, 'let(a,1,let(["a":2,"b":a],b))');
+
                     /*
                     // Removed while I think about how I want this to work
 
@@ -908,6 +912,9 @@
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([1,2,3])")),[1,2,3],"sort([1,2,3])");
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([2,1,3])")),[1,2,3],"sort([2,1,3])");
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort([expression('5'),expression('3')])")).map(function(t){return t.tok.value}),[3,5],"sort([expression('5'),expression('3')])");
+
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate('sort([2,1 as "number"])')),[1,2],'sort(2,1 as "number")');
+                    deepCloseEqual(assert,jme.unwrapValue(evaluate('sort([1/2, 1/4, 1/2, 1/4])')).map(function(n){return n.toFloat()}),[0.25,0.25,0.5,0.5],'sort([1/2,1/4,1/2,1/4])');
 
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([1,2,3])")),[0,1,2],"sort_destinations([1,2,3])");
                     deepCloseEqual(assert,jme.unwrapValue(evaluate("sort_destinations([2,1,3])")),[1,0,2],"sort_destinations([2,1,3])");
@@ -1471,7 +1478,10 @@
                     assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
                     assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers'),'(49 - 63i)/130',"(49)/(130)-(63)/(130)*i");
                     assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers,!collectLikeFractions'),'49/130 - (63/130)*i',"(49)/(130)-(63)/(130)*i");
-                    assert.equal(simplifyExpression("0(1/(9x))",'all'),'0(1/(9x))','0(1/(9x)) doesn\'t get stuck in a loop');
+                    assert.equal(simplifyExpression("(1/10/10)*9",'collectNumbers'),'9/100',"(1/10/10)*9 doesn\'t get stuck in a loop");
+                    assert.equal(simplifyExpression("4*(1/3/x)",'all'),'4/(3x)',"4*(1/3/x) doesn\'t get stuck in a loop");
+                    assert.equal(simplifyExpression("0(1/(9x))",'all'),'0','0(1/(9x)) doesn\'t get stuck in a loop');
+                    assert.equal(simplifyExpression("2*(x*(-1/2))",'all'),'-x','2*(x*(-1/2)) doesn\'t get stuck in a loop');
                     assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('6-48i')},{fractionnumbers:true}),'6 - 48i','6-48i');
 
 					var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
