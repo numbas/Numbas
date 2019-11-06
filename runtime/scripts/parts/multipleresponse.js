@@ -525,6 +525,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         return {
             choices: this.settings.choices,
             answers: this.settings.answers,
+            displayType: this.settings.displayType,
+            layout: this.layout,
             answerAsArray: true
         };
     },
