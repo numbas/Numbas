@@ -546,12 +546,10 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         q.signals.on('ready', function() {
             q.allParts().forEach(function(p) {
                 p.json.unitTests.forEach(function(test) {
-                    console.log(test);
                     QUnit.test(test.name, function(assert) {
                         p.storeAnswer(test.answer.value);
                         p.setStudentAnswer();
                         var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
-                        console.log(res);
                         assert.ok(res.state_valid.mark);
                         test.notes.forEach(function(note) {
                             assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
@@ -570,12 +568,12 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                             assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
                         });
 
+                        p.credit = 0;
+
                         var final_res = p.markAgainstScope(p.getScope(),{markingFeedback:[],warnings:[]});
-                        console.log('final_res',final_res);
                         var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
                         var mark_note = test.notes.find(function(n) { return n.name=='mark' });
                         var expectedMessages = mark_note.expected.messages.join('\n');
-                        console.log(messages);
                         assert.equal(messages,expectedMessages,'Feedback messages');
                         var warnings = final_res.warnings.join('\n');
                         var expectedWarnings = mark_note.expected.warnings.join('\n');
