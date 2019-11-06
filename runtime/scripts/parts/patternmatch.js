@@ -46,6 +46,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
         tryLoad(data, ['caseSensitive', 'partialCredit','matchMode'], settings);
+        settings.partialCredit /= 100;
     },
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());
