@@ -84,7 +84,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,1,'"1/3" correct');
     });
     QUnit.test('Answer is 1/3, fraction must be reduced', function(assert) {
-        var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', allowFractions: true, mustBeReduced: true, mustBeReducedPC: 0.5});
+        var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', allowFractions: true, mustBeReduced: true, mustBeReducedPC: 50});
         var res = mark_part(p,'1/3');
         assert.equal(res.credit,1,'"1/3" correct');
         var res = mark_part(p,'2/6');
@@ -540,13 +540,13 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
 
     unit_test_questions.forEach(function(data) {
         var name = data.name;
-        QUnit.module(name);
         var q = Numbas.createQuestionFromJSON(data);
         q.generateVariables();
         q.signals.on('ready', function() {
+            QUnit.module(name);
             q.allParts().forEach(function(p) {
                 p.json.unitTests.forEach(function(test) {
-                    QUnit.test(test.name, function(assert) {
+                    QUnit.test(p.name+' '+test.name, function(assert) {
                         p.storeAnswer(test.answer.value);
                         p.setStudentAnswer();
                         var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
@@ -570,7 +570,8 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
 
                         p.credit = 0;
 
-                        var final_res = p.markAgainstScope(p.getScope(),{markingFeedback:[],warnings:[]});
+                        p.submit();
+                        var final_res = p.marking_result;
                         var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
                         var mark_note = test.notes.find(function(n) { return n.name=='mark' });
                         var expectedMessages = mark_note.expected.messages.join('\n');
@@ -580,11 +581,6 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                         assert.equal(warnings, expectedWarnings,'Warnings');
                         assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
                         assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
-                        /*
-                        var differentError = this.error() != this.expected.error();
-                        var differentValidity = this.valid() != this.expected.valid();
-                        var differentCredit = this.credit() != this.expected.credit();
-                        */
                     });
                 });
             });
