@@ -821,6 +821,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.markingFeedback.splice(0,0,{op: 'feedback', message: R('part.marking.used variable replacements')});
         }
         this.calculateScore();
+
+        this.marking_result = {
+            warnings: this.warnings.slice(),
+            markingFeedback: this.markingFeedback.slice(),
+            finalised_result: this.finalised_result,
+            credit: this.credit,
+            answered: this.answered
+        };
+
         this.question && this.question.updateScore();
         if(this.answered)
         {
@@ -1055,7 +1064,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 change *= part.gaps[action.gap].marks/part.marks;
                 credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
             }
+            var ot = t;
             t += change;
+            t = Math.max(0,t);
+            change = t-ot;
             var message = action.message || '';
             if(util.isNonemptyHTML(message)) {
                 var marks = Math.abs(change);
