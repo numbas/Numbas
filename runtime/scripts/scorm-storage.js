@@ -296,10 +296,19 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     partSuspendData: function(part)
     {
+        var name_bits = [part.name];
+        var par = part.parentPart;
+        while(par) {
+            name_bits.splice(0,0,par.name);
+            par = par.parentPart;
+        }
+        name_bits.splice(0,0,part.question.name);
+        var name = name_bits.join(' ');
         var pobj = {
             answered: part.answered,
             stepsShown: part.stepsShown,
-            stepsOpen: part.stepsOpen
+            stepsOpen: part.stepsOpen,
+            name: name
         };
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
