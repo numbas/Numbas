@@ -14,8 +14,8 @@ class VersionError(Exception):
 class NumbasObject:
     version = '1'
 
-    def __init__(self,source=None,data=None,version=1):
-        if data:
+    def __init__(self,source=None,data=None,version='1'):
+        if data is not None:
             self.set_data(data,version)
         elif source:
             self.from_source(source)

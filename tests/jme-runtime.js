@@ -244,6 +244,9 @@ Numbas.addExtension = function(name,deps,callback) {
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
+    if(!cb) {
+        throw(new Numbas.Error("extension.not found",{name: name}));
+    }
     if(!cb.activated) {
         cb.callback(cb.extension);
         cb.activated = true;
@@ -253,17 +256,18 @@ Numbas.activateExtension = function(name) {
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
-    for(var file in scriptreqs) {
-        var req = scriptreqs[file];
+    var fails = [];
+    Object.values(scriptreqs).forEach(function(req) {
         if(req.executed) {
-            continue;
+            return;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            var err = new Numbas.Error('die.script not loaded',{file:file});
+            var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
-            break;
         }
-    }
+        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
+    });
+    return fails;
 }
 })();
 
@@ -11250,7 +11254,8 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
         ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c']
+        ['?;a+(-?;b-?;c)','','a-b-c'],
+        ['?;a/?;b/?;c','','a/(b*c)']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
@@ -11281,10 +11286,10 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0','','0']
     ],
     collectNumbers: [
-        ['$n;a * 1/$n;b','ag','a/b'],
+        ['$n;a * (1/?;b)','ags','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! $n)`+;x * real:$n;n','acgs','n*x']            //shift numbers to left hand side
+        ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']            //shift numbers to left hand side
     ],
     simplifyFractions: [
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
@@ -14520,7 +14525,7 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
     'rational': function(a,b) {
         a = a.value.toFloat();
         b = b.value.toFloat();
-        return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
+        return a>b ? 1 : a<b ? -1 : 0;
     },
     'string': compareTokensByValue,
     'boolean': compareTokensByValue
@@ -14538,7 +14543,14 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
  */
 var compareTokens = jme.compareTokens = function(a,b) {
     if(a.type!=b.type) {
-        return jme.compareTrees({tok:a},{tok:b});
+        var type = jme.findCompatibleType(a.type,b.type);
+        if(type) {
+            var ca = jme.castToType(a,type);
+            var cb = jme.castToType(b,type);
+            return compareTokens(ca,cb);
+        } else {
+            return jme.compareTrees({tok:a},{tok:b});
+        }
     } else {
         var compare = tokenComparisons[a.type];
         if(compare) {
@@ -16508,12 +16520,29 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     return vars;
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
+    var nscope = new Scope([scope]);
     if(tree.args[0].tok.type=='dict') {
         var d = tree.args[0];
-        d.args = d.args.map(function(da) { return jme.substituteTree(da,scope,allowUnbound) });
+        var names = d.args.map(function(da) { return da.tok.key; });
+        for(var i=0;i<names.length;i++) {
+            nscope.deleteVariable(names[i]);
+        }
+        d.args = d.args.map(function(da) { return jme.substituteTree(da,nscope,allowUnbound) });
     } else {
         for(var i=1;i<tree.args.length-1;i+=2) {
-            tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+            switch(tree.args[i-1].tok.type) {
+                case 'name':
+                    var name = tree.args[i-1].tok.name;
+                    nscope.deleteVariable(name);
+                    break;
+                case 'list':
+                    var names = tree.args[i-1].args;
+                    for(var j=0;j<names.length;j++) {
+                        nscope.deleteVariable(names[j].tok.name);
+                    }
+                    break;
+            }
+            tree.args[i] = jme.substituteTree(tree.args[i],nscope,allowUnbound);
         }
     }
 }

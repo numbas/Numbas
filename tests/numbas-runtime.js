@@ -244,6 +244,9 @@ Numbas.addExtension = function(name,deps,callback) {
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
+    if(!cb) {
+        throw(new Numbas.Error("extension.not found",{name: name}));
+    }
     if(!cb.activated) {
         cb.callback(cb.extension);
         cb.activated = true;
@@ -253,17 +256,18 @@ Numbas.activateExtension = function(name) {
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
-    for(var file in scriptreqs) {
-        var req = scriptreqs[file];
+    var fails = [];
+    Object.values(scriptreqs).forEach(function(req) {
         if(req.executed) {
-            continue;
+            return;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            var err = new Numbas.Error('die.script not loaded',{file:file});
+            var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
-            break;
         }
-    }
+        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
+    });
+    return fails;
 }
 })();
 
@@ -6301,7 +6305,8 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
         ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
         ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c']
+        ['?;a+(-?;b-?;c)','','a-b-c'],
+        ['?;a/?;b/?;c','','a/(b*c)']
     ],
     collectComplex: [
         ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
@@ -6332,10 +6337,10 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['-0','','0']
     ],
     collectNumbers: [
-        ['$n;a * 1/$n;b','ag','a/b'],
+        ['$n;a * (1/?;b)','ags','a/b'],
         ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
         ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! $n)`+;x * real:$n;n','acgs','n*x']            //shift numbers to left hand side
+        ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']            //shift numbers to left hand side
     ],
     simplifyFractions: [
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
@@ -9571,7 +9576,7 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
     'rational': function(a,b) {
         a = a.value.toFloat();
         b = b.value.toFloat();
-        return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
+        return a>b ? 1 : a<b ? -1 : 0;
     },
     'string': compareTokensByValue,
     'boolean': compareTokensByValue
@@ -9589,7 +9594,14 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
  */
 var compareTokens = jme.compareTokens = function(a,b) {
     if(a.type!=b.type) {
-        return jme.compareTrees({tok:a},{tok:b});
+        var type = jme.findCompatibleType(a.type,b.type);
+        if(type) {
+            var ca = jme.castToType(a,type);
+            var cb = jme.castToType(b,type);
+            return compareTokens(ca,cb);
+        } else {
+            return jme.compareTrees({tok:a},{tok:b});
+        }
     } else {
         var compare = tokenComparisons[a.type];
         if(compare) {
@@ -11559,12 +11571,29 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     return vars;
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
+    var nscope = new Scope([scope]);
     if(tree.args[0].tok.type=='dict') {
         var d = tree.args[0];
-        d.args = d.args.map(function(da) { return jme.substituteTree(da,scope,allowUnbound) });
+        var names = d.args.map(function(da) { return da.tok.key; });
+        for(var i=0;i<names.length;i++) {
+            nscope.deleteVariable(names[i]);
+        }
+        d.args = d.args.map(function(da) { return jme.substituteTree(da,nscope,allowUnbound) });
     } else {
         for(var i=1;i<tree.args.length-1;i+=2) {
-            tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+            switch(tree.args[i-1].tok.type) {
+                case 'name':
+                    var name = tree.args[i-1].tok.name;
+                    nscope.deleteVariable(name);
+                    break;
+                case 'list':
+                    var names = tree.args[i-1].args;
+                    for(var j=0;j<names.length;j++) {
+                        nscope.deleteVariable(names[j].tok.name);
+                    }
+                    break;
+            }
+            tree.args[i] = jme.substituteTree(tree.args[i],nscope,allowUnbound);
         }
     }
 }
@@ -14838,6 +14867,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Element}
      */
     xml: '',
+    /** JSON defining this part
+     * @type {Object}
+     */
+    json: null,
     /** Load the part's settings from an XML <part> node
      * @param {Element} xml
      */
@@ -14895,6 +14928,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {Object} data
      */
     loadFromJSON: function(data) {
+        this.json = data;
         var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -15483,6 +15517,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.markingFeedback.splice(0,0,{op: 'feedback', message: R('part.marking.used variable replacements')});
         }
         this.calculateScore();
+
+        this.marking_result = {
+            warnings: this.warnings.slice(),
+            markingFeedback: this.markingFeedback.slice(),
+            finalised_result: this.finalised_result,
+            credit: this.credit,
+            answered: this.answered
+        };
+
         this.question && this.question.updateScore();
         if(this.answered)
         {
@@ -15707,6 +15750,44 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         }
         part.answered = valid;
+
+        var t = 0;
+        for(var i=0;i<part.markingFeedback.length;i++) {
+            var action = part.markingFeedback[i];
+            var change = action.credit*part.marks;
+            var credit_change = action.credit;
+            if(action.gap!=undefined) {
+                change *= part.gaps[action.gap].marks/part.marks;
+                credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
+            }
+            var ot = t;
+            t += change;
+            t = Math.max(0,t);
+            change = t-ot;
+            var message = action.message || '';
+            if(util.isNonemptyHTML(message)) {
+                var marks = Math.abs(change);
+                if(change>0) {
+                    action.message += '\n\n'+R('feedback.you were awarded',{count:marks});
+                } else if(change<0) {
+                    action.message += '\n\n'+R('feedback.taken away',{count:marks});
+                }
+            }
+            var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
+            switch(action.reason) {
+                case 'correct':
+                    change_desc = 'positive';
+                    break;
+                case 'incorrect':
+                    change_desc = 'negative';
+                    break;
+                case 'invalid':
+                    change_desc = 'invalid';
+                    break;
+            }
+            action.credit_change = change_desc;
+        }
+
     },
     marking_parameters: function(studentAnswer) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -23633,7 +23714,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.title = params.title || '';
         },
         template: '\
-        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+widget(), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
+        <span data-bind="if: widget"><span data-bind="css: classes, component: {name: \'answer-widget-\'+Knockout.unwrap(widget), params: {answerJSON: answerJSON, part: part, disable: disable, options: widget_options, events: events, title: title}}"></span></span>\
         '
     });
     Knockout.components.register('answer-widget-string', {
@@ -23928,7 +24009,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
                 var result = this.result();
-                var valuesSame = (!result.valid && !lastValue.valid) || ((result.value!==undefined && lastValue.value!==undefined) && result.value.length == lastValue.value.length && result.value.every(function(row,i) { return row.length== lastValue.value[i].length && row.every(function(cell,j){ return cell == lastValue.value[i][j] || isNaN(cell) && isNaN(lastValue.value[i][j]); }) }));
+                var valuesSame = 
+                    (!result.valid && !lastValue.valid) || 
+                    (
+                        (result.value!==undefined && lastValue.value!==undefined) && 
+                        result.value.length == lastValue.value.length && 
+                        result.value.every(function(row,i) { 
+                            return row.length==lastValue.value[i].length && row.every(function(cell,j){ 
+                                return cell == lastValue.value[i][j]; 
+                            }) 
+                        })
+                    );
                 if(!valuesSame || result.valid!=lastValue.valid) {
                     this.answerJSON(result);
                 }
@@ -24303,6 +24394,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
     });
     Knockout.components.register('answer-widget-m_n_x', {
         viewModel: function(params) {
+            var vm = this;
             this.part = params.part;
             this.answerJSON = params.answerJSON;
             this.disable = params.disable;
@@ -24310,14 +24402,36 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
+            this.layout = this.options.layout;
+            for(var i=0;i<this.answers().length;i++) {
+                this.layout[i] = this.layout[i] || [];
+                for(var j=0;j<this.choices().length;j++) {
+                    this.layout[i][j] = this.layout[i][j]===undefined || this.layout[i][j];
+                }
+            }
+            switch(this.options.displayType) {
+                case 'radiogroup':
+                    this.input_type = 'radio';
+                    break;
+                default:
+                    this.input_type = 'checkbox';
+            }
             this.ticks = Knockout.computed(function() {
                 var choices = this.choices();
                 var answers = this.answers();
                 var ticks = [];
                 for(var i=0;i<choices.length;i++) {
                     var row = [];
-                    for(var j=0;j<answers.length;j++) {
-                        row.push({ticked: Knockout.observable(false)});
+                    row.name = 'row-'+i;
+                    if(this.input_type=='checkbox') {
+                        for(var j=0;j<answers.length;j++) {
+                            row.push({ticked: Knockout.observable(false), display: this.layout[j][i]});
+                        }
+                    } else {
+                        var ticked = row.ticked = Knockout.observable(null);
+                        for(var j=0;j<answers.length;j++) {
+                            row.push({ticked: ticked, display: this.layout[j][i]});
+                        }
                     }
                     ticks.push(row);
                 }
@@ -24327,13 +24441,27 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             if(init.valid) {
                 var ticks = this.ticks();
                 for(var i=0;i<ticks.length;i++) {
-                    for(var j=0;j<ticks[i].length;j++) {
-                        ticks[i][j].ticked(init.value[i][j]);
+                    if(this.input_type=='checkbox') {
+                        for(var j=0;j<ticks[i].length;j++) {
+                            ticks[i][j].ticked(init.value[i] && init.value[i][j]);
+                        }
+                    } else {
+                        ticks[i].ticked(init.value[i]);
                     }
                 }
             }
             this.setAnswerJSON = Knockout.computed(function() {
-                var ticks = this.ticks().map(function(r){return r.map(function(d){return d.ticked()})});
+                var ticks;
+                if(this.input_type=='checkbox') {
+                    ticks = this.ticks().map(function(r){return r.map(function(d){return d.ticked()})});
+                } else {
+                    ticks = this.ticks().map(function(r){
+                        var ticked = r.ticked();
+                        return vm.answers().map(function(a,i) {
+                            return i==ticked;
+                        });
+                    });
+                }
                 // because of the never-ending madness to do with the order of matrices in multiple choice parts,
                 // this matrix needs to be transposed
                 // It makes more sense for the array to go [choice][answer], because that's how they're displayed, but
@@ -24365,11 +24493,18 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     <th><span data-bind="html: $data"></span></th>\
                     <!-- /ko -->\
                 </tr>\
-                <tbody data-bind="foreach: ticks">\
+                <tbody data-bind="foreach: choices">\
                     <tr>\
-                        <th><span data-bind="html: $parent.choices()[$index()]"></span></th>\
-                        <!-- ko foreach: $data -->\
-                        <td><input type="checkbox" data-bind="checked: ticked, disable: $parents[1].disable, event: $parents[1].events"></td>\
+                        <th><span data-bind="html: $data"></span></th>\
+                        <!-- ko foreach: $parent.ticks()[$index()] -->\
+                            <td>\
+                            <!-- ko if: $parents[1].input_type=="checkbox" -->\
+                                <input type="checkbox" data-bind="visible: display, checked: ticked, disable: $parents[1].disable, event: $parents[1].events">\
+                            <!-- /ko -->\
+                            <!-- ko if: $parents[1].input_type=="radio" -->\
+                                <input type="radio" data-bind="visible: display, attr: {name: $parent.name, value: $index()}, checked: ticked, disable: $parents[1].disable, event: $parents[1].events">\
+                            <!-- /ko -->\
+                            </td>\
                         <!-- /ko -->\
                     </tr>\
                 </tbody>\
@@ -24440,6 +24575,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
+        settings.mustBeReducedPC /= 100;
         tryLoad(data, ['notationStyles'], settings);
         tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
         settings.precisionPC /= 100;
@@ -25687,6 +25823,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         return {
             choices: this.settings.choices,
             answers: this.settings.answers,
+            displayType: this.settings.displayType,
+            layout: this.layout,
             answerAsArray: true
         };
     },
@@ -26501,6 +26639,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
         tryLoad(data, ['caseSensitive', 'partialCredit','matchMode'], settings);
+        settings.partialCredit /= 100;
     },
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());

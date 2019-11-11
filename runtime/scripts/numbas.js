@@ -242,6 +242,9 @@ Numbas.addExtension = function(name,deps,callback) {
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
+    if(!cb) {
+        throw(new Numbas.Error("extension.not found",{name: name}));
+    }
     if(!cb.activated) {
         cb.callback(cb.extension);
         cb.activated = true;
@@ -251,17 +254,18 @@ Numbas.activateExtension = function(name) {
 /** Check all required scripts have executed - the theme should call this once the document has loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
-    for(var file in scriptreqs) {
-        var req = scriptreqs[file];
+    var fails = [];
+    Object.values(scriptreqs).forEach(function(req) {
         if(req.executed) {
-            continue;
+            return;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            var err = new Numbas.Error('die.script not loaded',{file:file});
+            var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
-            break;
         }
-    }
+        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
+    });
+    return fails;
 }
 })();
 
