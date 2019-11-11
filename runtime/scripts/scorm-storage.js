@@ -277,14 +277,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             revealed: question.revealed
         };
         qobj.variables = {};
-        var all_variables = question.scope.allVariables();
-        for(var name in all_variables)
-        {
-            qobj.variables[name] = Numbas.jme.display.treeToJME({tok: all_variables[name]},{niceNumber:false, wrapexpressions: true});
-        }
+        question.local_definitions.variables.forEach(function(name) {
+            var value = question.scope.getVariable(name);
+            qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true});
+        });
         qobj.parts = [];
-        for(var i=0;i<question.parts.length;i++)
-        {
+        for(var i=0;i<question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
         return qobj;
