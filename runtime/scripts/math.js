@@ -891,28 +891,40 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {String}
      */
     unscientific: function(str) {
-        var m = /(-)?([ \d]+)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
+        var m = /(-)? *(0|[1-9][ \d]*)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
         if(!m) {
             return str;
         }
         var minus = m[1] || '';
-        var digits = (m[2]+(m[3] || '')).replace(' ','');
+        var significand_integer = m[2].replace(' ','');
+        var significand_decimal = (m[3] || '').replace(' ','');
+        var digits = significand_integer+significand_decimal;
         var pow = parseInt(m[4].replace(' ',''));
+        pow += significand_integer.length
+        var zm = digits.match(/^(0+)[^0]/);
+        if(zm) {
+            var num_zeros = zm[1].length;
+            digits = digits.slice(num_zeros);
+            pow -= num_zeros;
+        }
         var l = digits.length;
         var out;
-        if(pow>=l-1) {
+        if(l<pow) {
             out = digits;
-            for(var i=l-1;i<pow;i++) {
+            for(var i=l;i<pow;i++) {
                 out += '0';
             }
         } else if(pow<0) {
             out = digits;
-            for(var i=1;i<-pow;i++) {
+            for(var i=0;i<-pow;i++) {
                 out = '0'+out;
             }
             out = '0.'+out;
         } else {
-            out = digits.slice(0,pow+1) + '.' + digits.slice(pow+1);
+            out = digits.slice(0,pow);
+            if(digits.length>pow) {
+                out += '.' + digits.slice(pow);
+            }
         }
         return minus + out;
     },

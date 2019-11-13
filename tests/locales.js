@@ -2344,6 +2344,7 @@ Numbas.locale = {
     "die.sorry": "Sorry, Numbas has encountered an error which means it can't continue. Below is a description of the error.",
     "die.script not loaded": "Numbas couldn't start because the file <code>{{file}}</code> was not loaded. Check that it's included in <code>scripts.js</code>.",
     "die.error": "Error",
+    "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
     "exam.enter password": "Password:",
