@@ -1607,6 +1607,7 @@
                     assert.equal(exprToLaTeX('e*i',''),'e i','e*i');
                     assert.equal(exprToLaTeX('2/4','flatFractions'),'\\left. 2 \\middle/ 4 \\right.','');
                     assert.equal(exprToLaTeX('(2 + 3)/(a + b)','flatFractions'),'\\left. \\left ( 2 + 3 \\right ) \\middle/ \\left ( a + b \\right ) \\right.','');
+                    assert.equal(exprToLaTeX('matrix([1,1]) + matrix([1]) + (-5)matrix([1])','all'),'\\begin{pmatrix} 1, & 1 \\end{pmatrix} - 4 \\begin{pmatrix} 1 \\end{pmatrix}','matrix([1,1]) + matrix([1]) + (-5)matrix([1])');
 				});
 
                 doc_tests.forEach(function(section) {

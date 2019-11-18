@@ -503,6 +503,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return a.key==b.key;
         },
         'list': function(a,b) {
+            if(!a.value || !b.value) {
+                return !a.value && !b.value;
+            }
             return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
         },
         'matrix': function(a,b) {
@@ -14715,6 +14718,21 @@ var compareTrees = jme.compareTrees = function(a,b) {
             return a.tok.type<b.tok.type ? -1 : 1;
         }
     }
+
+    if(a.args || b.args) {
+        var aargs = a.args || [];
+        var bargs = b.args || [];
+        if(aargs.length!=bargs.length) {
+            return aargs.length<bargs.length ? -1 : 1;
+        }
+        for(var i=0;i<aargs.length;i++) {
+            var c = jme.compareTrees(aargs[i],bargs[i]);
+            if(c!=0) {
+                return c;
+            }
+        }
+    }
+
     switch(a.tok.type) {
         case 'op':
         case 'function':
@@ -14734,15 +14752,6 @@ var compareTrees = jme.compareTrees = function(a,b) {
             }
             if(a.tok.name!=b.tok.name) {
                 return a.tok.name<b.tok.name ? -1 : 1;
-            }
-            if(a.args.length!=b.args.length) {
-                return a.args.length<b.args.length ? -1 : 1;
-            }
-            for(var i=0;i<a.args.length;i++) {
-                var c = jme.compareTrees(a.args[i],b.args[i]);
-                if(c!=0) {
-                    return c;
-                }
             }
             break;
         case 'expression':

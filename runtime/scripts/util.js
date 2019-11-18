@@ -193,6 +193,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return a.key==b.key;
         },
         'list': function(a,b) {
+            if(!a.value || !b.value) {
+                return !a.value && !b.value;
+            }
             return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
         },
         'matrix': function(a,b) {
