@@ -257,16 +257,17 @@ Numbas.activateExtension = function(name) {
  */
 Numbas.checkAllScriptsLoaded = function() {
     var fails = [];
-    Object.values(scriptreqs).forEach(function(req) {
+    for(var file in scriptreqs) {
+        var req = scriptreqs[file];
         if(req.executed) {
-            return;
+            continue;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
             var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
         }
         fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
-    });
+    };
     return fails;
 }
 })();
@@ -1713,6 +1714,26 @@ if(!String.prototype.split)
         return cbSplit(this, separator, limit);
     };
 }
+
+(function() {
+var reduce = Function.bind.call(Function.call, Array.prototype.reduce);
+var isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable);
+var concat = Function.bind.call(Function.call, Array.prototype.concat);
+var keys = Reflect.ownKeys;
+
+if (!Object.values) {
+	Object.values = function values(O) {
+		return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), []);
+	};
+}
+
+if (!Object.entries) {
+	Object.entries = function entries(O) {
+		return reduce(keys(O), (e, k) => concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []), []);
+	};
+}
+})();
+
 });
 
 /*

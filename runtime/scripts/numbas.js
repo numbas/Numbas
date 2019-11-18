@@ -255,16 +255,17 @@ Numbas.activateExtension = function(name) {
  */
 Numbas.checkAllScriptsLoaded = function() {
     var fails = [];
-    Object.values(scriptreqs).forEach(function(req) {
+    for(var file in scriptreqs) {
+        var req = scriptreqs[file];
         if(req.executed) {
-            return;
+            continue;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
             var err = new Numbas.Error('die.script not loaded',{file:req.file});
             Numbas.display && Numbas.display.die(err);
         }
         fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
-    });
+    };
     return fails;
 }
 })();
