@@ -18809,7 +18809,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             } else if(isNumber && bits[i].indexOf('/')>=0) {
                 arg_op = '/';   // implied division because this number will be written in the form 'a/b'
             }
-            var bracketArg = arg_op!=null && op in opBrackets && opBrackets[op][i][arg_op]==true;
+            var bracketArg = false;
+            if(arg_op!=null) {
+                if(op in opBrackets) {
+                    bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
+                } else {
+                    bracketArg = tok.prefix==true;
+                }
+            }
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
                 args[i].bracketed=true;
@@ -18945,13 +18952,14 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
  */
 var opBrackets = Numbas.jme.display.opBrackets = {
     '+u':[{}],
-    '-u':[{'+':true,'-':true}],
+    '-u':[{'+':true,'-':true,'*':false,'/':false}],
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
     '*': [{'+u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
     '/': [{'+u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true, '^': true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
+    'not': [{'and':true,'or':true,'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
     '=': [{},{}],
