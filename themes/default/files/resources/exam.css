@@ -360,6 +360,7 @@ input.jme {
 
 #questionList .questionSelector > a {
     padding: 0.5em 0.3em;
+    cursor: pointer;
 }
 
 .questionSelector .info {
@@ -469,15 +470,6 @@ input.jme {
 
 /* results page */
 
-.resultBtns div {
-	margin-top: 2em;
-}
-
-.resultrow td, .resultrow th {
-	font-weight: bold;
-	font-size: 1.3em;
-}
-
 #results table tbody th {
 	border-bottom: 2px solid #eee;
 }
@@ -495,6 +487,10 @@ input.jme {
 #question-breakdown .question-group-header th {
     text-align: center;
     padding-top: 1em;
+}
+
+#question-breakdown .btn.review {
+    padding: 0;
 }
 
 
