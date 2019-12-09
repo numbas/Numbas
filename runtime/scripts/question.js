@@ -442,6 +442,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         this.updateScore();
     },
+
+    /** Remove a part from the question
+     * @param {Numbas.parts.Part} part
+     */
+    removePart: function(part) {
+        this.parts = this.parts.filter(function(p2) { return p2!=part; });
+        this.display.removePart(part);
+        this.updateScore();
+        if(this.partsMode=='explore' && this.currentPart==part) {
+            if(part.previousPart) {
+                this.setCurrentPart(part.previousPart);
+            } else {
+                this.setCurrentPart(this.parts[0]);
+            }
+        }
+    },
+
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
      * @fires Numbas.Question#functionsMade
      * @fires Numbas.Question#rulesetsMade

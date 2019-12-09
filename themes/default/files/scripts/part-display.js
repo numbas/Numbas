@@ -333,11 +333,11 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 pd.feedbackShown(!pd.feedbackShown());
             },
             submit: function() {
-                var np = p;
-                while(np.isGap)
-                    np = np.parentPart;
-                np.submit();
-                Numbas.store.save();
+                var ps = p;
+                while(ps.isGap) {
+                    ps = ps.parentPart;
+                }
+                Numbas.controls.submitPart(ps);
             },
             showSteps: function() {
                 p.showSteps();

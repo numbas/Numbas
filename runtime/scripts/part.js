@@ -116,7 +116,7 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store]
  * @property {Boolean} isStep - is this part a step?
- * @proeprty {Boolean} isGap - is this part a gap?
+ * @property {Boolean} isGap - is this part a gap?
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -219,19 +219,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var nextPartNodes = nextPartsNode.selectNodes('nextpart');
         for(var i=0;i<nextPartNodes.length;i++) {
             var nextPartNode = nextPartNodes[i];
-            var np = {variableReplacements: [], instance: null, penalty: null, penaltyAmount: 0};
-            tryGetAttribute(np,nextPartNode,'.',['index','label','availabilityCondition','penalty']);
-            tryGetAttribute(np,nextPartNode,'.',['penaltyAmount'],['penaltyAmountString']);
-            np.penaltyAmountString += '';
-            var replacementNodes = nextPartNode.selectNodes('variablereplacements/replacement');
-            for(var j=0;j<replacementNodes.length;j++) {
-                var replacement = {};
-                tryGetAttribute(replacement,replacementNodes[j],'.',['variable','definition']);
-                np.variableReplacements.push(replacement);
-            }
-            var otherPartNode = this.question.xml.selectNodes('parts/part')[np.index];
-            np.label = np.label || otherPartNode.getAttribute('customname');
-            np.xml = otherPartNode;
+            var np = new NextPart(this);
+            np.loadFromXML(nextPartNode);
             this.nextParts.push(np);
         }
 
@@ -783,13 +772,21 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
      */
     submit: function() {
+        var p = this;
         this.shouldResubmit = false;
         this.credit = 0;
         this.markingFeedback = [];
-        if(this.question.partsMode=='explore' && this.settings.exploreObjective) {
-            this.markingComment(
-                R('part.marking.counts towards objective',{objective: this.settings.exploreObjective})
-            );
+        if(this.question.partsMode=='explore') {
+            this.nextParts.forEach(function(np) {
+                if(np.instance!==null && np.usesStudentAnswer()) {
+                    p.removeNextPart(np);
+                }
+            });
+            if(this.settings.exploreObjective) {
+                this.markingComment(
+                    R('part.marking.counts towards objective',{objective: this.settings.exploreObjective})
+                );
+            }
         }
         this.finalised_result = {valid: false, credit: 0, states: []};
         this.submitting = true;
@@ -1323,7 +1320,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     
     /** Make an instance of the selected next part
-     * @param {Numbas.parts.nextpart} np
+     * @param {Numbas.parts.NextPart} np
      */
     makeNextPart: function(np) {
         var p = this;
@@ -1347,6 +1344,24 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question.updateScore();
     },
 
+    /** Remove the existing instance of the given next part
+     * @param {Numbas.parts.NextPart} np
+     */
+    removeNextPart: function(np) {
+        if(!np.instance) {
+            return;
+        }
+        this.question.removePart(np.instance);
+        np.instance.nextParts.forEach(function(np2) {
+            np.instance.removeNextPart(np2);
+        });
+        np.instance = null;
+        if(this.display) {
+            this.display.updateNextParts();
+        }
+        this.question.updateScore();
+    },
+
     /** Reveal the correct answer to this part
      * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
      */
@@ -1363,6 +1378,89 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.steps[i].revealAnswer(dontStore);
             }
         }
+    }
+};
+
+/** Definition of a 'next part' option following on from a part.
+ * @constructor
+ * @memberof Numbas.parts
+ * @param {Numbas.parts.Part} parentPart - the part this one follows on from
+ */
+var NextPart = Numbas.parts.NextPart = function(parentPart) {
+    this.parentPart = parentPart;
+
+    this.variableReplacements = [];
+}
+NextPart.prototype = {
+    /** List of variable replacements to make when creating this part.
+     * @type {Array.<Object>}
+     */
+    variableReplacements: [],
+
+    /** Reference to the instance of this next part, if it's been created.
+     * @type {Numbas.parts.Part}
+     */
+    instance: null,
+
+    /** Name of the penalty to apply when this part is visited.
+     * @type {String}
+     */
+    penalty: null,
+
+    /** Amount of penalty to apply when this part is visited.
+     * @type {Number}
+     */
+    penaltyAmount: 0,
+
+    /** Expression defining the amount of penalty to apply when this part is visited.
+     * @type {JME}
+     */
+    penaltyAmountString: '',
+
+    /** Index of the definition of this part in the question's list of part definitions.
+     * @type {Number}
+     */
+    index: null,
+
+    /** Label for the button to select this next part
+     * @type {String}
+     */
+    label: '',
+
+    /** When should this next part be available to the student?
+     * @type {JME}
+     */
+    availabilityCondition: '',
+
+    /** Load the definition of this next part from XML
+     * @param {Element} xml
+     */
+    loadFromXML: function(xml) {
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+        tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty']);
+        tryGetAttribute(this,xml,'.',['penaltyAmount'],['penaltyAmountString']);
+        this.penaltyAmountString += '';
+        var replacementNodes = xml.selectNodes('variablereplacements/replacement');
+        for(var j=0;j<replacementNodes.length;j++) {
+            var replacement = {};
+            tryGetAttribute(replacement,replacementNodes[j],'.',['variable','definition']);
+            this.variableReplacements.push(replacement);
+        }
+        var otherPartNode = this.parentPart.question.xml.selectNodes('parts/part')[this.index];
+        this.label = this.label || otherPartNode.getAttribute('customname');
+        this.xml = otherPartNode;
+    },
+
+    /** Do any of the variable replacements for this next part rely on information from the student's answer to the parent part?
+     * Returns true if a variable replacement definition contains a variable name which is not a question variable - it must come from the marking algorithm.
+     * @returns {Boolean}
+     */
+    usesStudentAnswer: function() {
+        var question_variables = this.parentPart.question.local_definitions.variables;
+        return this.variableReplacements.some(function(vr) {
+            var vars = jme.findvars(Numbas.jme.compile(vr.definition));
+            return vars.some(function(name) { return !question_variables.contains(name); });
+        });
     }
 };
 

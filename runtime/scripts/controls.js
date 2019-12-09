@@ -133,6 +133,26 @@ Numbas.controls = /** @lends Numbas.controls */ {
             );
         });
     },
+
+    /** 
+     */
+    submitPart: function(p) {
+        function go() {
+            p.submit();
+            Numbas.store.save();
+        }
+        if(p.question.partsMode=='explore') {
+            var uses_answer = p.nextParts.some(function(np) {
+                return np.instance!==null && np.usesStudentAnswer();
+            })
+            if(uses_answer) {
+                Numbas.display.showConfirm(R('control.submit part.confirm remove next parts'),go);
+                return;
+            }
+        }
+        go();
+    },
+
     /** Submit student's answers to all parts in the current question
      * @see Numbas.Question#submit
      */

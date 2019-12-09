@@ -109,6 +109,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             }
         };
 
+        /** Set the current part
+         * @param {Numbas.display.PartDisplay} pd
+         */
+        this.setCurrentPart = function(pd) {
+            q.setCurrentPart(pd.part);
+        }
+
         /** Student's current score ({@link Numbas.Question#score})
          * @member {observable|Number} score
          * @memberof Numbas.display.QuestionDisplay
@@ -277,14 +284,21 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             });
         },
 
+        /** Update the list of parts
+         */
+        updateParts: function() {
+            this.parts(this.question.parts.map(function(p){ return p.display; }));
+            this.marks(this.question.marks);
+        },
+
         /** Add a new part to the display
          * @param {Numbas.parts.Part} p
          */
         addPart: function(p) {
             var qd = this;
+            this.updateParts();
             this.question.signals.on('HTMLAttached',function() {
-                qd.parts(qd.question.parts.map(function(p){ return p.display; }));
-                var promise = display.makeHTMLFromXML(
+                var promise = p.display.html_promise = display.makeHTMLFromXML(
                     p.xml, 
                     Numbas.xml.templates.part, 
                     p.getScope(), 
@@ -292,8 +306,25 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                     qd.html.find('.parts'),
                     p.display
                 );
+                promise.then(function(html) {
+                    p.display.html = html;
+                });
             });
-            this.marks(this.question.marks);
+        },
+
+        /** Remove a part from the display
+         * @param {Numbas.parts.Part} p
+         */
+        removePart: function(p) {
+            var qd = this;
+            this.updateParts();
+            this.question.signals.on('HTMLAttached',function() {
+                if(p.display.html_promise) {
+                    p.display.html_promise.then(function(html) {
+                        html.remove();
+                    });
+                }
+            });
         },
 
         /** Show the question
