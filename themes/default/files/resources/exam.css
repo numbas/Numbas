@@ -790,6 +790,9 @@ select.multiplechoice {
     font-weight: bold;
     font-style: italic;
 }
+.parts-tree .name {
+    cursor: pointer;
+}
 
 #explore-breakdown {
     margin: 1rem;

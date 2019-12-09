@@ -23,7 +23,7 @@ Copyright 2011-16 Newcastle University
                     <span class="part-progress"><localise>question.progress</localise></span>
                     <div class="part" data-bind="treeView: firstPart">
                         <div>
-                            <a class="name" href="#" data-bind="latex: name, click: $parent.currentPart, css: partTreeCSS"></a>
+                            <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS"></a>
                         </div>
                         <ul data-bind="foreach: madeNextParts">
                             <li>
