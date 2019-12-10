@@ -421,12 +421,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {String}
      */
     customName: '',
-    /** Assign a name to this part
+    /** Assign a name to this part, and then assign names to its children
      * @param {Number} index - the number of parts before this one that have names.
      * @param {Number} siblings - the number of siblings this part has
      * @returns {Boolean} true if this part has a name that should increment the label counter
      */
     assignName: function(index,siblings) {
+        var p = this;
+
         if(this.useCustomName) {
             this.name = jme.subvars(this.customName,this.getScope(),true);
         } else if(this.isGap) {
@@ -439,8 +441,23 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.name = util.letterOrdinal(index)+')';
         }
 
+        if(this.gaps) {
+            var gi = 0;
+            this.gaps.forEach(function(g) {
+                var hasName = g.assignName(gi,p.gaps.length-1);
+                gi += hasName ? 1 : 0;
+            });
+        }
+        if(this.steps) {
+            var si = 0;
+            this.steps.forEach(function(s) {
+                var hasName = s.assignName(si,p.steps.length-1);
+                si += hasName ? 1 : 0;
+            });
+        }
+
         this.display && this.display.setName(this.name);
-        return this.name!='';
+        return this.name != '';
     },
     /** This part's type, e.g. "jme", "numberentry", ...
      * @type {String}
@@ -761,7 +778,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     getScope: function() {
         if(!this.scope) {
-            if(this.question) {
+            if(this.parentPart) {
+                this.scope = this.parentPart.getScope();
+            } else if(this.question) {
                 this.scope = this.question.scope;
             } else {
                 this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
@@ -1337,6 +1356,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         if(np.xml) {
             np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p);
         }
+        np.instance.useCustomName = true;
+        np.instance.customName = np.label;
+        np.instance.assignName();
         this.store && this.store.initPart(np.instance);
         if(this.display) {
             this.display.updateNextParts();
