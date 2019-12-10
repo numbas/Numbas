@@ -4,7 +4,7 @@
         <xsl:choose>
             <xsl:when test="@isgap='true' and @type='1_n_2' and choices/@displaytype='dropdownlist'"><xsl:text>true</xsl:text></xsl:when>
             <xsl:when test="@isgap='true' and not (choices)"><xsl:text>true</xsl:text></xsl:when>
-            <xsl:otherwise></xsl:otherwise>
+            <xsl:otherwise><xsl:text>false</xsl:text></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
     <xsl:variable name="tag">

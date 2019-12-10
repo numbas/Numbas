@@ -15,7 +15,7 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <div class="question clearfix" data-bind="with: question, visible: question.isCurrentQuestion">
+        <div class="question clearfix" data-bind="with: question, visible: question.isCurrentQuestion, css: question.css_classes">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <h3 data-bind="text: displayName" class="print-only"></h3>

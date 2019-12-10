@@ -65,13 +65,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {observable.<Array.<Numbas.display.PartDisplay>>} parts
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.parts = ko.observableArray(this.question.parts.map(function(p){ return p.display; }));
+        this.parts = Knockout.observableArray(this.question.parts.map(function(p){ return p.display; }));
 
         /** The first part in the question
          * @member {observable.<Numbas.display.PartDisplay>} firstPart
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.firstPart = ko.computed(function() {
+        this.firstPart = Knockout.computed(function() {
             return this.parts()[0];
         },this);
 
@@ -85,13 +85,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {observable|Numbas.display.PartDisplay} currentPart
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.currentPart = ko.observable(null);
+        this.currentPart = Knockout.observable(null);
 
         /** The part that created the current part
          * @member {observable|Numbas.display.PartDisplay} previousPart
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.previousPart = ko.computed(function() {
+        this.previousPart = Knockout.computed(function() {
             var p = this.currentPart();
             if(!(p && p.part.previousPart)) {
                 return null;
@@ -181,16 +181,16 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var od = {
                 objective: o,
                 name: o.name,
-                marks: ko.observable(o.limit),
-                score: ko.observable(o.score),
-                doesMarking: ko.observable(true),
+                marks: Knockout.observable(o.limit),
+                score: Knockout.observable(o.score),
+                doesMarking: Knockout.observable(true),
                 revealed: qd.revealed,
-                answered: ko.observable(false)
+                answered: Knockout.observable(false)
             }
-            od.credit = ko.computed(function() {
+            od.credit = Knockout.computed(function() {
                 return od.score()/od.marks();
             });
-            od.visible = ko.computed(function() {
+            od.visible = Knockout.computed(function() {
                 return q.objectiveVisibility=='always' || od.answered() || od.revealed();
             },this);
             od.feedback = display.showScoreFeedback(od,q.exam.settings);
@@ -205,14 +205,14 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 penalty: p,
                 name: p.name,
                 limit: p.limit,
-                score: ko.observable(p.score),
+                score: Knockout.observable(p.score),
                 revealed: qd.revealed,
-                applied: ko.observable(false),
+                applied: Knockout.observable(false),
             };
-            pd.visible = ko.computed(function() {
+            pd.visible = Knockout.computed(function() {
                 return q.penaltyVisibility=='always' || pd.applied() || pd.revealed();
             })
-            pd.scoreDisplay = ko.computed(function() {
+            pd.scoreDisplay = Knockout.computed(function() {
                 return Numbas.math.niceNumber(pd.score());
             });
             return pd;
@@ -222,7 +222,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {Observable.<Boolean>} showScoreBreakdown
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.showScoreBreakdown = ko.computed(function() {
+        this.showScoreBreakdown = Knockout.computed(function() {
             return q.partsMode=='explore' && q.objectives.length>0;
         },this);
 
@@ -230,7 +230,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {Observable.<Boolean>} showPartsTree
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.showPartsTree = ko.computed(function() {
+        this.showPartsTree = Knockout.computed(function() {
             return q.partsMode=='explore';
         },this);
 
@@ -242,6 +242,16 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         this.review = function() {
             exam.reviewQuestion(q.number);
         }
+
+        /** CSS classes for this question's HTML element
+         * @member {Observable.<Object>} css_classes
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.css_classes = Knockout.computed(function() {
+            var css = {};
+            css['partsmode-'+q.partsMode] = true;
+            return css;
+        },this);
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
     {

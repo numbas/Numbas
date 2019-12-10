@@ -22,7 +22,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @see Numbas.parts.Part#name
          */
         this.name = Knockout.observable('');
-
         /** Title text for this part's answer input
          * @member {observable.<String>} input_title
          * @memberof Numbas.display.PartDisplay
@@ -36,8 +35,9 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showName = ko.computed(function() {
-            return this.name() && this.part.question.partsMode=='all';
+            return this.name() && (this.part.question.partsMode=='all' || this.revealed());
         },this);
+
         /** The question this part belongs to
          * @member {Numbas.Question} question
          * @memberof Numbas.display.PartDisplay
@@ -302,7 +302,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },this);
 
         this.reachedDeadEnd = ko.computed(function() {
-            return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts();
+            return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
         },this);
 
         this.partTreeCSS = ko.computed(function() {
