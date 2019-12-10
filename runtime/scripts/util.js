@@ -427,6 +427,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     isNonemptyHTML: function(html) {
+        if(html===undefined || html===null) {
+            return false;
+        }
         if(window.document) {
             var d = document.createElement('div');
             d.innerHTML = html;
