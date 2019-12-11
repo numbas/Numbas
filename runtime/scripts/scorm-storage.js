@@ -211,7 +211,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var index = this.get('interactions._count');
             this.partIndices[id] = index;
         }
-        var prepath = 'interactions.'+this.partIndices[id]+'.';
+        var prepath = this.partPath(p);
         this.set(prepath+'id',id);
         this.set(prepath+'objectives.0.id',this.getQuestionId(p.question));
         this.set(prepath+'weighting',p.marks);
@@ -256,7 +256,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
-        this.set('suspend_data',JSON.stringify(eobj));
+        var estr = JSON.stringify(eobj);
+        if(estr!=this.get('suspend_data')) {
+            this.set('suspend_data',estr);
+        }
         this.setSessionTime();
         this.suspendData = eobj;
     },
@@ -431,10 +434,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             if(!pobj) {
                 throw(new Numbas.Error('scorm.no part suspend data'));
             }
-            var id = this.getPartId( part );
-            var index = this.partIndices[id];
+            var prepath = this.partPath(part);
             var sc = this;
-            function get(key) { return sc.get('interactions.'+index+'.'+key); };
+            function get(key) { return sc.get(prepath+key); };
             pobj.answer = get('learner_response');
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
@@ -510,14 +512,24 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('location',question.number);    //set bookmark
         this.setSuspendData();    //because currentQuestion.visited has changed
     },
+
+    /** The 'interactions.N.' prefix for the given part's datamodel elements
+     * @param {Numbas.parts.Part} part
+     * @returns {String}
+     */
+    partPath: function(part) {
+        var id = this.getPartId(part);
+        var index = this.partIndices[id];
+        return 'interactions.'+index+'.';
+    },
+
     /** Call this when a part is answered
      * @param {Numbas.parts.Part} part
      */
     partAnswered: function(part)
     {
-        var id = this.getPartId(part);
-        var index = this.partIndices[id];
-        var prepath = 'interactions.'+index+'.';
+        var sc = this;
+        var prepath = this.partPath(part);
         this.set(prepath+'result',part.score);
         if(part.answered) {
             var typeStorage = this.getPartStorage(part);
