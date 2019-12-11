@@ -461,6 +461,13 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         'string': function(v,display) {
             return v.value;
         },
+        'html': function(v) {
+            v = v.value;
+            if(window.jQuery) {
+                v = v.toArray();
+            }
+            return v.map(function(e){return e.outerHTML;}).join('');
+        }
     },
     /** Produce a string representation of the given token, for display
      * @param {Numbas.jme.token} v
