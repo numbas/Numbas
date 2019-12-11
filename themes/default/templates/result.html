@@ -10,19 +10,21 @@
         </thead>
         <tbody>
             <!-- ko foreach: question_groups -->
-            <tr class="question-group-header" data-bind="if: $root.showQuestionGroupNames">
-                <th data-bind="text: name, typeset: name"></th>
-                <th colspan="4"></th>
-            </tr>
-            <!-- ko foreach: questions -->
-            <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
-                <td data-bind="text: question.number+1"></td>
-                <td data-bind="niceNumber: score"></td>
-                <td>/</td>
-                <td data-bind="niceNumber: marks"></td>
-                <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
-            </tr>
-            <!-- /ko -->
+                <!-- ko if: $root.showQuestionGroupNames -->
+                <tr class="question-group-header" data-bind="visible: show_name">
+                    <th data-bind="text: name, typeset: name"></th>
+                    <th colspan="4"></th>
+                </tr>
+                <!-- /ko -->
+                <!-- ko foreach: questions -->
+                <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
+                    <td data-bind="text: question.number+1"></td>
+                    <td data-bind="niceNumber: score"></td>
+                    <td>/</td>
+                    <td data-bind="niceNumber: marks"></td>
+                    <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
+                </tr>
+                <!-- /ko -->
             <!-- /ko -->
             <tr>
                 <th data-localise="Total"></th>

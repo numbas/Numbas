@@ -262,10 +262,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         initQuestionList: function() {
             this.question_groups = this.exam.question_groups.map(function(g) {
+                var questions = Knockout.observable(g.questionList.map(function(q){return q.display}));
+                var show_name = Knockout.computed(function() {
+                    return questions().some(function(q) { return q.visible(); });
+                });
                 return {
                     name: g.settings.name,
                     group: g,
-                    questions: Knockout.observable(g.questionList.map(function(q){return q.display}))
+                    questions: questions,
+                    show_name: show_name
                 }
             });
             for(var i=0; i<this.exam.questionList.length; i++) {
