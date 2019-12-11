@@ -1349,7 +1349,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
         if(np.variableReplacements.length) {
             np.variableReplacements.forEach(function(vr) {
-                values[vr.variable] = replaceScope.evaluate(vr.definition);
+                values[vr.variable] = replaceScope.evaluate(vr.definition+'');
             });
         }
 
