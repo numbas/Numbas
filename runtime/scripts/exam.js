@@ -574,9 +574,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     tryChangeQuestion: function(i)
     {
-        if(i<0 || i>=this.settings.numQuestions)
+        if(i<0 || i>=this.settings.numQuestions) {
             return;
-        if( ! (this.settings.navigateBrowse     // is browse navigation enabled?
+        }
+        if( ! (
+               this.mode=='review' 
+            || this.settings.navigateBrowse     // is browse navigation enabled?
             || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
             || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
         ))
