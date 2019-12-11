@@ -495,6 +495,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             } else if(q.adviceDisplayed) {
                 q.getAdvice(true);
             }
+            q.display && q.display.resume();
             q.updateScore();
         });
     },
@@ -598,7 +599,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     getAdvice: function(dontStore)
     {
         this.adviceDisplayed = true;
-    this.display && this.display.showAdvice(true);
+        this.display && this.display.showAdvice(true);
         if(this.store && !dontStore) {
             this.store.adviceDisplayed(this);
         }

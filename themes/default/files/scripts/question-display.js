@@ -267,6 +267,16 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             }
             this.numParts(q.parts.length);
         },
+        /** Called when the attempt is resumed
+         * @see Numbas.Question#resume
+         */
+        resume: function() {
+            var q = this.question;
+            this.adviceDisplayed(q.adviceDisplayed);
+            this.answered(q.answered);
+            this.revealed(q.revealed);
+            this.visited(q.visited);
+        },
         /** Called when the exam ends
          * @memberof Numbas.display.QuestionDisplay
          */
