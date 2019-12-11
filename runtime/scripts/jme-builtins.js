@@ -294,11 +294,14 @@ newBuiltin('render',[TString,sig.optional(sig.type('dict'))],TString, null, {
     }
 });
 jme.findvarsOps.render = function(tree,boundvars,scope) {
-    if(tree.args.length>1) {
-        return jme.findvars(tree.args[1],boundvars,scope);
-    } else {
-        return [];
+    var vars = [];
+    if(tree.args[0].tok.type!='string') {
+        vars = jme.findvars(tree.args[0]);
     }
+    if(tree.args.length>1) {
+        vars = vars.merge(jme.findvars(tree.args[1],boundvars,scope));
+    }
+    return vars;
 }
 newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s); });
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
