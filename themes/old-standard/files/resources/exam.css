@@ -14,10 +14,6 @@ Copyright 2011-13 Newcastle University
    limitations under the License.
 */
 
-/* VML fix for IE */
-v\:* { behavior: url(#default#VML); display: inline-block}
-o\:* { behavior: url(#default#VML); }
-
 .clearAfter:after {
     clear: both;
     content: '.';
