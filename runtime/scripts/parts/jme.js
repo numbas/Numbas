@@ -117,7 +117,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
-                settings.mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                var mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                if(util.isNonemptyHTML(mustMatchMessage)) {
+                    settings.mustMatchMessage = mustMatchMessage;
+                }
             }
         }
 
@@ -232,7 +235,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: '',
+        mustMatchMessage: R('part.jme.must-match.failed'),
         nameToCompare: ''
     },
     /** The name of the input widget this part uses, if any.
