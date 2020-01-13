@@ -162,10 +162,9 @@ img, object[type*="image"] {
 #progressbar {
 	position: relative;
 }
-#progressbar #completed {
+#progressbar .completed {
 	position: absolute;
 	height: 100%;
-	back
 }
 
 #navMenu .logo {
@@ -326,10 +325,10 @@ input.jme {
 .part:not(.dirty) > .student-answer.answered .multiplechoice.show-cell-answer-state .checked label {
     border-bottom: 1px solid hsl(204,72%,50%);
 }
-..part:not(.dirty) > student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked.correct label {
+.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked.correct label {
     border-bottom-color: hsl(120,50%,50%);
 }
-..part:not(.dirty) > student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked:not(.correct) label {
+.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked:not(.correct) label {
     border-bottom-color: hsl(0,50%,50%);
 }
 

@@ -3497,7 +3497,7 @@ tbody.collapse.in {
 }
 @media (prefers-reduced-motion: reduce) {
   .collapsing {
-    transition-duration; 0s;
+    transition-duration: 0s;
   }
 }
 .caret {
@@ -6185,7 +6185,7 @@ button.close {
     backface-visibility: hidden;
     -webkit-perspective: 1000;
     -moz-perspective: 1000;
-    perspective: 1000;
+    perspective: 1000px;
   }
   .carousel-inner > .item.next,
   .carousel-inner > .item.active.right {
