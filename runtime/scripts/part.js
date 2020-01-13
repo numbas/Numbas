@@ -1068,13 +1068,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             t += change;
             t = Math.max(0,t);
             change = t-ot;
-            var message = action.message || '';
-            if(util.isNonemptyHTML(message)) {
+            if(change!=0) {
+                if(util.isNonemptyHTML(action.message)) {
+                    action.message += '\n\n';
+                }
                 var marks = Math.abs(change);
                 if(change>0) {
-                    action.message += '\n\n'+R('feedback.you were awarded',{count:marks});
+                    action.message += R('feedback.you were awarded',{count:marks});
                 } else if(change<0) {
-                    action.message += '\n\n'+R('feedback.taken away',{count:marks});
+                    action.message += R('feedback.taken away',{count:marks});
                 }
             }
             var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';

@@ -65,11 +65,23 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.isDirty = Knockout.observable(false);
+
+        var _warnings = Knockout.observableArray([]);
+
         /** Warnings based on the student's answer
          * @member {observable|Array.<Object.<String>>} warnings
          * @memberof Numbas.display.PartDisplay
          */
-        this.warnings = Knockout.observableArray([]);
+        this.warnings = Knockout.computed({
+            read: function() {
+                return _warnings().filter(function(w) { return util.isNonemptyHTML(w.message); });
+            },
+            write: _warnings
+        });
+        this.warnings.push = function() {
+            return _warnings.push.call(_warnings,arguments);
+        }
+
         /** Does the part have any warnings to show?
          * Changes to false immediately.
          * Only changes to true after a delay if the part is dirty, but immediately if the part is not (i.e. it's just been submitted)
@@ -351,7 +363,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                 valid = this.part.answered;
             this.answered(valid);
             if(this.part.markingFeedback.length && !this.part.question.revealed) {
-                var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message); }).map(function(action) {
+                var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message) || action.credit!=0; }).map(function(action) {
                     var icons = {
                         'positive': 'icon-ok',
                         'negative': 'icon-remove',
