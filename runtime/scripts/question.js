@@ -482,6 +482,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         q.signals.on('preambleLoaded', function() {
             q.runPreamble();
+            if(q.partsMode=='explore') {
+                if(q.maxMarks==0) {
+                    q.objectives.forEach(function(o) {
+                        q.maxMarks += o.limit;
+                    });
+                }
+            }
         });
         q.signals.on('functionsLoaded', function() {
             q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
