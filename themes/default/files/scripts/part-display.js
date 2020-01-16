@@ -298,7 +298,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             if(this.revealed()) {
                 return false;
             }
-            return this.answered() || !this.doesMarking();
+            return true;
         },this);
 
         this.reachedDeadEnd = ko.computed(function() {

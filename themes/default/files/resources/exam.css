@@ -505,6 +505,10 @@ table {
 .statement {
 	margin: 1em 0;
 }
+.question.partsmode-explore .statement {
+    margin-bottom: 4em;
+}
+
 .part {
 	margin: .5em 0;
 }

@@ -1321,6 +1321,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     availableNextParts: function() {
         var scope = new jme.Scope([this.getScope(),{variables: this.marking_values}]);
         scope.setVariable('credit',new jme.types.TNum(this.credit));
+        scope.setVariable('answered', new jme.types.TBool(this.answered));
         return this.nextParts.filter(function(np) {
             if(np.instance) {
                 return true;
