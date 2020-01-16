@@ -22,6 +22,12 @@ Copyright 2011-16 Newcastle University
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
+            <p class="marks" role="status">
+                <span data-bind="visible: numParts()>1 &amp;&amp; question.exam.settings.showTotalMark"><localise>control.total</localise>: </span>
+                <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
+                <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
+                <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
+            </p>
         </div>
     </xsl:template>
     <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
