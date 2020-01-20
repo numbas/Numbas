@@ -58,8 +58,15 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
     var part = createPart(type, path, question, parentPart, store, scope);
-    part.loadFromXML(xml);
-    part.finaliseLoad();
+    try {
+        part.loadFromXML(xml);
+        part.finaliseLoad();
+    } catch(e) {
+        if(e.originalMessage=='part.error') {
+            throw(e);
+        }
+        part.error(e.message,{},e);
+    }
     return part;
 }
 /** Create a question part based on an XML definition.

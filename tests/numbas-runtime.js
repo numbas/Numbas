@@ -1086,63 +1086,79 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {String} str - string to split
      * @param {String} lb - left bracket string
      * @param {String} rb - right bracket string
+     * @param {String} [nestlb=""] - string to replace nested left brackets with
+     * @param {String} [nestrb=""] - string to repalce nested right brackets with
      * @returns {Array.<String>} - alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
      */
-    splitbrackets: function(str,lb,rb)
-    {
+    splitbrackets: function(str,lb,rb,nestlb,nestrb) {
         var length = str.length;
-        var lb_length = lb.length;
-        var rb_length = rb.length;
-        var out = [];    // bits to return
-        var end = 0;    // end of the last pair of bracket
+        nestlb = nestlb || '';
+        nestrb = nestrb || '';
+        var bits = [];
+        var start = 0;
         for(var i=0;i<length;i++) {
-            // if last character wasn't an escape
-            if(i==0 || str.charAt(i-1)!='\\') {
-                // if cursor is at a left bracket
-                if(str.slice(i,i+lb_length)==lb) {
-                    var j = i+lb_length;
-                    var depth = 1;
-                    var shortened = str.slice();    // this will store the contents of the brackets, with nested brackets removed
-                    var acc = 0;    // number of characters removed in shortened text
-                    // scan along until matching right bracket found
-                    while(j<length && depth>0) {
-                        if(j==0 || str.charAt(j-1)!='\\') {
-                            if(str.slice(j,j+lb_length)==lb) {
-                                // remove this bracket from shortened
-                                shortened = shortened.slice(0,j-acc)+shortened.slice(j+lb_length-acc);
-                                acc += lb_length;
-                                // add 1 to depth
-                                depth += 1;
-                                j += lb_length;
-                            } else if(str.slice(j,j+rb_length)==rb) {
-                                // remove this bracket from shortened
-                                shortened = shortened.slice(0,j-acc)+shortened.slice(j+rb_length-acc);
-                                acc += rb_length;
-                                // subtract 1 from depth
-                                depth -= 1;
-                                j += rb_length;
-                            } else {
-                                j += 1;
-                            }
-                        } else {
-                            j += 1;
-                        }
-                    }
-                    // if matching right bracket found
-                    if(depth==0) {
-                        // output plain text found before bracket
-                        out.push(str.slice(end,i));
-                        // output contents of bracket
-                        out.push(shortened.slice(i+lb_length,j-acc));
-                        // remember the position of the end of the bracket
-                        end = j;
-                        i = j-1;
-                    }
-                }
+            if(str.charAt(i)=='\\') {
+                i += 1;
+                continue;
+            }
+            // if cursor is at a left bracket
+            if(str.slice(i,i+lb.length)==lb) {
+                bits.push({kind:'str',str:str.slice(start,i)});
+                bits.push({kind:'lb'});
+                i += lb.length-1;
+                start = i+1;
+            } else if(str.slice(i,i+rb.length)==rb) {
+                bits.push({kind:'str',str:str.slice(start,i)});
+                bits.push({kind:'rb'});
+                i += rb.length-1;
+                start = i+1;
             }
         }
-        // output the remaining plain text
-        out.push(str.slice(end));
+        if(start<str.length) {
+            bits.push({kind:'str',str:str.slice(start)});
+        }
+        var out = [];
+        var depth = 0;
+        var s = '';
+        var s_plain = '';
+        var s_unclosed = '';
+        for(var i=0;i<bits.length;i++) {
+            switch(bits[i].kind) {
+                case 'str':
+                    s += bits[i].str;
+                    s_unclosed += bits[i].str;
+                    break;
+                case 'lb':
+                    s_unclosed += lb;
+                    if(depth==0) {
+                        s_plain = s;
+                        s = '';
+                    } else {
+                        s += nestlb;
+                    }
+                    depth += 1;
+                    break;
+                case 'rb':
+                    if(depth==0) {
+                        s += rb;
+                        s_unclosed += rb;
+                    } else {
+                        depth -= 1;
+                        if(depth>0) {
+                            s += nestrb;
+                        } else {
+                            out.push(s_plain);
+                            out.push(s);
+                            s = '';
+                            s_unclosed = '';
+                        }
+                    }
+                    break;
+            }
+        }
+        if(s_unclosed.length) {
+            out.push(s_unclosed);
+        }
         return out;
     },
 
@@ -6980,7 +6996,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     subvars: function(str, scope,display)
     {
-        var bits = util.splitbrackets(str,'{','}');
+        var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1)
         {
             return str;
@@ -6990,7 +7006,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                var v = jme.evaluate(jme.compile(bits[i]),scope);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
@@ -9459,7 +9475,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
             for(var i=0;i<bits.length;i+=4)
             {
                 var plain = bits[i];
-                var sbits = util.splitbrackets(plain,'{','}');
+                var sbits = util.splitbrackets(plain,'{','}','(',')');
                 for(var k=1;k<sbits.length-1;k+=2)
                 {
                     var tree2 = jme.compile(sbits[k],scope,true);
@@ -9478,7 +9494,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
                             out = out.merge(findvars(tree2,boundvars));
                             break;
                         case 'simplify':
-                            var sbits = util.splitbrackets(expr,'{','}');
+                            var sbits = util.splitbrackets(expr,'{','}','(',')');
                             for(var k=1;k<sbits.length-1;k+=2)
                             {
                                 var tree2 = jme.compile(sbits[k],scope,true);
@@ -14508,7 +14524,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
-        var bits = util.splitbrackets(str,'{','}');
+        var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1) {
             return [doc.createTextNode(str)];
         }
@@ -14748,7 +14764,7 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
         for(var i=0; i<bits.length; i+=4) {
-            var tbits = util.splitbrackets(bits[i],'{','}');
+            var tbits = util.splitbrackets(bits[i],'{','}','(',')');
             for(var j=1;j<tbits.length;j+=2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
@@ -14833,8 +14849,15 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
     var part = createPart(type, path, question, parentPart, store, scope);
-    part.loadFromXML(xml);
-    part.finaliseLoad();
+    try {
+        part.loadFromXML(xml);
+        part.finaliseLoad();
+    } catch(e) {
+        if(e.originalMessage=='part.error') {
+            throw(e);
+        }
+        part.error(e.message,{},e);
+    }
     return part;
 }
 /** Create a question part based on an XML definition.
@@ -16096,6 +16119,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     availableNextParts: function() {
         var scope = new jme.Scope([this.getScope(),{variables: this.marking_values}]);
         scope.setVariable('credit',new jme.types.TNum(this.credit));
+        scope.setVariable('answered', new jme.types.TBool(this.answered));
         return this.nextParts.filter(function(np) {
             if(np.instance) {
                 return true;
@@ -16747,6 +16771,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         q.signals.on('preambleLoaded', function() {
             q.runPreamble();
+            if(q.partsMode=='explore') {
+                if(q.maxMarks==0) {
+                    q.objectives.forEach(function(o) {
+                        q.maxMarks += o.limit;
+                    });
+                }
+            }
         });
         q.signals.on('functionsLoaded', function() {
             q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});

@@ -23,8 +23,10 @@ body.worksheet .warning-icon,
 body.worksheet .steps,
 body.worksheet .penaltyMessage,
 body.worksheet .correct-answer,
-body.worksheet .jme-preview,
-body.worksheet .submit-and-feedback {
+body.worksheet .jme-preview {
+    display: none;
+}
+body.worksheet .answered-state {
     display: none;
 }
 body.worksheet .partheader {
@@ -149,6 +151,11 @@ body.worksheet input[type="text"], body.worksheet input[type="number"] {
 }
 body.worksheet .btn {
     display: none;
+}
+
+body.worksheet .question > .marks {
+    text-align: right;
+    font-weight: bold;
 }
 
 @media screen {
