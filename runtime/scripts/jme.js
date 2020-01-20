@@ -482,7 +482,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     subvars: function(str, scope,display)
     {
-        var bits = util.splitbrackets(str,'{','}');
+        var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1)
         {
             return str;
@@ -492,7 +492,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                var v = jme.evaluate(jme.compile(bits[i]),scope);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
@@ -2961,7 +2961,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
             for(var i=0;i<bits.length;i+=4)
             {
                 var plain = bits[i];
-                var sbits = util.splitbrackets(plain,'{','}');
+                var sbits = util.splitbrackets(plain,'{','}','(',')');
                 for(var k=1;k<sbits.length-1;k+=2)
                 {
                     var tree2 = jme.compile(sbits[k],scope,true);
@@ -2980,7 +2980,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
                             out = out.merge(findvars(tree2,boundvars));
                             break;
                         case 'simplify':
-                            var sbits = util.splitbrackets(expr,'{','}');
+                            var sbits = util.splitbrackets(expr,'{','}','(',')');
                             for(var k=1;k<sbits.length-1;k+=2)
                             {
                                 var tree2 = jme.compile(sbits[k],scope,true);

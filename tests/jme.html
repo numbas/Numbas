@@ -74,11 +74,25 @@
                 }
 
 				QUnit.module('Subvars');
+				QUnit.test('splitbrackets',function(assert) {
+                    assert.deepEqual(Numbas.util.splitbrackets('a','{','}'),['a'],'a');
+                    assert.deepEqual(Numbas.util.splitbrackets('a{1}','{','}'),['a','1'],'a{1}');
+                    assert.deepEqual(Numbas.util.splitbrackets('{1}a','{','}'),['','1','a'],'{1}a');
+                    assert.deepEqual(Numbas.util.splitbrackets('{1}a{2}','{','}'),['','1','a','2'],'{1}a{2}');
+                    assert.deepEqual(Numbas.util.splitbrackets('}a','{','}'),['}a'],'}a');
+                    assert.deepEqual(Numbas.util.splitbrackets('a{{','{','}'),['a{{'],'a{{');
+                    assert.deepEqual(Numbas.util.splitbrackets('}a{','{','}'),['}a{'],'}a{');
+                    assert.deepEqual(Numbas.util.splitbrackets('a{1}b{','{','}'),['a','1','b{'],'a{1}b{');
+                    assert.deepEqual(Numbas.util.splitbrackets('a{b{1}c}d','{','}','[[',']]'),['a','b[[1]]c','d'],'a{b{1}c}d');
+                });
 				QUnit.test('contentsplitbrackets',function(assert) {
 					deepCloseEqual(assert, Numbas.util.contentsplitbrackets('{a}$x$'),["{a}","$","x","$"],'return the character before the maths delimiter to the plain text part');
 				});
 				QUnit.test('subvars',function(assert) {
 					assert.equal(Numbas.jme.subvars('{1}a{',Numbas.jme.builtinScope,true),'1a{','Leave unclosed brackets alone');
+                    assert.equal(Numbas.jme.subvars('e^{-{2}5}',Numbas.jme.builtinScope,true),'e^-10','e^{-{2}5} - Replace nested brackets with parentheses');
+                    var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
+                    assert.equal(Numbas.jme.subvars('e^{-{x}x}',scope,true),'e^-4','e^{-{x}x} - Replace nested brackets with parentheses');
 				});
 
 				QUnit.test('findvars',function(assert) {

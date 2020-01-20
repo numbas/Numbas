@@ -348,7 +348,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
-        var bits = util.splitbrackets(str,'{','}');
+        var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1) {
             return [doc.createTextNode(str)];
         }
@@ -588,7 +588,7 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
         for(var i=0; i<bits.length; i+=4) {
-            var tbits = util.splitbrackets(bits[i],'{','}');
+            var tbits = util.splitbrackets(bits[i],'{','}','(',')');
             for(var j=1;j<tbits.length;j+=2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
