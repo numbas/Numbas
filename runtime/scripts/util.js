@@ -255,6 +255,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     objects_equal: function(a,b) {
+        if(a===b) {
+            return true;
+        }
         if(typeof(a)!=typeof(b)) {
             return false;
         }
