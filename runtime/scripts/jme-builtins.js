@@ -1713,6 +1713,16 @@ newBuiltin('string',[TExpression],TString,null, {
         return new TString(jme.display.treeToJME(args[0].tree));
     }
 });
+newBuiltin('latex',[TExpression],TString,null, {
+    evaluate: function(args,scope) {
+        var expr = args[0];
+        var tex = jme.display.texify(expr.tree);
+        var s = new TString(tex);
+        s.latex = true;
+        return s;
+    }
+});
+
 newBuiltin('eval',[TExpression],'?',null,{
     evaluate: function(args,scope) {
         return scope.evaluate(args[0].tree);
