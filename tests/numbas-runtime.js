@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/i18next/i18next.js runtime/scripts/es5-shim.js runtime/scripts/es6-shim.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/i18next/i18next.js runtime/scripts/es5-shim.js runtime/scripts/es6-shim.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -565,6 +565,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Boolean}
      */
     objects_equal: function(a,b) {
+        if(a===b) {
+            return true;
+        }
         if(typeof(a)!=typeof(b)) {
             return false;
         }
@@ -6071,7 +6074,11 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,option
     }
     if(jme.isFunction(tok,'eval')) {
         return {tok: jme.evaluate(tree.args[0],options.scope)};
+    } else if(jme.isFunction(tok,'m_listval')) {
+        var n = tree.args[1].tok.value;
+        return tree.args[0].args[n];
     }
+
     return tree;
 }
 
@@ -6399,7 +6406,8 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     simplifyFractions: [
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
-        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)']            // cancel i when numerator and denominator are both purely imaginary
+        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)'],            // cancel i when numerator and denominator are both purely imaginary
+        ['?;=a / ?;=a','acg','1']
     ],
     zeroBase: [
         ['0^?;x','','0']
@@ -8999,6 +9007,9 @@ var TExpression = types.TExpression = function(tree) {
     if(typeof(tree)=='string') {
         tree = jme.compile(tree);
     }
+    if(tree && tree.tok.type=='expression' && !tree.args) {
+        tree = tree.tok.tree;
+    }
     this.tree = tree;
 }
 jme.registerType(TExpression,'expression');
@@ -9452,6 +9463,9 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         scope = jme.builtinScope;
     if(boundvars===undefined)
         boundvars = [];
+    if(!tree) {
+        return [];
+    }
     if(tree.tok.type=='function' && tree.tok.name in findvarsOps) {
         return findvarsOps[tree.tok.name](tree,boundvars,scope);
     }
@@ -10478,7 +10492,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -11984,6 +11998,19 @@ newBuiltin('list',[TMatrix],TList,null, {
         return new TList(value);
     }
 });
+
+newBuiltin('diff',[TExpression,String],TExpression,null, {
+    evaluate: function(args,scope) {
+        var expr = scope.evaluate(args[0]).tree;
+        var name = scope.evaluate(args[1]).value;
+        var res = jme.calculus.differentiate(expr,name,scope);
+        var ruleset = jme.collectRuleset('all',scope.allRulesets());
+        var simplified = jme.display.simplifyTree(res,ruleset,scope);
+        return new TExpression(simplified);
+    }
+});
+Numbas.jme.lazyOps.push('diff');
+
 /** Set the content of an HTML element to something corresponding to the value of the given token.
  * If the token is not of type HTML, use {@link jme.typeToDisplayString}.
  * @param {Element} element
@@ -12164,6 +12191,16 @@ newBuiltin('string',[TExpression],TString,null, {
         return new TString(jme.display.treeToJME(args[0].tree));
     }
 });
+newBuiltin('latex',[TExpression],TString,null, {
+    evaluate: function(args,scope) {
+        var expr = args[0];
+        var tex = jme.display.texify(expr.tree);
+        var s = new TString(tex);
+        s.latex = true;
+        return s;
+    }
+});
+
 newBuiltin('eval',[TExpression],'?',null,{
     evaluate: function(args,scope) {
         return scope.evaluate(args[0].tree);
@@ -12343,6 +12380,11 @@ newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
 newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
     evaluate: function(args,scope) {
         var substitutions = args[0].value;
+        for(var x in substitutions) {
+            if(substitutions[x].type=='expression') {
+                substitutions[x] = substitutions[x].tree;
+            }
+        }
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
         var nexpr = jme.substituteTree(expr,scope,true);
@@ -12774,7 +12816,7 @@ var texOps = jme.display.texOps = {
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'diff': (function(thing,texArgs,settings)
             {
-                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
+                var degree = thing.args.length>=2 ? (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
                 if(thing.args[0].tok.type=='name') {
                     if (settings.flatfractions) {
                         return ('\\left. \\mathrm{d}'+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
@@ -12791,7 +12833,7 @@ var texOps = jme.display.texOps = {
             }),
     'partialdiff': (function(thing,texArgs,settings)
             {
-                var degree = (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}';
+                var degree = thing.args.length>=2 ? (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
                 if(thing.args[0].tok.type=='name')
                     if (settings.flatfractions) {
                         return ('\\left. \\partial '+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
@@ -13454,6 +13496,9 @@ var typeToTeX = jme.display.typeToTeX = {
             texArgs.push(texify(tok.value[i],settings));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+    },
+    expression: function(thing,tok,texArgs,settings) {
+        return texify(tok.tree,settings);
     }
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -14787,6 +14832,167 @@ DOMcontentsubber.prototype = {
         return foundvars;
     }
 }
+});
+
+Numbas.queueScript('jme-calculus',['jme-base','jme-rules'],function() {
+/** @file Code to do with differentiation and integration
+ *
+ * Provides {@link Numbas.jme.calculus}
+ */
+
+var jme = Numbas.jme;
+var TNum = Numbas.jme.types.TNum;
+
+/** @namespace Numbas.jme.calculus */
+var calculus = jme.calculus = {};
+
+var differentiation_rules = [
+    ['$n','0'],
+    ['?;a + ?`+;b','$diff(a) + $diff(b)'],
+    ['?;a - ?`+;b','$diff(a) - $diff(b)'],
+    ['+?;a','$diff(a)'],
+    ['-?;a','-$diff(a)'],
+    ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
+    ['?;u * ?;v','u*$diff(v) + v*$diff(u)'],
+    ['e^?;p', '$diff(p)*e^p'],
+    ['(`+-$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
+    ['?;a^(`+-$n);p','p*$diff(a)*a^(p-1)'],
+];
+/** Rules for differentiating parts of expressions.
+ *
+ * Occurrences of the function `$diff` in the result expression have differentiation applied with respect to the same variable
+ *
+ * @type {Object.<Numbas.jme.rules.Rule>}
+ */
+calculus.differentiation_rules = differentiation_rules.map(function(r) {
+    return new Numbas.jme.rules.Rule(r[0],r[1],'acgs');
+});
+
+/** Standard derivatives of functions of one variable.
+ * 
+ * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule
+ *
+ * @type Object.<Numbas.jme.tree>
+ */
+calculus.derivatives = {
+    'cos': '-sin(x)',
+    'sin': 'cos(x)',
+    'e': 'e^x',
+    'ln': '1/x',
+    'log': '1/(ln(10)*x)',
+    'tan': 'sec(x)^2',
+    'cosec': '-cosec(x)*cot(x)',
+    'sec': 'sec(x)*tan(x)',
+    'cot': '-cosec(x)^2',
+    'arcsin': '1/sqrt(1-x^2)',
+    'arccos': '-1/sqrt(1-x^2)',
+    'arctan': '1/(1+x^2)',
+    'cosh': 'sinh(x)',
+    'sinh': 'cosh(x)',
+    'tanh': 'sech(x)^2',
+    'sech': '-sech(x)*tanh(x)',
+    'cosech': '-cosech(x)*coth(x)',
+    'coth': '-cosech(x)^2',
+    'arccosh': '1/sqrt(x^2-1)',
+    'arcsinh': '1/sqrt(x^2+1)',
+    'arctanh': '1/(1-x^2)',
+    'sqrt': '1/(2*sqrt(x))'
+};
+
+for(var x in calculus.derivatives) {
+    calculus.derivatives[x] = jme.compile(calculus.derivatives[x]);
+}
+
+/** Functions that differentiation distributes over.
+ *
+ * i.e. d/dx f(a, b, ...) = f(da/dx, db/dx, ...)
+ *
+ * @type Object.<Boolean>
+ */
+calculus.distributing_derivatives = {
+    'vector': true,
+    'matrix': true,
+    'rowvector': true,
+
+}
+
+var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_listval(a,0))*standard_derivative(f,m_listval(a,0))');
+
+/** Differentiate the given expression with respect to the given variable name
+ *
+ * @param {Numbas.jme.tree} tree
+ * @param {String} x
+ * @param {Numbas.jme.Scope} scope
+ * @returns Numbas.jme.tree
+ */
+var differentiate = calculus.differentiate = function(tree,x,scope) {
+    function apply_diff(tree) {
+        if(jme.isFunction(tree.tok,'$diff')) {
+            var res = base_differentiate(tree.args[0]);
+            return res;
+        } else if(jme.isFunction(tree.tok,'standard_derivative')) {
+            var name = tree.args[0].tok.value;
+            var derivative = calculus.derivatives[name];
+            var arg = apply_diff(tree.args[1]);
+            var scope = new jme.Scope({variables: {x: arg}});
+            return jme.substituteTree(derivative,scope);
+        }
+        if(tree.args) {
+            var args = tree.args.map(apply_diff);
+            return {tok: tree.tok, args: args};
+        }
+        return tree;
+    }
+
+    function distribute_differentiation(tree) {
+        var nargs = tree.args.map(base_differentiate);
+        return {tok: tree.tok, args: nargs};
+    }
+
+    var original_tree = tree;
+    function base_differentiate(tree) {
+        var tok = tree.tok;
+
+        switch(tok.type) {
+        case 'number':
+            return {tok: new TNum(0)};
+        case 'name':
+            return {tok: new TNum(tok.name==x ? 1 : 0)};
+        case 'list':
+            if(tree.args) {
+                return distribute_differentiation(tree);
+            } else {
+                return {tok: new jme.types.TList(tree.tok.value.map(function(v) { return new TNum(0); }))};
+            }
+        case 'expression':
+            return base_differentiate(tok.tree);
+        case 'op':
+        case 'function':
+            if(tree.args.length==1 && tok.name in calculus.derivatives) {
+                var res = function_derivative_rule.replace(tree,scope);
+                return apply_diff(res.expression);
+            }
+            if(calculus.distributing_derivatives[tok.name]) {
+                return distribute_differentiation(tree);
+            }
+            break;
+        }
+
+
+        for(var i=0;i<calculus.differentiation_rules.length;i++) {
+            var result = calculus.differentiation_rules[i].replace(tree,scope);
+            if(result.changed) {
+                var res = apply_diff(result.expression);
+                return res;
+            }
+        }
+
+        throw(new Numbas.Error("jme.calculus.unknown derivative",{tree: jme.display.treeToJME(tree)}));
+    }
+
+    return base_differentiate(original_tree);
+}
+
 });
 
 /*

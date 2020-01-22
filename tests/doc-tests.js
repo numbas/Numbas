@@ -245,15 +245,6 @@ var doc_tests =
                 ]
             },
             {
-                "name": "log(x,b)",
-                "examples": [
-                    {
-                        "in": "log(8,2)",
-                        "out": "3"
-                    }
-                ]
-            },
-            {
                 "name": "degrees(x)",
                 "examples": [
                     {
