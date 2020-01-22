@@ -2492,6 +2492,9 @@ var TExpression = types.TExpression = function(tree) {
     if(typeof(tree)=='string') {
         tree = jme.compile(tree);
     }
+    if(tree && tree.tok.type=='expression' && !tree.args) {
+        tree = tree.tok.tree;
+    }
     this.tree = tree;
 }
 jme.registerType(TExpression,'expression');
