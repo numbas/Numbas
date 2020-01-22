@@ -2948,6 +2948,9 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         scope = jme.builtinScope;
     if(boundvars===undefined)
         boundvars = [];
+    if(!tree) {
+        return [];
+    }
     if(tree.tok.type=='function' && tree.tok.name in findvarsOps) {
         return findvarsOps[tree.tok.name](tree,boundvars,scope);
     }
