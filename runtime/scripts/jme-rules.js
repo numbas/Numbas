@@ -1624,7 +1624,11 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,option
     }
     if(jme.isFunction(tok,'eval')) {
         return {tok: jme.evaluate(tree.args[0],options.scope)};
+    } else if(jme.isFunction(tok,'m_listval')) {
+        var n = tree.args[1].tok.value;
+        return tree.args[0].args[n];
     }
+
     return tree;
 }
 
