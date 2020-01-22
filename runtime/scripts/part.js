@@ -1050,8 +1050,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 case 'end_lift':
                     var last_lift = lifts.pop();
                     var lift_credit = this.credit;
-                    this.creditFraction = last_lift.creditFraction;
-                    this.addCredit(lift_credit);
+                    this.creditFraction = last_lift.creditFraction.add(math.Fraction.fromFloat(lift_credit));
                     scale = last_lift.scale;
                     break;
             }
@@ -1062,6 +1061,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         part.answered = valid;
 
+        /** Add marks awarded/taken away messages to the end of each feedback item which changes awarded credit
+         */
         var t = 0;
         for(var i=0;i<part.markingFeedback.length;i++) {
             var action = part.markingFeedback[i];
@@ -1075,6 +1076,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             t += change;
             t = Math.max(0,t);
             change = t-ot;
+            if(action.message===undefined) {
+                action.message = '';
+            }
             if(change!=0) {
                 if(util.isNonemptyHTML(action.message)) {
                     action.message += '\n\n';
