@@ -14,7 +14,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -1520,6 +1520,19 @@ newBuiltin('list',[TMatrix],TList,null, {
         return new TList(value);
     }
 });
+
+newBuiltin('diff',[TExpression,String],TExpression,null, {
+    evaluate: function(args,scope) {
+        var expr = scope.evaluate(args[0]).tree;
+        var name = scope.evaluate(args[1]).value;
+        var res = jme.calculus.differentiate(expr,name,scope);
+        var ruleset = jme.collectRuleset('all',scope.allRulesets());
+        var simplified = jme.display.simplifyTree(res,ruleset,scope);
+        return new TExpression(simplified);
+    }
+});
+Numbas.jme.lazyOps.push('diff');
+
 /** Set the content of an HTML element to something corresponding to the value of the given token.
  * If the token is not of type HTML, use {@link jme.typeToDisplayString}.
  * @param {Element} element
