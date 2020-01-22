@@ -1902,6 +1902,11 @@ newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
 newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
     evaluate: function(args,scope) {
         var substitutions = args[0].value;
+        for(var x in substitutions) {
+            if(substitutions[x].type=='expression') {
+                substitutions[x] = substitutions[x].tree;
+            }
+        }
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
         var nexpr = jme.substituteTree(expr,scope,true);
