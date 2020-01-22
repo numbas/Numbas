@@ -1956,7 +1956,8 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     simplifyFractions: [
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
-        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)']            // cancel i when numerator and denominator are both purely imaginary
+        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)'],            // cancel i when numerator and denominator are both purely imaginary
+        ['?;=a / ?;=a','acg','1']
     ],
     zeroBase: [
         ['0^?;x','','0']
