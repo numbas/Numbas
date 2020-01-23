@@ -749,13 +749,10 @@ select.multiplechoice {
 }
 .next-parts > ul {
     list-style: none;
-    display: flex;
-    flex-wrap: wrap;
     padding-left: 0;
-    justify-content: flex-start;
 }
 .next-parts > ul > .next-part ~ .next-part {
-    margin-left: 2em;
+    margin-top: 1em;
 }
 
 .next-part-option.made {
