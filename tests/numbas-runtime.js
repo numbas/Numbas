@@ -1431,7 +1431,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {String}
      */
     nicePartName: function(path) {
-        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?$/;
+        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?(?:a(\d+))?$/;
         var m = re_path.exec(path);
         var s = R('part')+' '+util.letterOrdinal(m[1]);
         if(m[2]) {
@@ -1439,6 +1439,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         if(m[3]) {
             s += ' '+R('gap')+' '+m[3];
+        }
+        if(m[4]) {
+            s += ' '+R('alternative')+' '+m[4];
         }
         return s;
     }
@@ -15148,6 +15151,7 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     //initialise gap and step arrays
     this.gaps = [];
     this.steps = [];
+    this.alternatives = [];
     this.isStep = this.path.match(/s\d+$/)!==null;
     this.isGap = this.path.match(/g\d+$/)!==null;
     this.settings.errorCarriedForwardReplacements = [];
@@ -15205,6 +15209,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             for(var i=0; i<stepNodes.length; i++) {
                 stepNodes[i].parentElement.removeChild(stepNodes[i]);
             }
+        }
+        var alternativeNodes = this.xml.selectNodes('alternatives/part');
+        for(var i=0; i<alternativeNodes.length; i++) {
+            var alternative = Numbas.createPartFromXML( alternativeNodes[i], this.path+'a'+i, this.question, this, this.store);
+            this.addAlternative(alternative,i);
+        }
+        var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
+        if(alternativeFeedbackMessageNode) {
+            this.alternativeFeedbackMessage = $.xsl.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode).string;
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
@@ -15343,6 +15356,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         step.isStep = true;
         this.steps.splice(index,0,step);
         this.stepsMarks += step.marks;
+    },
+    /** Add an alternative to this part
+     * @param {Numbas.parts.Part} alternative
+     * @param {Number} index - position of the alternative
+     */
+    addAlternative: function(alternative, index) {
+        alternative.isAlternative = true;
+        this.alternatives.splice(index,0,alternative);
     },
     /** Add a variable replacement for this part's adaptive marking
      * @param {String} variable - the name of the variable to replace
@@ -15517,6 +15538,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Numbas.parts.Part[]}
      */
     steps: [],
+    /** Child alternative parts
+     * @type {Numbas.parts.Part[]}
+     */
+    alternatives: [],
+    /** Feedback message shown if this part is used as an alternative
+     * @type {String}
+     */
+    alternativeFeedbackMessage: '',
     /** Have the steps been show for this part?
      * @type {Boolean}
      */
@@ -15792,13 +15821,60 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         return this.scope;
     },
+
+    markAdaptive: function() {
+        if(!this.doesMarking) {
+            return;
+        }
+        this.setStudentAnswer();
+
+        // save existing feedback
+        var existing_feedback = {
+            warnings: this.warnings.slice(),
+            markingFeedback: this.markingFeedback.slice()
+        };
+
+        var result;
+        var try_replacement;
+        if(this.settings.variableReplacementStrategy=='originalfirst') {
+            var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
+            result = result_original;
+            var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
+        }
+        if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+            try {
+                var scope = this.errorCarriedForwardScope();
+                var result_replacement = this.markAgainstScope(scope,existing_feedback);
+                if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
+                    result = result_replacement;
+                    result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
+                    result.adaptiveMarkingUsed = true;
+                }
+            } catch(e) {
+                if(e.originalMessage=='part.marking.variable replacement part not answered') {
+                    this.markingComment(e.message);
+                } else {
+                    try{
+                        this.error(e.message,{},e);
+                    } catch(pe) {
+                        console.error(pe.message);
+                    }
+                }
+            }
+        }
+        return result;
+    },
+
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
      */
     submit: function() {
         var p = this;
         this.shouldResubmit = false;
+
         this.credit = 0;
         this.markingFeedback = [];
+        this.finalised_result = {valid: false, credit: 0, states: []};
+
         if(this.question.partsMode=='explore') {
             this.nextParts.forEach(function(np) {
                 if(np.instance!==null && np.usesStudentAnswer()) {
@@ -15811,71 +15887,85 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 );
             }
         }
-        this.finalised_result = {valid: false, credit: 0, states: []};
+
         this.submitting = true;
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.setDirty(true);
         }
-        this.setStudentAnswer();
-        if(this.doesMarking) {
-            this.removeWarnings();
-            if(this.hasStagedAnswer()) {
-                this.setDirty(false);
-                // save existing feedback
-                var existing_feedback = {
-                    warnings: this.warnings.slice(),
-                    markingFeedback: this.markingFeedback.slice()
-                };
-                var result;
-                var try_replacement;
-                var adaptiveMarkingUsed = false;
-                try{
-                    if(this.settings.variableReplacementStrategy=='originalfirst') {
-                        var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
-                        result = result_original;
-                        var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
+        this.removeWarnings();
+        if(this.hasStagedAnswer()) {
+            this.setDirty(false);
+            var existing_feedback = {
+                warnings: this.warnings.slice(),
+                markingFeedback: this.markingFeedback.slice()
+            };
+
+            try {
+                var result = this.markAdaptive();
+            } catch(e) {
+                this.error('part.marking.uncaught error',{message:e.message},e);
+            }
+            if(this.alternatives.length) {
+                var best_alternative = null;
+                var best_credit = result.credit;
+                for(var i=0;i<this.alternatives.length;i++) {
+                    var alt = this.alternatives[i];
+                    alt.stagedAnswer = this.stagedAnswer;
+                    try {
+                        var altres = alt.markAdaptive();
+                    } catch(e) {
+                        continue;
                     }
-                    if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
-                        try {
-                            var scope = this.errorCarriedForwardScope();
-                            var result_replacement = this.markAgainstScope(scope,existing_feedback);
-                            if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
-                                result = result_replacement;
-                                result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
-                                adaptiveMarkingUsed = true;
-                            }
-                        } catch(e) {
-                            if(e.originalMessage=='part.marking.variable replacement part not answered') {
-                                this.markingComment(e.message);
-                            } else {
-                                try{
-                                    this.error(e.message,{},e);
-                                } catch(pe) {
-                                    console.error(pe.message);
-                                }
-                            }
+                    if(!altres) {
+                        continue;
+                    }
+                    var scale = (this.marks==0 ? 1 : alt.marks/this.marks);
+                    var altcredit = altres.credit * scale;
+                    altres.credit = altcredit;
+                    if(!best_alternative || altcredit>best_alternative.credit) {
+                        best_alternative = {
+                            credit: altcredit,
+                            result: altres,
+                            alternative: alt,
+                            scale: scale
                         }
                     }
-                    if(!result) {
-                        this.setCredit(0,R('part.marking.no result after replacement'));
-                        this.answered = true;
-                    } else {
-                        this.setWarnings(result.warnings);
-                        this.markingFeedback = result.markingFeedback;
-                        this.finalised_result = result.finalised_result;
-                        this.adaptiveMarkingUsed = adaptiveMarkingUsed;
-                        this.marking_values = result.values;
-                        this.credit = result.credit;
-                        this.answered = result.answered;
-                    }
-                } catch(e) {
-                    this.error('part.marking.uncaught error',{message:e.message},e);
                 }
-            } else {
-                this.giveWarning(R('part.marking.not submitted'));
-                this.setCredit(0,R('part.marking.did not answer'));;
-                this.answered = false;
+                if(best_alternative && (!result || best_alternative.credit>result.credit)) {
+                    var alternative = best_alternative.alternative;
+                    result = best_alternative.result;
+                    var states = best_alternative.result.finalised_result.states.slice();
+                    if(util.isNonemptyHTML(alternative.alternativeFeedbackMessage)) {
+                        states.splice(1,0,{op:'feedback',message: alternative.alternativeFeedbackMessage});
+                    }
+                    states.splice(0,0,{op:'start_lift',scale: best_alternative.scale });
+                    states.push({op:'end_lift'});
+                    result.finalised_result = {
+                        credit: best_alternative.credit,
+                        states: states,
+                        valid: best_alternative.result.finalised_result.valid
+                    };
+                    this.restore_feedback(existing_feedback);
+                    this.apply_feedback(result.finalised_result);
+                    result.markingFeedback = this.markingFeedback.slice();
+                }
             }
+            this.submit_result = result;
+            if(!result) {
+                this.setCredit(0,R('part.marking.no result after replacement'));
+                this.answered = true;
+            } else {
+                this.setWarnings(result.warnings);
+                this.markingFeedback = result.markingFeedback.slice();
+                this.finalised_result = result.finalised_result;
+                this.marking_values = result.values;
+                this.credit = result.credit;
+                this.answered = result.answered;
+            }
+        } else {
+            this.giveWarning(R('part.marking.not submitted'));
+            this.setCredit(0,R('part.marking.did not answer'));;
+            this.answered = false;
         }
         if(this.stepsShown) {
             for(var i=0;i<this.steps.length;i++) {
@@ -15970,8 +16060,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.parts.marking_results}
      */
     markAgainstScope: function(scope,feedback) {
-        this.setWarnings(feedback.warnings.slice());
-        this.markingFeedback = feedback.markingFeedback.slice();
+        this.restore_feedback(feedback);
         var values;
         var finalised_result = {states: [], valid: false, credit: 0};
         try {
@@ -16057,6 +16146,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
         return {finalised_result: finalised_result, values: result.values};
     },
+
+    /** Restore a set of feedback messages
+     * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+     */
+    restore_feedback: function(feedback) {
+        this.setWarnings(feedback.warnings.slice());
+        this.markingFeedback = feedback.markingFeedback.slice();
+    },
     /** Apply a finalised list of feedback states to this part.
      * @param {Numbas.marking.feedback_item[]} feedback
      * @see Numbas.marking.finalise_state
@@ -16128,6 +16225,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var t = 0;
         for(var i=0;i<part.markingFeedback.length;i++) {
             var action = part.markingFeedback[i];
+            if(action.credit===undefined) {
+                continue;
+            }
             var change = action.credit*part.marks;
             var credit_change = action.credit;
             if(action.gap!=undefined) {

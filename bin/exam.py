@@ -698,6 +698,7 @@ class Part(object):
     useCustomName = False
     customName = ''
     prompt = ''
+    alternativeFeedbackMessage = ''
     kind = ''
     stepsPenalty = 0
     enableMinimumMarks = True
@@ -715,6 +716,7 @@ class Part(object):
         self.marks = marks
         self.prompt = prompt
         self.steps = []
+        self.alternatives = []
         self.scripts = {}
         self.variable_replacements = []
         self.next_parts = []
@@ -746,10 +748,17 @@ class Part(object):
         if haskey(data,'prompt'):
             self.prompt = data['prompt']
 
+        if haskey(data,'alternativeFeedbackMessage'):
+            self.alternativeFeedbackMessage = data['alternativeFeedbackMessage']
+
         if haskey(data,'steps'):
             steps = data['steps']
             for step in steps:
                 self.steps.append(builder.part(step))
+
+        if haskey(data,'alternatives'):
+            for alternative in data['alternatives']:
+                self.alternatives.append(builder.part(alternative))
 
         if haskey(data,'scripts'):
             for name,script in data['scripts'].items():
@@ -764,7 +773,9 @@ class Part(object):
     def toxml(self):
         part = makeTree(['part',
                             ['prompt'],
+                            ['alternativefeedbackmessage'],
                             ['steps'],
+                            ['alternatives'],
                             ['scripts'],
                             ['adaptivemarking',
                                 ['variablereplacements'],
@@ -789,9 +800,16 @@ class Part(object):
 
         part.find('prompt').append(makeContentNode(self.prompt))
 
+        if self.alternativeFeedbackMessage:
+            part.find('alternativefeedbackmessage').append(makeContentNode(self.alternativeFeedbackMessage))
+
         steps = part.find('steps')
         for step in self.steps:
             steps.append(step.toxml())
+
+        alternatives = part.find('alternatives')
+        for alternative in self.alternatives:
+            alternatives.append(alternative.toxml())
 
         scripts = part.find('scripts')
         for name,script_dict in self.scripts.items():

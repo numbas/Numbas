@@ -1121,7 +1121,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {String}
      */
     nicePartName: function(path) {
-        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?$/;
+        var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?(?:a(\d+))?$/;
         var m = re_path.exec(path);
         var s = R('part')+' '+util.letterOrdinal(m[1]);
         if(m[2]) {
@@ -1129,6 +1129,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         if(m[3]) {
             s += ' '+R('gap')+' '+m[3];
+        }
+        if(m[4]) {
+            s += ' '+R('alternative')+' '+m[4];
         }
         return s;
     }
