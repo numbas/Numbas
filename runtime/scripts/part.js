@@ -909,7 +909,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
             if(this.alternatives.length) {
                 var best_alternative = null;
-                var best_credit = result.credit;
                 for(var i=0;i<this.alternatives.length;i++) {
                     var alt = this.alternatives[i];
                     alt.stagedAnswer = this.stagedAnswer;
@@ -918,34 +917,40 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     } catch(e) {
                         continue;
                     }
-                    if(!altres) {
+                    if(!altres || !altres.finalised_result.valid) {
                         continue;
                     }
                     var scale = (this.marks==0 ? 1 : alt.marks/this.marks);
-                    var altcredit = altres.credit * scale;
-                    altres.credit = altcredit;
-                    if(!best_alternative || altcredit>best_alternative.credit) {
-                        best_alternative = {
-                            credit: altcredit,
-                            result: altres,
-                            alternative: alt,
-                            scale: scale
-                        }
+                    var scaled_credit = altres.credit * scale;
+                    if(altres.credit==0) {
+                        continue;
+                    }
+                    if(scaled_credit<result.credit) {
+                        continue;
+                    }
+                    if(best_alternative && scaled_credit<=best_alternative.scaled_credit) {
+                        continue;
+                    }
+                    altres.credit = scaled_credit;
+                    best_alternative = {
+                        scaled_credit: scaled_credit,
+                        credit: altres.credit,
+                        result: altres,
+                        alternative: alt,
+                        scale: scale
                     }
                 }
-                if(best_alternative && (!result || best_alternative.credit>result.credit)) {
+                if(best_alternative) {
                     var alternative = best_alternative.alternative;
                     result = best_alternative.result;
-                    var states = best_alternative.result.finalised_result.states.slice();
-                    if(util.isNonemptyHTML(alternative.alternativeFeedbackMessage)) {
-                        states.splice(1,0,{op:'feedback',message: alternative.alternativeFeedbackMessage});
-                    }
-                    states.splice(0,0,{op:'start_lift',scale: best_alternative.scale });
-                    states.push({op:'end_lift'});
+                    var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
+                    var states = [
+                        {op:'set_credit', credit: best_alternative.scaled_credit, message: alternative.alternativeFeedbackMessage, reason: reason}
+                    ];
                     result.finalised_result = {
-                        credit: best_alternative.credit,
+                        credit: best_alternative.scaled_credit,
                         states: states,
-                        valid: best_alternative.result.finalised_result.valid
+                        valid: true
                     };
                     this.restore_feedback(existing_feedback);
                     this.apply_feedback(result.finalised_result);
