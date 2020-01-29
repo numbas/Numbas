@@ -833,15 +833,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice()
         };
+        
+        var settings = this.isAlternative ? this.parentPart.settings : this.settings;
 
         var result;
         var try_replacement;
-        if(this.settings.variableReplacementStrategy=='originalfirst') {
+        if(settings.variableReplacementStrategy=='originalfirst') {
             var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
             result = result_original;
-            var try_replacement = this.settings.hasVariableReplacements && (!result.answered || result.credit<1);
+            var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if(this.settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+        if(settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
             try {
                 var scope = this.errorCarriedForwardScope();
                 var result_replacement = this.markAgainstScope(scope,existing_feedback);
@@ -1084,7 +1086,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     errorCarriedForwardScope: function() {
         // dictionary of variables to replace
-        var replace = this.settings.errorCarriedForwardReplacements;
+        var replace = this.isAlternative ? this.parentPart.settings.errorCarriedForwardReplacements : this.settings.errorCarriedForwardReplacements;
         var replaced = [];
         if(!this.question) {
             return this.getScope();
