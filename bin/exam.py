@@ -786,7 +786,7 @@ class Part(object):
 
         part.attrib = {
             'usecustomname': strcons_fix(self.useCustomName),
-            'customName': strcons_fix(self.customName),
+            'customName': strcons(self.customName),
             'type': strcons(self.kind), 
             'marks': strcons_fix(self.marks), 
             'stepspenalty': strcons_fix(self.stepsPenalty), 
