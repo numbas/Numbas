@@ -461,25 +461,25 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         } else if(this.isStep) {
             this.name = util.capitalise(R('step'))+' '+index;
         } else if(siblings==0) {
-            return '';
+            this.name = '';
         } else {
             this.name = util.letterOrdinal(index)+')';
         }
 
-        if(this.gaps) {
-            var gi = 0;
-            this.gaps.forEach(function(g) {
-                var hasName = g.assignName(gi,p.gaps.length-1);
-                gi += hasName ? 1 : 0;
+        function assign_child_names(children) {
+            if(!children) {
+                return;
+            }
+            var i = 0;
+            children.forEach(function(c) {
+                var hasName = c.assignName(i,children.length-1);
+                i += hasName ? 1 : 0;
             });
         }
-        if(this.steps) {
-            var si = 0;
-            this.steps.forEach(function(s) {
-                var hasName = s.assignName(si,p.steps.length-1);
-                si += hasName ? 1 : 0;
-            });
-        }
+
+        assign_child_names(this.gaps);
+        assign_child_names(this.steps);
+        assign_child_names(this.alternatives);
 
         this.display && this.display.setName(this.name);
         return this.name != '';
