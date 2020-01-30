@@ -1031,6 +1031,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
 
         var res = mark_alternative(this);
+        res.values['used_expected_error'] = new Numbas.jme.types.TNothing()
+        res.values['used_expected_error_name'] = new Numbas.jme.types.TNothing();
 
         if(this.alternatives.length) {
             var best_alternative = null;
@@ -1059,7 +1061,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     scaled_credit: scaled_credit,
                     credit: altres.credit,
                     result: altres,
-                    alternative: alt
+                    alternative: alt,
+                    index: i
                 }
             }
             if(best_alternative) {
@@ -1077,6 +1080,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.restore_feedback(feedback);
                 this.apply_feedback(res.finalised_result);
                 this.warnings = best_alternative.alternative.warnings.slice();
+                res.values['used_expected_error'] = new Numbas.jme.types.TNum(best_alternative.index);
+                res.values['used_expected_error_name'] = new Numbas.jme.types.TString(alternative.name);
             }
         }
 
