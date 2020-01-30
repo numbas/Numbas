@@ -907,57 +907,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             } catch(e) {
                 this.error('part.marking.uncaught error',{message:e.message},e);
             }
-            if(this.alternatives.length) {
-                var best_alternative = null;
-                for(var i=0;i<this.alternatives.length;i++) {
-                    var alt = this.alternatives[i];
-                    alt.stagedAnswer = this.stagedAnswer;
-                    try {
-                        var altres = alt.markAdaptive();
-                    } catch(e) {
-                        continue;
-                    }
-                    if(!altres || !altres.finalised_result.valid) {
-                        continue;
-                    }
-                    var scale = (this.marks==0 ? 1 : alt.marks/this.marks);
-                    var scaled_credit = altres.credit * scale;
-                    if(altres.credit==0) {
-                        continue;
-                    }
-                    if(scaled_credit<result.credit) {
-                        continue;
-                    }
-                    if(best_alternative && scaled_credit<=best_alternative.scaled_credit) {
-                        continue;
-                    }
-                    altres.credit = scaled_credit;
-                    best_alternative = {
-                        scaled_credit: scaled_credit,
-                        credit: altres.credit,
-                        result: altres,
-                        alternative: alt,
-                        scale: scale
-                    }
-                }
-                if(best_alternative) {
-                    var alternative = best_alternative.alternative;
-                    result = best_alternative.result;
-                    var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
-                    var states = [
-                        {op:'set_credit', credit: best_alternative.scaled_credit, message: alternative.alternativeFeedbackMessage, reason: reason}
-                    ];
-                    result.finalised_result = {
-                        credit: best_alternative.scaled_credit,
-                        states: states,
-                        valid: true
-                    };
-                    this.restore_feedback(existing_feedback);
-                    this.apply_feedback(result.finalised_result);
-                    result.markingFeedback = this.markingFeedback.slice();
-                }
-            }
-            this.submit_result = result;
             if(!result) {
                 this.setCredit(0,R('part.marking.no result after replacement'));
                 this.answered = true;
@@ -1067,21 +1016,75 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.parts.marking_results}
      */
     markAgainstScope: function(scope,feedback) {
-        this.restore_feedback(feedback);
-        var values;
-        var finalised_result = {states: [], valid: false, credit: 0};
-        try {
-            var result = this.mark(scope);
-            finalised_result = result.finalised_result;
-            values = result.values;
-        } catch(e) {
-            this.giveWarning(e.message);
+        function mark_alternative(alt) {
+            alt.restore_feedback(feedback);
+            var values;
+            var finalised_result = {states: [], valid: false, credit: 0};
+            try {
+                var result = alt.mark(scope);
+                finalised_result = result.finalised_result;
+                values = result.values;
+            } catch(e) {
+                this.giveWarning(e.message);
+            }
+            return {finalised_result: finalised_result, values: values, credit: alt.credit};
         }
+
+        var res = mark_alternative(this);
+
+        if(this.alternatives.length) {
+            var best_alternative = null;
+            for(var i=0;i<this.alternatives.length;i++) {
+                var alt = this.alternatives[i];
+                alt.stagedAnswer = this.stagedAnswer;
+                alt.setStudentAnswer();
+                var altres = mark_alternative(alt);
+                if(!altres.finalised_result.valid) {
+                    continue;
+                }
+                var scale = (this.marks==0 ? 1 : alt.marks/this.marks);
+                var scaled_credit = altres.credit * scale;
+                if(altres.credit==0) {
+                    continue;
+                }
+                if(scaled_credit<res.credit) {
+                    continue;
+                }
+                if(best_alternative && scaled_credit<=best_alternative.scaled_credit) {
+                    continue;
+                }
+                altres.credit = scaled_credit;
+                best_alternative = {
+                    scale: scale,
+                    scaled_credit: scaled_credit,
+                    credit: altres.credit,
+                    result: altres,
+                    alternative: alt
+                }
+            }
+            if(best_alternative) {
+                var alternative = best_alternative.alternative;
+                res = best_alternative.result;
+                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
+                var states = [
+                    {op:'set_credit', credit: best_alternative.scaled_credit, message: alternative.alternativeFeedbackMessage, reason: reason}
+                ];
+                res.finalised_result = {
+                    credit: best_alternative.scaled_credit,
+                    states: states,
+                    valid: true
+                };
+                this.restore_feedback(feedback);
+                this.apply_feedback(res.finalised_result);
+                this.warnings = best_alternative.alternative.warnings.slice();
+            }
+        }
+
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
-            finalised_result: finalised_result,
-            values: values,
+            finalised_result: res.finalised_result,
+            values: res.values,
             credit: this.credit,
             answered: this.answered
         }
