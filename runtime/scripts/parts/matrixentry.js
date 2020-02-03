@@ -88,9 +88,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             var answerSize = settings.numRows+'×'+settings.numColumns;
             throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
         }
-        if(Numbas.display) {
-            this.display = new Numbas.display.MatrixEntryPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.MatrixEntryPartDisplay(this);
     },
     /** The student's last submitted answer */
     studentAnswer: '',

@@ -163,9 +163,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     finaliseLoad: function() {
         this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
-        if(Numbas.display) {
-            this.display = new Numbas.display.JMEPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.JMEPartDisplay(this);
     },
     /** Student's last submitted answer
      * @type {String}

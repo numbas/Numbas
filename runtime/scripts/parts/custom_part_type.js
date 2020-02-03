@@ -131,9 +131,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         } catch(e) {
             this.error(e.message,{},e);
         }
-        if(Numbas.display) {
-            this.display = new Numbas.display.CustomPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.CustomPartDisplay(this);
     },
     getCorrectAnswer: function(scope) {
         this.evaluateSettings(scope);

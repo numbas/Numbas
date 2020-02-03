@@ -62,10 +62,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             });
         }
     },
-    finaliseLoad: function() {
-        if(Numbas.display) {
-            this.display = new Numbas.display.GapFillPartDisplay(this);
-        }
+    finaliseLoad: function() {},
+    initDisplay: function() {
+        this.display = new Numbas.display.GapFillPartDisplay(this);
     },
 
     /** The total marks available for this part, after applying adaptive marking and steps penalties

@@ -534,7 +534,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('variablesGenerated',function() {
             q.name = jme.contentsubvars(q.name,q.scope);
         });
-        if(Numbas.display) {
+        if(Numbas.display && q.exam && q.exam.display) {
             q.display = new Numbas.display.QuestionDisplay(q);
         }
         q.signals.on('partsGenerated', function() {
@@ -691,7 +691,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @see Numbas.display.QuestionDisplay.leave
      */
     leave: function() {
-    this.display && this.display.leave();
+        this.display && this.display.leave();
     },
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. 
      * @fires Numbas.Question#preambleRun

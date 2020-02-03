@@ -61,6 +61,9 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
     try {
         part.loadFromXML(xml);
         part.finaliseLoad();
+        if(Numbas.display && part.question && part.question.display) {
+            part.initDisplay();
+        }
     } catch(e) {
         if(e.originalMessage=='part.error') {
             throw(e);
@@ -317,9 +320,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 np.penaltyAmount = scope.evaluate(np.penaltyAmountString).value;
             }
         });
-        if(Numbas.display) {
-            this.display = new Numbas.display.PartDisplay(this);
-        }
+    },
+    /** Initialise this part's display object.
+     *  Only called if the question this part belongs to has a display
+     */
+    initDisplay: function() {
+        this.display = new Numbas.display.PartDisplay(this);
     },
     /** Load saved data about this part from storage
      *  The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.

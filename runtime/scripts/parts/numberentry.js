@@ -75,9 +75,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             this.error(e.message,{},e);
         }
         this.stagedAnswer = '';
-        if(Numbas.display) {
-            this.display = new Numbas.display.NumberEntryPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.NumberEntryPartDisplay(this);
     },
     resume: function() {
         if(!this.store) {

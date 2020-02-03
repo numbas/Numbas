@@ -445,9 +445,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.stagedAnswer[i].push(false);
             }
         }
-        if(Numbas.display) {
-            this.display = new Numbas.display.MultipleResponsePartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.MultipleResponsePartDisplay(this);
     },
     /** Student's last submitted answer/choice selections
      * @type {Array.<Array.<Boolean>>}

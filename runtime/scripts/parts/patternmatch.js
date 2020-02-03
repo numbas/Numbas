@@ -50,9 +50,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     },
     finaliseLoad: function() {
         this.getCorrectAnswer(this.getScope());
-        if(Numbas.display) {
-            this.display = new Numbas.display.PatternMatchPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.PatternMatchPartDisplay(this);
     },
     resume: function() {
         if(!this.store) {

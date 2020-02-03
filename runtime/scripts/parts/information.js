@@ -43,9 +43,9 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
     finaliseLoad: function() {
         this.answered = true;
         this.isDirty = false;
-        if(Numbas.display) {
-            this.display = new Numbas.display.InformationPartDisplay(this);
-        }
+    },
+    initDisplay: function() {
+        this.display = new Numbas.display.InformationPartDisplay(this);
     },
     /** This part is always valid
      * @returns {Boolean} true

@@ -29,10 +29,9 @@ var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, p
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     loadFromXML: function() {},
     loadFromJSON: function() {},
-    finaliseLoad: function() {
-        if(Numbas.display) {
-    this.display = new Numbas.display.ExtensionPartDisplay(this);
-        }
+    finaliseLoad: function() {},
+    initDisplay: function() {
+        this.display = new Numbas.display.ExtensionPartDisplay(this);
     },
     validate: function() {
         return false;
