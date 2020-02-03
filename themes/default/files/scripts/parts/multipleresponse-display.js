@@ -53,7 +53,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             }
             var oldAnswer = null;
             Knockout.computed(function() {
-                if(this.studentAnswer()==='') {
+                if(this.studentAnswer()==='' && oldAnswer!==null) {
                     oldAnswer = null;
                     p.storeTick({answer:null, choice: 0});
                 }
