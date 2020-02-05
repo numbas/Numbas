@@ -42,13 +42,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         //show the page;
         $('#loading').hide();
         $('#everything').show();
-        Knockout.applyBindings(Numbas.exam.display);
-        for(var i=0;i<Numbas.exam.questionList.length;i++) {
-            Numbas.exam.display.applyQuestionBindings(Numbas.exam.questionList[i]);
-        }
-        Numbas.exam.display.questions().map(function(q) {
-            q.init();
-        });
         // hide the side nav when you click a question selector
         $('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
         });
@@ -91,6 +84,22 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 hide_lightbox();
             }
         });
+
+        this.viewModel = {
+            exam: Knockout.observable(Numbas.exam.display)
+        }
+        
+        this.setExam(Numbas.exam);
+        Knockout.applyBindings(this.viewModel);
+    },
+    setExam: function(exam) {
+        this.viewModel.exam(exam.display);
+        for(var i=0;i<exam.questionList.length;i++) {
+            exam.display.applyQuestionBindings(exam.questionList[i]);
+        }
+        exam.display.questions().map(function(q) {
+            q.init();
+        });
     },
     //alert / confirm boxes
     //
@@ -129,28 +138,26 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     typeset: function(selector,callback)
     {
-        try
-        {
-            if(!selector)
-                selector = $('body');
-            $(selector).each(function(i,elem) {
-                display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
-            });
-            if(callback)
-                display.MathJaxQueue.Push(callback);
-        }
-        catch(e)
-        {
-            if(MathJax===undefined && !display.failedMathJax)
+        setTimeout(function() {
+            try
             {
-                display.failedMathJax = true;
-                display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+                if(!selector)
+                    selector = $('body');
+                $(selector).each(function(i,elem) {
+                    display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+                });
+                if(callback)
+                    display.MathJaxQueue.Push(callback);
+            } catch(e) {
+                if(MathJax===undefined && !display.failedMathJax) {
+                    display.failedMathJax = true;
+                    display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+                } else {
+                    Numbas.showError(e);
+                }
             }
-            else
-            {
-                Numbas.showError(e);
-            }
-        };
+        },1);
+
     },
 
     /** Associate a JME scope with the given element
@@ -167,34 +174,24 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {XMLDocument} template
      * @param {Numbas.jme.Scope} scope
      * @param {String} contextDescription - description of the JME context, for error messages
-     * @param {Element} parentElement - element to append the generated HTML to
-     * @param {Object} [viewModel]
-     * @returns {Promise} - resolves to the produced HTML element after it's been added to the parent element, variables have been substituted and knockout bindings applied.
+     * @returns {Promise} - resolves to the produced HTML element after variables have been substituted.
      */
-    makeHTMLFromXML: function(xml, template, scope, contextDescription, parentElement, viewModel) {
-        var html = $($.xsl.transform(template, xml).string);
+    makeHTMLFromXML: function(xml, template, scope, contextDescription) {
+        var htmlString = $.xsl.transform(template, xml).string;
+        var d = document.createElement('div');
+        d.innerHTML = htmlString;
+        html = d.firstElementChild;
         display.setJMEScope(html,scope);
-        html.attr('data-jme-context-description',contextDescription);
-        html.find('table').wrap('<div class="table-responsive">');    // wrap tables so they have a scrollbar when they overflow
+        html.setAttribute('data-jme-context-description',contextDescription);
         var promise = new Promise(function(resolve, reject) {
-            Numbas.schedule.add(function() {
-                try {
-                    html.each(function(e) {
-                        Numbas.jme.variables.DOMcontentsubvars(this,scope);
-                    })
-                } catch(e) {
-                    throw(new Error(contextDescription+': '+e.message));
-                }
-                if(parentElement) {
-                    $(parentElement).append(html);
-                }
-                if(viewModel) {
-                    Knockout.applyBindings(viewModel, html[0]);
-                }
-                // make mathjax process the question text (render the maths)
-                Numbas.display.typeset(html);
-                resolve(html);
-            });
+            try {
+                Numbas.jme.variables.DOMcontentsubvars(html,scope);
+            } catch(e) {
+                throw(new Error(contextDescription+': '+e.message));
+            }
+            // make mathjax process the question text (render the maths)
+            Numbas.display.typeset(html);
+            resolve(html);
         });
 
         return promise;

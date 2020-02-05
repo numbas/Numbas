@@ -1,6 +1,8 @@
 <div id="questionContainer" class="container-fluid" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
     <div class="contentArea ">
-        <div id="questionDisplay" data-bind="stopbinding: true">
+        <div id="questionDisplay" data-bind="foreach: questions">
+            <div data-bind="promise: html_promise">
+            </div>
         </div>
         <div data-bind="with: currentQuestion">
             {% include 'question-nav.html' %}

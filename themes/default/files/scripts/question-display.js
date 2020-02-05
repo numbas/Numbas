@@ -272,12 +272,11 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var qd = this;
 
-            var promise = display.makeHTMLFromXML(
+            var promise = qd.html_promise = display.makeHTMLFromXML(
                 q.xml, 
                 Numbas.xml.templates.question, 
                 q.scope,
-                R('question.header',{number:q.number+1}),
-                $('#questionDisplay')
+                R('question.header',{number:q.number+1})
             );
 
             promise.then(function(html) {
@@ -312,9 +311,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                     p.xml, 
                     Numbas.xml.templates.part, 
                     p.getScope(), 
-                    p.display.name(),
-                    qd.html.find('.parts'),
-                    p.display
+                    p.display.name()
                 );
                 promise.then(function(html) {
                     p.display.html = html;
@@ -345,7 +342,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var qd = this;
             var exam = q.exam;
-            this.html.append(this.css);
+            $(this.html).append(this.css);
             this.visited(q.visited);
             //update the question menu - highlight this question, etc.
             exam.display.updateQuestionMenu();

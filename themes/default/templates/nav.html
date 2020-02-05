@@ -11,13 +11,13 @@
 
         <ul id="questionList" class="nav navmenu-nav">
             <!-- ko foreach: question_groups -->
-                <!-- ko if: $root.showQuestionGroupNames -->
+                <!-- ko if: $root.exam().showQuestionGroupNames -->
                 <li class="question-group-header" data-bind="visible: show_name">
                     <h3 data-bind="text: name, typeset: name"></h3>
                 </li>
                 <!-- /ko -->
                 <!-- ko foreach: questions -->
-                <li class="questionSelector" data-bind="visible: visible, css: {active: $root.currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
+                <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
                     <a role="button" class="clearfix" role="button">
                         <div class="info">
                             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
@@ -80,7 +80,7 @@
             <li><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
             <li>	
                 <div class="titleBits" data-bind="with: currentQuestion">
-                    <span class="review-header" data-bind="visible: $root.mode()=='review'" data-localise="exam.review header"></span>
+                    <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
                     <span id="questionNameDisplay" data-bind="text: displayName"></span>
                 </div>
             </li>

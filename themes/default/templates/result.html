@@ -10,7 +10,7 @@
         </thead>
         <tbody>
             <!-- ko foreach: question_groups -->
-                <!-- ko if: $root.showQuestionGroupNames -->
+                <!-- ko if: $root.exam().showQuestionGroupNames -->
                 <tr class="question-group-header" data-bind="visible: show_name">
                     <th data-bind="text: name, typeset: name"></th>
                     <th colspan="4"></th>

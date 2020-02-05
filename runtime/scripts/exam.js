@@ -330,6 +330,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             exam.signals.trigger('ready');
         });
+        exam.signals.on(['ready','display question list initialised'],function() {
+            exam.signals.trigger('display ready');
+        });
     },
     /** Restore previously started exam from storage 
      * @fires Numbas.Exam#event:ready
@@ -437,6 +440,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','HTMLAttached']) })).then(function() {
                 //register questions with exam display
                 exam.display.initQuestionList();
+                exam.signals.trigger('display question list initialised');
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
@@ -683,6 +687,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @see Numbas.Exam#end
      */
     tryEnd: function() {
+        var exam = this;
         var message = R('control.confirm end');
         var answeredAll = true;
         var submittedAll = true;
@@ -706,7 +711,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         Numbas.display.showConfirm(
             message,
             function() {
-                job(Numbas.exam.end,Numbas.exam,true);
+                job(exam.end,exam,true);
             }
         );
     },

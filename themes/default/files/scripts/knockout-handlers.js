@@ -162,8 +162,13 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             $(element).toggleClass('invisible',!val);
         }
     }
-    Knockout.bindingHandlers.stopbinding = {
-        init: function() {
+    Knockout.bindingHandlers.promise = {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            var promise = Knockout.unwrap(valueAccessor());
+            promise.then(function(html) {
+                element.appendChild(html);
+                Knockout.applyBindingsToDescendants(bindingContext,element);
+            });
             return {controlsDescendantBindings: true};
         }
     }

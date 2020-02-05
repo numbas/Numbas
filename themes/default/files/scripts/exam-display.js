@@ -364,7 +364,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         startRegen: function() {
             $('#questionDisplay').hide();
-            this.exam.currentQuestion.display.html.remove();
+            var html = this.exam.currentQuestion.display.html;
+            html.parentElement.removeChild(html);
             this.oldQuestion = this.exam.currentQuestion.display;
         },
         /** Called after the current question has been regenerated
@@ -386,7 +387,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         applyQuestionBindings: function(question) {
-            Knockout.applyBindings({exam: this, question: question.display},question.display.html[0]);
         },
         /** Called when the exam ends
          * @memberof Numbas.display.ExamDisplay
