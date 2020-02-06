@@ -5,8 +5,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.answerJSON = params.answer;
             this.part = params.part;
             this.disable = params.disable;
-            this.widget = params.widget || Knockout.computed(function() { return this.part() && this.part().input_widget();},this);
-            this.widget_options = params.widget_options || Knockout.computed(function() { return this.part() && this.part().input_options()},this);
+            this.widget = params.widget || Knockout.computed(function() { 
+                var part = Knockout.unwrap(this.part);
+                return part && part.input_widget();
+            },this);
+            this.widget_options = params.widget_options || Knockout.computed(function() { 
+                var part = Knockout.unwrap(this.part);
+                return part && part.input_options()
+            },this);
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
             this.events = params.events;
