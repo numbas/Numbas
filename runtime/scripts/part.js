@@ -849,7 +849,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if(settings.variableReplacementStrategy=='alwaysreplace' || try_replacement) {
+        if(this.question.partsMode!='explore' && (settings.variableReplacementStrategy=='alwaysreplace' || try_replacement)) {
             try {
                 var scope = this.errorCarriedForwardScope();
                 var result_replacement = this.markAgainstScope(scope,existing_feedback);
