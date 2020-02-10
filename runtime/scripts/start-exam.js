@@ -45,11 +45,12 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             }
             var seed = Math.seedrandom(new Date().getTime());
             var job = Numbas.schedule.add;
-            job(Numbas.xml.loadXMLDocs);                //load in all the XML and XSLT files
+            job(Numbas.xml.loadXMLDocs);
             job(Numbas.display.localisePage);
             job(function() {
-                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();    //The storage object manages communication between the LMS and the exam
-                var exam = Numbas.exam = new Numbas.Exam(store);                    //create the exam object, and load in everything from the XML
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var xml = Numbas.xml.examXML.selectSingleNode('/exam');
+                var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
                 exam.seed = Numbas.util.hashCode(seed);
                 var entry = store.getEntry();
                 if(store.getMode() == 'review') {

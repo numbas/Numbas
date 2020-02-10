@@ -14,120 +14,66 @@ Copyright 2011-14 Newcastle University
 Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme'],function() {
     var job = Numbas.schedule.add;
     var util = Numbas.util;
-/** Keeps track of all info we need to know while exam is running.
- *
- * Loads XML from {@link Numbas.xml.examXML}
+
+/** Create a {@link Numbas.Exam} object from an XML definition.
+ * @memberof Numbas
+ * @param {Element} xml
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @returns Numbas.Exam}
+ */
+var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
+    var exam = new Exam(store);
+
+    var xml = Numbas.xml.examXML.selectSingleNode('/exam');
+    exam.loadFromXML(xml)
+
+    exam.finaliseLoad(makeDisplay)
+
+    return exam;
+}
+
+/** Create a {@link Numbas.Exam} object from a JSON definition.
+ * @memberof Numbas
+ * @param {Object} data
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @returns Numbas.Exam}
+ */
+var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay) {
+    var exam = new Exam(store);
+
+    exam.loadFromJSON(data);
+
+    exam.finaliseLoad(makeDisplay)
+
+    return exam;
+}
+
+/** Keeps track of all info we need to know while exam is running.
+ *
+ * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @constructor
  * @memberof Numbas
  */
-function Exam(store,makeDisplay)
+function Exam(store)
 {
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
     this.store = store;
-    //get the exam info out of the XML and into the exam object
-    var xml = this.xml = Numbas.xml.examXML.selectSingleNode('/exam');
-    if(!xml)
-    {
-        throw(new Numbas.Error('exam.xml.bad root'));
-    }
-    var settings = this.settings;
     this.signals = new Numbas.schedule.SignalBox();
-    //load settings from XML
-    tryGetAttribute(settings,xml,'.',['name','percentPass']);
-    tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-    tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
-    //get navigation events and actions
-    settings.navigationEvents = {};
-    var navigationEventNodes = xml.selectNodes('settings/navigation/event');
-    for( var i=0; i<navigationEventNodes.length; i++ )
-    {
-        var e = new ExamEvent(navigationEventNodes[i]);
-        settings.navigationEvents[e.type] = e;
-    }
-    tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
-    //get text representation of exam duration
-    this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
-    //get timing events
-    settings.timerEvents = {};
-    var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-    for( i=0; i<timerEventNodes.length; i++ )
-    {
-        var e = new ExamEvent(timerEventNodes[i]);
-        settings.timerEvents[e.type] = e;
-    }
-    //feedback
-    var feedbackPath = 'settings/feedback';
-    tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName']);
-    var serializer = new XMLSerializer();
-    var isEmpty = Numbas.xml.isEmpty;
-    var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
-    this.hasIntro = !isEmpty(introNode);
-    this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
-    var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
-    this.feedbackMessages = [];
-    for(var i=0;i<feedbackMessageNodes.length;i++) {
-        var feedbackMessageNode = feedbackMessageNodes[i];
-        var feedbackMessage = {threshold: 0, message: ''};
-        feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
-        tryGetAttribute(feedbackMessage,null,feedbackMessageNode,['threshold']);
-        this.feedbackMessages.push(feedbackMessage);
-    }
-    this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
     var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
     for(var extension in Numbas.extensions) {
         if('scope' in Numbas.extensions[extension]) {
             scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
         }
     }
-    scope = new Numbas.jme.Scope([scope,{functions: Numbas.jme.variables.makeFunctions(this.xml,this.scope)}]);
     this.scope = scope;
-    //rulesets
-    var rulesetNodes = xml.selectNodes('settings/rulesets/set');
-    var sets = {};
-    for( i=0; i<rulesetNodes.length; i++)
-    {
-        var name = rulesetNodes[i].getAttribute('name');
-        var set = [];
-        //get new rule definitions
-        defNodes = rulesetNodes[i].selectNodes('ruledef');
-        for( var j=0; j<defNodes.length; j++ )
-        {
-            var pattern = defNodes[j].getAttribute('pattern');
-            var result = defNodes[j].getAttribute('result');
-            var conditions = [];
-            var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-            for(var k=0; k<conditionNodes.length; k++)
-            {
-                conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
-            }
-            var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
-            set.push(rule);
-        }
-        //get included sets
-        var includeNodes = rulesetNodes[i].selectNodes('include');
-        for(var j=0; j<includeNodes.length; j++ )
-        {
-            set.push(includeNodes[j].getAttribute('name'));
-        }
-        sets[name] = this.scope.rulesets[name] = set;
-    }
-    for(var name in sets)
-    {
-        this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
-    }
-    // question groups
-    tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames']);
-    var groupNodes = this.xml.selectNodes('question_groups/question_group');
+
+    var settings = this.settings;
+    settings.navigationEvents = {};
+    settings.timerEvents = {};
+    this.feedbackMessages = [];
     this.question_groups = [];
-    for(var i=0;i<groupNodes.length;i++) {
-        this.question_groups.push(new QuestionGroup(this,groupNodes[i]));
-    }
-    //initialise display
-    if(Numbas.display && (makeDisplay || makeDisplay===undefined)) {
-        this.display = new Numbas.display.ExamDisplay(this);
-    }
+
 }
 Numbas.Exam = Exam;
 
@@ -140,6 +86,149 @@ Numbas.Exam = Exam;
  */
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
+
+    /** Load the exam's settings from an XML <exam> node
+     * @param {Element} xml
+     */
+    loadFromXML: function(xml) {
+        var tryGetAttribute = Numbas.xml.tryGetAttribute;
+        if(!xml) {
+            throw(new Numbas.Error('exam.xml.bad root'));
+        }
+        var settings = this.settings;
+
+        this.xml = xml;
+        tryGetAttribute(settings,xml,'.',['name','percentPass']);
+        tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
+        tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
+        //get navigation events and actions
+        var navigationEventNodes = xml.selectNodes('settings/navigation/event');
+        for( var i=0; i<navigationEventNodes.length; i++ ) {
+            var e = ExamEvent.createFromXML(navigationEventNodes[i]);
+            settings.navigationEvents[e.type] = e;
+        }
+        tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
+        var timerEventNodes = this.xml.selectNodes('settings/timing/event');
+        for( i=0; i<timerEventNodes.length; i++ ) {
+            var e = ExamEvent.createFromXML(timerEventNodes[i]);
+            settings.timerEvents[e.type] = e;
+        }
+        var feedbackPath = 'settings/feedback';
+        tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName']);
+        var serializer = new XMLSerializer();
+        var isEmpty = Numbas.xml.isEmpty;
+        var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
+        this.hasIntro = !isEmpty(introNode);
+        this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
+        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
+        for(var i=0;i<feedbackMessageNodes.length;i++) {
+            var feedbackMessageNode = feedbackMessageNodes[i];
+            var feedbackMessage = {threshold: 0, message: ''};
+            feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
+            tryGetAttribute(feedbackMessage,null,feedbackMessageNode,['threshold']);
+            this.feedbackMessages.push(feedbackMessage);
+        }
+        var rulesetNodes = xml.selectNodes('settings/rulesets/set');
+        var sets = {};
+        for( i=0; i<rulesetNodes.length; i++) {
+            var name = rulesetNodes[i].getAttribute('name');
+            var set = [];
+            //get new rule definitions
+            defNodes = rulesetNodes[i].selectNodes('ruledef');
+            for( var j=0; j<defNodes.length; j++ ) {
+                var pattern = defNodes[j].getAttribute('pattern');
+                var result = defNodes[j].getAttribute('result');
+                var conditions = [];
+                var conditionNodes = defNodes[j].selectNodes('conditions/condition');
+                for(var k=0; k<conditionNodes.length; k++) {
+                    conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
+                }
+                var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+                set.push(rule);
+            }
+            //get included sets
+            var includeNodes = rulesetNodes[i].selectNodes('include');
+            for(var j=0; j<includeNodes.length; j++ ) {
+                set.push(includeNodes[j].getAttribute('name'));
+            }
+            sets[name] = this.scope.rulesets[name] = set;
+        }
+        for(var name in sets) {
+            this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
+        }
+        // question groups
+        tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames']);
+        var groupNodes = this.xml.selectNodes('question_groups/question_group');
+        for(var i=0;i<groupNodes.length;i++) {
+            var qg = new QuestionGroup(this);
+            qg.loadFromXML(groupNodes[i]);
+            this.question_groups.push(qg);
+        }
+    },
+
+    loadFromJSON: function(data) {
+        this.json = data;
+        var exam = this;
+        var settings = exam.settings;
+        var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
+        tryLoad(data,['name','duration','percentPass','showQuestionGroupNames','showStudentName','shuffleQuestions'],settings);
+        var question_groups = tryGet(data,'question_groups');
+        if(question_groups) {
+            question_groups.forEach(function(qgdata) {
+                var qg = new QuestionGroup(this);
+                qg.loadFromJSON(qgdata);
+                exam.question_groups.push(qg);
+            });
+        }
+        var navigation = tryGet(data,'navigation');
+        if(navigation) {
+            tryLoad(data,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword'],settings);
+            tryLoad(data,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
+            var onleave = tryGet(navigation,'onleave');
+            if(onleave) {
+                settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
+            }
+        }
+        var timing = tryGet(data,'timing');
+        if(timing) {
+            tryLoad(data,['allowPause'],settings);
+            var timeout = tryGet(timing,'timeout');
+            if(timeout) {
+                settings.timerEvents.timeout = ExamEvent.createFromJSON('timeout',timeout);
+            }
+            var timedwarning = tryGet(timing,'timedwarning');
+            if(timedwarning) {
+                settings.timerEvents.timedwarning = ExamEvent.createFromJSON('timedwarning',timedwarning);
+            }
+        }
+        var feedback = tryGet(data,'feedback');
+        if(feedback) {
+            tryLoad(data,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold']);
+            tryLoad(data,['intro'],exam,['introMessage']);
+            var feedbackmessages = tryGet(feedback,'feedbackmessages');
+            if(feedbackmessages) {
+                feedbackmessages.forEach(function(d) {
+                    var fm = {threshold: 0, message: ''};
+                    tryLoad(d,['mesage','threshold'],fm);
+                    exam.feedbackMessages.push(fm);
+                });
+            }
+        }
+    },
+
+    finaliseLoad: function(makeDisplay) {
+        makeDisplay = makeDisplay || makeDisplay===undefined;
+        var settings = this.settings;
+        this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
+        this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
+
+        //initialise display
+        if(Numbas.display && makeDisplay) {
+            this.display = new Numbas.display.ExamDisplay(this);
+        }
+    },
+
     /** Signals produced while loading this exam.
      * @type {Numbas.schedule.SignalBox} 
      * */
@@ -209,6 +298,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type Element
      */
     xml: undefined,
+    /** Definition of the exam
+     * @type Objects
+     */
+    json: undefined,
     /**
      * Can be
      *  * `"normal"` - Student is currently sitting the exam
@@ -314,13 +407,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
      * @fires Numbas.Exam#event:ready
+     * @fires Numbas.Exam#event:display ready
      */
     init: function()
     {
         var exam = this;
-        var variablesTodo = Numbas.xml.loadVariables(exam.xml,exam.scope);
-        var result = Numbas.jme.variables.makeVariables(variablesTodo,exam.scope);
-        exam.scope.variables = result.variables;
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
         exam.signals.on('question list initialised', function() {
@@ -409,10 +500,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var questionAcc = 0;
         this.question_groups.forEach(function(group) {
             group.questionList = [];
-            var questionNodes = group.xml.selectNodes("questions/question");
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
-                var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope, exam.store);
+                    if(group.xml) {
+                        var questionNodes = group.xml.selectNodes("questions/question");
+                        var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope, exam.store);
+                    } else if(group.json) {
+                        var question = Numbas.createQuestionFromJSON( group.json.questions[n], questionAcc++, exam, group, exam.scope, exam.store);
+                    }
                     if(loading) {
                         question.resume();
                     } else {
@@ -778,12 +873,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
  * @constructor
  * @memberof Numbas
  */
-function ExamEvent(eventNode)
-{
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    tryGetAttribute(this,null,eventNode,['type','action']);
-    this.message = Numbas.xml.serializeMessage(eventNode);
-}
+function ExamEvent() {}
 ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
     /** Name of the event this corresponds to
      *
@@ -822,24 +912,56 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
      */
     message: ''
 };
+ExamEvent.createFromXML = function(eventNode) {
+    var e = new ExamEvent();
+    var tryGetAttribute = Numbas.xml.tryGetAttribute;
+    tryGetAttribute(e,null,eventNode,['type','action']);
+    e.message = Numbas.xml.serializeMessage(eventNode);
+    return e;
+}
+ExamEvent.createFromJSON = function(type,data) {
+    var e = new ExamEvent();
+    e.type = type;
+    e.action = data.action;
+    e.message = data.message;
+    return e;
+}
+
+
 /** Represents a group of questions
  *
  * @constructor
  * @param {Numbas.Exam} exam
  * @param {Element} groupNode - the XML defining the group.
  * @property {Numbas.Exam} exam - the exam this group belongs to
- * @property {Element} xml
+ * @property {Element} xml - the XML defining the group
+ * @property {Object} json - the JSON object defining the group
  * @property {Array.<Number>} questionSubset - the indices of the picked questions, in the order they should appear to the student
  * @property {Array.<Numbas.Question>} questionList
  * @memberof Numbas
  */
-function QuestionGroup(exam, groupNode) {
+function QuestionGroup(exam) {
     this.exam = exam;
-    this.xml = groupNode;
     this.settings = util.copyobj(this.settings);
-    Numbas.xml.tryGetAttribute(this.settings,this.xml,'.',['name','pickingStrategy','pickQuestions']);
 }
 QuestionGroup.prototype = {
+    /** Load this question group's settings from the given XML <question_group> node
+     * @param {Element} xml
+     */
+    loadFromXML: function(xml) {
+        this.xml = xml;
+        Numbas.xml.tryGetAttribute(this.settings,this.xml,'.',['name','pickingStrategy','pickQuestions']);
+        var questionNodes = this.xml.selectNodes('questions/question');
+        this.numQuestions = questionNodes.length;
+    },
+    /** Load this question group's settings from the given JSON dictionary
+     * @param {Object} data
+     */
+    loadFromJSON: function(data) {
+        this.json = data;
+        Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
+        this.numQuestions = data.questions.length;
+    },
     /** Settings for this group
      * @property {String} name
      * @property {String} pickingStrategy - how to pick the list of questions: 'all-ordered', 'all-shuffled' or 'random-subset'
@@ -852,17 +974,15 @@ QuestionGroup.prototype = {
     },
     /** Decide which questions to use and in what order */
     chooseQuestionSubset: function() {
-        var questionNodes = this.xml.selectNodes('questions/question');
-        var numQuestions = questionNodes.length;
         switch(this.settings.pickingStrategy) {
             case 'all-ordered':
-                this.questionSubset = Numbas.math.range(numQuestions);
+                this.questionSubset = Numbas.math.range(this.numQuestions);
                 break;
             case 'all-shuffled':
-                this.questionSubset = Numbas.math.deal(numQuestions);
+                this.questionSubset = Numbas.math.deal(this.numQuestions);
                 break;
             case 'random-subset':
-                this.questionSubset = Numbas.math.deal(numQuestions).slice(0,this.settings.pickQuestions);
+                this.questionSubset = Numbas.math.deal(this.numQuestions).slice(0,this.settings.pickQuestions);
                 break;
         }
     }
