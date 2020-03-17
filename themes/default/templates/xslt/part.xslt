@@ -68,7 +68,7 @@
                 </div>
             </div>
             <div class="next-parts" data-bind="visible: showNextParts">
-                <p class="what-next"><localise>part.choose next part</localise></p>
+                <p class="what-next" data-bind="text: whatNextMessage"></p>
                 <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">

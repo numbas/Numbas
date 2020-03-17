@@ -26,7 +26,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable.<String>} input_title
          * @memberof Numbas.display.PartDisplay
          */
-        this.input_title = ko.computed(function() {
+        this.input_title = Knockout.computed(function() {
             return R('part.input title',{name: this.name()});
         },this);
 
@@ -34,7 +34,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable|Boolean} showName
          * @memberof Numbas.display.PartDisplay
          */
-        this.showName = ko.computed(function() {
+        this.showName = Knockout.computed(function() {
             return this.name() && (this.part.question.partsMode=='all' || this.revealed());
         },this);
 
@@ -48,7 +48,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {Boolean} visible
          * @memeberof Numbas.display.PartDisplay
          */
-        this.visible = ko.computed(function() {
+        this.visible = Knockout.computed(function() {
             switch(this.question.partsMode) {
                 case 'all':
                     return true;
@@ -281,14 +281,14 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observable} nextParts
          * @memberof Numbas.display.PartDisplay
          */
-        this.nextParts = ko.observableArray([]);
+        this.nextParts = Knockout.observableArray([]);
         this.updateNextParts();
 
         /** Should the list of next parts be shown?
          * @member {observable.<Boolean>} showNextParts
          * @memberof Numbas.display.PartDisplay
          */
-        this.showNextParts = ko.computed(function() {
+        this.showNextParts = Knockout.computed(function() {
             if(this.part.question.partsMode!='explore') {
                 return false;
             }
@@ -301,11 +301,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             return true;
         },this);
 
-        this.reachedDeadEnd = ko.computed(function() {
+        this.whatNextMessage = Knockout.computed(function() {
+            return R(this.answered() ? "part.choose next part.answered" : "part.choose next part.unanswered");
+        },this);
+
+        this.reachedDeadEnd = Knockout.computed(function() {
             return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
         },this);
 
-        this.partTreeCSS = ko.computed(function() {
+        this.partTreeCSS = Knockout.computed(function() {
             return {
                 current: this==this.question.display.currentPart()
             };
@@ -315,7 +319,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @member {observableArray.<Numbas.display.PartDisplay>} madeNextParts
          * @memberof Numbas.display.PartDisplay
          */
-        this.madeNextParts = ko.computed(function() {
+        this.madeNextParts = Knockout.computed(function() {
             var parts = this.nextParts().filter(function(np){ return np.made; }).map(function(np) { return np.instance; });
             return parts.sort(function(a,b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});
         },this);
