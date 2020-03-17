@@ -144,7 +144,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 if(!selector)
                     selector = $('body');
                 $(selector).each(function(i,elem) {
-                    display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+                    var oe;
+                    var e = elem;
+                    while(e) {
+                        oe = e;
+                        e = e.parentNode;
+                    }
+                    if(oe==document) {
+                        display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+                    }
                 });
                 if(callback)
                     display.MathJaxQueue.Push(callback);
