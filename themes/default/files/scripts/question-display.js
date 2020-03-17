@@ -252,6 +252,18 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             css['partsmode-'+q.partsMode] = true;
             return css;
         },this);
+
+        /** A promise resolving to the question's HTML element.
+         * @see Numbas.display.makeHTMLFromXML
+         * @type {Promise}
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.html_promise = new Promise(function(resolve) {
+            qd.resolve_html_promise = resolve;
+        });
+        this.html_promise.then(function(html) {
+            q.signals.trigger('HTMLAttached');
+        });
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
     {
@@ -260,6 +272,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         question: undefined,            //reference back to the main question object
+
         /** HTML representing the question
          * @type {Element}
          * @memberof Numbas.display.QuestionDisplay
@@ -272,7 +285,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var qd = this;
 
-            var promise = qd.html_promise = display.makeHTMLFromXML(
+            var promise = display.makeHTMLFromXML(
                 q.xml, 
                 Numbas.xml.templates.question, 
                 q.scope,
@@ -281,6 +294,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
 
             promise.then(function(html) {
                 qd.html = html;
+                qd.resolve_html_promise(html);
                 qd.css = document.createElement('style');
                 qd.css.setAttribute('type','text/css');
                 
@@ -289,7 +303,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 } else {
                     qd.css.appendChild(document.createTextNode(q.preamble.css));
                 }
-                q.signals.trigger('HTMLAttached');
             });
         },
 
@@ -307,7 +320,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var qd = this;
             this.updateParts();
             this.question.signals.on('HTMLAttached',function() {
-                var promise = p.display.html_promise = display.makeHTMLFromXML(
+                var promise = display.makeHTMLFromXML(
                     p.xml, 
                     Numbas.xml.templates.part, 
                     p.getScope(), 
@@ -315,6 +328,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 );
                 promise.then(function(html) {
                     p.display.html = html;
+                    p.display.resolve_html_promise(html);
                 });
             });
         },
@@ -326,11 +340,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var qd = this;
             this.updateParts();
             this.question.signals.on('HTMLAttached',function() {
-                if(p.display.html_promise) {
-                    p.display.html_promise.then(function(html) {
-                        html.remove();
-                    });
-                }
+                p.display.html_promise.then(function(html) {
+                    html.remove();
+                });
             });
         },
 

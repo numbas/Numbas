@@ -373,6 +373,15 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         p.xml.setAttribute('path',p.path);
         p.xml.setAttribute('isgap',p.isGap);
         p.xml.setAttribute('isstep',p.isStep);
+
+        /** A promise resolving to the part's HTML element.
+         * @see Numbas.display.makeHTMLFromXML
+         * @type {Promise}
+         * @memberof Numbas.display.PartDisplay
+         */
+        pd.html_promise = new Promise(function(resolve) {
+            pd.resolve_html_promise = resolve;
+        });
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
