@@ -320,5 +320,10 @@
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
     "variable.error in variable definition": "Error in definition of variable <code>{{name}}</code>",
     "left brace": "{",
-    "right brace": "}"
+    "right brace": "}",
+    "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
+    "control.toggle navigation menu": "Toggle the navigation menu",
+    "part.input title": "Answer for part {{name}}",
+    "part.correct answer title": "Expected answer for part {{name}}",
+    "part.jme.must-match.failed": "Your answer is not in the right form."
 }

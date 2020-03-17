@@ -2,7 +2,7 @@
     "page.loading": "Wird geladen...",
     "page.saving": "<p>Wird gespeichert.</p>\n<p>Dies kann einen Moment dauern.</p>",
     "mathjax.math processing error": "\"{{message}}\" beim TeXen von <code>{{expression}}</code>",
-    "die.numbas failed": "Numbas konnte nicht gestartet werden",
+    "die.numbas failed": "Numbas hatte gescheitert.",
     "die.sorry": "Entschuldigung, Numbas hat einen Fehler festgestellt, der eine weitere Bearbeitung unmöglich macht. Es folgt eine Beschreibung des Fehlers.",
     "die.error": "Fehler",
     "modal.ok": "OK",
@@ -320,5 +320,10 @@
     "question.score feedback.score total actual": "Punktestand: {{score,niceNumber}}/{{marks,niceNumber}}",
     "variable.error in variable definition": "Fehler in der Definition der Variable <code>{{name}}</code>",
     "left brace": "{",
-    "right brace": "}"
+    "right brace": "}",
+    "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
+    "control.toggle navigation menu": "Toggle the navigation menu",
+    "part.input title": "Answer for part {{name}}",
+    "part.correct answer title": "Expected answer for part {{name}}",
+    "part.jme.must-match.failed": "Your answer is not in the right form."
 }
