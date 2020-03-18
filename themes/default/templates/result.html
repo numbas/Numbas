@@ -3,8 +3,13 @@
 <p class="col-sm-6 col-sm-offset-3" data-localise="result.click a question to review"></p>
 <div class="row">
     <table id="question-breakdown" class="col-sm-6 col-sm-offset-3">
+        <colgroup>
+            <col>
+            <col span="3" class="score">
+            <col>
+        </colgroup>
         <thead>
-            <th data-localise="result.question number"></th>
+            <th data-localise="question"></th>
             <th colspan="3" data-localise="result.question score"></th>
             <th></th>
         </thead>
@@ -18,7 +23,7 @@
                 <!-- /ko -->
                 <!-- ko foreach: questions -->
                 <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
-                    <td data-bind="text: question.number+1"></td>
+                    <td data-bind="latex: displayName"></td>
                     <td data-bind="niceNumber: score"></td>
                     <td>/</td>
                     <td data-bind="niceNumber: marks"></td>

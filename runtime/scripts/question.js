@@ -205,7 +205,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
-        tryGetAttribute(q,q.xml,'.',['name','partsMode','maxMarks','objectiveVisibility','penaltyVisibility']);
+        tryGetAttribute(q,q.xml,'.',['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility']);
+        if(q.customName.trim()!='') {
+            q.name = q.customName.trim();
+        }
 
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
         for(var i = 0; i<preambleNodes.length; i++) {
@@ -774,12 +777,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     validate: function()
     {
-        var success = true;
-        for(var i=0; i<this.parts.length; i++)
-        {
-            success = success && (this.parts[i].answered || this.parts[i].marks==0);
+        switch(this.partsMode) {
+            case 'all':
+                var success = true;
+                for(var i=0; i<this.parts.length; i++)
+                {
+                    success = success && (this.parts[i].answered || this.parts[i].marks==0);
+                }
+                return success;
+            case 'explore':
+                var numAnswered = 0;
+                var numMarked = 0;
+                this.parts.forEach(function(p) {
+                    if(p.doesMarking) {
+                        numMarked += 1;
+                        if(p.answered) {
+                            numAnswered += 1;
+                        }
+                    }
+                });
+                return numMarked>0 && numAnswered == numMarked;
         }
-        return success;
     },
     /** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
      * @returns {Boolean}
@@ -801,7 +819,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
-        Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
             return true;
         }
     },

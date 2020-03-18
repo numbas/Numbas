@@ -294,6 +294,9 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var answered = Knockout.computed(function() {
         return obj.answered();
     });
+    var attempted = Knockout.computed(function() {
+        return obj.visited!==undefined && obj.visited();
+    });
     var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
     var anyAnswered = Knockout.computed(function() {
         if(obj.anyAnswered===undefined) {
@@ -366,6 +369,10 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
                 return '';
             }
             var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
+            return R('question.score feedback.'+key);
+        },this),
+        attemptedString: Knockout.computed(function() {
+            var key = attempted() ? 'attempted' : 'unattempted';
             return R('question.score feedback.'+key);
         },this),
         message: Knockout.computed(function() {

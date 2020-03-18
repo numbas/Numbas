@@ -261,17 +261,55 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         initQuestionList: function() {
-            this.question_groups = this.exam.question_groups.map(function(g) {
+            var exam = this.exam;
+            this.question_groups = exam.question_groups.map(function(g) {
                 var questions = Knockout.observable(g.questionList.map(function(q){return q.display}));
                 var show_name = Knockout.computed(function() {
                     return questions().some(function(q) { return q.visible(); });
                 });
-                return {
+                var qg = {
                     name: g.settings.name,
                     group: g,
                     questions: questions,
-                    show_name: show_name
+                    show_name: show_name,
+                    doesMarking: Knockout.observable(true)
                 }
+                qg.marks = Knockout.computed(function() {
+                    var total = 0;
+                    questions().forEach(function(qd) {
+                        total += qd.marks();
+                    });
+                    return total;
+                });
+                qg.score = Knockout.computed(function() {
+                    var score = 0;
+                    questions().forEach(function(qd) {
+                        score += qd.score();
+                    });
+                    return score;
+                });
+                qg.credit = Knockout.computed(function() {
+                    var score = qg.score();
+                    var marks = qg.marks();
+                    return marks==0 ? 0 : score/marks;
+                });
+                qg.revealed= Knockout.computed(function() {
+                    return questions().every(function(qd) {
+                        return qd.revealed();
+                    });
+                });
+                qg.anyAnswered = Knockout.computed(function() {
+                    return questions().some(function(qd) {
+                        return qd.anyAnswered();
+                    });
+                })
+                qg.answered = Knockout.computed(function() {
+                    return questions().every(function(qd) {
+                        return qd.answered();
+                    });
+                });
+                qg.feedback = display.showScoreFeedback(qg,exam.settings);
+                return qg;
             });
             for(var i=0; i<this.exam.questionList.length; i++) {
                 this.questions.push(this.exam.questionList[i].display);

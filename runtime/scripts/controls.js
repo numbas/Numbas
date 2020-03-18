@@ -64,6 +64,11 @@ Numbas.controls = /** @lends Numbas.controls */ {
     {
         job(Numbas.exam.exit,Numbas.exam);
     },
+    /** Go back to the question menu
+    */
+    backToMenu: function() {
+        job(Numbas.exam.showMenu,Numbas.exam);
+    },
     /** Try to move to the next question
      * @see Numbas.Exam#tryChangeQuestion
      */
@@ -99,8 +104,10 @@ Numbas.controls = /** @lends Numbas.controls */ {
     jumpQuestion: function( jumpTo )
     {
         job(function() {
-            if(jumpTo == Numbas.exam.currentQuestion.number)
+            if(Numbas.exam.currentQuestion && jumpTo == Numbas.exam.currentQuestion.number) {
+                Numbas.exam.display.showQuestion();
                 return;
+            }
             Numbas.exam.tryChangeQuestion( jumpTo );
         });
     },

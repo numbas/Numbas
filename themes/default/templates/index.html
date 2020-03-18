@@ -19,7 +19,7 @@ Copyright 2011-16 Newcastle University
         {% include 'head.html' %}
 	</head>
 	
-    <body data-bind="with: exam, css: {'show-nav': exam().viewType()=='question'}">
+    <body data-bind="with: exam, css: {'show-nav': exam().viewType()=='question', 'navigate-sequence': exam().exam.settings.navigateMode=='sequence', 'navigate-menu': exam().exam.settings.navigateMode=='menu'}">
         {% include 'modals.html' %}
         {% include 'die.html' %}
         {% include 'loading.html' %}

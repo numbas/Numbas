@@ -100,7 +100,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.xml = xml;
         tryGetAttribute(settings,xml,'.',['name','percentPass']);
         tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-        tryGetAttribute(settings,xml,'settings/navigation',['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
+        tryGetAttribute(settings,xml,'settings/navigation',['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -253,6 +253,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {Boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {String} startPassword - password the student must enter before beginning the exam
      * @property {Boolean} allowRegen -can student re-randomise a question?
+     * @property {String} navigateMode="sequence" - how is the exam navigated? Either `"sequence"` or `"menu"`
      * @property {Boolean} navigateReverse - can student navigate to previous question?
      * @property {Boolean} navigateBrowse - can student jump to any question they like?
      * @property {Boolean} allowSteps - are steps enabled?
@@ -278,6 +279,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         preventLeave: true,
         startPassword: '',
         allowRegen: false,
+        navigateMode: 'menu',
         navigateReverse: false,
         navigateBrowse: false,
         allowSteps: true,
@@ -546,6 +548,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             },this);
         }
     },
+
+    /** Show the question menu
+     */
+    showMenu: function() {
+        if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
+            return;
+        }
+        this.currentQuestion = undefined;
+        this.showInfoPage('menu');
+    },
     /**
      * Show the given info page
      * @param {String} page - Name of the page to show
@@ -574,12 +586,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.start = new Date();        //make a note of when the exam was started
         this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
         this.timeRemaining = this.settings.duration;
-        this.changeQuestion(0);            //start at the first question!
         this.updateScore();                //initialise score
         //set countdown going
         if(this.mode!='review')
             this.startTiming();
-        this.display && this.display.showQuestion();    //display the current question
+
+        switch(this.settings.navigateMode) {
+            case 'sequence':
+                this.changeQuestion(0);            //start at the first question!
+                this.display && this.display.showQuestion();    //display the current question
+                break;
+            case 'menu':
+                this.display.showInfoPage('menu');
+                break;
+        }
     },
     /**
      * Pause the exam, and show the `suspend` page
@@ -596,7 +616,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     resume: function()
     {
         this.startTiming();
-        this.display && this.display.showQuestion();
+        if(this.display) {
+            if(this.currentQuestion) {
+                this.display.showQuestion();
+            } else if(this.settings.navigateMode=='menu') {
+                this.display.showInfoPage('menu');
+            }
+        }
     },
     /**
      * Set the stopwatch going
@@ -686,6 +712,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         if( ! (
                this.mode=='review' 
+            || this.settings.navigateMode=='menu'
             || this.settings.navigateBrowse     // is browse navigation enabled?
             || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
             || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
@@ -693,17 +720,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         {
             return;
         }
-        var currentQuestion = this.currentQuestion;
-        if(!currentQuestion)
-            return;
-        if(i==currentQuestion.number)
-            return;
+
         var exam = this;
         /** Change the question
          */
         function go() {
             exam.changeQuestion(i);
             exam.display.showQuestion();
+        }
+        var currentQuestion = this.currentQuestion;
+        if(!currentQuestion) {
+            go();
+            return;
+        }
+        if(i==currentQuestion.number) {
+            return;
         }
         if(currentQuestion.leavingDirtyQuestion()) {
         } else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
@@ -795,7 +826,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 submittedAll = false;
             }
         }
-        if(this.currentQuestion.leavingDirtyQuestion())
+        if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion())
             return;
         if(!answeredAll) {
             message = R('control.not all questions answered') + '<br/>' + message;

@@ -141,6 +141,7 @@ class Exam(object):
         self.name = name
         self.navigation = {    
                 'allowregen': False,                #allow student to re-randomise a question?
+                'navigatemode': 'sequence',
                 'reverse': True,
                 'browse': True,
                 'allowsteps': True,
@@ -175,7 +176,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -246,6 +247,7 @@ class Exam(object):
         nav = settings.find('navigation')
         nav.attrib = {
             'allowregen': strcons_fix(self.navigation['allowregen']),
+            'navigatemode': strcons_fix(self.navigation['navigatemode']),
             'reverse': strcons_fix(self.navigation['reverse']), 
             'browse': strcons_fix(self.navigation['browse']),
             'allowsteps': strcons_fix(self.navigation['allowsteps']),
@@ -390,6 +392,11 @@ class QuestionGroup(object):
             for q in data['questions']:
                 qg.questions.append(builder.question(q))
 
+        if 'questionNames' in data:
+            question_names = data['questionNames']
+            for name,q in zip(question_names,qg.questions):
+                q.customName = name
+
         return qg
 
     def toxml(self):
@@ -407,6 +414,7 @@ class QuestionGroup(object):
 
 class Question(object):
     name = 'Untitled Question'
+    customName = ''
     statement =''
     advice = ''
     parts_mode = 'all'
@@ -497,7 +505,8 @@ class Question(object):
                             ])
 
         question.attrib = {
-            'name': strcons(self.name), 
+            'name': strcons(self.name),
+            'customName': strcons(self.customName),
             'partsMode': strcons(self.parts_mode),
             'maxMarks': strcons_fix(self.maxMarks),
             'objectiveVisibility': strcons_fix(self.objectiveVisibility),

@@ -18,7 +18,7 @@ Copyright 2011-16 Newcastle University
         <div class="question clearfix" data-bind="visible: isCurrentQuestion, css: css_classes">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
-                <h3 data-bind="text: displayName" class="print-only"></h3>
+                <h3 data-bind="text: displayName" class="question-header"></h3>
                 <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree">
                     <span class="part-progress"><localise>question.progress</localise></span>
                     <div class="part" data-bind="treeView: firstPart">

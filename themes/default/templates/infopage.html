@@ -2,6 +2,9 @@
     <div id="frontpage" class="row" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
         {% include 'frontpage.html' %}
     </div>
+    <div id="menu" class="row" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
+        {% include 'menu.html' %}
+    </div>
     <div id="suspend" data-bind="visible: infoPage()=='suspend', if: infoPage()=='suspend'">
         {% include 'suspend.html' %}
     </div>
