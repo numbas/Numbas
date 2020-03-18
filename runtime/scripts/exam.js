@@ -650,7 +650,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     {
         var t = new Date();
         this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
-        if(this.settings.duration > 0)
+        if(this.settings.navigateMode=='sequence' && this.settings.duration > 0)
         {
             this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
             this.display && this.display.showTiming();
