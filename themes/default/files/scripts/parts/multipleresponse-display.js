@@ -190,6 +190,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         },
 
         restoreAnswer: function(ticks) {
+            ticks = ticks || this.part.ticks;
             var part = this.part;
             switch(part.type) {
             case '1_n_2':
