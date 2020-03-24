@@ -77,7 +77,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                     case 'review':
                         job(exam.load,exam);
                         exam.signals.on('ready', function() {
-                            job(Numbas.display.init);
+                            job(function() {
+                                Numbas.display.init();
+                            });
                             job(function() {
                                 if(entry == 'review') {
                                     job(exam.end,exam,false);
