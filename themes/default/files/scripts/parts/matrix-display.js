@@ -52,9 +52,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         updateCorrectAnswer: function(answer) {
             this.correctAnswer(answer);
         },
-        restoreAnswer: function()
-        {
-            var studentAnswer = this.part.studentAnswer;
+        restoreAnswer: function(studentAnswer) {
             this.studentAnswerRows(studentAnswer.length || 1);
             this.studentAnswerColumns(studentAnswer.length ? studentAnswer[0].length : 1);
             this.studentAnswer(studentAnswer);

@@ -38,9 +38,8 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
             this.correctAnswer(this.part.settings.correctAnswer);
             this.displayAnswer(answer);
         },
-        restoreAnswer: function()
-        {
-            this.studentAnswer(this.part.studentAnswer);
+        restoreAnswer: function(studentAnswer) {
+            this.studentAnswer(studentAnswer);
         }
     };
     display.PatternMatchPartDisplay = extend(display.PartDisplay,display.PatternMatchPartDisplay,true);

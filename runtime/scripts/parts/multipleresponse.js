@@ -653,24 +653,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * */
     storeTick: function(answer)
     {
-        this.setDirty(true);
-        this.display && this.display.removeWarnings();
         //get choice and answer
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
         var answerIndex = answer.answer;
         var choiceIndex = answer.choice;
-        switch(this.settings.displayType)
-        {
-        case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
-        case 'dropdownlist':
-            for(var i=0; i<this.numAnswers; i++)
-            {
-                this.stagedAnswer[i][choiceIndex] = i===answerIndex;
-            }
-            break;
-        default:
-            this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
+        switch(this.settings.displayType) {
+            case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
+            case 'dropdownlist':
+                for(var i=0; i<this.numAnswers; i++) {
+                    this.stagedAnswer[i][choiceIndex] = i===answerIndex;
+                }
+                break;
+            default:
+                this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
+        this.storeAnswer(this.stagedAnswer);
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */

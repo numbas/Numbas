@@ -445,6 +445,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     pobj.studentAnswer = studentAnswer;
                 }
             }
+            pobj.stagedAnswer = undefined;
+            var stagedAnswerString = get('staged_answer');
+            if(stagedAnswerString!='') {
+                try {
+                    pobj.stagedAnswer = JSON.parse(stagedAnswerString);
+                } catch(e) {
+                }
+            }
             return pobj;
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading part',{part:part.name,message:e.message}));
@@ -520,7 +528,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     partPath: function(part) {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
-        return 'interactions.'+index+'.';
+        if(index!==undefined) {
+            return 'interactions.'+index+'.';
+        }
     },
 
     /** Call this when a part is answered
@@ -541,6 +551,18 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.set(prepath+'learner_response', '');
         }
         this.setSuspendData();
+    },
+    /** Save the staged answer for a part.
+     * Note: this is not part of the SCORM standard, so can't rely on this being saved.
+     * @param {Numbas.parts.Part} part
+     */
+    storeStagedAnswer: function(part) {
+        var sc = this;
+        var prepath = this.partPath(part);
+        if(prepath===undefined) {
+            return;
+        }
+        this.set(prepath+'staged_answer',JSON.stringify(part.stagedAnswer));
     },
     /** Save exam-level details (just score at the mo)
      * @param {Numbas.Exam} exam

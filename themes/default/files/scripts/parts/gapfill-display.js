@@ -17,10 +17,14 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
             for(var i=0;i<this.part.gaps.length; i++)
                 this.part.gaps[i].display.show();
         },
-        restoreAnswer: function()
+        restoreAnswer: function(studentAnswer)
         {
-            for(var i=0;i<this.part.gaps.length; i++)
-                this.part.gaps[i].display.restoreAnswer();
+            if(!studentAnswer) {
+                return;
+            }
+            for(var i=0;i<this.part.gaps.length; i++) {
+                this.part.gaps[i].display.restoreAnswer(studentAnswer);
+            }
         },
         revealAnswer: function()
         {

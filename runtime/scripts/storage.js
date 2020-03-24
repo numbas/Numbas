@@ -144,6 +144,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @param {Numbas.parts.Part} part
      */
     partAnswered: function(part) {},
+    /** Save the staged answer for a part.
+     * Note: this is not part of the SCORM standard, so can't rely on this being saved.
+     * @param {Numbas.parts.Part} part
+     */
+    storeStagedAnswer: function(part) {},
     /** Save exam-level details (just score at the mo)
      * @param {Numbas.Exam} exam
      */

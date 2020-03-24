@@ -46,8 +46,8 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
         updateCorrectAnswer: function(answer) {
             this.correctAnswer({valid: true, value: answer});
         },
-        restoreAnswer: function() {
-            this.studentAnswer({valid: this.part.studentAnswer!==undefined, value: this.part.studentAnswer});
+        restoreAnswer: function(studentAnswer) {
+            this.studentAnswer({valid: studentAnswer!==undefined, value: studentAnswer});
         }
     };
     display.CustomPartDisplay = extend(display.PartDisplay,display.CustomPartDisplay,true);

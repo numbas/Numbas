@@ -114,9 +114,8 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
         updateCorrectAnswer: function(answer) {
             this.correctAnswer(answer);
         },
-        restoreAnswer: function()
-        {
-            this.studentAnswer(this.part.studentAnswer);
+        restoreAnswer: function(studentAnswer) {
+            this.studentAnswer(studentAnswer);
         }
     };
     display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
