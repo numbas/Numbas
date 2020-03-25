@@ -46,7 +46,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             this.removeWarnings();
             try {
-                var tex = jme.display.exprToLaTeX(studentAnswer,'',p.question.scope);
+                var tex = jme.display.exprToLaTeX(studentAnswer,'',p.getScope());
                 if(tex===undefined)
                     throw(new Numbas.Error('display.part.jme.error making maths'));
             }
@@ -55,7 +55,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             }
             if(p.settings.checkVariableNames) {
-                var tree = jme.compile(studentAnswer,p.question.scope);
+                var tree = jme.compile(studentAnswer,p.getScope());
                 var usedvars = jme.findvars(tree);
                 var failExpectedVariableNames = false;
                 var expectedVariableNames = jme.findvars(jme.compile(this.correctAnswer()));
@@ -102,7 +102,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         updateCorrectAnswer: function(answer) {
             var p = this.part;
             this.correctAnswer(answer);
-            this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.question.scope));
+            this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.getScope()));
         },
         restoreAnswer: function(studentAnswer) {
             this.studentAnswer(studentAnswer);
