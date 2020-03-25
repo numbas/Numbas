@@ -163,6 +163,7 @@
     "part.feedback": "feedback",
     "part.choose next part.answered": "What do you want to do next?",
     "part.choose next part.unanswered": "Or, you could:",
+    "part.choose next part.will be locked": "(This part will be locked)",
     "part.reached dead end": "There's nothing more to do from here.",
     "part.next part.penalty amount": "(lose {{count}} $t(mark))",
     "part.script.error": "Error in part {{path}} custom script {{script}}: {{-message}}",

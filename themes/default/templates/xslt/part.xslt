@@ -68,11 +68,16 @@
                 </div>
             </div>
             <div class="next-parts" data-bind="visible: showNextParts">
-                <p class="what-next" data-bind="text: whatNextMessage"></p>
+                <p>
+                    <span class="what-next" data-bind="text: whatNextMessage"></span>
+                </p>
                 <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
-                        <button class="btn btn-primary next-part-option" type="button" data-bind="latex: label, click: select, css: {{made: made}}"></button>
+                        <button class="btn btn-primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}">
+                            <span data-bind="latex: label"></span>
+                            <span class="hint" data-bind="visible: lockAfterLeaving"> <localise>part.choose next part.will be locked</localise></span>
+                        </button>
                     </li>
                 </ul>
             </div>

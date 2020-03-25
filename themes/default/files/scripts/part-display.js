@@ -209,12 +209,24 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = Knockout.observable(false);
+        /** Has this part been locked?
+         * @member {observable|Boolean} locked
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.locked = Knockout.observable(false);
+        /** Is this part disabled? True if revealed or locked.
+         * @member {observable|Boolean} locked
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.disabled = Knockout.computed(function() {
+            return this.revealed() || this.locked();
+        },this);
         /** Show the "submit part" button?
          * @member {observable|Boolean} showSubmitPart
          * @memberof Numbas.display.PartDisplay
          */
         this.showSubmitPart = Knockout.computed(function() {
-            return this.doesMarking() && !this.revealed();
+            return this.doesMarking() && !this.disabled();
         },this);
         /** Text to describe the state of the steps penalty
          * @member {observable|String} stepsPenaltyMessage
@@ -495,6 +507,17 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             this.showScore();
         },
 
+        /** Lock this part
+         * @memberof Numbas.display.PartDisplay
+         */
+        lock: function() {
+            this.locked(true);
+        },
+
+        /** Update the list of next parts.
+         * Called when an instance of a next part is created or removed.
+         * @memberof Numbas.display.PartDisplay
+         */
         updateNextParts: function() {
             var p = this.part;
             this.nextParts(p.availableNextParts().map(function(np) {
@@ -507,6 +530,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     made: np.instance !== null,
                     instance: np.instance !== null ? np.instance.display : null,
                     penaltyAmount: np.penaltyAmount,
+                    lockAfterLeaving: np.lockAfterLeaving,
                     select: function() {
                         if(np.instance) {
                             p.question.setCurrentPart(np.instance)

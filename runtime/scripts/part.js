@@ -350,7 +350,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var npobj = pobj.nextParts[i];
             if(npobj.instance !== null) {
                 np.instanceVariables = part.store.loadVariables(npobj.instanceVariables,scope);
-                np.instance = part.question.addExtraPartFromXML(np.index,scope,np.instanceVariables,part,npobj.index);
+                part.makeNextPart(np,index);
                 np.instance.resume();
             }
         });
@@ -573,6 +573,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Boolean}
      */
     doesMarking: true,
+    /** Has the answer to this part been revealed?
+     * @type {Boolean}
+     */
+    revealed: false,
+    /** Is this part locked? If false, the student can change and submit their answer.
+     * @type {Boolean}
+     */
+    locked: false,
     /** Properties set when the part is generated
      * @type {Object}
      * @property {Number} stepsPenalty - Number of marks to deduct when the steps are shown
@@ -1486,30 +1494,39 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     
     /** Make an instance of the selected next part
      * @param {Numbas.parts.NextPart} np
+     * @param {Number} [index]
      */
-    makeNextPart: function(np) {
+    makeNextPart: function(np,index) {
         var p = this;
         var scope = this.getScope();
 
-        var values = np.instanceVariables = {};
-        var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
-        if(np.variableReplacements.length) {
-            np.variableReplacements.forEach(function(vr) {
-                values[vr.variable] = replaceScope.evaluate(vr.definition+'');
-            });
+        var values = np.instanceVariables;
+        if(np.instanceVariables===null) {
+            values = np.instanceVariables = {};
+            var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
+            if(np.variableReplacements.length) {
+                np.variableReplacements.forEach(function(vr) {
+                    values[vr.variable] = replaceScope.evaluate(vr.definition+'');
+                });
+            }
         }
 
         if(np.xml) {
-            np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p);
+            np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p,index);
         }
         np.instance.useCustomName = true;
         np.instance.customName = np.label;
         np.instance.assignName();
-        this.store && this.store.initPart(np.instance);
+        if(np.lockAfterLeaving) {
+            this.lock();
+        }
         if(this.display) {
             this.display.updateNextParts();
         }
-        this.question.updateScore();
+        if(index===undefined) {
+            this.store && this.store.initPart(np.instance);
+            this.question.updateScore();
+        }
     },
 
     /** Remove the existing instance of the given next part
@@ -1546,6 +1563,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.steps[i].revealAnswer(dontStore);
             }
         }
+    },
+
+    /** Lock this part
+     */
+    lock: function() {
+        this.locked = true;
+        if(this.display) {
+            this.display.lock();
+        }
     }
 };
 
@@ -1564,6 +1590,11 @@ NextPart.prototype = {
      * @type {Array.<Object>}
      */
     variableReplacements: [],
+
+    /** Values of replaced variables for this next part, once it's been created.
+     * @type {Object.<Numbas.jme.token>}
+     */
+    instanceVariables: null,
 
     /** Reference to the instance of this next part, if it's been created.
      * @type {Numbas.parts.Part}
@@ -1605,7 +1636,7 @@ NextPart.prototype = {
      */
     loadFromXML: function(xml) {
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty']);
+        tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty','lockAfterLeaving']);
         tryGetAttribute(this,xml,'.',['penaltyAmount'],['penaltyAmountString']);
         this.penaltyAmountString += '';
         var replacementNodes = xml.selectNodes('variablereplacements/replacement');

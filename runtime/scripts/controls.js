@@ -145,6 +145,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     submitPart: function(p) {
         function go() {
+            if(p.locked) {
+                return;
+            }
             p.submit();
             Numbas.store.save();
         }

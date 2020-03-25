@@ -642,6 +642,7 @@ class NextPart(object):
     availability_condition = ''
     penalty = ''
     penalty_amount = ''
+    lockAfterLeaving = False
 
     def __init__(self):
         self.variable_replacements = []
@@ -650,7 +651,7 @@ class NextPart(object):
     def fromDATA(builder, data):
         np = NextPart()
         tryLoad(data,'otherPart',np,'other_part')
-        tryLoad(data,['label','availabilityCondition','penalty'],np)
+        tryLoad(data,['label','availabilityCondition','penalty','lockAfterLeaving'],np)
         tryLoad(data,'penaltyAmount',np,'penalty_amount')
         if 'variableReplacements' in data:
             for vrd in data['variableReplacements']:
@@ -669,6 +670,7 @@ class NextPart(object):
             'availabilityCondition': strcons(self.availabilityCondition),
             'penalty': strcons(self.penalty),
             'penaltyamount': strcons_fix(self.penalty_amount),
+            'lockafterleaving': strcons_fix(self.lockAfterLeaving),
         }
         variable_replacements = nextpart.find('variablereplacements')
         for vr in self.variable_replacements:
