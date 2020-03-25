@@ -1134,6 +1134,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             s += ' '+R('alternative')+' '+m[4];
         }
         return s;
+    },
+
+    debounce: function(frequency) {
+        var last_run = 0;
+        var cb;
+        var timeout;
+        function go() {
+            var t = new Date();
+            if(t-frequency < last_run) {
+                if(timeout) {
+                    clearTimeout(timeout);
+                }
+                timeout = setTimeout(go,frequency+1-(t-last_run));
+            } else {
+                last_run = t;
+                cb();
+            }
+        }
+        return function(fn) {
+            cb = fn;
+            go();
+        }
     }
 };
 /** Different styles of writing a decimal

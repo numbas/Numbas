@@ -479,6 +479,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         },
         /** Fill the student's last submitted answer into inputs
          * @abstract
+         * @param {Object} studentAnswer
          * @memberof Numbas.display.PartDisplay
          */
         restoreAnswer: function()
@@ -531,7 +532,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         end: function() {
-            this.restoreAnswer();
+            this.restoreAnswer(this.part.studentAnswer);
             for(var i=0;i<this.part.steps.length;i++) {
                 this.part.steps[i].display.end();
             }

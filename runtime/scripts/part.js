@@ -17,6 +17,8 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
 
+var SAVE_STAGED_ANSWER_FREQUENCY = 5000;
+
 /** Definitions of custom part types
  * @name custom_part_types
  * @type {Object}
@@ -166,6 +168,8 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
+
+    this.save_staged_answer_debounce = Numbas.util.debounce(SAVE_STAGED_ANSWER_FREQUENCY);
 
     Object.defineProperty(this,"credit", {
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
@@ -339,6 +343,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.answered = pobj.answered;
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
+        this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
         var scope = this.getScope();
         this.nextParts.forEach(function(np,i) {
@@ -351,7 +356,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         });
         this.display && this.display.updateNextParts();
         this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
-            part.display.restoreAnswer();
+            part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
     },
     /** Add a step to this part
@@ -794,9 +799,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see {Numbas.parts.Part.stagedAnswer}
      */
     storeAnswer: function(answer) {
+        var p = this;
+
         this.stagedAnswer = answer;
         this.setDirty(true);
         this.removeWarnings();
+
+        if(!this.question || !this.question.exam || !this.question.exam.loading) {
+            this.store && this.save_staged_answer_debounce(function() {
+                p.store.storeStagedAnswer(p);
+            })
+        }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
      * @param {Boolean} dirty

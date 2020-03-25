@@ -104,9 +104,8 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.correctAnswer(answer);
             this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.question.scope));
         },
-        restoreAnswer: function()
-        {
-            this.studentAnswer(this.part.studentAnswer);
+        restoreAnswer: function(studentAnswer) {
+            this.studentAnswer(studentAnswer);
         }
     };
     display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);

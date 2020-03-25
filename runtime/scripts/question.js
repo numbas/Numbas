@@ -590,16 +590,18 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     part.resume();
                 }
             });
+            function submit_part(part) {
+                if(part.answered) {
+                    part.submit();
+                }
+                if(part.resume_stagedAnswer!==undefined) {
+                    part.stagedAnswer = part.resume_stagedAnswer;
+                }
+            }
             q.signals.on('ready',function() {
                 q.parts.forEach(function(part) {
-                    part.steps.forEach(function(step) {
-                        if(step.answered) {
-                            step.submit();
-                        }
-                    });
-                    if(part.answered) {
-                        part.submit();
-                    }
+                    part.steps.forEach(submit_part);
+                    submit_part(part);
                 });
             });
             q.signals.trigger('partsResumed');
