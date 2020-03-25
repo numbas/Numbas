@@ -79,7 +79,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             write: _warnings
         });
         this.warnings.push = function() {
-            return _warnings.push.call(_warnings,arguments);
+            return _warnings.push.apply(_warnings,arguments);
         }
 
         /** Does the part have any warnings to show?
