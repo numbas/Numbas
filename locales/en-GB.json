@@ -121,6 +121,7 @@
     "jme.variables.syntax error in function definition": "Syntax error in function definition",
     "jme.variables.variable not defined": "Variable <code>{{name}}</code> is not defined.",
     "jme.variables.empty definition": "Definition of variable <code>{{name}}</code> is empty.",
+    "jme.variables.empty name": "A question variable has not been given a name.",
     "jme.variables.circular reference": "Circular variable reference in definition of <code>{{name}}</code>",
     "jme.variables.error computing dependency": "Error computing referenced variable <code>{{name}}</code>",
     "jme.variables.error evaluating variable": "Error evaluating variable {{name}}: {{-message}}",

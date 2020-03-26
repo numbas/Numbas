@@ -140,6 +140,12 @@ var xml = Numbas.xml = {
         {
             var name = variableNodes[i].getAttribute('name').toLowerCase();
             var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+            if(name.trim()=='') {
+                if(value.trim()=='') {
+                    continue;
+                }
+                throw(new Numbas.Error('jme.variables.empty name'));
+            }
             if(value.trim()=='') {
                 throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
             }
