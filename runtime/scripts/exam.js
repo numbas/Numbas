@@ -341,6 +341,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var suspendData = this.store.load(this);    //get saved info from storage
         job(function() {
             var e = this;
+            e.seed = suspendData.randomSeed || e.seed;
             var numQuestions = 0;
             suspendData.questionSubsets.forEach(function(subset,i) {
                 e.question_groups[i].questionSubset = subset;
