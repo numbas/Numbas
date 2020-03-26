@@ -54,8 +54,10 @@ body.worksheet hr {
 body.worksheet #questionNameDisplay {
     font-size:2em;
 }
-body.worksheet .examID {
-    float: left;
+
+body.worksheet .exam > .intro {
+    padding: 1em;
+    margin: 2em 0;
 }
 
 body.worksheet .timeBox{
@@ -109,8 +111,11 @@ body.worksheet #examTemplate {
     display: none;
 }
 
-body.worksheet .exam:not(:last-child) {
-    page-break-after: always;
+@media print {
+    body.worksheet .exam:not(:last-child) {
+        page-break-after: always;
+        break-after: always;
+    }
 }
 
 body.worksheet .logo img {
