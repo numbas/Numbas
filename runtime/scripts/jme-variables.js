@@ -165,7 +165,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(path===undefined)
             path=[];
         computeFn = computeFn || jme.variables.computeVariable;
-        console.log(name);
         if(name=='') {
             throw(new Numbas.Error('jme.variables.empty name'));
         }
