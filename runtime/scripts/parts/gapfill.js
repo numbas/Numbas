@@ -74,7 +74,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     availableMarks: function() {
         var marks = 0;
         for(var i=0;i<this.gaps.length;i++) {
-            marks += this.gaps[i].availableMarks();
+            marks += this.gaps[i].marks;
         }
         if(this.adaptiveMarkingUsed) {
             marks -= this.settings.adaptiveMarkingPenalty;
