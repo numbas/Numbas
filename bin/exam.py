@@ -992,6 +992,10 @@ class MatrixEntryPart(Part):
     numRows = 3
     numColumns = 3
     allowResize = True
+    minColumns = 0
+    maxColumns = 0
+    minRows = 0
+    maxRows = 0
 
     tolerance = 0
     markPerCell = False
@@ -1008,7 +1012,25 @@ class MatrixEntryPart(Part):
 
     def loadDATA(self, builder, data):
         super(MatrixEntryPart,self).loadDATA(builder, data)
-        tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],self)
+        tryLoad(data,[
+            'correctAnswer',
+            'correctAnswerFractions',
+            'numRows',
+            'numColumns',
+            'allowResize',
+            'minColumns',
+            'maxColumns',
+            'minRows',
+            'maxRows',
+            'tolerance',
+            'markPerCell',
+            'allowFractions',
+            'precisionType',
+            'precision',
+            'precisionPartialCredit',
+            'precisionMessage',
+            'strictPrecision'
+        ],self)
 
     def toxml(self):
         part = super(MatrixEntryPart,self).toxml()
@@ -1024,6 +1046,10 @@ class MatrixEntryPart(Part):
             'rows': strcons_fix(self.numRows),
             'columns': strcons_fix(self.numColumns),
             'allowresize': strcons_fix(self.allowResize),
+            'mincolumns': strcons_fix(self.minColumns),
+            'maxcolumns': strcons_fix(self.maxColumns),
+            'minrows': strcons_fix(self.minRows),
+            'maxrows': strcons_fix(self.maxRows),
             'tolerance': strcons_fix(self.tolerance),
             'markpercell': strcons_fix(self.markPerCell),
             'allowfractions': strcons_fix(self.allowFractions),
