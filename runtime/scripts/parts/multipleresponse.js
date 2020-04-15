@@ -584,7 +584,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                           this.error('part.mcq.matrix cell empty',{part:this.path,row:i,column:j});
                         }
                         try {
-                          value = jme.evaluate(value,scope).value;
+                          value = jme.castToType(jme.evaluate(value,scope),'number').value;
                         } catch(e) {
                           this.error('part.mcq.matrix jme error',{part:this.path,row:i,column:j,error:e.message});
                         }
