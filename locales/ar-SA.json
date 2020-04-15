@@ -326,5 +326,6 @@
     "control.toggle navigation menu": "Toggle the navigation menu",
     "part.input title": "Answer for part {{name}}",
     "part.correct answer title": "Expected answer for part {{name}}",
-    "part.jme.must-match.failed": "Your answer is not in the right form."
+    "part.jme.must-match.failed": "Your answer is not in the right form.",
+    "question.score feedback.none": ""
 }
