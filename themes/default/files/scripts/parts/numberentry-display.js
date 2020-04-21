@@ -42,7 +42,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                     p.giveWarning(R('part.numberentry.answer not integer'));
             }
             if(!util.isNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true)) {
-                p.giveWarning(R('part.numberentry.answer not integer or decimal'));
+                p.giveWarning(R(p.settings.allowFractions ? 'part.numberentry.answer not integer or decimal or fraction' : 'part.numberentry.answer not integer or decimal'));
                 return '';
             }
             var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true);

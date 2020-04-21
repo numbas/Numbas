@@ -218,6 +218,7 @@
     "part.numberentry.give your answer as a reduced fraction": "Reduce your answer to lowest terms.",
     "part.numberentry.answer not integer": "Your answer is invalid. You must enter a whole number, not a decimal.",
     "part.numberentry.answer not integer or decimal": "Your answer is invalid. You must enter an integer or a decimal.",
+    "part.numberentry.answer not integer or decimal or fraction": "Your answer is invalid. You must enter an integer, a decimal or a fraction.",
     "part.numberentry.zero sig fig": "This part is set up to round the student's answer to zero significant figures, which has no meaning.",
     "part.numberentry.negative decimal places": "This part is set up to round the student's answer to a negative number of decimal places, which has no meaning.",
     "part.numberentry.precision type.dp": "decimal place",
