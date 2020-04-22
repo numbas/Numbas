@@ -91,6 +91,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 hide_lightbox();
             }
         });
+        Numbas.signals.trigger('display ready');
     },
     //alert / confirm boxes
     //
