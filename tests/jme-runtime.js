@@ -11640,9 +11640,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {Numbas.jme.tree} tree
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} [allowUnbound=false] - allow unbound variables to remain in the returned tree
+     * @param {Boolean} [unwrapExpressions=false] - unwrap TExpression tokens?
      * @returns {Numbas.jme.tree}
      */
-    substituteTree: function(tree,scope,allowUnbound)
+    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
     {
         if(!tree)
             return null;
@@ -11665,7 +11666,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 {
                     if(v.tok) {
                         return v;
-                    } else if(v.type=='expression') {
+                    } else if(unwrapExpressions && v.type=='expression') {
                         return v.tree;
                     } else {
                         return {tok: v};
@@ -11678,7 +11679,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
             tree = {tok: tree.tok,
                     args: tree.args.slice()};
-            substituteTreeOps[tree.tok.name](tree,scope,allowUnbound);
+            substituteTreeOps[tree.tok.name](tree,scope,allowUnbound,unwrapExpressions);
             return tree;
         } else {
             tree = {
@@ -11686,7 +11687,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 args: tree.args.slice()
             };
             for(var i=0;i<tree.args.length;i++) {
-                tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+                tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound,unwrapExpressions);
             }
             return tree;
         }
@@ -17331,7 +17332,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         var substitutions = args[0].value;
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
-        var nexpr = jme.substituteTree(expr,scope,true);
+        var nexpr = jme.substituteTree(expr,scope,true,true);
         return new TExpression(nexpr);
     }
 });

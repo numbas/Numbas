@@ -1898,7 +1898,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         var substitutions = args[0].value;
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
-        var nexpr = jme.substituteTree(expr,scope,true);
+        var nexpr = jme.substituteTree(expr,scope,true,true);
         return new TExpression(nexpr);
     }
 });
