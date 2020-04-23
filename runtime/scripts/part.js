@@ -1040,7 +1040,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message);
+                    part.markingComment(state.message,state.reason);
                     break;
                 case FeedbackOps.END:
                     if(lifts.length) {
@@ -1224,11 +1224,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Add a comment to the marking feedback
      * @param {String} message
      */
-    markingComment: function(message)
+    markingComment: function(message,reason)
     {
         this.markingFeedback.push({
             op: 'feedback',
-            message: message
+            message: message,
+            reason: reason
         });
     },
     /** Show the steps, as a result of the student asking to show them.
