@@ -99,7 +99,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @see Numbas.marking.StatefulScope
      * @returns {Numbas.jme.funcObj}
      */
-    function state_fn(name, args, outtype, fn) {
+    var state_fn = marking.state_fn = function(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
                 if(jme.lazyOps.contains(name)) {
