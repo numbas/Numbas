@@ -258,6 +258,7 @@
     "part.custom.error evaluating input option": "Error evaluating input option <code>{{option}}</code>: {{-error}}",
     "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
     "part.custom.error evaluating setting": "Error evaluating setting <code>{{setting}}</code>: {{-error}}",
+    "part.custom.custom widget error": "Error creating a custom input widget: {{-message}}",
     "question.loaded name mismatch": "Can't resume this attempt - the package has changed since the last session.",
     "question.error": "Question {{number}}: {{-message}}",
     "question.error creating question": "Error while creating question {{number}}: {{-message}}",

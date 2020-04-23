@@ -121,7 +121,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
         for(var option in raw_input_options) {
             try {
-                p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
+                if(p.definition.input_widget=='custom' && (option=='create' || option=='set_answer')) {
+                    p.resolved_input_options[option] = raw_input_options[option];
+                } else {
+                    p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
+                }
             } catch(e) {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message},e);
             }
@@ -188,6 +192,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         },
         'dropdown': function(answer) {
             return new types.TNum(answer);
+        },
+        'custom': function(answer){ 
+            return jme.wrapValue(answer);
         }
     },
     setting_evaluators: {

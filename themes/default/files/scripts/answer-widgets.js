@@ -352,8 +352,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = params.maxColumns ? params.maxColumns : Knockout.observable(0);
             this.minRows = params.minRows ? params.minRows : Knockout.observable(0);
             this.maxRows = params.maxRows ? params.maxRows : Knockout.observable(0);
-            console.log(params);
-            console.log(this.minRows());
             this.title = params.title || '';
             var _numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -362,10 +360,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     v = parseInt(v);
                     var minRows = Knockout.unwrap(this.minRows);
                     var maxRows = Knockout.unwrap(this.maxRows);
-                    console.log(minRows,v,maxRows);
                     v = minRows==0 ? v : Math.max(minRows,v);
                     v = maxRows==0 ? v : Math.min(maxRows,v);
-                    console.log(v);
                     return _numRows(v);
                 }
             },this);
@@ -850,4 +846,51 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </form>\
         '
     });
+
+    Knockout.components.register('answer-widget-custom', {
+        viewModel: function(params) {
+            var vm = this;
+            this.answerJSON = params.answerJSON;
+            this.part = params.part;
+            this.options = Knockout.unwrap(params.options);
+        },
+        template: '\
+            <div class="custom-widget" data-bind="customWidget: options, part: part, answer: answerJSON"></div>\
+        '
+    });
+
+    Knockout.bindingHandlers.customWidget = {
+        init: function(element, valueAccessor, allBindings) {
+            var options = Knockout.unwrap(valueAccessor());
+            var part = allBindings.get('part')
+            var answerJSON = allBindings.get('answer');
+
+            var init = Knockout.unwrap(answerJSON);
+            this.input = Knockout.observable(init.valid ? init.value || '' : '');
+            var lastValue = init.valid ? init.value : null;
+
+            function set_answer_from_widget(value) {
+                if(value.value!==lastValue) {
+                    lastValue = value.value;
+                    answerJSON(value);
+                }
+            }
+
+            function make_fn(code,args) {
+                return eval('(function('+args.join(',')+'){try{\n'+code+'\n}catch(e){e = new Numbas.Error(\'part.custom.custom widget error\',{message:e.message}); Numbas.showError(e); throw(e);}})');
+            }
+            var create_fn = make_fn(options.create,['options','part','set_answer']);
+
+            var html = create_fn(options,part,set_answer_from_widget);
+            element.appendChild(html);
+
+            var set_answer_fn = make_fn(options.set_answer,['options','part','answer']);
+            answerJSON.subscribe(function(v) {
+                set_answer_fn(options,part,v);
+            });
+            return { controlsDescendantBindings: true };
+        },
+        update: function(element, valueAccessor) {
+        }
+    };
 });
