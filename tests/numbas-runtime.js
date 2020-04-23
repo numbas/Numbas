@@ -1438,6 +1438,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             s += ' '+R('gap')+' '+m[3];
         }
         return s;
+    },
+
+    debounce: function(frequency) {
+        var last_run = 0;
+        var cb;
+        var timeout;
+        function go() {
+            var t = new Date();
+            if(t-frequency < last_run) {
+                if(timeout) {
+                    clearTimeout(timeout);
+                }
+                timeout = setTimeout(go,frequency+1-(t-last_run));
+            } else {
+                last_run = t;
+                cb();
+            }
+        }
+        return function(fn) {
+            cb = fn;
+            go();
+        }
     }
 };
 /** Different styles of writing a decimal
@@ -6694,6 +6716,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 {
                     if(v.tok) {
                         return v;
+                    } else if(v.type=='expression') {
+                        return v.tree;
                     } else {
                         return {tok: v};
                     }
@@ -13458,6 +13482,9 @@ var typeToTeX = jme.display.typeToTeX = {
             texArgs.push(texify(tok.value[i],settings));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+    },
+    expression: function(thing,tok,texArgs,settings) {
+        return texify(tok.tree,settings);
     }
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -13507,6 +13534,16 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
     if(thing.args)
     {
+        thing = {
+            tok: thing.tok,
+            args: thing.args.map(function(arg) {
+                if(arg.tok.type=='expression') {
+                    return arg.tree;
+                } else {
+                    return arg;
+                }
+            })
+        }
         var texArgs = [];
         for(var i=0; i<thing.args.length; i++ )
         {
@@ -14319,6 +14356,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(path===undefined)
             path=[];
         computeFn = computeFn || jme.variables.computeVariable;
+        if(name=='') {
+            throw(new Numbas.Error('jme.variables.empty name'));
+        }
         if(path.contains(name))
         {
             throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
@@ -14786,6 +14826,8 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
 
+var SAVE_STAGED_ANSWER_FREQUENCY = 5000;
+
 /** Definitions of custom part types
  * @name custom_part_types
  * @type {Object}
@@ -14924,6 +14966,8 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
     this.scripts = {};
+
+    this.save_staged_answer_debounce = Numbas.util.debounce(SAVE_STAGED_ANSWER_FREQUENCY);
 
     Object.defineProperty(this,"credit", {
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
@@ -15069,9 +15113,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.answered = pobj.answered;
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
+        this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
         this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
-            part.display.restoreAnswer();
+            part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
     },
     /** Add a step to this part
@@ -15477,9 +15522,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see {Numbas.parts.Part.stagedAnswer}
      */
     storeAnswer: function(answer) {
+        var p = this;
+
         this.stagedAnswer = answer;
         this.setDirty(true);
         this.removeWarnings();
+
+        if(!this.question || !this.question.exam || !this.question.exam.loading) {
+            this.store && this.save_staged_answer_debounce(function() {
+                p.store.storeStagedAnswer(p);
+            })
+        }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
      * @param {Boolean} dirty
@@ -15796,7 +15849,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message);
+                    part.markingComment(state.message,state.reason);
                     break;
                 case FeedbackOps.END:
                     if(lifts.length) {
@@ -15843,7 +15896,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
             var ot = t;
             t += change;
-            t = Math.max(0,t);
             change = t-ot;
             if(action.message===undefined) {
                 action.message = '';
@@ -15883,7 +15935,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),
-            marks: new jme.types.TNum(this.marks),
+            marks: new jme.types.TNum(this.availableMarks()),
             partType: new jme.types.TString(this.type),
             gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME())})),
             steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME())}))
@@ -15981,11 +16033,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Add a comment to the marking feedback
      * @param {String} message
      */
-    markingComment: function(message)
+    markingComment: function(message,reason)
     {
         this.markingFeedback.push({
             op: 'feedback',
-            message: message
+            message: message,
+            reason: reason
         });
     },
     /** Show the steps, as a result of the student asking to show them.
@@ -16330,7 +16383,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             Object.keys(variables).map(function(name) {
                 var vd = variables[name];
                 var definition = vd.definition+'';
-                if(definition=='') {
+                if(name.trim()=='') {
+                    if(definition=='') {
+                        return;
+                    }
+                    throw(new Numbas.Error('jme.variables.empty name'));
+                }
+                if(definition.trim()=='') {
                     throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
                 }
                 try {
@@ -16521,16 +16580,18 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     part.resume();
                 }
             });
+            function submit_part(part) {
+                if(part.answered) {
+                    part.submit();
+                }
+                if(part.resume_stagedAnswer!==undefined) {
+                    part.stagedAnswer = part.resume_stagedAnswer;
+                }
+            }
             q.signals.on('ready',function() {
                 q.parts.forEach(function(part) {
-                    part.steps.forEach(function(step) {
-                        if(step.answered) {
-                            step.submit();
-                        }
-                    });
-                    if(part.answered) {
-                        part.submit();
-                    }
+                    part.steps.forEach(submit_part);
+                    submit_part(part);
                 });
             });
             q.signals.trigger('partsResumed');
@@ -17124,6 +17185,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var suspendData = this.store.load(this);    //get saved info from storage
         job(function() {
             var e = this;
+            e.seed = suspendData.randomSeed || e.seed;
             var numQuestions = 0;
             suspendData.questionSubsets.forEach(function(subset,i) {
                 e.question_groups[i].questionSubset = subset;
@@ -17857,6 +17919,13 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         callback.resolve();
     }
 }
+
+/** Signals produced by the Numbas runtime.
+ * @type {Numbas.schedule.SignalBox}
+ * @memberof Numbas
+ */
+Numbas.signals = new Numbas.schedule.SignalBox();
+
 });
 
 Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math'],function() {
@@ -17960,7 +18029,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @see Numbas.marking.StatefulScope
      * @returns {Numbas.jme.funcObj}
      */
-    function state_fn(name, args, outtype, fn) {
+    var state_fn = marking.state_fn = function(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
                 if(jme.lazyOps.contains(name)) {
@@ -18116,7 +18185,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         part.setStudentAnswer();
         return jme.wrapValue({
             credit: part.credit,
-            marks: part.marks,
+            marks: part.availableMarks(),
             feedback: part.finalised_result.states,
             answered: part.answered
         });
@@ -18187,7 +18256,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
-                marks: part.marks,
+                marks: part.availableMarks(),
                 credit: result.credit,
                 feedback: result.states,
                 valid: result.valid,
@@ -18806,6 +18875,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                     case 'ab-initio':
                         job(exam.init,exam);
                         exam.signals.on('ready', function() {
+                            Numbas.signals.trigger('exam ready');
                             job(function() {
                                     Numbas.display.init();
                             });
@@ -18822,7 +18892,10 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                     case 'review':
                         job(exam.load,exam);
                         exam.signals.on('ready', function() {
-                            job(Numbas.display.init);
+                            Numbas.signals.trigger('exam ready');
+                            job(function() {
+                                Numbas.display.init();
+                            });
                             job(function() {
                                 if(entry == 'review') {
                                     job(exam.end,exam,false);
@@ -18835,6 +18908,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                         });
                         break;
                 }
+            });
+            job(function() {
+                Numbas.signals.trigger('Numbas initialised');
             });
         });
     }
@@ -23845,7 +23921,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-number', {
@@ -23911,7 +23987,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-jme', {
@@ -24003,7 +24079,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), attr: {title: title}">\
             <span class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
@@ -24049,6 +24125,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.allowResize = this.options.allowResize===undefined ? true : this.options.allowResize;
             this.numRows = this.options.numRows || 1;
             this.numColumns = this.options.numColumns || 1;
+            this.minColumns = this.options.minColumns || 0;
+            this.maxColumns = this.options.minColumns || 0;
+            this.minRows = this.options.minRows || 0;
+            this.maxRowws = this.options.maxRows || 0;
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
@@ -24128,19 +24208,48 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, events: events, title: title"></matrix-input>\
+            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, minColumns: minColumns, maxColumns: maxColumns, minRows: minRows, maxRows: maxRows, events: events, title: title"></matrix-input>\
         '
     });
     Knockout.components.register('matrix-input',{
         viewModel: function(params) {
             var vm = this;
             this.allowResize = params.allowResize ? params.allowResize : Knockout.observable(false);
+            this.minColumns = params.minColumns ? params.minColumns : Knockout.observable(0);
+            this.maxColumns = params.maxColumns ? params.maxColumns : Knockout.observable(0);
+            this.minRows = params.minRows ? params.minRows : Knockout.observable(0);
+            this.maxRows = params.maxRows ? params.maxRows : Knockout.observable(0);
+            console.log(params);
+            console.log(this.minRows());
             this.title = params.title || '';
-            this.numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            this.numRows = Knockout.computed({
+                read: _numRows,
+                write: function(v) {
+                    v = parseInt(v);
+                    var minRows = Knockout.unwrap(this.minRows);
+                    var maxRows = Knockout.unwrap(this.maxRows);
+                    console.log(minRows,v,maxRows);
+                    v = minRows==0 ? v : Math.max(minRows,v);
+                    v = maxRows==0 ? v : Math.min(maxRows,v);
+                    console.log(v);
+                    return _numRows(v);
+                }
+            },this);
             if(typeof params.rows=='function') {
                 params.rows.subscribe(function(v) { vm.numRows(v); });
             }
-            this.numColumns = Knockout.observable(Knockout.unwrap(params.columns) || 2);
+            var _numColumns = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            this.numColumns = Knockout.computed({
+                read: _numColumns,
+                write: function(v) {
+                    var minColumns = Knockout.unwrap(this.minColumns);
+                    var maxColumns = Knockout.unwrap(this.maxColumns);
+                    v = minColumns==0 ? v : Math.max(minColumns,v);
+                    v = maxColumns==0 ? v : Math.min(maxColumns,v);
+                    return _numColumns(v);
+                }
+            },this);
             if(typeof params.columns=='function') {
                 params.columns.subscribe(function(v) { vm.numColumns(v); });
             }
@@ -24289,8 +24398,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
          '<div class="matrix-input" data-bind="attr: {title: title}">'
         +'    <!-- ko if: allowResize --><div class="matrix-size">'
         +'        <fieldset><legend aria-label="'+R('matrix input.size control legend')+'"></legend>'
-        +'        <label class="num-rows">Rows: <input type="number" min="1" data-bind="value: numRows, autosize: true, disable: disable"/></label>'
-        +'        <label class="num-columns">Columns: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable"/></label>'
+        +'        <label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {\'min\': minRows()==0 ? 1 : minRows(), \'max\': maxRows()==0 ? \'\' : maxRows()}"/></label>'
+        +'        <label class="num-columns">Columns: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {\'min\': minColumns()==0 ? 1 : minColumns(), \'max\': maxColumns()==0 ? \'\' : maxColumns()}"/></label>'
         +'        </fieldset>'
         +'    </div><!-- /ko -->'
         +'    <div class="matrix-wrapper">'
@@ -24299,7 +24408,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
         +'                <tr data-bind="foreach: $data">'
-        +'                    <td class="cell"><input type="text" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"></td>'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'
@@ -24927,7 +25036,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     availableMarks: function() {
         var marks = 0;
         for(var i=0;i<this.gaps.length;i++) {
-            marks += this.gaps[i].availableMarks();
+            marks += this.gaps[i].marks;
         }
         if(this.adaptiveMarkingUsed) {
             marks -= this.settings.adaptiveMarkingPenalty;
@@ -25981,7 +26090,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                           this.error('part.mcq.matrix cell empty',{part:this.path,row:i,column:j});
                         }
                         try {
-                          value = jme.evaluate(value,scope).value;
+                          value = jme.castToType(jme.evaluate(value,scope),'number').value;
                         } catch(e) {
                           this.error('part.mcq.matrix jme error',{part:this.path,row:i,column:j,error:e.message});
                         }
@@ -26050,24 +26159,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * */
     storeTick: function(answer)
     {
-        this.setDirty(true);
-        this.display && this.display.removeWarnings();
         //get choice and answer
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
         var answerIndex = answer.answer;
         var choiceIndex = answer.choice;
-        switch(this.settings.displayType)
-        {
-        case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
-        case 'dropdownlist':
-            for(var i=0; i<this.numAnswers; i++)
-            {
-                this.stagedAnswer[i][choiceIndex] = i===answerIndex;
-            }
-            break;
-        default:
-            this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
+        switch(this.settings.displayType) {
+            case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
+            case 'dropdownlist':
+                for(var i=0; i<this.numAnswers; i++) {
+                    this.stagedAnswer[i][choiceIndex] = i===answerIndex;
+                }
+                break;
+            default:
+                this.stagedAnswer[answerIndex][choiceIndex] = answer.ticked;
         }
+        this.storeAnswer(this.stagedAnswer);
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
@@ -26374,10 +26480,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new jme.types.TString(value);
         },
         'code': function(def, value, scope) {
-            if(!value.trim()) {
-                throw(new Numbas.Error('part.custom.empty setting'));
-            }
             if(def.evaluate) {
+                if(!value.trim()) {
+                    throw(new Numbas.Error('part.custom.empty setting'));
+                }
                 return scope.evaluate(value);
             } else {
                 return new jme.types.TString(value);
@@ -26519,7 +26625,34 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfractions','rows','columns','allowresize','tolerance','markpercell','allowfractions'],['correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions']);
+        tryGetAttribute(settings,xml,'answer',
+            [
+                'correctanswerfractions',
+                'rows',
+                'columns',
+                'allowresize',
+                'mincolumns',
+                'maxcolumns',
+                'minrows',
+                'maxrows',
+                'tolerance',
+                'markpercell',
+                'allowfractions'
+            ],
+            [
+                'correctAnswerFractions',
+                'numRows',
+                'numColumns',
+                'allowResize',
+                'minColumns',
+                'maxColumns',
+                'minRows',
+                'maxRows',
+                'tolerance',
+                'markPerCell',
+                'allowFractions'
+            ]
+        );
         tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
         tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
@@ -26530,7 +26663,37 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data,['correctAnswer', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions'], settings, ['correctAnswerString', 'correctAnswerFractions', 'numRows', 'numColumns', 'allowResize', 'tolerance', 'markPerCell', 'allowFractions']);
+        tryLoad(data,
+            [
+                'correctAnswer',
+                'correctAnswerFractions',
+                'numRows',
+                'numColumns',
+                'allowResize',
+                'minColumns',
+                'maxColumns',
+                'minRows',
+                'maxRows',
+                'tolerance',
+                'markPerCell',
+                'allowFractions'
+            ],
+            settings,
+            [
+                'correctAnswerString',
+                'correctAnswerFractions',
+                'numRows',
+                'numColumns',
+                'allowResize',
+                'minColumns',
+                'maxColumns',
+                'minRows',
+                'maxRows',
+                'tolerance',
+                'markPerCell',
+                'allowFractions'
+            ]
+        );
         tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
         settings.precisionPC /= 100;
     },
@@ -26548,12 +26711,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     finaliseLoad: function() {
         var settings = this.settings;
         var scope = this.getScope();
-        var numRows = jme.subvars(settings.numRows, scope);
-        settings.numRows = scope.evaluate(numRows).value;
-        var numColumns = jme.subvars(settings.numColumns, scope);
-        settings.numColumns = scope.evaluate(numColumns).value;
-        var tolerance = jme.subvars(settings.tolerance, scope);
-        settings.tolerance = scope.evaluate(tolerance).value;
+
+        function eval_setting(setting) {
+            var expr = jme.subvars(settings[setting]+'', scope);
+            settings[setting] = scope.evaluate(expr).value;
+        }
+        ['numRows','numColumns','tolerance'].map(eval_setting);
+        if(settings.allowResize) {
+            ['minColumns','maxColumns','minRows','maxRows'].map(eval_setting);
+        }
         settings.tolerance = Math.max(settings.tolerance,0.00000000001);
         if(settings.precisionType!='none') {
             settings.allowFractions = false;
@@ -26629,6 +26795,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             allowResize: this.settings.allowResize,
             numRows: this.settings.numRows,
             numColumns: this.settings.numColumns,
+            minColumns: this.settings.minColumns,
+            maxColumns: this.settings.maxColumns,
+            minRows: this.settings.minRows,
+            maxRows: this.settings.maxRows,
             parseCells: false
         };
     },

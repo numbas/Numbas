@@ -1076,6 +1076,9 @@ var typeToTeX = jme.display.typeToTeX = {
             texArgs.push(texify(tok.value[i],settings));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+    },
+    expression: function(thing,tok,texArgs,settings) {
+        return texify(tok.tree,settings);
     }
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -1125,6 +1128,16 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
     if(thing.args)
     {
+        thing = {
+            tok: thing.tok,
+            args: thing.args.map(function(arg) {
+                if(arg.tok.type=='expression') {
+                    return arg.tree;
+                } else {
+                    return arg;
+                }
+            })
+        }
         var texArgs = [];
         for(var i=0; i<thing.args.length; i++ )
         {

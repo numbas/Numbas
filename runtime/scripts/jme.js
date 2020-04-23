@@ -187,6 +187,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 {
                     if(v.tok) {
                         return v;
+                    } else if(v.type=='expression') {
+                        return v.tree;
                     } else {
                         return {tok: v};
                     }

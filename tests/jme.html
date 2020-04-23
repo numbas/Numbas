@@ -374,6 +374,9 @@
                     deepCloseEqual(assert, evaluate('let(b,1,let(a,b,b,a+1,b))').value, 2, 'let(b,1,let(a,b,b,a+1,b))');
                     deepCloseEqual(assert, evaluate('let(a,1,let(["a":2,"b":a],b))').value, 1, 'let(a,1,let(["a":2,"b":a],b))');
 
+                    var expr = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("c"))');
+                    assert.notEqual(expr.tree.tok.type,'expression',"When substituting subexpressions into subexpressions, unwrap them");
+
                     /*
                     // Removed while I think about how I want this to work
 
@@ -1574,6 +1577,10 @@
                     assert.equal(mixedfrac('-76/11'),'-6 \\frac{10}{11}','-76/11');
                     assert.equal(mixedfrac('1234567/123'),'10037 \\frac{16}{123}','1234567/123');
                     assert.equal(mixedfrac('3i/2'),'1 \\frac{1}{2} i','3i/2');
+
+                    var tree = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("1/c"))');
+                    assert.equal(Numbas.jme.display.texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
+                    assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
                 });
 
 				QUnit.test('expression to LaTeX', function(assert) {
