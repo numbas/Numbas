@@ -234,10 +234,9 @@ var xml = Numbas.xml = {
                     {
                         if(typeof(obj[name]) == 'number')
                         {
-                            if(Numbas.util.isFloat(value))
-                                value = parseFloat(value);
-                            else if(Numbas.util.isFloat(Numbas.util.unPercent(value)))
-                            {
+                            if(Numbas.util.isNumber(value,true)) {
+                                value = Numbas.util.parseNumber(value,true);
+                            } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
                                 value = Numbas.util.unPercent(value);
                             }
                             else
