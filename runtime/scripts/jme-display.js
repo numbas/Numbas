@@ -1519,7 +1519,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 if(op in opBrackets) {
                     bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
                 } else {
-                    bracketArg = tok.prefix==true;
+                    bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
             if(bracketArg) {
@@ -1667,8 +1667,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'not': [{'and':true,'or':true,'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
-    '=': [{},{}],
-    'fact': [{'+': true, '-': true}]
+    '=': [{},{}]
 };
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
