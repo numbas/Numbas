@@ -11003,6 +11003,22 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
+    evaluate: function(args,scope) {
+        var n = args[0].value;
+        var bits = math.parseScientific(n.re.toExponential());
+        var s = new TString(math.niceDecimal(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        s.latex = true;
+        return s;
+    }
+});
+newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
+    var bits = math.parseScientific(n.re.toExponential());
+    var s = document.createElement('span');
+    s.innerHTML = math.niceDecimal(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    return s;
+});
+
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });

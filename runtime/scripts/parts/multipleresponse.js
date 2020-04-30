@@ -40,6 +40,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
     loadFromXML: function(xml) {
+        var p = this;
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var scope = this.getScope();
