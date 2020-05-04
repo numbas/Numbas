@@ -772,6 +772,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return out;
         }
     },
+
+    /** Convert a JS Number to a Decimal
+     * @param {Number} n
+     * @returns {Decimal}
+     */
+    numberToDecimal: function(x) {
+        if(x.complex) {
+            return new math.ComplexDecimal(math.numberToDecimal(x.re), math.numberToDecimal(x.im));
+        } else {
+            if(x==Math.PI) {
+                return Decimal.acos(-1);
+            } else if(x==Math.E) {
+                return Decimal(1).exp();
+            } else {
+                return new Decimal(x);
+            }
+        }
+    },
+
     /** Get a random number in range `[0..n-1]`
      * @param {Number} n
      * @returns {Number}
