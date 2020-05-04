@@ -502,6 +502,7 @@
 					deepCloseEqual(assert, evaluateNumber('(1+i)^(-2)'),math.complex(0,-0.5),'(1+i)^(-2)');
 					deepCloseEqual(assert, evaluateNumber('(1+i)^(-3)'),math.complex(-0.25,-0.25),'(1+i)^(-3)');
 					deepCloseEqual(assert, evaluateNumber('2^i'),math.complex(0.7692389013639721,0.6389612763136348),'2^i');
+                    assert.equal(evaluateNumber('e^0.9'),evaluateNumber('exp(0.9)'),'e^0.9 == exp(0.9)');
 				});
 
 				QUnit.test('Logic',function(assert) {

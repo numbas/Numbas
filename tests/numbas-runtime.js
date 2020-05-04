@@ -1971,14 +1971,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Number} b
      * @returns {Number}
      */
-    pow: function(a,b)
-    {
-        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100)
-        {
-            if(b<0)
+    pow: function(a,b) {
+        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100) {
+            if(b<0) {
                 return math.div(1,math.pow(a,-b));
-            if(b==0)
+            }
+            if(b==0) {
                 return 1;
+            }
             var coeffs = math.binomialCoefficients(b);
             var re = 0;
             var im = 0;
@@ -1988,12 +1988,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
                 sign = -sign;
             }
-            if(b%2==0)
+            if(b%2==0) {
                 re += Math.pow(a.im,b)*sign;
+            }
             return math.complex(re,im);
         }
-        if(a.complex || b.complex || (a<0 && math.fract(b)!=0))
-        {
+        if(a.complex || b.complex || (a<0 && math.fract(b)!=0)) {
             if(!a.complex)
                 a = {re: a, im: 0, complex: true};
             if(!b.complex)
@@ -2003,9 +2003,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
             var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
             return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-        }
-        else
-        {
+        } else if(a==Math.E) {
+            return Math.exp(b);
+        } else {
             return Math.pow(a,b);
         }
     },
@@ -25570,6 +25570,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
     loadFromXML: function(xml) {
+        var p = this;
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var scope = this.getScope();
