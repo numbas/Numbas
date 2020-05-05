@@ -144,7 +144,7 @@
     "math.permutations.complex": "Can't compute permutations of complex numbers",
     "math.gcf.complex": "Can't compute GCF of complex numbers",
     "math.lcm.complex": "Can't compute LCM of complex numbers",
-    "math.lt.order complex numbers": "Can't order complex numbers",
+    "math.order complex numbers": "Can't order complex numbers",
     "math.niceNumber.undefined": "Was expecting a number, but got <code>undefined</code>",
     "math.choose.empty selection": "Empty selection given to random function",
     "math.rangeToList.zero step size": "Can't convert a range with step size zero to a list.",
