@@ -42,7 +42,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          */
         this.studentAnswerLaTeX = Knockout.computed(function() {
             var studentAnswer = this.studentAnswer();
-            if(studentAnswer=='')
+            if(studentAnswer.trim()=='')
                 return '';
             this.removeWarnings();
             try {
