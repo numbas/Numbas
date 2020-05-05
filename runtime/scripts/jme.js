@@ -1340,6 +1340,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(this.output.length>l) {
                 n++;
             }
+            if(this.output.length==n-1) {
+                n -= 1;
+            }
             switch(this.listmode.pop()) {
             case 'new':
                 this.addoutput(new TList(n))
