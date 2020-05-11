@@ -132,6 +132,9 @@ class Exam(object):
     showanswerstate = True            #show right/wrong on questions?
     allowrevealanswer = True        #allow student to reveal answer to question?
     intro = ''                        #text shown on the front page
+    reviewshowscore = True          #show student's score in review mode?
+    reviewshowfeedback = True       #show part feedback messages in review mode?
+    reviewshowexpectedanswer = True #show expected answers in review mode?
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
     showstudentname = True
@@ -187,7 +190,7 @@ class Exam(object):
                     tryLoad(timing[event],['action','message'],exam.timing[event])
 
         if haskey(data,'feedback'):
-            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],exam)
+            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],'intro',exam,'intro')
@@ -272,6 +275,9 @@ class Exam(object):
                 'showanswerstate': strcons_fix(self.showanswerstate),
                 'allowrevealanswer': strcons_fix(self.allowrevealanswer),
                 'showstudentname': strcons_fix(self.showstudentname),
+                'reviewshowscore': strcons_fix(self.reviewshowscore),
+                'reviewshowfeedback': strcons_fix(self.reviewshowfeedback),
+                'reviewshowexpectedanswer': strcons_fix(self.reviewshowexpectedanswer),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedbackmessages = feedback.find('feedbackmessages')

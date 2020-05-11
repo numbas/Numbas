@@ -58,7 +58,7 @@ function Exam(store)
     }
     //feedback
     var feedbackPath = 'settings/feedback';
-    tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName']);
+    tryGetAttribute(settings,xml,feedbackPath,['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','showStudentName','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer'],['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','showStudentName','reviewShowScore','reviewShowFeedback','reviewShowExpectedAnswer']);
     var serializer = new XMLSerializer();
     var isEmpty = Numbas.xml.isEmpty;
     var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
@@ -175,6 +175,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {Boolean} showAnswerState - tell student if answer is correct/wrong/partial?
      * @property {Boolean} allowRevealAnswer - allow 'reveal answer' button?
      * @property {Boolean} showQuestionGroupNames - show the names of question groups?
+     * @property {Boolean} reviewShowScore - show student's score in review mode?
+     * @property {Boolean} reviewShowFeedback - show part feedback messages in review mode?
      * @memberof Numbas.Exam.prototype
      * @instance
      */
@@ -200,7 +202,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         showAnswerState: false,
         allowRevealAnswer: false,
         showQuestionGroupNames: false,
-        showStudentName: true
+        showStudentName: true,
+        reviewShowScore: true,
+        reviewShowFeedback: true,
+        reviewShowExpectedAnswer: true
     },
     /** Base node of exam XML
      * @type Element
