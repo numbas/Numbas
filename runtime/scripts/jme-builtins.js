@@ -1607,6 +1607,13 @@ newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
+newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],TExpression,null, {
+    evaluate: function(args,scope) {
+        var tree = args[0].tree;
+        var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
+        return new TExpression(scope.expandJuxtapositions(tree,options));
+    }
+});
 newBuiltin('expression',[TString],TExpression,function(str) {
     return jme.compile(str);
 });

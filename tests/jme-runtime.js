@@ -13542,6 +13542,166 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         default:
             return tok;
         }
+    },
+
+    /** Options for {@link Numbas.jme.Scope.expandJuxtapositions}
+     * @typedef {Object} Numbas.jme.expand_juxtapositions_options
+     * @property {Boolean} singleLetterVariables - Enforce single-letter variables names: a name token like `xy` is rewritten to `x*y`.
+     * @property {Boolean} noUnknownFunctions - Rewrite applications of functions not defined in this scope to products, e.g. `x(y)` is rewritten to `x*y`.
+     * @property {Boolean} implicitFunctionComposition - If function names are juxtaposed, either as a single token or as (implicit) multiplication, rewrite as composition: e.g. `lnabs(x)` and `ln abs(x)` are both rewritten to `ln(abs(x))`.
+     */
+    /** Expand juxtapositions in variable and function names for implicit multiplication or composition
+     * @param {Numbas.jme.tree} tree
+     * @param {Numbas.jme.expand_juxtapositions_options} options
+     * @returns Numbas.jme.tree
+     */
+    expandJuxtapositions: function(tree, options) {
+        var scope = this;
+        var default_options = {
+            singleLetterVariables: true,    // `xy = x*y`
+            noUnknownFunctions: true,    // `x(y) = x*y` when `x` is not the name of a function defined in this scope
+            implicitFunctionComposition: true  // `lnabs(x) = ln(abs(x))`, only applied when `noUnknownFunctions` is true, and `ln abs(x) = ln(abs(x))`
+        }
+        options = options || default_options;
+
+        if(!(options.singleLetterVariables || options.noUnknownFunctions || options.implicitFunctionComposition)) {
+            return tree;
+        }
+
+        function tfunc(name) {
+            return new TFunc(scope.parser.funcSynonym(name));
+        }
+
+        function get_function_names() {
+            // grab names of defined functions from the right
+            var defined_names = {};
+            var s = scope;
+            while(s) {
+                for(var name in s.functions) {
+                    defined_names[name] = true;
+                }
+                for(var name in jme.funcSynonyms) {
+                    defined_names[name] = true;
+                }
+                if(s.parser.funcSynonyms) {
+                    for(var name in s.parser.funcSynonyms) {
+                        defined_names[name] = true;
+                    }
+                }
+                s = s.parent
+            }
+            return defined_names;
+        }
+
+        var tok = tree.tok;
+
+        if(options.implicitFunctionComposition && jme.isOp(tok,'*') && tree.args[1].tok.type=='function') {
+            var search = true;
+            var defined_names = get_function_names();
+            while(search) {
+                if(!jme.isOp(tree.tok,'*')) {
+                    break;
+                }
+                search = false;
+                var c = tree.args[0];
+                while(jme.isOp(c.tok,'*')) {
+                    c = c.args[1];
+                }
+                if(c.tok.type=='name' && defined_names[c.tok.name]) {
+                    search = true;
+                    var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
+                    composed_fn.tok.vars = 1;
+                    if(c==tree.args[0]) {
+                        tree = composed_fn;
+                    } else {
+                        function remove_multiplicand(t) {
+                            if(t.args[1]==c) {
+                                return t.args[0];
+                            } else {
+                                return {tok: t.tok, args: [t.args[0], remove_multiplicand(t.args[1])]};
+                            }
+                        }
+                        tree = {tok: tree.tok, args: [remove_multiplicand(tree.args[0]),composed_fn]};
+                    }
+                }
+            }
+
+        }
+
+        if(tree.args) {
+            tree.args = tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); });
+        }
+
+        switch(tok.type) {
+            case 'name':
+                if(options.singleLetterVariables && tok.name.length>1) {
+                    var bits = [];
+                    var name = tok.name;
+                    var re_name = /^[a-zA-Z][0-9]*(_([a-zA-Z]|[0-9]+|$))?'*/;
+                    var m;
+                    while(name.length && (m = re_name.exec(name))) {
+                        bits.push(m[0]);
+                        name = name.slice(m[0].length);
+                    }
+                    var tree = {tok: new TName(bits[0])};
+                    for(var i=1;i<bits.length;i++) {
+                        tree = {tok: this.parser.op('*'), args: [tree,{tok: new TName(bits[i])}]};
+                    }
+                    return tree;
+                }
+                break;
+            case 'function':
+                if(options.noUnknownFunctions) {
+                    var defined_names = get_function_names();
+                    var name = tok.name;
+                    var breaks = [name.length];
+                    for(var i=name.length-1;i>=0;i--) {
+                        for(var j=0;j<breaks.length;j++) {
+                            var sub = name.slice(i,breaks[j]);
+                            if(defined_names[sub]) {
+                                breaks = breaks.slice(0,j+1);
+                                breaks.push(i);
+                            }
+                        }
+                    }
+                    var bits = [];
+                    var remainder;
+                    if(options.implicitFunctionComposition) {
+                        breaks.reverse();
+                        for(var i=0;i<breaks.length-1;i++) {
+                            bits.push(name.slice(breaks[i],breaks[i+1]));
+                        }
+                        remainder = name.slice(0,breaks[0]);
+                    } else {
+                        if(breaks.length>1) {
+                            bits.push(name.slice(breaks[1],breaks[0]));
+                        }
+                        remainder = name.slice(0,breaks[1]);
+                    }
+                    if(!bits.length) {
+                        if(tree.args.length>1) {
+                            return tree;
+                        } else {
+                            return {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};
+                        }
+                    }
+                    var args = tree.args;
+                    for(var i=bits.length-1;i>=0;i--) {
+                        tree = {tok: tfunc(bits[i]), args: args};
+                        tree.tok.vars = 1;
+                        args = [tree];
+                    }
+
+                    // then interpret anything remaining on the left as multiplication by variables
+                    if(remainder.length) {
+                        var left = this.expandJuxtapositions({tok: new TName(remainder)},options);
+                        tree = {tok: this.parser.op('*'), args: [left,tree]};
+                    }
+                    return tree;
+                }
+                break;
+        }
+        return tree;
     }
 };
 /** @typedef {Object} Numbas.jme.token
@@ -14471,7 +14631,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
             {
                 var plain = bits[i];
                 var sbits = util.splitbrackets(plain,'{','}','(',')');
-                for(var k=1;k<sbits.length-1;k+=2)
+                for(var k=1;k<=sbits.length-1;k+=2)
                 {
                     var tree2 = jme.compile(sbits[k],scope,true);
                     out = out.merge(findvars(tree2,boundvars));
@@ -17066,6 +17226,13 @@ newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
+newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],TExpression,null, {
+    evaluate: function(args,scope) {
+        var tree = args[0].tree;
+        var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
+        return new TExpression(scope.expandJuxtapositions(tree,options));
+    }
+});
 newBuiltin('expression',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
@@ -17688,6 +17855,9 @@ var texOps = jme.display.texOps = {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.name.length,right.tok.name.length)>1) {
+                    use_symbol = true;
+                // multiplication of a name by something in brackets
+                } else if(jme.isType(left.tok,'name') && texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
                 } else if ( jme.isType(right.tok,'number')
@@ -19600,6 +19770,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
+
+    this.IGNORE_TAGS = ['iframe','script','style'];
 }
 DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children
@@ -19617,14 +19789,16 @@ DOMcontentsubber.prototype = {
                 return;
         }
     },
+
     sub_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             if(element.getAttribute('src').match(/.svg$/i)) {
                 element.parentElement
                 var object = element.ownerDocument.createElement('object');
@@ -19640,7 +19814,7 @@ DOMcontentsubber.prototype = {
                 subber.sub_element(object);
                 return;
             }
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             /** Substitute content into the object's root element
              */
             function go() {
@@ -19657,7 +19831,9 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                $(element).remove();
+                if(element.parentElement) {
+                    element.parentElement.removeChild(element);
+                }
                 return;
             }
         }
@@ -19721,13 +19897,14 @@ DOMcontentsubber.prototype = {
     findvars_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return [];
         } else if(element.hasAttribute('nosubvars')) {
             return [];
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             return [];
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             if(element.contentDocument && element.contentDocument.rootElement) {
                 return this.findvars_element(element.contentDocument.rootElement);
             }

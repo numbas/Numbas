@@ -46,19 +46,29 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             this.removeWarnings();
             try {
-                var tex = jme.display.exprToLaTeX(studentAnswer,'',p.getScope());
-                if(tex===undefined)
+                var scope = p.getScope();
+                var studentTree = scope.parser.compile(studentAnswer);
+                var expand_settings = {
+                    singleLetterVariables: p.settings.singleLetterVariables,
+                    noUnknownFunctions: !p.settings.allowUnknownFunctions,
+                    implicitFunctionComposition: p.settings.implicitFunctionComposition
+                };
+                studentTree = scope.expandJuxtapositions(studentTree, expand_settings);
+                var tex = jme.display.texify(studentTree);
+                if(tex === undefined) {
                     throw(new Numbas.Error('display.part.jme.error making maths'));
+                }
             }
             catch(e) {
                 p.giveWarning(e.message);
                 return '';
             }
             if(p.settings.checkVariableNames) {
-                var tree = jme.compile(studentAnswer,p.getScope());
-                var usedvars = jme.findvars(tree);
+                var usedvars = jme.findvars(studentTree);
                 var failExpectedVariableNames = false;
-                var expectedVariableNames = jme.findvars(jme.compile(this.correctAnswer()));
+                var correctTree = scope.parser.compile(this.correctAnswer());
+                correctTree = scope.expandJuxtapositions(correctTree, expand_settings);
+                var expectedVariableNames = jme.findvars(correctTree);
                 var unexpectedVariableName;
                 for(var i=0;i<usedvars.length;i++) {
                     if(!expectedVariableNames.contains(usedvars[i])) {

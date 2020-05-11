@@ -4,7 +4,17 @@ studentExpr (The student's answer, parsed):
         fail(translate("part.marking.nothing entered"))
     );
     try(
-        simplify(parse(studentAnswer),'basic')
+        simplify(
+            expand_juxtapositions(
+                parse(studentAnswer),
+                [
+                    "singleLetterVariables": settings["singleLetterVariables"],
+                    "noUnknownFunctions": not settings["allowUnknownFunctions"],
+                    "implicitFunctionComposition": settings["implicitFunctionComposition"]
+                ]
+            ),
+            'basic'
+        )
     , message,
         warn(translate("part.jme.answer invalid",["message":message]));
         fail(translate("part.jme.answer invalid",["message":message]))
@@ -16,7 +26,14 @@ scope_vars (Variables already defined in the scope):
     definedvariables()
 
 correctExpr (The correct answer, parsed):
-    parse(settings["correctAnswer"])
+    expand_juxtapositions(
+        parse(settings["correctAnswer"]),
+        [
+            "singleLetterVariables": settings["singleLetterVariables"],
+            "noUnknownFunctions": not settings["allowUnknownFunctions"],
+            "implicitFunctionComposition": settings["implicitFunctionComposition"]
+        ]
+    )
 
 studentMatch (The result of matching the student's expression against the pattern):
     match(studentExpr,settings["mustMatchPattern"])
