@@ -5,7 +5,9 @@
     <table id="question-breakdown" class="col-sm-6 col-sm-offset-3">
         <thead>
             <th data-localise="result.question number"></th>
+            <!-- ko if: showActualMark -->
             <th colspan="3" data-localise="result.question score"></th>
+            <!-- /ko -->
             <th></th>
         </thead>
         <tbody>
@@ -19,13 +21,16 @@
                 <!-- ko foreach: questions -->
                 <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
                     <td data-bind="text: question.number+1"></td>
+                    <!-- ko if: scoreFeedback.revealed -->
                     <td data-bind="niceNumber: score"></td>
                     <td>/</td>
                     <td data-bind="niceNumber: marks"></td>
+                    <!-- /ko -->
                     <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
                 </tr>
                 <!-- /ko -->
             <!-- /ko -->
+            <!-- ko if: showActualMark -->
             <tr>
                 <th data-localise="Total"></th>
                 <th data-bind="niceNumber: score"></th>
@@ -35,6 +40,7 @@
                     (<span data-bind="text: percentScore"></span>%)
                 </th>
             </tr>
+            <!-- /ko -->
         </tbody>
     </table>
     <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage" localise-data-jme-context-description="exam.feedback"></div>

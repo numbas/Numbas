@@ -282,6 +282,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
                 newScore(false);
             }
         }),
+        revealed: revealed,
         state: state,
         answered: answered,
         answeredString: Knockout.computed(function() {

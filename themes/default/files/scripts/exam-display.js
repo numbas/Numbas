@@ -77,6 +77,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.score = Knockout.observable(e.score);
+        /** Show the student their total score?
+         * @member {observable|Boolean} showActualMark
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.showActualMark = Knockout.computed(function() {
+            return e.settings.showActualMark || (this.mode()=='review' && e.settings.reviewShowScore) || Numbas.is_instructor;
+        },this);
         /** The total marks available for the exam ({@link Numbas.Exam#mark})
          * @member {observable|Number} marks
          * @memberof Numbas.display.ExamDisplay
