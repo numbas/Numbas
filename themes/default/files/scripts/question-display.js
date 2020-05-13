@@ -1,4 +1,4 @@
-Numbas.queueScript('question-display',['display-base','jme-variables','xml','schedule','jme'],function() {
+Numbas.queueScript('question-display',['display-base','jme-variables','xml','schedule','jme','util'],function() {
     var display = Numbas.display;
     /** Display properties of a question object
      * @name QuestionDisplay
@@ -10,6 +10,17 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
     {
         this.question = q;
         var exam = q.exam;
+
+        /** Does this question have non-empty statement text?
+         * @member {observable|String} hasStatement
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.hasStatement = Knockout.observable(Numbas.util.isNonemptyHTML(q.statement));
+        /** Does this question have non-empty advice text?
+         * @member {observable|String} hasAdvice
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.hasAdvice = Knockout.observable(Numbas.util.isNonemptyHTML(q.advice));
         /** Has the advice been shown?
          * @member {observable|Boolean} adviceDisplayed
          * @memberof Numbas.display.QuestionDisplay

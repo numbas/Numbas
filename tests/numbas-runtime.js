@@ -16502,6 +16502,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.originalXML = q.xml;
         //get question's name
         tryGetAttribute(q,q.xml,'.','name');
+
+        var statementNode = q.xml.selectSingleNode('statement/content/span');
+        q.statement = statementNode.innerHTML;
+        var adviceNode = q.xml.selectSingleNode('advice/content/span');
+        q.advice = adviceNode.innerHTML;
+
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
         for(var i = 0; i<preambleNodes.length; i++) {
             var lang = preambleNodes[i].getAttribute('language');
@@ -16569,7 +16575,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,'name',q);
+        tryLoad(data,['name','statement','advice'],q);
         var preambles = tryGet(data,'preamble');
         if(preambles) {
             Object.keys(preambles).forEach(function(key) {
@@ -16840,10 +16846,18 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @type {Number}
      */
     number: -1,
-    /** Name - shouldn't be shown to students
+    /** The question's name
      * @type {String}
      */
     name: '',
+    /** The question's statement text
+     * @type {String}
+     */
+    statement: '',
+    /** The question's advice text
+     * @type {String}
+     */
+    advice: '',
     /** The JME scope for this question. Contains variables, functions and rulesets defined in this question
      * @type {Numbas.jme.Scope}
      */
