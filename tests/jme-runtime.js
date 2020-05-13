@@ -13679,7 +13679,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         remainder = name.slice(0,breaks[1]);
                     }
                     if(!bits.length) {
-                        if(tree.args.length>1) {
+                        if(tree.args.length!=1) {
                             return tree;
                         } else {
                             return {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};

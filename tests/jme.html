@@ -303,6 +303,7 @@
                     treesEqual(assert, expand('ln*abs(x)'), compile('ln(abs(x))'), 'ln*abs(x)');
                     treesEqual(assert, expand('x ln abs(x)'), compile('x*ln(abs(x))'), 'x ln abs(x)');
                     treesEqual(assert, expand('xy*sin ln abs(x)'), compile('x*y*sin(ln(abs(x)))'), 'xy*sin ln abs(x)');
+                    treesEqual(assert, expand('5g()'), compile('5*g()'), '5g()');
                 });
 				
 				QUnit.module('Evaluating');
