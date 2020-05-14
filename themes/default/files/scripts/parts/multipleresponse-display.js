@@ -38,7 +38,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             return obs;
         }
         this.layout = util.copyarray(p.layout);
-        this.showCellAnswerState = Knockout.observable(p.settings.showCellAnswerState);
+        this.showCellAnswerState = Knockout.computed(function() {
+            if(p.question && p.question.exam) {
+                if(!p.question.exam.settings.reviewShowExpectedAnswer) {
+                    return false;
+                }
+            }
+            return p.settings.showCellAnswerState;
+        },this);
         this.displayColumns = Knockout.observable(p.settings.displayColumns);
         switch(p.type) {
         case '1_n_2':
