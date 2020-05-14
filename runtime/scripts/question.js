@@ -620,6 +620,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getAdvice: function(dontStore)
     {
+        if(this.exam && !this.exam.settings.reviewShowAdvice) {
+            return;
+        }
         this.adviceDisplayed = true;
         this.display && this.display.showAdvice(true);
         if(this.store && !dontStore) {

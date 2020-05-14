@@ -135,9 +135,10 @@ class Exam(object):
     reviewshowscore = True          #show student's score in review mode?
     reviewshowfeedback = True       #show part feedback messages in review mode?
     reviewshowexpectedanswer = True #show expected answers in review mode?
+    reviewshowadvice = True         #show question advice in review mode?
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
-    showstudentname = True
+    showstudentname = True          #show the student's name?
 
 
     def __init__(self,name='Untitled Exam'):
@@ -190,7 +191,7 @@ class Exam(object):
                     tryLoad(timing[event],['action','message'],exam.timing[event])
 
         if haskey(data,'feedback'):
-            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer'],exam)
+            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer','reviewshowadvice'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],'intro',exam,'intro')
@@ -278,6 +279,7 @@ class Exam(object):
                 'reviewshowscore': strcons_fix(self.reviewshowscore),
                 'reviewshowfeedback': strcons_fix(self.reviewshowfeedback),
                 'reviewshowexpectedanswer': strcons_fix(self.reviewshowexpectedanswer),
+                'reviewshowadvice': strcons_fix(self.reviewshowadvice),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedbackmessages = feedback.find('feedbackmessages')
