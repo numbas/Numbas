@@ -620,7 +620,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getAdvice: function(dontStore)
     {
-        if(this.exam && !this.exam.settings.reviewShowAdvice) {
+        if(!Numbas.is_instructor && this.exam && !this.exam.settings.reviewShowAdvice) {
             return;
         }
         this.adviceDisplayed = true;
