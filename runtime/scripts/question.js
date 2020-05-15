@@ -181,7 +181,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var statementNode = q.xml.selectSingleNode('statement');
         q.statement = Numbas.xml.serializeMessage(statementNode);
         var adviceNode = q.xml.selectSingleNode('advice');
-        q.advice = Numbas.xml.serializeMessage('advice');
+        q.advice = Numbas.xml.serializeMessage(adviceNode);
 
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
         for(var i = 0; i<preambleNodes.length; i++) {
