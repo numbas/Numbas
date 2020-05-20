@@ -63,9 +63,28 @@ function test_question(q) {
             test_part(p);
         });
     }).catch(e=>{
+        if(q.scope) {
+            console.log("Question variables:");
+            for(let name of Object.keys(q.scope.variables)) {
+                const value = Numbas.jme.display.treeToJME({tok:q.scope.getVariable(name)});
+                console.log(`  ${name}: ${value}`);
+            }
+        }
         die(e);
     });
     return promise;
+}
+
+function scope_for_part(p) {
+    return p.settings.variableReplacementStrategy=='alwaysreplace' ? p.errorCarriedForwardScope() : p.getScope();
+}
+
+function answer_for_part(p) {
+    if(p.type=='gapfill') {
+        return p.gaps.map(answer_for_part);
+    }
+    var answer = p.getCorrectAnswer(scope_for_part(p));
+    return answer;
 }
 
 function test_part(p) {
@@ -75,15 +94,23 @@ function test_part(p) {
     if(p.type=='gapfill' && p.gaps.length==0) {
         return;
     }
-    var answer = p.getCorrectAnswer(p.getScope());
+    var answer = answer_for_part(p);
     p.storeAnswer(answer);
     p.setStudentAnswer();
-    p.mark(p.getScope());
+    const scope = scope_for_part(p);
+    p.mark(scope);
     if(Numbas.math.precround(p.credit,5)!=1) {
         const niceName = Numbas.util.capitalise(Numbas.util.nicePartName(p.path));
         real_console.error(`✖ ${niceName}: ${p.type}`);
         real_console.error(`Answer: ${JSON.stringify(answer)}`);
         real_console.error(`Credit: ${p.credit}`);
+        if(p.settings.variableReplacementStrategy=='alwaysreplace') {
+            real_console.error('Variables:');
+            for(let name of Object.keys(scope.variables)) {
+                const value = Numbas.jme.display.treeToJME({tok:scope.getVariable(name)});
+                real_console.error(`  ${name}: ${value}`);
+            }
+        }
         p.markingFeedback.filter(m=>m.message).forEach(m=>real_console.error(`* ${m.message}`));
         throw(new PartCreditError(`${niceName} got ${p.credit} credit`));
     }
@@ -95,7 +122,7 @@ function run(numbasobject) {
         var data = parse_numbasobject(numbasobject);
         Numbas.custom_part_types = {};
         data.custom_part_types.forEach(d=>Numbas.custom_part_types[d.short_name] = d);
-        var extensions = data.extensions.map(p=>{
+        var extension_names = data.extensions.map(p=>{
             var abspath = path.resolve(p);
             var location = path.basename(abspath);
             fs.readdirSync(abspath).forEach(f=>{
@@ -104,13 +131,15 @@ function run(numbasobject) {
                     const obj = require(fname);
                 }
             });
-            return `extensions/${location}/${location}.js`;
+            return location;
         });
+        var extensions = extension_names.map(location=>`extensions/${location}/${location}.js`);
         var reqs = standard_reqs.concat(extensions);
         Numbas.runImmediately(reqs,function() {
             for(var name in Numbas.custom_part_types) {
                 Numbas.partConstructors[name] = Numbas.parts.CustomPart;
             };
+            extension_names.forEach(extension=>Numbas.activateExtension(extension));
             var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
             for(var extension in Numbas.extensions) {
                 if('scope' in Numbas.extensions[extension]) {

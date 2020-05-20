@@ -106,7 +106,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             write: _warnings
         });
         this.warnings.push = function() {
-            return _warnings.push.call(_warnings,arguments);
+            return _warnings.push.apply(_warnings,arguments);
         }
 
         /** Does the part have any warnings to show?
@@ -248,7 +248,8 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showCorrectAnswer = Knockout.computed(function() {
-            return (p.settings.showCorrectAnswer || Numbas.is_instructor) && pd.revealed();
+            var e = p.question.exam;
+            return ((p.settings.showCorrectAnswer && e.settings.reviewShowExpectedAnswer) || Numbas.is_instructor) && pd.revealed();
         });
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
@@ -286,7 +287,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          */
         this.showFeedbackMessages = Knockout.pureComputed(function() {
             var e = p.question.exam;
-            return (p.question.display.revealed() || e.settings.showAnswerState) && pd.feedbackMessages().length;            
+            return (Numbas.is_instructor || (p.question.display.revealed() && e.settings.reviewShowFeedback) || e.settings.showAnswerState) && pd.feedbackMessages().length;            
         },this);
 
         /** Options for the next part

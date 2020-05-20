@@ -165,6 +165,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(path===undefined)
             path=[];
         computeFn = computeFn || jme.variables.computeVariable;
+        if(name=='') {
+            throw(new Numbas.Error('jme.variables.empty name'));
+        }
         if(path.contains(name))
         {
             throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
@@ -440,6 +443,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
+
+    this.IGNORE_TAGS = ['iframe','script','style'];
 }
 DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children
@@ -457,14 +462,16 @@ DOMcontentsubber.prototype = {
                 return;
         }
     },
+
     sub_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             if(element.getAttribute('src').match(/.svg$/i)) {
                 element.parentElement
                 var object = element.ownerDocument.createElement('object');
@@ -480,7 +487,7 @@ DOMcontentsubber.prototype = {
                 subber.sub_element(object);
                 return;
             }
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             /** Substitute content into the object's root element
              */
             function go() {
@@ -497,7 +504,9 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                $(element).remove();
+                if(element.parentElement) {
+                    element.parentElement.removeChild(element);
+                }
                 return;
             }
         }
@@ -561,13 +570,14 @@ DOMcontentsubber.prototype = {
     findvars_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return [];
         } else if(element.hasAttribute('nosubvars')) {
             return [];
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             return [];
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             if(element.contentDocument && element.contentDocument.rootElement) {
                 return this.findvars_element(element.contentDocument.rootElement);
             }

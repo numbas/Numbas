@@ -124,7 +124,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
-        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','showPreview']);
+        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','showPreview']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -145,7 +145,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'expectedVariableNames', 'showPreview'], settings);
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview'], settings);
         var valuegenerators = tryGet(data,'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
@@ -206,6 +206,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
      * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
      * @property {String} nameToCompare - the name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
+     * @property {Boolean} checkVariableNames - Check that the student has used the same variable names as the correct answer?
+     * @property {Boolean} singleLetterVariables - Force single letter variable names in the answer? Multi-letter variable names will be considered as implicit multiplication.
+     * @property {Boolean} allowUnknownFunctions - Allow the use of unknown functions in the answer? If false, application of unknown functions will be considered as multiplication instead.
+     * @property {Boolean} implicitFunctionComposition - Consider juxtaposition of function names as composition?
      */
     settings:
     {
@@ -236,7 +240,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         mustMatchPattern: '',
         mustMatchPC: 0,
         mustMatchMessage: R('part.jme.must-match.failed'),
-        nameToCompare: ''
+        nameToCompare: '',
+        checkVariableNames: false,
+        singleLetterVariables: false,
+        allowUnknownFunctions: true,
+        implicitFunctionComposition: false
     },
     /** The name of the input widget this part uses, if any.
      * @returns {String}

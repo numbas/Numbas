@@ -258,7 +258,7 @@
 					raisesNumbasError(assert, function(){tokenise('x.1')},'jme.tokenise.invalid near','Invalid: x.1');
 				});
 
-				var compile = function(s){ return jme.compile(s,jme.builtinScope) };
+				var compile = function(s){ return jme.compile(s) };
 
 				QUnit.test('jme.shunt',function(assert) {
 					raisesNumbasError(assert, function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
@@ -274,6 +274,37 @@
                     assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
 				})
 			
+                QUnit.test('Expand juxtapositions',function(assert) {
+                    function expand(expr,options) {
+                        var tree = compile(expr);
+                        return Numbas.jme.builtinScope.expandJuxtapositions(tree,options);
+                    }
+                    treesEqual(assert, expand('xy'), compile('x*y'), 'xy');
+                    treesEqual(assert, expand('xy',{singleLetterVariables:false}), compile('xy'), 'xy, allow single letter variable names');
+                    treesEqual(assert, expand('g12x'), compile('g12*x'), 'g12x');
+                    treesEqual(assert, expand('x\'y'), compile('x\'*y'), 'x\'y');
+                    treesEqual(assert, expand('ax_yz'), compile('a*x_y*z'), 'ax_yz');
+                    treesEqual(assert, expand('axy\'z'), compile('a*x*y\'*z'), 'axy\'z');
+                    treesEqual(assert, expand('xcos(x)'), compile('x*cos(x)'), 'xcos(x)');
+                    treesEqual(assert, expand('xsqr(x)'), compile('x*sqrt(x)'), 'xsqr(x)');
+                    treesEqual(assert, expand('lnabs(x)'), compile('ln(abs(x))'), 'lnabs(x)');
+                    treesEqual(assert, expand('lnabs(x)',{implicitFunctionComposition:false}), compile('lnabs(x)'), 'lnabs(x), no implicit function composition');
+                    treesEqual(assert, expand('x(y)'), compile('x*y'), 'x(y)');
+                    treesEqual(assert, expand('x(y)',{noUnknownFunctions: false}), compile('x(y)'), 'x(y), allow unknown functions');
+                    treesEqual(assert, expand('xy(z)'), compile('x*y*z'), 'xy(z)');
+                    treesEqual(assert, expand('xlnabs(x)'), compile('x*ln(abs(x))'), 'xlnabs(x)');
+                    treesEqual(assert, expand('lnarccos(x)'), compile('ln(arccos(x))'), 'lnarccos(x)');
+                    treesEqual(assert, expand('lnlnln(x)'), compile('ln(ln(ln(x)))'), 'lnlnln(x)');
+                    treesEqual(assert, expand('xysincos(x)'), compile('x*y*sin(cos(x))'), 'xysincos(x)');
+                    treesEqual(assert, expand('x(y,1)'), compile('x(y,1)'), 'x(y,1)');
+                    treesEqual(assert, expand('ln(y)'), compile('ln(y)'), 'ln(y)');
+                    treesEqual(assert, expand('f(y)'), compile('f*y'), 'f(y)');
+                    treesEqual(assert, expand('ln abs(x)'), compile('ln(abs(x))'), 'ln abs(x)');
+                    treesEqual(assert, expand('ln*abs(x)'), compile('ln(abs(x))'), 'ln*abs(x)');
+                    treesEqual(assert, expand('x ln abs(x)'), compile('x*ln(abs(x))'), 'x ln abs(x)');
+                    treesEqual(assert, expand('xy*sin ln abs(x)'), compile('x*y*sin(ln(abs(x)))'), 'xy*sin ln abs(x)');
+                    treesEqual(assert, expand('5g()'), compile('5*g()'), '5g()');
+                });
 				
 				QUnit.module('Evaluating');
 
@@ -373,6 +404,9 @@
                     deepCloseEqual(assert, evaluate('let(a,1,let(a,2,b,a,b))').value, 2, 'let(a,1,let(a,2,b,a,b))');
                     deepCloseEqual(assert, evaluate('let(b,1,let(a,b,b,a+1,b))').value, 2, 'let(b,1,let(a,b,b,a+1,b))');
                     deepCloseEqual(assert, evaluate('let(a,1,let(["a":2,"b":a],b))').value, 1, 'let(a,1,let(["a":2,"b":a],b))');
+
+                    var expr = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("c"))');
+                    assert.notEqual(expr.tree.tok.type,'expression',"When substituting subexpressions into subexpressions, unwrap them");
 
                     /*
                     // Removed while I think about how I want this to work
@@ -499,6 +533,11 @@
 					deepCloseEqual(assert, evaluateNumber('(1+i)^(-2)'),math.complex(0,-0.5),'(1+i)^(-2)');
 					deepCloseEqual(assert, evaluateNumber('(1+i)^(-3)'),math.complex(-0.25,-0.25),'(1+i)^(-3)');
 					deepCloseEqual(assert, evaluateNumber('2^i'),math.complex(0.7692389013639721,0.6389612763136348),'2^i');
+                    assert.equal(evaluateNumber('e^0.9'),evaluateNumber('exp(0.9)'),'e^0.9 == exp(0.9)');
+                    assert.ok(Numbas.jme.builtinScope.evaluate('iszero(dec(e)-exp(dec(1)))').value,'dec(e) uses more accurate e than Math.E');
+                    assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(e)-exp(1))').value,'dec(e) uses more accurate e than Math.E');
+                    assert.ok(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(dec(-1)))').value,'dec(pi) uses more accurate pi than Math.PI');
+                    assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(-1))').value,'dec(pi) uses more accurate pi than Math.PI');
 				});
 
 				QUnit.test('Logic',function(assert) {
@@ -1528,6 +1567,7 @@
                     assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(10)^1000')}),'dec("1e+1000")','dec(10)^1000');
                     assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
                     assert.equal(simplifyExpression('dot:x + x','all'), 'dot:x + x', 'dot:x + x does not collect terms in x');
+                    assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
                 });
 
                 QUnit.test('large product',function(assert) {
@@ -1574,6 +1614,10 @@
                     assert.equal(mixedfrac('-76/11'),'-6 \\frac{10}{11}','-76/11');
                     assert.equal(mixedfrac('1234567/123'),'10037 \\frac{16}{123}','1234567/123');
                     assert.equal(mixedfrac('3i/2'),'1 \\frac{1}{2} i','3i/2');
+
+                    var tree = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("1/c"))');
+                    assert.equal(Numbas.jme.display.texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
+                    assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
                 });
 
 				QUnit.test('expression to LaTeX', function(assert) {
@@ -1626,6 +1670,7 @@
                     assert.equal(exprToLaTeX('2/4','flatFractions'),'\\left. 2 \\middle/ 4 \\right.','');
                     assert.equal(exprToLaTeX('(2 + 3)/(a + b)','flatFractions'),'\\left. \\left ( 2 + 3 \\right ) \\middle/ \\left ( a + b \\right ) \\right.','');
                     assert.equal(exprToLaTeX('matrix([1,1]) + matrix([1]) + (-5)matrix([1])','all'),'\\begin{pmatrix} 1, & 1 \\end{pmatrix} - 4 \\begin{pmatrix} 1 \\end{pmatrix}','matrix([1,1]) + matrix([1]) + (-5)matrix([1])');
+                    assert.equal(exprToLaTeX('x*(x+1)',''),'x \\times \\left ( x + 1 \\right )','x*(x+1)');
 				});
 
                 doc_tests.forEach(function(section) {

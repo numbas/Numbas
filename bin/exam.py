@@ -132,9 +132,13 @@ class Exam(object):
     showanswerstate = True            #show right/wrong on questions?
     allowrevealanswer = True        #allow student to reveal answer to question?
     intro = ''                        #text shown on the front page
+    reviewshowscore = True          #show student's score in review mode?
+    reviewshowfeedback = True       #show part feedback messages in review mode?
+    reviewshowexpectedanswer = True #show expected answers in review mode?
+    reviewshowadvice = True         #show question advice in review mode?
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
-    showstudentname = True
+    showstudentname = True          #show the student's name?
 
 
     def __init__(self,name='Untitled Exam'):
@@ -188,7 +192,7 @@ class Exam(object):
                     tryLoad(timing[event],['action','message'],exam.timing[event])
 
         if haskey(data,'feedback'):
-            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer'],exam)
+            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer','reviewshowadvice'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],'intro',exam,'intro')
@@ -274,6 +278,10 @@ class Exam(object):
                 'showanswerstate': strcons_fix(self.showanswerstate),
                 'allowrevealanswer': strcons_fix(self.allowrevealanswer),
                 'showstudentname': strcons_fix(self.showstudentname),
+                'reviewshowscore': strcons_fix(self.reviewshowscore),
+                'reviewshowfeedback': strcons_fix(self.reviewshowfeedback),
+                'reviewshowexpectedanswer': strcons_fix(self.reviewshowexpectedanswer),
+                'reviewshowadvice': strcons_fix(self.reviewshowadvice),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedbackmessages = feedback.find('feedbackmessages')
@@ -865,6 +873,9 @@ class JMEPart(Part):
     vsetRangeEnd = 1
     vsetRangePoints = 5
     checkVariableNames = False
+    singleLetterVariables = False
+    allowUnknownFunctions = True
+    implicitFunctionComposition = False
     valueGenerators = []
 
     def __init__(self,marks=0,prompt=''):
@@ -881,7 +892,7 @@ class JMEPart(Part):
     def loadDATA(self, builder, data):
         super(JMEPart,self).loadDATA(builder, data)
 
-        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames'],self)
+        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition'],self)
 
         #default checking accuracies
         if self.checkingType.lower() == 'reldiff' or self.checkingType.lower() == 'absdiff':
@@ -924,6 +935,9 @@ class JMEPart(Part):
         answer = part.find('answer')
         answer.attrib = {
                 'checkvariablenames': strcons_fix(self.checkVariableNames),
+                'singlelettervariables': strcons_fix(self.singleLetterVariables),
+                'allowunknownfunctions': strcons_fix(self.allowUnknownFunctions),
+                'implicitfunctioncomposition': strcons_fix(self.implicitFunctionComposition),
                 'showPreview': strcons_fix(self.showPreview),
         }
         correctAnswer = answer.find('correctanswer')
@@ -1150,6 +1164,10 @@ class MatrixEntryPart(Part):
     numRows = 3
     numColumns = 3
     allowResize = True
+    minColumns = 0
+    maxColumns = 0
+    minRows = 0
+    maxRows = 0
 
     tolerance = 0
     markPerCell = False
@@ -1166,7 +1184,25 @@ class MatrixEntryPart(Part):
 
     def loadDATA(self, builder, data):
         super(MatrixEntryPart,self).loadDATA(builder, data)
-        tryLoad(data,['correctAnswer','correctAnswerFractions','numRows','numColumns','allowResize','tolerance','markPerCell','allowFractions','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision'],self)
+        tryLoad(data,[
+            'correctAnswer',
+            'correctAnswerFractions',
+            'numRows',
+            'numColumns',
+            'allowResize',
+            'minColumns',
+            'maxColumns',
+            'minRows',
+            'maxRows',
+            'tolerance',
+            'markPerCell',
+            'allowFractions',
+            'precisionType',
+            'precision',
+            'precisionPartialCredit',
+            'precisionMessage',
+            'strictPrecision'
+        ],self)
 
     def toxml(self):
         part = super(MatrixEntryPart,self).toxml()
@@ -1182,6 +1218,10 @@ class MatrixEntryPart(Part):
             'rows': strcons_fix(self.numRows),
             'columns': strcons_fix(self.numColumns),
             'allowresize': strcons_fix(self.allowResize),
+            'mincolumns': strcons_fix(self.minColumns),
+            'maxcolumns': strcons_fix(self.maxColumns),
+            'minrows': strcons_fix(self.minRows),
+            'maxrows': strcons_fix(self.maxRows),
             'tolerance': strcons_fix(self.tolerance),
             'markpercell': strcons_fix(self.markPerCell),
             'allowfractions': strcons_fix(self.allowFractions),

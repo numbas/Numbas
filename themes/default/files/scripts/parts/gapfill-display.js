@@ -23,7 +23,9 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
                 return;
             }
             for(var i=0;i<this.part.gaps.length; i++) {
-                this.part.gaps[i].display.restoreAnswer(studentAnswer);
+                if(studentAnswer[i]!==undefined) {
+                    this.part.gaps[i].display.restoreAnswer(studentAnswer[i]);
+                }
             }
         },
         revealAnswer: function()

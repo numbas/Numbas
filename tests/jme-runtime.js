@@ -1444,6 +1444,28 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             s += ' '+R('alternative')+' '+m[4];
         }
         return s;
+    },
+
+    debounce: function(frequency) {
+        var last_run = 0;
+        var cb;
+        var timeout;
+        function go() {
+            var t = new Date();
+            if(t-frequency < last_run) {
+                if(timeout) {
+                    clearTimeout(timeout);
+                }
+                timeout = setTimeout(go,frequency+1-(t-last_run));
+            } else {
+                last_run = t;
+                cb();
+            }
+        }
+        return function(fn) {
+            cb = fn;
+            go();
+        }
     }
 };
 /** Different styles of writing a decimal
@@ -1955,14 +1977,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Number} b
      * @returns {Number}
      */
-    pow: function(a,b)
-    {
-        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100)
-        {
-            if(b<0)
+    pow: function(a,b) {
+        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100) {
+            if(b<0) {
                 return math.div(1,math.pow(a,-b));
-            if(b==0)
+            }
+            if(b==0) {
                 return 1;
+            }
             var coeffs = math.binomialCoefficients(b);
             var re = 0;
             var im = 0;
@@ -1972,12 +1994,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
                 sign = -sign;
             }
-            if(b%2==0)
+            if(b%2==0) {
                 re += Math.pow(a.im,b)*sign;
+            }
             return math.complex(re,im);
         }
-        if(a.complex || b.complex || (a<0 && math.fract(b)!=0))
-        {
+        if(a.complex || b.complex || (a<0 && math.fract(b)!=0)) {
             if(!a.complex)
                 a = {re: a, im: 0, complex: true};
             if(!b.complex)
@@ -1987,9 +2009,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var mag = Math.pow(ss,b.re/2) * Math.exp(-b.im*arg1);
             var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
             return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-        }
-        else
-        {
+        } else if(a==Math.E) {
+            return Math.exp(b);
+        } else {
             return Math.pow(a,b);
         }
     },
@@ -2538,6 +2560,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return out;
         }
     },
+
+    /** Convert a JS Number to a Decimal
+     * @param {Number} n
+     * @returns {Decimal}
+     */
+    numberToDecimal: function(x) {
+        if(x.complex) {
+            return new math.ComplexDecimal(math.numberToDecimal(x.re), math.numberToDecimal(x.im));
+        } else {
+            if(x==Math.PI) {
+                return Decimal.acos(-1);
+            } else if(x==Math.E) {
+                return Decimal(1).exp();
+            } else {
+                return new Decimal(x);
+            }
+        }
+    },
+
     /** Get a random number in range `[0..n-1]`
      * @param {Number} n
      * @returns {Number}
@@ -11629,9 +11670,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {Numbas.jme.tree} tree
      * @param {Numbas.jme.Scope} scope
      * @param {Boolean} [allowUnbound=false] - allow unbound variables to remain in the returned tree
+     * @param {Boolean} [unwrapExpressions=false] - unwrap TExpression tokens?
      * @returns {Numbas.jme.tree}
      */
-    substituteTree: function(tree,scope,allowUnbound)
+    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
     {
         if(!tree)
             return null;
@@ -11654,6 +11696,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 {
                     if(v.tok) {
                         return v;
+                    } else if(unwrapExpressions && v.type=='expression') {
+                        return v.tree;
                     } else {
                         return {tok: v};
                     }
@@ -11665,7 +11709,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
             tree = {tok: tree.tok,
                     args: tree.args.slice()};
-            substituteTreeOps[tree.tok.name](tree,scope,allowUnbound);
+            substituteTreeOps[tree.tok.name](tree,scope,allowUnbound,unwrapExpressions);
             return tree;
         } else {
             tree = {
@@ -11673,7 +11717,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 args: tree.args.slice()
             };
             for(var i=0;i<tree.args.length;i++) {
-                tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound);
+                tree.args[i] = jme.substituteTree(tree.args[i],scope,allowUnbound,unwrapExpressions);
             }
             return tree;
         }
@@ -12811,6 +12855,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(this.output.length>l) {
                 n++;
             }
+            if(this.output.length==n-1) {
+                n -= 1;
+            }
             switch(this.listmode.pop()) {
             case 'new':
                 this.addoutput(new TList(n))
@@ -13513,6 +13560,166 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         default:
             return tok;
         }
+    },
+
+    /** Options for {@link Numbas.jme.Scope.expandJuxtapositions}
+     * @typedef {Object} Numbas.jme.expand_juxtapositions_options
+     * @property {Boolean} singleLetterVariables - Enforce single-letter variables names: a name token like `xy` is rewritten to `x*y`.
+     * @property {Boolean} noUnknownFunctions - Rewrite applications of functions not defined in this scope to products, e.g. `x(y)` is rewritten to `x*y`.
+     * @property {Boolean} implicitFunctionComposition - If function names are juxtaposed, either as a single token or as (implicit) multiplication, rewrite as composition: e.g. `lnabs(x)` and `ln abs(x)` are both rewritten to `ln(abs(x))`.
+     */
+    /** Expand juxtapositions in variable and function names for implicit multiplication or composition
+     * @param {Numbas.jme.tree} tree
+     * @param {Numbas.jme.expand_juxtapositions_options} options
+     * @returns Numbas.jme.tree
+     */
+    expandJuxtapositions: function(tree, options) {
+        var scope = this;
+        var default_options = {
+            singleLetterVariables: true,    // `xy = x*y`
+            noUnknownFunctions: true,    // `x(y) = x*y` when `x` is not the name of a function defined in this scope
+            implicitFunctionComposition: true  // `lnabs(x) = ln(abs(x))`, only applied when `noUnknownFunctions` is true, and `ln abs(x) = ln(abs(x))`
+        }
+        options = options || default_options;
+
+        if(!(options.singleLetterVariables || options.noUnknownFunctions || options.implicitFunctionComposition)) {
+            return tree;
+        }
+
+        function tfunc(name) {
+            return new TFunc(scope.parser.funcSynonym(name));
+        }
+
+        function get_function_names() {
+            // grab names of defined functions from the right
+            var defined_names = {};
+            var s = scope;
+            while(s) {
+                for(var name in s.functions) {
+                    defined_names[name] = true;
+                }
+                for(var name in jme.funcSynonyms) {
+                    defined_names[name] = true;
+                }
+                if(s.parser.funcSynonyms) {
+                    for(var name in s.parser.funcSynonyms) {
+                        defined_names[name] = true;
+                    }
+                }
+                s = s.parent
+            }
+            return defined_names;
+        }
+
+        var tok = tree.tok;
+
+        if(options.implicitFunctionComposition && jme.isOp(tok,'*') && tree.args[1].tok.type=='function') {
+            var search = true;
+            var defined_names = get_function_names();
+            while(search) {
+                if(!jme.isOp(tree.tok,'*')) {
+                    break;
+                }
+                search = false;
+                var c = tree.args[0];
+                while(jme.isOp(c.tok,'*')) {
+                    c = c.args[1];
+                }
+                if(c.tok.type=='name' && defined_names[c.tok.name]) {
+                    search = true;
+                    var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
+                    composed_fn.tok.vars = 1;
+                    if(c==tree.args[0]) {
+                        tree = composed_fn;
+                    } else {
+                        function remove_multiplicand(t) {
+                            if(t.args[1]==c) {
+                                return t.args[0];
+                            } else {
+                                return {tok: t.tok, args: [t.args[0], remove_multiplicand(t.args[1])]};
+                            }
+                        }
+                        tree = {tok: tree.tok, args: [remove_multiplicand(tree.args[0]),composed_fn]};
+                    }
+                }
+            }
+
+        }
+
+        if(tree.args) {
+            tree.args = tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); });
+        }
+
+        switch(tok.type) {
+            case 'name':
+                if(options.singleLetterVariables && tok.name.length>1) {
+                    var bits = [];
+                    var name = tok.name;
+                    var re_name = /^[a-zA-Z][0-9]*(_([a-zA-Z]|[0-9]+|$))?'*/;
+                    var m;
+                    while(name.length && (m = re_name.exec(name))) {
+                        bits.push(m[0]);
+                        name = name.slice(m[0].length);
+                    }
+                    var tree = {tok: new TName(bits[0])};
+                    for(var i=1;i<bits.length;i++) {
+                        tree = {tok: this.parser.op('*'), args: [tree,{tok: new TName(bits[i])}]};
+                    }
+                    return tree;
+                }
+                break;
+            case 'function':
+                if(options.noUnknownFunctions) {
+                    var defined_names = get_function_names();
+                    var name = tok.name;
+                    var breaks = [name.length];
+                    for(var i=name.length-1;i>=0;i--) {
+                        for(var j=0;j<breaks.length;j++) {
+                            var sub = name.slice(i,breaks[j]);
+                            if(defined_names[sub]) {
+                                breaks = breaks.slice(0,j+1);
+                                breaks.push(i);
+                            }
+                        }
+                    }
+                    var bits = [];
+                    var remainder;
+                    if(options.implicitFunctionComposition) {
+                        breaks.reverse();
+                        for(var i=0;i<breaks.length-1;i++) {
+                            bits.push(name.slice(breaks[i],breaks[i+1]));
+                        }
+                        remainder = name.slice(0,breaks[0]);
+                    } else {
+                        if(breaks.length>1) {
+                            bits.push(name.slice(breaks[1],breaks[0]));
+                        }
+                        remainder = name.slice(0,breaks[1]);
+                    }
+                    if(!bits.length) {
+                        if(tree.args.length!=1) {
+                            return tree;
+                        } else {
+                            return {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};
+                        }
+                    }
+                    var args = tree.args;
+                    for(var i=bits.length-1;i>=0;i--) {
+                        tree = {tok: tfunc(bits[i]), args: args};
+                        tree.tok.vars = 1;
+                        args = [tree];
+                    }
+
+                    // then interpret anything remaining on the left as multiplication by variables
+                    if(remainder.length) {
+                        var left = this.expandJuxtapositions({tok: new TName(remainder)},options);
+                        tree = {tok: this.parser.op('*'), args: [left,tree]};
+                    }
+                    return tree;
+                }
+                break;
+        }
+        return tree;
     }
 };
 /** @typedef {Object} Numbas.jme.token
@@ -14442,7 +14649,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
             {
                 var plain = bits[i];
                 var sbits = util.splitbrackets(plain,'{','}','(',')');
-                for(var k=1;k<sbits.length-1;k+=2)
+                for(var k=1;k<=sbits.length-1;k+=2)
                 {
                     var tree2 = jme.compile(sbits[k],scope,true);
                     out = out.merge(findvars(tree2,boundvars));
@@ -15951,6 +16158,22 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
+    evaluate: function(args,scope) {
+        var n = args[0].value;
+        var bits = math.parseScientific(n.re.toExponential());
+        var s = new TString(math.niceDecimal(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        s.latex = true;
+        return s;
+    }
+});
+newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
+    var bits = math.parseScientific(n.re.toExponential());
+    var s = document.createElement('span');
+    s.innerHTML = math.niceDecimal(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    return s;
+});
+
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
@@ -16021,13 +16244,7 @@ newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
-newBuiltin('decimal',[TNum],TDecimal,function(x){
-    if(x.complex) {
-        return new math.ComplexDecimal(new Decimal(x.re), new Decimal(x.im));
-    } else {
-        return new Decimal(x);
-    }
-});
+newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
@@ -17031,6 +17248,13 @@ newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
+newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],TExpression,null, {
+    evaluate: function(args,scope) {
+        var tree = args[0].tree;
+        var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
+        return new TExpression(scope.expandJuxtapositions(tree,options));
+    }
+});
 newBuiltin('expression',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
@@ -17339,7 +17563,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         }
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
-        var nexpr = jme.substituteTree(expr,scope,true);
+        var nexpr = jme.substituteTree(expr,scope,true,true);
         return new TExpression(nexpr);
     }
 });
@@ -17661,6 +17885,9 @@ var texOps = jme.display.texOps = {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.name.length,right.tok.name.length)>1) {
+                    use_symbol = true;
+                // multiplication of a name by something in brackets
+                } else if(jme.isType(left.tok,'name') && texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
                 } else if ( jme.isType(right.tok,'number')
@@ -18500,6 +18727,16 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
     if(thing.args)
     {
+        thing = {
+            tok: thing.tok,
+            args: thing.args.map(function(arg) {
+                if(arg.tok.type=='expression') {
+                    return arg.tree;
+                } else {
+                    return arg;
+                }
+            })
+        }
         var texArgs = [];
         for(var i=0; i<thing.args.length; i++ )
         {
@@ -18881,7 +19118,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 if(op in opBrackets) {
                     bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
                 } else {
-                    bracketArg = tok.prefix==true;
+                    bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
             if(bracketArg) {
@@ -19029,8 +19266,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'not': [{'and':true,'or':true,'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
-    '=': [{},{}],
-    'fact': [{'+': true, '-': true}]
+    '=': [{},{}]
 };
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
@@ -19312,6 +19548,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(path===undefined)
             path=[];
         computeFn = computeFn || jme.variables.computeVariable;
+        if(name=='') {
+            throw(new Numbas.Error('jme.variables.empty name'));
+        }
         if(path.contains(name))
         {
             throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
@@ -19587,6 +19826,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
+
+    this.IGNORE_TAGS = ['iframe','script','style'];
 }
 DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children
@@ -19604,14 +19845,16 @@ DOMcontentsubber.prototype = {
                 return;
         }
     },
+
     sub_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             if(element.getAttribute('src').match(/.svg$/i)) {
                 element.parentElement
                 var object = element.ownerDocument.createElement('object');
@@ -19627,7 +19870,7 @@ DOMcontentsubber.prototype = {
                 subber.sub_element(object);
                 return;
             }
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             /** Substitute content into the object's root element
              */
             function go() {
@@ -19644,7 +19887,9 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                $(element).remove();
+                if(element.parentElement) {
+                    element.parentElement.removeChild(element);
+                }
                 return;
             }
         }
@@ -19708,13 +19953,14 @@ DOMcontentsubber.prototype = {
     findvars_element: function(element) {
         var subber = this;
         var scope = this.scope;
-        if($.nodeName(element,'iframe')) {
+        var tagName = element.tagName.toLowerCase();
+        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
             return [];
         } else if(element.hasAttribute('nosubvars')) {
             return [];
-        } else if($.nodeName(element,'img')) {
+        } else if(tagName=='img') {
             return [];
-        } else if($.nodeName(element,'object')) {
+        } else if(tagName=='object') {
             if(element.contentDocument && element.contentDocument.rootElement) {
                 return this.findvars_element(element.contentDocument.rootElement);
             }

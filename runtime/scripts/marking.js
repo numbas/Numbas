@@ -99,7 +99,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @see Numbas.marking.StatefulScope
      * @returns {Numbas.jme.funcObj}
      */
-    function state_fn(name, args, outtype, fn) {
+    var state_fn = marking.state_fn = function(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
                 if(jme.lazyOps.contains(name)) {
@@ -255,7 +255,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         part.setStudentAnswer();
         return jme.wrapValue({
             credit: part.credit,
-            marks: part.marks,
+            marks: part.availableMarks(),
             feedback: part.finalised_result.states,
             answered: part.answered
         });
@@ -326,7 +326,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
-                marks: part.marks,
+                marks: part.availableMarks(),
                 credit: result.credit,
                 feedback: result.states,
                 valid: result.valid,

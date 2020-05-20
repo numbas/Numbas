@@ -100,6 +100,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         exam.display.questions().map(function(q) {
             q.init();
         });
+        Numbas.signals.trigger('display ready');
     },
     //alert / confirm boxes
     //
@@ -266,6 +267,7 @@ $.textMetrics = function(el) {
  * @property {Boolean} showTotalMark - Show the total marks available?
  * @property {Boolean} showActualMark - Show the student's current score?
  * @property {Boolean} showAnswerState - Show the correct/incorrect state after marking?
+ * @property {Boolean} reviewShowScore - Show the score once answers have been revealed?
  */
 /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
  * @typedef {String} Numbas.display.feedback_state
@@ -308,9 +310,14 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var partiallyAnswered = Knockout.computed(function() {
         return anyAnswered() && !answered();
     },this);
+    var revealed = Knockout.computed(function() {
+        return (obj.revealed() && settings.reviewShowScore) || Numbas.is_instructor;
+    });
     var state = Knockout.computed(function() {
-        var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks(), credit = obj.credit();
-        if( obj.doesMarking() && showFeedbackIcon && (revealed || (settings.showAnswerState && anyAnswered())) ) {
+        var score = obj.score();
+        var marks = obj.marks();
+        var credit = obj.credit();
+        if( obj.doesMarking() && showFeedbackIcon && (revealed() || (settings.showAnswerState && anyAnswered())) ) {
             if(credit<=0) {
                 return 'wrong';
             } else if(Numbas.math.precround(credit,10)==1) {
@@ -324,7 +331,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         }
     });
     var messageIngredients = ko.computed(function() {
-        var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks();
+        var score = obj.score();
+        var marks = obj.marks();
         var scoreobj = {
             marks: marks,
             score: score,
@@ -334,7 +342,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         var messageKey;
         if(marks==0) {
             messageKey = 'question.score feedback.not marked';
-        } else if(!revealed) {
+        } else if(!revealed()) {
             if(settings.showActualMark) {
                 if(settings.showTotalMark) {
                     messageKey = 'question.score feedback.score total actual';
@@ -362,10 +370,11 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
                 newScore(false);
             }
         }),
+        revealed: revealed,
         state: state,
         answered: answered,
         answeredString: Knockout.computed(function() {
-            if((obj.marks()==0 && !obj.doesMarking()) || !(Numbas.is_instructor || obj.revealed() || settings.showActualMark || settings.showTotalMark)) {
+            if((obj.marks()==0 && !obj.doesMarking()) || !(revealed() || settings.showActualMark || settings.showTotalMark)) {
                 return '';
             }
             var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';

@@ -106,7 +106,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     }
 };
 
-var WorksheetDisplay = Numbas.display.Worksheetdisplay = function() {
+var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     this.numExams = ko.observable(1);
     this.sheetTypes = [
         {name: 'questionsheet', label: 'Question sheets'},

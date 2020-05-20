@@ -40,6 +40,7 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
     loadFromXML: function(xml) {
+        var p = this;
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var scope = this.getScope();
@@ -584,7 +585,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                           this.error('part.mcq.matrix cell empty',{part:this.path,row:i,column:j});
                         }
                         try {
-                          value = jme.evaluate(value,scope).value;
+                          value = jme.castToType(jme.evaluate(value,scope),'number').value;
                         } catch(e) {
                           this.error('part.mcq.matrix jme error',{part:this.path,row:i,column:j,error:e.message});
                         }

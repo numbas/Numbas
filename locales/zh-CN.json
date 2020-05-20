@@ -321,9 +321,10 @@
     "variable.error in variable definition": "变量<code>{{name}}</code>的定义错误",
     "left brace": "{",
     "right brace": "}",
-    "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
-    "control.toggle navigation menu": "Toggle the navigation menu",
-    "part.input title": "Answer for part {{name}}",
-    "part.correct answer title": "Expected answer for part {{name}}",
-    "part.jme.must-match.failed": "Your answer is not in the right form."
+    "extension.not found": "无法加载扩展：<code>{{name}}</code>。",
+    "control.toggle navigation menu": "切换导航菜单",
+    "part.input title": "第{{name}}步答案",
+    "part.correct answer title": "第{{name}}步正确答案",
+    "part.jme.must-match.failed": "答案格式存在错误。",
+    "question.score feedback.none": ""
 }

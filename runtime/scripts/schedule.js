@@ -216,4 +216,11 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         callback.resolve();
     }
 }
+
+/** Signals produced by the Numbas runtime.
+ * @type {Numbas.schedule.SignalBox}
+ * @memberof Numbas
+ */
+Numbas.signals = new Numbas.schedule.SignalBox();
+
 });

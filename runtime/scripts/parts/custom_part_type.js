@@ -214,10 +214,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new jme.types.TString(value);
         },
         'code': function(def, value, scope) {
-            if(!value.trim()) {
-                throw(new Numbas.Error('part.custom.empty setting'));
-            }
             if(def.evaluate) {
+                if(!value.trim()) {
+                    throw(new Numbas.Error('part.custom.empty setting'));
+                }
                 return scope.evaluate(value);
             } else {
                 return new jme.types.TString(value);

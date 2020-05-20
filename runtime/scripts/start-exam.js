@@ -62,6 +62,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                     case 'ab-initio':
                         job(exam.init,exam);
                         exam.signals.on('ready', function() {
+                            Numbas.signals.trigger('exam ready');
                             job(function() {
                                     Numbas.display.init();
                             });
@@ -78,6 +79,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                     case 'review':
                         job(exam.load,exam);
                         exam.signals.on('ready', function() {
+                            Numbas.signals.trigger('exam ready');
                             job(function() {
                                 Numbas.display.init();
                             });
@@ -93,6 +95,9 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                         });
                         break;
                 }
+            });
+            job(function() {
+                Numbas.signals.trigger('Numbas initialised');
             });
         });
     }

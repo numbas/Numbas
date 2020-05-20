@@ -521,6 +521,22 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
+    evaluate: function(args,scope) {
+        var n = args[0].value;
+        var bits = math.parseScientific(n.re.toExponential());
+        var s = new TString(math.niceDecimal(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        s.latex = true;
+        return s;
+    }
+});
+newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
+    var bits = math.parseScientific(n.re.toExponential());
+    var s = document.createElement('span');
+    s.innerHTML = math.niceDecimal(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    return s;
+});
+
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
@@ -591,13 +607,7 @@ newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
-newBuiltin('decimal',[TNum],TDecimal,function(x){
-    if(x.complex) {
-        return new math.ComplexDecimal(new Decimal(x.re), new Decimal(x.im));
-    } else {
-        return new Decimal(x);
-    }
-});
+newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
@@ -1601,6 +1611,13 @@ newBuiltin('max_height',[TNum,THTML],THTML,function(w,h) {
 newBuiltin('parse',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
+newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],TExpression,null, {
+    evaluate: function(args,scope) {
+        var tree = args[0].tree;
+        var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
+        return new TExpression(scope.expandJuxtapositions(tree,options));
+    }
+});
 newBuiltin('expression',[TString],TExpression,function(str) {
     return jme.compile(str);
 });
@@ -1909,7 +1926,7 @@ newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
         }
         var expr = args[1].tree;
         scope = new Scope({variables: substitutions});
-        var nexpr = jme.substituteTree(expr,scope,true);
+        var nexpr = jme.substituteTree(expr,scope,true,true);
         return new TExpression(nexpr);
     }
 });

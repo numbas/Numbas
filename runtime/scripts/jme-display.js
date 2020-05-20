@@ -290,6 +290,9 @@ var texOps = jme.display.texOps = {
                 // multiplication of two names, at least one of which has more than one letter
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.name.length,right.tok.name.length)>1) {
                     use_symbol = true;
+                // multiplication of a name by something in brackets
+                } else if(jme.isType(left.tok,'name') && texifyWouldBracketOpArg(thing,i)) {
+                    use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
                 } else if ( jme.isType(right.tok,'number')
                         ||
@@ -1128,6 +1131,16 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
     if(thing.args)
     {
+        thing = {
+            tok: thing.tok,
+            args: thing.args.map(function(arg) {
+                if(arg.tok.type=='expression') {
+                    return arg.tree;
+                } else {
+                    return arg;
+                }
+            })
+        }
         var texArgs = [];
         for(var i=0; i<thing.args.length; i++ )
         {
@@ -1509,7 +1522,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 if(op in opBrackets) {
                     bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
                 } else {
-                    bracketArg = tok.prefix==true;
+                    bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
             if(bracketArg) {
@@ -1657,8 +1670,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'not': [{'and':true,'or':true,'xor':true}],
     'or': [{'xor':true},{'xor':true}],
     'xor':[{},{}],
-    '=': [{},{}],
-    'fact': [{'+': true, '-': true}]
+    '=': [{},{}]
 };
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.

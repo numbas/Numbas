@@ -37,6 +37,8 @@ Copyright 2011-16 Newcastle University
                 <div class="examID">ID: <span class="id" data-bind="text: id"></span></div>
             </div>
 
+            <div class="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+
             <ol class="questionList">
             </ol>
         </div>

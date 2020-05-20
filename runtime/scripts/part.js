@@ -1230,7 +1230,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message);
+                    part.markingComment(state.message,state.reason);
                     break;
                 case FeedbackOps.END:
                     if(lifts.length) {
@@ -1280,7 +1280,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
             var ot = t;
             t += change;
-            t = Math.max(0,t);
             change = t-ot;
             if(action.message===undefined) {
                 action.message = '';
@@ -1320,7 +1319,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
             studentAnswer: studentAnswer,
             settings: jme.wrapValue(this.settings),
-            marks: new jme.types.TNum(this.marks),
+            marks: new jme.types.TNum(this.availableMarks()),
             partType: new jme.types.TString(this.type),
             gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME())})),
             steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME())}))
@@ -1418,11 +1417,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Add a comment to the marking feedback
      * @param {String} message
      */
-    markingComment: function(message)
+    markingComment: function(message,reason)
     {
         this.markingFeedback.push({
             op: 'feedback',
-            message: message
+            message: message,
+            reason: reason
         });
     },
     /** Show the steps, as a result of the student asking to show them.

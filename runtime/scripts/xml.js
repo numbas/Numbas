@@ -140,6 +140,12 @@ var xml = Numbas.xml = {
         {
             var name = variableNodes[i].getAttribute('name').toLowerCase();
             var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+            if(name.trim()=='') {
+                if(value.trim()=='') {
+                    continue;
+                }
+                throw(new Numbas.Error('jme.variables.empty name'));
+            }
             if(value.trim()=='') {
                 throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
             }
@@ -228,10 +234,9 @@ var xml = Numbas.xml = {
                     {
                         if(typeof(obj[name]) == 'number')
                         {
-                            if(Numbas.util.isFloat(value))
-                                value = parseFloat(value);
-                            else if(Numbas.util.isFloat(Numbas.util.unPercent(value)))
-                            {
+                            if(Numbas.util.isNumber(value,true)) {
+                                value = Numbas.util.parseNumber(value,true);
+                            } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
                                 value = Numbas.util.unPercent(value);
                             }
                             else
