@@ -247,6 +247,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             timeSpent: exam.timeSpent || 0,
             duration: exam.settings.duration || 0,
             questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
+            questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
             randomSeed: exam && exam.seed
@@ -366,6 +367,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             timeSpent: eobj.timeSpent || 0,
             duration: eobj.duration || 0 ,
             questionSubsets: eobj.questionSubsets,
+            questionGroupOrder: eobj.questionGroupOrder,
             start: eobj.start,
             stop: eobj.stop,
             score: score,
