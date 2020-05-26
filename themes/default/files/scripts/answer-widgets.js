@@ -261,7 +261,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.minColumns = this.options.minColumns || 0;
             this.maxColumns = this.options.minColumns || 0;
             this.minRows = this.options.minRows || 0;
-            this.maxRowws = this.options.maxRows || 0;
+            this.maxRows = this.options.maxRows || 0;
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
