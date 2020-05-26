@@ -25093,6 +25093,11 @@ if(typeof module !='undefined') {
 
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
+
+    function defaultObservable(v,d) {
+        return v!==undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
+    }
+
     Knockout.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
@@ -25352,7 +25357,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.numRows = this.options.numRows || 1;
             this.numColumns = this.options.numColumns || 1;
             this.minColumns = this.options.minColumns || 0;
-            this.maxColumns = this.options.minColumns || 0;
+            this.maxColumns = this.options.maxColumns || 0;
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
@@ -25440,13 +25445,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
     Knockout.components.register('matrix-input',{
         viewModel: function(params) {
             var vm = this;
-            this.allowResize = params.allowResize ? params.allowResize : Knockout.observable(false);
-            this.minColumns = params.minColumns ? params.minColumns : Knockout.observable(0);
-            this.maxColumns = params.maxColumns ? params.maxColumns : Knockout.observable(0);
-            this.minRows = params.minRows ? params.minRows : Knockout.observable(0);
-            this.maxRows = params.maxRows ? params.maxRows : Knockout.observable(0);
-            console.log(params);
-            console.log(this.minRows());
+            this.allowResize = defaultObservable(params.allowResize,false);
+            this.minColumns = defaultObservable(params.minColumns,0);
+            this.maxColumns = defaultObservable(params.maxColumns,0);
+            this.minRows = defaultObservable(params.minRows,0);
+            this.maxRows = defaultObservable(params.maxRows,0);
             this.title = params.title || '';
             var _numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -25455,10 +25458,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     v = parseInt(v);
                     var minRows = Knockout.unwrap(this.minRows);
                     var maxRows = Knockout.unwrap(this.maxRows);
-                    console.log(minRows,v,maxRows);
                     v = minRows==0 ? v : Math.max(minRows,v);
                     v = maxRows==0 ? v : Math.min(maxRows,v);
-                    console.log(v);
                     return _numRows(v);
                 }
             },this);
@@ -25672,6 +25673,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 }
                 return this.choices().map(function(c,i){ return [i==choice]; })
             },this);
+            this.result = Knockout.computed(function() {
+                var value = this.answerAsArray ? this.choiceArray() : this.choice();
+                var valid = value!==null;
+                var empty = value===null;
+                return {value: value, valid: valid, empty: empty};
+            },this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v.valid) {
@@ -25684,9 +25691,21 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
+            var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
-                var value = this.answerAsArray ? this.choiceArray() : this.choice();
-                this.answerJSON({valid: value!==null, value: value, empty: value===null});
+                var result = this.result();
+                var valuesSame = 
+                    (!result.valid && !lastValue.valid) ||
+                    !lastValue.valid || 
+                    (this.answerAsArray ? 
+                        result.value.every(function(c,i){ return c[0]==lastValue.value[i][0]; })
+                        : result.value==lastValue.value
+                    )
+                ;
+                if(!valuesSame || result.valid!=lastValue.valid) {
+                    this.answerJSON(result);
+                }
+                lastValue = result;
             },this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
