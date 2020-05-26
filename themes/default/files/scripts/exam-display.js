@@ -268,7 +268,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         initQuestionList: function() {
-            this.question_groups = this.exam.question_groups.map(function(g) {
+            var groups = [];
+            for (var i = 0; i < this.exam.questionGroupOrder.length; i++) {
+                var index = this.exam.questionGroupOrder[i];
+                var g = this.exam.question_groups[index];
+                groups.push(g);
+            }
+            this.question_groups = groups.map(function(g) {
                 var questions = Knockout.observable(g.questionList.map(function(q){return q.display}));
                 var show_name = Knockout.computed(function() {
                     return questions().some(function(q) { return q.visible(); });
