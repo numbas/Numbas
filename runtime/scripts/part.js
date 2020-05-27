@@ -350,7 +350,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             var npobj = pobj.nextParts[i];
             if(npobj.instance !== null) {
                 np.instanceVariables = part.store.loadVariables(npobj.instanceVariables,scope);
-                part.makeNextPart(np,index);
+                part.makeNextPart(np,i);
                 np.instance.resume();
             }
         });

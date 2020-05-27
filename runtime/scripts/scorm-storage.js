@@ -296,6 +296,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             adviceDisplayed: question.adviceDisplayed,
             revealed: question.revealed
         };
+        qobj.variables = {};
         if(question.partsMode=='explore') {
             qobj.currentPart = question.currentPart.path;
         }
