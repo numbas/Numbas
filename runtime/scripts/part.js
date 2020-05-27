@@ -335,6 +335,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      *  The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
      */
     resume: function() {
+        this.resuming = true;
         var part = this;
         if(!this.store) {
             return;
@@ -349,8 +350,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.nextParts.forEach(function(np,i) {
             var npobj = pobj.nextParts[i];
             if(npobj.instance !== null) {
-                np.instanceVariables = part.store.loadVariables(npobj.instanceVariables,scope);
-                part.makeNextPart(np,i);
+                np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
+                part.makeNextPart(np,npobj.index);
                 np.instance.resume();
             }
         });
@@ -358,6 +359,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
+        this.resuming = false;
     },
     /** Add a step to this part
      * @param {Numbas.parts.Part} step
@@ -905,11 +907,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.finalised_result = {valid: false, credit: 0, states: []};
 
         if(this.question.partsMode=='explore') {
-            this.nextParts.forEach(function(np) {
-                if(np.instance!==null && np.usesStudentAnswer()) {
-                    p.removeNextPart(np);
-                }
-            });
+            if(!this.resuming) {
+                this.nextParts.forEach(function(np) {
+                    if(np.instance!==null && np.usesStudentAnswer()) {
+                        p.removeNextPart(np);
+                    }
+                });
+            }
             if(this.settings.exploreObjective) {
                 this.markingComment(
                     R('part.marking.counts towards objective',{objective: this.settings.exploreObjective})

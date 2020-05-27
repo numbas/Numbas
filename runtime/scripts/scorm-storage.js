@@ -631,6 +631,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set(prepath+'score.scaled',(question.marks > 0 ? question.score/question.marks : 0) || 0);
         this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
         this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
+        this.setSuspendData();
     },
     /** Record that a question has been submitted
      * @param {Numbas.Question} question

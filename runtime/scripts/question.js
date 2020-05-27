@@ -602,12 +602,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
             });
             function submit_part(part) {
+                part.resuming = true;
                 if(part.answered) {
                     part.submit();
                 }
                 if(part.resume_stagedAnswer!==undefined) {
                     part.stagedAnswer = part.resume_stagedAnswer;
                 }
+                part.resuming = false;
             }
             q.signals.on('ready',function() {
                 q.parts.forEach(function(part) {
