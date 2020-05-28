@@ -231,7 +231,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings,this.xml,adaptiveMarkingNode,['penalty','strategy'],['adaptiveMarkingPenalty','variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
-        this.settings.hasVariableReplacements = replacementNodes.length>0;
         for(var i=0;i<replacementNodes.length;i++) {
             var n = replacementNodes[i];
             var vr = {}
@@ -389,6 +388,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             part: part,
             must_go_first: must_go_first
         };
+        this.settings.hasVariableReplacements = true;
         this.settings.errorCarriedForwardReplacements.push(vr);
     },
     /** The base marking script for this part.
