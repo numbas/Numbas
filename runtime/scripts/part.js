@@ -81,14 +81,15 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
-var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart, store) {
+var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart, store, scope) {
     if(!data.type) {
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
-    var part = createPart(data.type, path, question, parentPart, store);
+    var part = createPart(data.type, path, question, parentPart, store, scope);
     part.loadFromJSON(data);
     part.finaliseLoad();
     return part;
@@ -204,7 +205,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this,this.xml,'.',['type','marks','useCustomName','customName']);
-        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','exploreObjective','suggestGoingBack'],[]);
+        tryGetAttribute(this.settings,this.xml,'.',['minimumMarks','enableMinimumMarks','stepsPenalty','showCorrectAnswer','showFeedbackIcon','exploreObjective','suggestGoingBack','useAlternativeFeedback'],[]);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -279,7 +280,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['marks','useCustomName','customName'],this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty'],this.settings);
+        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty','exploreObjective','suggestGoingBack','useAlternativeFeedback'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -292,6 +293,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 p.addStep(s,i);
             });
         }
+        var alternatives = tryGet(data,'alternatives');
+        if(alternatives) {
+            alternatives.forEach(function(ad,i) {
+                var alternative = Numbas.createPartFromJSON(ad, p.path+'a'+i, p.question, p, p.store);
+                p.addAlternative(alternative,i);
+            });
+        }
+        tryLoad(data,'alternativeFeedbackMessage',this);
         var marking = {};
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         if(marking.customMarkingAlgorithm) {
@@ -304,6 +313,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 var script = data.scripts[name];
                 this.setScript(name, script.order, script.script);
             }
+        }
+        var nextParts = tryGet(data,'nextParts');
+        if(nextParts) {
+            nextParts.forEach(function(npdata) {
+                var np = new NextPart(p);
+                np.loadFromJSON(npdata);
+                p.nextParts.push(np);
+            });
         }
     },
     /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded
@@ -355,7 +372,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
         this.display && this.display.updateNextParts();
-        this.display && this.question.signals.on(['ready','HTMLAttached'], function() {
+        this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
         this.resuming = false;
@@ -595,6 +612,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {String} exploreObjective - objective that this part's score counts towards
      * @property {String} suggestGoingBack - in explore mode, suggest to the student to go back to the previous part after completing this one?
      * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
+     * @property {Boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      */
     settings:
     {
@@ -607,7 +625,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         variableReplacementStrategy: 'originalfirst',
         exploreObjective: '',
         suggestGoingBack: false,
-        adaptiveMarkingPenalty: 0
+        adaptiveMarkingPenalty: 0,
+        useAlternativeFeedback: false
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -872,7 +891,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if(this.question.partsMode!='explore' && (settings.variableReplacementStrategy=='alwaysreplace' || try_replacement)) {
+        if((!this.question || this.question.partsMode!='explore') && (settings.variableReplacementStrategy=='alwaysreplace' || try_replacement)) {
             try {
                 var scope = this.errorCarriedForwardScope();
                 var result_replacement = this.markAgainstScope(scope,existing_feedback);
@@ -906,7 +925,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = [];
         this.finalised_result = {valid: false, credit: 0, states: []};
 
-        if(this.question.partsMode=='explore') {
+        if(this.question && this.question.partsMode=='explore') {
             if(!this.resuming) {
                 this.nextParts.forEach(function(np) {
                     if(np.instance!==null && np.usesStudentAnswer()) {
@@ -1040,32 +1059,50 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @property {Array.<String>} warnings - Warning messages.
      * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
      * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
+     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
      * @property {Number} credit - Proportion of the available marks to award to the student.
      * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
-    /** Calculate the correct answer in the given scope, and mark the student's answer
+
+    /** @typedef {Object} Numbas.parts.alternative_result
+     * A dictionary representing the result of marking the student's answer against a certain alternative version of the part and a given scope
+     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
+     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
+     * @property {Number} credit - Proportion of the available marks to award to the student.
+     * @property {Numbas.marking.marking_script_result} script_result - the unprocessed result of the marking script.
+     */
+
+    /** @typedef {Object} Numbas.parts.markAlternatives_result
+     * A dictionary representing the results of the `markAlternatives` method.
+     * @property {Numbas.parts.alternative_result} result - the data produced by marking against the best alternative
+     * @property {Numbas.parts.Part} best_alternative - the alternative which was used. Null if no alternative used.
+     */
+
+    /** Mark the student's answer against this part and its alternatives, and return the feedback corresponding to the alternative awarding the most credit.
      * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
      * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
-     * @returns {Numbas.parts.marking_results}
+     * @returns {Numbas.parts.markAlternatives_result}
      */
-    markAgainstScope: function(scope,feedback) {
+    markAlternatives: function(scope,feedback) {
         function mark_alternative(alt) {
             alt.restore_feedback(feedback);
             var values;
             var finalised_result = {states: [], valid: false, credit: 0};
+            var script_result;
             try {
                 var result = alt.mark(scope);
                 finalised_result = result.finalised_result;
                 values = result.values;
+                script_result = result.script_result
             } catch(e) {
                 this.giveWarning(e.message);
             }
-            return {finalised_result: finalised_result, values: values, credit: alt.credit};
+            return {finalised_result: finalised_result, values: values, credit: alt.credit, script_result: script_result};
         }
 
         var res = mark_alternative(this);
-        res.values['used_expected_error'] = new Numbas.jme.types.TNothing()
-        res.values['used_expected_error_name'] = new Numbas.jme.types.TNothing();
+        res.values['used_alternative'] = new Numbas.jme.types.TNothing()
+        res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
 
         if(this.alternatives.length) {
             var best_alternative = null;
@@ -1103,8 +1140,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 res = best_alternative.result;
                 var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
                 var states = [
-                    {op:'set_credit', credit: best_alternative.scaled_credit, message: alternative.alternativeFeedbackMessage, reason: reason}
+                    Numbas.marking.feedback.set_credit(best_alternative.scaled_credit,reason,alternative.alternativeFeedbackMessage)
                 ];
+                if(alternative.settings.useAlternativeFeedback) {
+                    states = res.finalised_result.states.map(function(s) {
+                        if(s.credit!==undefined) {
+                            s.credit *= best_alternative.scale;
+                        }
+                        return s;
+                    }).concat(states);
+                }
                 res.finalised_result = {
                     credit: best_alternative.scaled_credit,
                     states: states,
@@ -1113,10 +1158,30 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.restore_feedback(feedback);
                 this.apply_feedback(res.finalised_result);
                 this.warnings = best_alternative.alternative.warnings.slice();
-                res.values['used_expected_error'] = new Numbas.jme.types.TNum(best_alternative.index);
-                res.values['used_expected_error_name'] = new Numbas.jme.types.TString(alternative.name);
+                res.values['used_alternative'] = new Numbas.jme.types.TNum(best_alternative.index);
+                res.values['used_alternative_name'] = new Numbas.jme.types.TString(alternative.name);
             }
         }
+
+        res.script_result.states['used_alternative'] = [];
+        res.script_result.states['used_alternative_name'] = [];
+        res.script_result.state_valid['used_alternative'] = true;
+        res.script_result.state_valid['used_alternative_name'] = true;
+
+        return {
+            result: res,
+            best_alternative: best_alternative ? best_alternative.alternative : null
+        }
+    },
+
+    /** Mark the student's answer against the given scope
+     * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
+     * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+     * @returns {Numbas.parts.marking_results}
+     */
+    markAgainstScope: function(scope,feedback) {
+        var altres = this.markAlternatives(scope,feedback);
+        var res = altres.result;
 
         return {
             warnings: this.warnings.slice(),
@@ -1175,12 +1240,20 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     studentAnswerAsJME: function() {
         return this.interpretedStudentAnswer;
     },
+
+    /** @typedef {Object} Numbas.parts.mark_result
+     * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives
+     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
+     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
+     * @property {Numbas.marking.marking_script_result} script_result - the unprocessed result of the marking script.
+     */
+
     /** Function which marks the student's answer: run `this.settings.markingScript`, which sets the credit for the student's answer to a number between 0 and 1 and produces a list of feedback messages and warnings.
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
      * @see Numbas.parts.Part#markingScript
      * @see Numbas.parts.Part#answered
      * @param {Numbas.jme.Scope} scope
-     * @returns {Numbas.marking.finalised_state}
+     * @returns {Numbas.parts.mark_result}
      */
     mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
@@ -1192,13 +1265,19 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var finalised_result = marking.finalise_state(result.states.mark);
         this.apply_feedback(finalised_result);
         this.interpretedStudentAnswer = result.values['interpreted_answer'];
-        return {finalised_result: finalised_result, values: result.values};
+        return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
     /** Restore a set of feedback messages
      * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
      */
     restore_feedback: function(feedback) {
+        if(feedback===undefined) {
+            feedback = {
+                warnings: [],
+                markingFeedback: []
+            }
+        }
         this.setWarnings(feedback.warnings.slice());
         this.markingFeedback = feedback.markingFeedback.slice();
     },
@@ -1515,9 +1594,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         }
 
-        if(np.xml) {
-            np.instance = this.question.addExtraPartFromXML(np.index,scope,values,p,index);
-        }
+        np.instance = this.question.addExtraPart(np.index,scope,values,p,index);
         np.instance.useCustomName = true;
         np.instance.customName = np.label;
         np.instance.assignName();
@@ -1652,6 +1729,30 @@ NextPart.prototype = {
         var otherPartNode = this.parentPart.question.xml.selectNodes('parts/part')[this.index];
         this.label = this.label || otherPartNode.getAttribute('customname');
         this.xml = otherPartNode;
+    },
+
+    /** Load the definition of this next part from JSON
+     * @param {Object} data
+     */
+    loadFromJSON: function(data) {
+        var np = this;
+        var tryLoad = Numbas.json.tryLoad;
+        var tryGet = Numbas.json.tryGet;
+
+        tryLoad(data,['label','availabilityCondition','penalty','lockAfterLeaving'],this);
+        tryLoad(data,['penaltyAmount','otherPart'],this,['penaltyAmountString','index']);
+        this.penaltyAmountString += '';
+        var variableReplacements = tryGet(data,'variableReplacements');
+        if(variableReplacements) {
+            variableReplacements.forEach(function(rd) {
+                var replacement = {};
+                tryLoad(rd,['variable','definition'],replacement);
+                np.variableReplacements.push(replacement);
+            });
+        }
+        var otherPart = this.parentPart.question.json.parts[this.index];
+        this.label = this.label || tryGet(otherPart,'customName');
+        this.json = data;
     },
 
     /** Do any of the variable replacements for this next part rely on information from the student's answer to the parent part?

@@ -98,6 +98,8 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.parts = [];
     q.partDictionary = {};
     q.extraPartOrder = [];
+    q.objectives = [];
+    q.penalties = [];
 }
 
 /** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
@@ -227,7 +229,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         //make rulesets
         var rulesetNodes = q.xml.selectNodes('rulesets/set');
-        q.rulesets = {};
         for(var i=0; i<rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
@@ -254,7 +255,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('rulesetsLoaded');
 
         var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
-        q.objectives = [];
         for(var i=0; i<objectiveNodes.length; i++) {
             var objective = {
                 name: '',
@@ -267,7 +267,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
-        q.penalties = [];
         for(var i=0; i<penaltyNodes.length; i++) {
             var penalty = {
                 name: '',
@@ -299,38 +298,54 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     }
                     break;
                 case 'explore':
-                    var partNode = q.xml.selectSingleNode('parts/part');
-                    q.addExtraPartFromXML(0);
+                    q.addExtraPart(0);
                     break;
             }
             q.signals.trigger('partsGenerated');
         });
     },
 
-    /** Create a part with the given XML definition, using the given scope, and add it to this question.
+    /** Create a part whose definition is at the given index in the question's definition, using the given scope, and add it to this question.
      *  The question's variables are remade using the given dictionary of changed variables
-     *  @param {Number} xml_index - the index of the part's definition in the XML
+     *  @param {Number} def_index - the index of the part's definition in the question's list of part definitions
      *  @param {Numbas.jme.Scope} scope
      *  @param {Object.<Numbas.jme.token>} variables
      *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
      *  @param {Number} [index] - the position of the part in the parts list (added to the end if not given)
      *  @returns {Numbas.parts.Part}
      */
-    addExtraPartFromXML: function(xml_index,scope,variables,previousPart,index) {
-        this.extraPartOrder.push(xml_index);
-        var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
-        this.xml.selectSingleNode('parts').appendChild(xml);
+    addExtraPart: function(def_index,scope,variables,previousPart,index) {
+        var p;
+
+        this.extraPartOrder.push(def_index);
         scope = scope || this.scope;
-        var j = this.parts.length;
         variables = variables || {};
         var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
-        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, pscope);
+
+        if(this.xml) {
+            p = this.createExtraPartFromXML(def_index,pscope);
+        } else {
+            p = this.createExtraPartFromJSON(def_index,pscope);
+        }
         var index = index!==undefined ? index : this.parts.length;
         this.addPart(p,index);
         p.assignName(index,this.parts.length-1);
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
+        return p;
+    },
+
+    /** Create an extra part with the given XML definition, using the given scope.
+     *  @param {Number} xml_index - the index of the part's definition in the XML
+     *  @param {Numbas.jme.Scope} scope
+     *  @returns {Numbas.parts.Part}
+     */
+    createExtraPartFromXML: function(xml_index,scope) {
+        var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
+        this.xml.selectSingleNode('parts').appendChild(xml);
+        var j = this.parts.length;
+        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, scope);
         return p;
     },
 
@@ -354,10 +369,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#event:variablesGenerated
      */
     loadFromJSON: function(data) {
+        this.json = data;
         var q = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['name','statement','advice'],q);
+        tryLoad(data,['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility','statement','advice'],q);
         var preambles = tryGet(data,'preamble');
         if(preambles) {
             Object.keys(preambles).forEach(function(key) {
@@ -386,6 +402,34 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
         q.signals.trigger('rulesetsLoaded');
+
+        var objectives = tryGet(data,'objectives');
+        if(objectives) {
+            objectives.forEach(function(od) {
+                var objective = {
+                    name: '',
+                    limit: 0,
+                    score: 0, 
+                    answered: false
+                };
+                tryLoad(od,['name','limit'],objective);
+                q.objectives.push(objective);
+            });
+        }
+        var penalties = tryGet(data,'penalties');
+        if(penalties) {
+            penalties.forEach(function(pd) {
+                var penalty = {
+                    name: '',
+                    limit: 0,
+                    score: 0, 
+                    applied: false
+                };
+                tryLoad(pd,['name','limit'],penalty);
+                q.penalties.push(penalty);
+            });
+        }
+
         var variables = tryGet(data,'variables');
         if(variables) {
             Object.keys(variables).map(function(name) {
@@ -420,13 +464,36 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('variablesGenerated', function() {
             var parts = tryGet(data,'parts');
             if(parts) {
-                parts.forEach(function(pd,i) {
-                    var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
-                    q.addPart(p,i);
-                });
+                switch(q.partsMode) {
+                    case 'all':
+                        parts.forEach(function(pd,i) {
+                            var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
+                            q.addPart(p,i);
+                        });
+                        break;
+                    case 'explore':
+                        q.addExtraPart(0);
+                        break;
+                }
             }
             q.signals.trigger('partsGenerated');
         });
+    },
+
+
+    /** Create a part with the given JSON definition, using the given scope, and add it to this question.
+     *  The question's variables are remade using the given dictionary of changed variables
+     *  @param {Number} json_index - the index of the part's definition in the JSON
+     *  @param {Numbas.jme.Scope} scope
+     *  @param {Object.<Numbas.jme.token>} variables
+     *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
+     *  @param {Number} [index] - the position of the part in the parts list (added to the end if not given)
+     *  @returns {Numbas.parts.Part}
+     */
+    createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
+        var data = this.json.parts[json_index];
+        var p = Numbas.createPartFromJSON(data, 'p'+this.parts.length, this, null, this.store, scope);
+        return p;
     },
 
     setErrorCarriedForwardBackReferences: function() {

@@ -10,7 +10,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         scope = scope || p.getScope();
         p.storeAnswer(answer);
         p.setStudentAnswer();
-        return p.mark(scope);
+        return p.mark(scope).finalised_result;
     }
 
     function matrix(cells) {
@@ -26,6 +26,27 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             });
         });
         return match!==undefined;
+    }
+
+    function question_test(name,data,test_fn,error_fn) {
+        QUnit.test(name, function(assert) {
+            var done = assert.async();
+            var q = Numbas.createQuestionFromJSON(data);
+            q.generateVariables();
+            q.signals.on('ready').then(function() {
+                test_fn(assert,q);
+                done();
+            }).catch(function(e) {
+                if(error_fn) {
+                    error_fn(assert,q,e);
+                    done();
+                } else {
+                    console.error(e);
+                    done();
+                    throw(e);
+                }
+            });
+        });
     }
 
     QUnit.module('Part')
@@ -248,24 +269,16 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.deepEqual(res.states, expectedFeedback,"x is marked correct");
     });
 
-    QUnit.test('Variables defined by the question aren\'t used in evaluating student\'s expression', function(assert) {
-        var data = {"name":"scope used when evaluating JME","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"[1,2,3]","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $2a$</p>","answer":"2a","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]};
-        var done = assert.async();
-
-        var q = Numbas.createQuestionFromJSON(data, 0);
-        q.generateVariables();
-        q.signals.on('ready',function() {
+    question_test('Variables defined by the question aren\'t used in evaluating student\'s expression',
+        {"name":"scope used when evaluating JME","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"[1,2,3]","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $2a$</p>","answer":"2a","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]},
+        function(assert,q) {
             var p = q.getPart('p0');
             p.storeAnswer('2a');
-            p.setStudentAnswer();
             q.submit();
 
             assert.equal(q.score,1,'Score is 1');
-
-            done();
-        });
-
-    });
+        }
+    );
 
     QUnit.module('Pattern match');
     QUnit.test('Answer is "hi+"', function(assert) {
@@ -307,28 +320,18 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.ok(contains_note(res,{note:'all_same_precision',message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
     });
 
-    QUnit.test('Note name used both for question variable and marking note',function(assert) {
-        var data = {"name":"wrong size matrix","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"rows":{"name":"rows","group":"Ungrouped variables","definition":"4","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["rows"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"\n<p>[[0]]</p>","gaps":[{"type":"matrix","marks":"4","showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"correctAnswer":"matrix([1,0,3,3,1],[0,1,4,4,2],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0])","correctAnswerFractions":true,"numRows":"6","numColumns":"5","allowResize":true,"tolerance":0,"markPerCell":false,"allowFractions":true}],"sortAnswers":false}]};
 
-        var done = assert.async();
-        assert.expect(1);
-
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        var promise = q.signals.on('ready',function() {
+    question_test(
+        'Note name used both for question variable and marking note',
+        {"name":"wrong size matrix","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"rows":{"name":"rows","group":"Ungrouped variables","definition":"4","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["rows"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"\n<p>[[0]]</p>","gaps":[{"type":"matrix","marks":"4","showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"correctAnswer":"matrix([1,0,3,3,1],[0,1,4,4,2],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0])","correctAnswerFractions":true,"numRows":"6","numColumns":"5","allowResize":true,"tolerance":0,"markPerCell":false,"allowFractions":true}],"sortAnswers":false}]},
+        function(assert,q) {
             var g = q.getPart('p0g0');
             g.storeAnswer(matrix([['2','0'],['0','1']]));
             var p = q.getPart('p0');
             p.submit();
             assert.ok(p.answered,'can submit a smaller matrix than expected');
-            done();
-        }).catch(function(e) {
-            console.log(e);
-            done();
-            throw(e);
-        });
-
-    });
+        }
+    );
 
     QUnit.module('Choose one from a list');
     QUnit.test('Three choices, first answer is correct', function(assert) {
@@ -392,35 +395,30 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,['x+2'],scope);
         assert.equal(res.credit,1,'"x+2" correct');
     });
-    QUnit.test('One JME gap with string restrictions', function(assert) {
-        var done = assert.async();
-        var data = {"name":"string restriction in gapfill JME part","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>x^2+x</p>\n<p>[[0]]</p>","gaps":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x^2+x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[],"musthave":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"didn't use ("},"notallowed":{"strings":["^"],"showStrings":false,"partialCredit":0,"message":"did use ^"}}]},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]};
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        var promise = q.signals.on('ready',function() {
+
+    question_test(
+        'One JME gap with string restrictions',
+        {"name":"string restriction in gapfill JME part","tags":[],"metadata":{"description":"","licence":"Creative Commons Attribution 4.0 International"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>x^2+x</p>\n<p>[[0]]</p>","gaps":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x^2+x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[],"musthave":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"didn't use ("},"notallowed":{"strings":["^"],"showStrings":false,"partialCredit":0,"message":"did use ^"}}]},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]},
+        function(assert,q) {
             var p = q.getPart('p0');
             var res = mark_part(p,['x^2+x']);
             assert.ok(res.valid,"x^2+x is valid");
             assert.equal(res.credit,0,"x^2+x is incorrect");
             var res2 = mark_part(p,['x*(x+1)']);
             assert.equal(res2.credit,1,"x*(x+1) is correct");
-            done();
-        }).catch(function(e) {
-            console.error(e);
-        });
-    });
+        }
+    );
 
-    QUnit.test('Sort answers', function(assert) {
-        var done = assert.async();
-        var q = Numbas.createQuestionFromJSON({
+    question_test(
+        'Sort answers',
+        {
             name: 'q',
             parts: [
                 {type: 'gapfill', gaps: [{type:'numberentry', minValue: '1', maxValue: '1', marks: 1},{type:'numberentry', minValue: '2', maxValue: '2', marks: 1}]},
                 {type: 'gapfill', sortAnswers: true, gaps: [{type:'numberentry', minValue: '1', maxValue: '1', marks: 1},{type:'numberentry', minValue: '2', maxValue: '2', marks: 1}]}
             ]
-        });
-        q.generateVariables();
-        q.signals.on('ready',function() {
+        },
+        function(assert,q) {
             var p = q.getPart('p0');
             var res = mark_part(p,['1','2']);
             assert.equal(res.credit,1,"1,2 correct without sortAnswers");
@@ -431,9 +429,8 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             assert.equal(res.credit,1,"1,2 correct with sortAnswers");
             var res = mark_part(p,['2','1']);
             assert.equal(res.credit,1,"2,1 correct with sortAnswers");
-            done();
-        });
-    });
+        }
+    );
 
     QUnit.test("Multiply credit in a gap",function(assert) {
         var data = {"type":"gapfill","useCustomName":false,"customName":"","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>[[0]]</p>\n<p>[[1]]</p>","gaps":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1.2","maxValue":"1.2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"1","precisionPartialCredit":"25","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1.2","maxValue":"1.2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"1","precisionPartialCredit":"50","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"sortAnswers":false};
@@ -456,56 +453,30 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(p2.creditFraction.toFloat(),0.5,'part.creditFraction is 0.5 as well');
     });
 
-    QUnit.module('Custom marking script');
-    QUnit.test('Mark constants of integration',function(assert) {
-        var done = assert.async();
-        var data = {"name":"Christian's copy of Custom Marking - Constants of Integration","tags":[],"metadata":{"description":"<p>Finding the general solution to a second-order homogeneous differential equation, with undetermined constants of integration (i.e y=Ae^(nx)+Be^(mx)). Custom marking designed to check that the solution is numerically correct, with some constant of integration in front of each term (any non-whitespace containing string accepted for each constant). If not, the answer obtains half-marks if one or both of the constants have been left out; failing that, the answer obtains no marks.</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":["jsxgraph"],"variables":{"r2":{"name":"r2","group":"Ungrouped variables","definition":"2","description":"","templateType":"anything"},"r1":{"name":"r1","group":"Ungrouped variables","definition":"3","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["r1","r2"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Find the general form of the differential equation $\\simplify{y''-{r1+r2}y'+{r1*r2}y=0}$, up to undetermined coefficients.</p>\n<p>$y=$ [[0]]</p>","gaps":[{"type":"jme","marks":"2","showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{"mark":{"script":"// Get the variables from the question data.\nvar variables = this.question.scope.variables;\nvar unwrap = Numbas.jme.unwrapValue;\nvar r1 = unwrap(variables.r1);\n// Because of the quirks in 'compile', explicit string conversions 1x->x and -1x->-1 have to be made...\nif (r1==1) r1=\"\";\nif (r1==-1) r1=\"-\";\nvar r2 = unwrap(variables.r2);\nif (r2==1) r2=\"\";\nif (r2==-1) r2=\"-\";\n\n// Pull out the student's answer, and set up some rules for checking.\nvar studentTree = Numbas.jme.compile(this.studentAnswer,Numbas.jme.builtinScope);\n// Completely correct solution: numerically correct with constants of integration (m_any(?)) in front.\n// Not sure if you need both orderings of the roots...it seems to break otherwise.\nvar rule = Numbas.jme.compile('m_any(m_any(?) e^('+r1+'x)+m_any(?) e^('+r2+'x),m_any(?) e^('+r2+'x)+m_any(?) e^('+r1+'x))');\n// Solution with one/zero constants of integration (??).\nvar noconstr = Numbas.jme.compile('m_any(?? e^('+r1+'x)+?? e^('+r2+'x),??e^('+r2+'x)+??e^('+r1+'x))');\n\nvar m = Numbas.jme.display.matchTree(rule,studentTree,true);\nvar mpartial = Numbas.jme.display.matchTree(noconstr,studentTree,true);\n\n// Give full credit if it passes the first test..\nif(m)\n{\n this.setCredit(1, 'Correct. Well done!'); \n}\n// ..if not, check whether it passes the second..\nelse if(mpartial)\n{\n  this.setCredit(0.5,'It looks like you have forgotten one or more constants of integration.');\n}  \n// ..if not, the answer must be numerically wrong.\nelse\n{\n  this.setCredit(0,'You appear to have found the roots of the auxiliary equation incorrectly.');\n}","order":"instead"}},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"e^({r1}x)+e^({r2}x)","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]}]};
-        var data = {"name":"Christian's copy of Custom Marking - Constants of Integration","tags":[],"metadata":{"description":"<p>Finding the general solution to a second-order homogeneous differential equation, with undetermined constants of integration (i.e y=Ae^(nx)+Be^(mx)). Custom marking designed to check that the solution is numerically correct, with some constant of integration in front of each term (any non-whitespace containing string accepted for each constant). If not, the answer obtains half-marks if one or both of the constants have been left out; failing that, the answer obtains no marks.</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":["jsxgraph"],"variables":{"r2":{"name":"r2","group":"Ungrouped variables","definition":"2","description":"","templateType":"anything"},"r1":{"name":"r1","group":"Ungrouped variables","definition":"3","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["r1","r2"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Find the general form of the differential equation $\\simplify{y''-{r1+r2}y'+{r1*r2}y=0}$, up to undetermined coefficients.</p>\n<p>$y=$ [[0]]</p>","gaps":[{"type":"jme","marks":"2","showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{"mark":{"script":"// Get the variables from the question data.\nvar variables = this.question.scope.variables;\nvar unwrap = Numbas.jme.unwrapValue;\nvar r1 = unwrap(variables.r1);\n// Because of the quirks in 'compile', explicit string conversions 1x->x and -1x->-1 have to be made...\nif (r1==1) r1=\"\";\nif (r1==-1) r1=\"-\";\nvar r2 = unwrap(variables.r2);\nif (r2==1) r2=\"\";\nif (r2==-1) r2=\"-\";\n\n// Pull out the student's answer, and set up some rules for checking.\nvar studentTree = Numbas.jme.compile(this.studentAnswer,Numbas.jme.builtinScope);\n// Completely correct solution: numerically correct with constants of integration (m_any(?)) in front.\n// Not sure if you need both orderings of the roots...it seems to break otherwise.\nvar rule = '(`+- m_name`?;a) * e^('+r1+' x) + (`+- m_name`?;b) * e^('+r2+' x)';\n// Solution with one/zero constants of integration (??).\n\nvar m = Numbas.jme.display.matchExpression(rule,this.studentAnswer,{commutative:true});\n\nif(m) {\n  if(m.a && m.b) {\n    this.setCredit(1, 'Correct. Well done!'); \n  } else {\n    this.setCredit(0.5,'It looks like you have forgotten one or more constants of integration.');\n  }    \n} else {\n  this.setCredit(0,'You appear to have found the roots of the auxiliary equation incorrectly.');\n}","order":"instead"}},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"answer":"e^({r1}x)+e^({r2}x)","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}],"sortAnswers":false}]};
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        var promise = q.signals.on('ready',function() {
-            var p = q.getPart('p0');
-            var res = mark_part(p,['e^(3x)+e^(2x)']);
-            assert.ok(res.valid,"e^(3x)+e^(2x) is valid");
-            assert.equal(res.credit,0.5,"e^(3x)+e^(2x) is partially correct");
-            done();
-        });
-    });
-
     QUnit.module('Question');
-    QUnit.test('Question', function(assert) {
-        var done = assert.async();
-
-        var q = Numbas.createQuestionFromJSON({
+    question_test(
+        'Question',
+        {
             name:'Barg',
             parts: [
                 {type:'jme',answer:'x+2', marks: 1}
             ]
-        }, 0);
-        q.generateVariables();
-        q.signals.on('ready',function() {
+        },
+        function(assert,q) {
             var p = q.getPart('p0');
             assert.ok(p,'Part created');
             p.storeAnswer('x+2');
-            p.setStudentAnswer();
             q.submit();
 
             assert.equal(q.name,'Barg');
             assert.equal(q.score,1,'Score is 1');
+        }
+    );
 
-            done();
-        });
-    });
-
-    QUnit.test("A big question", function(assert) {
-        var done = assert.async();
-        assert.expect(3);
-        assert.timeout(1000);
-        var data = {"name":"Working on standalone part instances","tags":[],"metadata":{"description":"<p>Check that the&nbsp;MarkingScript reimplementations of the marking algorithms work properly.</p>","licence":"None specified"},"statement":"<p>Parts&nbsp;<strong>a</strong> to&nbsp;<strong>f</strong> use the standard marking algorithms.</p>","advice":"","rulesets":{},"extensions":[],"variables":{"m":{"name":"m","group":"Ungrouped variables","definition":"id(2)","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["m"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 1 and 2</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"2","precisionPartialCredit":0,"precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":false,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"matrix","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a $2 \\times 2$ identity matrix.</p>","correctAnswer":"id(2)","correctAnswerFractions":false,"numRows":"2","numColumns":"2","allowResize":true,"tolerance":0,"markPerCell":true,"allowFractions":false,"precisionType":"dp","precision":0,"precisionPartialCredit":"40","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $x$</p>","answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":true,"expectedVariableNames":["x"],"notallowed":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"<p>No brackets!</p>"}},{"type":"patternmatch","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write \"a+\"</p>","answer":"a+","displayAnswer":"","caseSensitive":true,"partialCredit":"30","matchMode":"exact"},{"type":"1_n_2","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Choose choice 1</p>","minMarks":0,"maxMarks":0,"shuffleChoices":false,"displayType":"radiogroup","displayColumns":0,"choices":["Choice 1","Choice 2","Choice 3"],"matrix":["1",0,"-1"],"distractors":["Choice 1 is good","Choice 2 is not great","Choice 3 is bad"]},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[{"variable":"m","part":"p1","must_go_first":false}],"variableReplacementStrategy":"alwaysreplace","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>What's&nbsp;the determinant of the matrix in part b?</p>","minValue":"det(m)","maxValue":"det(m)","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"q:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":4,\"maxvalue\":5],1)\n\nr:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":3,\"maxvalue\":4],1)\n\nmark:\n  feedback(\"number between 4 and 5\");\n  concat_feedback(q[\"mark\"][\"feedback\"],marks/2);\n  feedback(\"number between 3 and 4\");\n  concat_feedback(r[\"mark\"][\"feedback\"],marks/2)","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 4 and 5, and between 3 and 4.</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]};
-
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        var promise = q.signals.on('ready',function() {
+    question_test(
+        "A big question",
+        {"name":"Working on standalone part instances","tags":[],"metadata":{"description":"<p>Check that the&nbsp;MarkingScript reimplementations of the marking algorithms work properly.</p>","licence":"None specified"},"statement":"<p>Parts&nbsp;<strong>a</strong> to&nbsp;<strong>f</strong> use the standard marking algorithms.</p>","advice":"","rulesets":{},"extensions":[],"variables":{"m":{"name":"m","group":"Ungrouped variables","definition":"id(2)","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["m"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 1 and 2</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"2","precisionPartialCredit":0,"precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":false,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"matrix","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a $2 \\times 2$ identity matrix.</p>","correctAnswer":"id(2)","correctAnswerFractions":false,"numRows":"2","numColumns":"2","allowResize":true,"tolerance":0,"markPerCell":true,"allowFractions":false,"precisionType":"dp","precision":0,"precisionPartialCredit":"40","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $x$</p>","answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":true,"expectedVariableNames":["x"],"notallowed":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"<p>No brackets!</p>"}},{"type":"patternmatch","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write \"a+\"</p>","answer":"a+","displayAnswer":"","caseSensitive":true,"partialCredit":"30","matchMode":"exact"},{"type":"1_n_2","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Choose choice 1</p>","minMarks":0,"maxMarks":0,"shuffleChoices":false,"displayType":"radiogroup","displayColumns":0,"choices":["Choice 1","Choice 2","Choice 3"],"matrix":["1",0,"-1"],"distractors":["Choice 1 is good","Choice 2 is not great","Choice 3 is bad"]},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[{"variable":"m","part":"p1","must_go_first":false}],"variableReplacementStrategy":"alwaysreplace","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>What's&nbsp;the determinant of the matrix in part b?</p>","minValue":"det(m)","maxValue":"det(m)","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"q:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":4,\"maxvalue\":5],1)\n\nr:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":3,\"maxvalue\":4],1)\n\nmark:\n  feedback(\"number between 4 and 5\");\n  concat_feedback(q[\"mark\"][\"feedback\"],marks/2);\n  feedback(\"number between 3 and 4\");\n  concat_feedback(r[\"mark\"][\"feedback\"],marks/2)","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 4 and 5, and between 3 and 4.</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]},
+        function(assert,q) {
             assert.ok(q);
 
             var p1 = q.getPart('p1');
@@ -517,36 +488,158 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             p5.submit();
             assert.equal(p5.credit,1,'Adaptive marking used for part f');
 
-            done();
-        }).catch(function(e) {
-            console.log(e);
-            done();
-            throw(e);
-        });
-    });
+        }
+    );
 
-    QUnit.test("Catch error in a marking script", function(assert) {
-        var done = assert.async();
-        var data = {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]};
-
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        var promise = q.signals.on('ready').catch(function(e){
+    question_test(
+        "Catch error in a marking script",
+        {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]},
+        function() {},
+        function(assert,q,e) {
             assert.equal(e.originalMessage,'marking.script.error parsing notes','Error is "marking.script.error parsing notes"');
-            done();
-        });
+        }
+    );
 
-    });
+    QUnit.module('Explore mode');
+    question_test(
+        'One next part',
+        {"name":"Explore mode: one link","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"information","useCustomName":true,"customName":"Beginning","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Step 2","rawLabel":"","otherPart":1,"variableReplacements":[],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Step 2","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null}],"partsMode":"explore","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            assert.equal(q.parts.length,1)
+            var p = q.currentPart;
+            assert.ok(q.currentPart);
+            assert.equal(q.currentPart.name,'Beginning');
+            assert.equal(q.currentPart.nextParts.length,1);
+            assert.equal(q.currentPart.nextParts[0].label,'Step 2');
+            q.currentPart.makeNextPart(q.currentPart.nextParts[0]);
+            assert.equal(q.parts.length,2);
+            assert.equal(q.currentPart.name,'Step 2');
+        }
+    );
 
+    question_test(
+        'Replace a variable',
+        {"name":"Explore mode: replace variables","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"1","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"Enter number","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Show a","rawLabel":"","otherPart":1,"variableReplacements":[{"variable":"a","definition":"interpreted_answer"}],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"information","useCustomName":true,"customName":"Show a","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>$a = \\var{a}$</p>"}],"partsMode":"explore","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.currentPart;
+            assert.equal(p.getScope().getVariable('a').value,1);
+            p.storeAnswer('2');
+            p.submit();
+            p.makeNextPart(p.nextParts[0]);
+            var p2 = q.currentPart;
+            assert.equal(p2.getScope().getVariable('a').value,2);
+        }
+    );
+
+    question_test('Conditional availability of next parts',
+        {"name":"Explore mode: conditional availability","tags":[],"metadata":{"descripton":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"Enter a number","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Always available","rawLabel":"","otherPart":1,"variableReplacements":[],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when wrong","rawLabel":"","otherPart":2,"variableReplacements":[],"availabilityCondition":"answered and credit<1","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when correct","rawLabel":"","otherPart":3,"variableReplacements":[],"availabilityCondition":"answered and credit=1","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when answered","rawLabel":"","otherPart":4,"variableReplacements":[],"availabilityCondition":"answered","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"information","useCustomName":true,"customName":"Always available","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when wrong","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when correct","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when answered","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null}],"partsMode":"explore","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.currentPart;
+            function check_next_parts(expect) {
+                assert.deepEqual(p.availableNextParts().map(function(np){ return np.label; }),expect);
+            }
+            check_next_parts(['Always available']);
+            p.storeAnswer('2');
+            p.submit();
+            check_next_parts(['Always available','Available when wrong','Available when answered']);
+        }
+    );
+
+    question_test(
+        'Objectives and penalties',
+        {"name":"Explore mode: objectives and penalties","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"Write 1","marks":"1","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Write 1","rawLabel":"","otherPart":0,"variableReplacements":[],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Get penalty","rawLabel":"Get penalty","otherPart":0,"variableReplacements":[],"availabilityCondition":"","penalty":"Penalty","penaltyAmount":"0.5","lockAfterLeaving":false},{"label":"Write 2","rawLabel":"","otherPart":1,"variableReplacements":[],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":"Main objective","minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":true,"customName":"Write 2","marks":"2","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":"Second objective","minValue":"2","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"explore","maxMarks":"0","objectives":[{"name":"Main objective","limit":1,"mode":"sum"},{"name":"Second objective","limit":"2","mode":"sum"}],"penalties":[{"name":"Penalty","limit":"1","mode":"sum"}],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.currentPart;
+            p.storeAnswer('1');
+            p.submit();
+            assert.equal(q.score,1,'Score 1 for correct answer');
+
+            q.currentPart.makeNextPart(p.nextParts[0]);
+            var p2 = q.currentPart;
+            p2.storeAnswer('1');
+            p2.submit();
+            assert.equal(q.score,1,'Score limited to 1');
+
+            q.currentPart.makeNextPart(p.nextParts[2]);
+            var p3 = q.currentPart;
+            p3.storeAnswer('2');
+            p3.submit();
+            assert.equal(q.score,3,'Both objectives');
+            assert.equal(q.objectives[0].score,1,'First objective has 1 mark');
+            assert.equal(q.objectives[1].score,2,'Second objective has 2 marks');
+
+            q.currentPart.makeNextPart(p.nextParts[1]);
+            assert.equal(q.score,2.5,'Penalty applied after objectives limited');
+
+        }
+    );
+
+    QUnit.module('Alternative answers');
+    question_test(
+        'Separate number answer',
+        {"name":"Alternative answer: 2 instead of 1","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"alternatives":[{"type":"numberentry","useCustomName":true,"customName":"2","marks":0.5,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"alternativeFeedbackMessage":"<p>You wrote 2.</p>","useAlternativeFeedback":false,"minValue":"2","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.parts[0];
+            p.storeAnswer('1');
+            p.submit();
+            assert.equal(p.credit,1,'1 credit for correct answer');
+            p.storeAnswer('2');
+            p.submit();
+            assert.equal(p.credit,0.5,'0.5 credit for alternative answer');
+            assert.equal(p.markingFeedback[0].message,'<p>You wrote 2.</p>\n\nYou were awarded <strong>0.5</strong> marks.');
+        }
+    );
+
+    question_test(
+        'Expanding range of accepted answers',
+        {"name":"Alternative answers: expanding range of accepted answers","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"1","marks":"5","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"alternatives":[{"type":"numberentry","useCustomName":true,"customName":"0-2","marks":"4","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"alternativeFeedbackMessage":"","useAlternativeFeedback":false,"minValue":"0","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":true,"customName":"0-3","marks":"3","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"alternativeFeedbackMessage":"","useAlternativeFeedback":false,"minValue":"0","maxValue":"3","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.parts[0];
+            p.storeAnswer('1');
+            p.submit();
+            assert.equal(p.credit,1,'full credit for 1');
+            p.storeAnswer('2');
+            p.submit();
+            assert.equal(p.credit,4/5,'4/5 marks for 2');
+            p.storeAnswer('3');
+            p.submit();
+            assert.equal(p.credit,3/5,'3/5 marks for 3');
+            p.storeAnswer('4');
+            p.submit();
+            assert.equal(p.credit,0,'0 marks for 4');
+        }
+    );
+
+    question_test(
+        'Show all feedback',
+        {"name":"Alternative answers: show all feedback","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","useCustomName":true,"customName":"x","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"alternatives":[{"type":"jme","useCustomName":true,"customName":"y - not all feedback","marks":"0.5","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"alternativeFeedbackMessage":"<p>You wrote y</p>","useAlternativeFeedback":false,"answer":"y","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"y","value":""}]},{"type":"jme","useCustomName":true,"customName":"z - all feedback","marks":0.5,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"alternativeFeedbackMessage":"<p>You wrote z</p>","useAlternativeFeedback":true,"answer":"z","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"x","value":""}]}],"answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"x","value":""}]}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            function collect_feedback(feedback) {
+                return feedback.map(function(m) { return m.message; }).join('\n');
+            }
+            var p = q.parts[0];
+            p.storeAnswer('x');
+            p.submit();
+            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.\n\nYou were awarded <strong>1</strong> mark.\nYou scored <strong>1</strong> mark for this part.');
+            p.storeAnswer('y');
+            p.submit();
+            assert.equal(collect_feedback(p.markingFeedback),'<p>You wrote y</p>\n\nYou were awarded <strong>0.5</strong> marks.\nYou scored <strong>0.5</strong> marks for this part.');
+            p.storeAnswer('z');
+            p.submit();
+            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.\n\nYou were awarded <strong>0.5</strong> marks.\n<p>You wrote z</p>\nYou scored <strong>0.5</strong> marks for this part.');
+        }
+    );
+
+    QUnit.module('Part unit tests');
     unit_test_questions.forEach(function(data) {
         var name = data.name;
-        var q = Numbas.createQuestionFromJSON(data);
-        q.generateVariables();
-        q.signals.on('ready', function() {
-            QUnit.module(name);
-            q.allParts().forEach(function(p) {
-                p.json.unitTests.forEach(function(test) {
-                    QUnit.test(p.name+' '+test.name, function(assert) {
+        QUnit.test(name, function(assert) {
+            var done = assert.async();
+            var q = Numbas.createQuestionFromJSON(data);
+            q.generateVariables();
+            q.signals.on('ready', function() {
+                q.allParts().forEach(function(p) {
+                    p.json.unitTests.forEach(function(test) {
                         p.storeAnswer(test.answer.value);
                         p.setStudentAnswer();
                         var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
@@ -583,10 +676,11 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                         assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
                     });
                 });
+                done();
+            }).catch(function(e) {
+                console.log(e);
+                throw(e);
             });
-        }).catch(function(e) {
-            console.log(e);
-            throw(e);
         });
     });
 });

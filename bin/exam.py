@@ -718,6 +718,7 @@ class Part(object):
     customName = ''
     prompt = ''
     alternativeFeedbackMessage = ''
+    useAlternativeFeedback = False
     kind = ''
     stepsPenalty = 0
     enableMinimumMarks = True
@@ -757,6 +758,7 @@ class Part(object):
                 'extendBaseMarkingAlgorithm',
                 'exploreObjective',
                 'suggestGoingBack',
+                'useAlternativeFeedback',
             ],
             self
         )
@@ -815,6 +817,7 @@ class Part(object):
             'showfeedbackicon': strcons_fix(self.showFeedbackIcon),
             'exploreobjective': strcons_fix(self.exploreObjective) if self.exploreObjective is not None else '',
             'suggestgoingback': strcons_fix(self.suggestGoingBack),
+            'usealternativefeedback': strcons_fix(self.useAlternativeFeedback),
         }
 
         part.find('prompt').append(makeContentNode(self.prompt))
