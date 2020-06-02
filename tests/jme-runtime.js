@@ -254,6 +254,7 @@ Numbas.activateExtension = function(name) {
 }
 
 /** Check all required scripts have executed - the theme should call this once the document has loaded
+ * @returns {Array.<Object>} a list of files which have not loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
     var fails = [];
@@ -1446,10 +1447,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return s;
     },
 
+    /** Debounce a function: run it no more than every `frequency` milliseconds
+     * @param {Number} frequency - minimum gap between runs of the callback, in milliseconds
+     * @returns {Function} call with a callback that you want to run
+     */
     debounce: function(frequency) {
         var last_run = 0;
         var cb;
         var timeout;
+        /** If it's at least `frequency` milliseconds since the last run, run the callback, else wait and try again.
+         */
         function go() {
             var t = new Date();
             if(t-frequency < last_run) {
@@ -2562,7 +2569,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
 
     /** Convert a JS Number to a Decimal
-     * @param {Number} n
+     * @param {Number} x
      * @returns {Decimal}
      */
     numberToDecimal: function(x) {
@@ -11547,6 +11554,12 @@ var math = Numbas.math;
   * @property {Numbas.jme.token} tok - the token at this node
   */
 
+/** @typedef {Object} Numbas.jme.call_signature
+ * @property {Numbas.jme.funcObj} fn - the function to call
+ * @property {Numbas.jme.signature} signature - the signature to use
+ */
+
+
 /** @namespace Numbas.jme */
 var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Mathematical constants */
@@ -12711,7 +12724,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
 
     /** Update regular expressions for matching tokens
-     * @see Numbas.jme.Parser.re
+     * @see Numbas.jme.Parser#re
      */
     make_re: function() {
         /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
@@ -13036,7 +13049,7 @@ jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototyp
 /** Regular expressions for parser tokens.
  * Included for backwards-compatibility
  * @type {Object.<RegExp>}
- * @see {Numbas.jme.Parser.re}
+ * @see Numbas.jme.Parser#re
  */
 jme.re = jme.Parser.prototype.re;
 
@@ -13213,10 +13226,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
         return this._resolved_functions[name];
     },
+
     /** Get the definition of the function with the given name which matches the types of the given arguments
      * @param {Numbas.jme.token} tok - the token of the function or operator
      * @param {Array.<Numbas.jme.token>} args
-     * @returns {Object} - {fn: Numbas.jme.funcObj, signature: Numbas.jme.signature}
+     * @returns {Numbas.jme.call_signature}
      */
     matchFunctionToArguments: function(tok,args) {
         var op = tok.name.toLowerCase();
@@ -13547,7 +13561,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         }
                         j += 1;
                     }
-                    return matchedFunction.fn.evaluate(castargs,scope,signature);
+                    return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
                         if(eargs[i] && eargs[i].unboundName) {
@@ -13568,10 +13582,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @property {Boolean} noUnknownFunctions - Rewrite applications of functions not defined in this scope to products, e.g. `x(y)` is rewritten to `x*y`.
      * @property {Boolean} implicitFunctionComposition - If function names are juxtaposed, either as a single token or as (implicit) multiplication, rewrite as composition: e.g. `lnabs(x)` and `ln abs(x)` are both rewritten to `ln(abs(x))`.
      */
+
     /** Expand juxtapositions in variable and function names for implicit multiplication or composition
      * @param {Numbas.jme.tree} tree
      * @param {Numbas.jme.expand_juxtapositions_options} options
-     * @returns Numbas.jme.tree
+     * @returns {Numbas.jme.tree}
      */
     expandJuxtapositions: function(tree, options) {
         var scope = this;
@@ -13586,12 +13601,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             return tree;
         }
 
+        /** Construct a TFunc token with the given name, applying any synonyms
+         * @param {String} name
+         * @returns {Numbas.jme.token}
+         */
         function tfunc(name) {
             return new TFunc(scope.parser.funcSynonym(name));
         }
 
+        /** Get the names of all functions defined in the scope
+         * @returns {Object}
+         */
         function get_function_names() {
-            // grab names of defined functions from the right
             var defined_names = {};
             var s = scope;
             while(s) {
@@ -13632,6 +13653,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     if(c==tree.args[0]) {
                         tree = composed_fn;
                     } else {
+                        /** Remove the multiplicand from an n-ary multiplication
+                         * @param {Numbas.jme.tree} t
+                         * @returns {Numbas.jme.tree}
+                         */
                         function remove_multiplicand(t) {
                             if(t.args[1]==c) {
                                 return t.args[0];
@@ -14457,11 +14482,10 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @function evaluate
      * @param {Numbas.jme.token[]} args
      * @param {Numbas.jme.Scope} scope
-     * @param {Numbas.jme.call_signature} signature
      * @returns {Numbas.jme.token}
      * @memberof Numbas.jme.funcObj
      */
-    this.evaluate = options.evaluate || function(args,scope,signature)
+    this.evaluate = options.evaluate || function(args,scope)
     {
         var nargs = [];
         for(var i=0; i<args.length; i++) {
@@ -15419,6 +15443,10 @@ SignatureEnumerator.prototype = {
 jme.inferExpressionType = function(tree,scope) {
     var assignments = jme.inferVariableTypes(tree,scope);
 
+    /** Construct a stub of a token of the given type, for the type-checker to work against
+     * @param {String} type
+     * @returns {Numbas.jme.token}
+     */
     function fake_token(type) {
         var tok = {type: type};
         if(jme.types[type]) {
@@ -15429,6 +15457,10 @@ jme.inferExpressionType = function(tree,scope) {
     for(var x in assignments) {
         assignments[x] = fake_token(assignments[x]);
     }
+    /** Infer the type of a tree
+     * @param {Numbas.jme.tree} tree
+     * @returns {String}
+     */
     function infer_type(tree) {
         var tok = tree.tok;
         switch(tok.type) {
@@ -20121,9 +20153,13 @@ var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_lis
  * @param {Numbas.jme.tree} tree
  * @param {String} x
  * @param {Numbas.jme.Scope} scope
- * @returns Numbas.jme.tree
+ * @returns {Numbas.jme.tree}
  */
 var differentiate = calculus.differentiate = function(tree,x,scope) {
+    /** Apply differentiation to the given tree.
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function apply_diff(tree) {
         if(jme.isFunction(tree.tok,'$diff')) {
             var res = base_differentiate(tree.args[0]);
@@ -20142,12 +20178,21 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         return tree;
     }
 
+    /** Apply base_differentiation over all the tree's arguments, but don't look at the root token
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function distribute_differentiation(tree) {
         var nargs = tree.args.map(base_differentiate);
         return {tok: tree.tok, args: nargs};
     }
 
-    var original_tree = tree;
+    /** Apply differentiation to the given tree.
+     * First look at the type of the root token, then see if the tree matches any of the differentiation rules.
+     * @see Numbas.jme.calculus.differentiation_rules
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function base_differentiate(tree) {
         var tok = tree.tok;
 
@@ -20188,7 +20233,7 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         throw(new Numbas.Error("jme.calculus.unknown derivative",{tree: jme.display.treeToJME(tree)}));
     }
 
-    return base_differentiate(original_tree);
+    return base_differentiate(tree);
 }
 
 });

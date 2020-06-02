@@ -1,6 +1,11 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
 
+    /** Ensure `v` is an observable, and if it's not given return the default value
+     * @param {Object|Observable|undefined} v
+     * @param {Object} d - the default value
+     * @returns {Observable}
+     */
     function defaultObservable(v,d) {
         return v!==undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
     }

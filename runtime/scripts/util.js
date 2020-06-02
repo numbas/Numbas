@@ -1136,10 +1136,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return s;
     },
 
+    /** Debounce a function: run it no more than every `frequency` milliseconds
+     * @param {Number} frequency - minimum gap between runs of the callback, in milliseconds
+     * @returns {Function} call with a callback that you want to run
+     */
     debounce: function(frequency) {
         var last_run = 0;
         var cb;
         var timeout;
+        /** If it's at least `frequency` milliseconds since the last run, run the callback, else wait and try again.
+         */
         function go() {
             var t = new Date();
             if(t-frequency < last_run) {

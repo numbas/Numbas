@@ -20,7 +20,7 @@ Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','st
  * @param {Element} xml
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
- * @returns Numbas.Exam}
+ * @returns {Numbas.Exam}
  */
 var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
     var exam = new Exam(store);
@@ -38,7 +38,7 @@ var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDispla
  * @param {Object} data
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
  * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
- * @returns Numbas.Exam}
+ * @returns {Numbas.Exam}
  */
 var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay) {
     var exam = new Exam(store);
@@ -331,7 +331,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     xml: undefined,
     /** Definition of the exam
-     * @type Objects
+     * @type Object
      */
     json: undefined,
     /**

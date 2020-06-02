@@ -87,9 +87,13 @@ var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_lis
  * @param {Numbas.jme.tree} tree
  * @param {String} x
  * @param {Numbas.jme.Scope} scope
- * @returns Numbas.jme.tree
+ * @returns {Numbas.jme.tree}
  */
 var differentiate = calculus.differentiate = function(tree,x,scope) {
+    /** Apply differentiation to the given tree.
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function apply_diff(tree) {
         if(jme.isFunction(tree.tok,'$diff')) {
             var res = base_differentiate(tree.args[0]);
@@ -108,12 +112,21 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         return tree;
     }
 
+    /** Apply base_differentiation over all the tree's arguments, but don't look at the root token
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function distribute_differentiation(tree) {
         var nargs = tree.args.map(base_differentiate);
         return {tok: tree.tok, args: nargs};
     }
 
-    var original_tree = tree;
+    /** Apply differentiation to the given tree.
+     * First look at the type of the root token, then see if the tree matches any of the differentiation rules.
+     * @see Numbas.jme.calculus.differentiation_rules
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
     function base_differentiate(tree) {
         var tok = tree.tok;
 
@@ -154,7 +167,7 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         throw(new Numbas.Error("jme.calculus.unknown derivative",{tree: jme.display.treeToJME(tree)}));
     }
 
-    return base_differentiate(original_tree);
+    return base_differentiate(tree);
 }
 
 });

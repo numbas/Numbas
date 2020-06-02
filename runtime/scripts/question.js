@@ -668,6 +668,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     part.resume();
                 }
             });
+            /** Submit a given part, setting its `resume` property so it doesn't save to storage
+             * @param {Numbas.parts.Part} part
+             */
             function submit_part(part) {
                 part.resuming = true;
                 if(part.answered) {

@@ -252,6 +252,7 @@ Numbas.activateExtension = function(name) {
 }
 
 /** Check all required scripts have executed - the theme should call this once the document has loaded
+ * @returns {Array.<Object>} a list of files which have not loaded
  */
 Numbas.checkAllScriptsLoaded = function() {
     var fails = [];

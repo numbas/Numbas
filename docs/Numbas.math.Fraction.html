@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Namespace: json | Numbas API documentation</title>
+    <title>Class: Fraction | Numbas API documentation</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="body-container">
 	<div id="main">
 
-		<h1 class="page-title">Namespace: json</h1>
+		<h1 class="page-title">Class: Fraction</h1>
 
 		
 
@@ -33,7 +33,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="Numbas.html">Numbas</a>.</span>json</h2>
+            <span class="ancestors"><a href="Numbas.html">Numbas</a><a href="Numbas.math.html">.math</a>.</span>Fraction</h2>
         
     
 </header>
@@ -43,8 +43,190 @@
 		
 			
 
-			
-			
+    
+	
+
+    <h4 class="name" id="Fraction"><span class="type-signature"></span>new Fraction<span class="signature">(numerator, denominator)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>A rational number.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>numerator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>denominator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>numerator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>denominator</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
 
 
 <dl class="details">
@@ -76,7 +258,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/json.js#L3">runtime/scripts/json.js, line 3</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/math.js#L1795">runtime/scripts/math.js, line 1795</a>
     </li></ul></dd>
     
 
@@ -87,9 +269,9 @@
     
 </dl>
 
-			
 
-			
+
+
 		
     </div>
 
@@ -100,447 +282,9 @@
 	
 
 	
-	<nav class="toc">
-		<h3>Table of contents</h3>
-		<div class="toc-sections">
-			
-
-			
-
-			
-
-			
-				<div class="toc-section">
-					<h4>Methods</h4>
-					<ul>
-					
-						<li class="name"><a href="Numbas.json.html#.tryGet">tryGet</a></li>
-					
-						<li class="name"><a href="Numbas.json.html#.tryLoad">tryLoad</a></li>
-					
-					</ul>
-				</div>
-			
-
-			
-
-			
-		</div>
-	</nav>
-	
 
     
 
-    
-		<div class="subsection">
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-	
-		<div class="item function">
-	
-
-    <h4 class="name" id=".tryGet"><span class="type-signature">(static) </span>tryGet<span class="signature">(source, attr)</span><span class="type-signature"> &rarr; {*}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Try to load an attribute with the given name from <code>source</code>. The given name and its lower-case equivalent are tried.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>source</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>attr</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-<table class="returns">
-    <thead>
-        <tr>
-            <th>Type</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-    
-        
-<tr>
-<td class="type">
-
-    
-<span class="param-type">*</span>
-
-
-
-</td>
-<td class="description">
-
-</td>
-</tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/json.js#L41">runtime/scripts/json.js, line 41</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-	</div>
-
-
-        
-            
-
-    
-	
-		<div class="item function">
-	
-
-    <h4 class="name" id=".tryLoad"><span class="type-signature">(static) </span>tryLoad<span class="signature">(source, attrs, target, altnames)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Try to load an attribute with name from <code>attr</code> from <code>source</code> into <code>target</code>.
-Tries lower-case</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>source</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>object to load value(s) from</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>attrs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the name, or list of names, of attributes to load</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>target</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>object to set values in</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>altnames</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the name, or list of names, to set in the target object</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/json.js#L12">runtime/scripts/json.js, line 12</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-	</div>
-
-
-        
-		</div>
     
 
     

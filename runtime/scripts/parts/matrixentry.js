@@ -122,6 +122,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var scope = this.getScope();
 
+        /** Evaluate a setting given as a JME expression
+         * @param {JME} setting
+         */
         function eval_setting(setting) {
             var expr = jme.subvars(settings[setting]+'', scope);
             settings[setting] = scope.evaluate(expr).value;

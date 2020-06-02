@@ -672,6 +672,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.save();
     }
 };
+
+/** @typedef {Object} Numbas.storage.scorm.partTypeStorage
+ * @property {Function} interaction_type(part)
+ * @property {Function} correct_answer(part)
+ * @property {Function} student_answer(part)
+ * @property {Function} suspend_data(part)
+ * @property {Function} load(part,data)
+ */
+
 scorm.partTypeStorage = {
     'information': {
         interaction_type: function() {return 'other';},

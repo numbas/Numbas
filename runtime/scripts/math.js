@@ -774,7 +774,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     },
 
     /** Convert a JS Number to a Decimal
-     * @param {Number} n
+     * @param {Number} x
      * @returns {Decimal}
      */
     numberToDecimal: function(x) {

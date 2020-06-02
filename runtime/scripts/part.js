@@ -496,6 +496,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.name = util.letterOrdinal(index)+')';
         }
 
+        /** Assign names to the given child parts
+         * @param {Array.<Numbas.parts.Part>} children
+         */
         function assign_child_names(children) {
             if(!children) {
                 return;
@@ -1084,6 +1087,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.parts.markAlternatives_result}
      */
     markAlternatives: function(scope,feedback) {
+        /** Mark against the given alternative
+         * @param {Numbas.parts.Part} alt
+         * @returns {Numbas.parts.alternative_result}
+         */
         function mark_alternative(alt) {
             alt.restore_feedback(feedback);
             var values;
@@ -1499,6 +1506,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Add a comment to the marking feedback
      * @param {String} message
+     * @param {String} reason
      */
     markingComment: function(message,reason)
     {
