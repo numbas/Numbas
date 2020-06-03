@@ -19,9 +19,10 @@ var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
 
-/** A LaTeX string
+/** A LaTeX string.
+ *
  * @typedef TeX
- * @type {String}
+ * @type {string}
  */
 
 /** @namespace Numbas.jme.display */
@@ -29,7 +30,7 @@ jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {TeX}
@@ -46,10 +47,10 @@ jme.display = /** @lends Numbas.jme.display */ {
         var tex = texify(tree,ruleset.flags); //render the tree as TeX
         return tex;
     },
-    /** Simplify a JME expression string according to the given ruleset and return it as a JME string
+    /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset - can be anything accepted by {@link Numbas.jme.display.collectRuleset}
+     * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
      * @param {Numbas.jme.Scope} scope
      * @returns {JME}
      *
@@ -62,10 +63,10 @@ jme.display = /** @lends Numbas.jme.display */ {
         var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
         return treeToJME(simplifiedTree,ruleset.flags);
     },
-    /** Simplify a JME expression string according to given ruleset and return it as a syntax tree
+    /** Simplify a JME expression string according to given ruleset and return it as a syntax tree.
      *
      * @param {JME} expr
-     * @param {Array.<String>|Numbas.jme.rules.Ruleset} ruleset
+     * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {Numbas.jme.tree}
@@ -91,13 +92,13 @@ jme.display = /** @lends Numbas.jme.display */ {
             throw(e);
         }
     },
-    /** Simplify a syntax tree according to the given ruleset
+    /** Simplify a syntax tree according to the given ruleset.
      *
      * @see Numbas.jme.rules.Ruleset#simplify
      * @param {Numbas.jme.tree} exprTree
      * @param {Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
-     * @param {Boolean} allowUnbound
+     * @param {boolean} allowUnbound
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplify
@@ -108,10 +109,11 @@ jme.display = /** @lends Numbas.jme.display */ {
 };
 
 /** Would texify put brackets around a given argument of an operator?
+ *
  * @param {Numbas.jme.tree} thing
- * @param {Number} i - the index of the argument
+ * @param {number} i - The index of the argument.
  * @param {Numbas.jme.display.texify_settings} settings
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
@@ -137,13 +139,14 @@ function texifyWouldBracketOpArg(thing,i, settings) {
     }
     return false;
 }
-/** Apply brackets to an op argument if appropriate
+/** Apply brackets to an op argument if appropriate.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
  * @param {Numbas.jme.tree} thing
- * @param {Array.<String>} texArgs - the arguments of `thing`, as TeX
- * @param {Number} i - the index of the argument to bracket
+ * @param {Array.<string>} texArgs - The arguments of `thing`, as TeX.
+ * @param {number} i - The index of the argument to bracket.
  * @returns {TeX}
  */
 function texifyOpArg(thing,texArgs,i)
@@ -154,12 +157,13 @@ function texifyOpArg(thing,texArgs,i)
     }
     return tex;
 }
-/** Helper function for texing infix operators
+/** Helper function for texing infix operators.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {TeX} code - the TeX command for the operator
- * @returns {Function} - a function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
+ * @param {TeX} code - The TeX command for the operator.
+ * @returns {Function} - A function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
  */
 function infixTex(code)
 {
@@ -177,23 +181,25 @@ function infixTex(code)
         }
     }
 }
-/** Helper for texing nullary functions
+/** Helper for texing nullary functions.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {TeX} code - the TeX command for the function
- * @returns {Function} - a function which returns the appropriate (constant) TeX code
+ * @param {TeX} code - The TeX command for the function.
+ * @returns {Function} - A function which returns the appropriate (constant) TeX code.
  */
 function nullaryTex(code)
 {
     return function(thing,texArgs){ return '\\textrm{'+code+'}'; };
 }
-/** Helper function for texing functions
+/** Helper function for texing functions.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {TeX} code - the TeX command for the function
- * @returns {Function} - a function which converts a syntax tree to the appropriate TeX
+ * @param {TeX} code - The TeX command for the function.
+ * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
  */
 function funcTex(code)
 {
@@ -204,7 +210,8 @@ function funcTex(code)
     return f;
 }
 
-/** TeX the name of a pattern-matching operator
+/** TeX the name of a pattern-matching operator.
+ *
  * @param {TeX} code
  * @returns {TeX}
  */
@@ -212,8 +219,9 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
-/** Define how to texify each operation and function
- * @enum {function}
+/** Define how to texify each operation and function.
+ *
+ * @enum {Function}
  * @memberof Numbas.jme.display
  */
 var texOps = jme.display.texOps = {
@@ -559,8 +567,9 @@ var texOps = jme.display.texOps = {
     'm_numeric': overbraceTex('numeric ='),
 }
 
-/** Returns a function which puts the given label over the first arg of the op
- * @param {String} label
+/** Returns a function which puts the given label over the first arg of the op.
+ *
+ * @param {string} label
  * @returns {Function}
  */
 function overbraceTex(label) {
@@ -569,8 +578,9 @@ function overbraceTex(label) {
     }
 }
 
-/** Produce LaTeX for a unary pattern-matching operator
- * @param {String} code - TeX for the operator's name
+/** Produce LaTeX for a unary pattern-matching operator.
+ *
+ * @param {string} code - TeX for the operator's name.
  * @returns {Function}
  */
 function unaryPatternTex(code) {
@@ -580,11 +590,12 @@ function unaryPatternTex(code) {
 }
 
 /** Convert a special number to TeX, or return undefined if not a special number.
- *  @memberof Numbas.jme.display
- *  @private
  *
- *  @param {Number} value
- *  @returns {TeX}
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {number} value
+ * @returns {TeX}
  */
 var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
     var specials = jme.display.specialNumbers;
@@ -595,11 +606,12 @@ var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
         }
     }
 }
-/** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}
+/** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Number} n
+ * @param {number} n
  * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
@@ -691,10 +703,11 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
     }
 }
 /** Convert a number to TeX, displaying it as a decimal.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Number} n
+ * @param {number} n
  * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
@@ -766,10 +779,11 @@ function texRealNumber(n, settings)
     }
 }
 /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Array.<Number>|Numbas.jme.tree} v
+ * @param {Array.<number>|Numbas.jme.tree} v
  * @param {Numbas.jme.display.texify_settings} settings
  * @returns {TeX}
  */
@@ -790,12 +804,13 @@ function texVector(v,settings)
     return out;
 }
 /** Convert a matrix to TeX.
+ *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Array.<Array.<Number>>|Numbas.jme.tree} m
+ * @param {Array.<Array.<number>>|Numbas.jme.tree} m
  * @param {Numbas.jme.display.texify_settings} settings
- * @param {Boolean} parens - enclose the matrix in parentheses?
+ * @param {boolean} parens - Enclose the matrix in parentheses?
  * @returns {TeX}
  */
 function texMatrix(m,settings,parens)
@@ -836,7 +851,7 @@ function texMatrix(m,settings,parens)
     else
         return '\\begin{matrix} '+out+' \\end{matrix}';
 }
-/** Dictionary of functions to convert specific name annotations to TeX
+/** Dictionary of functions to convert specific name annotations to TeX.
  *
  * @enum
  * @memberof Numbas.jme.display
@@ -869,8 +884,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     decimal: propertyAnnotation('decimal')
 }
 
-/** Return a function which TeXs an annotation which marks a property for pattern-matching
- * @param {String} text
+/** Return a function which TeXs an annotation which marks a property for pattern-matching.
+ * 
+ * @param {string} text
  * @returns {Function}
  */
 function propertyAnnotation(text) {
@@ -881,19 +897,21 @@ function propertyAnnotation(text) {
 texNameAnnotations.verb = texNameAnnotations.verbatim;
 texNameAnnotations.v = texNameAnnotations.vector;
 texNameAnnotations.m = texNameAnnotations.matrix;
-/** Convert a variable name to TeX
+/** Convert a variable name to TeX.
+ *
  * @memberof Numbas.jme.display
  *
- * @param {String} name
- * @param {Array.<String>} [annotations]
- * @param {Function} [longNameMacro=texttt] - function which returns TeX for a long name
+ * @param {string} name
+ * @param {Array.<string>} [annotations]
+ * @param {Function} [longNameMacro=texttt] - Function which returns TeX for a long name.
  * @returns {TeX}
  */
 var texName = jme.display.texName = function(name,annotations,longNameMacro)
 {
     longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
     var oname = name;
-    /** Apply annotations to the given name
+    /** Apply annotations to the given name.
+     *
      * @param {TeX} name
      * @returns {TeX}
      */
@@ -940,7 +958,8 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
     return name;
 }
 
-/** TeX a special name used in pattern-matching
+/** TeX a special name used in pattern-matching.
+ *
  * @param {TeX} display
  * @returns {TeX}
  */
@@ -948,9 +967,10 @@ function texPatternName(display) {
     return '\\text{'+display+'}';
 }
 
-/** Names with special renderings
+/** Names with special renderings.
+ *
  * @memberof Numbas.jme.display
- * @type {Object.<String>}
+ * @type {object.<string>}
  */
 var specialNames = jme.display.specialNames = {
     '$z': texPatternName('nothing'),
@@ -959,13 +979,16 @@ var specialNames = jme.display.specialNames = {
 }
 
 var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
-/** Definition of a number with a special name
+
+/** Definition of a number with a special name.
+ *
  * @typedef Numbas.jme.display.special_number_definition
- * @property {Number} value
- * @property {TeX} tex - The TeX code for this number
- * @property {JME} jme - The JME code for this number
+ * @property {number} value
+ * @property {TeX} tex - The TeX code for this number.
+ * @property {JME} jme - The JME code for this number.
  */
-/** List of numbers with special names
+
+/** List of numbers with special names.
  *
  * @memberof Numbas.jme.display
  * @type {Array.<Numbas.jme.display.special_number_definition>}
@@ -975,7 +998,7 @@ jme.display.specialNumbers = [
     {value: Math.PI, tex: '\\pi', jme: 'pi'},
     {value: Infinity, tex: '\\infty', jme: 'infinity'}
 ];
-/** Dictionary of functions to turn {@link Numbas.jme.types} objects into TeX strings
+/** Dictionary of functions to turn {@link Numbas.jme.types} objects into TeX strings.
  *
  * @enum
  * @memberof Numbas.jme.display
@@ -1063,8 +1086,9 @@ var typeToTeX = jme.display.typeToTeX = {
             return texOps[lowerName](thing,texArgs,settings);
         }
         else {
-            /** long operators get wrapped in `\operatorname`
-             * @param {String} name
+            /** Long operators get wrapped in `\operatorname`.
+             *
+             * @param {string} name
              * @returns {TeX}
              */
             function texOperatorName(name) {
@@ -1085,8 +1109,9 @@ var typeToTeX = jme.display.typeToTeX = {
     }
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
+ *
  * @param {Numbas.jme.tree} tree
- * @param {String} op
+ * @param {string} op
  * @returns {Array.<Numbas.jme.tree>}
  */
 function flatten(tree,op) {
@@ -1099,19 +1124,22 @@ function flatten(tree,op) {
     }
     return args;
 }
+
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
+ *
  * @typedef Numbas.jme.display.texify_settings
- * @property {Boolean} fractionnumbers - Show all numbers as fractions?
- * @property {Boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
- * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
- * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
+ * @property {boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
+ * @property {boolean} rowvector - Display vectors as a horizontal list of components?
  */
+
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
  *
- * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX
+ * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX.
  *
  * @memberof Numbas.jme.display
- * @method
+ * @function
  *
  * @param {Numbas.jme.tree} thing
  * @param {Numbas.jme.display.texify_settings} settings
@@ -1155,11 +1183,12 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
 }
 /** Convert a special number to JME, or return undefined if not a special number.
- *  @memberof Numbas.jme.display
- *  @private
  *
- *  @param {Number} value
- *  @returns {TeX}
+ * @memberof Numbas.jme.display
+ * @private
+ *
+ * @param {number} value
+ * @returns {TeX}
  */
 var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
     var specials = jme.display.specialNumbers;
@@ -1170,13 +1199,13 @@ var jmeSpecialNumber = jme.display.jmeSpecialNumber = function(value) {
         }
     }
 }
-/** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}
+/** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}.
  *
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Number} n
- * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {number} n
+ * @param {Numbas.jme.display.jme_display_settings} settings - Ff `settings.niceNumber===false`, don't round off numbers.
  * @returns {JME}
  */
 var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
@@ -1256,8 +1285,8 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
  * @memberof Numbas.jme.display
  * @private
  *
- * @param {Number} n
- * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {number} n
+ * @param {Numbas.jme.display.jme_display_settings} settings - If `settings.niceNumber===false`, don't round off numbers.
  * @returns {JME}
  */
 var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
@@ -1344,7 +1373,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
  * @private
  *
  * @param {Numbas.math.ComplexDecimal|Decimal} n
- * @param {Numbas.jme.display.jme_display_settings} settings - if `settings.niceNumber===false`, don't round off numbers
+ * @param {Numbas.jme.display.jme_display_settings} settings - If `settings.niceNumber===false`, don't round off numbers.
  * @returns {JME}
  */
 var jmeDecimal = jme.display.jmeDecimal = function(n,settings)
@@ -1388,7 +1417,7 @@ var jmeDecimal = jme.display.jmeDecimal = function(n,settings)
     }
 }
 
-/** Dictionary of functions to turn {@link Numbas.jme.types} objects into JME strings
+/** Dictionary of functions to turn {@link Numbas.jme.types} objects into JME strings.
  *
  * @enum
  * @memberof Numbas.jme.display
@@ -1601,7 +1630,8 @@ jme.display.registerType = function(type, renderers) {
 }
 
 /** Define how to render function in JME, for special cases when the normal rendering `f(...)` isn't right.
- * @enum {function}
+ *
+ * @enum {Function}
  * @memberof Numbas.jme.display
  */
 var jmeFunctions = jme.display.jmeFunctions = {
@@ -1617,17 +1647,21 @@ var jmeFunctions = jme.display.jmeFunctions = {
         return bits[0]+'['+bits[1]+']';
     }
 }
+
 /** A dictionary of settings for {@link Numbas.jme.display.treeToJME}.
+ *
  * @typedef Numbas.jme.display.jme_display_settings
- * @property {Boolean} fractionnumbers - Show all numbers as fractions?
- * @property {Boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
- * @property {Boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
- * @property {Boolean} ignorestringattributes - don't wrap strings in functions for attributes like latex() and safe()
- * @property {Number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
+ * @property {boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {boolean} ignorestringattributes - Don't wrap strings in functions for attributes like latex() and safe().
+ * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
-/** Turn a syntax tree back into a JME expression (used when an expression is simplified)
+
+/** Turn a syntax tree back into a JME expression (used when an expression is simplified).
+ *
  * @memberof Numbas.jme.display
- * @method
+ * @function
  *
  * @param {Numbas.jme.tree} tree
  * @param {Numbas.jme.display.jme_display_settings} settings
@@ -1653,7 +1687,8 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
 }
 /** Does each argument (of an operation) need brackets around it?
  *
- * Arrays consisting of one object for each argument of the operation
+ * Arrays consisting of one object for each argument of the operation.
+ *
  * @enum
  * @memberof Numbas.jme.display
  * @private
@@ -1674,15 +1709,17 @@ var opBrackets = Numbas.jme.display.opBrackets = {
 };
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
- * @param {String} header
- * @param {Array.<String>} items
- * @returns {String}
+ *
+ * @param {string} header
+ * @param {Array.<string>} items
+ * @returns {string}
  */
 var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
-    /** Pad a lien of text so it's in the centre of a line of length `n`.
-     * @param {String} line
-     * @param {Number} n
-     * @returns {String}
+    /** Pad a line of text so it's in the centre of a line of length `n`.
+     *
+     * @param {string} line
+     * @param {number} n
+     * @returns {string}
      */
     function centre(line,n) {
         if(line.length>=n) {
@@ -1762,9 +1799,10 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
     return [top_line,middle_line,bottom_line].join('\n');
 }
 
-/** Display a tree as a diagram using
+/** Display a tree as a diagram using.
+ *
  * @param {Numbas.jme.tree} tree
- * @returns {String}
+ * @returns {string}
  */
 var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
     switch(tree.tok.type) {
@@ -1778,7 +1816,7 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 };
 
 /** For backwards compatibility, copy references from some Numbas.jme.rules members to Numbas.jme.display.
- *  These used to belong to Numbas.jme.display, but were moved into a separate file.
+ * These used to belong to Numbas.jme.display, but were moved into a separate file.
  */
 ['Rule','getTerms','matchTree','matchExpression','simplificationRules','compileRules'].forEach(function(name) {
     jme.display[name] = jme.rules[name];

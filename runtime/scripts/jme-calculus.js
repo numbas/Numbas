@@ -24,9 +24,9 @@ var differentiation_rules = [
 ];
 /** Rules for differentiating parts of expressions.
  *
- * Occurrences of the function `$diff` in the result expression have differentiation applied with respect to the same variable
+ * Occurrences of the function `$diff` in the result expression have differentiation applied with respect to the same variable.
  *
- * @type {Object.<Numbas.jme.rules.Rule>}
+ * @type {object.<Numbas.jme.rules.Rule>}
  */
 calculus.differentiation_rules = differentiation_rules.map(function(r) {
     return new Numbas.jme.rules.Rule(r[0],r[1],'acgs');
@@ -34,9 +34,9 @@ calculus.differentiation_rules = differentiation_rules.map(function(r) {
 
 /** Standard derivatives of functions of one variable.
  * 
- * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule
+ * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule.
  *
- * @type Object.<Numbas.jme.tree>
+ * @type {object.<Numbas.jme.tree>}
  */
 calculus.derivatives = {
     'cos': '-sin(x)',
@@ -71,7 +71,7 @@ for(var x in calculus.derivatives) {
  *
  * i.e. d/dx f(a, b, ...) = f(da/dx, db/dx, ...)
  *
- * @type Object.<Boolean>
+ * @type {object.<boolean>}
  */
 calculus.distributing_derivatives = {
     'vector': true,
@@ -82,15 +82,16 @@ calculus.distributing_derivatives = {
 
 var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_listval(a,0))*standard_derivative(f,m_listval(a,0))');
 
-/** Differentiate the given expression with respect to the given variable name
+/** Differentiate the given expression with respect to the given variable name.
  *
  * @param {Numbas.jme.tree} tree
- * @param {String} x
+ * @param {string} x
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.tree}
  */
 var differentiate = calculus.differentiate = function(tree,x,scope) {
     /** Apply differentiation to the given tree.
+     *
      * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}
      */
@@ -112,7 +113,8 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         return tree;
     }
 
-    /** Apply base_differentiation over all the tree's arguments, but don't look at the root token
+    /** Apply base_differentiation over all the tree's arguments, but don't look at the root token.
+     *
      * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}
      */
@@ -123,6 +125,7 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
 
     /** Apply differentiation to the given tree.
      * First look at the type of the root token, then see if the tree matches any of the differentiation rules.
+     *
      * @see Numbas.jme.calculus.differentiation_rules
      * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}

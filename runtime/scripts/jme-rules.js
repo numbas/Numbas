@@ -9,18 +9,20 @@ var jme = Numbas.jme;
 var util = Numbas.util;
 jme.rules = {};
 
-/** Options for {@link Numbas.jme.rules.matchTree}
+/** Options for {@link Numbas.jme.rules.matchTree}.
+ *
  * @typedef Numbas.jme.rules.matchTree_options
- * @type {Object}
- * @property {Boolean} commutative - should the commutativity of operations be used? If `false`, terms must appear in the same order as in the pattern.
- * @property {Boolean} associative - should the associativity of operations be used? If `true`, all terms in nested applications of associative ops are gathered together before comparing.
- * @property {Boolean} allowOtherTerms - when matching an associative op, if the expression contains terms that don't match any of the pattern, should they be ignored? If `false`, every term in the expression must match a term in the pattern.
- * @property {Boolean} strictInverse - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
+ * @type {object}
+ * @property {boolean} commutative - Should the commutativity of operations be used? If `false`, terms must appear in the same order as in the pattern.
+ * @property {boolean} associative - Should the associativity of operations be used? If `true`, all terms in nested applications of associative ops are gathered together before comparing.
+ * @property {boolean} allowOtherTerms - When matching an associative op, if the expression contains terms that don't match any of the pattern, should they be ignored? If `false`, every term in the expression must match a term in the pattern.
+ * @property {boolean} strictInverse - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  * @property {Numbas.jme.Scope} scope - A JME scope in which to evaluate conditions.
  */
 
 /** Parse a string specifying options for a Rule.
- * @param {String} str
+ *
+ * @param {string} str
  * @returns {Numbas.jme.rules.matchTree_options}
  * @see Numbas.jme.rules.Rule
  */
@@ -35,6 +37,7 @@ function parse_options(str) {
 }
 
 /** Override or extend a matchTree options object with new values.
+ *
  * @memberof Numbas.jme.rules
  * @param {Numbas.jme.rules.matchTree_options} a
  * @param {Numbas.jme.rules.matchTree_options} b
@@ -53,22 +56,23 @@ var extend_options = Numbas.jme.rules.extend_options = function(a,b) {
     };
 }
 
-/** Simplification rule
+/** Simplification rule.
+ *
  * @memberof Numbas.jme.rules
- * @constructor
+ * @class
  *
- * @param {JME} pattern - expression pattern to match. Variables will match any sub-expression.
- * @param {JME} result - expression pattern to rewrite to.
- * @param {String|Numbas.jme.rules.matchTree_options} options
- * @param {String} [name] - a human-readable name for the rule
+ * @param {JME} pattern - Expression pattern to match. Variables will match any sub-expression.
+ * @param {JME} result - Expression pattern to rewrite to.
+ * @param {string|Numbas.jme.rules.matchTree_options} options
+ * @param {string} [name] - A human-readable name for the rule
  *
- * @property {JME} patternString - the JME string defining the pattern to match
- * @property {JME} resultString - the JME string defining the result of the rule
- * @property {Numbas.jme.rules.matchTree_options} options - default options for the match algorithm
- * @property {JME} conditionStrings - JME strings defining the conditions
- * @property {Numbas.jme.tree} patternTree - `patternString` compiled to a syntax tree
- * @property {Numbas.jme.tree} result - `result` compiled to a syntax tree
- * @property {Numbas.jme.tree[]} conditions `conditions` compiled to syntax trees
+ * @property {JME} patternString - The JME string defining the pattern to match.
+ * @property {JME} resultString - The JME string defining the result of the rule.
+ * @property {Numbas.jme.rules.matchTree_options} options - Default options for the match algorithm.
+ * @property {JME} conditionStrings - JME strings defining the conditions.
+ * @property {Numbas.jme.tree} patternTree - `patternString` compiled to a syntax tree.
+ * @property {Numbas.jme.tree} result - The parameter `result` compiled to a syntax tree.
+ * @property {Numbas.jme.tree[]} conditions - The parameter `conditions` compiled to syntax trees.
  */
 var Rule = jme.rules.Rule = function(pattern,result,options,name) {
     this.name = name;
@@ -86,7 +90,8 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
         return this.patternString+' -> '+this.resultString;
     },
 
-    /** Extend this rule's default options with the given options
+    /** Extend this rule's default options with the given options.
+     *
      * @param {Numbas.jme.rules.matchTree_options} options
      * @returns {Numbas.jme.rules.matchTree_options}
      */
@@ -98,10 +103,11 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
         }
     },
     /** Match a rule on given syntax tree.
+     *
      * @memberof Numbas.jme.rules.Rule.prototype
-     * @param {Numbas.jme.tree} exprTree - the syntax tree to test
-     * @param {Numbas.jme.Scope} scope - used when checking conditions
-     * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees
+     * @param {Numbas.jme.tree} exprTree - The syntax tree to test.
+     * @param {Numbas.jme.Scope} scope - Used when checking conditions.
+     * @returns {boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, or a dictionary of matched subtrees.
      * @see Numbas.jme.rules.matchTree
      */
     match: function(exprTree,scope) {
@@ -109,8 +115,9 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     },
 
     /** Find all matches for the rule, anywhere within the given expression.
-     * @param {Numbas.jme.tree} exprTree - the syntax tree to test
-     * @param {Numbas.jme.Scope} scope - used when checking conditions
+     *
+     * @param {Numbas.jme.tree} exprTree - The syntax tree to test.
+     * @param {Numbas.jme.Scope} scope - Used when checking conditions.
      * @returns {Array.<Numbas.jme.rules.jme_pattern_match>}
      * @see {Numbas.jme.rules.matchAllTree}
      */
@@ -119,8 +126,9 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     },
 
     /** Transform the given expression if it matches this rule's pattern.
-     * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
-     * @param {Numbas.jme.Scope} scope - used when checking conditions
+     *
+     * @param {Numbas.jme.tree} exprTree - The syntax tree to transform.
+     * @param {Numbas.jme.Scope} scope - Used when checking conditions.
      * @returns {Numbas.jme.rules.transform_result}
      * @see Numbas.jme.rules.transform
      */
@@ -129,8 +137,9 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     },
 
     /** Transform all occurences of this rule's pattern in the given expression.
-     * @param {Numbas.jme.tree} exprTree - the syntax tree to transform
-     * @param {Numbas.jme.Scope} scope - used when checking conditions
+     *
+     * @param {Numbas.jme.tree} exprTree - The syntax tree to transform.
+     * @param {Numbas.jme.Scope} scope - Used when checking conditions.
      * @returns {Numbas.jme.rules.transform_result}
      * @see Numbas.jme.rules.transform
      */
@@ -139,36 +148,39 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     }
 }
 
-/** Options for {@link Numbas.jme.rules.getTerms}
+/** Options for {@link Numbas.jme.rules.getTerms}.
+ *
  * @typedef Numbas.jme.rules.getTerms_options
- * @type Object
- * @property {Boolean} commutative - should the operator be considered as commutative, for the purposes of matching ops with opposites? If yes, `a>c` will produce terms `c` and `a` when `op='<'`.
- * @property {Boolean} associative - should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
- * @property {Boolean} strictInverse - if `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
+ * @type {object}
+ * @property {boolean} commutative - Should the operator be considered as commutative, for the purposes of matching ops with opposites? If yes, `a>c` will produce terms `c` and `a` when `op='<'`.
+ * @property {boolean} associative - Should the operator be considered as associative? If yes, `(a+b)+c` will produce three terms `a`,`b` and `c`. If no, it will produce two terms, `(a+b)` and `c`.
+ * @property {boolean} strictInverse - If `false`, `a-b` will be interpreted as `a+(-b)` when finding additive terms.
  */
 
 /** Information to do with a term found in an expression by {@link Numbas.jme.rules.getTerms}.
+ *
  * @typedef Numbas.jme.rules.term
- * @type {Object}
+ * @type {object}
  * @property {Numbas.jme.tree} term
- * @property {Array.<String>} names - names captured by this term
- * @property {Array.<String>} equalnames - identified names captured by this term
- * @property {String} quantifier - code describing how many times the term can appear, if it's a pattern term
- * @property {Number} min - the minimum number of times the term must appear
- * @property {Number} max - the maximum number of times the term can appear
- * @property {Numbas.jme.tree} defaultValue - a value to use if this term is missing
+ * @property {Array.<string>} names - Names captured by this term.
+ * @property {Array.<string>} equalnames - Identified names captured by this term.
+ * @property {string} quantifier - Code describing how many times the term can appear, if it's a pattern term.
+ * @property {number} min - The minimum number of times the term must appear.
+ * @property {number} max - The maximum number of times the term can appear.
+ * @property {Numbas.jme.tree} defaultValue - A value to use if this term is missing.
  */
 
 /** A term in a sequence.
- * @constructor
+ *
+ * @class
  * @param {Numbas.jme.tree} tree
  * @property {Numbas.jme.tree} term
- * @property {Array.<String>} names - names captured by this term
- * @property {Array.<String>} equalnames - identified names captured by this term
- * @property {String} quantifier - code describing how many times the term can appear, if it's a pattern term
- * @property {Number} min - the minimum number of times the term must appear
- * @property {Number} max - the maximum number of times the term can appear
- * @property {Numbas.jme.tree} defaultValue - a value to use if this term is missing
+ * @property {Array.<string>} names - Names captured by this term.
+ * @property {Array.<string>} equalnames - Identified names captured by this term.
+ * @property {string} quantifier - Code describing how many times the term can appear, if it's a pattern term.
+ * @property {number} min - The minimum number of times the term must appear.
+ * @property {number} max - The maximum number of times the term can appear.
+ * @property {Numbas.jme.tree} defaultValue - A value to use if this term is missing.
  */
 var Term = Numbas.jme.rules.Term = function(tree) {
     var names = [];
@@ -187,7 +199,7 @@ var Term = Numbas.jme.rules.Term = function(tree) {
         '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
         '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
     };
-    /** Unwrap quantifiers from the top of the tree
+    /** Unwrap quantifiers from the top of the tree.
      */
     while(tree.tok.type=='op') {
         var op = tree.tok.name;
@@ -216,6 +228,7 @@ var Term = Numbas.jme.rules.Term = function(tree) {
     /** Find "identified names" - captured subexpressions which must be equal every time the name is captured - inside this tree.
      * These are the right-hand arguments of the `;=` operator.
      * Names found are appended to the list `equalnames`.
+     *
      * @param {Numbas.jme.tree} tree
      */
     function find_equal_names(tree) {
@@ -275,6 +288,7 @@ var nonStrictCanonicalOps = {
 
 /** Insert a unary minus in this tree.
  * If it's a product, the minus applies to the leftmost factor.
+ *
  * @param {Numbas.jme.tree} tree
  * @returns {Numbas.jme.tree}
  */
@@ -288,9 +302,10 @@ function insertUnaryMinus(tree) {
     }
 }
 
-/** Remove capturing operators ; and ;= from the top of a tree
+/** Remove capturing operators ; and ;= from the top of a tree.
+ *
  * @param {Numbas.jme.tree} tree
- * @returns {Object} - `tree`: the unwrapped tree, `names`: a list of names removed, `equalnames`: a list of identified names removed
+ * @returns {object} - `tree`: the unwrapped tree, `names`: a list of names removed, `equalnames`: a list of identified names removed
  */
 function unwrapCapture(tree) {
     var names = [];
@@ -309,18 +324,20 @@ function unwrapCapture(tree) {
 }
 
 /** Given a tree representing a series of terms t1 <op> t2 <op> t3 <op> ..., return the terms as a list.
+ *
  * @memberof Numbas.jme.rules
- * @param {Numbas.jme.tree} tree - tree to find terms in
- * @param {String} op - the name of the operator whose terms are to be found.
+ * @param {Numbas.jme.tree} tree - The tree to find terms in.
+ * @param {string} op - The name of the operator whose terms are to be found.
  * @param {Numbas.jme.rules.getTerms_options} options
- * @param {Boolean} calculate_minimum - Should the minimum allowed number of occurrences of each term be calculated? This is a pre-process step when getting the terms in a pattern expression.
+ * @param {boolean} calculate_minimum - Should the minimum allowed number of occurrences of each term be calculated? This is a pre-process step when getting the terms in a pattern expression.
  * @returns {Array.<Numbas.jme.rules.term>}
  */
 var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_minimum) {
-    /** Add the list of existing names passed in at the start to each term
+    /** Add the list of existing names passed in at the start to each term.
+     *
      * @param {Array.<Numbas.jme.rules.term>} items
-     * @param {Array.<Numbas.jme.tree>} existing_names - names captured higher up the tree
-     * @param {Array.<Numbas.jme.tree>} existing_equal_names - identified names captured higher up the tree
+     * @param {Array.<Numbas.jme.tree>} existing_names - Names captured higher up the tree.
+     * @param {Array.<Numbas.jme.tree>} existing_equal_names - Identified names captured higher up the tree.
      * @returns {Array.<Numbas.jme.rules.term>}
      */
     function add_existing_names(items,existing_names,existing_equal_names) {
@@ -366,9 +383,10 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
     }
 
     /** Is the given token the op we're looking for?
-     * True if it's literally that operator, it's the converse of that operator, or it would be replaced to that op in non-strict mode
+     * True if it's literally that operator, it's the converse of that operator, or it would be replaced to that op in non-strict mode.
+     *
      * @param {Numbas.jme.token} tok
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     function isThisOp(tok) {
         if(jme.isOp(tok,op)) {
@@ -424,6 +442,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
 
 /** The `_match` name in a match object stores the whole tree that matched the pattern.
  * This function makes sure that `_match` is set, setting it to the given tree if it's missing.
+ *
  * @param {Numbas.jme.rules.jme_pattern_match} m
  * @param {Numbas.jme.tree} exprTree
  * @returns {Numbas.jme.rules.jme_pattern_match}
@@ -440,19 +459,21 @@ function preserve_match(m,exprTree) {
 
 /** A dictionary representing the results of a successful JME pattern match.
  * Maps variable names to trees.
+ *
  * @typedef Numbas.jme.rules.jme_pattern_match
- * @type Object.<Numbas.jme.tree>
+ * @type {object.<Numbas.jme.tree>}
  * @see {Numbas.jme.rules#matchTree}
  */
 
 /** Recursively check whether `exprTree` matches `ruleTree`. Variables in `ruleTree` match any subtree.
- * @method
+ *
+ * @function
  * @memberof Numbas.jme.rules
  *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
- * @param {Numbas.jme.rules.matchTree_options} options - options specifying the behaviour of the matching algorithm
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @param {Numbas.jme.rules.matchTree_options} options - Options specifying the behaviour of the matching algorithm.
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names.
  */
 var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
     var m = (function() {
@@ -486,7 +507,8 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
     return preserve_match(m,exprTree);
 }
 
-/** Conditions for the `$n` rule
+/** Conditions for the `$n` rule.
+ *
  * @enum {Function}
  * @memberof Numbas.jme.rules
  */
@@ -566,7 +588,8 @@ var number_conditions = jme.rules.number_conditions = {
     }
 }
 
-/** Special JME names used in pattern-matching
+/** Special JME names used in pattern-matching.
+ *
  * @enum {Function}
  * @memberof Numbas.jme.rules
  */
@@ -606,10 +629,11 @@ var specialMatchNames = jme.rules.specialMatchNames = {
 
 /** Match a name token. `?` matches any name, `$n` matches a number, with constraints specified by annotations, `$z` never matches.
  * Otherwise, the name matches if the expression being considered is exactly the same name, ignoring case.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match. The top token is assumed to be a name.
- * @param {Numbas.jme.tree} exprTree - the expression being considered.
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match. The top token is assumed to be a name.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  * @see Numbas.jme.rules.number_conditions
  */
 function matchName(ruleTree,exprTree,options) {
@@ -629,7 +653,8 @@ function matchName(ruleTree,exprTree,options) {
     }
 }
 
-/** Make a matching function which overrides one or more matching options, then calls {@link Numbas.jme.rules.matchTree}
+/** Make a matching function which overrides one or more matching options, then calls {@link Numbas.jme.rules.matchTree}.
+ *
  * @param {Numbas.jme.rules.matchTree_options} new_options
  * @returns {Function}
  */
@@ -639,11 +664,12 @@ function setMatchOptions(new_options) {
     }
 }
 
-/** Match if the given pattern occurs as a subexpression anywhere in the given expression
+/** Match if the given pattern occurs as a subexpression anywhere in the given expression.
+ *
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchAnywhere(ruleTree,exprTree,options) {
     var m = matchTree(ruleTree,exprTree,options);
@@ -661,7 +687,8 @@ function matchAnywhere(ruleTree,exprTree,options) {
     return false;
 }
 
-/** Special JME functions used in pattern-matching
+/** Special JME functions used in pattern-matching.
+ * 
  * @enum {Function}
  * @memberof Numbas.jme.rules
  */
@@ -695,10 +722,11 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
 
 /** Match the application of a function.
  * Dispatches to one of the special pattern-matching functions, or {@link matchOrdinaryFunction} otherwise.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match.
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
@@ -714,10 +742,11 @@ function matchFunction(ruleTree,exprTree,options) {
 }
 
 /** Match the application of any function. The first argument of `ruleTree` is a pattern that the function's name, considered as a string, must satisfy, and the second argument is a pattern that the function's arguments, considered as a list, must satisfy.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match.
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchGenericFunction(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='function') {
@@ -737,10 +766,11 @@ function matchGenericFunction(ruleTree,exprTree,options) {
 }
 
 /** Match the application of any operator. The first argument of `ruleTree` is a pattern that the operator's name, considered as a string, must satisfy, and the second argument is a pattern that the operator's arguments, considered as a list, must satisfy.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match.
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchGenericOp(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='op') {
@@ -759,7 +789,8 @@ function matchGenericOp(ruleTree,exprTree,options) {
     }
 }
 
-/** Special JME operators used in pattern-matching
+/** Special JME operators used in pattern-matching.
+ *
  * @enum {Function}
  * @memberof Numbas.jme.rules
  */
@@ -801,10 +832,11 @@ var specialMatchOps = jme.rules.specialMatchOps = {
 
 /** Match an application of an operator.
  * Dispatches to one of the special pattern-matching operators, or {@link matchOrdinaryOp} otherwise.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match. It's assumed that the topmost token is an operator.
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match. It's assumed that the topmost token is an operator.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchOp(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
@@ -819,11 +851,12 @@ function matchOp(ruleTree,exprTree,options) {
 }
 
 /** Match a `where` condition - the expression must match the given pattern, and the condition specified in terms of the matched names must evaluate to `true`.
- * @param {Numbas.jme.tree} pattern - the pattern to match
- * @param {Numbas.jme.tree} condition - the condition to evaluate
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} pattern - The pattern to match.
+ * @param {Numbas.jme.tree} condition - The condition to evaluate.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchWhere(pattern,condition,exprTree,options) {
     var scope = new Numbas.jme.Scope(options.scope);
@@ -847,11 +880,12 @@ function matchWhere(pattern,condition,exprTree,options) {
 }
 
 /** Substitute sub-patterns into a bigger pattern before matching.
- * @param {Numbas.jme.tree} subPatterns - a dictionary of patterns
- * @param {Numbas.jme.tree} pattern - the pattern to substitute into
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} subPatterns - A dictionary of patterns.
+ * @param {Numbas.jme.tree} pattern - The pattern to substitute into.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchMacro(subPatterns, pattern, exprTree, options) {
     if(subPatterns.tok.type!='dict') {
@@ -869,10 +903,11 @@ function matchMacro(subPatterns, pattern, exprTree, options) {
 
 /** Match the application of a function.
  * Matches if the expression is the application of the same function, and all of the arguments match the arguments of the pattern.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchOrdinaryFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
@@ -891,9 +926,10 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
     }
 
     /** Is the given name captured by this tree?
-     * @param {String} name
+     *
+     * @param {string} name
      * @param {Numbas.jme.tree} tree
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     function name_captured(name,tree) {
         if(jme.isOp(tree.tok,';')) {
@@ -924,16 +960,18 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
 }
 
 /** Match the given expression against the given pattern, which is assumed to be a list.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchList(ruleTree,exprTree,options) {
     if(exprTree.tok.type!='list') {
         return false;
     }
     /** Get the elements of a list. If it's been evaluated, the elements will be stored as the token's value. Otherwise, they're the arguments of the tree.
+     *
      * @param {Numbas.jme.tree} list
      * @returns {Array.<Numbas.jme.tree>}
      */
@@ -964,10 +1002,11 @@ function matchList(ruleTree,exprTree,options) {
 }
 
 /** Match an exact token - the expression must be the same type, and equal to, the rule token.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchToken(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
@@ -986,9 +1025,10 @@ var quantifier_limits = {
 };
 
 /** Resolve the name and value to store when capturing a subexpression.
- * @param {Numbas.jme.tree} nameTree - right-hand side of the `;` capturing operator. Either a name, or a keypair giving a name and the value to store.
- * @param {Numbas.jme.tree} value - the value to store, if `nameTree` doesn't override it.
- * @returns {Object} - `name` is the name to store under, and `value` is the value
+ *
+ * @param {Numbas.jme.tree} nameTree - The right-hand side of the `;` capturing operator. Either a name, or a keypair giving a name and the value to store.
+ * @param {Numbas.jme.tree} value - The value to store, if `nameTree` doesn't override it.
+ * @returns {object} - `name` is the name to store under, and `value` is the value.
  */
 function resolveName(nameTree,value) {
     var nameTok = nameTree.tok;
@@ -1005,9 +1045,10 @@ function resolveName(nameTree,value) {
     return {name: name, value: value};
 }
 
-/** Find names captured by this pattern
+/** Find names captured by this pattern.
+ *
  * @param {Numbas.jme.tree} ruleTree
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
     var tok = ruleTree.tok;
@@ -1027,7 +1068,8 @@ var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
 
 /** Remove unary divisions from a tree.
  * They're only introduced to make pattern-matching products work more easily, and are a hassle to deal with elsewhere.
- * Expressions of the form `a*(/b)` are replaced with `a/b`
+ * Expressions of the form `a*(/b)` are replaced with `a/b`.
+ *
  * @param {Numbas.jme.tree} tree
  * @returns {Numbas.jme.tree}
  */
@@ -1046,8 +1088,9 @@ function removeUnaryDivision(tree) {
 
 /** Match an expression against a pattern which is an application of an operator to one or more terms.
  * Assuming that the pattern and the expression trees are each a sequence of terms joined by the same operator, find the terms of each, and try to match them up, obeying quantifiers in the pattern.
- * @param {Numbas.jme.tree} ruleTree - the pattern to match, whose top token must be an operator.
- * @param {Numbas.jme.tree} exprTree - the expression being considered
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match, whose top token must be an operator.
+ * @param {Numbas.jme.tree} exprTree - The expression being considered.
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Numbas.jme.jme_pattern_match}
  */
@@ -1107,24 +1150,25 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
 /** Match a sequence of terms.
  * Calls {@link Numbas.jme.rules.findSequenceMatch}, and uses {@link Numbas.jme.rules.matchTree} to match individual terms up.
  *
- * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - the terms in the pattern
- * @param {Array.<Numbas.jme.rules.Term>} exprTerms - the terms in the expression
- * @param {Boolean} commuting - can the terms match in any order?
- * @param {Boolean} allowOtherTerms - allow extra terms which don't match any of the pattern terms?
+ * @param {Array.<Numbas.jme.rules.Term>} ruleTerms - The terms in the pattern.
+ * @param {Array.<Numbas.jme.rules.Term>} exprTerms - The terms in the expression.
+ * @param {boolean} commuting - Can the terms match in any order?
+ * @param {boolean} allowOtherTerms - Allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Object.<Numbas.jme.jme_pattern_match>} - false if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name)
+ * @returns {boolean|object.<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
  */
 function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
     /** Does the given input term match the given rule term?
-     * The indices of the input and rule terms are given so the result of the match can be cached
-     * @param {Numbas.jme.rules.term} exprTerm - the input term
-     * @param {Numbas.jme.rules.term} ruleTerm - the term in the pattern which must be matched
-     * @param {Number} ic - the index of the input term 
-     * @param {Number} pc - the index of the rule term
-     * @returns {Boolean}
+     * The indices of the input and rule terms are given so the result of the match can be cached.
+     *
+     * @param {Numbas.jme.rules.term} exprTerm - The input term.
+     * @param {Numbas.jme.rules.term} ruleTerm - The term in the pattern which must be matched.
+     * @param {number} ic - The index of the input term.
+     * @param {number} pc - The index of the rule term.
+     * @returns {boolean}
      */
     function term_ok(exprTerm,ruleTerm,ic,pc) {
         if(matches[ic][pc]===undefined) {
@@ -1156,10 +1200,11 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
 
     /** Does the given assignment satisfy the constraints of the matching algorithm?
      * At the moment, the only constraint is that all subexpressions matched with the same name using the `;=` operator must be equal, according to {@link Numbas.jme.compareTrees}.
-     * @param {Object} assignment - the result of {@link Numbas.jme.rules.findSequenceMatch}
-     * @param {Number} ic - the current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
-     * @param {Number} pc - the current index in the list of pattern terms
-     * @returns {Boolean}
+     *
+     * @param {object} assignment - The result of {@link Numbas.jme.rules.findSequenceMatch}.
+     * @param {number} ic - The current index in the list of input terms. Only matches introduced by this term are considered - previous terms are assumed to have already passed the constraint check.
+     * @param {number} pc - The current index in the list of pattern terms.
+     * @returns {boolean}
      */
     function constraint_ok(assignment,ic,pc) {
         var m1 = matches[ic][pc];
@@ -1201,10 +1246,11 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         });
     });
     /** Record that `exprTree` was captured with the given name.
-     * @param {String} name
+     *
+     * @param {string} name
      * @param {Numbas.jme.tree} exprTree
      * @param {Numbas.jme.rules.Term} ruleTerm
-     * @param {Boolean} allowReservedName - if `false`, reserved names such as `_match` and `_rest`, which are introduced by the matching algorithm, will be ignored.
+     * @param {boolean} allowReservedName - If `false`, reserved names such as `_match` and `_rest`, which are introduced by the matching algorithm, will be ignored.
      */
     function nameTerm(name,exprTree,ruleTerm,allowReservedName) {
         if(!allowReservedName && name.match(/^_/)) {
@@ -1219,6 +1265,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         namedTerms[name].push(exprTree);
     }
     /** Record that `exprTree` was matched against `ruleTerm` - add `exprTree` to all of `ruleTerm`'s names.
+     *
      * @param {Numbas.jme.rules.term} ruleTerm
      * @param {Numbas.jme.tree} exprTree
      */
@@ -1257,25 +1304,26 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
 }
 
 /** Options for {@link Numbas.jme.rules.findSequenceMatch}.
- * @type Object
+ *
+ * @type {object}
  * @typedef Numbas.jme.rules.findSequenceMatch_options
- * @property {Boolean} allowOtherTerms - if `true`, terms that don't match any term in the pattern can be ignored
- * @property {Boolean} commutative - can the input terms be considered in any order?
- * @property {Function} constraintFn - function to test if the current set of matches satisfies constraints
- * @property {Function} checkFn - function to test if an input term matches a given pattern term
+ * @property {boolean} allowOtherTerms - If `true`, terms that don't match any term in the pattern can be ignored.
+ * @property {boolean} commutative - Can the input terms be considered in any order?
+ * @property {Function} constraintFn - Function to test if the current set of matches satisfies constraints.
+ * @property {Function} checkFn - Function to test if an input term matches a given pattern term.
  */
 
 /** Match a sequence of terms against a given pattern sequence of terms.
  * Try to find an assignment of input terms to the pattern, satisfying the quantifier for each term in the pattern.
  * The match is greedy - input terms will match earlier pattern terms in preference to later ones.
  *
- * @method
+ * @function
  * @memberof Numbas.jme.rules
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
  * @param {Array.<Numbas.jme.tree>} input
  * @param {Numbas.jme.rules.findSequenceMatch_options} options
- * @returns {Object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
+ * @returns {object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
 var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,options) {
     var capture = [];
@@ -1286,28 +1334,31 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
     var ic = 0;
 
     /** Count the number of times we have matched pattern term `p` so far.
-     * @param {Number} p - index of the term
-     * @returns {Number}
+     *
+     * @param {number} p - The index of the term.
+     * @returns {number}
      */
     function count(p) {
         return capture.filter(function(x){return x==p}).length;
     }
     /** Have we consumed pattern term `p` as many times as allowed?
-     * @param {Number} p
-     * @returns {Boolean}
+     *
+     * @param {number} p
+     * @returns {boolean}
      */
     function consumed(p) {
         return count(p)>=pattern[p].max;
     }
     /** Have we matched this pattern term at least its minimum number of times?
-     * @param {Number} p - the index of the pattern term
-     * @returns {Boolean}
+     *
+     * @param {number} p - The index of the pattern term.
+     * @returns {boolean}
      */
     function enough(p) {
         return count(p)>=pattern[p].min;
     }
     /** Move the start pointer along one.
-     * Terms before the start will be returned in `ignored_start_terms`
+     * Terms before the start will be returned in `ignored_start_terms`.
      */
     function increment_start() {
         //debug('increment start position');
@@ -1436,10 +1487,11 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
 
 /** Match any of the given patterns.
  * The first pattern which successfully matches is used.
+ *
  * @param {Array.<Numbas.jme.tree>} patterns
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchAny(patterns,exprTree,options) {
     for(var i=0;i<patterns.length;i++) {
@@ -1453,11 +1505,12 @@ function matchAny(patterns,exprTree,options) {
 
 /** Perform a match with a default value.
  * This operation only makes sense when matching a sequence of terms, so just match the pattern.
+ *
  * @param {Numbas.jme.tree} ruleTree
- * @param {Numbas.jme.tree} defaultValue - ignored
+ * @param {Numbas.jme.tree} defaultValue - Ignored.
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchDefault(ruleTree, defaultValue, exprTree, options) {
     var m = matchTree(ruleTree,exprTree,options);
@@ -1465,6 +1518,7 @@ function matchDefault(ruleTree, defaultValue, exprTree, options) {
 }
 
 /** Bring any unary minus to the top of the tree.
+ *
  * @param {Numbas.jme.tree} tree
  * @returns {Numbas.jme.tree}
  */
@@ -1485,12 +1539,13 @@ function extractLeadingMinus(tree) {
     }
 }
 
-/** Match `rule`, or `prefix(rule)` - allow any of a list of optional unary operators at the top of the tree
- * @param {Array.<String>} prefixes - the names of the optional operators
+/** Match `rule`, or `prefix(rule)` - allow any of a list of optional unary operators at the top of the tree.
+ *
+ * @param {Array.<string>} prefixes - The names of the optional operators.
  * @param {Numbas.jme.tree} ruleTree
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchOptionalPrefix(prefixes,ruleTree,exprTree,options) {
     var originalExpr = exprTree;
@@ -1511,11 +1566,12 @@ function matchOptionalPrefix(prefixes,ruleTree,exprTree,options) {
     }
 }
 
-/** Match if the expression doesn't match the given pattern
- * @param {Numbas.jme.tree} ruleTree - the pattern which must not be matched
- * @param {Numbas.jme.tree} exprTree - the expression to teset
+/** Match if the expression doesn't match the given pattern.
+ *
+ * @param {Numbas.jme.tree} ruleTree - The pattern which must not be matched.
+ * @param {Numbas.jme.tree} exprTree - The expression to test.
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchNot(ruleTree,exprTree,options) {
     if(!matchTree(ruleTree,exprTree,options)) {
@@ -1526,9 +1582,10 @@ function matchNot(ruleTree,exprTree,options) {
 }
 
 /** Match if the expression uses all of the given names as free variables.
- * @param {Array.<String>} names
+ *
+ * @param {Array.<string>} names
  * @param {Numbas.jme.tree} exprTree
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchUses(names,exprTree) {
     var vars = jme.findvars(exprTree);
@@ -1541,9 +1598,10 @@ function matchUses(names,exprTree) {
 }
 
 /** Match if the top token of the given expression is of the given type.
- * @param {String} wantedType - the required type
+ *
+ * @param {string} wantedType - The required type.
  * @param {Numbas.jme.tree} exprTree
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchType(wantedType,exprTree) {
     if(exprTree.tok.type==wantedType) {
@@ -1555,10 +1613,11 @@ function matchType(wantedType,exprTree) {
 
 /** Match all of the given patterns against the given expression. 
  * Return `false` if any of the patterns don't match.
+ *
  * @param {Array.<Numbas.jme.tree>} patterns
  * @param {Numbas.jme.tree} exprTree
  * @param {Numbas.jme.rules.matchTree_options} options
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match}
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchAnd(patterns,exprTree,options) {
     var matches = [];
@@ -1574,10 +1633,11 @@ function matchAnd(patterns,exprTree,options) {
 }
 
 /** Find all matches for the rule, anywhere within the given expression.
+ *
  * @memberof Numbas.jme.rules
- * @method
- * @param {Numbas.jme.tree} ruleTree - the pattern to match
- * @param {Numbas.jme.tree} exprTree - the syntax tree to test
+ * @function
+ * @param {Numbas.jme.tree} ruleTree - The pattern to match.
+ * @param {Numbas.jme.tree} exprTree - The syntax tree to test.
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Array.<Numbas.jme.rules.jme_pattern_match>}
  */
@@ -1598,6 +1658,7 @@ var matchAllTree = jme.rules.matchAllTree = function(ruleTree,exprTree,options) 
 
 /** Merge a list of matches into one match object.
  * Later matches override earlier ones: if two matches have the same captured name, the later one is used.
+ *
  * @param {Array.<Numbas.jme.rules.jme_pattern_match>} matches
  * @returns {Numbas.jme.rules.jme_pattern_match}
  */
@@ -1608,8 +1669,9 @@ function mergeMatches(matches) {
 }
 
 /** Apply operations specified in the result of a tree transformation: `eval(x)` is replaced with the result of evaluating `x`.
+ *
  * @memberof Numbas.jme.rules
- * @method
+ * @function
  * @param {Numbas.jme.tree} tree
  * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {Numbas.jme.tree}
@@ -1632,20 +1694,22 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,option
     return tree;
 }
 
-/** Object returned by {@link Numbas.jme.rules.transform}
- * @type Object
+/** Object returned by {@link Numbas.jme.rules.transform}.
+ *
+ * @type {object}
  * @typedef Numbas.jme.rules.transform_result
- * @property {Boolean} changed - Is the result expression different to the input expression?
- * @property {Numbas.jme.tree} expression - the result expression
+ * @property {boolean} changed - Is the result expression different to the input expression?
+ * @property {Numbas.jme.tree} expression - The result expression.
  */
 
-/** Replace one expression with another, if it matches the given rule
+/** Replace one expression with another, if it matches the given rule.
+ *
  * @memberof Numbas.jme.rules
- * @method
- * @param {Numbas.jme.tree} ruleTree - the rule to test against
- * @param {Numbas.jme.tree} resultTree - the tree to output, with named groups from the rule substituted in.
- * @param {Numbas.jme.tree} exprTree - the expression to be tested
- * @param {Numbas.jme.rules.matchTree_options} options - options for the match
+ * @function
+ * @param {Numbas.jme.tree} ruleTree - The rule to test against.
+ * @param {Numbas.jme.tree} resultTree - The tree to output, with named groups from the rule substituted in.
+ * @param {Numbas.jme.tree} exprTree - The expression to be tested.
+ * @param {Numbas.jme.rules.matchTree_options} options - Options for the match.
  * @returns {Numbas.jme.rules.transform_result}
  */
 var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,options) {
@@ -1666,13 +1730,14 @@ var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,opti
     return {expression: out, changed: !jme.treesSame(exprTree,out)};
 }
 
-/** Replace anything matching the rule with the given result, at any position in the given expression
+/** Replace anything matching the rule with the given result, at any position in the given expression.
+ *
  * @memberof Numbas.jme.rules
- * @method
- * @param {Numbas.jme.tree} ruleTree - the rule to test against
- * @param {Numbas.jme.tree} resultTree - the tree to output, with named groups from the rule substituted in.
- * @param {Numbas.jme.tree} exprTree - the expression to be tested
- * @param {Numbas.jme.rules.matchTree_options} options - options for the match
+ * @function
+ * @param {Numbas.jme.tree} ruleTree - The rule to test against.
+ * @param {Numbas.jme.tree} resultTree - The tree to output, with named groups from the rule substituted in.
+ * @param {Numbas.jme.tree} exprTree - The expression to be tested.
+ * @param {Numbas.jme.rules.matchTree_options} options - Options for the match.
  * @returns {Numbas.jme.rules.transform_result}
  */
 var transformAll = jme.rules.transformAll = function(ruleTree,resultTree,exprTree,options) {
@@ -1692,6 +1757,7 @@ var transformAll = jme.rules.transformAll = function(ruleTree,resultTree,exprTre
 }
 
 /** A parser for JME patterns. Adds pattern-matching operators to the standard parser.
+ *
  * @memberof Numbas.jme.rules
  */
 var patternParser = jme.rules.patternParser = new jme.Parser();
@@ -1722,16 +1788,16 @@ patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
 patternParser.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
 
 
-/** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}
+/** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}.
  *
  * @memberof Numbas.jme.rules
- * @method
+ * @function
  *
  * @param {JME} pattern
  * @param {JME} expr
- * @param {Numbas.jme.rules.matchTree_options} options - default is `commutative`, `associative`, and `allowOtherTerms` all `true`, and using {@link Numbas.jme.builtinScope}.
+ * @param {Numbas.jme.rules.matchTree_options} options - Default is `commutative`, `associative`, and `allowOtherTerms` all `true`, and using {@link Numbas.jme.builtinScope}.
  *
- * @returns {Boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names
+ * @returns {boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names.
  */
 var matchExpression = jme.rules.matchExpression = function(pattern,expr,options) {
     var default_options = {
@@ -1748,7 +1814,8 @@ var matchExpression = jme.rules.matchExpression = function(pattern,expr,options)
     return matchTree(pattern,expr,options);
 }
 /** Flags used to control the behaviour of JME display functions.
- * Values are `undefined` so they can be overridden
+ * Values are `undefined` so they can be overridden.
+ *
  * @memberof Numbas.jme.rules
  */
 var displayFlags = jme.rules.displayFlags = {
@@ -1759,16 +1826,18 @@ var displayFlags = jme.rules.displayFlags = {
     flatfractions: undefined
 };
 /** Flags used in JME simplification rulesets
- * @type Object.<Boolean>
+ *
+ * @type {object.<boolean>}
  * @typedef Numbas.jme.rules.ruleset_flags
- * @property {Boolean} fractionnumbers - Show all numbers as fractions?
- * @property {Boolean} rowvector - Display vectors as a horizontal list of components?
- * @property {Boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
- * @property {Boolean} flatfractions - Display fractions horizontally?
+ * @property {boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {boolean} rowvector - Display vectors as a horizontal list of components?
+ * @property {boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
+ * @property {boolean} flatfractions - Display fractions horizontally?
  * @see Numbas.jme.rules.Ruleset
  */
-/** Set of simplification rules
- * @constructor
+/** Set of simplification rules.
+ *
+ * @class
  * @memberof Numbas.jme.rules
  * @param {Numbas.jme.rules.Rule[]} rules
  * @param {Numbas.jme.rules.ruleset_flags} flags
@@ -1779,9 +1848,10 @@ var Ruleset = jme.rules.Ruleset = function(rules,flags) {
 }
 
 Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
-    /** Test whether flag is set
-     * @param {String} flag
-     * @returns {Boolean}
+    /** Test whether flag is set.
+     *
+     * @param {string} flag
+     * @returns {boolean}
      */
     flagSet: function(flag) {
         flag = flag.toLowerCase();
@@ -1791,7 +1861,8 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
             return false;
     },
 
-    /** Apply this set's rules to the given expression until they don't change any more 
+    /** Apply this set's rules to the given expression until they don't change any more.
+     *
      * @param {Numbas.jme.tree} exprTree
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.rules.transform
@@ -1831,6 +1902,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
 }
 var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
 /** Merge two rulesets: combine their lists of rules, and merge their flags. The second rule takes precedence over the first.
+ *
  * @param {Numbas.jme.rules.Ruleset} r1
  * @param {Numbas.jme.rules.Ruleset} r2
  * @returns {Numbas.jme.rules.Ruleset}
@@ -1841,10 +1913,11 @@ function mergeRulesets(r1,r2) {
     return new Ruleset(rules, flags);
 }
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
+ *
  * @memberof Numbas.jme.rules
- * @method
- * @param {String|Array.<String|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {Object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @function
+ * @param {string|Array.<string|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
+ * @param {object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
@@ -1901,7 +1974,8 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
     }
     return new Ruleset(rules,flags);
 }
-/** Built-in simplification rules
+/** Built-in simplification rules.
+ *
  * @enum {Numbas.jme.rules.Rule[]}
  * @memberof Numbas.jme.rules
  */
@@ -2032,11 +2106,12 @@ var conflictingSimplificationRules = {
         ['?;top/(?;base^(?`? `: 1);degree)','','top * base^(-degree)']
     ]
 }
-/** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects
+/** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.
+ *
  * @memberof Numbas.jme.rules
- * @method
+ * @function
  * @param {Array} rules
- * @param {String} name - a name for this group of rules
+ * @param {string} name - a name for this group of rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var compileRules = jme.rules.compileRules = function(rules,name)

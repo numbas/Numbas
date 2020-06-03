@@ -52,49 +52,51 @@
     /** A line of feedback to give to the student, produced while marking their answer.
      * Can modify the credit awarded.
      *
-     * @typedef {Object} Numbas.marking.feedback_item
+     * @typedef {object} Numbas.marking.feedback_item
      *
-     * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
-     * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
-     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
-     * @property {String} [message] - A message to display to the student.
+     * @property {string} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
+     * @property {number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
+     * @property {string} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
+     * @property {string} [message] - A message to display to the student.
      */
 
-    /** Kinds of feedback item
+    /** Kinds of feedback item.
+     *
      * @readonly
-     * @enum {String}
+     * @enum {string}
      * @memberof Numbas.marking
      */
     var FeedbackOps = Numbas.marking.FeedbackOps = {
-        /** Set the credit to the given value */
+        /** Set the credit to the given value. */
         SET_CREDIT: 'set_credit',
 
-        /** Add the given amount of credit */
+        /** Add the given amount of credit. */
         ADD_CREDIT: 'add_credit',
 
-        /** Multiply the current credit by the given amount */
+        /** Multiply the current credit by the given amount. */
         MULTIPLY_CREDIT: 'multiply_credit',
 
-        /** Subtract the given amount of credit */
+        /** Subtract the given amount of credit. */
         SUB_CREDIT: 'sub_credit',
 
-        /** End marking */
+        /** End marking. */
         END: 'end',
 
-        /** Give the student a warning next to the answer widget */
+        /** Give the student a warning next to the answer widget. */
         WARNING: 'warning',
 
-        /** Give the student a message */
+        /** Give the student a message. */
         FEEDBACK: 'feedback',
 
-        /** Add the given list of items to the end of the current list of feedback items */
+        /** Add the given list of items to the end of the current list of feedback items. */
         CONCAT: 'concat'
     }
 
     /** Constructors for feedback items.
+     *
      * @see Numbas.marking.feedback_item
      * @memberof Numbas.marking
-     * @type {Object.&lt;Function>}
+     * @type {object.&lt;Function>}
      */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit,reason,message) {
@@ -124,10 +126,11 @@
     }
 
     /** Create a JME function which modifies the state.
-     * @param {String} name
-     * @param {Array.&lt;Function|String>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+     *
+     * @param {string} name
+     * @param {Array.&lt;Function|string>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
      * @param {Function} outtype - The constructor for the output value of the function
-     * @param {Function} fn - a function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
+     * @param {Function} fn - A function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
      * @see Numbas.marking.StatefulScope
      * @returns {Numbas.jme.funcObj}
      */
@@ -272,10 +275,11 @@
         return tree;
     }
 
-    /** Submit the given answer to the given part
+    /** Submit the given answer to the given part.
+     *
      * @param {Numbas.parts.Part} part
      * @param {*} answer
-     * @returns {Numbas.jme.token} - a dictinoary with keys "credit", "marks", "feedback", "answered".
+     * @returns {Numbas.jme.token} - A dictionary with keys "credit", "marks", "feedback", "answered".
      */
     function submit_part(part,answer) {
         var originalAnswer = part.stagedAnswer;
@@ -382,18 +386,18 @@
 
 
     /** A JME scope with marking state attached.
-     *  The "current" state is a list of feedback items. 
-     *  The scope can also refer to previously computed states by name.
-     *  The state can be modified by functions as they are called.
-     *  This should be the base 
+     * The "current" state is a list of feedback items. 
+     * The scope can also refer to previously computed states by name.
+     * The state can be modified by functions as they are called.
+     * This should be the base.
      *
-     *  @memberof Numbas.marking
-     *  @augments Numbas.jme.Scope
-     *  @constructor
-     *  @property {Numbas.marking.feedback_item[]} state
-     *  @property {Object.&lt;Numbas.marking.feedback_item[]>} states - Previously computed states
-     *  @property {Object.&lt;Boolean>} state_valid - Record of whether previously computed states were valid
-     *  @property {Object.&lt;Error>} state_errors - The errors that caused states to become invalid, if any.
+     * @memberof Numbas.marking
+     * @augments Numbas.jme.Scope
+     * @class
+     * @property {Numbas.marking.feedback_item[]} state
+     * @property {object.&lt;Numbas.marking.feedback_item[]>} states - Previously computed states.
+     * @property {object.&lt;boolean>} state_valid - Record of whether previously computed states were valid.
+     * @property {object.&lt;Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
         this.nesting_depth = 0;
@@ -430,24 +434,24 @@
 
     /** A definition of a marking note.
      *
-     *  The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+     * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
      *
-     * @typedef {String} Numbas.marking.note_definition
+     * @typedef {string} Numbas.marking.note_definition
      */
 
     /** A note forming part of a marking script.
-     *  Evaluates to a JME value and a list of feedback items.
+     * Evaluates to a JME value and a list of feedback items.
      *
-     *  @memberof Numbas.marking
-     *  @constructor
+     * @memberof Numbas.marking
+     * @class
      *
-     *  @property {String} name
-     *  @property {String} description
-     *  @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
-     *  @property {Numbas.jme.tree} tree - The compiled form of the expression
-     *  @property {String[]} vars - The names of the variables this note depends on
-     *  
-     *  @param {JME} source
+     * @property {string} name
+     * @property {string} description
+     * @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
+     * @property {Numbas.jme.tree} tree - The compiled form of the expression.
+     * @property {string[]} vars - The names of the variables this note depends on.
+     * 
+     * @param {JME} source
      */
     var MarkingNote = marking.MarkingNote = function(source) {
         source = source.trim();
@@ -477,29 +481,29 @@
 
     /** The result of a marking script.
      *
-     * @typedef {Object} Numbas.marking.marking_script_result
+     * @typedef {object} Numbas.marking.marking_script_result
      *
-     * @property {Object.&lt;Numbas.marking.feedback_item[]>} states - the feedback resulting from each of the notes
-     * @property {Object.&lt;Numbas.jme.token>} values - the values of each of the notes
-     * @property {Object.&lt;Boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}
-     * @property {Object.&lt;Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}
+     * @property {object.&lt;Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
+     * @property {object.&lt;Numbas.jme.token>} values - The values of each of the notes.
+     * @property {object.&lt;boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
+     * @property {object.&lt;Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
     /** A script to mark a part.
-     *  A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
+     * A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
      *
-     *  Two notes are required:
-     *  
-     *  * The `mark` note is the final note, used to provide feedback on the part.
-     *  * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
-     *  
-     *  @memberof Numbas.marking
-     *  @constructor
-     *  
-     *  @param {String} source - The definitions of the script's notes.
-     *  @param {Numbas.marking.MarkingScript} [base] - a base script to extend.
+     * Two notes are required:
+     * 
+     * * The `mark` note is the final note, used to provide feedback on the part.
+     * * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     * 
+     * @memberof Numbas.marking
+     * @class
+     * 
+     * @param {string} source - The definitions of the script's notes.
+     * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
      *
-     *  @property {Numbas.marking.MarkingNote[]} notes
+     * @property {Numbas.marking.MarkingNote[]} notes
      */
     var MarkingScript = marking.MarkingScript = function(source, base) {
         this.source = source;
@@ -530,15 +534,16 @@
     }
     MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
 
-        /** The source code of the script
-         * @type {String}
+        /** The source code of the script.
+         *
+         * @type {string}
          */
         source: '',
 
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {Object.&lt;Numbas.jme.token>} variables - Extra variables defined in the scope
+         * @param {object.&lt;Numbas.jme.token>} variables - Extra variables defined in the scope.
          *
          * @returns {Numbas.marking.marking_script_result}
          */
@@ -564,14 +569,14 @@
         }
     }
 
-    /** Compute the marking note with the given name in the given scope
+    /** Compute the marking note with the given name in the given scope.
      *
      * @memberof Numbas.marking
      * @function
      * @see Numbas.jme.variables.computeVariable
      *
-     * @param {String} name
-     * @param {Object} todo - dictionary of notes still to evaluate
+     * @param {string} name
+     * @param {object} todo - Dictionary of notes still to evaluate.
      * @param {Numbas.marking.StatefulScope} scope
      *
      * @returns {Numbas.jme.token}
@@ -614,15 +619,17 @@
         return scope.variables[name];
     }
     /** The result of attempting to mark a part.
+     *
      * @typedef Numbas.marking.finalised_state
-     * @type {Object}
-     * @property {Boolean} valid - Can the answer be marked?
-     * @property {Number} credit - Proportion of the credit to award
-     * @property {Array.&lt;Object>} states - Feedback actions
+     * @type {object}
+     * @property {boolean} valid - Can the answer be marked?
+     * @property {number} credit - Proportion of the credit to award.
+     * @property {Array.&lt;object>} states - Feedback actions.
      */
 
     /** Run through a sequence of state operations, accumulating credit.
      * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
+     *
      * @see Numbas.parts.Part#apply_feedback
      * @function
      * @memberof Numbas.marking
@@ -810,10 +817,6 @@
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._endTime"><a href="Numbas.display.ExamDisplay.html#._endTime">Numbas.display.ExamDisplay._endTime</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._startTime"><a href="Numbas.display.ExamDisplay.html#._startTime">Numbas.display.ExamDisplay._startTime</a></li>
-		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
@@ -835,6 +838,8 @@
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endTime"><a href="Numbas.display.ExamDisplay.html#.endTime">Numbas.display.ExamDisplay.endTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
@@ -858,7 +863,7 @@
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">Numbas.display.ExamDisplay.passwordFeedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -889,6 +894,8 @@
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.showTiming"><a href="Numbas.display.ExamDisplay.html#.showTiming">Numbas.display.ExamDisplay.showTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startRegen"><a href="Numbas.display.ExamDisplay.html#.startRegen">Numbas.display.ExamDisplay.startRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startTime"><a href="Numbas.display.ExamDisplay.html#.startTime">Numbas.display.ExamDisplay.startTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.timeSpent"><a href="Numbas.display.ExamDisplay.html#.timeSpent">Numbas.display.ExamDisplay.timeSpent</a></li>
 		
@@ -954,9 +961,13 @@
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.part"><a href="Numbas.display.PartDisplay.html#.part">Numbas.display.PartDisplay.part</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.partTreeCSS"><a href="Numbas.display.PartDisplay.html#.partTreeCSS">Numbas.display.PartDisplay.partTreeCSS</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.pd.html_promise"><a href="Numbas.display.PartDisplay.html#.pd.html_promise">Numbas.display.PartDisplay.pd.html_promise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.question"><a href="Numbas.display.PartDisplay.html#.question">Numbas.display.PartDisplay.question</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.reachedDeadEnd"><a href="Numbas.display.PartDisplay.html#.reachedDeadEnd">Numbas.display.PartDisplay.reachedDeadEnd</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.removeWarnings"><a href="Numbas.display.PartDisplay.html#.removeWarnings">Numbas.display.PartDisplay.removeWarnings</a></li>
 		
@@ -1008,11 +1019,15 @@
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateNextParts"><a href="Numbas.display.PartDisplay.html#.updateNextParts">Numbas.display.PartDisplay.updateNextParts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.visible"><a href="Numbas.display.PartDisplay.html#.visible">Numbas.display.PartDisplay.visible</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.whatNextMessage"><a href="Numbas.display.PartDisplay.html#.whatNextMessage">Numbas.display.PartDisplay.whatNextMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
@@ -1486,6 +1501,8 @@
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#make_re"><a href="Numbas.jme.Parser.html#make_re">Numbas.jme.Parser#make_re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#op"><a href="Numbas.jme.Parser.html#op">Numbas.jme.Parser#op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
@@ -1703,6 +1720,14 @@
 			<li class="search-result" data-longname="Numbas.jme.types.TVector"><a href="Numbas.jme.types.TVector.html">Numbas.jme.types.TVector</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString"><a href="Numbas.jme.html#.typeToDisplayString">Numbas.jme.typeToDisplayString</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.decimal"><a href="Numbas.jme.html#.typeToDisplayString#.decimal">Numbas.jme.typeToDisplayString.decimal</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.html"><a href="Numbas.jme.html#.typeToDisplayString#.html">Numbas.jme.typeToDisplayString.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
 		
@@ -3914,6 +3939,8 @@
 		
 			<li class="search-result" data-longname="Numbas.Question#adviceDisplayed"><a href="Numbas.Question.html#adviceDisplayed">Numbas.Question#adviceDisplayed</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#allParts"><a href="Numbas.Question.html#allParts">Numbas.Question#allParts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#answered"><a href="Numbas.Question.html#answered">Numbas.Question#answered</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#calculateScore"><a href="Numbas.Question.html#calculateScore">Numbas.Question#calculateScore</a></li>
@@ -3959,6 +3986,8 @@
 			<li class="search-result" data-longname="Numbas.Question#extraPartOrder"><a href="Numbas.Question.html#extraPartOrder">Numbas.Question#extraPartOrder</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#generateVariables"><a href="Numbas.Question.html#generateVariables">Numbas.Question#generateVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
 		
@@ -4015,6 +4044,8 @@
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#setCurrentPart"><a href="Numbas.Question.html#setCurrentPart">Numbas.Question#setCurrentPart</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#setErrorCarriedForwardBackReferences"><a href="Numbas.Question.html#setErrorCarriedForwardBackReferences">Numbas.Question#setErrorCarriedForwardBackReferences</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
 		
@@ -4556,8 +4587,6 @@
 		
 			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
 		
-			<li class="search-result" data-longname="visible"><a href="global.html#visible">visible</a></li>
-		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -4586,7 +4615,7 @@
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li><li><a href="global.html#visible">visible</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

@@ -13,32 +13,36 @@ Copyright 2011-14 Newcastle University
 /** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
 Numbas.queueScript('xml',['base','jme'],function() {
 
-/** Raw XML of the exam definition
+/** Raw XML of the exam definition.
+ *
  * @name rawxml 
  * @memberof Numbas
- * @type {Object.<String>}
+ * @type {object.<string>}
  */
 
-/** XML for the current exam
+/** XML for the current exam.
+ *
  * @name examXML
  * @memberof Numbas.xml
  * @type {XMLDocument}
  */
 
-/** XSLT stylesheets
+/** XSLT stylesheets.
+ *
  * @name templates
  * @memberof Numbas.xml
- * @type {Object.<XMLDocument>}
+ * @type {object.<XMLDocument>}
  */
 
 /** @namespace Numbas.xml */
 var xml = Numbas.xml = {
-    /** DOM parser to use to parse XML
+    /** DOM parser to use to parse XML.
+     *
      * @type {DOMParser}
      * @private
      */
     dp: new DOMParser(),
-    /** Load in all the XSLT/XML documents from {@link Numbas.rawxml} */
+    /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {
         var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
@@ -49,8 +53,9 @@ var xml = Numbas.xml = {
             xml.localise(templates[x]);
         }
     },
-    /** Load in a single XML document
-     * @param {String} xmlstring
+    /** Load in a single XML document.
+     *
+     * @param {string} xmlstring
      * @returns {XMLDocument}
      */
     loadXML: function(xmlstring)
@@ -88,7 +93,8 @@ var xml = Numbas.xml = {
         }
         return doc;
     },
-    /** Load user-defined functions from an XML node
+    /** Load user-defined functions from an XML node.
+     *
      * @param {Element} xml
      * @returns {Numbas.jme.variables.func_data[]}
      */
@@ -125,9 +131,10 @@ var xml = Numbas.xml = {
         }
         return tmpFunctions;
     },
-    /** Load variable definitions from an XML node
+    /** Load variable definitions from an XML node.
+     *
      * @param {Element} xml
-     * @param {Numbas.jme.Scope} scope - scope to compile relative to
+     * @param {Numbas.jme.Scope} scope - Scope to compile relative to.
      * @returns {Numbas.jme.variables.variable_data_dict[]}
      */
     loadVariables: function(xml,scope) {
@@ -164,25 +171,28 @@ var xml = Numbas.xml = {
     },
     /** Lots of the time we have a message stored inside content/html/.. structure.
      *
-     * This pulls the message out and serializes it so it can be inserted easily with jQuery
+     * This pulls the message out and serializes it so it can be inserted easily with jQuery.
+     *
      * @param {Element} node
-     * @returns {String}
+     * @returns {string}
      */
     serializeMessage: function(node)
     {
         return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
     },
-    /** Get all the text belonging to an element
+    /** Get all the text belonging to an element.
+     *
      * @param {Element} elem
-     * @returns {String}
+     * @returns {string}
      */
     getTextContent: function(elem)
     {
         return $(elem).text();
     },
-    /** Set the text content of an element
+    /** Set the text content of an element.
+     *
      * @param {Element} elem
-     * @param {String} text
+     * @param {string} text
      */
     setTextContent: function(elem,text)
     {
@@ -191,17 +201,18 @@ var xml = Numbas.xml = {
         else
             elem.text = text;
     },
-    /** @typedef {Object} Numbas.xml.tryGetAttribute_options
-     * @property {Boolean} string - Always return the attribute as a string.
+    /** @typedef {object} Numbas.xml.tryGetAttribute_options
+     * @property {boolean} string - Always return the attribute as a string.
      */
     /** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
-     * @param {Object} obj - object to fill up
-     * @param {Element} xmlroot - root XML element
-     * @param {Element|String} elem - either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`
-     * @param {String[]} names - names of attributes to load
-     * @param {String[]} [altnames] - names of object properties to associate with attribute names. If undefined, the attribute name is used.
+     *
+     * @param {object} obj - Object to fill up.
+     * @param {Element} xmlroot - Root XML element.
+     * @param {Element|string} elem - Either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`.
+     * @param {string[]} names - Names of attributes to load.
+     * @param {string[]} [altnames] - Names of object properties to associate with attribute names. If undefined, the attribute name is used.
      * @param {Numbas.xml.tryGetAttribute_options} options
-     * @returns {Object} - The last attribute loaded.
+     * @returns {object} - The last attribute loaded.
      */
     tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
     {
@@ -271,6 +282,7 @@ var xml = Numbas.xml = {
         return value;
     },
     /** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
+     *
      * @param {Element} template
      * @returns {Element}
      */
@@ -282,8 +294,9 @@ var xml = Numbas.xml = {
         return template;
     },
     /** Is the given node empty? True if it has no children.
+     *
      * @param {Element} node
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     isEmpty: function(node) {
         return node.childNodes.length==0;

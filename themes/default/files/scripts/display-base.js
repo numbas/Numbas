@@ -3,7 +3,7 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
-    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result
+    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
      */
     localisePage: function() {
         $('[data-localise]').each(function() {
@@ -13,9 +13,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
      * If that exists, localise its value and set the desired attribute, then return it.
+     *
      * @param {Element} elem
-     * @param {String} name
-     * @returns {String}
+     * @param {string} name
+     * @returns {string}
      */
     getLocalisedAttribute: function(elem, name) {
         var attr_localise;
@@ -26,7 +27,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         return attr;
     },
-    /** Update the progress bar when loading
+    /** Update the progress bar when loading.
      */
     showLoadProgress: function()
     {
@@ -59,10 +60,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         })
 
         var lightbox = document.querySelector('#lightbox');
+        /** Show the lightbox.
+         */
         function show_lightbox() {
             lightbox.classList.add('shown');
             lightbox.focus();
         }
+        /** Hide the lightbox.
+         *
+         */
         function hide_lightbox() {
             lightbox.classList.remove('shown');
             lightbox.innerHTML = '';
@@ -104,16 +110,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     //alert / confirm boxes
     //
-    /** Callback functions for the modals
-     * @type {Object.<function>}
+    /** Callback functions for the modals.
+     *
+     * @type {object.<Function>}
      */
     modal: {
         ok: function() {},
         cancel: function() {}
     },
-    /** Show an alert dialog
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback when OK is clicked
+    /** Show an alert dialog.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback when OK is clicked
      */
     showAlert: function(msg,fnOK) {
         fnOK = fnOK || function() {};
@@ -122,10 +130,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
     },
-    /** Show a confirmation dialog box
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback if OK is clicked
-     * @param {function} fnCancel - callback if cancelled
+    /** Show a confirmation dialog box.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback if OK is clicked
+     * @param {Function} fnCancel - callback if cancelled
      */
     showConfirm: function(msg,fnOK,fnCancel) {
         this.modal.ok = fnOK || function(){};
@@ -133,9 +142,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
-    /** Make MathJax typeset any maths in the selector
-     * @param {jQuery|Element} [selector] - elements to typeset. If not given, the whole page is typeset
-     * @param {function} callback - function to call when typesetting is finished
+    /** Make MathJax typeset any maths in the selector.
+     *
+     * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
+     * @param {Function} callback - Function to call when typesetting is finished.
      */
     typeset: function(selector,callback)
     {
@@ -169,7 +179,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     },
 
-    /** Associate a JME scope with the given element
+    /** Associate a JME scope with the given element.
+     *
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
      */
@@ -179,11 +190,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     /** Make HTML from an XML node and bind it to the given scope and display object.
      * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
+     *
      * @param {Element} xml
      * @param {XMLDocument} template
      * @param {Numbas.jme.Scope} scope
-     * @param {String} contextDescription - description of the JME context, for error messages
-     * @returns {Promise} - resolves to the produced HTML element after variables have been substituted.
+     * @param {string} contextDescription - Description of the JME context, for error messages.
+     * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
      */
     makeHTMLFromXML: function(xml, template, scope, contextDescription) {
         var htmlString = $.xsl.transform(template, xml).string;
@@ -207,7 +219,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
 
 
-    /** The Numbas exam has failed so much it can't continue - show an error message and the error
+    /** The Numbas exam has failed so much it can't continue - show an error message and the error.
+     *
      * @param {Error} e
      */
     die: function(e) {
@@ -252,41 +265,46 @@ $.textMetrics = function(el) {
     return ret;
 }
 /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
- * @typedef {Object} Numbas.display.feedbackable
- * 	@property {observable.<Boolean>} answered - has the object been answered?
- * 	@property {observable.<Boolean>} isDirty - has the student's answer changed?
- * 	@property {observable.<Number>} score - number of marks awarded
- *  @property {observable.<Number>} marks - number of marks available
- *  @property {observable.<Number>} credit - proportion of available marks awarded
- *  @property {observable.<Boolean>} doesMarking - does the object do any marking?
- *	@property {observable.<Boolean>} revealed - have the correct answers been revealed?
- *	@property {Boolean} plainScore - Show the score without the "Score: " prefix?
+ *
+ * @typedef {object} Numbas.display.feedbackable
+ * @property {observable.<boolean>} answered - Has the object been answered?
+ * @property {observable.<boolean>} isDirty - Has the student's answer changed?
+ * @property {observable.<number>} score - Number of marks awarded
+ * @property {observable.<number>} marks - Number of marks available
+ * @property {observable.<number>} credit - Proportion of available marks awarded
+ * @property {observable.<boolean>} doesMarking - Does the object do any marking?
+ * @property {observable.<boolean>} revealed - Have the correct answers been revealed?
+ * @property {boolean} plainScore - Show the score without the "Score: " prefix?
  */
 /** Settings for {@link Numbas.display.showScoreFeedback}
- * @typedef {Object} Numbas.display.showScoreFeedback_settings
- * @property {Boolean} showTotalMark - Show the total marks available?
- * @property {Boolean} showActualMark - Show the student's current score?
- * @property {Boolean} showAnswerState - Show the correct/incorrect state after marking?
- * @property {Boolean} reviewShowScore - Show the score once answers have been revealed?
+ *
+ * @typedef {object} Numbas.display.showScoreFeedback_settings
+ * @property {boolean} showTotalMark - Show the total marks available?
+ * @property {boolean} showActualMark - Show the student's current score?
+ * @property {boolean} showAnswerState - Show the correct/incorrect state after marking?
+ * @property {boolean} reviewShowScore - Show the score once answers have been revealed?
  */
 /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
- * @typedef {String} Numbas.display.feedback_state
+ *
+ * @typedef {string} Numbas.display.feedback_state
  */
 /** A model representing feedback on an item which is marked - a question or a part.
- * @typedef {Object} Numbas.display.scoreFeedback
- * @property {observable.<Boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
+ *
+ * @typedef {object} Numbas.display.scoreFeedback
+ * @property {observable.<boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
  * @property {observable.<Numbas.display.feedback_state>} state - The current state of the item, to be shown to the student.
- * @property {observable.<Boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
- * @property {observable.<String>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
- * @property {observable.<String>} message - Text summarising the state of the item.
- * @property {observable.<String>} iconClass - CSS class for the feedback icon.
- * @property {observable.<Object>} iconAttr - A dictionary of attributes for the feedback icon.
+ * @property {observable.<boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
+ * @property {observable.<string>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
+ * @property {observable.<string>} message - Text summarising the state of the item.
+ * @property {observable.<string>} iconClass - CSS class for the feedback icon.
+ * @property {observable.<object>} iconAttr - A dictionary of attributes for the feedback icon.
  */
-/** Update a score feedback box
- * @param {Numbas.display.feedbackable} obj - object to show feedback about
+/** Update a score feedback box.
+ *
+ * @param {Numbas.display.feedbackable} obj - Object to show feedback about.
  * @param {Numbas.display.showScoreFeedback_settings} settings
  * @memberof Numbas.display
- * @returns Numbas.display.scoreFeedback
+ * @returns {Numbas.display.scoreFeedback}
  */
 var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 {

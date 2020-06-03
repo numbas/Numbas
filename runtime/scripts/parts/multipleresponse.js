@@ -23,7 +23,7 @@ var Part = Numbas.parts.Part;
  * * `m_n_2`: pick several from a list. Represented as N answers, 1 choice
  * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
  *
- * @constructor
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -99,11 +99,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         var def;
         /** Load the definition of the choice or answer labels.
+         *
          * @param {JME} def
          * @param {Numbas.jme.Scope} scope
-         * @param {Element} topNode - parent element of the list of labels
-         * @param {String} nodeName - 'choice' or 'answer'
-         * @returns {Number} - the number of items
+         * @param {Element} topNode - Parent element of the list of labels
+         * @param {string} nodeName - 'choice' or 'answer'.
+         * @returns {number} - The number of items.
          */
         function loadDef(def,scope,topNode,nodeName) {
             var values = jme.evaluate(def,scope);
@@ -118,8 +119,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 content.appendChild(span);
                 node.appendChild(content);
                 topNode.appendChild(node);
-                /** Load a string representing the text of a label into the `span` element for this label
-                 * @param {String} str
+                /** Load a string representing the text of a label into the `span` element for this label.
+                 *
+                 * @param {string} str
                  */
                 function load_string(str) {
                     var d = document.createElement('d');
@@ -450,40 +452,46 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     initDisplay: function() {
         this.display = new Numbas.display.MultipleResponsePartDisplay(this);
     },
-    /** Student's last submitted answer/choice selections
-     * @type {Array.<Array.<Boolean>>}
+    /** Student's last submitted answer/choice selections.
+     *
+     * @type {Array.<Array.<boolean>>}
      */
     ticks: [],
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.multipleresponse; },
-    /** Number of choices - used by `m_n_x` parts
-     * @type {Number}
+    /** Number of choices - used by `m_n_x` parts.
+     *
+     * @type {number}
      */
     numChoices: 0,
-    /** Number of answers
-     * @type {Number}
+    /** Number of answers.
+     *
+     * @type {number}
      */
     numAnswers: 0,
-    /** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)
-     * @type {Boolean}
+    /** Have choice and answers been swapped (because of the weird settings for 1_n_2 and m_n_2 parts)?
+     *
+     * @type {boolean}
      */
     flipped: false,
-    /** Properties set when the part is generated
-     * Extends {@link Numbas.parts.Part#settings}
-     * @property {Boolean} maxMarksEnabled - is there a maximum number of marks the student can get?
-     * @property {String} minAnswersString - minimum number of responses the student must select, without variables substituted in.
-     * @property {String} maxAnswersString - maximum number of responses the student must select, without variables substituted in.
-     * @property {Number} minAnswers - minimum number of responses the student must select. Generated from `minAnswersString`.
-     * @property {Number} maxAnswers - maximum number of responses the student must select. Generated from `maxAnswersString`.
-     * @property {String} shuffleChoices - should the order of choices be randomised?
-     * @property {String} shuffleAnswers - should the order of answers be randomised?
-     * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
-     * @property {String} displayType - how to display the response selectors. Can be `radiogroup`, `checkbox` or `dropdownlist`.
-     * @property {Number} displayColumns - how many columns to use to display the choices
-     * @property {String} warningType - what to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit)
-     * @property {String} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}
+    /** Properties set when the part is generated.
+     * Extends {@link Numbas.parts.Part#settings}.
+     *
+     * @property {boolean} maxMarksEnabled - Is there a maximum number of marks the student can get?
+     * @property {string} minAnswersString - Minimum number of responses the student must select, without variables substituted in.
+     * @property {string} maxAnswersString - Maximum number of responses the student must select, without variables substituted in.
+     * @property {number} minAnswers - Minimum number of responses the student must select. Generated from `minAnswersString`.
+     * @property {number} maxAnswers - Maximum number of responses the student must select. Generated from `maxAnswersString`.
+     * @property {string} shuffleChoices - Should the order of choices be randomised?
+     * @property {string} shuffleAnswers - Should the order of answers be randomised?
+     * @property {Array.<Array.<number>>} matrix - Marks for each answer/choice pair. Arranged as `matrix[answer][choice]`.
+     * @property {string} displayType - How to display the response selectors. Can be `radiogroup`, `checkbox` or `dropdownlist`.
+     * @property {number} displayColumns - How many columns to use to display the choices.
+     * @property {string} warningType - What to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit).
+     * @property {string} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}.
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
      */
     settings:
@@ -502,7 +510,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         layoutExpression: ''
     },
     /** The name of the input widget this part uses, if any.
-     * @returns {String}
+     *
+     * @returns {string}
      */
     input_widget: function() {
         switch(this.type) {
@@ -519,8 +528,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 return 'm_n_x';
         }
     },
-    /** Options for this part's input widget
-     * @returns {Object}
+    /** Options for this part's input widget.
+     *
+     * @returns {object}
      */
     input_options: function() {
         return {
@@ -532,6 +542,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         };
     },
     /** Compute the correct answer, based on the given scope - a matrix filled with 1 for choices that should be selected, and 0 otherwise.
+     *
      * @param {Numbas.jme.Scope} scope
      * @returns {matrix}
      */
@@ -649,8 +660,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         settings.matrix = matrix;
         return settings.maxMatrix;
     },
-    /** Store the student's choices 
-     * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
+    /** Store the student's choices.
+     *
+     * @param {object} answer - Object with properties `answer` and `choice`, giving the index of the chosen item.
      * */
     storeTick: function(answer)
     {
@@ -675,14 +687,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     setStudentAnswer: function() {
         this.ticks = util.copyarray(this.stagedAnswer,true);
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
         return Numbas.jme.wrapValue(this.ticks);
     },
-    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
@@ -719,8 +733,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
         }
     },
-    /** Reveal the correct answers, and any distractor messages for the student's choices
-     * Extends {@link Numbas.parts.Part.revealAnswer}
+    /** Reveal the correct answers, and any distractor messages for the student's choices.
+     * Extends {@link Numbas.parts.Part.revealAnswer}.
      */
     revealAnswer: function()
     {
@@ -744,8 +758,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
 
-/** Layouts for multiple response types
- * @type {Object.<function>}
+/** Layouts for multiple response types.
+ *
+ * @type {object.<Function>}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row,column) { return true; },

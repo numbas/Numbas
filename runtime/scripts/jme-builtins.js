@@ -47,7 +47,8 @@ var TFunc = types.TFunc;
 
 var sig = jme.signature;
 
-/** The built-in JME evaluation scope
+/** The built-in JME evaluation scope.
+ *
  * @type {Numbas.jme.Scope}
  * @memberof Numbas.jme
  */
@@ -56,9 +57,10 @@ builtinScope.setVariable('nothing',new types.TNothing);
 var funcs = {};
 
 /** Add a function to the built-in scope.
+ *
  * @see Numbas.jme.builtinScope
- * @param {String} name
- * @param {Array.<Function|String>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+ * @param {string} name
+ * @param {Array.<Function|string>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
  * @param {Function} outcons - The constructor for the output value of the function
  * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
  * @param {Numbas.jme.funcObj_options} options
@@ -753,13 +755,14 @@ newBuiltin('repeat',['?',TNum],TList, null, {
 });
 Numbas.jme.lazyOps.push('repeat');
 
-/** Evaluate the given expressions until the list of conditions is satisfied
- * @param {Array.<String>} names - names for each expression
- * @param {Array.<Numbas.jme.tree>} definitions - definition of each expression
- * @param {Array.<Numbas.jme.tree>} conditions - expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
- * @param {Numbas.jme.Scope} scope - the scope in which to evaluate everything
- * @param {Number} [maxRuns=100] - the maximum number of times to try to generate a set of values
- * @returns {Object.<Numbas.jme.token>} - a dictionary mapping names to their generated values.
+/** Evaluate the given expressions until the list of conditions is satisfied.
+ *
+ * @param {Array.<string>} names - Names for each expression.
+ * @param {Array.<Numbas.jme.tree>} definitions - Definition of each expression.
+ * @param {Array.<Numbas.jme.tree>} conditions - Expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
+ * @param {Numbas.jme.Scope} scope - The scope in which to evaluate everything.
+ * @param {number} [maxRuns=100] - The maximum number of times to try to generate a set of values.
+ * @returns {object.<Numbas.jme.token>} - A dictionary mapping names to their generated values.
  */
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
@@ -911,10 +914,11 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
 }
 /** Map the given expression, considered as a lambda, over the given list.
+ *
  * @param {Numbas.jme.tree} lambda
- * @param {String|Array.<String>} names - either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
- * @param {Numbas.jme.types.TList} list - the list to map over.
- * @param {Numbas.jme.Scope} scope - the scope in which to evaluate
+ * @param {string|Array.<string>} names - Either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
+ * @param {Numbas.jme.types.TList} list - The list to map over.
+ * @param {Numbas.jme.Scope} scope - The scope in which to evaluate.
  * @returns {Numbas.jme.types.TList}
  */
 function mapOverList(lambda,names,list,scope) {
@@ -932,9 +936,10 @@ function mapOverList(lambda,names,list,scope) {
 }
 /** Functions for 'map', by the type of the thing being mapped over.
  * Functions take a JME expression lambda, a name or list of names to map, a value to map over, and a scope to evaluate against.
+ *
  * @memberof Numbas.jme
  * @name mapFunctions
- * @enum {function}
+ * @enum {Function}
  */
 jme.mapFunctions = {
     'list': mapOverList,
@@ -1095,8 +1100,9 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
 
 
 /** Is the given token the value `true`?
+ *
  * @param {Numbas.jme.token} item
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function tok_is_true(item){return item.type=='boolean' && item.value}
 newBuiltin('all',[sig.listof(sig.type('boolean'))],TBool,function(list) {
@@ -1545,6 +1551,7 @@ Numbas.jme.lazyOps.push('diff');
 
 /** Set the content of an HTML element to something corresponding to the value of the given token.
  * If the token is not of type HTML, use {@link jme.typeToDisplayString}.
+ *
  * @param {Element} element
  * @param {Numbas.jme.token} tok
  */
@@ -1809,10 +1816,11 @@ newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.t
     }
 });
 
-/** Helper function for the JME `match` function
+/** Helper function for the JME `match` function.
+ *
  * @param {Numbas.jme.tree} expr
- * @param {String} pattern
- * @param {String} options
+ * @param {string} pattern
+ * @param {string} options
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.token}
  * @see Numbas.jme.rules.Rule#match
@@ -1853,10 +1861,11 @@ newBuiltin('match',[TExpression,TString,TString],TDict,null, {
     }
 });
 
-/** Helper function for the JME `matches` function
+/** Helper function for the JME `matches` function.
+ *
  * @param {Numbas.jme.tree} expr
- * @param {String} pattern
- * @param {String} options
+ * @param {string} pattern
+ * @param {string} options
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.token}
  * @see Numbas.jme.rules.Rule#match
@@ -1884,11 +1893,12 @@ newBuiltin('matches',[TExpression,TString,TString],TBool,null, {
     }
 });
 
-/** Helper function for the JME `replace` function
- * @param {String} pattern
- * @param {String} repl
+/** Helper function for the JME `replace` function.
+ *
+ * @param {string} pattern
+ * @param {string} repl
  * @param {Numbas.jme.tree} expr
- * @param {String} options
+ * @param {string} options
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.token}
  * @see Numbas.jme.rules.Rule#replaceAll

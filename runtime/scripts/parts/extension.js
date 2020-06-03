@@ -15,7 +15,8 @@ Numbas.queueScript('parts/extension',['base','util','part'],function() {
 var util = Numbas.util;
 var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
- * @constructor
+ *
+ * @class
  * @param {Element} xml
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
@@ -44,13 +45,15 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         this.markingComment(R('part.extension.not implemented',{name:'mark'}));
     },
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
-     * @returns {Object}
+     *
+     * @returns {object}
      */
     createSuspendData: function() {
         return {};
     },
     /** Get the suspend data created in a previous session for this part, if it exists.
-     * @returns {Object}
+     *
+     * @returns {object}
      */
     loadSuspendData: function() {
         if(!this.store) {

@@ -20,49 +20,51 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     /** A line of feedback to give to the student, produced while marking their answer.
      * Can modify the credit awarded.
      *
-     * @typedef {Object} Numbas.marking.feedback_item
+     * @typedef {object} Numbas.marking.feedback_item
      *
-     * @property {String} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
-     * @property {Number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
-     * @property {String} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
-     * @property {String} [message] - A message to display to the student.
+     * @property {string} op - The operation to perform. See {@link Numbas.marking.FeedbackOps}
+     * @property {number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
+     * @property {string} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
+     * @property {string} [message] - A message to display to the student.
      */
 
-    /** Kinds of feedback item
+    /** Kinds of feedback item.
+     *
      * @readonly
-     * @enum {String}
+     * @enum {string}
      * @memberof Numbas.marking
      */
     var FeedbackOps = Numbas.marking.FeedbackOps = {
-        /** Set the credit to the given value */
+        /** Set the credit to the given value. */
         SET_CREDIT: 'set_credit',
 
-        /** Add the given amount of credit */
+        /** Add the given amount of credit. */
         ADD_CREDIT: 'add_credit',
 
-        /** Multiply the current credit by the given amount */
+        /** Multiply the current credit by the given amount. */
         MULTIPLY_CREDIT: 'multiply_credit',
 
-        /** Subtract the given amount of credit */
+        /** Subtract the given amount of credit. */
         SUB_CREDIT: 'sub_credit',
 
-        /** End marking */
+        /** End marking. */
         END: 'end',
 
-        /** Give the student a warning next to the answer widget */
+        /** Give the student a warning next to the answer widget. */
         WARNING: 'warning',
 
-        /** Give the student a message */
+        /** Give the student a message. */
         FEEDBACK: 'feedback',
 
-        /** Add the given list of items to the end of the current list of feedback items */
+        /** Add the given list of items to the end of the current list of feedback items. */
         CONCAT: 'concat'
     }
 
     /** Constructors for feedback items.
+     *
      * @see Numbas.marking.feedback_item
      * @memberof Numbas.marking
-     * @type {Object.<Function>}
+     * @type {object.<Function>}
      */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit,reason,message) {
@@ -92,10 +94,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }
 
     /** Create a JME function which modifies the state.
-     * @param {String} name
-     * @param {Array.<Function|String>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+     *
+     * @param {string} name
+     * @param {Array.<Function|string>} args - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
      * @param {Function} outtype - The constructor for the output value of the function
-     * @param {Function} fn - a function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
+     * @param {Function} fn - A function which returns an object `{state,return}`, where `state` is a list of {@link Numbas.marking.feedback_item} to add to the state, and `return` is a {@link Numbas.jme.token}, the result of the function.
      * @see Numbas.marking.StatefulScope
      * @returns {Numbas.jme.funcObj}
      */
@@ -240,10 +243,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return tree;
     }
 
-    /** Submit the given answer to the given part
+    /** Submit the given answer to the given part.
+     *
      * @param {Numbas.parts.Part} part
      * @param {*} answer
-     * @returns {Numbas.jme.token} - a dictinoary with keys "credit", "marks", "feedback", "answered".
+     * @returns {Numbas.jme.token} - A dictionary with keys "credit", "marks", "feedback", "answered".
      */
     function submit_part(part,answer) {
         var originalAnswer = part.stagedAnswer;
@@ -350,18 +354,18 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
 
 
     /** A JME scope with marking state attached.
-     *  The "current" state is a list of feedback items. 
-     *  The scope can also refer to previously computed states by name.
-     *  The state can be modified by functions as they are called.
-     *  This should be the base 
+     * The "current" state is a list of feedback items. 
+     * The scope can also refer to previously computed states by name.
+     * The state can be modified by functions as they are called.
+     * This should be the base.
      *
-     *  @memberof Numbas.marking
-     *  @augments Numbas.jme.Scope
-     *  @constructor
-     *  @property {Numbas.marking.feedback_item[]} state
-     *  @property {Object.<Numbas.marking.feedback_item[]>} states - Previously computed states
-     *  @property {Object.<Boolean>} state_valid - Record of whether previously computed states were valid
-     *  @property {Object.<Error>} state_errors - The errors that caused states to become invalid, if any.
+     * @memberof Numbas.marking
+     * @augments Numbas.jme.Scope
+     * @class
+     * @property {Numbas.marking.feedback_item[]} state
+     * @property {object.<Numbas.marking.feedback_item[]>} states - Previously computed states.
+     * @property {object.<boolean>} state_valid - Record of whether previously computed states were valid.
+     * @property {object.<Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
         this.nesting_depth = 0;
@@ -398,24 +402,24 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
 
     /** A definition of a marking note.
      *
-     *  The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+     * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
      *
-     * @typedef {String} Numbas.marking.note_definition
+     * @typedef {string} Numbas.marking.note_definition
      */
 
     /** A note forming part of a marking script.
-     *  Evaluates to a JME value and a list of feedback items.
+     * Evaluates to a JME value and a list of feedback items.
      *
-     *  @memberof Numbas.marking
-     *  @constructor
+     * @memberof Numbas.marking
+     * @class
      *
-     *  @property {String} name
-     *  @property {String} description
-     *  @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
-     *  @property {Numbas.jme.tree} tree - The compiled form of the expression
-     *  @property {String[]} vars - The names of the variables this note depends on
-     *  
-     *  @param {JME} source
+     * @property {string} name
+     * @property {string} description
+     * @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
+     * @property {Numbas.jme.tree} tree - The compiled form of the expression.
+     * @property {string[]} vars - The names of the variables this note depends on.
+     * 
+     * @param {JME} source
      */
     var MarkingNote = marking.MarkingNote = function(source) {
         source = source.trim();
@@ -445,29 +449,29 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
 
     /** The result of a marking script.
      *
-     * @typedef {Object} Numbas.marking.marking_script_result
+     * @typedef {object} Numbas.marking.marking_script_result
      *
-     * @property {Object.<Numbas.marking.feedback_item[]>} states - the feedback resulting from each of the notes
-     * @property {Object.<Numbas.jme.token>} values - the values of each of the notes
-     * @property {Object.<Boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}
-     * @property {Object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}
+     * @property {object.<Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
+     * @property {object.<Numbas.jme.token>} values - The values of each of the notes.
+     * @property {object.<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
+     * @property {object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
     /** A script to mark a part.
-     *  A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
+     * A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
      *
-     *  Two notes are required:
-     *  
-     *  * The `mark` note is the final note, used to provide feedback on the part.
-     *  * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
-     *  
-     *  @memberof Numbas.marking
-     *  @constructor
-     *  
-     *  @param {String} source - The definitions of the script's notes.
-     *  @param {Numbas.marking.MarkingScript} [base] - a base script to extend.
+     * Two notes are required:
+     * 
+     * * The `mark` note is the final note, used to provide feedback on the part.
+     * * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     * 
+     * @memberof Numbas.marking
+     * @class
+     * 
+     * @param {string} source - The definitions of the script's notes.
+     * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
      *
-     *  @property {Numbas.marking.MarkingNote[]} notes
+     * @property {Numbas.marking.MarkingNote[]} notes
      */
     var MarkingScript = marking.MarkingScript = function(source, base) {
         this.source = source;
@@ -498,15 +502,16 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }
     MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
 
-        /** The source code of the script
-         * @type {String}
+        /** The source code of the script.
+         *
+         * @type {string}
          */
         source: '',
 
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {Object.<Numbas.jme.token>} variables - Extra variables defined in the scope
+         * @param {object.<Numbas.jme.token>} variables - Extra variables defined in the scope.
          *
          * @returns {Numbas.marking.marking_script_result}
          */
@@ -532,14 +537,14 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         }
     }
 
-    /** Compute the marking note with the given name in the given scope
+    /** Compute the marking note with the given name in the given scope.
      *
      * @memberof Numbas.marking
      * @function
      * @see Numbas.jme.variables.computeVariable
      *
-     * @param {String} name
-     * @param {Object} todo - dictionary of notes still to evaluate
+     * @param {string} name
+     * @param {object} todo - Dictionary of notes still to evaluate.
      * @param {Numbas.marking.StatefulScope} scope
      *
      * @returns {Numbas.jme.token}
@@ -582,15 +587,17 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return scope.variables[name];
     }
     /** The result of attempting to mark a part.
+     *
      * @typedef Numbas.marking.finalised_state
-     * @type {Object}
-     * @property {Boolean} valid - Can the answer be marked?
-     * @property {Number} credit - Proportion of the credit to award
-     * @property {Array.<Object>} states - Feedback actions
+     * @type {object}
+     * @property {boolean} valid - Can the answer be marked?
+     * @property {number} credit - Proportion of the credit to award.
+     * @property {Array.<object>} states - Feedback actions.
      */
 
     /** Run through a sequence of state operations, accumulating credit.
      * It might look like this is duplicated in `Numbas.parts.Part#apply_feedback`, but we need to be able to get a description of what a sequence of operations does in abstract so it can be reused in marking scripts for parent parts.
+     *
      * @see Numbas.parts.Part#apply_feedback
      * @function
      * @memberof Numbas.marking

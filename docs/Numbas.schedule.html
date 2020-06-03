@@ -189,7 +189,7 @@
 
 
 <div class="description">
-    <p>Functions to call</p>
+    <p>Functions to call.</p>
 </div>
 
 
@@ -237,7 +237,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L22">runtime/scripts/schedule.js, line 22</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L24">runtime/scripts/schedule.js, line 24</a>
     </li></ul></dd>
     
 
@@ -257,13 +257,13 @@
         
             
 <div class="item member">
-<h4 class="name" id=".completed"><span class="type-signature">(static) </span>completed<span class="type-signature"> :Number</span></h4>
+<h4 class="name" id=".completed"><span class="type-signature">(static) </span>completed<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    <p>Number of tasks completed</p>
+    <p>Number of tasks completed.</p>
 </div>
 
 
@@ -272,7 +272,230 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L34">runtime/scripts/schedule.js, line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".halt_error"><span class="type-signature">(static) </span>halt_error<span class="type-signature"> :Error</span></h4>
+
+
+
+
+<div class="description">
+    <p>Error which caused the scheduler to halt.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L50">runtime/scripts/schedule.js, line 50</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".halted"><span class="type-signature">(static) </span>halted<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Should the scheduler stop running tasks?
+Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.schedule.halt</code></a>.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L45">runtime/scripts/schedule.js, line 45</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".lifts"><span class="type-signature">(static) </span>lifts<span class="type-signature"> :Array.&lt;Array.&lt;function()>></span></h4>
+
+
+
+
+<div class="description">
+    <p>Bits of queue that have been picked up while a task performs sub-tasks.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;function()>></span>
 
 
         </li>
@@ -331,13 +554,13 @@
         
             
 <div class="item member">
-<h4 class="name" id=".halt_error"><span class="type-signature">(static) </span>halt_error<span class="type-signature"> :Error</span></h4>
+<h4 class="name" id=".total"><span class="type-signature">(static) </span>total<span class="type-signature"> :number</span></h4>
 
 
 
 
 <div class="description">
-    <p>Error which caused the scheduler to halt</p>
+    <p>Total number of tasks ever scheduled.</p>
 </div>
 
 
@@ -346,7 +569,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a></span>
+<span class="param-type">number</span>
 
 
         </li>
@@ -385,230 +608,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L42">runtime/scripts/schedule.js, line 42</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".halted"><span class="type-signature">(static) </span>halted<span class="type-signature"> :Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Should the scheduler stop running tasks?
-Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.schedule.halt</code></a></p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L38">runtime/scripts/schedule.js, line 38</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".lifts"><span class="type-signature">(static) </span>lifts<span class="type-signature"> :Array.&lt;Array.&lt;function()>></span></h4>
-
-
-
-
-<div class="description">
-    <p>Bits of queue that have been picked up while a task performs sub-tasks</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;function()>></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L25">runtime/scripts/schedule.js, line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".total"><span class="type-signature">(static) </span>total<span class="type-signature"> :Number</span></h4>
-
-
-
-
-<div class="description">
-    <p>Total number of tasks ever scheduled</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L33">runtime/scripts/schedule.js, line 33</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L39">runtime/scripts/schedule.js, line 39</a>
     </li></ul></dd>
     
 
@@ -648,7 +648,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
 
 <div class="description">
-    <p>Add a task to the queue</p>
+    <p>Add a task to the queue.</p>
 </div>
 
 
@@ -703,7 +703,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
             
 
-            <td class="description last"><p>the function to run, or a dictionary <code>{task: fn, error: fn}</code>, where <code>error</code> is a callback if an error is caused</p></td>
+            <td class="description last"><p>The function to run, or a dictionary <code>{task: fn, error: fn}</code>, where <code>error</code> is a callback if an error is caused.</p></td>
         </tr>
 
     
@@ -716,7 +716,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+<span class="param-type">object</span>
 
 
             
@@ -726,7 +726,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
             
 
-            <td class="description last"><p>what <code>this</code> should be when the function is called</p></td>
+            <td class="description last"><p>What <code>this</code> should be when the function is called.</p></td>
         </tr>
 
     
@@ -781,7 +781,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L61">runtime/scripts/schedule.js, line 61</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L71">runtime/scripts/schedule.js, line 71</a>
     </li></ul></dd>
     
 
@@ -812,7 +812,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
 
 <div class="description">
-    <p>Put the last lifted queue back on the end of the real queue</p>
+    <p>Put the last lifted queue back on the end of the real queue.</p>
 </div>
 
 
@@ -870,7 +870,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L116">runtime/scripts/schedule.js, line 116</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L126">runtime/scripts/schedule.js, line 126</a>
     </li></ul></dd>
     
 
@@ -1008,7 +1008,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L48">runtime/scripts/schedule.js, line 48</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L57">runtime/scripts/schedule.js, line 57</a>
     </li></ul></dd>
     
 
@@ -1048,7 +1048,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
 
 <div class="description">
-    <p>'pick up' the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called</p>
+    <p>Pick up the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called.</p>
 </div>
 
 
@@ -1106,7 +1106,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L110">runtime/scripts/schedule.js, line 110</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L120">runtime/scripts/schedule.js, line 120</a>
     </li></ul></dd>
     
 
@@ -1196,7 +1196,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L93">runtime/scripts/schedule.js, line 93</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L103">runtime/scripts/schedule.js, line 103</a>
     </li></ul></dd>
     
 
@@ -1234,7 +1234,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+<span class="param-type">object</span>
 
 
         </li>
@@ -1309,7 +1309,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
             
 
-            <td class="description last"><p>the promise's <code>resolve</code> function</p></td>
+            <td class="description last"><p>The promise's <code>resolve</code> function.</p></td>
         </tr>
 
     
@@ -1332,7 +1332,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
             
 
-            <td class="description last"><p>the promise's <code>reject</code> function</p></td>
+            <td class="description last"><p>The promise's <code>reject</code> function.</p></td>
         </tr>
 
     
@@ -1345,7 +1345,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
             
@@ -1355,7 +1355,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 
             
 
-            <td class="description last"><p>has the promise been resolved?</p></td>
+            <td class="description last"><p>Has the promise been resolved?</p></td>
         </tr>
 
     
@@ -1394,7 +1394,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L130">runtime/scripts/schedule.js, line 130</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L141">runtime/scripts/schedule.js, line 141</a>
     </li></ul></dd>
     
 
@@ -1425,7 +1425,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+<span class="param-type">object</span>
 
 
         </li>
@@ -1539,7 +1539,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L53">runtime/scripts/schedule.js, line 53</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/schedule.js#L62">runtime/scripts/schedule.js, line 62</a>
     </li></ul></dd>
     
 
@@ -1665,10 +1665,6 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._endTime"><a href="Numbas.display.ExamDisplay.html#._endTime">Numbas.display.ExamDisplay._endTime</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._startTime"><a href="Numbas.display.ExamDisplay.html#._startTime">Numbas.display.ExamDisplay._startTime</a></li>
-		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
@@ -1690,6 +1686,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endTime"><a href="Numbas.display.ExamDisplay.html#.endTime">Numbas.display.ExamDisplay.endTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
@@ -1713,7 +1711,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">Numbas.display.ExamDisplay.passwordFeedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -1744,6 +1742,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.showTiming"><a href="Numbas.display.ExamDisplay.html#.showTiming">Numbas.display.ExamDisplay.showTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startRegen"><a href="Numbas.display.ExamDisplay.html#.startRegen">Numbas.display.ExamDisplay.startRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startTime"><a href="Numbas.display.ExamDisplay.html#.startTime">Numbas.display.ExamDisplay.startTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.timeSpent"><a href="Numbas.display.ExamDisplay.html#.timeSpent">Numbas.display.ExamDisplay.timeSpent</a></li>
 		
@@ -1809,9 +1809,13 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.part"><a href="Numbas.display.PartDisplay.html#.part">Numbas.display.PartDisplay.part</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.partTreeCSS"><a href="Numbas.display.PartDisplay.html#.partTreeCSS">Numbas.display.PartDisplay.partTreeCSS</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.pd.html_promise"><a href="Numbas.display.PartDisplay.html#.pd.html_promise">Numbas.display.PartDisplay.pd.html_promise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.question"><a href="Numbas.display.PartDisplay.html#.question">Numbas.display.PartDisplay.question</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.reachedDeadEnd"><a href="Numbas.display.PartDisplay.html#.reachedDeadEnd">Numbas.display.PartDisplay.reachedDeadEnd</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.removeWarnings"><a href="Numbas.display.PartDisplay.html#.removeWarnings">Numbas.display.PartDisplay.removeWarnings</a></li>
 		
@@ -1863,11 +1867,15 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateNextParts"><a href="Numbas.display.PartDisplay.html#.updateNextParts">Numbas.display.PartDisplay.updateNextParts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.visible"><a href="Numbas.display.PartDisplay.html#.visible">Numbas.display.PartDisplay.visible</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.whatNextMessage"><a href="Numbas.display.PartDisplay.html#.whatNextMessage">Numbas.display.PartDisplay.whatNextMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
@@ -2341,6 +2349,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#make_re"><a href="Numbas.jme.Parser.html#make_re">Numbas.jme.Parser#make_re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#op"><a href="Numbas.jme.Parser.html#op">Numbas.jme.Parser#op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
@@ -2558,6 +2568,14 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 			<li class="search-result" data-longname="Numbas.jme.types.TVector"><a href="Numbas.jme.types.TVector.html">Numbas.jme.types.TVector</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString"><a href="Numbas.jme.html#.typeToDisplayString">Numbas.jme.typeToDisplayString</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.decimal"><a href="Numbas.jme.html#.typeToDisplayString#.decimal">Numbas.jme.typeToDisplayString.decimal</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.html"><a href="Numbas.jme.html#.typeToDisplayString#.html">Numbas.jme.typeToDisplayString.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
 		
@@ -4769,6 +4787,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="Numbas.Question#adviceDisplayed"><a href="Numbas.Question.html#adviceDisplayed">Numbas.Question#adviceDisplayed</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#allParts"><a href="Numbas.Question.html#allParts">Numbas.Question#allParts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#answered"><a href="Numbas.Question.html#answered">Numbas.Question#answered</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#calculateScore"><a href="Numbas.Question.html#calculateScore">Numbas.Question#calculateScore</a></li>
@@ -4814,6 +4834,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 			<li class="search-result" data-longname="Numbas.Question#extraPartOrder"><a href="Numbas.Question.html#extraPartOrder">Numbas.Question#extraPartOrder</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#generateVariables"><a href="Numbas.Question.html#generateVariables">Numbas.Question#generateVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
 		
@@ -4870,6 +4892,8 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#setCurrentPart"><a href="Numbas.Question.html#setCurrentPart">Numbas.Question#setCurrentPart</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#setErrorCarriedForwardBackReferences"><a href="Numbas.Question.html#setErrorCarriedForwardBackReferences">Numbas.Question#setErrorCarriedForwardBackReferences</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
 		
@@ -5411,8 +5435,6 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
 		
-			<li class="search-result" data-longname="visible"><a href="global.html#visible">visible</a></li>
-		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -5441,7 +5463,7 @@ Don't use this directly - use <a href="Numbas.schedule.html#.halt"><code>Numbas.
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li><li><a href="global.html#visible">visible</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

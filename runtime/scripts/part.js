@@ -19,37 +19,42 @@ var marking = Numbas.marking;
 
 var SAVE_STAGED_ANSWER_FREQUENCY = 5000;
 
-/** Definitions of custom part types
+/** Definitions of custom part types.
+ *
  * @name custom_part_types
- * @type {Object}
+ * @type {object}
  * @memberof Numbas
  */
 
 /** A unique identifier for a {@link Numbas.parts.Part} object, of the form `qXpY[gZ|sZ]`. Numbering starts from zero, and the `gZ` bit is used only when the part is a gap, and `sZ` is used if it's a step.
+ *
  * @typedef Numbas.parts.partpath
- * @type {String}
+ * @type {string}
  */
-/** Part type constructors
- * These functions aren't called directly - they're the original part constructor objects before they're extended with the generic part methods, kept for reference so their methods can be reused by other parts
+/** Part type constructors.
+ * These functions aren't called directly - they're the original part constructor objects before they're extended with the generic part methods, kept for reference so their methods can be reused by other parts.
+ *
  * @see Numbas.partConstructors
  * @namespace Numbas.parts
  * @memberof Numbas
  */
 Numbas.parts = {};
-/** Associate part type names with their object constructors
+/** Associate part type names with their object constructors.
  * These constructors are called by {@link Numbas.createPart} - they should be finalised constructors with all the generic part methods implemented.
- * Most often, you do this by extending {@link Numbas.parts.Part}
+ * Most often, you do this by extending {@link Numbas.parts.Part}.
+ *
  * @memberof Numbas
  */
 var partConstructors = Numbas.partConstructors = {};
 /** Create a question part based on an XML definition.
+ *
  * @memberof Numbas
  * @param {Element} xml
  * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
@@ -75,13 +80,14 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
     return part;
 }
 /** Create a question part based on an XML definition.
+ *
  * @memberof Numbas
- * @param {Object} data
+ * @param {object} data
  * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
  * @param {Numbas.parts.Part} [parentPart]
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
@@ -95,13 +101,14 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
     return part;
 }
 /** Create a new question part.
+ *
  * @see Numbas.partConstructors
- * @param {String} type
+ * @param {string} type
  * @param {Numbas.parts.partpath} path
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {Numbas.jme.Scope} [scope] - scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
@@ -121,15 +128,16 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
     }
 }
 
-/** Base question part object
- * @constructor
+/** Base question part object.
+ *
+ * @class
  * @memberof Numbas.parts
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
  * @param {Numbas.storage.BlankStorage} [store]
- * @property {Boolean} isStep - is this part a step?
- * @property {Boolean} isGap - is this part a gap?
+ * @property {boolean} isStep - Is this part a step?
+ * @property {boolean} isGap - Is this part a gap?
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function( path, question, parentPart, store)
@@ -174,8 +182,9 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
 
     Object.defineProperty(this,"credit", {
         /** Proportion of available marks awarded to the student - i.e. `score/marks`. Penalties will affect this instead of the raw score, because of things like the steps marking algorithm.
-         * @type {Number}
-         * @returns {Number}
+         *
+         * @type {number}
+         * @returns {number}
          */
         get: function() {
             return this.creditFraction.toFloat();
@@ -186,19 +195,23 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     });
 }
 Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
-    /** Storage engine
+    /** Storage engine.
+     *
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
-    /** XML defining this part
+    /** XML defining this part.
+     *
      * @type {Element}
      */
     xml: '',
-    /** JSON defining this part
-     * @type {Object}
+    /** JSON defining this part.
+     *
+     * @type {object}
      */
     json: null,
-    /** Load the part's settings from an XML <part> node
+    /** Load the part's settings from an XML `<part>` node.
+     *
      * @param {Element} xml
      */
     loadFromXML: function(xml) {
@@ -269,8 +282,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.setScript(name, order, script);
         }
     },
-    /** Load the part's settings from a JSON object
-     * @param {Object} data
+    /** Load the part's settings from a JSON object.
+     *
+     * @param {object} data
      */
     loadFromJSON: function(data) {
         this.json = data;
@@ -323,7 +337,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             });
         }
     },
-    /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded
+    /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded.
      */
     finaliseLoad: function() {
         this.applyScripts();
@@ -342,13 +356,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         });
     },
     /** Initialise this part's display object.
-     *  Only called if the question this part belongs to has a display
+     * Only called if the question this part belongs to has a display.
      */
     initDisplay: function() {
         this.display = new Numbas.display.PartDisplay(this);
     },
-    /** Load saved data about this part from storage
-     *  The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
+    /** Load saved data about this part from storage.
+     * The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
      */
     resume: function() {
         this.resuming = true;
@@ -377,27 +391,30 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         })
         this.resuming = false;
     },
-    /** Add a step to this part
+    /** Add a step to this part.
+     *
      * @param {Numbas.parts.Part} step
-     * @param {Number} index - position of the step
+     * @param {number} index - Position of the step.
      */
     addStep: function(step, index) {
         step.isStep = true;
         this.steps.splice(index,0,step);
         this.stepsMarks += step.marks;
     },
-    /** Add an alternative to this part
+    /** Add an alternative to this part.
+     *
      * @param {Numbas.parts.Part} alternative
-     * @param {Number} index - position of the alternative
+     * @param {number} index - Position of the alternative.
      */
     addAlternative: function(alternative, index) {
         alternative.isAlternative = true;
         this.alternatives.splice(index,0,alternative);
     },
-    /** Add a variable replacement for this part's adaptive marking
-     * @param {String} variable - the name of the variable to replace
-     * @param {String} part - the path of the part to use
-     * @param {Boolean} must_go_first - Must the referred part be answered before this part can be marked?
+    /** Add a variable replacement for this part's adaptive marking.
+     *
+     * @param {string} variable - The name of the variable to replace.
+     * @param {string} part - The path of the part to use.
+     * @param {boolean} must_go_first - Must the referred part be answered before this part can be marked?
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
@@ -409,13 +426,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.settings.errorCarriedForwardReplacements.push(vr);
     },
     /** The base marking script for this part.
+     *
      * @abstract
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() {},
-    /** Set this part's JME marking script
-     * @param {String} markingScriptString
-     * @param {Boolean} extend_base - Does this script extend the built-in script?
+    /** Set this part's JME marking script.
+     *
+     * @param {string} markingScriptString
+     * @param {boolean} extend_base - Does this script extend the built-in script?
      */
     setMarkingScript: function(markingScriptString, extend_base) {
         var p = this;
@@ -429,10 +448,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
     },
-    /** Set a custom JavaScript script
-     * @param {String} name - the name of the method to override
-     * @param {String} order - When should the script run? `'instead'`, `'before'` or `'after'`
-     * @param {String} script - the source code of the script
+    /** Set a custom JavaScript script.
+     *
+     * @param {string} name - The name of the method to override.
+     * @param {string} order - When should the script run? `'instead'`, `'before'` or `'after'`.
+     * @param {string} script - The source code of the script.
      * @see {Numbas.parts.Part#applyScripts}
      */
     setScript: function(name,order,script) {
@@ -450,36 +470,43 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         this.scripts[name] = {script: script, order: order};
     },
-    /** The question this part belongs to
+    /** The question this part belongs to.
+     *
      * @type {Numbas.Question}
      */
     question: undefined,
-    /** Reference to parent of this part, if this is a gap or a step
+    /** Reference to parent of this part, if this is a gap or a step.
+     *
      * @type {Numbas.parts.Part}
      */
     parentPart: undefined,
     /** A question-wide unique 'address' for this part.
+     *
      * @type {Numbas.parts.partpath}
      */
     path: '',
     /** A readable name for this part, to show to the student.
-     * Change it with {@link Numbas.parts.Part#setName}
-     * @type {String}
+     * Change it with {@link Numbas.parts.Part#setName}.
+     *
+     * @type {string}
      */
     name: '',
     /** Should a custom name be used?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     useCustomName: false,
     /** Custom name for this part, or null if none.
      * Variables will be substituted into this string from the part's scope.
-     * @type {String}
+     *
+     * @type {string}
      */
     customName: '',
-    /** Assign a name to this part, and then assign names to its children
-     * @param {Number} index - the number of parts before this one that have names.
-     * @param {Number} siblings - the number of siblings this part has
-     * @returns {Boolean} true if this part has a name that should increment the label counter
+    /** Assign a name to this part, and then assign names to its children.
+     *
+     * @param {number} index - The number of parts before this one that have names.
+     * @param {number} siblings - The number of siblings this part has.
+     * @returns {boolean} `true` if this part has a name that should increment the label counter.
      */
     assignName: function(index,siblings) {
         var p = this;
@@ -496,7 +523,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.name = util.letterOrdinal(index)+')';
         }
 
-        /** Assign names to the given child parts
+        /** Assign names to the given child parts.
+         *
          * @param {Array.<Numbas.parts.Part>} children
          */
         function assign_child_names(children) {
@@ -518,104 +546,126 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return this.name != '';
     },
     /** This part's type, e.g. "jme", "numberentry", ...
-     * @type {String}
+     *
+     * @type {string}
      */
     type: '',
-    /** Maximum marks available for this part
-     * @type {Number}
+    /** Maximum marks available for this part.
+     *
+     * @type {number}
      */
     marks: 0,
-    /** Marks available for the steps, if any
-     * @type {Number}
+    /** Marks available for the steps, if any.
+     *
+     * @type {number}
      */
     stepsMarks: 0,
     /** Credit as a fraction. Used to avoid simple floating point errors.
+     *
      * @type {Numbas.math.Fraction}
      */
     creditFraction: new math.Fraction(0,1),
-    /** Student's score on this part
-     * @type {Number}
+    /** Student's score on this part.
+     *
+     * @type {number}
      */
     score: 0,
-    /** Messages explaining how marks were awarded
+    /** Messages explaining how marks were awarded.
+     *
      * @type {Array.<Numbas.parts.feedbackmessage>}
      */
     markingFeedback: [],
-    /** The result of the last marking run
+    /** The result of the last marking run.
+     *
      * @type {Numbas.marking.finalised_state}
      */
     finalised_result: {valid: false, credit: 0, states: []},
-    /** Warnings shown next to the student's answer
-     * @type {Array.<String>}
+    /** Warnings shown next to the student's answer.
+     *
+     * @type {Array.<string>}
      */
     warnings: [],
     /** Has the student changed their answer since last submitting?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     isDirty: false,
-    /** Student's answers as visible on the screen (not necessarily yet submitted)
-     * @type {Array.<String>}
+    /** Student's answers as visible on the screen (not necessarily yet submitted).
+     *
+     * @type {Array.<string>}
      */
     stagedAnswer: undefined,
 
     /** Has this part been answered?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     answered: false,
 
-    /** Child gapfill parts
+    /** Child gapfill parts.
+     *
      * @type {Numbas.parts.Part[]}
      */
     gaps: [],
-    /** Child step parts
+    /** Child step parts.
+     *
      * @type {Numbas.parts.Part[]}
      */
     steps: [],
-    /** Child alternative parts
+    /** Child alternative parts.
+     *
      * @type {Numbas.parts.Part[]}
      */
     alternatives: [],
-    /** Feedback message shown if this part is used as an alternative
-     * @type {String}
+    /** Feedback message shown if this part is used as an alternative.
+     *
+     * @type {string}
      */
     alternativeFeedbackMessage: '',
     /** Have the steps been show for this part?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     stepsShown: false,
-    /** Is the steps display open? (Students can toggle it, but that doesn't affect whether they get the penalty)
-     * @type {Boolean}
+    /** Is the steps display open?
+     *
+     * @type {boolean}
      */
     stepsOpen: false,
-    /** True if this part should be resubmitted because another part it depended on has changed
-     * @type {Boolean}
+    /** True if this part should be resubmitted because another part it depended on has changed.
+     *
+     * @type {boolean}
      */
     shouldResubmit: false,
-    /** Does this mark do any marking? False for information only parts
-     * @type {Boolean}
+    /** Does this mark do any marking? False for information only parts.
+     *
+     * @type {boolean}
      */
     doesMarking: true,
     /** Has the answer to this part been revealed?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     revealed: false,
     /** Is this part locked? If false, the student can change and submit their answer.
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     locked: false,
-    /** Properties set when the part is generated
-     * @type {Object}
-     * @property {Number} stepsPenalty - Number of marks to deduct when the steps are shown
-     * @property {Boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
-     * @property {Number} minimumMarks - Lower limit on the score the student can be awarded for this part
-     * @property {Boolean} showCorrectAnswer - Show the correct answer on reveal?
-     * @property {Boolean} showFeedbackIcon - Show the tick/cross feedback symbol after this part is submitted?
-     * @property {Boolean} hasVariableReplacements - Does this part have any variable replacement rules?
-     * @property {String} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`
-     * @property {String} exploreObjective - objective that this part's score counts towards
-     * @property {String} suggestGoingBack - in explore mode, suggest to the student to go back to the previous part after completing this one?
-     * @property {Number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used
-     * @property {Boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
+    /** Properties set when the part is generated.
+     *
+     * @type {object}
+     * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown.
+     * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
+     * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part.
+     * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
+     * @property {boolean} showFeedbackIcon - Show the tick/cross feedback symbol after this part is submitted?
+     * @property {boolean} hasVariableReplacements - Does this part have any variable replacement rules?
+     * @property {string} variableReplacementStrategy - `'originalfirst'` or `'alwaysreplace'`.
+     * @property {string} exploreObjective - Name of the objective that this part's score counts towards.
+     * @property {string} suggestGoingBack - In explore mode, suggest to the student to go back to the previous part after completing this one?
+     * @property {number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used.
+     * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      */
     settings:
     {
@@ -633,14 +683,16 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @type {Numbas.marking.MarkingScript}
      */
     markingScript: null,
 
-    /** Throw an error, with the part's identifier prepended to the message
-     * @param {String} message
-     * @param {Object} args - arguments for the error message
-     * @param {Error} [originalError] - if this is a re-thrown error, the original error object
+    /** Throw an error, with the part's identifier prepended to the message.
+     *
+     * @param {string} message
+     * @param {object} args - Arguments for the error message.
+     * @param {Error} [originalError] - If this is a re-thrown error, the original error object.
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
@@ -653,13 +705,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
-     * @returns {String}
+     *
+     * @returns {string}
      */
     input_widget: function() {
         return null;
     },
-    /** Options for this part's input widget
-     * @returns {Object}
+    /** Options for this part's input widget.
+     * 
+     * @returns {object}
      */
     input_options: function() {
         return {};
@@ -677,7 +731,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                     break;
                 default:
                     var originalScript = this[name];
-                    /** Create a function which runs `script` (instead of the built-in script)
+                    /** Create a function which runs `script` (instead of the built-in script).
+                     *
                      * @param {Function} script
                      * @returns {Function}
                      */
@@ -686,7 +741,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             return script.apply(part,arguments);
                         }
                     }
-                    /** Create a function which runs `script` before `originalScript`
+                    /** Create a function which runs `script` before `originalScript`.
+                     *
                      * @param {Function} script
                      * @param {Function} originalScript
                      * @returns {Function}
@@ -697,7 +753,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                             return originalScript.apply(part,arguments);
                         }
                     }
-                    /** Create a function which runs `script` after `originalScript`
+                    /** Create a function which runs `script` after `originalScript`.
+                     *
                      * @param {Function} script
                      * @param {Function} originalScript
                      * @returns {Function}
@@ -723,11 +780,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
     /** Associated display object. It is not safe to assume this is always present - in the editor, parts have no display.
+     *
      * @type {Numbas.display.PartDisplay}
      */
     display: undefined,
     /** Give the student a warning about this part.
-     * @param {String} warning
+     *
+     * @param {string} warning
      * @see Numbas.display.PartDisplay.warning
      */
     giveWarning: function(warning)
@@ -735,23 +794,26 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.warnings.push(warning);
         this.display && this.display.warning(warning);
     },
-    /** Set the list of warnings
-     * @param {Array.<String>} warnings
+    /** Set the list of warnings.
+     *
+     * @param {Array.<string>} warnings
      * @see Numbas.display.PartDisplay.warning
      */
     setWarnings: function(warnings) {
         this.warnings = warnings;
         this.display && this.display.setWarnings(warnings);
     },
-    /** Remove all warnings
+    /** Remove all warnings.
+     *
      * @see Numbas.display.PartDisplay.warning
      */
     removeWarnings: function() {
         this.setWarnings([]);
     },
 
-    /** The total marks available for this part, after applying adaptive marking and steps penalties
-     * @returns {Number}
+    /** The total marks available for this part, after applying adaptive marking and steps penalties.
+     *
+     * @returns {number}
      */
     availableMarks: function() {
         var marks = this.marks;
@@ -765,7 +827,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return marks;
     },
 
-    /** Calculate the student's score based on their submitted answers
+    /** Calculate the student's score based on their submitted answers.
      *
      * Calls the parent part's `calculateScore` method at the end.
      */
@@ -826,7 +888,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
 
-    /** Update the stored answer from the student (called when the student changes their answer, but before submitting)
+    /** Update the stored answer from the student (called when the student changes their answer, but before submitting).
+     *
      * @param {*} answer
      * @see {Numbas.parts.Part.stagedAnswer}
      */
@@ -843,8 +906,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             })
         }
     },
-    /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}
-     * @param {Boolean} dirty
+    /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
+     *
+     * @param {boolean} dirty
      */
     setDirty: function(dirty) {
         this.isDirty = dirty;
@@ -858,6 +922,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Get a JME scope for this part.
      * If `this.question` is set, use the question's scope. Otherwise, use {@link Numbas.jme.builtinScope}.
+     *
      * @returns {Numbas.jme.Scope}
      */
     getScope: function() {
@@ -918,7 +983,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return result;
     },
 
-    /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores
+    /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores.
      */
     submit: function() {
         var p = this;
@@ -1037,13 +1102,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
     /** Has the student entered an answer to this part?
+     *
      * @see Numbas.parts.Part#stagedAnswer
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     hasStagedAnswer: function() {
         return !(this.stagedAnswer==undefined);
     },
-    /** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part)
+    /** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part).
      * Sets this part as dirty, and gives a warning explaining why the student must resubmit.
      */
     pleaseResubmit: function() {
@@ -1053,41 +1119,48 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             this.giveWarning(R('part.marking.resubmit because of variable replacement'));
         }
     },
-    /** @typedef {Object} Numbas.parts.feedbackmessage
-     * @property {String} op - the kind of feedback
+
+    /** @typedef {object} Numbas.parts.feedbackmessage
+     * @property {string} op - The kind of feedback.
      * @see Numbas.parts.Part#setCredit Numbas.parts.Part#addCredit Numbas.parts.Part#multCredit Numbas.parts.Part#markingComment
      */
-    /** @typedef {Object} Numbas.parts.marking_results
+
+    /** @typedef {object} Numbas.parts.marking_results
      * A dictionary representing the results of marking a student's answer.
-     * @property {Array.<String>} warnings - Warning messages.
-     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
+     *
+     * @property {Array.<string>} warnings - Warning messages.
+     * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
      * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
-     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
-     * @property {Number} credit - Proportion of the available marks to award to the student.
-     * @property {Boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
+     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {number} credit - Proportion of the available marks to award to the student.
+     * @property {boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
 
-    /** @typedef {Object} Numbas.parts.alternative_result
-     * A dictionary representing the result of marking the student's answer against a certain alternative version of the part and a given scope
-     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
-     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
-     * @property {Number} credit - Proportion of the available marks to award to the student.
-     * @property {Numbas.marking.marking_script_result} script_result - the unprocessed result of the marking script.
+    /** @typedef {object} Numbas.parts.alternative_result
+     * A dictionary representing the result of marking the student's answer against a certain alternative version of the part and a given scope.
+     *
+     * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
+     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {number} credit - Proportion of the available marks to award to the student.
+     * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
 
-    /** @typedef {Object} Numbas.parts.markAlternatives_result
+    /** @typedef {object} Numbas.parts.markAlternatives_result
      * A dictionary representing the results of the `markAlternatives` method.
-     * @property {Numbas.parts.alternative_result} result - the data produced by marking against the best alternative
-     * @property {Numbas.parts.Part} best_alternative - the alternative which was used. Null if no alternative used.
+     *
+     * @property {Numbas.parts.alternative_result} result - The data produced by marking against the best alternative
+     * @property {Numbas.parts.Part} best_alternative - The alternative which was used. Null if no alternative used.
      */
 
     /** Mark the student's answer against this part and its alternatives, and return the feedback corresponding to the alternative awarding the most credit.
-     * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
-     * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+     *
+     * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
+     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @returns {Numbas.parts.markAlternatives_result}
      */
     markAlternatives: function(scope,feedback) {
-        /** Mark against the given alternative
+        /** Mark against the given alternative.
+         *
          * @param {Numbas.parts.Part} alt
          * @returns {Numbas.parts.alternative_result}
          */
@@ -1181,9 +1254,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
 
-    /** Mark the student's answer against the given scope
-     * @param {Numbas.jme.Scope} scope - scope in which to calculate the correct answer
-     * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+    /** Mark the student's answer against the given scope.
+     *
+     * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
+     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @returns {Numbas.parts.marking_results}
      */
     markAgainstScope: function(scope,feedback) {
@@ -1199,7 +1273,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             answered: this.answered
         }
     },
-    /** Replace variables with student's answers to previous parts
+    /** Replace variables with student's answers to previous parts.
+     *
      * @returns {Numbas.jme.Scope}
      */
     errorCarriedForwardScope: function() {
@@ -1226,21 +1301,25 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Compute the correct answer, based on the given scope.
      * Anything to do with marking that depends on the scope should be in this method, and calling it with a new scope should update all the settings used by the marking algorithm.
+     *
      * @param {Numbas.jme.Scope} scope
      * @abstract
      */
     getCorrectAnswer: function(scope) {},
     /** Save an answer entered by the student, for use in marking.
+     *
      * @abstract
      */
     setStudentAnswer: function() {},
     /** Get the student's answer as it was entered as a JME data type, to be used in the marking script.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
     },
-    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
@@ -1248,15 +1327,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return this.interpretedStudentAnswer;
     },
 
-    /** @typedef {Object} Numbas.parts.mark_result
-     * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives
-     * @property {Numbas.marking.finalised_state} finalised_result - sequence of marking operations
-     * @property {Object.<Numbas.jme.token>} values - the values of marking algorithm notes.
-     * @property {Numbas.marking.marking_script_result} script_result - the unprocessed result of the marking script.
+    /** @typedef {object} Numbas.parts.mark_result
+     * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives.
+     *
+     * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
+     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
 
     /** Function which marks the student's answer: run `this.settings.markingScript`, which sets the credit for the student's answer to a number between 0 and 1 and produces a list of feedback messages and warnings.
      * If the question has been answered in a way that can be marked, `this.answered` should be set to `true`.
+     *
      * @see Numbas.parts.Part#markingScript
      * @see Numbas.parts.Part#answered
      * @param {Numbas.jme.Scope} scope
@@ -1275,8 +1356,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
-    /** Restore a set of feedback messages
-     * @param {Object.<Array.<String>>} feedback - dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended
+    /** Restore a set of feedback messages.
+     *
+     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      */
     restore_feedback: function(feedback) {
         if(feedback===undefined) {
@@ -1289,6 +1371,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.markingFeedback = feedback.markingFeedback.slice();
     },
     /** Apply a finalised list of feedback states to this part.
+     *
      * @param {Numbas.marking.feedback_item[]} feedback
      * @see Numbas.marking.finalise_state
      */
@@ -1354,7 +1437,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         part.answered = valid;
 
-        /** Add marks awarded/taken away messages to the end of each feedback item which changes awarded credit
+        /** Add marks awarded/taken away messages to the end of each feedback item which changes awarded credit.
          */
         var t = 0;
         for(var i=0;i<part.markingFeedback.length;i++) {
@@ -1417,6 +1500,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Run the marking script against the given answer.
      * This does NOT apply the feedback and credit to the part object, it just returns it.
+     *
      * @param {Numbas.jme.token} studentAnswer
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.parts.Part#mark
@@ -1437,10 +1521,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         return result;
     },
-    /** Set the `credit` to an absolute value
-     * @param {Number} credit
-     * @param {String} message - message to show in feedback to explain this action
-     * @param {String} reason - why was the credit set to this value? If given, either 'correct' or 'incorrect'.
+    /** Set the `credit` to an absolute value.
+     *
+     * @param {number} credit
+     * @param {string} message - Message to show in feedback to explain this action.
+     * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
      */
     setCredit: function(credit,message,reason)
     {
@@ -1455,9 +1540,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             });
         }
     },
-    /** Add an absolute value to `credit`
-     * @param {Number} credit - amount to add
-     * @param {String} message - message to show in feedback to explain this action
+    /** Add an absolute value to `credit`.
+     *
+     * @param {number} credit - Amount to add.
+     * @param {string} message - Message to show in feedback to explain this action.
      */
     addCredit: function(credit,message)
     {
@@ -1471,9 +1557,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             });
         }
     },
-    /** Subtract an absolute value from `credit`
-     * @param {Number} credit - amount to subtract
-     * @param {String} message - message to show in feedback to explain this action
+    /** Subtract an absolute value from `credit`.
+     *
+     * @param {number} credit - Amount to subtract.
+     * @param {string} message - Message to show in feedback to explain this action.
      */
     subCredit: function(credit,message)
     {
@@ -1487,9 +1574,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             });
         }
     },
-    /** Multiply `credit` by the given amount - use to apply penalties
-     * @param {Number} factor
-     * @param {String} message - message to show in feedback to explain this action
+    /** Multiply `credit` by the given amount - use to apply penalties.
+     *
+     * @param {number} factor
+     * @param {string} message - Message to show in feedback to explain this action.
      */
     multCredit: function(factor,message)
     {
@@ -1504,9 +1592,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             });
         }
     },
-    /** Add a comment to the marking feedback
-     * @param {String} message
-     * @param {String} reason
+    /** Add a comment to the marking feedback.
+     *
+     * @param {string} message
+     * @param {string} reason
      */
     markingComment: function(message,reason)
     {
@@ -1519,7 +1608,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Show the steps, as a result of the student asking to show them.
      * If the answers have not been revealed, we should apply the steps penalty.
      *
-     * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+     * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      */
     showSteps: function(dontStore)
     {
@@ -1558,7 +1647,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.store && this.store.stepsHidden(this);
     },
 
-    /** Currently available next parts
+    /** Currently available next parts.
+     *
      * @returns {Array.<Numbas.parts.NextPart>}
      */
     availableNextParts: function() {
@@ -1583,9 +1673,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         });
     },
     
-    /** Make an instance of the selected next part
+    /** Make an instance of the selected next part.
+     *
      * @param {Numbas.parts.NextPart} np
-     * @param {Number} [index]
+     * @param {number} [index]
      */
     makeNextPart: function(np,index) {
         var p = this;
@@ -1618,7 +1709,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
 
-    /** Remove the existing instance of the given next part
+    /** Remove the existing instance of the given next part.
+     *
      * @param {Numbas.parts.NextPart} np
      */
     removeNextPart: function(np) {
@@ -1636,8 +1728,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.question.updateScore();
     },
 
-    /** Reveal the correct answer to this part
-     * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+    /** Reveal the correct answer to this part.
+     *
+     * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      */
     revealAnswer: function(dontStore)
     {
@@ -1654,7 +1747,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
     },
 
-    /** Lock this part
+    /** Lock this part.
      */
     lock: function() {
         this.locked = true;
@@ -1665,9 +1758,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 };
 
 /** Definition of a 'next part' option following on from a part.
- * @constructor
+ *
+ * @class
  * @memberof Numbas.parts
- * @param {Numbas.parts.Part} parentPart - the part this one follows on from
+ * @param {Numbas.parts.Part} parentPart - The part this one follows on from.
  */
 var NextPart = Numbas.parts.NextPart = function(parentPart) {
     this.parentPart = parentPart;
@@ -1676,51 +1770,61 @@ var NextPart = Numbas.parts.NextPart = function(parentPart) {
 }
 NextPart.prototype = {
     /** List of variable replacements to make when creating this part.
-     * @type {Array.<Object>}
+     *
+     * @type {Array.<object>}
      */
     variableReplacements: [],
 
     /** Values of replaced variables for this next part, once it's been created.
-     * @type {Object.<Numbas.jme.token>}
+     *
+     * @type {object.<Numbas.jme.token>}
      */
     instanceVariables: null,
 
     /** Reference to the instance of this next part, if it's been created.
+     *
      * @type {Numbas.parts.Part}
      */
     instance: null,
 
     /** Name of the penalty to apply when this part is visited.
-     * @type {String}
+     *
+     * @type {string}
      */
     penalty: null,
 
     /** Amount of penalty to apply when this part is visited.
-     * @type {Number}
+     *
+     * @type {number}
      */
     penaltyAmount: 0,
 
     /** Expression defining the amount of penalty to apply when this part is visited.
+     *
      * @type {JME}
      */
     penaltyAmountString: '',
 
     /** Index of the definition of this part in the question's list of part definitions.
-     * @type {Number}
+     *
+     * @type {number}
      */
     index: null,
 
-    /** Label for the button to select this next part
-     * @type {String}
+    /** Label for the button to select this next part.
+     *
+     * @type {string}
      */
     label: '',
 
     /** When should this next part be available to the student?
+     *
      * @type {JME}
      */
     availabilityCondition: '',
 
-    /** Load the definition of this next part from XML
+    /** Load the definition of this next part from XML.
+     *
      * @param {Element} xml
      */
     loadFromXML: function(xml) {
@@ -1739,8 +1843,9 @@ NextPart.prototype = {
         this.xml = otherPartNode;
     },
 
-    /** Load the definition of this next part from JSON
-     * @param {Object} data
+    /** Load the definition of this next part from JSON.
+     *
+     * @param {object} data
      */
     loadFromJSON: function(data) {
         var np = this;
@@ -1765,7 +1870,8 @@ NextPart.prototype = {
 
     /** Do any of the variable replacements for this next part rely on information from the student's answer to the parent part?
      * Returns true if a variable replacement definition contains a variable name which is not a question variable - it must come from the marking algorithm.
-     * @returns {Boolean}
+     *
+     * @returns {boolean}
      */
     usesStudentAnswer: function() {
         var question_variables = this.parentPart.question.local_definitions.variables;

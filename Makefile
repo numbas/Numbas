@@ -14,7 +14,8 @@ RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js s
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
-ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
+ESLINT_THEME_SOURCES = $(THEME_SOURCES) display-base.js display.js exam-display.js mathjax.js part-display.js question-display.js
+ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(ESLINT_THEME_SOURCES)) $(PART_SOURCES)
 ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
 
 
@@ -105,6 +106,9 @@ docs: docs/index.html
 
 eslint: $(ESLINT_SOURCES)
 	@eslint $^
+
+eslint_fix: $(ESLINT_SOURCES)
+	@eslint --fix $^
 
 tests/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "var doc_tests = " > $@

@@ -17,7 +17,8 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
- * @constructor
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -33,7 +34,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     /** Properties set when the part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}
-     * @property {Boolean} sortAnswers - Should the student's answers to the gaps be put in ascending order before marking?
+     *
+     * @property {boolean} sortAnswers - Should the student's answers to the gaps be put in ascending order before marking?
      */
     settings: {
         sortAnswers: false
@@ -67,8 +69,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         this.display = new Numbas.display.GapFillPartDisplay(this);
     },
 
-    /** The total marks available for this part, after applying adaptive marking and steps penalties
-     * @returns {Number}
+    /** The total marks available for this part, after applying adaptive marking and steps penalties.
+     *
+     * @returns {number}
      */
     availableMarks: function() {
         var marks = 0;
@@ -86,9 +89,10 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     },
 
 
-    /** Add a gap to this part
+    /** Add a gap to this part.
+     *
      * @param {Numbas.parts.Part} gap
-     * @param {Number} index - the position of the gap
+     * @param {number} index - the position of the gap
      */
     addGap: function(gap, index) {
         gap.isGap = true;
@@ -106,19 +110,22 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     stagedAnswer: 'something',
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
-    /** Reveal the answers to all of the child gaps
-     * @param {Boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
-     * @extends Numbas.parts.Part#revealAnswer
+    /** Reveal the answers to all of the child gaps.
+     *
+     * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
+     * @augments Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore)
     {
         for(var i=0; i<this.gaps.length; i++)
             this.gaps[i].revealAnswer(dontStore);
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
@@ -139,7 +146,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             return g.studentAnswer;
         });
     },
-    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations
+    /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */

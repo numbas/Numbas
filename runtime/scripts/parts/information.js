@@ -17,7 +17,8 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Information only part - no input, no marking, just display some content to the student.
- * @constructor
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -47,14 +48,15 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
     initDisplay: function() {
         this.display = new Numbas.display.InformationPartDisplay(this);
     },
-    /** This part is always valid
-     * @returns {Boolean} true
+    /** This part is always valid.
+     *
+     * @returns {boolean} true
      */
     validate: function() {
         this.answered = true;
         return true;
     },
-    /** This part is never dirty
+    /** This part is never dirty.
      */
     setDirty: function() {
         this.isDirty = false;

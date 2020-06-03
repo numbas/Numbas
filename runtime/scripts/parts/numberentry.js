@@ -17,7 +17,8 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Number entry part - student's answer must be within given range, and written to required precision.
- * @constructor
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -89,29 +90,31 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     /** The student's last submitted answer */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.numberentry; },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
-     * @property {Number} minvalueString - definition of minimum value, before variables are substituted in
-     * @property {Number} minvalue - minimum value marked correct
-     * @property {Number} maxvalueString - definition of maximum value, before variables are substituted in
-     * @property {Number} maxvalue - maximum value marked correct
-     * @property {Number} correctAnswerFraction - display the correct answer as a fraction?
-     * @property {Boolean} allowFractions - can the student enter a fraction as their answer?
-     * @property {Array.<String>} notationStyles - styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
-     * @property {Number} displayAnswer - representative correct answer to display when revealing answers
-     * @property {String} precisionType - type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures
-     * @property {Number} precisionString - definition of precision setting, before variables are substituted in
-     * @property {Boolean} strictPrecision - must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
-     * @property {Number} precision - how many decimal places or significant figures to require
-     * @property {Number} precisionPC - partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision
-     * @property {String} precisionMessage - message to display in the marking feedback if their answer was not given to the required precision
-     * @property {Boolean} mustBeReduced - should the student enter a fraction in lowest terms
-     * @property {Number} mustBeReducedPC - partial credit to award if the answer is not a reduced fraction
-     * @property {Boolean} showPrecisionHint - show a hint about the required precision next to the input?
-     * @property {Boolean} showFractionHint - show a hint that the answer should be a fraction next to the input?
+     *
+     * @property {number} minvalueString - Definition of minimum value, before variables are substituted in.
+     * @property {number} minvalue - Minimum value marked correct.
+     * @property {number} maxvalueString - Definition of maximum value, before variables are substituted in.
+     * @property {number} maxvalue - Maximum value marked correct.
+     * @property {number} correctAnswerFraction - Display the correct answer as a fraction?
+     * @property {boolean} allowFractions - Can the student enter a fraction as their answer?
+     * @property {Array.<string>} notationStyles - Styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
+     * @property {number} displayAnswer - Representative correct answer to display when revealing answers.
+     * @property {string} precisionType - Type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures.
+     * @property {number} precisionString - Definition of precision setting, before variables are substituted in.
+     * @property {boolean} strictPrecision - Must the student give exactly the required precision? If false, omitting trailing zeros is allowed.
+     * @property {number} precision - How many decimal places or significant figures to require.
+     * @property {number} precisionPC - Partial credit to award if the answer is between `minvalue` and `maxvalue` but not given to the required precision.
+     * @property {string} precisionMessage - Message to display in the marking feedback if their answer was not given to the required precision.
+     * @property {boolean} mustBeReduced - Should the student enter a fraction in lowest terms.
+     * @property {number} mustBeReducedPC - Partial credit to award if the answer is not a reduced fraction.
+     * @property {boolean} showPrecisionHint - Show a hint about the required precision next to the input?
+     * @property {boolean} showFractionHint - Show a hint that the answer should be a fraction next to the input?
      */
     settings:
     {
@@ -135,13 +138,15 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         showFractionHint: true
     },
     /** The name of the input widget this part uses, if any.
-     * @returns {String}
+     *
+     * @returns {string}
      */
     input_widget: function() {
         return 'string';
     },
-    /** Options for this part's input widget
-     * @returns {Object}
+    /** Options for this part's input widget.
+     *
+     * @returns {object}
      */
     input_options: function() {
         return {
@@ -149,9 +154,10 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             allowedNotationStyles: this.settings.notationStyles
         };
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope.
+     *
      * @param {Numbas.jme.Scope} scope
-     * @returns {String}
+     * @returns {string}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -213,8 +219,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     },
     /** Tidy up the student's answer - at the moment, just remove space.
      * You could override this to do more substantial filtering of the student's answer.
-     * @param {String} answer
-     * @returns {String}
+     *
+     * @param {string} answer
+     * @returns {string}
      */
     cleanAnswer: function(answer) {
         answer = answer.toString().trim();
@@ -225,7 +232,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     setStudentAnswer: function() {
         this.studentAnswer = this.cleanAnswer(this.stagedAnswer);
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */

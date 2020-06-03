@@ -19,7 +19,8 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
         Numbas.partConstructors[name] = Numbas.parts.CustomPart;
     };
 
-    /** The current exam
+    /** The current exam.
+     *
      * @name exam
      * @memberof Numbas
      * @type {Numbas.Exam}
@@ -34,9 +35,10 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      * - display the frontpage
      *
      * This function is called when all the other scripts have been loaded and executed.
-     * It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised
+     * It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised.
+     *
      * @memberof Numbas
-     * @method
+     * @function
      */
     var init = Numbas.init = function() {
         $(document).ready(function() {

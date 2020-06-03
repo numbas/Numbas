@@ -16,14 +16,14 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
-/** Judged Mathematical Expression
+/** Judged Mathematical Expression.
  *
  * Student enters a string representing a mathematical expression, eg. `x^2+x+1`, and it is compared with the correct answer by evaluating over a range of values.
- * @constructor
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
@@ -167,49 +167,52 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     initDisplay: function() {
         this.display = new Numbas.display.JMEPartDisplay(this);
     },
-    /** Student's last submitted answer
-     * @type {String}
+    /** Student's last submitted answer.
+     *
+     * @type {string}
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.jme; },
     /** Properties set when the part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}
-     * @property {JME} correctAnswerString - the definition of the correct answer, without variables substituted into it.
-     * @property {String} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-     * @property {String} answerSimplificationString - string from the XML defining which answer simplification rules to use
-     * @property {Array.<String>} answerSimplification - names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
-     * @property {String} checkingType - method to compare answers. See {@link Numbas.jme.checkingFunctions}
-     * @property {Number} checkingAccuracy - accuracy threshold for checking. Exact definition depends on the checking type.
-     * @property {Number} failureRate - comparison failures allowed before we decide answers are different
-     * @property {Number} vsetRangeStart - lower bound on range of points to pick values from for variables in the answer expression
-     * @property {Number} vsetRangeEnd - upper bound on range of points to pick values from for variables in the answer expression
-     * @property {Number} vsetRangePoints - number of points to compare answers on
-     * @property {Number} maxLength - maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-     * @property {Number} maxLengthPC - partial credit if the student's answer is too long
-     * @property {String} maxLengthMessage - Message to add to marking feedback if the student's answer is too long
-     * @property {Number} minLength - minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted
-     * @property {Number} minLengthPC - partial credit if the student's answer is too short
-     * @property {String} minLengthMessage - message to add to the marking feedback if the student's answer is too short
-     * @property {Array.<String>} mustHave - strings which must be present in the student's answer
-     * @property {Number} mustHavePC - partial credit to award if any must-have string is missing
-     * @property {String} mustHaveMessage - message to add to the marking feedback if the student's answer is missing a must-have string.
-     * @property {Boolean} mustHaveShowStrings - tell the students which strings must be included in the marking feedback, if they're missing a must-have?
-     * @property {Array.<String>} notAllowed - strings which must not be present in the student's answer
-     * @property {Number} notAllowedPC - partial credit to award if any not-allowed string is present
-     * @property {String} notAllowedMessage - message to add to the marking feedback if the student's answer contains a not-allowed string.
-     * @property {Boolean} notAllowedShowStrings - tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
-     * @property {String} mustMatchPattern - A pattern that the student's answer must match
-     * @property {Number} mustMatchPC - partial credit to award if the student's answer does not match the pattern
-     * @property {String} mustMatchMessage - message to add to the marking feedback if the student's answer does not match the pattern
-     * @property {String} nameToCompare - the name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
-     * @property {Boolean} checkVariableNames - Check that the student has used the same variable names as the correct answer?
-     * @property {Boolean} singleLetterVariables - Force single letter variable names in the answer? Multi-letter variable names will be considered as implicit multiplication.
-     * @property {Boolean} allowUnknownFunctions - Allow the use of unknown functions in the answer? If false, application of unknown functions will be considered as multiplication instead.
-     * @property {Boolean} implicitFunctionComposition - Consider juxtaposition of function names as composition?
+     *
+     * @property {JME} correctAnswerString - The definition of the correct answer, without variables substituted into it.
+     * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
+     * @property {string} answerSimplificationString - String from the XML defining which answer simplification rules to use
+     * @property {Array.<string>} answerSimplification - Names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
+     * @property {string} checkingType - Method to compare answers. See {@link Numbas.jme.checkingFunctions}
+     * @property {number} checkingAccuracy - Accuracy threshold for checking. Exact definition depends on the checking type.
+     * @property {number} failureRate - Comparison failures allowed before we decide answers are different
+     * @property {number} vsetRangeStart - Lower bound on range of points to pick values from for variables in the answer expression
+     * @property {number} vsetRangeEnd - Upper bound on range of points to pick values from for variables in the answer expression
+     * @property {number} vsetRangePoints - Number of points to compare answers on
+     * @property {number} maxLength - Maximum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted.
+     * @property {number} maxLengthPC - Partial credit if the student's answer is too long.
+     * @property {string} maxLengthMessage - Message to add to marking feedback if the student's answer is too long.
+     * @property {number} minLength - Minimum length, in characters, of the student's answer. Note that the student's answer is cleaned up before checking length, so extra space or brackets aren't counted.
+     * @property {number} minLengthPC - Partial credit if the student's answer is too short.
+     * @property {string} minLengthMessage - Message to add to the marking feedback if the student's answer is too short.
+     * @property {Array.<string>} mustHave - Strings which must be present in the student's answer.
+     * @property {number} mustHavePC - Partial credit to award if any must-have string is missing.
+     * @property {string} mustHaveMessage - Message to add to the marking feedback if the student's answer is missing a must-have string.
+     * @property {boolean} mustHaveShowStrings - Tell the students which strings must be included in the marking feedback, if they're missing a must-have?
+     * @property {Array.<string>} notAllowed - Strings which must not be present in the student's answer.
+     * @property {number} notAllowedPC - Partial credit to award if any not-allowed string is present.
+     * @property {string} notAllowedMessage - Message to add to the marking feedback if the student's answer contains a not-allowed string.
+     * @property {boolean} notAllowedShowStrings - Tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+     * @property {string} mustMatchPattern - A pattern that the student's answer must match.
+     * @property {number} mustMatchPC - Partial credit to award if the student's answer does not match the pattern.
+     * @property {string} mustMatchMessage - Message to add to the marking feedback if the student's answer does not match the pattern.
+     * @property {string} nameToCompare - The name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
+     * @property {boolean} checkVariableNames - Check that the student has used the same variable names as the correct answer?
+     * @property {boolean} singleLetterVariables - Force single letter variable names in the answer? Multi-letter variable names will be considered as implicit multiplication.
+     * @property {boolean} allowUnknownFunctions - Allow the use of unknown functions in the answer? If false, application of unknown functions will be considered as multiplication instead.
+     * @property {boolean} implicitFunctionComposition - Consider juxtaposition of function names as composition?
      */
     settings:
     {
@@ -247,13 +250,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         implicitFunctionComposition: false
     },
     /** The name of the input widget this part uses, if any.
-     * @returns {String}
+     *
+     * @returns {string}
      */
     input_widget: function() {
         return 'jme';
     },
-    /** Options for this part's input widget
-     * @returns {Object}
+    /** Options for this part's input widget.
+     *
+     * @returns {object}
      */
     input_options: function() {
         return {
@@ -261,7 +266,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             returnString: true
         };
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope.
+     *
      * @param {Numbas.jme.Scope} scope
      * @returns {JME}
      */
@@ -286,7 +292,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */
@@ -295,7 +302,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     },
 
     /** Add a value generator expression to the list in this part's settings.
-     * @param {String} name
+     *
+     * @param {string} name
      * @param {JME} expr
      */
     addValueGenerator: function(name, expr) {

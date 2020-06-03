@@ -17,8 +17,9 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
-/** Custom part - a part type defined in {@link Numbas.custom_part_types}
- * @constructor
+/** Custom part - a part type defined in {@link Numbas.custom_part_types}.
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -105,7 +106,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             }
         })
         /** Get the value of an input option by evaluating its definition.
-         * @param {String|Object} option
+         *
+         * @param {string|object} option
          * @returns {*}
          */
         function evaluate_input_option(option) {

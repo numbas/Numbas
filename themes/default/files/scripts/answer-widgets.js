@@ -1,9 +1,10 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
 
-    /** Ensure `v` is an observable, and if it's not given return the default value
-     * @param {Object|Observable|undefined} v
-     * @param {Object} d - the default value
+    /** Ensure `v` is an observable, and if it's not given return the default value.
+     *
+     * @param {object|Observable|undefined} v
+     * @param {object} d - The default value.
      * @returns {Observable}
      */
     function defaultObservable(v,d) {
@@ -81,9 +82,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var init = Knockout.unwrap(this.answerJSON);
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
-             * `undefined` produces an empty string
-             * @param {Number} n
-             * @returns {String}
+             * `undefined` produces an empty string.
+             *
+             * @param {number} n
+             * @returns {string}
              */
             function cleanNumber(n) {
                 if(n===undefined) {
@@ -147,8 +149,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
              * If it's a {@link Numbas.jme.tree}, run it through {@link Numbas.jme.display.treeToJME}.
-             * @param {String|Numbas.jme.tree} expr
-             * @returns {String}
+             *
+             * @param {string|Numbas.jme.tree} expr
+             * @returns {string}
              */
             function cleanExpression(expr) {
                 if(typeof(expr)=='string') {
@@ -394,7 +397,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.value = Knockout.observableArray([]);
             var v = params.value();
-            /** Produce the output value for the widget
+            /** Produce the output value for the widget.
              */
             function make_result() {
                 var v = vm.value().map(function(row,i){
@@ -402,16 +405,18 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 })
                 vm.result(v);
             };
-            /** Make a new cell
-             * @param {Number|String} c - the value of the cell
-             * @returns {Object} - `cell` is an observable holding the cell's value.
+            /** Make a new cell.
+             *
+             * @param {number|string} c - The value of the cell.
+             * @returns {object} - `cell` is an observable holding the cell's value.
              */
             function make_cell(c) {
                 var cell = {cell: Knockout.observable(c)};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
-            /** Overwrite the value of the widget with the given matrix
+            /** Overwrite the value of the widget with the given matrix.
+             *
              * @param {matrix} v
              */
             function setMatrix(v) {

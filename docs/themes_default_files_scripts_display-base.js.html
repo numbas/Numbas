@@ -35,7 +35,7 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
-    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result
+    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
      */
     localisePage: function() {
         $('[data-localise]').each(function() {
@@ -45,9 +45,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-&lt;name>.
      * If that exists, localise its value and set the desired attribute, then return it.
+     *
      * @param {Element} elem
-     * @param {String} name
-     * @returns {String}
+     * @param {string} name
+     * @returns {string}
      */
     getLocalisedAttribute: function(elem, name) {
         var attr_localise;
@@ -58,7 +59,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         return attr;
     },
-    /** Update the progress bar when loading
+    /** Update the progress bar when loading.
      */
     showLoadProgress: function()
     {
@@ -91,10 +92,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         })
 
         var lightbox = document.querySelector('#lightbox');
+        /** Show the lightbox.
+         */
         function show_lightbox() {
             lightbox.classList.add('shown');
             lightbox.focus();
         }
+        /** Hide the lightbox.
+         *
+         */
         function hide_lightbox() {
             lightbox.classList.remove('shown');
             lightbox.innerHTML = '';
@@ -136,16 +142,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     //alert / confirm boxes
     //
-    /** Callback functions for the modals
-     * @type {Object.&lt;function>}
+    /** Callback functions for the modals.
+     *
+     * @type {object.&lt;Function>}
      */
     modal: {
         ok: function() {},
         cancel: function() {}
     },
-    /** Show an alert dialog
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback when OK is clicked
+    /** Show an alert dialog.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback when OK is clicked
      */
     showAlert: function(msg,fnOK) {
         fnOK = fnOK || function() {};
@@ -154,10 +162,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
     },
-    /** Show a confirmation dialog box
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback if OK is clicked
-     * @param {function} fnCancel - callback if cancelled
+    /** Show a confirmation dialog box.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback if OK is clicked
+     * @param {Function} fnCancel - callback if cancelled
      */
     showConfirm: function(msg,fnOK,fnCancel) {
         this.modal.ok = fnOK || function(){};
@@ -165,9 +174,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
-    /** Make MathJax typeset any maths in the selector
-     * @param {jQuery|Element} [selector] - elements to typeset. If not given, the whole page is typeset
-     * @param {function} callback - function to call when typesetting is finished
+    /** Make MathJax typeset any maths in the selector.
+     *
+     * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
+     * @param {Function} callback - Function to call when typesetting is finished.
      */
     typeset: function(selector,callback)
     {
@@ -201,7 +211,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     },
 
-    /** Associate a JME scope with the given element
+    /** Associate a JME scope with the given element.
+     *
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
      */
@@ -211,11 +222,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     /** Make HTML from an XML node and bind it to the given scope and display object.
      * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
+     *
      * @param {Element} xml
      * @param {XMLDocument} template
      * @param {Numbas.jme.Scope} scope
-     * @param {String} contextDescription - description of the JME context, for error messages
-     * @returns {Promise} - resolves to the produced HTML element after variables have been substituted.
+     * @param {string} contextDescription - Description of the JME context, for error messages.
+     * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
      */
     makeHTMLFromXML: function(xml, template, scope, contextDescription) {
         var htmlString = $.xsl.transform(template, xml).string;
@@ -239,7 +251,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
 
 
-    /** The Numbas exam has failed so much it can't continue - show an error message and the error
+    /** The Numbas exam has failed so much it can't continue - show an error message and the error.
+     *
      * @param {Error} e
      */
     die: function(e) {
@@ -284,41 +297,46 @@ $.textMetrics = function(el) {
     return ret;
 }
 /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
- * @typedef {Object} Numbas.display.feedbackable
- * 	@property {observable.&lt;Boolean>} answered - has the object been answered?
- * 	@property {observable.&lt;Boolean>} isDirty - has the student's answer changed?
- * 	@property {observable.&lt;Number>} score - number of marks awarded
- *  @property {observable.&lt;Number>} marks - number of marks available
- *  @property {observable.&lt;Number>} credit - proportion of available marks awarded
- *  @property {observable.&lt;Boolean>} doesMarking - does the object do any marking?
- *	@property {observable.&lt;Boolean>} revealed - have the correct answers been revealed?
- *	@property {Boolean} plainScore - Show the score without the "Score: " prefix?
+ *
+ * @typedef {object} Numbas.display.feedbackable
+ * @property {observable.&lt;boolean>} answered - Has the object been answered?
+ * @property {observable.&lt;boolean>} isDirty - Has the student's answer changed?
+ * @property {observable.&lt;number>} score - Number of marks awarded
+ * @property {observable.&lt;number>} marks - Number of marks available
+ * @property {observable.&lt;number>} credit - Proportion of available marks awarded
+ * @property {observable.&lt;boolean>} doesMarking - Does the object do any marking?
+ * @property {observable.&lt;boolean>} revealed - Have the correct answers been revealed?
+ * @property {boolean} plainScore - Show the score without the "Score: " prefix?
  */
 /** Settings for {@link Numbas.display.showScoreFeedback}
- * @typedef {Object} Numbas.display.showScoreFeedback_settings
- * @property {Boolean} showTotalMark - Show the total marks available?
- * @property {Boolean} showActualMark - Show the student's current score?
- * @property {Boolean} showAnswerState - Show the correct/incorrect state after marking?
- * @property {Boolean} reviewShowScore - Show the score once answers have been revealed?
+ *
+ * @typedef {object} Numbas.display.showScoreFeedback_settings
+ * @property {boolean} showTotalMark - Show the total marks available?
+ * @property {boolean} showActualMark - Show the student's current score?
+ * @property {boolean} showAnswerState - Show the correct/incorrect state after marking?
+ * @property {boolean} reviewShowScore - Show the score once answers have been revealed?
  */
 /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
- * @typedef {String} Numbas.display.feedback_state
+ *
+ * @typedef {string} Numbas.display.feedback_state
  */
 /** A model representing feedback on an item which is marked - a question or a part.
- * @typedef {Object} Numbas.display.scoreFeedback
- * @property {observable.&lt;Boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
+ *
+ * @typedef {object} Numbas.display.scoreFeedback
+ * @property {observable.&lt;boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
  * @property {observable.&lt;Numbas.display.feedback_state>} state - The current state of the item, to be shown to the student.
- * @property {observable.&lt;Boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
- * @property {observable.&lt;String>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
- * @property {observable.&lt;String>} message - Text summarising the state of the item.
- * @property {observable.&lt;String>} iconClass - CSS class for the feedback icon.
- * @property {observable.&lt;Object>} iconAttr - A dictionary of attributes for the feedback icon.
+ * @property {observable.&lt;boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
+ * @property {observable.&lt;string>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
+ * @property {observable.&lt;string>} message - Text summarising the state of the item.
+ * @property {observable.&lt;string>} iconClass - CSS class for the feedback icon.
+ * @property {observable.&lt;object>} iconAttr - A dictionary of attributes for the feedback icon.
  */
-/** Update a score feedback box
- * @param {Numbas.display.feedbackable} obj - object to show feedback about
+/** Update a score feedback box.
+ *
+ * @param {Numbas.display.feedbackable} obj - Object to show feedback about.
  * @param {Numbas.display.showScoreFeedback_settings} settings
  * @memberof Numbas.display
- * @returns Numbas.display.scoreFeedback
+ * @returns {Numbas.display.scoreFeedback}
  */
 var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 {
@@ -553,10 +571,6 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._endTime"><a href="Numbas.display.ExamDisplay.html#._endTime">Numbas.display.ExamDisplay._endTime</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._startTime"><a href="Numbas.display.ExamDisplay.html#._startTime">Numbas.display.ExamDisplay._startTime</a></li>
-		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
@@ -578,6 +592,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endTime"><a href="Numbas.display.ExamDisplay.html#.endTime">Numbas.display.ExamDisplay.endTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
@@ -601,7 +617,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">Numbas.display.ExamDisplay.passwordFeedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -632,6 +648,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.showTiming"><a href="Numbas.display.ExamDisplay.html#.showTiming">Numbas.display.ExamDisplay.showTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startRegen"><a href="Numbas.display.ExamDisplay.html#.startRegen">Numbas.display.ExamDisplay.startRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startTime"><a href="Numbas.display.ExamDisplay.html#.startTime">Numbas.display.ExamDisplay.startTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.timeSpent"><a href="Numbas.display.ExamDisplay.html#.timeSpent">Numbas.display.ExamDisplay.timeSpent</a></li>
 		
@@ -697,9 +715,13 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.part"><a href="Numbas.display.PartDisplay.html#.part">Numbas.display.PartDisplay.part</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.partTreeCSS"><a href="Numbas.display.PartDisplay.html#.partTreeCSS">Numbas.display.PartDisplay.partTreeCSS</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.pd.html_promise"><a href="Numbas.display.PartDisplay.html#.pd.html_promise">Numbas.display.PartDisplay.pd.html_promise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.question"><a href="Numbas.display.PartDisplay.html#.question">Numbas.display.PartDisplay.question</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.reachedDeadEnd"><a href="Numbas.display.PartDisplay.html#.reachedDeadEnd">Numbas.display.PartDisplay.reachedDeadEnd</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.removeWarnings"><a href="Numbas.display.PartDisplay.html#.removeWarnings">Numbas.display.PartDisplay.removeWarnings</a></li>
 		
@@ -751,11 +773,15 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateNextParts"><a href="Numbas.display.PartDisplay.html#.updateNextParts">Numbas.display.PartDisplay.updateNextParts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.visible"><a href="Numbas.display.PartDisplay.html#.visible">Numbas.display.PartDisplay.visible</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.whatNextMessage"><a href="Numbas.display.PartDisplay.html#.whatNextMessage">Numbas.display.PartDisplay.whatNextMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
@@ -1229,6 +1255,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#make_re"><a href="Numbas.jme.Parser.html#make_re">Numbas.jme.Parser#make_re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#op"><a href="Numbas.jme.Parser.html#op">Numbas.jme.Parser#op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
@@ -1446,6 +1474,14 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.jme.types.TVector"><a href="Numbas.jme.types.TVector.html">Numbas.jme.types.TVector</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString"><a href="Numbas.jme.html#.typeToDisplayString">Numbas.jme.typeToDisplayString</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.decimal"><a href="Numbas.jme.html#.typeToDisplayString#.decimal">Numbas.jme.typeToDisplayString.decimal</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.html"><a href="Numbas.jme.html#.typeToDisplayString#.html">Numbas.jme.typeToDisplayString.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
 		
@@ -3657,6 +3693,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="Numbas.Question#adviceDisplayed"><a href="Numbas.Question.html#adviceDisplayed">Numbas.Question#adviceDisplayed</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#allParts"><a href="Numbas.Question.html#allParts">Numbas.Question#allParts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#answered"><a href="Numbas.Question.html#answered">Numbas.Question#answered</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#calculateScore"><a href="Numbas.Question.html#calculateScore">Numbas.Question#calculateScore</a></li>
@@ -3702,6 +3740,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.Question#extraPartOrder"><a href="Numbas.Question.html#extraPartOrder">Numbas.Question#extraPartOrder</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#generateVariables"><a href="Numbas.Question.html#generateVariables">Numbas.Question#generateVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
 		
@@ -3758,6 +3798,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#setCurrentPart"><a href="Numbas.Question.html#setCurrentPart">Numbas.Question#setCurrentPart</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#setErrorCarriedForwardBackReferences"><a href="Numbas.Question.html#setErrorCarriedForwardBackReferences">Numbas.Question#setErrorCarriedForwardBackReferences</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
 		
@@ -4299,8 +4341,6 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
 		
-			<li class="search-result" data-longname="visible"><a href="global.html#visible">visible</a></li>
-		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -4329,7 +4369,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li><li><a href="global.html#visible">visible</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

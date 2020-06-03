@@ -20,28 +20,32 @@ Numbas.queueScript('controls',['base','schedule'],function() {
 var job = Numbas.schedule.add;
 /** @namespace Numbas.controls */
 Numbas.controls = /** @lends Numbas.controls */ {
-    /** Start the exam - triggered when user clicks "Start" button on frontpage
+    /** Start the exam - triggered when user clicks "Start" button on frontpage.
+     *
      * @see Numbas.Exam#begin
      */
     beginExam: function()
     {
         job(Numbas.exam.begin,Numbas.exam);
     },
-    /** Pause the exam
+    /** Pause the exam.
+     *
      * @see Numbas.Exam#pause
      */
     pauseExam: function()
     {
         job(Numbas.exam.pause,Numbas.exam);
     },
-    /** Resume the paused exam
+    /** Resume the paused exam.
+     *
      * @see Numbas.Exam#resume
      */
     resumeExam: function()
     {
         job(Numbas.exam.resume,Numbas.exam);
     },
-    /** (Try to) end the exam
+    /** Try to end the exam.
+     *
      * @see Numbas.Exam#tryEnd
      */
     endExam: function()
@@ -50,26 +54,28 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.tryEnd();
         });
     },
-    /** In an ended exam, go back from reviewing a question the results page */
+    /** In an ended exam, go back from reviewing a question the results page. */
     backToResults: function()
     {
         job(function() {
             Numbas.exam.showInfoPage('result');
         });
     },
-    /** "Exit" the exam - really this just shows the "You can close the browser" page
+    /** Exit the exam - really this just shows the "You can close the browser" page.
+     *
      * @see Numbas.Exam#exit
      */
     exitExam: function()
     {
         job(Numbas.exam.exit,Numbas.exam);
     },
-    /** Go back to the question menu
-    */
+    /** Go back to the question menu.
+     */
     backToMenu: function() {
         job(Numbas.exam.showMenu,Numbas.exam);
     },
-    /** Try to move to the next question
+    /** Try to move to the next question.
+     *
      * @see Numbas.Exam#tryChangeQuestion
      */
     nextQuestion: function( )
@@ -78,7 +84,8 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number+1 );
         });
     },
-    /** Try to move to the previous question
+    /** Try to move to the previous question.
+     *
      * @see Numbas.Exam#tryChangeQuestion
      */
     previousQuestion: function()
@@ -87,9 +94,10 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number-1 );
         });
     },
-    /** Make a function which tries to jump to question N
-     * @param {Number} n - number of the question to jump to
-     * @returns {function}
+    /** Make a function which tries to jump to question N.
+     *
+     * @param {number} n - Number of the question to jump to.
+     * @returns {Function}
      * @see Numbas.controls.jumpQuestion
      */
     makeQuestionJumper: function(n) {
@@ -97,8 +105,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.controls.jumpQuestion(n);
         }
     },
-    /** Try to move directly to a particular question
-     * @param {Number} jumpTo - number of the question to jump to
+    /** Try to move directly to a particular question.
+     *
+     * @param {number} jumpTo - Number of the question to jump to.
      * @see Numbas.Exam#tryChangeQuestion
      */
     jumpQuestion: function( jumpTo )
@@ -111,7 +120,8 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.tryChangeQuestion( jumpTo );
         });
     },
-    /** Regenerate the current question
+    /** Regenerate the current question.
+     *
      * @see Numbas.Exam#regenQuestion
      */
     regenQuestion: function()
@@ -122,14 +132,16 @@ Numbas.controls = /** @lends Numbas.controls */ {
             );
         });
     },
-    /** Show the advice for the current question
+    /** Show the advice for the current question.
+     *
      * @see Numbas.Question#getAdvice
      */
     getAdvice: function()
     {
         job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam.currentQuestion);
     },
-    /** Reveal the answers to the current question
+    /** Reveal the answers to the current question.
+     *
      * @see Numbas.Question#revealAnswer
      */
     revealAnswer: function()
@@ -141,18 +153,22 @@ Numbas.controls = /** @lends Numbas.controls */ {
         });
     },
 
-    /** 
+    /** Submit a part.
+     *
+     * @param {Numbas.parts.Part} part
      */
-    submitPart: function(p) {
+    submitPart: function(part) {
+        /** Actually submit the part.
+         */
         function go() {
-            if(p.locked) {
+            if(part.locked) {
                 return;
             }
-            p.submit();
+            part.submit();
             Numbas.store.save();
         }
-        if(p.question.partsMode=='explore') {
-            var uses_answer = p.nextParts.some(function(np) {
+        if(part.question.partsMode=='explore') {
+            var uses_answer = part.nextParts.some(function(np) {
                 return np.instance!==null && np.usesStudentAnswer();
             })
             if(uses_answer) {
@@ -163,15 +179,17 @@ Numbas.controls = /** @lends Numbas.controls */ {
         go();
     },
 
-    /** Submit student's answers to all parts in the current question
+    /** Submit student's answers to all parts in the current question.
+     *
      * @see Numbas.Question#submit
      */
     submitQuestion: function()
     {
         job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
     },
-    /* Show steps for a question part
-     * @param {Numbas.parts.partpath} partRef - id of the part
+    /* Show steps for a question part.
+     *
+     * @param {Numbas.parts.partpath} partRef - The id of the part.
      * @see Numbas.parts.Part#showSteps
      */
     showSteps: function( partRef )
@@ -180,8 +198,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.currentQuestion.getPart(partRef).showSteps();
         });
     },
-    /** Hide the steps for a question part
-     * @param {Numbas.parts.partpath} partRef - id of the part
+    /** Hide the steps for a question part.
+     *
+     * @param {Numbas.parts.partpath} partRef - The id of the part.
      * @see Numbas.parts.Part#hideSteps
      */
     hideSteps: function( partRef )

@@ -16,10 +16,11 @@ Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','st
     var util = Numbas.util;
 
 /** Create a {@link Numbas.Exam} object from an XML definition.
+ *
  * @memberof Numbas
  * @param {Element} xml
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
  * @returns {Numbas.Exam}
  */
 var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
@@ -34,10 +35,11 @@ var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDispla
 }
 
 /** Create a {@link Numbas.Exam} object from a JSON definition.
+ *
  * @memberof Numbas
- * @param {Object} data
+ * @param {object} data
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {Boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
  * @returns {Numbas.Exam}
  */
 var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay) {
@@ -52,8 +54,9 @@ var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDis
 
 /** Keeps track of all info we need to know while exam is running.
  *
+ *
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @constructor
+ * @class
  * @memberof Numbas
  */
 function Exam(store)
@@ -78,16 +81,19 @@ function Exam(store)
 Numbas.Exam = Exam;
 
 /** The exam is ready for the student to start interacting with it.
+ *
  * @event Numbas.Exam#ready
  */
 
 /** The question list has been initialised - every question is loaded and ready to use.
+ *
  * @event Numbas.Exam#question list initialised
  */
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
-    /** Load the exam's settings from an XML <exam> node
+    /** Load the exam's settings from an XML <exam> node.
+     *
      * @param {Element} xml
      */
     loadFromXML: function(xml) {
@@ -253,47 +259,52 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /** Signals produced while loading this exam.
+     *
      * @type {Numbas.schedule.SignalBox} 
      * */
     signals: undefined,
 
     /** Storage engine
+     *
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
 
     /** How was the exam started? 
+     *
      * One of: `ab-initio`, `resume`, or `review`
-     * @type {String}
+     *
+     * @type {string}
      */
     entry: 'ab-initio',
 
     /** Settings
-     * @property {String} name - Title of exam
-     * @property {Number} percentPass - Percentage of max. score student must achieve to pass
-     * @property {Boolean} shuffleQuestions - should the questions be shuffled?
-     * @property {Number} numQuestions - number of questions in this sitting
-     * @property {Boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
-     * @property {String} startPassword - password the student must enter before beginning the exam
-     * @property {Boolean} allowRegen -can student re-randomise a question?
-     * @property {String} navigateMode="sequence" - how is the exam navigated? Either `"sequence"` or `"menu"`
-     * @property {Boolean} navigateReverse - can student navigate to previous question?
-     * @property {Boolean} navigateBrowse - can student jump to any question they like?
-     * @property {Boolean} allowSteps - are steps enabled?
-     * @property {Boolean} showFrontPage - show the frontpage before starting the exam?
-     * @property {Boolean} showResultsPage - show the results page after finishing the exam?
-     * @property {Array.<Object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<Object.<Numbas.ExamEvent>>} timerEvents - events based on timing
-     * @property {Number} duration - how long is exam? (seconds)
-     * @property {Boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
-     * @property {Boolean} showActualMark - show current score?
-     * @property {Boolean} showTotalMark - show total marks in exam?
-     * @property {Boolean} showAnswerState - tell student if answer is correct/wrong/partial?
-     * @property {Boolean} allowRevealAnswer - allow 'reveal answer' button?
-     * @property {Boolean} showQuestionGroupNames - show the names of question groups?
-     * @property {Boolean} reviewShowScore - show student's score in review mode?
-     * @property {Boolean} reviewShowFeedback - show part feedback messages in review mode?
-     * @property {Boolean} reviewShowAdvice - show question advice in review mode?
+     *
+     * @property {string} name - Title of exam
+     * @property {number} percentPass - Percentage of max. score student must achieve to pass
+     * @property {boolean} shuffleQuestions - should the questions be shuffled?
+     * @property {number} numQuestions - number of questions in this sitting
+     * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
+     * @property {string} startPassword - password the student must enter before beginning the exam
+     * @property {boolean} allowRegen -can student re-randomise a question?
+     * @property {string} navigateMode="sequence" - how is the exam navigated? Either `"sequence"` or `"menu"`
+     * @property {boolean} navigateReverse - can student navigate to previous question?
+     * @property {boolean} navigateBrowse - can student jump to any question they like?
+     * @property {boolean} allowSteps - are steps enabled?
+     * @property {boolean} showFrontPage - show the frontpage before starting the exam?
+     * @property {boolean} showResultsPage - show the results page after finishing the exam?
+     * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
+     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - events based on timing
+     * @property {number} duration - how long is exam? (seconds)
+     * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
+     * @property {boolean} showActualMark - show current score?
+     * @property {boolean} showTotalMark - show total marks in exam?
+     * @property {boolean} showAnswerState - tell student if answer is correct/wrong/partial?
+     * @property {boolean} allowRevealAnswer - allow 'reveal answer' button?
+     * @property {boolean} showQuestionGroupNames - show the names of question groups?
+     * @property {boolean} reviewShowScore - show student's score in review mode?
+     * @property {boolean} reviewShowFeedback - show part feedback messages in review mode?
+     * @property {boolean} reviewShowAdvice - show question advice in review mode?
      * @memberof Numbas.Exam.prototype
      * @instance
      */
@@ -327,117 +338,140 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         reviewShowAdvice: true
     },
     /** Base node of exam XML
-     * @type Element
+     *
+     * @type {Element}
      */
     xml: undefined,
     /** Definition of the exam
-     * @type Object
+     *
+     * @type {object}
      */
     json: undefined,
     /**
-     * Can be
-     *  * `"normal"` - Student is currently sitting the exam
-     *  * `"review"` - Student is reviewing a completed exam
-     *  @type String
+     * Can be:
+     *
+     * * `"normal"` - Student is currently sitting the exam.
+     * * `"review"` - Student is reviewing a completed exam.
+     *
+     * @type {string}
      */
     mode: 'normal',
-    /** Total marks available in the exam
-     * @type Number
+    /** Total marks available in the exam.
+     *
+     * @type {number}
      */
     mark: 0,
-    /** Student's current score
-     * @type Number
+    /** Student's current score.
+     *
+     * @type {number}
      */
     score: 0,                    //student's current score
-    /** Student's score as a percentage
-     * @type Number
+    /** Student's score as a percentage.
+     *
+     * @type {number}
      */
     percentScore: 0,
     /** Did the student pass the exam?
-     * @type Boolean
+     *
+     * @type {boolean}
      */
     passed: false,                //did student pass the exam?
-    /** Student's name
-     * @type String
+    /** Student's name.
+     *
+     * @type {string}
      */
     student_name: undefined,
-    /** Student's ID
-     * @type String
+    /** Student's ID.
+     *
+     * @type {string}
      */
     student_id: undefined,
-    /** JME evaluation environment
+    /** JME evaluation environment.
      *
      * Contains variables, rulesets and functions defined by the exam and by extensions.
      *
      * Inherited by each {@link Numbas.Question}'s scope.
-     * @type Numbas.jme.Scope
+     *
+     * @type {Numbas.jme.Scope}
      */
     scope: undefined,
-    /** Number of the current question
-     * @type Number
+    /** Number of the current question.
+     *
+     * @type {number}
      */
     currentQuestionNumber: 0,
-    /**
-     * Object representing the current question.
-     * @type Numbas.Question
+    /** Object representing the current question.
+     *
+     * @type {Numbas.Question}
      */
     currentQuestion: undefined,
-    /** Groups of questions in the exam
-     * @type Array.<Numbas.QuestionGroup>
+    /** Groups of questions in the exam.
+     *
+     * @type {Array.<Numbas.QuestionGroup>}
      */
     question_groups: [],
-    /**
-     * Which questions are used?
-     * @type Number[]
+    /** Which questions are used?
+     *
+     * @type {Array.<number>}
      */
     questionSubset: [],
-    /**
-     * Question objects, in the order the student will see them
-     * @type Array.<Numbas.Question>
+    /** Question objects, in the order the student will see them.
+     *
+     * @type {Array.<Numbas.Question>}
      */
     questionList: [],
-    /** Exam duration in `h:m:s` format
-     * @type String
+    /** Exam duration in `h:m:s` format.
+     *
+     * @type {string}
      */
     displayDuration: '',
     /** Stopwatch object - updates the timer every second.
+     *
      * @property {Date} start
      * @property {Date} end
-     * @property {Number} oldTimeSpent - `timeSpent` when the stopwatch was last updated
-     * @property {Number} id - id of the `Interval` which calls {@link Numbas.Exam#countDown}
+     * @property {number} oldTimeSpent - The value of `timeSpent` when the stopwatch was last updated.
+     * @property {number} id - The id of the `Interval` which calls {@link Numbas.Exam#countDown}.
      */
     stopwatch: undefined,
-    /** Time that the exam should stop
-     * @type Date
+    /** Time that the exam should stop.
+     *
+     * @type {Date}
      */
     endTime: undefined,
-    /** Seconds until the end of the exam
-     * @type Number
+    /** Seconds until the end of the exam.
+     *
+     * @type {number}
      */
     timeRemaining: 0,
-    /** Seconds the exam has been in progress
-     * @type Number
+    /** Seconds the exam has been in progress.
+     *
+     * @type {number}
      */
     timeSpent: 0,
     /** Is the exam in progress?
      *
      * `false` before starting, when paused, and after ending.
-     * @type Boolean
+     *
+     * @type {boolean}
      */
     inProgress: false,
-    /** Time the exam started
-     * @type Date
+    /** Time the exam started.
+     *
+     * @type {Date}
      */
     start: Date(),
-    /** Time the exam finished
-     * @type null|Date
+    /** Time the exam finished.
+     *
+     * @type {null|Date}
      */
     stop: null,
-    /* Display object for this exam
-     * @type Numbas.display.ExamDisplay
+    /* Display object for this exam.
+     *
+     * @type {Numbas.display.ExamDisplay}
      */
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
+     *
      * @fires Numbas.Exam#event:ready
      * @fires Numbas.Exam#event:display ready
      */
@@ -457,7 +491,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.signals.trigger('display ready');
         });
     },
-    /** Restore previously started exam from storage 
+    /** Restore previously started exam from storage.
+     *
      * @fires Numbas.Exam#event:ready
      * @listens Numbas.Exam#event:question list initialised
      */
@@ -500,7 +535,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.signals.trigger('ready');
         });
     },
-    /** Decide which questions to use and in what order
+    /** Decide which questions to use and in what order.
+     *
      * @see Numbas.QuestionGroup#chooseQuestionSubset
      */
     chooseQuestionSubset: function()
@@ -517,11 +553,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.signals.trigger('question subset chosen');
     },
     /**
-     * Having chosen which questions to use, make question list and create question objects
+     * Having chosen which questions to use, make question list and create question objects.
      *
-     * If loading, need to restore randomised variables instead of generating anew
+     * If loading, need to restore randomised variables instead of generating anew.
      *
-     * @param {Boolean} loading
+     * @param {boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:HTMLAttached
@@ -580,7 +616,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
-    /** Show the question menu
+    /** Show the question menu.
      */
     showMenu: function() {
         if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
@@ -590,8 +626,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.showInfoPage('menu');
     },
     /**
-     * Show the given info page
-     * @param {String} page - Name of the page to show
+     * Show the given info page.
+     *
+     * @param {string} page - Name of the page to show.
      */
     showInfoPage: function(page) {
         if(this.currentQuestion)
@@ -600,8 +637,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /** Accept the given password to begin the exam?
-     * @param {String} password
-     * @returns {Boolean}
+     *
+     * @param {string} password
+     * @returns {boolean}
      */
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
@@ -610,7 +648,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /**
-     * Begin the exam - start timing, go to the first question
+     * Begin the exam - start timing, go to the first question.
      */
     begin: function()
     {
@@ -633,7 +671,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
     /**
-     * Pause the exam, and show the `suspend` page
+     * Pause the exam, and show the `suspend` page.
      */
     pause: function()
     {
@@ -642,7 +680,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.store && this.store.pause();
     },
     /**
-     * Resume the exam
+     * Resume the exam.
      */
     resume: function()
     {
@@ -656,7 +694,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
     /**
-     * Set the stopwatch going
+     * Set the stopwatch going.
      */
     startTiming: function()
     {
@@ -675,7 +713,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.countDown();
     },
     /**
-     * Calculate time remaining and end the exam when timer reaches zero
+     * Calculate time remaining and end the exam when timer reaches zero.
      */
     countDown: function()
     {
@@ -705,13 +743,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
         }
     },
-    /** Stop the stopwatch */
+    /** Stop the stopwatch. */
     endTiming: function()
     {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
     },
     /** Recalculate and display the student's total score.
+     *
      * @see Numbas.Exam#calculateScore
      */
     updateScore: function()
@@ -720,7 +759,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.display && this.display.showScore();
         this.store && this.store.saveExam(this);
     },
-    /** Calculate the student's score */
+    /** Calculate the student's score. */
     calculateScore: function()
     {
         this.score=0;
@@ -731,9 +770,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Call this when student wants to move between questions.
      *
-     * Will check move is allowed and if so change question and update display
+     * Will check move is allowed and if so change question and update display.
      *
-     * @param {Number} i - Number of the question to move to
+     * @param {number} i - Number of the question to move to
      * @see Numbas.Exam#changeQuestion
      */
     tryChangeQuestion: function(i)
@@ -753,7 +792,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
 
         var exam = this;
-        /** Change the question
+        /** Change the question.
          */
         function go() {
             exam.changeQuestion(i);
@@ -787,9 +826,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
     /**
-     * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}
+     * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}.
      *
-     * @param {Number} i - Number of the question to move to
+     * @param {number} i - Number of the question to move to
      */
     changeQuestion: function(i)
     {
@@ -805,16 +844,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.store && this.store.changeQuestion(this.currentQuestion);
     },
     /**
-     * Show a question in review mode
+     * Show a question in review mode.
      *
-     * @param {Number} i - Number of the question to show
+     * @param {number} i - Number of the question to show
      */
     reviewQuestion: function(i) {
         this.changeQuestion(i);
         this.display && this.display.showQuestion();
     },
     /**
-     * Regenerate the current question
+     * Regenerate the current question.
+     *
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:HTMLAttached
      */
@@ -841,6 +881,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
+     *
      * @see Numbas.Exam#end
      */
     tryEnd: function() {
@@ -873,8 +914,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         );
     },
     /**
-     * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}
-     * @param {Boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
+     * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
+     *
+     * @param {boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
      */
     end: function(save)
     {
@@ -923,54 +965,57 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
     /**
-     * Exit the exam - show the `exit` page
+     * Exit the exam - show the `exit` page.
      */
     exit: function()
     {
         this.display && this.display.showInfoPage('exit');
     }
 };
-/** Represents what should happen when a particular timing or navigation event happens
- * @param {Element} eventNode - XML to load settings from
- * @constructor
+/** Represents what should happen when a particular timing or navigation event happens.
+ *
+ * @class
  * @memberof Numbas
  */
 function ExamEvent() {}
 ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
-    /** Name of the event this corresponds to
+    /** Name of the event this corresponds to.
      *
      * Navigation events:
-     * * `onleave` - the student tries to move to another question without answering the current one.
+     * * `onleave` - The student tries to move to another question without answering the current one.
      *
-     * (there used to be more, but now they're all the same one)
+     * (There used to be more, but now they're all the same one)
      *
      * Timer events:
      * * `timedwarning` - Five minutes until the exam ends.
      * * `timeout` - There's no time left; the exam is over.
+     *
      * @memberof Numbas.ExamEvent
      * @instance
-     * @type String
+     * @type {string}
      */
     type: '',
     /** Action to take when the event happens.
      *
      * Choices for timer events:
-     * * `none` - don't do anything
-     * * `warn` - show a message
+     * * `none` - Don't do anything.
+     * * `warn` - Show a message.
      *
      * Choices for navigation events:
      * * `none` - just allow the navigation
      * * `warnifunattempted` - Show a warning but allow the student to continue.
      * * `preventifunattempted` - Show a warning but allow the student to continue.
+     *
      * @memberof Numbas.ExamEvent
      * @instance
-     * @type String
+     * @type {string}
      */
     action: 'none',
     /** Message to show the student when the event happens.
+     *
      * @memberof Numbas.ExamEvent
      * @instance
-     * @type String
+     * @type {string}
      */
     message: ''
 };
@@ -990,15 +1035,14 @@ ExamEvent.createFromJSON = function(type,data) {
 }
 
 
-/** Represents a group of questions
+/** Represents a group of questions.
  *
- * @constructor
+ * @class
  * @param {Numbas.Exam} exam
- * @param {Element} groupNode - the XML defining the group.
- * @property {Numbas.Exam} exam - the exam this group belongs to
- * @property {Element} xml - the XML defining the group
- * @property {Object} json - the JSON object defining the group
- * @property {Array.<Number>} questionSubset - the indices of the picked questions, in the order they should appear to the student
+ * @property {Numbas.Exam} exam - The exam this group belongs to.
+ * @property {Element} xml - The XML defining the group.
+ * @property {object} json - The JSON object defining the group.
+ * @property {Array.<number>} questionSubset - The indices of the picked questions, in the order they should appear to the student.
  * @property {Array.<Numbas.Question>} questionList
  * @memberof Numbas
  */
@@ -1007,7 +1051,8 @@ function QuestionGroup(exam) {
     this.settings = util.copyobj(this.settings);
 }
 QuestionGroup.prototype = {
-    /** Load this question group's settings from the given XML <question_group> node
+    /** Load this question group's settings from the given XML <question_group> node.
+     *
      * @param {Element} xml
      */
     loadFromXML: function(xml) {
@@ -1016,25 +1061,27 @@ QuestionGroup.prototype = {
         var questionNodes = this.xml.selectNodes('questions/question');
         this.numQuestions = questionNodes.length;
     },
-    /** Load this question group's settings from the given JSON dictionary
-     * @param {Object} data
+    /** Load this question group's settings from the given JSON dictionary.
+     *
+     * @param {object} data
      */
     loadFromJSON: function(data) {
         this.json = data;
         Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
         this.numQuestions = data.questions.length;
     },
-    /** Settings for this group
-     * @property {String} name
-     * @property {String} pickingStrategy - how to pick the list of questions: 'all-ordered', 'all-shuffled' or 'random-subset'
-     * @property {Number} pickQuestions - if `pickingStrategy` is 'random-subset', how many questions to pick
+    /** Settings for this group.
+     *
+     * @property {string} name
+     * @property {string} pickingStrategy - How to pick the list of questions: 'all-ordered', 'all-shuffled' or 'random-subset'.
+     * @property {number} pickQuestions - If `pickingStrategy` is 'random-subset', how many questions to pick.
      */
     settings: {
         name: '',
         pickingStrategy: 'all-ordered',
         pickQuestions: 1
     },
-    /** Decide which questions to use and in what order */
+    /** Decide which questions to use and in what order. */
     chooseQuestionSubset: function() {
         switch(this.settings.pickingStrategy) {
             case 'all-ordered':

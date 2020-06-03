@@ -29,8 +29,9 @@ if(!window.Numbas) { window.Numbas = {} }
 /** Extensions should add objects to this so they can be accessed */
 Numbas.extensions = {};
 /** A function for displaying debug info in the console. It will try to give a reference back to the line that called it, if it can.
- * @param {String} msg - text to display
- * @param {Boolean} [noStack=false] - don't show the stack trace
+ *
+ * @param {string} msg - Text to display.
+ * @param {boolean} [noStack=false] - Don't show the stack trace.
  */
 Numbas.debug = function(msg,noStack)
 {
@@ -48,7 +49,8 @@ Numbas.debug = function(msg,noStack)
         }
     }
 };
-/** Display an error in a nice alert box. Also sends the error to the console via {@link Numbas.debug}
+/** Display an error in a nice alert box. Also sends the error to the console via {@link Numbas.debug}.
+ *
  * @param {Error} e
  */
 Numbas.showError = function(e)
@@ -59,10 +61,11 @@ Numbas.showError = function(e)
     Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };
-/** Generic error class. Extends JavaScript's Error
- * @constructor
- * @param {String} message - A description of the error. Localised by R.js.
- * @param {Object} args - Arguments for the error message
+/** Generic error class. Extends JavaScript's `Error`.
+ *
+ * @class
+ * @param {string} message - A description of the error. Localised by R.js.
+ * @param {object} args - Arguments for the error message.
  * @param {Error} originalError - If this is a re-thrown error, the original error object.
  */
 Numbas.Error = function(message, args, originalError)
@@ -85,17 +88,18 @@ Numbas.Error = function(message, args, originalError)
 Numbas.Error.prototype = Error.prototype;
 Numbas.Error.prototype.constructor = Numbas.Error;
 var scriptreqs = {};
-/** Keep track of loading status of a script and its dependencies
- * @param {String} file - name of script
- * @param {Array.<String>} fdeps - Scripts which this one depends on
+/** Keep track of loading status of a script and its dependencies.
+ *
+ * @param {string} file - Name of the script.
+ * @param {Array.<string>} fdeps - Scripts which this one depends on.
  * @param {Function} callback
  * @global
- * @constructor
- * @property {String} file - Name of script
- * @property {Boolean} loaded - Has the script been loaded yet?
- * @property {Boolean} executed - Has the script been run?
- * @property {Array.<String>} backdeps - Scripts which depend on this one (need this one to run first)
- * @property {Array.<String>} fdeps - Scripts which this one depends on (it must run after them)
+ * @class
+ * @property {string} file - Name of the script.
+ * @property {boolean} loaded - Has the script been loaded yet?
+ * @property {boolean} executed - Has the script been run?
+ * @property {Array.<string>} backdeps - Scripts which depend on this one (need this one to run first)
+ * @property {Array.<string>} fdeps - Scripts which this one depends on (it must run after them)
  * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
 var RequireScript = Numbas.RequireScript = function(file,fdeps,callback)
@@ -133,9 +137,10 @@ RequireScript.prototype = {
     }
 };
 /** Ask to load a javascript file. Unless `noreq` is set, the file's code must be wrapped in a call to Numbas.queueScript with its filename as the first parameter.
+ *
  * @memberof Numbas
- * @param {String} file
- * @param {Boolean} noreq - don't create a {@link Numbas.RequireScript} object
+ * @param {string} file
+ * @param {boolean} noreq - Don't create a {@link Numbas.RequireScript} object.
  * @returns {Numbas.RequireScript}
  */
 var loadScript = Numbas.loadScript = function(file,noreq)
@@ -151,10 +156,11 @@ var loadScript = Numbas.loadScript = function(file,noreq)
 }
 /**
  * Queue up a file's code to be executed.
- * Each script should be wrapped in this function
- * @param {String} file - Name of the script
- * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
- * @param {Function} callback - A function wrapping up this file's code
+ * Each script should be wrapped in this function.
+ *
+ * @param {string} file - Name of the script.
+ * @param {Array.<string>} deps - A list of other scripts which need to be run before this one can be run.
+ * @param {Function} callback - A function wrapping up this file's code.
  */
 Numbas.queueScript = function(file, deps, callback) {
     if(typeof(deps)=='string')
@@ -218,8 +224,9 @@ Numbas.runImmediately = function(deps,fn) {
 
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * The extension is not run immediately - call {@link Numbas.activateExtension} to run the extension.
- * @param {String} name - unique name of the extension
- * @param {Array.<String>} deps - A list of other scripts which need to be run before this one can be run
+ *
+ * @param {string} name - Unique name of the extension.
+ * @param {Array.<string>} deps - A list of other scripts which need to be run before this one can be run.
  * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
 var extension_callbacks = {};
@@ -237,8 +244,9 @@ Numbas.addExtension = function(name,deps,callback) {
     });
 }
 
-/** Run the extension with the given name. The extension must have already been registered with {@link Numbas.addExtension}
- * @param {String} name
+/** Run the extension with the given name. The extension must have already been registered with {@link Numbas.addExtension}.
+ *
+ * @param {string} name
  */
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
@@ -251,8 +259,9 @@ Numbas.activateExtension = function(name) {
     }
 }
 
-/** Check all required scripts have executed - the theme should call this once the document has loaded
- * @returns {Array.<Object>} a list of files which have not loaded
+/** Check all required scripts have executed - the theme should call this once the document has loaded.
+ * 
+ * @returns {Array.<object>} A list of files which have not loaded.
  */
 Numbas.checkAllScriptsLoaded = function() {
     var fails = [];
@@ -272,19 +281,22 @@ Numbas.checkAllScriptsLoaded = function() {
 })();
 
 /** Resources to do with localisation: `preferred_locale` is the code of the locale to use, and `resources` is a dictionary of localisations.
+ *
  * @name locale
  * @memberof Numbas
- * @type {Object}
+ * @type {object}
  */
 
-/** Definitions of marking scripts for the built-in part types
+/** Definitions of marking scripts for the built-in part types.
+ *
  * @name raw_marking_scripts
  * @memberof Numbas
- * @type {Object.<String>}
+ * @type {object.<string>}
  */
 
-/** Marking scripts for the built-in part types
+/** Marking scripts for the built-in part types.
+ *
  * @name marking_scripts
  * @memberof Numbas
- * @type {Object.<Numbas.marking.MarkingScript>}
+ * @type {object.<Numbas.marking.MarkingScript>}
  */

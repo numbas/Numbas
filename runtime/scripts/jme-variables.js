@@ -12,7 +12,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Stuff to do with making new functions from JME or JavaScript code,
  * generating question variables,
- * and substituting variables into maths or the DOM
+ * and substituting variables into maths or the DOM.
  *
  * Provides {@link Numbas.jme.variables}
  */
@@ -21,27 +21,30 @@ var jme = Numbas.jme;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
 
-/** A dictionary describing a variable to be evaluated
- * @typedef {Object} Numbas.jme.variables.variable_data_dict
- * @property {Numbas.jme.tree} tree - definition of variable
- * @property {String[]} vars - names of variables this variable depends on
+/** A dictionary describing a variable to be evaluated.
+ *
+ * @typedef {object} Numbas.jme.variables.variable_data_dict
+ * @property {Numbas.jme.tree} tree - Definition of the variable.
+ * @property {string[]} vars - Names of variables this variable depends on.
  */
 
 /** The definition of a custom JME function.
+ *
  * @typedef Numbas.jme.variables.func_data
- * @type {Object}
- * @property {String} name
- * @property {String} definition - definition of the function, either in {@link JME} or JavaScript
- * @property {String} language - either `"jme"` or `"javascript"`
- * @property {String} outtype - name of the {@link Numbas.jme.token} type this function returns
- * @property {Array.<Object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
+ * @type {object}
+ * @property {string} name
+ * @property {string} definition - Definition of the function, either in {@link JME} or JavaScript.
+ * @property {string} language - Either `"jme"` or `"javascript"`.
+ * @property {string} outtype - Name of the {@link Numbas.jme.token} type this function returns.
+ * @property {Array.<object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
  */
 
 jme.variables = /** @lends Numbas.jme.variables */ {
     /** Make a new function, whose definition is written in JME.
-     * @param {Object} fn - contains `definition` and `paramNames`.
+     *
+     * @param {object} fn - Contains `definition` and `paramNames`.
      * @param {Numbas.jme.Scope} scope
-     * @returns {Function} - function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
+     * @returns {Function} - Function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
      */
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
@@ -57,11 +60,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a new function, whose definition is written in JavaScript.
      *
-     * The JavaScript is wrapped with `(function(<paramNames>){ ` and ` }`)
+     * The JavaScript is wrapped with `(function(<paramNames>){ ` and ` }`).
      *
-     * @param {Object} fn - contains `definition` and `paramNames`.
-     * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {Function} - function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}
+     * @param {object} fn - Contains `definition` and `paramNames`.
+     * @param {object} withEnv - Dictionary of local variables for javascript functions.
+     * @returns {Function} - Function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}.
      */
     makeJavascriptFunction: function(fn,withEnv) {
         var paramNames = fn.paramNames.slice();
@@ -98,9 +101,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Object} tmpfn - contains `definition`, `name`, `language`, `parameters`
+     * @param {object} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
-     * @param {Object} withEnv - dictionary of local variables for javascript functions
+     * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
      */
     makeFunction: function(tmpfn,scope,withEnv) {
@@ -131,11 +134,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return fn
     },
-    /** Make up custom functions
+    /** Make up custom functions.
+     *
      * @param {Numbas.jme.variables.func_data[]} tmpFunctions
      * @param {Numbas.jme.Scope} scope
-     * @param {Object} withEnv - dictionary of local variables for javascript functions
-     * @returns {Object.<Numbas.jme.funcObj>}
+     * @param {object} withEnv - Dictionary of local variables for javascript functions.
+     * @returns {object.<Numbas.jme.funcObj>}
      * @see Numbas.jme.variables.makeFunction
      */
     makeFunctions: function(tmpFunctions,scope,withEnv)
@@ -151,11 +155,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return functions;
     },
     /** Evaluate a variable, evaluating all its dependencies first.
-     * @param {String} name - the name of the variable to evaluate
-     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables still to evaluate
+     *
+     * @param {string} name - The name of the variable to evaluate.
+     * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables still to evaluate.
      * @param {Numbas.jme.Scope} scope
-     * @param {String[]} path - Breadcrumbs - variable names currently being evaluated, so we can detect circular dependencies
-     * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - a function to call when a dependency needs to be computed.
+     * @param {string[]} path - Breadcrumbs - Variable names currently being evaluated, so we can detect circular dependencies.
+     * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - A function to call when a dependency needs to be computed.
      * @returns {Numbas.jme.token}
      */
     computeVariable: function(name,todo,scope,path,computeFn)
@@ -206,12 +211,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return value;
     },
-    /** Evaluate dictionary of variables
-     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
+    /** Evaluate dictionary of variables.
+     *
+     * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {Numbas.jme.Scope} scope
-     * @param {Numbas.jme.tree} condition - condition on the values of the variables which must be satisfied
-     * @param {Function} computeFn - a function to compute a variable. Default is Numbas.jme.variables.computeVariable
-     * @returns {Object} - {variables: dictionary of evaluated variables, conditionSatisfied: was the condition satisfied?}
+     * @param {Numbas.jme.tree} condition - Condition on the values of the variables which must be satisfied.
+     * @param {Function} computeFn - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
     makeVariables: function(todo,scope,condition,computeFn)
     {
@@ -235,8 +241,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
     /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
-     * @param {Numbas.jme.variables.variable_data_dict} todo - dictionary of variables mapped to their definitions
-     * @param {Object.<Numbas.jme.token>} changed_variables - dictionary of changed variables
+     *
+     * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
+     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables.
      * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.jme.Scope}
      */
@@ -259,10 +266,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
 
     /** Collect together a ruleset, evaluating all its dependencies first.
-     * @param {String} name - the name of the ruleset to evaluate
-     * @param {Object.<String[]>} todo - dictionary of rulesets still to evaluate
+     *
+     * @param {string} name - The name of the ruleset to evaluate.
+     * @param {object.<string[]>} todo - Dictionary of rulesets still to evaluate.
      * @param {Numbas.jme.Scope} scope
-     * @param {String[]} path - Breadcrumbs - rulesets names currently being evaluated, so we can detect circular dependencies
+     * @param {string[]} path - Breadcrumbs - Rulesets names currently being evaluated, so we can detect circular dependencies.
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
@@ -289,10 +297,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         scope.setRuleset(name,ruleset);
         return ruleset;
     },
-    /** Gather together a set of ruleset definitions
-     * @param {Object.<String[]>} todo - a dictionary mapping ruleset names to definitions
-     * @param {Numbas.jme.Scope} scope - the scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
-     * @returns {Object.<Numbas.jme.rules.Ruleset>} a dictionary of rulesets
+    /** Gather together a set of ruleset definitions.
+     *
+     * @param {object.<string[]>} todo - A dictionary mapping ruleset names to definitions.
+     * @param {Numbas.jme.Scope} scope - The scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
+     * @returns {object.<Numbas.jme.rules.Ruleset>} A dictionary of rulesets.
      */
     makeRulesets: function(todo,scope) {
         var out = {};
@@ -301,18 +310,20 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return out;
     },
-    /** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables
-     * @param {Object} todo - dictionary of variables mapped to their definitions
-     * @param {String[]} ancestors - list of variable names whose dependants we should find
-     * @returns {Object} - a copy of the todo list, only including the dependants of the given variables
+    /** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables.
+     *
+     * @param {object} todo - Dictionary of variables mapped to their definitions.
+     * @param {string[]} ancestors - List of variable names whose dependants we should find.
+     * @returns {object} - A copy of the todo list, only including the dependants of the given variables.
      */
     variableDependants: function(todo,ancestors) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
-        /** Find the names of the variables this variable depends on
-         * @param {String} name - the name of the variable to consider
-         * @param {Array.<String>} path - the chain of variables that have led to the one being considered, used to detect circular references
-         * @returns {Array.<String>} - the names of the variables this one depends on
+        /** Find the names of the variables this variable depends on.
+         *
+         * @param {string} name - The name of the variable to consider.
+         * @param {Array.<string>} path - The chain of variables that have led to the one being considered, used to detect circular references.
+         * @returns {Array.<string>} - The names of the variables this one depends on.
          */
         function findDependants(name,path) {
             path = path || [];
@@ -358,9 +369,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return out;
     },
-    /** Substitute variables into a DOM element (works recursively on the element's children)
+    /** Substitute variables into a DOM element (works recursively on the element's children).
      *
      * Ignores iframes and elements with the attribute `nosubvars`.
+     *
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.variables.DOMcontentsubber
@@ -370,10 +382,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
-     * @param {String} str - the contents of the text node
+     *
+     * @param {string} str - The contents of the text node.
      * @param {Numbas.jme.Scope} scope
-     * @param {Document} doc - the document the text node belongs to.
-     * @returns {Node[]} - array of DOM nodes to replace the string with
+     * @param {Document} doc - The document the text node belongs to.
+     * @returns {Node[]} - Array of DOM nodes to replace the string with.
      */
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
@@ -381,9 +394,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(bits.length==1) {
             return [doc.createTextNode(str)];
         }
-        /** Get HTML content for a given JME token
+        /** Get HTML content for a given JME token.
+         *
          * @param {Numbas.jme.token} token
-         * @returns {Element|String}
+         * @returns {Element|string}
          */
         function doToken(token) {
             switch(token.type){
@@ -436,9 +450,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
 /** An object which substitutes JME values into HTML.
  * JME expressions found inside text nodes are evaluated with respect to the given scope.
+ *
  * @param {Numbas.jme.Scope} scope
  * @memberof Numbas.jme.variables
- * @constructor
+ * @class
  */
 var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
@@ -447,7 +462,8 @@ var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.IGNORE_TAGS = ['iframe','script','style'];
 }
 DOMcontentsubber.prototype = {
-    /** Substitute JME values into the given element and any children
+    /** Substitute JME values into the given element and any children.
+     *
      * @param {Element} element
      */
     subvars: function(element) {
@@ -488,7 +504,7 @@ DOMcontentsubber.prototype = {
                 return;
             }
         } else if(tagName=='object') {
-            /** Substitute content into the object's root element
+            /** Substitute content into the object's root element.
              */
             function go() {
                 jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
@@ -552,9 +568,10 @@ DOMcontentsubber.prototype = {
         selector.remove();
     },
 
-    /** Find all variables which would be used when substituting into the given element
+    /** Find all variables which would be used when substituting into the given element.
+     *
      * @param {Element} element
-     * @returns {Array.<String>}
+     * @returns {Array.<string>}
      */
     findvars: function(element) {
         switch(element.nodeType) {

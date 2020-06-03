@@ -13,34 +13,43 @@ Copyright 2011-14 Newcastle University
 /** @file Provides {@link Numbas.schedule} */
 Numbas.queueScript('schedule',['base'],function() {
 /** Schedule functions to be called. The scheduler can put tiny timeouts in between function calls so the browser doesn't become unresponsive. It also updates the loading bar.
+ *
  * @namespace Numbas.schedule
  */
 var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
-    /** Functions to call
-     * @type {function[]}
+    /** Functions to call.
+     *
+     * @type {Function[]}
      */
     calls: [],
-    /** Bits of queue that have been picked up while a task performs sub-tasks
-     * @type {Array.<Array.<function>>} */
+    /** Bits of queue that have been picked up while a task performs sub-tasks.
+     *
+     * @type {Array.<Array.<Function>>} 
+     */
     lifts: [],
-    /** Number of tasks completed
-     * @type {Number}
+    /** Number of tasks completed.
+     *
+     * @type {number}
      */
     completed: 0,
-    /** Total number of tasks ever scheduled
-     * @type {Number}
+    /** Total number of tasks ever scheduled.
+     *
+     * @type {number}
      */
     total: 0,
     /** Should the scheduler stop running tasks?
-     * Don't use this directly - use {@link Numbas.schedule.halt}
-     * @type {Boolean}
+     * Don't use this directly - use {@link Numbas.schedule.halt}.
+     *
+     * @type {boolean}
      */
     halted:false,
-    /** Error which caused the scheduler to halt
+    /** Error which caused the scheduler to halt.
+     *
      * @type {Error}
      */
     halt_error: null,
     /** Prevent the scheduler from running any more tasks, and save the error message which caused this.
+     *
      * @param {Error} error
      * @see Numbas.schedule.halted
      * @see Numbas.schedule.halt_error
@@ -50,13 +59,14 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         schedule.halted = true;
         schedule.halt_error = error;
     },
-    /** @typedef {Object} Numbas.schedule.task_object
+    /** @typedef {object} Numbas.schedule.task_object
      * @property {Function} task - The function to execute.
      * @property {Function} error - A callback, used if an error is raised.
      */
-    /** Add a task to the queue
-     * @param {Function|Numbas.schedule.task_object} fn - the function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused
-     * @param {Object} that - what `this` should be when the function is called
+    /** Add a task to the queue.
+     *
+     * @param {Function|Numbas.schedule.task_object} fn - The function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused.
+     * @param {object} that - What `this` should be when the function is called.
      */
     add: function(fn,that)
     {
@@ -106,13 +116,13 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         schedule.completed++;
         Numbas.display && Numbas.display.showLoadProgress();
     },
-    /** 'pick up' the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called */
+    /** Pick up the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called. */
     lift: function()
     {
         schedule.lifts.push(schedule.calls);
         schedule.calls=new Array();
     },
-    /** Put the last lifted queue back on the end of the real queue */
+    /** Put the last lifted queue back on the end of the real queue. */
     drop: function()
     {
         schedule.calls = schedule.calls.concat(schedule.lifts.pop());
@@ -120,7 +130,8 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
 };
 
 /** Coordinates Promises corresponding to different stages in the loading process.
- * @constructor
+ *
+ * @class
  * @memberof Numbas.schedule
  */
 var SignalBox = schedule.SignalBox = function() {
@@ -128,22 +139,24 @@ var SignalBox = schedule.SignalBox = function() {
 }
 SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     /** @typedef Numbas.schedule.callback
-     * @type {Object}
+     * @type {object}
      * @property {Promise} Promise
-     * @property {function} resolve - the promise's `resolve` function
-     * @property {function} reject - the promise's `reject` function
-     * @property {Boolean} resolved - has the promise been resolved?
+     * @property {Function} resolve - The promise's `resolve` function.
+     * @property {Function} reject - The promise's `reject` function.
+     * @property {boolean} resolved - Has the promise been resolved?
      */
 
     /** Dictionary of registered callbacks.
-     * @type {Object.<Numbas.schedule.callback>}
+     *
+     * @type {object.<Numbas.schedule.callback>}
      * @private
      */
     callbacks: {},
 
     /** Get a callback object for the event with the hiven name.
      * If the callback hasn't been accessed before, it's created.
-     * @param {String} name
+     *
+     * @param {string} name
      * @returns {Numbas.schedule.callback}
      */
     getCallback: function(name) {
@@ -162,8 +175,9 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     },
 
     /** Once the given event(s) have resolved, run the given callback function. Returns a Promise, so can be used without a callback.
-     * @param {String|Array.<String>} events - the name of an event, or a list of event names
-     * @param {Function} [fn] - a callback function to run
+     *
+     * @param {string|Array.<string>} events - The name of an event, or a list of event names.
+     * @param {Function} [fn] - A callback function to run.
      * @returns {Promise} Resolves when all of the events have resolved, or rejects if the signal box is in an error state.
      */
     on: function(events, fn) {
@@ -205,7 +219,8 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     },
 
     /** Notify the signal box that the event with the given name has happened.
-     * @param {String} name
+     *
+     * @param {string} name
      */
     trigger: function(name) {
         var callback = this.getCallback(name);
@@ -218,6 +233,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 }
 
 /** Signals produced by the Numbas runtime.
+ *
  * @type {Numbas.schedule.SignalBox}
  * @memberof Numbas
  */

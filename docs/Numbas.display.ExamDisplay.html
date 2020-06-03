@@ -196,10 +196,6 @@
 					<h4>Members</h4>
 					<ul>
 					
-						<li class="name"><a href="Numbas.display.ExamDisplay.html#._endTime">_endTime</a></li>
-					
-						<li class="name"><a href="Numbas.display.ExamDisplay.html#._startTime">_startTime</a></li>
-					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.allowPause">allowPause</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.canAdvance">canAdvance</a></li>
@@ -215,6 +211,8 @@
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.currentQuestionNumber">currentQuestionNumber</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.displayTime">displayTime</a></li>
+					
+						<li class="name"><a href="Numbas.display.ExamDisplay.html#.endTime">endTime</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">enteredPassword</a></li>
 					
@@ -232,7 +230,7 @@
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.passed">passed</a></li>
 					
-						<li class="name"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">passwordFeedback.</a></li>
+						<li class="name"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">passwordFeedback</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.percentPass">percentPass</a></li>
 					
@@ -253,6 +251,8 @@
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.showActualMark">showActualMark</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.showQuestionGroupNames">showQuestionGroupNames</a></li>
+					
+						<li class="name"><a href="Numbas.display.ExamDisplay.html#.startTime">startTime</a></li>
 					
 						<li class="name"><a href="Numbas.display.ExamDisplay.html#.timeSpent">timeSpent</a></li>
 					
@@ -311,135 +311,7 @@
         
             
 <div class="item member">
-<h4 class="name" id="._endTime"><span class="type-signature">(static) </span>_endTime<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Time the exam ended, formatted for display</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L150">themes/default/files/scripts/exam-display.js, line 150</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id="._startTime"><span class="type-signature">(static) </span>_startTime<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Time the exam started, formatted for display</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L132">themes/default/files/scripts/exam-display.js, line 132</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".allowPause"><span class="type-signature">(static) </span>allowPause<span class="type-signature"> :Boolean</span></h4>
+<h4 class="name" id=".allowPause"><span class="type-signature">(static) </span>allowPause<span class="type-signature"> :boolean</span></h4>
 
 
 
@@ -454,1166 +326,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L169">themes/default/files/scripts/exam-display.js, line 169</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".canAdvance"><span class="type-signature">(static) </span>canAdvance<span class="type-signature"> :observable|Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Can the student go forward to the next question? (False if the current question is the last one)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L68">themes/default/files/scripts/exam-display.js, line 68</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".canBegin"><span class="type-signature">(static) </span>canBegin<span class="type-signature"> :observable|Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Does this exam need a password to begin?</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L206">themes/default/files/scripts/exam-display.js, line 206</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".canBegin"><span class="type-signature">(static) </span>canBegin<span class="type-signature"> :observable|Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Can the exam begin? True if no password is required, or if the student has entered the right password</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L218">themes/default/files/scripts/exam-display.js, line 218</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".canReverse"><span class="type-signature">(static) </span>canReverse<span class="type-signature"> :observable|Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Can the student go back to the previous question? (False if the current question is the first one</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L61">themes/default/files/scripts/exam-display.js, line 61</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".currentQuestion"><span class="type-signature">(static) </span>currentQuestion<span class="type-signature"> :observable|<a href="Numbas.Question.html">Numbas.Question</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>The current question (<a href="Numbas.Exam.html#currentQuestion"><code>Numbas.Exam#currentQuestion</code></a>)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="Numbas.Question.html">Numbas.Question</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L29">themes/default/files/scripts/exam-display.js, line 29</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".currentQuestionNumber"><span class="type-signature">(static) </span>currentQuestionNumber<span class="type-signature"> :observable|Number</span></h4>
-
-
-
-
-<div class="description">
-    <p>The number of the current question</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L45">themes/default/files/scripts/exam-display.js, line 45</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".displayTime"><span class="type-signature">(static) </span>displayTime<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>The time left in the exam</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L118">themes/default/files/scripts/exam-display.js, line 118</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".enteredPassword"><span class="type-signature">(static) </span>enteredPassword<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>Password entered by the student</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L212">themes/default/files/scripts/exam-display.js, line 212</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".exam"><span class="type-signature">(static) </span>exam<span class="type-signature"> :<a href="Numbas.Exam.html">Numbas.Exam</a></span></h4>
-
-
-
-
-<div class="description">
-    <p>Reference to the associated exam object</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="Numbas.Exam.html">Numbas.Exam</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L250">themes/default/files/scripts/exam-display.js, line 250</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".examScoreDisplay"><span class="type-signature">(static) </span>examScoreDisplay<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>String displaying the student's current score, and the total marks available, if allowed</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L97">themes/default/files/scripts/exam-display.js, line 97</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".feedbackMessage"><span class="type-signature">(static) </span>feedbackMessage<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>Message shown to the student based on their total score</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L200">themes/default/files/scripts/exam-display.js, line 200</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".infoPage"><span class="type-signature">(static) </span>infoPage<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>The name of the currently displayed info page</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L24">themes/default/files/scripts/exam-display.js, line 24</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".marks"><span class="type-signature">(static) </span>marks<span class="type-signature"> :observable|Number</span></h4>
-
-
-
-
-<div class="description">
-    <p>The total marks available for the exam (<a href="Numbas.Exam.html#mark"><code>Numbas.Exam#mark</code></a>)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L87">themes/default/files/scripts/exam-display.js, line 87</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".mode"><span class="type-signature">(static) </span>mode<span class="type-signature"> :observable|String</span></h4>
-
-
-
-
-<div class="description">
-    <p>The exam's mode (<a href="Numbas.Exam.html#mode"><code>Numbas.Exam#mode</code></a>)</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L14">themes/default/files/scripts/exam-display.js, line 14</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".passed"><span class="type-signature">(static) </span>passed<span class="type-signature"> :observable|Boolean</span></h4>
-
-
-
-
-<div class="description">
-    <p>Did the student pass the exam?</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
-|
-
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
         </li>
@@ -1672,14 +385,1271 @@
         
             
 <div class="item member">
-<h4 class="name" id=".passwordFeedback."><span class="type-signature">(static) </span>passwordFeedback.<span class="type-signature"> :observable|Object</span></h4>
+<h4 class="name" id=".canAdvance"><span class="type-signature">(static) </span>canAdvance<span class="type-signature"> :observable|boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Can the student go forward to the next question? False if the current question is the last one.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L79">themes/default/files/scripts/exam-display.js, line 79</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".canBegin"><span class="type-signature">(static) </span>canBegin<span class="type-signature"> :observable|boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Can the exam begin? True if no password is required, or if the student has entered the right password.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L252">themes/default/files/scripts/exam-display.js, line 252</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".canBegin"><span class="type-signature">(static) </span>canBegin<span class="type-signature"> :observable|boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Does this exam need a password to begin?</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L238">themes/default/files/scripts/exam-display.js, line 238</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".canReverse"><span class="type-signature">(static) </span>canReverse<span class="type-signature"> :observable|boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Can the student go back to the previous question? False if the current question is the first one.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L71">themes/default/files/scripts/exam-display.js, line 71</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".currentQuestion"><span class="type-signature">(static) </span>currentQuestion<span class="type-signature"> :observable|<a href="Numbas.Question.html">Numbas.Question</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>The current question.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type"><a href="Numbas.Question.html">Numbas.Question</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L34">themes/default/files/scripts/exam-display.js, line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.Exam.html#currentQuestion">Numbas.Exam#currentQuestion</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".currentQuestionNumber"><span class="type-signature">(static) </span>currentQuestionNumber<span class="type-signature"> :observable|number</span></h4>
+
+
+
+
+<div class="description">
+    <p>The number of the current question.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L53">themes/default/files/scripts/exam-display.js, line 53</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".displayTime"><span class="type-signature">(static) </span>displayTime<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The time left in the exam.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L139">themes/default/files/scripts/exam-display.js, line 139</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".endTime"><span class="type-signature">(static) </span>endTime<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>Time the exam ended, formatted for display.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L170">themes/default/files/scripts/exam-display.js, line 170</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".enteredPassword"><span class="type-signature">(static) </span>enteredPassword<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>Password entered by the student.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L245">themes/default/files/scripts/exam-display.js, line 245</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".exam"><span class="type-signature">(static) </span>exam<span class="type-signature"> :<a href="Numbas.Exam.html">Numbas.Exam</a></span></h4>
+
+
+
+
+<div class="description">
+    <p>Reference to the associated exam object.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="Numbas.Exam.html">Numbas.Exam</a></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L287">themes/default/files/scripts/exam-display.js, line 287</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".examScoreDisplay"><span class="type-signature">(static) </span>examScoreDisplay<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>String displaying the student's current score, and the total marks available, if allowed.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L116">themes/default/files/scripts/exam-display.js, line 116</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".feedbackMessage"><span class="type-signature">(static) </span>feedbackMessage<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>Message shown to the student based on their total score.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L231">themes/default/files/scripts/exam-display.js, line 231</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".infoPage"><span class="type-signature">(static) </span>infoPage<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The name of the currently displayed info page.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L28">themes/default/files/scripts/exam-display.js, line 28</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".marks"><span class="type-signature">(static) </span>marks<span class="type-signature"> :observable|number</span></h4>
+
+
+
+
+<div class="description">
+    <p>The total marks available for the exam.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">number</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L102">themes/default/files/scripts/exam-display.js, line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.Exam.html#mark">Numbas.Exam#mark</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".mode"><span class="type-signature">(static) </span>mode<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>The exam's mode.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L15">themes/default/files/scripts/exam-display.js, line 15</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.Exam.html#mode">Numbas.Exam#mode</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".passed"><span class="type-signature">(static) </span>passed<span class="type-signature"> :observable|boolean</span></h4>
+
+
+
+
+<div class="description">
+    <p>Did the student pass the exam?</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L225">themes/default/files/scripts/exam-display.js, line 225</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".passwordFeedback"><span class="type-signature">(static) </span>passwordFeedback<span class="type-signature"> :observable|object</span></h4>
 
 
 
 
 <div class="description">
     <p>Feedback on the password the student has entered.
-Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass</code></p>
+Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass</code>.</p>
 </div>
 
 
@@ -1691,7 +1661,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></span>
+<span class="param-type">object</span>
 
 
         </li>
@@ -1730,7 +1700,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L227">themes/default/files/scripts/exam-display.js, line 227</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L262">themes/default/files/scripts/exam-display.js, line 262</a>
     </li></ul></dd>
     
 
@@ -1750,13 +1720,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".percentPass"><span class="type-signature">(static) </span>percentPass<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".percentPass"><span class="type-signature">(static) </span>percentPass<span class="type-signature"> :observable|string</span></h4>
 
 
 
 
 <div class="description">
-    <p>The percentage score the student needs to achieve to pass (<code>Numbas.Exam#percentPass</code>), formatted as a string.</p>
+    <p>The percentage score the student needs to achieve to pass, formatted as a string.</p>
 </div>
 
 
@@ -1768,7 +1738,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -1807,12 +1777,19 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L92">themes/default/files/scripts/exam-display.js, line 92</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L109">themes/default/files/scripts/exam-display.js, line 109</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.Exam#percentPass</li>
+        </ul>
+    </dd>
     
 
     
@@ -1827,13 +1804,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".percentScore"><span class="type-signature">(static) </span>percentScore<span class="type-signature"> :observable|Number</span></h4>
+<h4 class="name" id=".percentScore"><span class="type-signature">(static) </span>percentScore<span class="type-signature"> :observable|number</span></h4>
 
 
 
 
 <div class="description">
-    <p>The student's total score as a percentage of the total marks available</p>
+    <p>The student's total score as a percentage of the total marks available.</p>
 </div>
 
 
@@ -1845,7 +1822,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
         </li>
@@ -1884,7 +1861,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L113">themes/default/files/scripts/exam-display.js, line 113</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L133">themes/default/files/scripts/exam-display.js, line 133</a>
     </li></ul></dd>
     
 
@@ -1910,7 +1887,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>All the exam's question display objects</p>
+    <p>All the exam's question display objects.</p>
 </div>
 
 
@@ -1961,7 +1938,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L56">themes/default/files/scripts/exam-display.js, line 56</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L65">themes/default/files/scripts/exam-display.js, line 65</a>
     </li></ul></dd>
     
 
@@ -1981,13 +1958,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".questionsAttempted"><span class="type-signature">(static) </span>questionsAttempted<span class="type-signature"> :observable|Number</span></h4>
+<h4 class="name" id=".questionsAttempted"><span class="type-signature">(static) </span>questionsAttempted<span class="type-signature"> :observable|number</span></h4>
 
 
 
 
 <div class="description">
-    <p>Total number of questions the student attempted</p>
+    <p>Total number of questions the student attempted.</p>
 </div>
 
 
@@ -1999,7 +1976,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
         </li>
@@ -2038,7 +2015,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L174">themes/default/files/scripts/exam-display.js, line 174</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L201">themes/default/files/scripts/exam-display.js, line 201</a>
     </li></ul></dd>
     
 
@@ -2058,13 +2035,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".questionsAttemptedDisplay"><span class="type-signature">(static) </span>questionsAttemptedDisplay<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".questionsAttemptedDisplay"><span class="type-signature">(static) </span>questionsAttemptedDisplay<span class="type-signature"> :observable|string</span></h4>
 
 
 
 
 <div class="description">
-    <p>Total number of questions the student attempted, formatted as a fraction of the total number of questions</p>
+    <p>Total number of questions the student attempted, formatted as a fraction of the total number of questions.</p>
 </div>
 
 
@@ -2076,7 +2053,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -2115,7 +2092,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L183">themes/default/files/scripts/exam-display.js, line 183</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L211">themes/default/files/scripts/exam-display.js, line 211</a>
     </li></ul></dd>
     
 
@@ -2135,7 +2112,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".result"><span class="type-signature">(static) </span>result<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".result"><span class="type-signature">(static) </span>result<span class="type-signature"> :observable|string</span></h4>
 
 
 
@@ -2153,7 +2130,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -2192,7 +2169,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L190">themes/default/files/scripts/exam-display.js, line 190</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L219">themes/default/files/scripts/exam-display.js, line 219</a>
     </li></ul></dd>
     
 
@@ -2212,7 +2189,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".saving"><span class="type-signature">(static) </span>saving<span class="type-signature"> :observable|Boolean</span></h4>
+<h4 class="name" id=".saving"><span class="type-signature">(static) </span>saving<span class="type-signature"> :observable|boolean</span></h4>
 
 
 
@@ -2230,7 +2207,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
         </li>
@@ -2269,7 +2246,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L19">themes/default/files/scripts/exam-display.js, line 19</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L22">themes/default/files/scripts/exam-display.js, line 22</a>
     </li></ul></dd>
     
 
@@ -2289,13 +2266,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".score"><span class="type-signature">(static) </span>score<span class="type-signature"> :observable|Number</span></h4>
+<h4 class="name" id=".score"><span class="type-signature">(static) </span>score<span class="type-signature"> :observable|number</span></h4>
 
 
 
 
 <div class="description">
-    <p>The student's total score (<a href="Numbas.Exam.html#score"><code>Numbas.Exam#score</code></a>)</p>
+    <p>The student's total score.</p>
 </div>
 
 
@@ -2307,7 +2284,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
         </li>
@@ -2346,12 +2323,19 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L75">themes/default/files/scripts/exam-display.js, line 75</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L87">themes/default/files/scripts/exam-display.js, line 87</a>
     </li></ul></dd>
     
 
     
 
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Numbas.Exam.html#score">Numbas.Exam#score</a></li>
+        </ul>
+    </dd>
     
 
     
@@ -2366,7 +2350,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".showActualMark"><span class="type-signature">(static) </span>showActualMark<span class="type-signature"> :observable|Boolean</span></h4>
+<h4 class="name" id=".showActualMark"><span class="type-signature">(static) </span>showActualMark<span class="type-signature"> :observable|boolean</span></h4>
 
 
 
@@ -2384,7 +2368,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
         </li>
@@ -2423,7 +2407,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L80">themes/default/files/scripts/exam-display.js, line 80</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L94">themes/default/files/scripts/exam-display.js, line 94</a>
     </li></ul></dd>
     
 
@@ -2443,7 +2427,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".showQuestionGroupNames"><span class="type-signature">(static) </span>showQuestionGroupNames<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".showQuestionGroupNames"><span class="type-signature">(static) </span>showQuestionGroupNames<span class="type-signature"> :observable|string</span></h4>
 
 
 
@@ -2461,7 +2445,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -2500,7 +2484,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L123">themes/default/files/scripts/exam-display.js, line 123</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L145">themes/default/files/scripts/exam-display.js, line 145</a>
     </li></ul></dd>
     
 
@@ -2520,13 +2504,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".timeSpent"><span class="type-signature">(static) </span>timeSpent<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".startTime"><span class="type-signature">(static) </span>startTime<span class="type-signature"> :observable|string</span></h4>
 
 
 
 
 <div class="description">
-    <p>The total time the student has spent in the exam</p>
+    <p>Time the exam started, formatted for display.</p>
 </div>
 
 
@@ -2538,7 +2522,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -2577,7 +2561,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L164">themes/default/files/scripts/exam-display.js, line 164</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L151">themes/default/files/scripts/exam-display.js, line 151</a>
     </li></ul></dd>
     
 
@@ -2597,13 +2581,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
         
             
 <div class="item member">
-<h4 class="name" id=".viewType"><span class="type-signature">(static) </span>viewType<span class="type-signature"> :observable|String</span></h4>
+<h4 class="name" id=".timeSpent"><span class="type-signature">(static) </span>timeSpent<span class="type-signature"> :observable|string</span></h4>
 
 
 
 
 <div class="description">
-    <p>What kind of view are we in at the moment? 'infopage' or 'question'</p>
+    <p>The total time the student has spent in the exam.</p>
 </div>
 
 
@@ -2615,7 +2599,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 <span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
 |
 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
         </li>
@@ -2654,7 +2638,84 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L34">themes/default/files/scripts/exam-display.js, line 34</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L189">themes/default/files/scripts/exam-display.js, line 189</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".viewType"><span class="type-signature">(static) </span>viewType<span class="type-signature"> :observable|string</span></h4>
+
+
+
+
+<div class="description">
+    <p>What kind of view are we in at the moment? 'infopage' or 'question'.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L41">themes/default/files/scripts/exam-display.js, line 41</a>
     </li></ul></dd>
     
 
@@ -2687,14 +2748,14 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		<div class="item function">
 	
 
-    <h4 class="name" id=".applyQuestionBindings"><span class="type-signature">(static) </span>applyQuestionBindings<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".applyQuestionBindings"><span class="type-signature">(static) </span>applyQuestionBindings<span class="signature">(question)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Apply knockout bindings to the given question</p>
+    <p>Apply knockout bindings to the given question.</p>
 </div>
 
 
@@ -2712,6 +2773,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     <thead>
     <tr>
         
+        <th>Name</th>
+        
 
         <th>Type</th>
 
@@ -2727,6 +2790,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
 
         <tr>
+            
+                <td class="name"><code>question</code></td>
             
 
             <td class="type">
@@ -2797,7 +2862,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L434">themes/default/files/scripts/exam-display.js, line 434</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L484">themes/default/files/scripts/exam-display.js, line 484</a>
     </li></ul></dd>
     
 
@@ -2828,7 +2893,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Try to begin the exam</p>
+    <p>Try to begin the exam.</p>
 </div>
 
 
@@ -2886,7 +2951,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L255">themes/default/files/scripts/exam-display.js, line 255</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L293">themes/default/files/scripts/exam-display.js, line 293</a>
     </li></ul></dd>
     
 
@@ -2917,7 +2982,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Called when the exam ends</p>
+    <p>Called when the exam ends.</p>
 </div>
 
 
@@ -2975,7 +3040,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L439">themes/default/files/scripts/exam-display.js, line 439</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L490">themes/default/files/scripts/exam-display.js, line 490</a>
     </li></ul></dd>
     
 
@@ -3006,7 +3071,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Called after the current question has been regenerated</p>
+    <p>Called after the current question has been regenerated.</p>
 </div>
 
 
@@ -3064,7 +3129,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L419">themes/default/files/scripts/exam-display.js, line 419</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L467">themes/default/files/scripts/exam-display.js, line 467</a>
     </li></ul></dd>
     
 
@@ -3095,7 +3160,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Hide the sliding side menu</p>
+    <p>Hide the sliding side menu.</p>
 </div>
 
 
@@ -3153,7 +3218,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L402">themes/default/files/scripts/exam-display.js, line 402</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L448">themes/default/files/scripts/exam-display.js, line 448</a>
     </li></ul></dd>
     
 
@@ -3184,7 +3249,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Hide the timer</p>
+    <p>Hide the timer.</p>
 </div>
 
 
@@ -3242,7 +3307,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L328">themes/default/files/scripts/exam-display.js, line 328</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L369">themes/default/files/scripts/exam-display.js, line 369</a>
     </li></ul></dd>
     
 
@@ -3273,7 +3338,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Initialise the question list display</p>
+    <p>Initialise the question list display.</p>
 </div>
 
 
@@ -3331,7 +3396,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L270">themes/default/files/scripts/exam-display.js, line 270</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L310">themes/default/files/scripts/exam-display.js, line 310</a>
     </li></ul></dd>
     
 
@@ -3362,7 +3427,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Show an info page (one of the front page, pause , results, or exit)</p>
+    <p>Show an info page (one of the front page, pause , results, or exit).</p>
 </div>
 
 
@@ -3404,7 +3469,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -3414,7 +3479,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
             
 
-            <td class="description last"><p>name of the page to show</p></td>
+            <td class="description last"><p>Name of the page to show.</p></td>
         </tr>
 
     
@@ -3469,7 +3534,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L356">themes/default/files/scripts/exam-display.js, line 356</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L400">themes/default/files/scripts/exam-display.js, line 400</a>
     </li></ul></dd>
     
 
@@ -3500,7 +3565,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Show the current question</p>
+    <p>Show the current question.</p>
 </div>
 
 
@@ -3558,7 +3623,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L387">themes/default/files/scripts/exam-display.js, line 387</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L432">themes/default/files/scripts/exam-display.js, line 432</a>
     </li></ul></dd>
     
 
@@ -3589,7 +3654,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Show/update the student's total score</p>
+    <p>Show/update the student's total score.</p>
 </div>
 
 
@@ -3647,7 +3712,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L335">themes/default/files/scripts/exam-display.js, line 335</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L377">themes/default/files/scripts/exam-display.js, line 377</a>
     </li></ul></dd>
     
 
@@ -3678,7 +3743,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Update the timer</p>
+    <p>Update the timer.</p>
 </div>
 
 
@@ -3736,7 +3801,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L262">themes/default/files/scripts/exam-display.js, line 262</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L301">themes/default/files/scripts/exam-display.js, line 301</a>
     </li></ul></dd>
     
 
@@ -3767,7 +3832,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Called just before the current question is regenerated</p>
+    <p>Called just before the current question is regenerated.</p>
 </div>
 
 
@@ -3825,7 +3890,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L410">themes/default/files/scripts/exam-display.js, line 410</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L457">themes/default/files/scripts/exam-display.js, line 457</a>
     </li></ul></dd>
     
 
@@ -3856,7 +3921,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 
 
 <div class="description">
-    <p>Update the question list display - typically, scroll so the current question is visible</p>
+    <p>Update the question list display - typically, scroll so the current question is visible.</p>
 </div>
 
 
@@ -3914,7 +3979,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L345">themes/default/files/scripts/exam-display.js, line 345</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/exam-display.js#L388">themes/default/files/scripts/exam-display.js, line 388</a>
     </li></ul></dd>
     
 
@@ -4041,10 +4106,6 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._endTime"><a href="Numbas.display.ExamDisplay.html#._endTime">Numbas.display.ExamDisplay._endTime</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._startTime"><a href="Numbas.display.ExamDisplay.html#._startTime">Numbas.display.ExamDisplay._startTime</a></li>
-		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
@@ -4066,6 +4127,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endTime"><a href="Numbas.display.ExamDisplay.html#.endTime">Numbas.display.ExamDisplay.endTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
@@ -4089,7 +4152,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">Numbas.display.ExamDisplay.passwordFeedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -4120,6 +4183,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.showTiming"><a href="Numbas.display.ExamDisplay.html#.showTiming">Numbas.display.ExamDisplay.showTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startRegen"><a href="Numbas.display.ExamDisplay.html#.startRegen">Numbas.display.ExamDisplay.startRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startTime"><a href="Numbas.display.ExamDisplay.html#.startTime">Numbas.display.ExamDisplay.startTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.timeSpent"><a href="Numbas.display.ExamDisplay.html#.timeSpent">Numbas.display.ExamDisplay.timeSpent</a></li>
 		
@@ -4185,9 +4250,13 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.part"><a href="Numbas.display.PartDisplay.html#.part">Numbas.display.PartDisplay.part</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.partTreeCSS"><a href="Numbas.display.PartDisplay.html#.partTreeCSS">Numbas.display.PartDisplay.partTreeCSS</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.pd.html_promise"><a href="Numbas.display.PartDisplay.html#.pd.html_promise">Numbas.display.PartDisplay.pd.html_promise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.question"><a href="Numbas.display.PartDisplay.html#.question">Numbas.display.PartDisplay.question</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.reachedDeadEnd"><a href="Numbas.display.PartDisplay.html#.reachedDeadEnd">Numbas.display.PartDisplay.reachedDeadEnd</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.removeWarnings"><a href="Numbas.display.PartDisplay.html#.removeWarnings">Numbas.display.PartDisplay.removeWarnings</a></li>
 		
@@ -4239,11 +4308,15 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateNextParts"><a href="Numbas.display.PartDisplay.html#.updateNextParts">Numbas.display.PartDisplay.updateNextParts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.visible"><a href="Numbas.display.PartDisplay.html#.visible">Numbas.display.PartDisplay.visible</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.whatNextMessage"><a href="Numbas.display.PartDisplay.html#.whatNextMessage">Numbas.display.PartDisplay.whatNextMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
@@ -4717,6 +4790,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#make_re"><a href="Numbas.jme.Parser.html#make_re">Numbas.jme.Parser#make_re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#op"><a href="Numbas.jme.Parser.html#op">Numbas.jme.Parser#op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
@@ -4934,6 +5009,14 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 			<li class="search-result" data-longname="Numbas.jme.types.TVector"><a href="Numbas.jme.types.TVector.html">Numbas.jme.types.TVector</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString"><a href="Numbas.jme.html#.typeToDisplayString">Numbas.jme.typeToDisplayString</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.decimal"><a href="Numbas.jme.html#.typeToDisplayString#.decimal">Numbas.jme.typeToDisplayString.decimal</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.html"><a href="Numbas.jme.html#.typeToDisplayString#.html">Numbas.jme.typeToDisplayString.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
 		
@@ -7145,6 +7228,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="Numbas.Question#adviceDisplayed"><a href="Numbas.Question.html#adviceDisplayed">Numbas.Question#adviceDisplayed</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#allParts"><a href="Numbas.Question.html#allParts">Numbas.Question#allParts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#answered"><a href="Numbas.Question.html#answered">Numbas.Question#answered</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#calculateScore"><a href="Numbas.Question.html#calculateScore">Numbas.Question#calculateScore</a></li>
@@ -7190,6 +7275,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 			<li class="search-result" data-longname="Numbas.Question#extraPartOrder"><a href="Numbas.Question.html#extraPartOrder">Numbas.Question#extraPartOrder</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#generateVariables"><a href="Numbas.Question.html#generateVariables">Numbas.Question#generateVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
 		
@@ -7246,6 +7333,8 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#setCurrentPart"><a href="Numbas.Question.html#setCurrentPart">Numbas.Question#setCurrentPart</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#setErrorCarriedForwardBackReferences"><a href="Numbas.Question.html#setErrorCarriedForwardBackReferences">Numbas.Question#setErrorCarriedForwardBackReferences</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
 		
@@ -7787,8 +7876,6 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
 		
-			<li class="search-result" data-longname="visible"><a href="global.html#visible">visible</a></li>
-		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -7817,7 +7904,7 @@ Has properties <code>iconClass</code>, <code>title</code> and <code>buttonClass<
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li><li><a href="global.html#visible">visible</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

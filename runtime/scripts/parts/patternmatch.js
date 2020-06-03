@@ -16,8 +16,9 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var Part = Numbas.parts.Part;
-/** Text-entry part - student's answer must match the given regular expression
- * @constructor
+/** Text-entry part - student's answer must match the given regular expression.
+ *
+ * @class
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -61,23 +62,26 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var pobj = this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
-    /** The student's last submitted answer
-     * @type {String}
+    /** The student's last submitted answer.
+     *
+     * @type {string}
      */
     studentAnswer: '',
     /** The script to mark this part - assign credit, and give messages and feedback.
+     *
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { return Numbas.marking_scripts.patternmatch; },
     /** Properties set when the part is generated.
-     * Extends {@link Numbas.parts.Part#settings}
-     * @property {String} correctAnswerString - the definition of the correct answer, without variables substituted in.
-     * @property {RegExp} correctAnswer - regular expression pattern to match correct answers
-     * @property {String} displayAnswerString - the definition of the display answer, without variables substituted in.
-     * @property {String} displayAnswer - a representative correct answer to display when answers are revealed
-     * @property {Boolean} caseSensitive - does case matter?
-     * @property {Number} partialCredit - partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
-     * @property {String} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
+     * Extends {@link Numbas.parts.Part#settings}.
+     *
+     * @property {string} correctAnswerString - The definition of the correct answer, without variables substituted in.
+     * @property {RegExp} correctAnswer - Regular expression pattern to match correct answers.
+     * @property {string} displayAnswerString - The definition of the display answer, without variables substituted in.
+     * @property {string} displayAnswer - A representative correct answer to display when answers are revealed.
+     * @property {boolean} caseSensitive - Does case matter?
+     * @property {number} partialCredit - Partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
+     * @property {string} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
      */
     settings: {
     correctAnswerString: '.*',
@@ -89,22 +93,25 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     matchMode: 'regex'
     },
     /** The name of the input widget this part uses, if any.
-     * @returns {String}
+     *
+     * @returns {string}
      */
     input_widget: function() {
         return 'string';
     },
-    /** Options for this part's input widget
-     * @returns {Object}
+    /** Options for this part's input widget.
+     *
+     * @returns {object}
      */
     input_options: function() {
         return {
             allowEmpty: false
         }
     },
-    /** Compute the correct answer, based on the given scope
+    /** Compute the correct answer, based on the given scope.
+     *
      * @param {Numbas.jme.Scope} scope
-     * @returns {String}
+     * @returns {string}
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
@@ -122,7 +129,8 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     setStudentAnswer: function() {
         this.studentAnswer = this.stagedAnswer;
     },
-    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
      * @abstract
      * @returns {Numbas.jme.token}
      */

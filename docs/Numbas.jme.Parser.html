@@ -53,7 +53,7 @@
 
 
 <div class="description">
-    <p>A parser for <a href="global.html#JME"><code>JME</code></a> expressions</p>
+    <p>A parser for <a href="global.html#JME"><code>JME</code></a> expressions.</p>
 </div>
 
 
@@ -160,7 +160,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L860">runtime/scripts/jme.js, line 860</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L887">runtime/scripts/jme.js, line 887</a>
     </li></ul></dd>
     
 
@@ -245,6 +245,8 @@
 					
 						<li class="name"><a href="Numbas.jme.Parser.html#make_re">make_re</a></li>
 					
+						<li class="name"><a href="Numbas.jme.Parser.html#op">op</a></li>
+					
 						<li class="name"><a href="Numbas.jme.Parser.html#opSynonym">opSynonym</a></li>
 					
 						<li class="name"><a href="Numbas.jme.Parser.html#setOperatorProperties">setOperatorProperties</a></li>
@@ -271,13 +273,13 @@
         
             
 <div class="item member">
-<h4 class="name" id="ops"><span class="type-signature"></span>ops<span class="type-signature"> :Array.&lt;String></span></h4>
+<h4 class="name" id="ops"><span class="type-signature"></span>ops<span class="type-signature"> :Array.&lt;string></span></h4>
 
 
 
 
 <div class="description">
-    <p>Binary operations</p>
+    <p>Binary operations.</p>
 </div>
 
 
@@ -286,7 +288,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>></span>
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;string></span>
 
 
         </li>
@@ -325,7 +327,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L967">runtime/scripts/jme.js, line 967</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1007">runtime/scripts/jme.js, line 1007</a>
     </li></ul></dd>
     
 
@@ -351,7 +353,7 @@
 
 
 <div class="description">
-    <p>Default options for new parsers</p>
+    <p>Default options for new parsers.</p>
 </div>
 
 
@@ -399,7 +401,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L881">runtime/scripts/jme.js, line 881</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L909">runtime/scripts/jme.js, line 909</a>
     </li></ul></dd>
     
 
@@ -419,13 +421,13 @@
         
             
 <div class="item member">
-<h4 class="name" id="re"><span class="type-signature"></span>re<span class="type-signature"> :Object.&lt;RegExp></span></h4>
+<h4 class="name" id="re"><span class="type-signature"></span>re<span class="type-signature"> :object.&lt;RegExp></span></h4>
 
 
 
 
 <div class="description">
-    <p>Regular expressions to match tokens</p>
+    <p>Regular expressions to match tokens.</p>
 </div>
 
 
@@ -434,7 +436,7 @@
     <ul>
         <li>
             
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">RegExp</a>></span>
+<span class="param-type">object.&lt;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">RegExp</a>></span>
 
 
         </li>
@@ -473,7 +475,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L972">runtime/scripts/jme.js, line 972</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1013">runtime/scripts/jme.js, line 1013</a>
     </li></ul></dd>
     
 
@@ -500,10 +502,180 @@
 
 <div class="description">
     <p>Descriptions of kinds of token that the tokeniser can match.
-<code>re</code> is a regular expression matching the token
+<code>re</code> is a regular expression matching the token.
 <code>parse</code> is a function which takes a RegEx match object, the tokens produced up to this point, the input expression, and the current position in the expression.
 It should return an object <code>{tokens, start, end}</code>.</p>
 </div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1128">runtime/scripts/jme.js, line 1128</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+		</div>
+    
+
+    
+		<div class="subsection">
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="addBinaryOperator"><span class="type-signature"></span>addBinaryOperator<span class="signature">(name, options)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Add a binary operator to the parser.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -553,176 +725,6 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
 
 
-
-
-</div>
-
-        
-		</div>
-    
-
-    
-		<div class="subsection">
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-	
-		<div class="item function">
-	
-
-    <h4 class="name" id="addBinaryOperator"><span class="type-signature"></span>addBinaryOperator<span class="signature">(name, options)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Add a binary operator to the parser</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1031">runtime/scripts/jme.js, line 1031</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
 	</div>
 
 
@@ -741,7 +743,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
 
 <div class="description">
-    <p>Add an operator to the parser</p>
+    <p>Add an operator to the parser.</p>
 </div>
 
 
@@ -783,7 +785,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -848,7 +850,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1019">runtime/scripts/jme.js, line 1019</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1062">runtime/scripts/jme.js, line 1062</a>
     </li></ul></dd>
     
 
@@ -890,7 +892,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
 
 <div class="description">
-    <p>Add a postfix operator to the parser</p>
+    <p>Add a postfix operator to the parser.</p>
 </div>
 
 
@@ -932,7 +934,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -955,7 +957,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -965,7 +967,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
             
 
-            <td class="description last"><p>the &quot;interpreted&quot; name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of <code>name</code> is used.</p></td>
+            <td class="description last"><p>The &quot;interpreted&quot; name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of <code>name</code> is used.</p></td>
         </tr>
 
     
@@ -1043,7 +1045,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1054">runtime/scripts/jme.js, line 1054</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1100">runtime/scripts/jme.js, line 1100</a>
     </li></ul></dd>
     
 
@@ -1074,7 +1076,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
 
 <div class="description">
-    <p>Add a prefix operator to the parser</p>
+    <p>Add a prefix operator to the parser.</p>
 </div>
 
 
@@ -1116,7 +1118,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -1139,7 +1141,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -1149,7 +1151,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
             
 
-            <td class="description last"><p>the &quot;interpreted&quot; name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of <code>name</code> is used.</p></td>
+            <td class="description last"><p>The &quot;interpreted&quot; name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of <code>name</code> is used.</p></td>
         </tr>
 
     
@@ -1227,7 +1229,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1041">runtime/scripts/jme.js, line 1041</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1086">runtime/scripts/jme.js, line 1086</a>
     </li></ul></dd>
     
 
@@ -1258,7 +1260,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 
 
 <div class="description">
-    <p>Compile an expression string to a syntax tree. (Runs <a href="Numbas.jme.html#.tokenise"><code>Numbas.jme.tokenise</code></a> then <a href="Numbas.jme.html#.shunt"><code>Numbas.jme.shunt</code></a>)</p>
+    <p>Compile an expression string to a syntax tree. (Runs <a href="Numbas.jme.html#.tokenise"><code>Numbas.jme.tokenise</code></a> then <a href="Numbas.jme.html#.shunt"><code>Numbas.jme.shunt</code></a>).</p>
 </div>
 
 
@@ -1394,7 +1396,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1514">runtime/scripts/jme.js, line 1514</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1574">runtime/scripts/jme.js, line 1574</a>
     </li></ul></dd>
     
 
@@ -1427,7 +1429,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="funcSynonym"><span class="type-signature"></span>funcSynonym<span class="signature">(name)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="funcSynonym"><span class="type-signature"></span>funcSynonym<span class="signature">(name)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -1476,7 +1478,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -1521,7 +1523,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
 
@@ -1570,7 +1572,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L955">runtime/scripts/jme.js, line 955</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L993">runtime/scripts/jme.js, line 993</a>
     </li></ul></dd>
     
 
@@ -1601,7 +1603,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="getArity"><span class="type-signature"></span>getArity<span class="signature">(name)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="getArity"><span class="type-signature"></span>getArity<span class="signature">(name)</span><span class="type-signature"> &rarr; {number}</span></h4>
 
     
 
@@ -1650,7 +1652,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -1695,7 +1697,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
 
@@ -1744,7 +1746,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L924">runtime/scripts/jme.js, line 924</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L957">runtime/scripts/jme.js, line 957</a>
     </li></ul></dd>
     
 
@@ -1768,7 +1770,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="getConstant"><span class="type-signature"></span>getConstant<span class="signature">(name)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="getConstant"><span class="type-signature"></span>getConstant<span class="signature">(name)</span><span class="type-signature"> &rarr; {number}</span></h4>
 
     
 
@@ -1817,7 +1819,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -1862,7 +1864,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
 
@@ -1911,7 +1913,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L906">runtime/scripts/jme.js, line 906</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L936">runtime/scripts/jme.js, line 936</a>
     </li></ul></dd>
     
 
@@ -1935,7 +1937,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="getPostfixForm"><span class="type-signature"></span>getPostfixForm<span class="signature">(name)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getPostfixForm"><span class="type-signature"></span>getPostfixForm<span class="signature">(name)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -1984,7 +1986,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2029,7 +2031,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
 
@@ -2078,7 +2080,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L918">runtime/scripts/jme.js, line 918</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L950">runtime/scripts/jme.js, line 950</a>
     </li></ul></dd>
     
 
@@ -2102,7 +2104,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="getPrecedence"><span class="type-signature"></span>getPrecedence<span class="signature">(name)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="getPrecedence"><span class="type-signature"></span>getPrecedence<span class="signature">(name)</span><span class="type-signature"> &rarr; {number}</span></h4>
 
     
 
@@ -2151,7 +2153,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2196,7 +2198,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></span>
+<span class="param-type">number</span>
 
 
 
@@ -2245,7 +2247,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L930">runtime/scripts/jme.js, line 930</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L964">runtime/scripts/jme.js, line 964</a>
     </li></ul></dd>
     
 
@@ -2269,7 +2271,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 		<div class="item function">
 	
 
-    <h4 class="name" id="getPrefixForm"><span class="type-signature"></span>getPrefixForm<span class="signature">(name)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="getPrefixForm"><span class="type-signature"></span>getPrefixForm<span class="signature">(name)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -2318,7 +2320,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2363,7 +2365,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
 
@@ -2412,7 +2414,7 @@ It should return an object <code>{tokens, start, end}</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L912">runtime/scripts/jme.js, line 912</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L943">runtime/scripts/jme.js, line 943</a>
     </li></ul></dd>
     
 
@@ -2486,7 +2488,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2496,7 +2498,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 
             
 
-            <td class="description last"><p>the name of the dictionary. Both <code>this</code> and of <code>Numbas.jme</code> must have members with this name.</p></td>
+            <td class="description last"><p>The name of the dictionary. Both <code>this</code> and of <code>Numbas.jme</code> must have members with this name.</p></td>
         </tr>
 
     
@@ -2509,7 +2511,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2519,7 +2521,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 
             
 
-            <td class="description last"><p>the name of the setting to try to load from the dictionary.</p></td>
+            <td class="description last"><p>The name of the setting to try to load from the dictionary.</p></td>
         </tr>
 
     
@@ -2603,7 +2605,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L892">runtime/scripts/jme.js, line 892</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L921">runtime/scripts/jme.js, line 921</a>
     </li></ul></dd>
     
 
@@ -2627,7 +2629,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		<div class="item function">
 	
 
-    <h4 class="name" id="isAssociative"><span class="type-signature"></span>isAssociative<span class="signature">(name)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="isAssociative"><span class="type-signature"></span>isAssociative<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
 
@@ -2676,7 +2678,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2721,7 +2723,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
 
@@ -2770,7 +2772,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L942">runtime/scripts/jme.js, line 942</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L978">runtime/scripts/jme.js, line 978</a>
     </li></ul></dd>
     
 
@@ -2794,7 +2796,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		<div class="item function">
 	
 
-    <h4 class="name" id="isCommutative"><span class="type-signature"></span>isCommutative<span class="signature">(name)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="isCommutative"><span class="type-signature"></span>isCommutative<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
 
@@ -2843,7 +2845,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -2888,7 +2890,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
 
@@ -2937,7 +2939,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L936">runtime/scripts/jme.js, line 936</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L971">runtime/scripts/jme.js, line 971</a>
     </li></ul></dd>
     
 
@@ -2961,7 +2963,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		<div class="item function">
 	
 
-    <h4 class="name" id="isRightAssociative"><span class="type-signature"></span>isRightAssociative<span class="signature">(name)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="isRightAssociative"><span class="type-signature"></span>isRightAssociative<span class="signature">(name)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
 
@@ -3010,7 +3012,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -3055,7 +3057,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>
+<span class="param-type">boolean</span>
 
 
 
@@ -3104,7 +3106,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L948">runtime/scripts/jme.js, line 948</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L985">runtime/scripts/jme.js, line 985</a>
     </li></ul></dd>
     
 
@@ -3135,7 +3137,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 
 
 <div class="description">
-    <p>Update regular expressions for matching tokens</p>
+    <p>Update regular expressions for matching tokens.</p>
 </div>
 
 
@@ -3193,7 +3195,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1214">runtime/scripts/jme.js, line 1214</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1268">runtime/scripts/jme.js, line 1268</a>
     </li></ul></dd>
     
 
@@ -3224,7 +3226,220 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		<div class="item function">
 	
 
-    <h4 class="name" id="opSynonym"><span class="type-signature"></span>opSynonym<span class="signature">(name)</span><span class="type-signature"> &rarr; {String}</span></h4>
+    <h4 class="name" id="op"><span class="type-signature"></span>op<span class="signature">(name, postfix, prefix)</span><span class="type-signature"> &rarr; {<a href="Numbas.jme.html#.token">Numbas.jme.token</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Create an operator token with the given name.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The name of the operator.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>postfix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Is the operator postfix?</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>prefix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Is the operator prefix?</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1115">runtime/scripts/jme.js, line 1115</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="opSynonym"><span class="type-signature"></span>opSynonym<span class="signature">(name)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -3273,7 +3488,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -3318,7 +3533,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 <td class="type">
 
     
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
 
@@ -3367,7 +3582,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L962">runtime/scripts/jme.js, line 962</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1001">runtime/scripts/jme.js, line 1001</a>
     </li></ul></dd>
     
 
@@ -3447,7 +3662,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
             <td class="type">
             
                 
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>
+<span class="param-type">string</span>
 
 
             
@@ -3457,7 +3672,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 
             
 
-            <td class="description last"><p>the name of the operator</p></td>
+            <td class="description last"><p>The name of the operator.</p></td>
         </tr>
 
     
@@ -3535,7 +3750,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L987">runtime/scripts/jme.js, line 987</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1029">runtime/scripts/jme.js, line 1029</a>
     </li></ul></dd>
     
 
@@ -3566,7 +3781,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 
 
 <div class="description">
-    <p>Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm (wikipedia has a good description)</p>
+    <p>Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm.</p>
 </div>
 
 
@@ -3702,7 +3917,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1459">runtime/scripts/jme.js, line 1459</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1517">runtime/scripts/jme.js, line 1517</a>
     </li></ul></dd>
     
 
@@ -3878,7 +4093,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1242">runtime/scripts/jme.js, line 1242</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1298">runtime/scripts/jme.js, line 1298</a>
     </li></ul></dd>
     
 
@@ -4012,10 +4227,6 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._endTime"><a href="Numbas.display.ExamDisplay.html#._endTime">Numbas.display.ExamDisplay._endTime</a></li>
-		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay._startTime"><a href="Numbas.display.ExamDisplay.html#._startTime">Numbas.display.ExamDisplay._startTime</a></li>
-		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
@@ -4037,6 +4248,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endRegen"><a href="Numbas.display.ExamDisplay.html#.endRegen">Numbas.display.ExamDisplay.endRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.endTime"><a href="Numbas.display.ExamDisplay.html#.endTime">Numbas.display.ExamDisplay.endTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.enteredPassword"><a href="Numbas.display.ExamDisplay.html#.enteredPassword">Numbas.display.ExamDisplay.enteredPassword</a></li>
 		
@@ -4060,7 +4273,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passed"><a href="Numbas.display.ExamDisplay.html#.passed">Numbas.display.ExamDisplay.passed</a></li>
 		
-			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback."><a href="Numbas.display.ExamDisplay.html#.passwordFeedback.">Numbas.display.ExamDisplay.passwordFeedback.</a></li>
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.passwordFeedback"><a href="Numbas.display.ExamDisplay.html#.passwordFeedback">Numbas.display.ExamDisplay.passwordFeedback</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentPass"><a href="Numbas.display.ExamDisplay.html#.percentPass">Numbas.display.ExamDisplay.percentPass</a></li>
 		
@@ -4091,6 +4304,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.showTiming"><a href="Numbas.display.ExamDisplay.html#.showTiming">Numbas.display.ExamDisplay.showTiming</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startRegen"><a href="Numbas.display.ExamDisplay.html#.startRegen">Numbas.display.ExamDisplay.startRegen</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.startTime"><a href="Numbas.display.ExamDisplay.html#.startTime">Numbas.display.ExamDisplay.startTime</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.timeSpent"><a href="Numbas.display.ExamDisplay.html#.timeSpent">Numbas.display.ExamDisplay.timeSpent</a></li>
 		
@@ -4156,9 +4371,13 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.part"><a href="Numbas.display.PartDisplay.html#.part">Numbas.display.PartDisplay.part</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.partTreeCSS"><a href="Numbas.display.PartDisplay.html#.partTreeCSS">Numbas.display.PartDisplay.partTreeCSS</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.pd.html_promise"><a href="Numbas.display.PartDisplay.html#.pd.html_promise">Numbas.display.PartDisplay.pd.html_promise</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.question"><a href="Numbas.display.PartDisplay.html#.question">Numbas.display.PartDisplay.question</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.reachedDeadEnd"><a href="Numbas.display.PartDisplay.html#.reachedDeadEnd">Numbas.display.PartDisplay.reachedDeadEnd</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.removeWarnings"><a href="Numbas.display.PartDisplay.html#.removeWarnings">Numbas.display.PartDisplay.removeWarnings</a></li>
 		
@@ -4210,11 +4429,15 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateNextParts"><a href="Numbas.display.PartDisplay.html#.updateNextParts">Numbas.display.PartDisplay.updateNextParts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.visible"><a href="Numbas.display.PartDisplay.html#.visible">Numbas.display.PartDisplay.visible</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warning"><a href="Numbas.display.PartDisplay.html#.warning">Numbas.display.PartDisplay.warning</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warnings"><a href="Numbas.display.PartDisplay.html#.warnings">Numbas.display.PartDisplay.warnings</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.warningsShown"><a href="Numbas.display.PartDisplay.html#.warningsShown">Numbas.display.PartDisplay.warningsShown</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.whatNextMessage"><a href="Numbas.display.PartDisplay.html#.whatNextMessage">Numbas.display.PartDisplay.whatNextMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay#setName"><a href="Numbas.display.PartDisplay.html#setName">Numbas.display.PartDisplay#setName</a></li>
 		
@@ -4688,6 +4911,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#make_re"><a href="Numbas.jme.Parser.html#make_re">Numbas.jme.Parser#make_re</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#op"><a href="Numbas.jme.Parser.html#op">Numbas.jme.Parser#op</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#ops"><a href="Numbas.jme.Parser.html#ops">Numbas.jme.Parser#ops</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#opSynonym"><a href="Numbas.jme.Parser.html#opSynonym">Numbas.jme.Parser#opSynonym</a></li>
@@ -4905,6 +5130,14 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 			<li class="search-result" data-longname="Numbas.jme.types.TVector"><a href="Numbas.jme.types.TVector.html">Numbas.jme.types.TVector</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString"><a href="Numbas.jme.html#.typeToDisplayString">Numbas.jme.typeToDisplayString</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.decimal"><a href="Numbas.jme.html#.typeToDisplayString#.decimal">Numbas.jme.typeToDisplayString.decimal</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.html"><a href="Numbas.jme.html#.typeToDisplayString#.html">Numbas.jme.typeToDisplayString.html</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
 		
@@ -7116,6 +7349,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="Numbas.Question#adviceDisplayed"><a href="Numbas.Question.html#adviceDisplayed">Numbas.Question#adviceDisplayed</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#allParts"><a href="Numbas.Question.html#allParts">Numbas.Question#allParts</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#answered"><a href="Numbas.Question.html#answered">Numbas.Question#answered</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#calculateScore"><a href="Numbas.Question.html#calculateScore">Numbas.Question#calculateScore</a></li>
@@ -7161,6 +7396,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 			<li class="search-result" data-longname="Numbas.Question#extraPartOrder"><a href="Numbas.Question.html#extraPartOrder">Numbas.Question#extraPartOrder</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#finaliseLoad"><a href="Numbas.Question.html#finaliseLoad">Numbas.Question#finaliseLoad</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#generateVariables"><a href="Numbas.Question.html#generateVariables">Numbas.Question#generateVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#getAdvice"><a href="Numbas.Question.html#getAdvice">Numbas.Question#getAdvice</a></li>
 		
@@ -7217,6 +7454,8 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 			<li class="search-result" data-longname="Numbas.Question#score"><a href="Numbas.Question.html#score">Numbas.Question#score</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#setCurrentPart"><a href="Numbas.Question.html#setCurrentPart">Numbas.Question#setCurrentPart</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#setErrorCarriedForwardBackReferences"><a href="Numbas.Question.html#setErrorCarriedForwardBackReferences">Numbas.Question#setErrorCarriedForwardBackReferences</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#signals"><a href="Numbas.Question.html#signals">Numbas.Question#signals</a></li>
 		
@@ -7758,8 +7997,6 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 			<li class="search-result" data-longname="viewModel"><a href="viewModel.html">viewModel</a></li>
 		
-			<li class="search-result" data-longname="visible"><a href="global.html#visible">visible</a></li>
-		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
@@ -7788,7 +8025,7 @@ This is a wrapper to load the value of the setting if it exists, and return <cod
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li><li><a href="global.html#visible">visible</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

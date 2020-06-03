@@ -3,11 +3,12 @@ Numbas.queueScript('json',['base'],function() {
 /** @namespace Numbas.json */
 var json = Numbas.json = {
     /** Try to load an attribute with name from `attr` from `source` into `target`.
-     *  Tries lower-case
-     *  @param {Object} source - object to load value(s) from
-     *  @param {String|Array.<String>} attrs - the name, or list of names, of attributes to load
-     *  @param {Object} target - object to set values in
-     *  @param {String|Array.<String>} altnames - the name, or list of names, to set in the target object
+     * Tries lower-case.
+     *
+     * @param {object} source - Object to load value(s) from.
+     * @param {string|Array.<string>} attrs - The name, or list of names, of attributes to load.
+     * @param {object} target - Object to set values in.
+     * @param {string|Array.<string>} altnames - The name, or list of names, to set in the target object.
      */
     tryLoad: function(source,attrs,target,altnames) {
         if(!source) {
@@ -34,8 +35,9 @@ var json = Numbas.json = {
         }
     },
     /** Try to load an attribute with the given name from `source`. The given name and its lower-case equivalent are tried.
-     * @param {Object} source
-     * @param {String} attr
+     *
+     * @param {object} source
+     * @param {string} attr
      * @returns {*}
      */
     tryGet: function(source, attr) {

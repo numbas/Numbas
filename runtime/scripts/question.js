@@ -16,14 +16,15 @@ Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','p
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
-/** Create a {@link Numbas.Question} object from an XML definition
+/** Create a {@link Numbas.Question} object from an XML definition.
+ *
  * @memberof Numbas
  * @param {Element} xml
- * @param {Number} number - the number of the question in the exam
- * @param {Numbas.Exam} [exam] - the exam this question belongs to
- * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
- * @param {Numbas.jme.Scope} [scope] - the global JME scope
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {number} number - The number of the question in the exam.
+ * @param {Numbas.Exam} [exam] - The exam this question belongs to.
+ * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
+ * @param {Numbas.jme.Scope} [scope] - The global JME scope.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @returns {Numbas.Question}
  */
 var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store) {
@@ -36,14 +37,15 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
     }
     return q;
 }
-/** Create a {@link Numbas.Question} object from a JSON object
+/** Create a {@link Numbas.Question} object from a JSON object.
+ *
  * @memberof Numbas
- * @param {Object} data
- * @param {Number} number - the number of the question in the exam
- * @param {Numbas.Exam} [exam] - the exam this question belongs to
- * @param {Numbas.QuestionGroup} [group] - the group this question belongs to
- * @param {Numbas.jme.Scope} [scope] - the global JME scope
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {object} data
+ * @param {number} number - The number of the question in the exam.
+ * @param {Numbas.Exam} [exam] - The exam this question belongs to.
+ * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
+ * @param {Numbas.jme.Scope} [scope] - The global JME scope.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @returns {Numbas.Question}
  */
 var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store) {
@@ -56,15 +58,15 @@ var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, numb
     }
     return q;
 }
-/** Keeps track of all info to do with an instance of a single question
+/** Keeps track of all info to do with an instance of a single question.
  *
- * @constructor
+ * @class
  * @memberof Numbas
- * @param {Number} number - index of this question in the exam (starting at 0)
- * @param {Numbas.Exam} [exam] - parent exam
- * @param {Numbas.QuestionGroup} [group] - group this question belongs to
- * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - global JME scope
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {number} number - The index of this question in the exam (starting at 0).
+ * @param {Numbas.Exam} [exam] - The parent exam.
+ * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
+ * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - The global JME scope.
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  */
 var Question = Numbas.Question = function( number, exam, group, gscope, store)
 {
@@ -103,53 +105,67 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
 }
 
 /** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
+ *
  * @event Numbas.Question#preambleLoaded
  * @see Numbas.Question#event:preambleRun
  */
 /** The question preamble has been run.
+ *
  * @event Numbas.Question#preambleRun
  */
 /** The question's function definitions have been loaded, but the corresponding {@link Numbas.jme.funcObj} objects have not been added to the scope yet.
+ *
  * @event Numbas.Question#functionsLoaded
  * @see Numbas.Question#event:functionsMade
  */
 /** The question's functions have been made and added to the question's scope.
+ *
  * @event Numbas.Question#functionsMade
  */
 /** The question's ruleset  definitions have been loaded, but the {@link Numbas.jme.rules.Ruleset} objects have not been added to the scope yet.
+ *
  * @event Numbas.Question#rulesetsLoaded
  * @see Numbas.Question#event:rulesetsMade
  */
 /** The question's rulesets have been made and added to the question's scope.
+ *
  * @event Numbas.Question#rulesetsMade
  */
 /** Trigger this when you're ready to evaluate the question's variables. In an exam context, the {@link Numbas.Exam} object triggers this event.
  * If the question has been created standalone, this event must be triggered in order for the question to finish loading.
+ *
  * @event Numbas.Question#generateVariables
  */
 /** The variable definitions have been loaded, but their values have not been generated yet.
+ *
  * @event Numbas.Question#variableDefinitionsLoaded
  * @see Numbas.Question#event:variablesSet
  * @see Numbas.Question#event:variablesGenerated
  */
 /** The parts of the question have been generated.
  * If resuming an attempt, the parts have not yet been restored to the saved state.
+ *
  * @event Numbas.Question#partsGenerated
  * @see Numbas.Question#event:partsResumed
  */
 /** Triggered when resuming a saved attempt: the question's parts have been restored to the saved state.
+ *
  * @event Numbas.Question#partsResumed
  */
 /** The variables have been evaluated, but {@link Numbas.Question.unwrappedVariables} has not been set yet.
+ *
  * @event Numbas.Question#variablesSet
  */
 /** The variables have been generated and added to the scope, and are ready to use.
+ *
  * @event Numbas.Question#variablesGenerated
  */
 /** The question is fully loaded and ready to use.
+ *
  * @event Numbas.Question#ready
  */
 /** The question's HTML has been generated and attached to the page.
+ *
  * @event Numbas.Question#HTMLAttached
  */
 
@@ -157,42 +173,51 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 {
     /** How should parts be shown? 
      *
-     * * `all`: all available parts are generated straight away
-     * * `explore`: parts are only generated when required
-     * @type {String}
+     * * `all` - All available parts are generated straight away.
+     * * `explore` - Parts are only generated when required.
+     *
+     * @type {string}
      */
     partsMode: 'all',
 
     /** Maximum available marks in explore mode.
-     * @type {Number}
+     *
+     * @type {number}
      */
     maxMarks: 0,
 
     /** When should information about objectives be shown to the student? ``'always'`` or ``'when-active'``.
-     * @type {String}
+     *
+     * @type {string}
      */
     objectiveVisibility: 'always',
 
     /** When should information about penalties be shown to the student? ``'always'`` or ``'when-active'``.
-     * @type {String}
+     *
+     * @type {string}
      */
     penaltyVisibility: 'always',
 
     /** In explore mode, the part that the student is currently looking at.
+     *
      * @type {Numbas.parts.Part}
      */
     currentPart: null,
 
     /** Signals produced while loading this question.
+     *
      * @type {Numbas.schedule.SignalBox} 
      * */
     signals: undefined,
 
-    /** Storage engine
+    /** Storage engine.
+     *
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
-    /** Load the question's settings from an XML <question> node
+
+    /** Load the question's settings from an XML <question> node.
+     *
      * @param {Element} xml
      * @fires Numbas.Question#preambleLoaded
      * @fires Numbas.Question#functionsLoaded
@@ -306,13 +331,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
 
     /** Create a part whose definition is at the given index in the question's definition, using the given scope, and add it to this question.
-     *  The question's variables are remade using the given dictionary of changed variables
-     *  @param {Number} def_index - the index of the part's definition in the question's list of part definitions
-     *  @param {Numbas.jme.Scope} scope
-     *  @param {Object.<Numbas.jme.token>} variables
-     *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
-     *  @param {Number} [index] - the position of the part in the parts list (added to the end if not given)
-     *  @returns {Numbas.parts.Part}
+     * The question's variables are remade using the given dictionary of changed variables.
+     *
+     * @param {number} def_index - The index of the part's definition in the question's list of part definitions.
+     * @param {Numbas.jme.Scope} scope
+     * @param {object.<Numbas.jme.token>} variables
+     * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
+     * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
+     * @returns {Numbas.parts.Part}
      */
     addExtraPart: function(def_index,scope,variables,previousPart,index) {
         var p;
@@ -337,9 +363,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
 
     /** Create an extra part with the given XML definition, using the given scope.
-     *  @param {Number} xml_index - the index of the part's definition in the XML
-     *  @param {Numbas.jme.Scope} scope
-     *  @returns {Numbas.parts.Part}
+     *
+     * @param {number} xml_index - The index of the part's definition in the XML.
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbas.parts.Part}
      */
     createExtraPartFromXML: function(xml_index,scope) {
         var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
@@ -349,7 +376,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return p;
     },
 
-    /** Set the currently displayed part
+    /** Set the currently displayed part.
+     *
      * @param {Numbas.parts.Part} part
      */
     setCurrentPart: function(part) {
@@ -359,8 +387,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
     },
 
-    /** Load the question's settings from a JSON object
-     * @param {Object} data
+    /** Load the question's settings from a JSON object.
+     *
+     * @param {object} data
      * @fires Numbas.Question#preambleLoaded
      * @fires Numbas.Question#functionsLoaded
      * @fires Numbas.Question#rulesetsLoaded
@@ -482,13 +511,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
 
     /** Create a part with the given JSON definition, using the given scope, and add it to this question.
-     *  The question's variables are remade using the given dictionary of changed variables
-     *  @param {Number} json_index - the index of the part's definition in the JSON
-     *  @param {Numbas.jme.Scope} scope
-     *  @param {Object.<Numbas.jme.token>} variables
-     *  @param {Numbas.parts.Part} [previousPart] - the part that this part follows on from
-     *  @param {Number} [index] - the position of the part in the parts list (added to the end if not given)
-     *  @returns {Numbas.parts.Part}
+     * The question's variables are remade using the given dictionary of changed variables.
+     *
+     * @param {number} json_index - The index of the part's definition in the JSON.
+     * @param {Numbas.jme.Scope} scope
+     * @param {object.<Numbas.jme.token>} variables
+     * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
+     * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
+     * @returns {Numbas.parts.Part}
      */
     createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
         var data = this.json.parts[json_index];
@@ -496,6 +526,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return p;
     },
 
+    /** Set back references for adaptive marking: for each part, maintain a list of other parts which use that part in adaptive marking.
+     */
     setErrorCarriedForwardBackReferences: function() {
         var q = this;
         this.allParts().forEach(function(p) {
@@ -506,15 +538,21 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
     },
 
+    /** A list of all parts in the question which can be answered by the student: top-level parts, gaps and steps.
+     * Doesn't include alternative versions of parts.
+     *
+     * @returns {Array.<Numbas.parts.Part>}
+     */
     allParts: function() {
         return this.parts.reduce(function(out, p) {
             return out.concat([p],p.gaps,p.steps);
         },[]);
     },
 
-    /** Add a part to the question
+    /** Add a part to the question.
+     *
      * @param {Numbas.parts.Part} part
-     * @param {Number} index
+     * @param {number} index
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
@@ -524,7 +562,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.updateScore();
     },
 
-    /** Remove a part from the question
+    /** Remove a part from the question.
+     *
      * @param {Numbas.parts.Part} part
      */
     removePart: function(part) {
@@ -540,7 +579,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
     },
 
-    /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded
+    /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
+     *
      * @fires Numbas.Question#functionsMade
      * @fires Numbas.Question#rulesetsMade
      * @fires Numbas.Question#variablesSet
@@ -639,10 +679,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.display && q.display.showScore();
         });
     },
+
+    /** Generate this question's variables.
+     */
     generateVariables: function() {
         this.signals.trigger('generateVariables');
     },
-    /** Load saved data about this question from storage
+    /** Load saved data about this question from storage.
+     *
      * @fires Numbas.Question#variablesSet
      * @fires Numbas.Question#partsResumed
      * @listens Numbas.Question#event:partsGenerated
@@ -668,7 +712,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     part.resume();
                 }
             });
-            /** Submit a given part, setting its `resume` property so it doesn't save to storage
+            /** Submit a given part, setting its `resume` property so it doesn't save to storage.
+             *
              * @param {Numbas.parts.Part} part
              */
             function submit_part(part) {
@@ -708,88 +753,108 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
         });
     },
-    /** XML definition of this question
+    /** XML definition of this question.
+     *
      * @type {Element}
      */
     xml: null,
-    /** Position of this question in the exam
-     * @type {Number}
+    /** Position of this question in the exam.
+     *
+     * @type {number}
      */
     number: -1,
-    /** The question's name
-     * @type {String}
+    /** The question's name.
+     *
+     * @type {string}
      */
     name: '',
-    /** The question's statement text
-     * @type {String}
+    /** The question's statement text.
+     *
+     * @type {string}
      */
     statement: '',
-    /** The question's advice text
-     * @type {String}
+    /** The question's advice text.
+     *
+     * @type {string}
      */
     advice: '',
-    /** The JME scope for this question. Contains variables, functions and rulesets defined in this question
+    /** The JME scope for this question. Contains variables, functions and rulesets defined in this question.
+     *
      * @type {Numbas.jme.Scope}
      */
     scope: null,
-    /** Maximum marks available for this question
-     * @type {Number}
+    /** Maximum marks available for this question.
+     *
+     * @type {number}
      */
     marks: 0,
-    /** Student's score on this question
-     * @type {Number}
+    /** Student's score on this question.
+     *
+     * @type {number}
      */
     score: 0,
     /** Has this question been seen by the student? For determining if you can jump back to this question, when {@link Numbas.Question.navigateBrowse} is disabled.
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     visited: false,
     /** Has this question been answered satisfactorily?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     answered: false,
     /** Number of times this question has been submitted.
-     * @type {Number}
+     *
+     * @type {number}
      */
     submitted: 0,
     /** Has the advice been displayed?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     adviceDisplayed: false,
     /** Have the correct answers been revealed?
-     * @type {Boolean}
+     *
+     * @type {boolean}
      */
     revealed: false,
     /** Parts belonging to this question, in the order they're displayed.
+     *
      * @type {Numbas.parts.Part}
      */
     parts: [],
     /** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
-     * @type {Object.<Numbas.parts.Part>}
+     *
+     * @type {object.<Numbas.parts.Part>}
      */
     partDictionary: {},
-    /** The indices in the definition of the extra parts that have been added to this question
-     * @type {Array.<Number>}
+    /** The indices in the definition of the extra parts that have been added to this question.
+     *
+     * @type {Array.<number>}
      */
     extraPartOrder: [],
-    /** Associated display object
+    /** Associated display object.
+     *
      * @type {Numbas.display.QuestionDisplay}
      */
     display: undefined,
-    /** Callbacks to run when various events happen
-     * @property {Array.<function>} HTMLAttached - Run when the question's HTML has been attached to the page.
-     * @property {Array.<function>} variablesGenerated - Run when the question's variables have been generated.
-     * @type {Object.<Array.<function>>}
+    /** Callbacks to run when various events happen.
+     *
+     * @property {Array.<Function>} HTMLAttached - Run when the question's HTML has been attached to the page.
+     * @property {Array.<Function>} variablesGenerated - Run when the question's variables have been generated.
+     * @type {object.<Array.<Function>>}
      */
     callbacks: {
     },
     /** Leave this question - called when moving to another question, or showing an info page.
+     *
      * @see Numbas.display.QuestionDisplay.leave
      */
     leave: function() {
         this.display && this.display.leave();
     },
-    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated. 
+    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
+     *
      * @fires Numbas.Question#preambleRun
      */
     runPreamble: function() {
@@ -806,7 +871,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         this.signals.trigger('preambleRun');
     },
-    /** Get the part object corresponding to a path
+    /** Get the part object corresponding to a path.
+     *
      * @param {Numbas.parts.partpath} path
      * @returns {Numbas.parts.Part}
      */
@@ -815,24 +881,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return this.partDictionary[path];
     },
 
-    /** Get the explore mode objective with the given name
-     * @param {String} name
-     * @returns {Object}
+    /** Get the explore mode objective with the given name.
+     *
+     * @param {string} name
+     * @returns {object}
      */
     getObjective: function(name) {
         return this.objectives.find(function(o){ return o.name==name; });
     },
 
-    /** Get the explore mode penalty with the given name
-     * @param {String} name
-     * @returns {Object}
+    /** Get the explore mode penalty with the given name.
+     *
+     * @param {string} name
+     * @returns {object}
      */
     getPenalty: function(name) {
         return this.penalties.find(function(p){ return p.name==name; });
     },
 
-    /** Show the question's advice
-     * @param {Boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+    /** Show the question's advice.
+     *
+     * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      */
     getAdvice: function(dontStore)
     {
@@ -845,8 +914,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.adviceDisplayed(this);
         }
     },
-    /** Reveal the correct answers to the student
-     * @param {Boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+    /** Reveal the correct answers to the student.
+     *
+     * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      */
     revealAnswer: function(dontStore)
     {
@@ -869,7 +939,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.exam && this.exam.updateScore();
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
-     * @returns {Boolean}
+     *
+     * @returns {boolean}
      */
     validate: function()
     {
@@ -896,7 +967,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
     },
     /** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
-     * @returns {Boolean}
+     *
+     * @returns {boolean}
      */
     isDirty: function()
     {
@@ -910,8 +982,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         return false;
     },
     /** Show a warning and return true if the question is dirty.
+     *
      * @see Numbas.Question#isDirty
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
@@ -919,7 +992,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             return true;
         }
     },
-    /** Calculate the student's total score for this question - adds up all part scores
+    /** Calculate the student's total score for this question - adds up all part scores.
      */
     calculateScore: function()
     {
@@ -978,7 +1051,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.marks = marks;
         this.answered = this.validate();
     },
-    /** Submit every part in the question */
+    /** Submit every part in the question.
+     */
     submit: function()
     {
         //submit every part
@@ -1011,7 +1085,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //notify storage
         this.store && this.store.saveQuestion(this);
     },
-    /** Add a callback function to run when the question's HTML is attached to the page
+    /** Add a callback function to run when the question's HTML is attached to the page.
      *
      * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
@@ -1020,7 +1094,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     onHTMLAttached: function(fn) {
         this.signals.on('HTMLAttached',fn);
     },
-    /** Add a callback function to run when the question's variables are generated (but before the HTML is attached)
+    /** Add a callback function to run when the question's variables are generated (but before the HTML is attached).
      *
      * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
