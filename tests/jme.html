@@ -483,7 +483,8 @@
 					closeEqual(assert, evaluate('sgn(4) = sign(4)').value,true,'sgn == sign');
 					closeEqual(assert, evaluate('len(32) = abs(32) and length(32) = abs(32)').value,true,'len == length == abs');
                     closeEqual(assert, jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
-                    assert.ok(jme.compile('length+1'),'length as a variable name')
+                    assert.ok(jme.compile('length+1'),'length as a variable name');
+                    closeEqual(assert, evaluate('2ˆ3').value,8,'2ˆ3 - modifier circumflex');
 				});
 
 				QUnit.test('Types (isa)',function(assert) {

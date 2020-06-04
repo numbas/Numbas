@@ -12824,7 +12824,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
 
     /** Regular expressions to match tokens.
      *
@@ -14702,7 +14702,8 @@ var opSynonyms = jme.opSynonyms = {
     '⟹': 'implies',
     '≠': '<>',
     '≥': '>=',
-    '≤': '<='
+    '≤': '<=',
+    'ˆ': '^'
 }
 /** Synonyms of function names - keys in this dictionary are translated to their corresponding values.
  *
