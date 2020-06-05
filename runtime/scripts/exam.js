@@ -380,12 +380,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var e = this;
             e.seed = suspendData.randomSeed || e.seed;
             var numQuestions = 0;
-            for(var i = 0; i < suspendData.questionGroupOrder.length; i++){
-                suspendData.questionSubsets.forEach(function(subset) {
-                    e.question_groups[i].questionSubset = subset;
-                    numQuestions += subset.length;
-                });
-            }
+            suspendData.questionSubsets.forEach(function(subset,i) {
+                e.question_groups[i].questionSubset = subset;
+                numQuestions += subset.length;
+            });
+            this.questionGroupOrder = suspendData.questionGroupOrder;
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
