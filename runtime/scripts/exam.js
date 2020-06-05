@@ -413,7 +413,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     {
         var numQuestions = 0;
         var numGroups = this.question_groups.length;
-        this.questionGroupOrder = Numbas.math.deal(numGroups);
+        if (this.settings.shuffleQuestionGroups){
+            this.questionGroupOrder = Numbas.math.deal(numGroups);
+        } else {
+            this.questionGroupOrder = Numbas.math.range(numGroups);
+        }
         for (var i = 0; i < numGroups; i++) {
             var groupIndex = this.questionGroupOrder[i];
             this.question_groups[groupIndex].chooseQuestionSubset();
