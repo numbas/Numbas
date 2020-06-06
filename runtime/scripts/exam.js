@@ -409,6 +409,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.signals.trigger('ready');
         });
     },
+    /** Decide which questions to use and in what order
+     * @see Numbas.QuestionGroup#chooseQuestionSubset
+     */
     chooseQuestionSubset: function()
     {
         var numQuestions = 0;
