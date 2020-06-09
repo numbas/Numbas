@@ -1674,6 +1674,26 @@
                     assert.equal(exprToLaTeX('x*(x+1)',''),'x \\times \\left ( x + 1 \\right )','x*(x+1)');
 				});
 
+                QUnit.module('Documentation');
+                QUnit.test('Coverage',function(assert) {
+                    var fns = [];
+                    doc_tests.forEach(function(d) {
+                        fns = fns.concat(d.fns.map(function(f) { return f.name; }));
+                    });
+                    var fn_names = fns.map(function(expr) {
+                        try {
+                            return Numbas.jme.compile(expr.replace('...','x')).tok.name;
+                        } catch(f) {
+                            return expr.replace(/\(.*/,'')
+                        }
+                    });
+
+                    var defined = Numbas.jme.builtinScope.allFunctions();
+
+                    var missing = fn_names.filter(function(n) {return defined[n.toLowerCase()]===undefined });
+                    assert.ok(missing.length==0,"No undocumented functions");
+                });
+
                 doc_tests.forEach(function(section) {
                     QUnit.module('Docs: '+section.name);
                     section.fns.forEach(function(fn) {

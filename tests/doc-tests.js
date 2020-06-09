@@ -2054,6 +2054,28 @@ var doc_tests =
         ]
     },
     {
+        "name": "Calculus",
+        "fns": [
+            {
+                "name": "diff(expression,variable)",
+                "examples": [
+                    {
+                        "in": "diff(expression(\"x^2 + 2x + 4\"), \"x\")",
+                        "out": "expression(\"2x + 2\")"
+                    },
+                    {
+                        "in": "diff(expression(\"x * y + 3x + 2y\"), \"x\")",
+                        "out": "expression(\"y + 3\")"
+                    },
+                    {
+                        "in": "diff(expression(\"cos(x^2)\"), \"x\")",
+                        "out": "expression(\"-2 * sin(x^2) * x\")"
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "name": "Pattern-matching sub-expressions",
         "fns": [
             {
