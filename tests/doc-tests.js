@@ -1025,7 +1025,12 @@ var doc_tests =
             },
             {
                 "name": "latex(x)",
-                "examples": []
+                "examples": [
+                    {
+                        "in": "latex(expression(\"x^2 + 3/4\"))",
+                        "out": "\"x^{2} + \\\\frac{3}{4}\""
+                    }
+                ]
             },
             {
                 "name": "safe(x)",
@@ -1256,7 +1261,7 @@ var doc_tests =
                 "examples": []
             },
             {
-                "name": "isclose(x,y,rel_tol,abs_tol)",
+                "name": "isclose(x,y,[rel_tol],[abs_tol])",
                 "examples": []
             },
             {
