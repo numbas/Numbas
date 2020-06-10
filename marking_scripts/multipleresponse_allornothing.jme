@@ -1,0 +1,57 @@
+numAnswers: len(settings["matrix"])
+
+numChoices: if(numAnswers=1,1,len(settings["matrix"][0]))
+
+numTicks (How many options did the student tick?):
+  sum(map(sum(map(if(x,1,0),x,row)),row,studentAnswer))
+
+wrongNumber:
+  assert(numTicks >= settings["minAnswers"] and (settings["maxAnswers"]=0 or numTicks<=settings["maxAnswers"]),
+    if(settings["warningType"]="prevent",
+        fail(translate("part.mcq.wrong number of choices"))
+    ,
+        incorrect(translate("part.mcq.wrong number of choices"));
+        end()
+    )
+  )
+
+tick_indexes (Indexes of choice/answer pairs):
+  product(list(0..(numAnswers-1)),list(0..(numChoices-1)))
+
+score_ticks (The score for each choice/answer pair):
+  map(
+    if(studentAnswer[x][y],
+      let(distractor,settings["distractors"][x][y], credit, if(marks=0,0,settings["matrix"][x][y]/marks),
+        switch(
+          credit<>0,
+            if(not isnonemptyhtml(distractor),
+              add_credit(credit,translate(if(credit>0,'part.mcq.correct choice','part.mcq.incorrect choice')))
+            ,
+              add_credit(credit,distractor)
+            )
+          ,
+            if(isnonemptyhtml(distractor),feedback(distractor),if(marks<>0,feedback(translate('part.mcq.incorrect choice')),false))
+        );credit
+      )
+    ,
+      0
+    ),
+    [x,y],
+    tick_indexes
+  )
+
+total_score: sum(score_ticks)
+
+mark:
+  assert(marks>0,correct());  // any answer is correct when 0 marks are available
+  assert(numTicks>0,
+    warn(translate("part.marking.nothing entered"));
+    fail(translate("part.marking.nothing entered"))
+  );
+  apply(same_ticks)
+
+should_be_ticked (A choice should be ticked if it's awarded a positive number of marks):
+  map(map(y>0,y,row),row,settings["matrix"])
+
+same_ticks (Did the student tick the same choices as the expected answer?):
+  correctif(studentanswer=should_be_ticked)
