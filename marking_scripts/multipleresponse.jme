@@ -48,8 +48,14 @@ mark:
     warn(translate("part.marking.nothing entered"));
     fail(translate("part.marking.nothing entered"))
   );
-  apply(wrongNumber);
-  apply(score_ticks)
+  if(settings["allOrNothing"],apply(same_ticks),apply(wrongNumber);apply(score_ticks))
+
 
 interpreted_answer (The student's answer, to be reused by other parts):
   studentAnswer
+
+should_be_ticked (A choice should be ticked if it's awarded a positive number of marks):
+  map(map(y>0,y,row),row,settings["matrix"])
+
+same_ticks (Did the student tick the same choices as the expected answer?):
+  correctif(studentanswer=should_be_ticked)
