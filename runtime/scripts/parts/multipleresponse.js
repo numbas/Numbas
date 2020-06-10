@@ -42,6 +42,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     loadFromXML: function(xml) {
         var p = this;
         var settings = this.settings;
+        console.log(this);
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var scope = this.getScope();
         //get number of answers and answer order setting
@@ -77,7 +78,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(!choicesNode) {
             this.error('part.mcq.choices missing');
         }
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType','displayColumns'],['minAnswersString','maxAnswersString','shuffleChoices']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','allornothingmarking','displayType','displayColumns'],['minAnswersString','maxAnswersString','shuffleChoices', 'allOrNothing']);
         var choiceNodes = choicesNode.selectNodes('choice');
         var answersNode, answerNodes;
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -246,8 +247,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type!='1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
-        tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
-        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns']);
+        tryLoad(data, ['minMarks'], settings, ['minimumMarks']); // TODO: pull allOrNothing here, too
+        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers','allorOrNothing','displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'allOrNothing', 'displayType','displayColumns']);
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
@@ -327,6 +328,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     },
     finaliseLoad: function() {
         var settings = this.settings;
+        //console.log(settings);
         var scope = this.getScope();
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -479,6 +481,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {Number} maxAnswers - maximum number of responses the student must select. Generated from `maxAnswersString`.
      * @property {String} shuffleChoices - should the order of choices be randomised?
      * @property {String} shuffleAnswers - should the order of answers be randomised?
+     * @property {Boolean} allOrNothing - only award marks if all correct answers selected?
      * @property {Array.<Array.<Number>>} matrix - marks for each answer/choice pair. Arranged as `matrix[answer][choice]`
      * @property {String} displayType - how to display the response selectors. Can be `radiogroup`, `checkbox` or `dropdownlist`.
      * @property {Number} displayColumns - how many columns to use to display the choices
@@ -495,6 +498,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         maxAnswers: 0,                //maximum ditto
         shuffleChoices: false,
         shuffleAnswers: false,
+        allOrNothing: false,
         matrix: [],                    //marks matrix
         displayType: 'radiogroup',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
         warningType: 'none',                //what to do if wrong number of responses
@@ -649,7 +653,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         settings.matrix = matrix;
         return settings.maxMatrix;
     },
-    /** Store the student's choices 
+    /** Store the student's choices
      * @param {Object} answer - object with properties `answer` and `choice`, giving the index of the chosen item
      * */
     storeTick: function(answer)
