@@ -1722,6 +1722,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             np.instance.removeNextPart(np2);
         });
         np.instance = null;
+        np.instanceVariables = null;
         if(this.display) {
             this.display.updateNextParts();
         }
