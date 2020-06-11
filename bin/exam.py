@@ -518,7 +518,7 @@ class Question(object):
             'partsMode': strcons(self.parts_mode),
             'maxMarks': strcons_fix(self.maxMarks),
             'objectiveVisibility': strcons_fix(self.objectiveVisibility),
-            'penaltyVisibility': strcons_fix(self.objectiveVisibility),
+            'penaltyVisibility': strcons_fix(self.penaltyVisibility),
         }
         question.find('statement').append(makeContentNode(self.statement))
         question.find('advice').append(makeContentNode(self.advice))
@@ -647,7 +647,7 @@ class VariableReplacement(object):
 class NextPart(object):
     other_part = ''
     label = ''
-    availability_condition = ''
+    availabilityCondition = ''
     penalty = ''
     penalty_amount = ''
     lockAfterLeaving = False
