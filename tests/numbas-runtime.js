@@ -17555,6 +17555,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             np.instance.removeNextPart(np2);
         });
         np.instance = null;
+        np.instanceVariables = null;
         if(this.display) {
             this.display.updateNextParts();
         }
@@ -18737,10 +18738,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     p.score = 0;
                     p.applied = false;
                 });
-                var defaultObjective = {score: 0, answered: false, limit: this.maxMarks};
-                for(var i=0; i<this.parts.length; i++) {
-                    var part = this.parts[i];
-                    var objective = this.getObjective(part.settings.exploreObjective) || defaultObjective;
+                this.allParts().forEach(function(part) {
+                    if(part.type=='gapfill') {
+                        return;
+                    }
+                    var objective = q.getObjective(part.settings.exploreObjective);
+                    if(!objective) {
+                        return;
+                    }
                     objective.score += part.score;
                     objective.answered = objective.answered || part.answered;
 
@@ -18753,9 +18758,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                             }
                         }
                     });
-                }
-                var objectives = this.objectives.concat([defaultObjective]);
-                objectives.forEach(function(o) {
+                });
+                this.objectives.forEach(function(o) {
                     o.score = Math.min(o.limit,o.score);
                     score += o.score;
                 });
