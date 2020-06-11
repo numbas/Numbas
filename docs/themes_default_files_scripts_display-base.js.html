@@ -370,7 +370,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         if( obj.doesMarking() &amp;&amp; showFeedbackIcon &amp;&amp; (revealed() || (settings.showAnswerState &amp;&amp; anyAnswered())) ) {
             if(credit&lt;=0) {
                 return 'wrong';
-            } else if(Numbas.math.precround(credit,10)==1) {
+            } else if(Numbas.math.precround(credit,10)>=1) {
                 return 'correct';
             } else {
                 return 'partial';
