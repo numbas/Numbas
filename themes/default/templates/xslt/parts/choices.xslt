@@ -28,7 +28,7 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice" data-bind="value: studentAnswer, disable: revealed, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title}}">
+            <select class="multiplechoice" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title}}">
                 <option value=""></option>
                 <xsl:apply-templates select="choice" mode="dropdownlist"/>
             </select>
@@ -76,7 +76,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
         <label>
-            <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: revealed" value="{$choicenum}"/>
+            <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: disabled" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
         </label>
     </li>
@@ -98,7 +98,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
-            <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: revealed" />
+            <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled" />
             <xsl:apply-templates select="content"/>
         </label>
     </li>

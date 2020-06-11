@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="part[@type='numberentry']" mode="typespecific">
     <xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
-    <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, textInput: studentAnswer, autosize: true, disable: revealed, css: {{'has-error': warningsShown}}, attr: {{title: input_title}}"/>
+    <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" step="{answer/inputstep/@value}" class="numberentry" data-bind="event: inputEvents, textInput: studentAnswer, autosize: true, disable: disabled, css: {{'has-error': warningsShown}}, attr: {{title: input_title}}"/>
     <span class="preview" data-bind="visible: showPreview &amp;&amp; studentAnswerLaTeX(), maths: showPreview ? studentAnswerLaTeX() : '', click: focusInput"></span>
     <span class="help-block hint precision-hint" data-bind="visible: showInputHint, html: inputHint"></span>
 {% endraw %}
