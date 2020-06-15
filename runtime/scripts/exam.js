@@ -186,7 +186,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
         }
         // question groups
-        tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames']);
+        tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
         for(var i=0;i<groupNodes.length;i++) {
             var qg = new QuestionGroup(this);
@@ -201,7 +201,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = exam.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['name','duration','percentPass','showQuestionGroupNames','showStudentName','shuffleQuestions'],settings);
+        tryLoad(data,['name','duration','percentPass','showQuestionGroupNames','showStudentName','shuffleQuestions','shuffleQuestionGroups'],settings);
         var question_groups = tryGet(data,'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
@@ -283,6 +283,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {string} name - Title of exam
      * @property {number} percentPass - Percentage of max. score student must achieve to pass
      * @property {boolean} shuffleQuestions - should the questions be shuffled?
+     * @property {boolean} shuffleQuestionGroups - randomize question group order?
      * @property {number} numQuestions - number of questions in this sitting
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {string} startPassword - password the student must enter before beginning the exam
@@ -331,6 +332,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         showAnswerState: false,
         allowRevealAnswer: false,
         showQuestionGroupNames: false,
+        shuffleQuestionGroups: false,
         showStudentName: true,
         reviewShowScore: true,
         reviewShowFeedback: true,
@@ -405,6 +407,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {Numbas.Question}
      */
     currentQuestion: undefined,
+    /**
+     * The order in which the question groups are displayed
+     *
+     * @type {Array.<number>}
+     */
+    questionGroupOrder: [],
     /** Groups of questions in the exam.
      *
      * @type {Array.<Numbas.QuestionGroup>}
@@ -511,6 +519,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 e.question_groups[i].questionSubset = subset;
                 numQuestions += subset.length;
             });
+            this.questionGroupOrder = suspendData.questionGroupOrder.slice();
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
@@ -542,10 +551,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     chooseQuestionSubset: function()
     {
         var numQuestions = 0;
-        this.question_groups.forEach(function(group) {
-            group.chooseQuestionSubset();
-            numQuestions += group.questionSubset.length;
-        });
+        var numGroups = this.question_groups.length;
+        if (this.settings.shuffleQuestionGroups){
+            this.questionGroupOrder = Numbas.math.deal(numGroups);
+        } else {
+            this.questionGroupOrder = Numbas.math.range(numGroups);
+        }
+        for (var i = 0; i < numGroups; i++) {
+            var groupIndex = this.questionGroupOrder[i];
+            this.question_groups[groupIndex].chooseQuestionSubset();
+            numQuestions += this.question_groups[groupIndex].questionSubset.length;  
+        }
         this.settings.numQuestions = numQuestions;
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
@@ -567,10 +583,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         this.questionList = [];
         var questionAcc = 0;
-        this.question_groups.forEach(function(group) {
+        for (var i = 0; i < this.questionGroupOrder.length; i++) {
+            var groupIndex = this.questionGroupOrder[i];
+            var group = this.question_groups[groupIndex];
             group.questionList = [];
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
+                    var group = this;
                     if(group.xml) {
                         var questionNodes = group.xml.selectNodes("questions/question");
                         var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope, exam.store);
@@ -586,7 +605,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     group.questionList.push(question);
                 },group,n);
             });
-        });
+        }
         job(function() {
             Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready']) })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;

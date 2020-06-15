@@ -139,6 +139,7 @@ class Exam(object):
     feedbackMessages = []
     showQuestionGroupNames = False          # show the names of question groups?
     showstudentname = True          #show the student's name?
+    shuffleQuestionGroups = False   #randomize the order of question groups?
 
 
     def __init__(self,name='Untitled Exam'):
@@ -176,7 +177,7 @@ class Exam(object):
     @staticmethod
     def fromDATA(builder, data):
         exam = Exam()
-        tryLoad(data,['name','duration','percentPass','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname'],exam)
+        tryLoad(data,['name','duration','percentPass','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname', 'shuffleQuestionGroups'],exam)
 
         if haskey(data,'navigation'):
             nav = data['navigation']
@@ -309,6 +310,7 @@ class Exam(object):
         question_groups = root.find('question_groups')
         question_groups.attrib = {
             'showQuestionGroupNames': strcons(self.showQuestionGroupNames),
+            'shuffleQuestionGroups' : strcons(self.shuffleQuestionGroups),
         }
 
         for qg in self.question_groups:
