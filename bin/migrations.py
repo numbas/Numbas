@@ -121,7 +121,6 @@ def exam_question_groups(data):
         pickingStrategy = 'all-ordered'
 
     data['showQuestionGroupNames'] = False
-    data[ 'shuffleQuestionGroups'] = False
 
     data['question_groups'] = [{
         'name': '',

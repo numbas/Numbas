@@ -583,9 +583,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         this.questionList = [];
         var questionAcc = 0;
+        var ogroups = this.question_groups.slice();
+        this.question_groups = [];
         for (var i = 0; i < this.questionGroupOrder.length; i++) {
             var groupIndex = this.questionGroupOrder[i];
-            var group = this.question_groups[groupIndex];
+            var group = ogroups[groupIndex];
+            this.question_groups[i] = group;
             group.questionList = [];
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
