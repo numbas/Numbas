@@ -64,4 +64,6 @@
 * [Grant Gollier](https://github.com/gragollier) ([issue #605](https://github.com/numbas/Numbas/issues/605))
 * [Danil Sergeev](https://github.com/yungcatx) - ([issue #642](https://github.com/numbas/Numbas/issues/634))
 * [tpilewicz](https://github.com/tpilewicz) - ([issue #626](https://github.com/numbas/Numbas/issues/626))
+* [Artemis Doumeni](https://github.com/artemdou) -([issue #525](https://github.com/numbas/Numbas/issues/525))
+* [Evangelia Vratsanou](https://github.com/EVratsanou) -([issue #525](https://github.com/numbas/Numbas/issues/525))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
