@@ -404,7 +404,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             case 'html':
                 return token.value;
             case 'string':
-                return token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value.replace(/\\([{}])/g,'$1');
+                if(token.latex) {
+                    html = '\\('+html+'\\)';
+                }
+                return html;
             case 'list':
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             default:
