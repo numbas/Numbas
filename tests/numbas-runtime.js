@@ -15392,7 +15392,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             case 'html':
                 return token.value;
             case 'string':
-                return token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value.replace(/\\([{}])/g,'$1');
+                if(token.latex) {
+                    html = '\\('+html+'\\)';
+                }
+                return html;
             case 'list':
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             default:
@@ -19414,12 +19418,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         this.questionList = [];
         var questionAcc = 0;
+        var ogroups = this.question_groups.slice();
+        this.question_groups = [];
         for (var i = 0; i < this.questionGroupOrder.length; i++) {
             var groupIndex = this.questionGroupOrder[i];
-            var group = this.question_groups[groupIndex];
+            var group = ogroups[groupIndex];
+            this.question_groups[i] = group;
             group.questionList = [];
             group.questionSubset.forEach(function(n) {
                 job(function(n) {
+                    var group = this;
                     if(group.xml) {
                         var questionNodes = group.xml.selectNodes("questions/question");
                         var question = Numbas.createQuestionFromXML( questionNodes[n], questionAcc++, exam, group, exam.scope, exam.store);
@@ -19433,7 +19441,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     exam.questionList.push(question);
                     group.questionList.push(question);
-                });
+                },group,n);
             });
         }
         job(function() {
