@@ -49,9 +49,7 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking">
-                <xsl:if test="count(../part) &gt; 1 or ancestor::steps">
-                    <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
-                </xsl:if>
+                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
                 <div class="feedbackMessages" aria-live="polite" role="log" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: showFeedbackMessages, foreach: feedbackMessages">
