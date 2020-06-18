@@ -76,7 +76,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
         <label>
-            <input type="radio" class="choice" name="{$path}-choice" data-bind="checked: studentAnswer, disable: disabled" value="{$choicenum}"/>
+            <input type="radio" class="choice" data-bind="checked: studentAnswer, disable: disabled, attr: {{name: part.path+'-choice'}}" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
         </label>
     </li>
@@ -88,7 +88,7 @@
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
         <label>
-            <input type="radio" class="choice" name="{$path}-choice-correctanswer" data-bind="checked: correctAnswer()+''" disabled="true" value="{$choicenum}"/>
+            <input type="radio" class="choice" data-bind="checked: correctAnswer()+'', attr: {{name: part.path+'-correctanswer'}}" disabled="true" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
         </label>
     </li>
@@ -98,7 +98,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
-            <input type="checkbox" class="choice" name="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled" />
+            <input type="checkbox" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, attr: {{name: part.path+'-choice'}}" />
             <xsl:apply-templates select="content"/>
         </label>
     </li>
@@ -107,7 +107,7 @@
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
         <label>
-            <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks()[{$choicenum}]" disabled="true" />
+            <input type="checkbox" class="choice" name="choice" data-bind="checked: correctTicks()[{$choicenum}], attr: {{name: part.path+'-correctanswer'}}" disabled="true" />
             <xsl:apply-templates select="content"/>
         </label>
     </li>
