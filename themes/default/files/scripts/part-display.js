@@ -40,7 +40,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showName = Knockout.computed(function() {
-            return this.name() && (this.part.question.partsMode=='all' || this.revealed());
+            return this.name() && !this.part.isGap && (this.part.question.partsMode=='all' || this.revealed());
         },this);
 
         /** The question this part belongs to.
