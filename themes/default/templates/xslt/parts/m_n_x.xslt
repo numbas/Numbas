@@ -91,10 +91,10 @@
             <td class="option">
                 <xsl:choose>
                     <xsl:when test="$displaytype='checkbox'">
-                        <input type="checkbox" class="choice" data-bind="checked: correctTicks()[{$answernum}][{$choicenum}], visible: layout[{$answernum}][{$choicenum}], disable: true, attr: {{name: part.path+'-choice-'+{$choicenum}+'-correctanswer}}" disabled="true"/>
+                        <input type="checkbox" class="choice" data-bind="checked: correctTicks()[{$answernum}][{$choicenum}], visible: layout[{$answernum}][{$choicenum}], disable: true, attr: {{name: part.path+'-choice-'+{$choicenum}+'-correctanswer'}}" disabled="true"/>
                     </xsl:when>
                     <xsl:when test="$displaytype='radiogroup'">
-                        <input type="radio" class="choice" data-bind="checked: correctTicks()[{$choicenum}]+'', visible: layout[{$answernum}][{$choicenum}], disable: true, attr: {{name: part.path+'-choice-'+{$choicenum}+'-correctanswer}}" disabled="true" value="{$answernum}"/>
+                        <input type="radio" class="choice" data-bind="checked: correctTicks()[{$choicenum}]+'', visible: layout[{$answernum}][{$choicenum}], disable: true, attr: {{name: part.path+'-choice-'+{$choicenum}+'-correctanswer'}}" disabled="true" value="{$answernum}"/>
                     </xsl:when>
                 </xsl:choose>
             </td>
