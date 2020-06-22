@@ -103,6 +103,7 @@ body.worksheet .questionsheet .adviceContainer {
     display: none;
 }
 body.worksheet .answersheet .statement, 
+body.worksheet .answersheet .statement + hr, 
 body.worksheet .answersheet .parts {
     display: none;
 }

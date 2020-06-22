@@ -12,13 +12,13 @@ Copyright 2011-16 Newcastle University
    limitations under the License.
 -->
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="xml" version="1.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/xhtml" omit-xml-declaration="yes"/>
+    <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <div class="question clearfix" data-bind="with: question">
+        <div class="question clearfix" data-bind="css: css_classes">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
-                <h3 data-bind="text: displayName"></h3>
+                <h3 data-bind="text: displayName" class="question-header"></h3>
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
@@ -39,21 +39,13 @@ Copyright 2011-16 Newcastle University
             <xsl:apply-templates select="@*|node()" mode="content" />
         </xsl:copy>
     </xsl:template>
+    <xsl:template match="parts">
+        <div class="parts" data-bind="foreach: parts">
+            <div data-bind="promise: html_promise"></div>
+        </div>
+    </xsl:template>
+    <xsl:template match="part">
+    </xsl:template>
     {% include 'xslt/statement.xslt' %}
-    {% include 'xslt/part.xslt' %}
-    {% include 'xslt/steps.xslt' %}
-    {% include 'xslt/prompt.xslt' %}
     {% include 'xslt/advice.xslt' %}
-    {% include 'xslt/parts/1_n_2.xslt' %}
-    {% include 'xslt/parts/m_n_2.xslt' %}
-    {% include 'xslt/parts/choices.xslt' %}
-    {% include 'xslt/parts/m_n_x.xslt' %}
-    {% include 'xslt/parts/patternmatch.xslt' %}
-    {% include 'xslt/parts/gapfill.xslt' %}
-    {% include 'xslt/parts/jme.xslt' %}
-    {% include 'xslt/parts/numberentry.xslt' %}
-    {% include 'xslt/parts/matrix.xslt' %}
-    {% include 'xslt/parts/information.xslt' %}
-    {% include 'xslt/parts/extension.xslt' %}
-    {% include 'xslt/parts/custom.xslt' %}
 </xsl:stylesheet>

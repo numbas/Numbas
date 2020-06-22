@@ -26,21 +26,24 @@ Copyright 2011-16 Newcastle University
 		<main id="everything" style="display:none" role="main">
             {% include 'generator.html' %}
 
-            <div id="examList" data-bind="attr: {class: sheetType().name}">
+            <div id="examList" data-bind="attr: {class: sheetType().name}, foreach: exams">
+                <div class="exam">
+                    <!-- top bar - logo, exam title, timing -->
+                    <div class="mainDiv titleBar">
+                        <div class="examID">ID: <span class="id" data-bind="text: id"></span></div>
+                    </div>
+
+                    <div class="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+
+                    <ol class="questionList" data-bind="foreach: exam.display.questions">
+                        <li>
+                            <div data-bind="promise: html_promise"></div>
+                        </li>
+                    </ol>
+                </div>
 			</div>
 
 		</main>
 
-        <div class="exam" id="examTemplate">
-            <!-- top bar - logo, exam title, timing -->
-            <div class="mainDiv titleBar">
-                <div class="examID">ID: <span class="id" data-bind="text: id"></span></div>
-            </div>
-
-            <div class="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
-
-            <ol class="questionList">
-            </ol>
-        </div>
 	</body>
 </html>

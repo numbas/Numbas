@@ -1,10 +1,12 @@
 Numbas.queueScript('display-base',['controls','math','xml','util','timing','jme','jme-display','schedule'],function() {
+var util = Numbas.util;
+var jme = Numbas.jme;
 
 var job = Numbas.schedule.add;
 
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
-    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result
+    /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
      */
     localisePage: function() {
         $('[data-localise]').each(function() {
@@ -15,8 +17,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
      * If that exists, localise its value and set the desired attribute, then return it.
      * @param {Element} elem
-     * @param {String} name
-     * @returns {String}
+     * @param {string} name
+     * @returns {string}
      */
     getLocalisedAttribute: function(elem, name) {
         var attr_localise;
@@ -27,7 +29,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         return attr;
     },
-    /** Update the progress bar when loading
+    /** Update the progress bar when loading.
      */
     showLoadProgress: function()
     {
@@ -48,22 +50,19 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         Knockout.applyBindings(vm,document.getElementById('everything'));
 
     },
-    /** Does an input element currently have focus?
-     * @type {Boolean}
-     */
-    inInput: false,
     //alert / confirm boxes
     //
-    /** Callback functions for the modals
-     * @type {Object.<function>}
+    /** Callback functions for the modals.
+     *
      */
     modal: {
         ok: function() {},
         cancel: function() {}
     },
-    /** Show an alert dialog
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback when OK is clicked
+    /** Show an alert dialog.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback when OK is clicked
      */
     showAlert: function(msg,fnOK) {
         fnOK = fnOK || function() {};
@@ -72,10 +71,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
     },
-    /** Show a confirmation dialog box
-     * @param {String} msg - message to show the user
-     * @param {function} fnOK - callback if OK is clicked
-     * @param {function} fnCancel - callback if cancelled
+    /** Show a confirmation dialog box.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback if OK is clicked
+     * @param {Function} fnCancel - callback if cancelled
      */
     showConfirm: function(msg,fnOK,fnCancel) {
         this.modal.ok = fnOK || function(){};
@@ -83,14 +83,57 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
-    /** Make MathJax typeset any maths in the selector
-     * @param {jQuery|Element} [selector] - elements to typeset. If not given, the whole page is typeset
-     * @param {function} callback - function to call when typesetting is finished
+    /** Make MathJax typeset any maths in the selector.
+     *
+     * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
+     * @param {Function} callback - Function to call when typesetting is finished.
      */
     typeset: function(selector,callback)
     {
     },
-    /** The Numbas exam has failed so much it can't continue - show an error message and the error
+
+    /** Associate a JME scope with the given element.
+     *
+     * @param {Element} element
+     * @param {Numbas.jme.Scope} scope
+     */
+    setJMEScope: function(element, scope) {
+        $(element).addClass('jme-scope').data('jme-scope',scope);
+    },
+
+    /** Make HTML from an XML node and bind it to the given scope and display object.
+     * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
+     *
+     * @param {Element} xml
+     * @param {XMLDocument} template
+     * @param {Numbas.jme.Scope} scope
+     * @param {string} contextDescription - Description of the JME context, for error messages.
+     * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
+     */
+    makeHTMLFromXML: function(xml, template, scope, contextDescription) {
+        var htmlString = $.xsl.transform(template, xml).string;
+        var d = document.createElement('div');
+        d.innerHTML = htmlString;
+        html = d.firstElementChild;
+        display.setJMEScope(html,scope);
+        html.setAttribute('data-jme-context-description',contextDescription);
+        var promise = new Promise(function(resolve, reject) {
+            try {
+                Numbas.jme.variables.DOMcontentsubvars(html,scope);
+            } catch(e) {
+                throw(new Error(contextDescription+': '+e.message));
+            }
+            // make mathjax process the question text (render the maths)
+            Numbas.display.typeset(html);
+            resolve(html);
+        });
+
+        return promise;
+    },
+
+
+    /** The Numbas exam has failed so much it can't continue - show an error message and the error.
+     *
      * @param {Error} e
      */
     die: function(e) {
@@ -167,26 +210,18 @@ function GeneratedExam(offset) {
     this.id = offset;
     Math.seedrandom(offset);
     this.progressText = ko.observable('Working...');
-    var exam = this.exam = new Numbas.Exam();
+    var xml = Numbas.xml.examXML.selectSingleNode('/exam');
+    var exam = this.exam = Numbas.createExamFromXML(xml,null,true);
     exam.id = offset;
     job(exam.init,exam);
     exam.settings.showActualMark = false;
     exam.settings.showAnswerState = false;
-    this.html = document.getElementById('examTemplate').cloneNode(true);
-    this.html.removeAttribute('id');
-    Knockout.applyBindings(this,this.html);
-    document.getElementById('examList').appendChild(this.html);
     exam.signals.on('question list initialised', function() {
         ge.progressText('Done');
         exam.questionList.forEach(function(q) {
             q.display.init();
             q.signals.on('HTMLAttached',function() {
-                var li = document.createElement('li');
-                li.appendChild(q.display.html[0])
-                ge.html.querySelector('.questionList').appendChild(li);
-                exam.display.applyQuestionBindings(q);
                 q.signals.trigger('HTML appended');
-                q.display.adviceDisplayed(true);
             });
         });
         Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated').promise})).then(function() {
@@ -230,39 +265,46 @@ $.textMetrics = function(el) {
 }
 
 /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
- * @typedef {Object} Numbas.display.feedbackable
- * 	@property {observable.<Boolean>} answered - has the object been answered?
- * 	@property {observable.<Boolean>} isDirty - has the student's answer changed?
- * 	@property {observable.<Number>} score - number of marks awarded
- *  @property {observable.<Number>} marks - number of marks available
- *  @property {observable.<Number>} credit - proportion of available marks awarded
- *  @property {observable.<Boolean>} doesMarking - does the object do any marking?
- *	@property {observable.<Boolean>} revealed - have the correct answers been revealed?
+ *
+ * @typedef {object} Numbas.display.feedbackable
+ * @property {observable.<boolean>} answered - Has the object been answered?
+ * @property {observable.<boolean>} isDirty - Has the student's answer changed?
+ * @property {observable.<number>} score - Number of marks awarded
+ * @property {observable.<number>} marks - Number of marks available
+ * @property {observable.<number>} credit - Proportion of available marks awarded
+ * @property {observable.<boolean>} doesMarking - Does the object do any marking?
+ * @property {observable.<boolean>} revealed - Have the correct answers been revealed?
+ * @property {boolean} plainScore - Show the score without the "Score: " prefix?
  */
 /** Settings for {@link Numbas.display.showScoreFeedback}
- * @typedef {Object} Numbas.display.showScoreFeedback_settings
- * @property {Boolean} showTotalMark - Show the total marks available?
- * @property {Boolean} showActualMark - Show the student's current score?
- * @property {Boolean} showAnswerState - Show the correct/incorrect state after marking?
+ *
+ * @typedef {object} Numbas.display.showScoreFeedback_settings
+ * @property {boolean} showTotalMark - Show the total marks available?
+ * @property {boolean} showActualMark - Show the student's current score?
+ * @property {boolean} showAnswerState - Show the correct/incorrect state after marking?
+ * @property {boolean} reviewShowScore - Show the score once answers have been revealed?
  */
 /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
- * @typedef {String} Numbas.display.feedback_state
+ *
+ * @typedef {string} Numbas.display.feedback_state
  */
 /** A model representing feedback on an item which is marked - a question or a part.
- * @typedef {Object} Numbas.display.scoreFeedback
- * @property {observable.<Boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
+ *
+ * @typedef {object} Numbas.display.scoreFeedback
+ * @property {observable.<boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
  * @property {observable.<Numbas.display.feedback_state>} state - The current state of the item, to be shown to the student.
- * @property {observable.<Boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
- * @property {observable.<String>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
- * @property {observable.<String>} message - Text summarising the state of the item.
- * @property {observable.<String>} iconClass - CSS class for the feedback icon.
- * @property {observable.<Object>} iconAttr - A dictionary of attributes for the feedback icon.
+ * @property {observable.<boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
+ * @property {observable.<string>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
+ * @property {observable.<string>} message - Text summarising the state of the item.
+ * @property {observable.<string>} iconClass - CSS class for the feedback icon.
+ * @property {observable.<object>} iconAttr - A dictionary of attributes for the feedback icon.
  */
-/** Update a score feedback box
- * @param {Numbas.display.feedbackable} obj - object to show feedback about
+/** Update a score feedback box.
+ *
+ * @param {Numbas.display.feedbackable} obj - Object to show feedback about.
  * @param {Numbas.display.showScoreFeedback_settings} settings
  * @memberof Numbas.display
- * @returns Numbas.display.scoreFeedback
+ * @returns {Numbas.display.scoreFeedback}
  */
 var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
 {
@@ -271,6 +313,9 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var newScore = Knockout.observable(false);
     var answered = Knockout.computed(function() {
         return obj.answered();
+    });
+    var attempted = Knockout.computed(function() {
+        return obj.visited!==undefined && obj.visited();
     });
     var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
     var anyAnswered = Knockout.computed(function() {
@@ -283,12 +328,17 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var partiallyAnswered = Knockout.computed(function() {
         return anyAnswered() && !answered();
     },this);
+    var revealed = Knockout.computed(function() {
+        return (obj.revealed() && settings.reviewShowScore) || Numbas.is_instructor;
+    });
     var state = Knockout.computed(function() {
-        var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks(), credit = obj.credit();
-        if( obj.doesMarking() && showFeedbackIcon && (revealed || (settings.showAnswerState && anyAnswered())) ) {
+        var score = obj.score();
+        var marks = obj.marks();
+        var credit = obj.credit();
+        if( obj.doesMarking() && showFeedbackIcon && (revealed() || (settings.showAnswerState && anyAnswered())) ) {
             if(credit<=0) {
                 return 'wrong';
-            } else if(Numbas.math.precround(credit,10)==1) {
+            } else if(Numbas.math.precround(credit,10)>=1) {
                 return 'correct';
             } else {
                 return 'partial';
@@ -297,6 +347,36 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         else {
             return 'none';
         }
+    });
+    var messageIngredients = ko.computed(function() {
+        var score = obj.score();
+        var marks = obj.marks();
+        var scoreobj = {
+            marks: marks,
+            score: score,
+            marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
+            scoreString: niceNumber(score)+' '+R('mark',{count:score}),
+        };
+        var messageKey;
+        if(marks==0) {
+            messageKey = 'question.score feedback.not marked';
+        } else if(!revealed()) {
+            if(settings.showActualMark) {
+                if(settings.showTotalMark) {
+                    messageKey = 'question.score feedback.score total actual';
+                } else {
+                    messageKey = 'question.score feedback.score actual';
+                }
+            } else if(settings.showTotalMark) {
+                messageKey = 'question.score feedback.score total';
+            } else {
+                var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
+                messageKey = 'question.score feedback.'+key;
+            }
+        } else {
+            messageKey = 'question.score feedback.score total actual';
+        }
+        return {key: messageKey, scoreobj: scoreobj};
     });
     return {
         update: Knockout.computed({
@@ -308,42 +388,31 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
                 newScore(false);
             }
         }),
+        revealed: revealed,
         state: state,
         answered: answered,
         answeredString: Knockout.computed(function() {
-            if((obj.marks()==0 && !obj.doesMarking()) || !(Numbas.is_instructor || obj.revealed() || settings.showActualMark || settings.showTotalMark)) {
+            if((obj.marks()==0 && !obj.doesMarking()) || !(revealed() || settings.showActualMark || settings.showTotalMark)) {
                 return '';
             }
             var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
             return R('question.score feedback.'+key);
         },this),
+        attemptedString: Knockout.computed(function() {
+            var key = attempted() ? 'attempted' : 'unattempted';
+            return R('question.score feedback.'+key);
+        },this),
         message: Knockout.computed(function() {
-            var revealed = obj.revealed() || Numbas.is_instructor, score = obj.score(), marks = obj.marks();
-            var scoreobj = {
-                marks: marks,
-                score: score,
-                marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
-                scoreString: niceNumber(score)+' '+R('mark',{count:score}),
-            };
-            if(marks==0) {
-                return R('question.score feedback.not marked');
+            var ingredients = messageIngredients();
+            return R(ingredients.key,ingredients.scoreobj);
+        }),
+        plainMessage: Knockout.computed(function() {
+            var ingredients = messageIngredients();
+            var key = ingredients.key;
+            if(key=='question.score feedback.score total actual' || key=='question.score feedback.score actual') {
+                key += '.plain';
             }
-            if(!revealed) {
-                if(settings.showActualMark) {
-                    if(settings.showTotalMark) {
-                        return R('question.score feedback.score total actual',scoreobj);
-                    } else {
-                        return R('question.score feedback.score actual',scoreobj);
-                    }
-                } else if(settings.showTotalMark) {
-                    return R('question.score feedback.score total',scoreobj);
-                } else {
-                    var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
-                    return key == 'unanswered' ? '' : R('question.score feedback.'+key);
-                }
-            } else {
-                return R('question.score feedback.score total actual',scoreobj);
-            }
+            return R(key,ingredients.scoreobj);
         }),
         iconClass: Knockout.computed(function() {
             if (!showFeedbackIcon) {
