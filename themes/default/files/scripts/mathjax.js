@@ -1,6 +1,6 @@
 Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function() {
     var jme = Numbas.jme;
-    Numbas.display.MathJaxQueue = MathJax.Callback.Queue(MathJax.Hub.Register.StartupHook('End',{}));
+    Numbas.display.MathJaxQueue = MathJax.Hub.queue;
     MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
         var elem = message[1];
         var contexts = [];
