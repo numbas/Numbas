@@ -160,6 +160,10 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
  *
  * @event Numbas.Question#variablesGenerated
  */
+/** The question advice has been shown to the student.
+ *
+ * @event Numbas.Question#adviceDisplayed
+ */
 /** The question is fully loaded and ready to use.
  *
  * @event Numbas.Question#ready
@@ -908,6 +912,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(!Numbas.is_instructor && this.exam && !this.exam.settings.reviewShowAdvice) {
             return;
         }
+        this.signals.trigger('adviceDisplayed');
         this.adviceDisplayed = true;
         this.display && this.display.showAdvice(true);
         if(this.store && !dontStore) {
