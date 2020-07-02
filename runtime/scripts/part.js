@@ -463,7 +463,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit};';
+            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit, values: {}, script_result: {states: {}, state_valid: {mark: true, interpreted_answer: true}, values: {}, state_errors: {}}};';
         }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
