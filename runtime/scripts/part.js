@@ -1032,6 +1032,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 this.setWarnings(result.warnings);
                 this.markingFeedback = result.markingFeedback.slice();
                 this.finalised_result = result.finalised_result;
+                this.adaptiveMarkingUsed = result.adaptiveMarkingUsed;
                 this.marking_values = result.values;
                 this.credit = result.credit;
                 this.answered = result.answered;

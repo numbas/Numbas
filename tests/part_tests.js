@@ -492,6 +492,21 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
     );
 
     question_test(
+        "Adaptive marking penalty",
+        {"name":"adaptive marking penalty","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"1","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":false,"customName":"","marks":"2","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[{"variable":"a","part":"p0","must_go_first":false}],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":"1","exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p0 = q.getPart('p0');
+            var p1 = q.getPart('p1');
+            p0.storeAnswer('2');
+            p0.submit();
+            p1.storeAnswer('2');
+            p1.submit();
+            assert.equal(p1.score,1,'Adaptive marking penalty applied');
+        }
+    );
+
+
+    question_test(
         "Catch error in a marking script",
         {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]},
         function() {},
