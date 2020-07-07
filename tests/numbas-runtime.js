@@ -12291,6 +12291,11 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
     return {tok:tree.tok, args: args};
 }
 
+newBuiltin('enumerate',[TList],TList,function(list) {
+    return list.map(function(v,i) {
+        return new TList([new TInt(i),v]);
+    });
+});
 
 
 /** Is the given token the value `true`?
@@ -18749,16 +18754,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     p.applied = false;
                 });
                 this.allParts().forEach(function(part) {
-                    if(part.type=='gapfill') {
-                        return;
-                    }
-                    var objective = q.getObjective(part.settings.exploreObjective);
-                    if(!objective) {
-                        return;
-                    }
-                    objective.score += part.score;
-                    objective.answered = objective.answered || part.answered;
-
                     part.nextParts.forEach(function(np) {
                         if(np.instance) {
                             var penalty = q.getPenalty(np.penalty);
@@ -18768,6 +18763,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                             }
                         }
                     });
+
+                    var objective = q.getObjective(part.settings.exploreObjective);
+                    if(!objective) {
+                        return;
+                    }
+                    objective.score += part.score;
+                    objective.answered = objective.answered || part.answered;
+
                 });
                 this.objectives.forEach(function(o) {
                     o.score = Math.min(o.limit,o.score);

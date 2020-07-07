@@ -17240,6 +17240,11 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
     return {tok:tree.tok, args: args};
 }
 
+newBuiltin('enumerate',[TList],TList,function(list) {
+    return list.map(function(v,i) {
+        return new TList([new TInt(i),v]);
+    });
+});
 
 
 /** Is the given token the value `true`?
