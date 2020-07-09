@@ -519,7 +519,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 e.question_groups[i].questionSubset = subset;
                 numQuestions += subset.length;
             });
-            this.questionGroupOrder = suspendData.questionGroupOrder.slice();
+            if(suspendData.questionGroupOrder) {
+                this.questionGroupOrder = suspendData.questionGroupOrder.slice();
+            } else {
+                this.questionGroupOrder = Numbas.math.range(this.question_groups.length);
+            }
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
