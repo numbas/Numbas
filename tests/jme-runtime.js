@@ -18808,7 +18808,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
                 }
             }
         }
-        if(n<0)
+        if(n<0 && out!='0')
             out='-'+out;
         switch(piD)
         {
@@ -19402,7 +19402,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
             out = Math.abs(f[0]).toString();
         else
             out = f[0]+'/'+f[1];
-        if(n<0)
+        if(n<0 && out!='0')
             out='-'+out;
         switch(piD)
         {

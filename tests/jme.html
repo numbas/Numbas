@@ -1629,6 +1629,8 @@
                     var tree = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("1/c"))');
                     assert.equal(Numbas.jme.display.texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
                     assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
+
+                    assert.equal(Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
                 });
 
 				QUnit.test('expression to LaTeX', function(assert) {
