@@ -218,7 +218,7 @@ Numbas.runImmediately = function(deps,fn) {
         }
     });
     if(missing_dependencies.length) {
-        console.log(deps.filter(function(r){return scriptreqs[r].executed}));
+        console.log(deps.filter(function(r){return scriptreqs[r] ? scriptreqs[r].executed : true}));
         throw(new Error("Can't run because the following dependencies have not run: "+missing_dependencies.join(', ')));
     }
     fn();
@@ -11508,7 +11508,8 @@ var displayFlags = jme.rules.displayFlags = {
     rowvector: undefined,
     alwaystimes: undefined,
     mixedfractions: undefined,
-    flatfractions: undefined
+    flatfractions: undefined,
+    barematrices: undefined
 };
 /** Flags used in JME simplification rulesets
  *
@@ -11517,7 +11518,9 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
+ * @property {boolean} mixedfractions - Show top-heavy fractions as mixed fractions, e.g. 3 3/4?
  * @property {boolean} flatfractions - Display fractions horizontally?
+ * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules.
@@ -18642,7 +18645,7 @@ var texOps = jme.display.texOps = {
             return texMatrix(thing,settings,true);
     }),
     'matrix': (function(thing,texArgs,settings) {
-        return texMatrix(thing,settings,true);
+        return texMatrix(thing,settings,!settings.barematrices);
     }),
     'listval': (function(thing,texArgs) {
         return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
@@ -19186,7 +19189,11 @@ var typeToTeX = jme.display.typeToTeX = {
                 + ' \\right )' );
     },
     matrix: function(thing,tok,texArgs,settings) {
-        return '\\left ( '+texMatrix(tok.value,settings)+' \\right )';
+        var m = texMatrix(tok.value,settings);
+        if(!settings.barematrices) {
+            m = '\\left ( ' + m + ' \\right )';
+        }
+        return m;
     },
     name: function(thing,tok,texArgs,settings) {
         return texName(tok.nameWithoutAnnotation,tok.annotation);
@@ -19249,11 +19256,17 @@ function flatten(tree,op) {
 
 /** A dictionary of settings for {@link Numbas.jme.display.texify}.
  *
+ * @see Numbas.jme.rules.displayFlags
+ *
  * @typedef Numbas.jme.display.texify_settings
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
+ * @property {boolean} rowvector - Display vectors as a horizontal list of components?
+ * @property {boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
+ * @property {boolean} mixedfractions - Show top-heavy fractions as mixed fractions, e.g. 3 3/4?
+ * @property {boolean} flatfractions - Display fractions horizontally?
+ * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @property {boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
- * @property {boolean} rowvector - Display vectors as a horizontal list of components?
  */
 
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
