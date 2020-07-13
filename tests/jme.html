@@ -1484,6 +1484,15 @@
                     assert.equal(Numbas.jme.subvars('{1-0.9-0.1}',Numbas.jme.builtinScope),'(0)','numbers very close to zero rounded to zero');
 				});
 
+                QUnit.test('token to display string',function(assert) {
+                    var scope = Numbas.jme.builtinScope;
+                    assert.equal(Numbas.jme.tokenToDisplayString(scope.evaluate('3-9*(11*(1/33))')),'0','very very nearly 0');
+                    assert.equal(Numbas.jme.tokenToDisplayString(scope.evaluate('vector(3)-9*(11*vector(1/33))')),'vector(0)','very nearly zero vector')
+                    assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(pi)')),'vector(pi)','pi vector')
+                    assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(pi/7)')),'vector(0.4487989505)','vector(pi/7)')
+                    assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(5pi)')),'vector(5 pi)','vector(5pi)')
+                });
+
 				QUnit.test('tree to JME', function(assert) {
 					function simplifyExpression(expr,rules) {
 						return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);

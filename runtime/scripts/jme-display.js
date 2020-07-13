@@ -750,7 +750,7 @@ function texRealNumber(n, settings)
             return special;
         }
         var piD;
-        if((piD = math.piDegree(n)) > 0)
+        if((piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
@@ -1331,7 +1331,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
             return special;
         }
         var piD;
-        if((piD = math.piDegree(n)) > 0)
+        if((piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out;
         if(settings.niceNumber===false) {

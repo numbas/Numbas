@@ -930,7 +930,7 @@ var doc_tests =
                 "examples": [
                     {
                         "in": "angle(vector(1,0),vector(0,1))",
-                        "out": "0.5 pi"
+                        "out": "1.5707963268"
                     }
                 ]
             },

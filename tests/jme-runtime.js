@@ -2447,26 +2447,31 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return !math.eq(a,b);
     },
     /** If `n` can be written in the form `a*pi^n`, with `a` an integer, return the biggest possible `n`, otherwise return `0`.
-     * Also returns `1` for `n` of the form `pi/a`, with `a` an integer.
+     * Also returns `1` for `n` of the form `pi/k`, with `k` an integer < 1000 if the parameter `allowFractions` is `true`.
      *
      * @param {number} n
+     * @param {boolean} [allowFractions=true] - return 1 if `n` is of the form `pi/k`, for some integer `k < 1000`.
      * @returns {number}
      */
-    piDegree: function(n)
+    piDegree: function(n,allowFractions)
     {
+        if(allowFractions===undefined) {
+            allowFractions = true;
+        }
+
         n = Math.abs(n);
         if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         var degree,a;
 
-        /* Check for pi/k, where k is an integer */
+        /* Check for pi/k, where k is an integer < 1000 */
         a = Math.PI/n;
-        if(Math.abs(a-math.round(a))<0.0000000001) {
+        if(allowFractions && a<1000 && Math.abs(a-math.round(a))<0.0000000001) {
             return 1;
         }
 
         for(degree=1; (a=n/Math.pow(Math.PI,degree))>1 && (Math.abs(a-math.round(a))>0.00000001 && Math.abs(1/a-math.round(1/a))>0.00000001); degree++) {}
-        return( a>=1 ? degree : 0 );
+        return a>=1 ? degree : 0;
     },
     /** Add the given number of zero digits to a string representation of a number.
      *
@@ -2549,7 +2554,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 return '-infinity';
             }
             var piD = 0;
-            if(options.precisionType === undefined && (piD = math.piDegree(n)) > 0)
+            if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
                 n /= Math.pow(Math.PI,piD);
             var out;
             if(options.style=='scientific') {
@@ -18867,7 +18872,7 @@ function texRealNumber(n, settings)
             return special;
         }
         var piD;
-        if((piD = math.piDegree(n)) > 0)
+        if((piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out = math.niceNumber(n);
         if(out.length>20) {
@@ -19448,7 +19453,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
             return special;
         }
         var piD;
-        if((piD = math.piDegree(n)) > 0)
+        if((piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI,piD);
         var out;
         if(settings.niceNumber===false) {
