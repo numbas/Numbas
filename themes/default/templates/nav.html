@@ -76,9 +76,10 @@
             </button>
 
             <ul class="nav">
-                <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.backToMenu"><span class="sr-only" data-localise="control.back to menu"></span>&larr;</button></li>
+                <!-- ko if: exam.settings.numQuestions>1 -->
                 <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
                 <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
+                <!-- /ko -->
                 <li><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
                 <li>	
                     <div class="titleBits" data-bind="with: currentQuestion">

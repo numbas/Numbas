@@ -160,7 +160,7 @@ img, object[type*="image"] {
 	#questionContainer {
 		margin-top: 51px;
 	}
-	.show-nav #questionContainer, .show-nav > footer {
+	.show-nav.navigate-sequence #questionContainer, .show-nav.navigate-sequence > footer {
 		margin-left: auto;
 	}
 }
