@@ -1,8 +1,8 @@
 regex_match (Match the student's answer with the correct answer, interpreted as a regular expression):
-  match_regex(settings["correctAnswer"],studentAnswer)
+  match_regex(settings["correctAnswer"],studentAnswer,"u")
 
 regex_match_case_insensitive (Match the student's answer with the correct answer, interpreted as a case-insensitive regular expression):
-  match_regex(settings["correctAnswer"],studentAnswer,"i")
+  match_regex(settings["correctAnswer"],studentAnswer,"iu")
 
 exact_match (Is the student's answer exactly the correct answer?):
   studentAnswer=settings["correctAnswer"]

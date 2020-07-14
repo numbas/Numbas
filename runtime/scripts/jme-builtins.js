@@ -324,7 +324,7 @@ newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(s
 newBuiltin('lpad',[TString,TNum,TString], TString, util.lpad);
 newBuiltin('rpad',[TString,TNum,TString], TString, util.rpad);
 newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
-    var re = new RegExp(pattern);
+    var re = new RegExp(pattern,'u');
     var m = re.exec(str);
     return m || [];
 },{unwrapValues: true});
@@ -335,7 +335,7 @@ newBuiltin('match_regex',[TString,TString,TString],TList,function(pattern,str,fl
 },{unwrapValues: true});
 
 newBuiltin('split_regex',[TString,TString],TList, function(str,delimiter) {
-    return str.split(new RegExp(delimiter)).map(function(s){return new TString(s)});
+    return str.split(new RegExp(delimiter,'u')).map(function(s){return new TString(s)});
 });
 newBuiltin('split_regex',[TString,TString,TString],TList, function(str,delimiter,flags) {
     return str.split(new RegExp(delimiter,flags)).map(function(s){return new TString(s)});
