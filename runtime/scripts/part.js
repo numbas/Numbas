@@ -1160,6 +1160,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @returns {Numbas.parts.markAlternatives_result}
      */
     markAlternatives: function(scope,feedback) {
+        var part = this;
+
         /** Mark against the given alternative.
          *
          * @param {Numbas.parts.Part} alt
@@ -1176,7 +1178,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 values = result.values;
                 script_result = result.script_result
             } catch(e) {
-                this.giveWarning(e.message);
+                part.giveWarning(e.message);
             }
             return {finalised_result: finalised_result, values: values, credit: alt.credit, script_result: script_result};
         }
