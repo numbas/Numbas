@@ -1445,33 +1445,34 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var t = 0;
         for(var i=0;i<part.markingFeedback.length;i++) {
             var action = part.markingFeedback[i];
-            if(action.credit===undefined) {
-                continue;
-            }
-            var change = action.credit*part.marks;
-            var credit_change = action.credit;
-            if(action.gap!=undefined) {
-                change *= part.gaps[action.gap].marks/part.marks;
-                credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
-            }
-            var ot = t;
-            t += change;
-            change = t-ot;
-            if(action.message===undefined) {
-                action.message = '';
-            }
-            if(change!=0) {
-                if(util.isNonemptyHTML(action.message)) {
-                    action.message += '\n\n';
+            var credit_change = 0;
+            var change_desc;
+            if(action.credit!==undefined) {
+                var change = action.credit*part.marks;
+                credit_change = action.credit;
+                if(action.gap!=undefined) {
+                    change *= part.gaps[action.gap].marks/part.marks;
+                    credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
                 }
-                var marks = Math.abs(change);
-                if(change>0) {
-                    action.message += R('feedback.you were awarded',{count:marks});
-                } else if(change<0) {
-                    action.message += R('feedback.taken away',{count:marks});
+                var ot = t;
+                t += change;
+                change = t-ot;
+                if(action.message===undefined) {
+                    action.message = '';
+                }
+                if(change!=0) {
+                    if(util.isNonemptyHTML(action.message)) {
+                        action.message += '\n\n';
+                    }
+                    var marks = Math.abs(change);
+                    if(change>0) {
+                        action.message += R('feedback.you were awarded',{count:marks});
+                    } else if(change<0) {
+                        action.message += R('feedback.taken away',{count:marks});
+                    }
                 }
             }
-            var change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
+            change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
             switch(action.reason) {
                 case 'correct':
                     change_desc = 'positive';

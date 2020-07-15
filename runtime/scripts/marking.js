@@ -85,8 +85,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message) {
-            return {op: FeedbackOps.FEEDBACK, message: message}
+        feedback: function(message,reason) {
+            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason}
         },
         concat: function(messages, scale) {
             return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
@@ -208,6 +208,18 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return {
             return: message,
             state: [feedback.feedback(message)]
+        }
+    }));
+    state_functions.push(state_fn('positive_feedback',[TString],TString,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'correct')]
+        }
+    }));
+    state_functions.push(state_fn('negative_feedback',[TString],TString,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'incorrect')]
         }
     }));
     state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
