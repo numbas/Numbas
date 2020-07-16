@@ -32,8 +32,9 @@ Numbas.extensions = {};
  *
  * @param {string} msg - Text to display.
  * @param {boolean} [noStack=false] - Don't show the stack trace.
+ * @param {Error} error
  */
-Numbas.debug = function(msg,noStack)
+Numbas.debug = function(msg,noStack,error)
 {
     if(window.console)
     {
@@ -41,7 +42,11 @@ Numbas.debug = function(msg,noStack)
         if(e.stack && !noStack)
         {
             var words= e.stack.split('\n')[2];
-            console.error(msg," "+words);
+            if(error) {
+                console.error(msg,error);
+            } else {
+                console.error(msg," "+words);
+            }
         }
         else
         {
@@ -57,7 +62,7 @@ Numbas.showError = function(e)
 {
     var message = (e || e.message)+'';
     message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
-    Numbas.debug(message);
+    Numbas.debug(message,false,e);
     Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };

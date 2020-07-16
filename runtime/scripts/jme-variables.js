@@ -420,7 +420,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                try {
+                    var tree = jme.compile(bits[i]);
+                } catch(e) {
+                    throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
+                }
+                var v = scope.evaluate(tree);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
                 }
@@ -471,15 +476,20 @@ DOMcontentsubber.prototype = {
      * @param {Element} element
      */
     subvars: function(element) {
-        switch(element.nodeType) {
-            case 1: //element
-                this.sub_element(element);
-                break;
-            case 3: //text
-                this.sub_text(element);
-                break;
-            default:
-                return;
+        try {
+            switch(element.nodeType) {
+                case 1: //element
+                    this.sub_element(element);
+                    break;
+                case 3: //text
+                    this.sub_text(element);
+                    break;
+                default:
+                    return;
+            }
+        } catch(error) {
+            error.element = error.element || element;
+            throw(error);
         }
     },
 

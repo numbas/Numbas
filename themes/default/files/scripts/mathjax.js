@@ -7,6 +7,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
         while(elem.parentElement) {
             var context = Numbas.display.getLocalisedAttribute(elem,'data-jme-context-description');
             if(context) {
+                console.log(elem);
                 contexts.splice(0,0,context);
             }
             elem = elem.parentElement;

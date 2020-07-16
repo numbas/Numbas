@@ -527,7 +527,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i]),scope);
+                try {
+                    var tree = jme.compile(bits[i]);
+                } catch(e) {
+                    throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
+                }
+                var v = scope.evaluate(tree);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }

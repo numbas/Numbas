@@ -466,7 +466,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          * @param {string} name
          */
         setName: function(name) {
-            this.name(name);
+            this.name(name || this.part.name);
         },
         /** Show a warning message about this part.
          *

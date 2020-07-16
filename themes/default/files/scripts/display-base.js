@@ -172,7 +172,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     display.failedMathJax = true;
                     display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
                 } else {
-                    Numbas.showError(e);
+                    Numbas.schedule.halt(e);
                 }
             }
         },1);
@@ -203,17 +203,36 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         d.innerHTML = htmlString;
         html = d.firstElementChild;
         display.setJMEScope(html,scope);
-        html.setAttribute('data-jme-context-description',contextDescription);
-        var promise = new Promise(function(resolve, reject) {
-            try {
+        if(!html.getAttribute('data-jme-context-description')) {
+            html.setAttribute('data-jme-context-description',contextDescription);
+        }
+        var promise = new Promise(
+            function(resolve, reject) {
                 Numbas.jme.variables.DOMcontentsubvars(html,scope);
-            } catch(e) {
-                throw(new Error(contextDescription+': '+e.message));
-            }
-            // make mathjax process the question text (render the maths)
-            Numbas.display.typeset(html);
-            resolve(html);
-        });
+                Numbas.display.typeset(html);
+                resolve(html);
+            })
+            .catch(function(error) {
+                var errorContextDescriptionBits = [];
+                var errorContextDescription;
+                if(error.element) {
+                    var elem = error.element;
+                    while(elem) {
+                        if(elem.nodeType==1) {
+                            var desc = Numbas.display.getLocalisedAttribute(elem,'data-jme-context-description');
+                            if(desc) {
+                                errorContextDescriptionBits.splice(0,0,desc);
+                            }
+                        }
+                        elem = elem.parentElement;
+                    }
+                    errorContextDescription = errorContextDescriptionBits.join(' ');
+                } else {
+                    errorContextDescription = contextDescription;
+                }
+                Numbas.schedule.halt(new Numbas.Error('display.error making html',{contextDescription: errorContextDescription, message: error.message},error));
+            })
+        ;
 
         return promise;
     },
@@ -226,7 +245,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     die: function(e) {
         var message = (e || e.message)+'';
         var stack = e.stack.replace(/\n/g,'<br>\n');
-        Numbas.debug(message+' <br> '+stack);
+        Numbas.debug(message,false,e);
         //hide all the non-error stuff
         $('.mainDisplay > *,#loading,#everything').hide();
         //show the error stuff

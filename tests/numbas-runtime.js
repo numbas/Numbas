@@ -34,8 +34,9 @@ Numbas.extensions = {};
  *
  * @param {string} msg - Text to display.
  * @param {boolean} [noStack=false] - Don't show the stack trace.
+ * @param {Error} error
  */
-Numbas.debug = function(msg,noStack)
+Numbas.debug = function(msg,noStack,error)
 {
     if(window.console)
     {
@@ -43,7 +44,11 @@ Numbas.debug = function(msg,noStack)
         if(e.stack && !noStack)
         {
             var words= e.stack.split('\n')[2];
-            console.error(msg," "+words);
+            if(error) {
+                console.error(msg,error);
+            } else {
+                console.error(msg," "+words);
+            }
         }
         else
         {
@@ -59,7 +64,7 @@ Numbas.showError = function(e)
 {
     var message = (e || e.message)+'';
     message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
-    Numbas.debug(message);
+    Numbas.debug(message,false,e);
     Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };
@@ -7406,7 +7411,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i]),scope);
+                try {
+                    var tree = jme.compile(bits[i]);
+                } catch(e) {
+                    throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
+                }
+                var v = scope.evaluate(tree);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
@@ -15431,7 +15441,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         {
             if(i % 2)
             {
-                var v = jme.evaluate(jme.compile(bits[i],scope),scope);
+                try {
+                    var tree = jme.compile(bits[i]);
+                } catch(e) {
+                    throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
+                }
+                var v = scope.evaluate(tree);
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
                 }
@@ -15482,15 +15497,20 @@ DOMcontentsubber.prototype = {
      * @param {Element} element
      */
     subvars: function(element) {
-        switch(element.nodeType) {
-            case 1: //element
-                this.sub_element(element);
-                break;
-            case 3: //text
-                this.sub_text(element);
-                break;
-            default:
-                return;
+        try {
+            switch(element.nodeType) {
+                case 1: //element
+                    this.sub_element(element);
+                    break;
+                case 3: //text
+                    this.sub_text(element);
+                    break;
+                default:
+                    return;
+            }
+        } catch(error) {
+            error.element = error.element || element;
+            throw(error);
         }
     },
 

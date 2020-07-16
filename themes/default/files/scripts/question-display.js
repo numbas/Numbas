@@ -12,6 +12,8 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         var qd = this;
         this.question = q;
         var exam = q.exam;
+        
+        this.contextDescription = R('question.header',{number:q.number+1});
 
         /** Does this question have non-empty statement text?
          *
@@ -342,7 +344,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 q.xml, 
                 Numbas.xml.templates.question, 
                 q.scope,
-                R('question.header',{number:q.number+1})
+                qd.contextDescription
             );
 
             promise.then(function(html) {
@@ -378,7 +380,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                     p.xml, 
                     Numbas.xml.templates.part, 
                     p.getScope(), 
-                    p.display.name()
+                    qd.contextDescription+' '+(p.display.name() || p.name)
                 );
                 promise.then(function(html) {
                     p.display.html = html;
