@@ -575,6 +575,9 @@ table {
 .partheader {
 	margin-left: -1em;
 }
+.step .partheader {
+    margin-left: 0;
+}
 
 .part.type-gapfill > .prompt .part {
 	display: inline-block;
