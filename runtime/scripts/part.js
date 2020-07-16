@@ -351,7 +351,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var scope = this.getScope();
         this.nextParts.forEach(function(np) {
             if(np.penaltyAmountString!='') {
-                np.penaltyAmount = scope.evaluate(np.penaltyAmountString).value;
+                np.penaltyAmount = np.penalty ? scope.evaluate(np.penaltyAmountString).value : 0;
             }
         });
     },

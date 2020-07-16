@@ -601,15 +601,16 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         updateNextParts: function() {
             var p = this.part;
             this.nextParts(p.availableNextParts().map(function(np) {
+                var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
                 var label = np.label;
-                if(!np.instance && np.penaltyAmount!=0) {
-                    label += ' '+R('part.next part.penalty amount',{count:np.penaltyAmount});
+                if(!np.instance && penaltyAmount!=0) {
+                    label += ' '+R('part.next part.penalty amount',{count:penaltyAmount});
                 }
                 return {
                     label: label,
                     made: np.instance !== null,
                     instance: np.instance !== null ? np.instance.display : null,
-                    penaltyAmount: np.penaltyAmount,
+                    penaltyAmount: penaltyAmount,
                     lockAfterLeaving: np.lockAfterLeaving,
                     select: function() {
                         if(np.instance) {
