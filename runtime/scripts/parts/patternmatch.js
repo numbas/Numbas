@@ -119,9 +119,12 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         switch(this.settings.matchMode) {
             case 'regex':
                 settings.correctAnswer = '^'+settings.correctAnswer+'$';
+                settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+                break;
+            case 'exact':
+                settings.displayAnswer = settings.correctAnswer;
                 break;
         }
-        settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
         return settings.displayAnswer;
     },
     /** Save a copy of the student's answer as entered on the page, for use in marking.
