@@ -869,7 +869,7 @@ class Part(object):
 class JMEPart(Part):
     kind = 'jme'
     answer = ''
-    answerSimplification = 'basic,unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers'
+    answerSimplification = ''
     showPreview = True
     checkingType = 'RelDiff'
     checkingAccuracy = 0        #real default value depends on checkingtype - 0.0001 for difference ones, 5 for no. of digits ones

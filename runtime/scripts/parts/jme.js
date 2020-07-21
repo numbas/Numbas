@@ -161,6 +161,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {
+        if(!this.settings.answerSimplificationString.trim()) {
+            this.settings.answerSimplificationString = 'basic,unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers';
+        }
         this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
     },
