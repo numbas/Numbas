@@ -313,7 +313,12 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             qd.resolve_html_promise = resolve;
         });
         this.html_promise.then(function(html) {
-            q.signals.trigger('HTMLAttached');
+            q.signals.trigger('mainHTMLAttached');
+        });
+        q.signals.on('partsGenerated',function() {
+            Promise.all([qd.html_promise].concat(qd.parts().map(function(pd) { return pd.html_promise; }))).then(function() {
+                q.signals.trigger('HTMLAttached');
+            })
         });
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
@@ -375,7 +380,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         addPart: function(p) {
             var qd = this;
             this.updateParts();
-            this.question.signals.on('HTMLAttached',function() {
+            this.question.signals.on('mainHTMLAttached',function() {
                 var promise = display.makeHTMLFromXML(
                     p.xml, 
                     Numbas.xml.templates.part, 
@@ -396,7 +401,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         removePart: function(p) {
             var qd = this;
             this.updateParts();
-            this.question.signals.on('HTMLAttached',function() {
+            this.question.signals.on('mainHTMLAttached',function() {
                 p.display.html_promise.then(function(html) {
                     html.remove();
                 });

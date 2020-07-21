@@ -458,6 +458,10 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
         pd.html_promise = new Promise(function(resolve) {
             pd.resolve_html_promise = resolve;
         });
+
+        pd.html_promise.then(function(html) {
+            p.signals.trigger('HTMLAttached');
+        });
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {
