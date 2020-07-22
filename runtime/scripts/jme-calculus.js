@@ -17,7 +17,7 @@ var differentiation_rules = [
     ['+?;a','$diff(a)'],
     ['-?;a','-$diff(a)'],
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
-    ['?;u * ?;v','u*$diff(v) + v*$diff(u)'],
+    ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
     ['(`+-$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
     ['?;a^(`+-$n);p','p*$diff(a)*a^(p-1)'],
@@ -136,15 +136,18 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         if(jme.isType(tok,'number')) {
             return {tok: new TNum(0)};
         } else if(jme.isType(tok,'name')) {
-            return {tok: new TNum(tok.name==x ? 1 : 0)};
+            var nameTok = jme.castToType(tok,'name');
+            return {tok: new TNum(nameTok.name==x ? 1 : 0)};
         } else if(jme.isType(tok,'list')) {
+            var listTok = jme.castToType(tok,'list');
             if(tree.args) {
                 return distribute_differentiation(tree);
             } else {
-                return {tok: new jme.types.TList(tree.tok.value.map(function(v) { return new TNum(0); }))};
+                return {tok: new jme.types.TList(listTok.value.map(function(v) { return new TNum(0); }))};
             }
         } else if(jme.isType(tok,'expression')) {
-            return base_differentiate(tok.tree);
+            var exprTok = jme.castToType(tok,'expression');
+            return base_differentiate(exprTok.tree);
         } else if(jme.isType(tok,'op') || jme.isType(tok,'function')) {
             if(tree.args.length==1 && tok.name in calculus.derivatives) {
                 var res = function_derivative_rule.replace(tree,scope);
