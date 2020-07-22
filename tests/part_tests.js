@@ -453,6 +453,22 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(p2.creditFraction.toFloat(),0.5,'part.creditFraction is 0.5 as well');
     });
 
+    QUnit.module('Custom marking algorithms');
+    question_test(
+        'Error in mark note',
+        {"name":"marking algorithm error display","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"q:\n  a\n\nmark:\n  apply(z)","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"x","value":""}]}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p = q.getPart('p0');
+            p.storeAnswer('x');
+            p.submit();
+            assert.notOk(p.marking_result.finalised_result.valid);
+        },
+        function(err) {
+            console.error(err);
+        }
+    );
+
+
     QUnit.module('Question');
     question_test(
         'Question',

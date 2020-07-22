@@ -17072,8 +17072,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
 
         var res = mark_alternative(this);
-        res.values['used_alternative'] = new Numbas.jme.types.TNothing()
-        res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
+        if(res.valid) {
+            res.values['used_alternative'] = new Numbas.jme.types.TNothing()
+            res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
+        }
 
         if(this.alternatives.length) {
             var best_alternative = null;
@@ -17134,10 +17136,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         }
 
-        res.script_result.states['used_alternative'] = [];
-        res.script_result.states['used_alternative_name'] = [];
-        res.script_result.state_valid['used_alternative'] = true;
-        res.script_result.state_valid['used_alternative_name'] = true;
+        if(res.valid) {
+            res.script_result.states['used_alternative'] = [];
+            res.script_result.states['used_alternative_name'] = [];
+            res.script_result.state_valid['used_alternative'] = true;
+            res.script_result.state_valid['used_alternative_name'] = true;
+        }
 
         return {
             result: res,
@@ -27789,6 +27793,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {
+        if(!this.settings.answerSimplificationString.trim()) {
+            this.settings.answerSimplificationString = 'basic,unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers';
+        }
         this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
     },

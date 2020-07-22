@@ -1192,8 +1192,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
 
         var res = mark_alternative(this);
-        res.values['used_alternative'] = new Numbas.jme.types.TNothing()
-        res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
+        if(res.valid) {
+            res.values['used_alternative'] = new Numbas.jme.types.TNothing()
+            res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
+        }
 
         if(this.alternatives.length) {
             var best_alternative = null;
@@ -1254,10 +1256,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         }
 
-        res.script_result.states['used_alternative'] = [];
-        res.script_result.states['used_alternative_name'] = [];
-        res.script_result.state_valid['used_alternative'] = true;
-        res.script_result.state_valid['used_alternative_name'] = true;
+        if(res.valid) {
+            res.script_result.states['used_alternative'] = [];
+            res.script_result.states['used_alternative_name'] = [];
+            res.script_result.state_valid['used_alternative'] = true;
+            res.script_result.state_valid['used_alternative_name'] = true;
+        }
 
         return {
             result: res,
