@@ -1062,6 +1062,25 @@
                     assert.equal(evaluate('table([["x","y"],["3",1]])').value.html(),"<tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table');
                     assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').value.html(),"<thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table with headers');
                 });
+
+                QUnit.test('Calculus', function(assert) {
+                    function diff(expr) {
+                        return jme.display.treeToJME({tok:evaluate('diff(expression("'+expr+'"),"x")')});
+                    }
+                    assert.equal(diff('0'),'0','0');
+                    assert.equal(diff('1'),'0','1');
+                    assert.equal(diff('x'),'1','x');
+                    assert.equal(diff('x^2'),'2x','x^2');
+                    assert.equal(diff('2x^5'),'10*x^4','2x^5');
+                    assert.equal(diff('x+x^2'),'1 + 2x','x+x^2');
+                    assert.equal(diff('x^2-x'),'2x - 1','x^2-x');
+                    assert.equal(diff('sin(x)/x'),'(x*cos(x) - sin(x))/x^2','sin(x)/x');
+                    assert.equal(diff('x*x'),'2x','x');
+                    assert.equal(diff('e^x'),'e^x','e^x');
+                    assert.equal(diff('2^x'),'ln(2)*2^x','2^x');
+                    assert.equal(diff('sin(x)^2'),'2*cos(x)*sin(x)','sin(x)^2');
+                    assert.equal(diff('sin(x^2)'),'2x*cos(x^2)','x');
+                });
 				
 				QUnit.module('Scopes');
 

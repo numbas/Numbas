@@ -133,21 +133,19 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
     function base_differentiate(tree) {
         var tok = tree.tok;
 
-        switch(tok.type) {
-        case 'number':
+        if(jme.isType(tok,'number')) {
             return {tok: new TNum(0)};
-        case 'name':
+        } else if(jme.isType(tok,'name')) {
             return {tok: new TNum(tok.name==x ? 1 : 0)};
-        case 'list':
+        } else if(jme.isType(tok,'list')) {
             if(tree.args) {
                 return distribute_differentiation(tree);
             } else {
                 return {tok: new jme.types.TList(tree.tok.value.map(function(v) { return new TNum(0); }))};
             }
-        case 'expression':
+        } else if(jme.isType(tok,'expression')) {
             return base_differentiate(tok.tree);
-        case 'op':
-        case 'function':
+        } else if(jme.isType(tok,'op') || jme.isType(tok,'function')) {
             if(tree.args.length==1 && tok.name in calculus.derivatives) {
                 var res = function_derivative_rule.replace(tree,scope);
                 return apply_diff(res.expression);
@@ -155,7 +153,6 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
             if(calculus.distributing_derivatives[tok.name]) {
                 return distribute_differentiation(tree);
             }
-            break;
         }
 
 
