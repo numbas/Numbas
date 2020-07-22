@@ -47,7 +47,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var lastValue = this.input();
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(v.value!=this.input()) {
+                    if(v && v.value!=this.input()) {
                         this.input(v.value);
                     }
                 },this),
@@ -113,7 +113,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             },this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(v.value==this.result().value) {
+                    if(!v || v.value==this.result().value) {
                         return;
                     }
                     var s = cleanNumber(v.value);
@@ -201,7 +201,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             },this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(v.value==this.result().value) {
+                    if(!v || v.value==this.result().value) {
                         return;
                     }
                     var s = cleanExpression(v.value);
@@ -320,7 +320,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             },this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(util.objects_equal(v.value,this.result().value)) {
+                    if(!v || util.objects_equal(v.value,this.result().value)) {
                         return;
                     }
                     if(v.valid) {
@@ -598,7 +598,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             },this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(!v.valid) {
+                    if(!v || !v.valid) {
                         this.choice(null);
                         return;
                     }
@@ -662,7 +662,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(!v.valid) {
+                    if(!v || !v.valid) {
                         this.choice(null);
                         return;
                     }
@@ -719,6 +719,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
+                    if(!v) {
+                        return;
+                    }
                     var value = v.value;
                     if(this.answerAsArray) {
                         value = value.map(function(row){ return row[0]; });
