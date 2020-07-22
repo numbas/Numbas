@@ -1064,22 +1064,31 @@
                 });
 
                 QUnit.test('Calculus', function(assert) {
-                    function diff(expr) {
-                        return jme.display.treeToJME({tok:evaluate('diff(expression("'+expr+'"),"x")')});
+                    function diff(expr,wrt) {
+                        wrt = wrt || 'x';
+                        return jme.display.treeToJME({tok:evaluate('diff(expression("'+expr+'"),"'+wrt+'")')});
                     }
-                    assert.equal(diff('0'),'0','0');
-                    assert.equal(diff('1'),'0','1');
-                    assert.equal(diff('x'),'1','x');
-                    assert.equal(diff('x^2'),'2x','x^2');
-                    assert.equal(diff('2x^5'),'10*x^4','2x^5');
-                    assert.equal(diff('x+x^2'),'1 + 2x','x+x^2');
-                    assert.equal(diff('x^2-x'),'2x - 1','x^2-x');
-                    assert.equal(diff('sin(x)/x'),'(x*cos(x) - sin(x))/x^2','sin(x)/x');
-                    assert.equal(diff('x*x'),'2x','x');
-                    assert.equal(diff('e^x'),'e^x','e^x');
-                    assert.equal(diff('2^x'),'ln(2)*2^x','2^x');
-                    assert.equal(diff('sin(x)^2'),'2*cos(x)*sin(x)','sin(x)^2');
-                    assert.equal(diff('sin(x^2)'),'2x*cos(x^2)','x');
+                    function diff_equals(expr,wrt,target) {
+                        assert.equal(diff(expr,wrt),target,'diff('+expr+', '+wrt+')');
+                    }
+                    diff_equals('0','x','0');
+                    diff_equals('1','x','0');
+                    diff_equals('x','x','1');
+                    diff_equals('x^2','x','2x');
+                    diff_equals('2x^5','x','10*x^4');
+                    diff_equals('x+x^2','x','1 + 2x');
+                    diff_equals('x^2-x','x','2x - 1');
+                    diff_equals('sin(x)/x','x','(x*cos(x) - sin(x))/x^2');
+                    diff_equals('x*x','x','2x');
+                    diff_equals('e^x','x','e^x');
+                    diff_equals('2^x','x','ln(2)*2^x');
+                    diff_equals('sin(x)^2','x','2*cos(x)*sin(x)');
+                    diff_equals('sin(x^2)','x','2x*cos(x^2)');
+                    diff_equals('x','y','0')
+                    diff_equals('y','y','1')
+                    diff_equals('x^3*y^2','y','2*x^3*y');
+                    diff_equals('cos(x)*y','y','cos(x)');
+                    diff_equals('x+y+x*y+y^2*x^2','y','1 + x + 2*x^2*y');
                 });
 				
 				QUnit.module('Scopes');
