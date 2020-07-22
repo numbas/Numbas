@@ -1278,6 +1278,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     markAgainstScope: function(scope,feedback) {
         var altres = this.markAlternatives(scope,feedback);
         var res = altres.result;
+        if(res.script_result.state_errors.mark) {
+            var message = R('part.marking.error in marking script',{message: res.script_result.state_errors.mark.message});
+            this.markingComment(message);
+            this.giveWarning(message);
+        }
 
         return {
             warnings: this.warnings.slice(),
@@ -1365,9 +1370,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             return;
         }
         var result = this.mark_answer(studentAnswer,scope);
-        var finalised_result = marking.finalise_state(result.states.mark);
-        this.apply_feedback(finalised_result);
-        this.interpretedStudentAnswer = result.values['interpreted_answer'];
+        if(!result.state_errors.mark) {
+            var finalised_result = marking.finalise_state(result.states.mark);
+            this.apply_feedback(finalised_result);
+            this.interpretedStudentAnswer = result.values['interpreted_answer'];
+        }
         return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
@@ -1531,9 +1538,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             );
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message}));
-        }
-        if(result.state_errors.mark) {
-            throw(result.state_errors.mark);
         }
         return result;
     },
