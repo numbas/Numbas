@@ -3166,6 +3166,7 @@ Numbas.locale = {
     "result.question review": "Review",
     "result.click a question to review": "Click on a question number to see how your answers were marked and, where available, full solutions.",
     "end.exam has finished": "The exam has finished. You may now close this window.",
+    "end.print": "Print your exam transcript",
     "control.confirm leave": "You haven't finished the exam.",
     "control.not all questions answered": "You have not completed every question in this exam.",
     "control.not all questions submitted": "You have made changes to one or more answers but not submitted them. Please check each question has been submitted.",
@@ -3454,7 +3455,8 @@ Numbas.locale = {
     "left brace": "{",
     "right brace": "}",
     "math.lt.order complex numbers": "Can't order complex numbers"
-}}
+}
+}
 ,
         "ar-sa": {translation: 
 {
