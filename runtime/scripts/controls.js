@@ -61,14 +61,6 @@ Numbas.controls = /** @lends Numbas.controls */ {
             Numbas.exam.showInfoPage('result');
         });
     },
-    /** Exit the exam - really this just shows the "You can close the browser" page.
-     *
-     * @see Numbas.Exam#exit
-     */
-    exitExam: function()
-    {
-        job(Numbas.exam.exit,Numbas.exam);
-    },
     /** Go back to the question menu.
      */
     backToMenu: function() {

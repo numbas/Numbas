@@ -106,6 +106,14 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.showActualMark = Knockout.computed(function() {
             return e.settings.showActualMark || (this.revealed() && e.settings.reviewShowScore) || Numbas.is_instructor;
         },this);
+        /** Label to use for the "print your transcript" button on the results page.
+         *
+         * @member {observable|string} printLabel
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.printLabel = Knockout.computed(function() {
+            return R(this.showActualMark() ? "result.print" : "end.print");
+        },this);
         /** The total marks available for the exam.
          *
          * @see Numbas.Exam#mark
@@ -399,7 +407,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             if(display.carouselGo)
                 display.carouselGo(exam.currentQuestion.number-1,300);
         },
-        /** Show an info page (one of the front page, pause , results, or exit).
+        /** Show an info page (one of the front page, pause, or results).
          *
          * @param {string} page - Name of the page to show.
          * @memberof Numbas.display.ExamDisplay
@@ -426,10 +434,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 break;
             case "suspend":
                 this.showScore();
-                break;
-            case "exit":
-                this.startTime(exam.start);
-                this.endTime(exam.stop);
                 break;
             }
             this.hideNavMenu();

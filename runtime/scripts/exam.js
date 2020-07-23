@@ -1005,13 +1005,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.questionList[i].revealAnswer(true);
         }
         this.display && this.display.revealAnswers();
-    },
-    /**
-     * Exit the exam - show the `exit` page.
-     */
-    exit: function()
-    {
-        this.display && this.display.showInfoPage('exit');
     }
 };
 /** Represents what should happen when a particular timing or navigation event happens.
