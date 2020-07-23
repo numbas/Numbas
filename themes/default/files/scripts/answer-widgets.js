@@ -65,7 +65,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-number', {
@@ -132,7 +132,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}">\
         '
     });
     Knockout.components.register('answer-widget-jme', {
@@ -225,7 +225,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed), attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), attr: {title: title}">\
             <span class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });

@@ -19,6 +19,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.mode = Knockout.observable(e.mode);
+        /** Have the correct answers been revealed?
+         *
+         * @see Numbas.Exam#revealed
+         * @member {observable|boolean} revealed
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.revealed = Knockout.observable(e.revealed);
         /** Is {@link Numbas.store} currently saving?
          *
          * @member {observable|boolean} saving
@@ -97,7 +104,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.showActualMark = Knockout.computed(function() {
-            return e.settings.showActualMark || (this.mode()=='review' && e.settings.reviewShowScore) || Numbas.is_instructor;
+            return e.settings.showActualMark || (this.revealed() && e.settings.reviewShowScore) || Numbas.is_instructor;
         },this);
         /** The total marks available for the exam.
          *
@@ -421,6 +428,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 this.showScore();
                 break;
             case "exit":
+                this.startTime(exam.start);
+                this.endTime(exam.stop);
                 break;
             }
             this.hideNavMenu();
@@ -482,6 +491,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         applyQuestionBindings: function(question) {
+        },
+        /** Reveal the answers to every question in the exam.
+         *
+         * @memberof Numbas.display.ExamDisplay
+         */
+        revealAnswers: function() {
+            this.revealed(this.exam.revealed);
         },
         /** Called when the exam ends.
          *

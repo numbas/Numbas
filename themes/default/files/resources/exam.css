@@ -52,6 +52,10 @@ img, object[type*="image"] {
     height: auto;
 }
 
+.btn-info {
+    color: #333;
+    background-color: #a2d1f0;
+}
 .btn-success {
     color: black;
     background-color: white;
@@ -470,6 +474,12 @@ input.jme {
 #performance-summary td {
 	text-align: right;
 }
+#performance-summary {
+    margin: 2rem 0;
+}
+#performance-summary h2 {
+    margin-top: 0;
+}
 #question-breakdown td {
 	text-align: center;
 }
@@ -509,11 +519,20 @@ input.jme {
 #infoDisplay .info-buttons {
 	margin-top: 1em;
 	text-align: center;
-}
-#infoDisplay .info-buttons .btn {
-	margin-bottom: 0.5em;
+    display: grid;
+    grid-gap: 1rem;
+    justify-content: center;
 }
 
+#end-name {
+    margin-bottom: 2rem;
+}
+
+#finished-text {
+    margin-top: 1.5em;
+    font-size: 3rem;
+    font-weight: bold;
+}
 /* results page */
 
 #results table tbody th {
@@ -538,7 +557,6 @@ input.jme {
 #question-breakdown .btn.review {
     padding: 0;
 }
-
 
 /* question bits */
 
@@ -923,10 +941,6 @@ input[type=text], input[type=number] {
 	padding: 0em 0.2em;
 }
 
-.print-only {
-	display: none;
-}
-
 body.navigate-sequence .question-header {
     display: none;
 }
@@ -941,9 +955,6 @@ body.navigate-sequence .question-header {
     .answered-state {
         display: none;
     }
-	.print-only {
-		display: inherit;
-	}
     .parts-tree {
         display: none;
     }
@@ -955,6 +966,10 @@ body.navigate-sequence .question-header {
 	.penaltyMessage {
 		display: none;
 	}
+
+    #finished-text {
+        display: none;
+    }
 
 	table {
 		page-break-inside: avoid;
@@ -996,6 +1011,10 @@ body.navigate-sequence .question-header {
 
 /* Try to allow scrolling for statement or prompt elements that are too wide */
 @media screen {
+    .print-only {
+        display: none;
+    }
+
 	.content-area > span > p, .content-area > span > div, .content-area > span > table {
 		overflow-x: auto;
 		overflow-y: hidden;

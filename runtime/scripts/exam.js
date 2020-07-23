@@ -373,6 +373,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {number}
      */
     percentScore: 0,
+    /** Have the correct answers been revealed?
+     *
+     * @type {boolean}
+     */
+    revealed: false,
     /** Did the student pass the exam?
      *
      * @type {boolean}
@@ -968,27 +973,38 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.store && this.store.end();
         }
         this.display && this.display.end();
+        //display the results
+        var revealAnswers = false;
+        switch(this.settings.showResultsPage) {
+            case 'oncompletion':
+                revealAnswers = true;
+                break;
+            case 'review':
+                revealAnswers = this.entry == 'review';
+                break;
+            default:
+                revealAnswers = false;
+                break;
+        }
+        if(Numbas.is_instructor) {
+            revealAnswers = true;
+        }
+        for(var i=0;i<this.questionList.length;i++) {
+            this.questionList[i].lock();
+        }
+        if(revealAnswers) {
+            this.revealAnswers();
+        }
+        this.display && this.display.showInfoPage( 'result' );
+    },
+    /** Reveal the answers to every question in the exam.
+     */
+    revealAnswers: function() {
+        this.revealed = true;
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
-        //display the results
-        var showResultsPage = false;
-        switch(this.settings.showResultsPage) {
-            case 'oncompletion':
-                showResultsPage = true;
-                break;
-            case 'review':
-                showResultsPage = this.entry == 'review';
-                break;
-            default:
-                showResultsPage = false;
-                break;
-        }
-        if(showResultsPage || Numbas.is_instructor) {
-            this.display && this.display.showInfoPage( 'result' );
-        } else {
-            this.exit();
-        }
+        this.display && this.display.revealAnswers();
     },
     /**
      * Exit the exam - show the `exit` page.

@@ -183,6 +183,13 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.answered = Knockout.observable(q.answered);
+        /** Has this question been locked?
+         *
+         * @see Numbas.Question#locked
+         * @member {observable|boolean} locked
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.locked = Knockout.observable(q.locked);
         /** Have the correct answers been revealed? 
          *
          * @see Numbas.Question#revealed
@@ -531,6 +538,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             this.adviceDisplayed(q.adviceDisplayed);
             this.answered(q.answered);
+            this.locked(q.locked);
             this.revealed(q.revealed);
             this.visited(q.visited);
         },
@@ -540,10 +548,10 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         end: function() {
             var q = this.question;
-            for(var i=0;i<q.parts.length;i++)
-            {
-                q.parts[i].display.end();
-            }
+            this.locked(true);
+            q.allParts().forEach(function(part) {
+                part.display.end();
+            });
         }
     };
     /** Scroll the given element into view.

@@ -64,7 +64,7 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
                     while(part.parentPart) {
                         part = part.parentPart;
                     }
-                    return this.question.display.currentPart()==part.display || this.question.display.revealed();
+                    return this.question.display.currentPart()==part.display || this.question.exam.mode=='review';
             }
         },this);
 
@@ -644,9 +644,6 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
          */
         end: function() {
             this.restoreAnswer(this.part.studentAnswer);
-            for(var i=0;i<this.part.steps.length;i++) {
-                this.part.steps[i].display.end();
-            }
         }
     };
 });

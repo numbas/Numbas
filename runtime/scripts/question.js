@@ -817,6 +817,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @type {boolean}
      */
     adviceDisplayed: false,
+    /** Has this question been locked?
+     *
+     * @type {boolean}
+     */
+    locked: false,
     /** Have the correct answers been revealed?
      *
      * @type {boolean}
@@ -919,12 +924,25 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.adviceDisplayed(this);
         }
     },
+
+    /** Lock this question - the student can no longer change their answers.
+     */
+    lock: function() {
+        this.locked = true;
+        this.allParts().forEach(function(part) {
+            part.lock();
+        });
+        if(this.display) {
+            this.display.end();
+        }
+    },
     /** Reveal the correct answers to the student.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      */
     revealAnswer: function(dontStore)
     {
+        this.lock();
         this.revealed = true;
         //display advice if allowed
         this.getAdvice(dontStore);
@@ -934,7 +952,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         if(this.display) {
             //display revealed answers
-            this.display.end();
             this.display.revealAnswer();
             this.display.showScore();
         }

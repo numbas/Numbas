@@ -1,6 +1,7 @@
 <div id="questionContainer" class="container-fluid" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
     <div class="contentArea ">
         <div id="questionDisplay" data-bind="foreach: questions">
+            <h2 class="question-name print-only" data-bind="latex: displayName"></h2>
             <div data-bind="promise: html_promise">
             </div>
         </div>
