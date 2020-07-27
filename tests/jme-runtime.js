@@ -18274,7 +18274,7 @@ function texifyWouldBracketOpArg(thing,i, settings) {
         var p1 = precedence[op1];    //precedence of child op
         var p2 = precedence[op2];    //precedence of parent op
         //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (op1=='-u' && precedence[op2]<=precedence['*']) )
+        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && op1=='-u' && precedence[op2]<=precedence['*']) )
     }
     //complex numbers might need brackets round them when multiplied with something else or unary minusing
     else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {

@@ -1664,6 +1664,8 @@
                     assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
 
                     assert.equal(Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
+
+                    assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
                 });
 
 				QUnit.test('expression to LaTeX', function(assert) {
@@ -1717,6 +1719,7 @@
                     assert.equal(exprToLaTeX('(2 + 3)/(a + b)','flatFractions'),'\\left. \\left ( 2 + 3 \\right ) \\middle/ \\left ( a + b \\right ) \\right.','');
                     assert.equal(exprToLaTeX('matrix([1,1]) + matrix([1]) + (-5)matrix([1])','all'),'\\begin{pmatrix} 1, & 1 \\end{pmatrix} - 4 \\begin{pmatrix} 1 \\end{pmatrix}','matrix([1,1]) + matrix([1]) + (-5)matrix([1])');
                     assert.equal(exprToLaTeX('x*(x+1)',''),'x \\times \\left ( x + 1 \\right )','x*(x+1)');
+                    assert.equal(exprToLaTeX('-2x','all'),'-2 x','-2 x');
 				});
 
                 QUnit.module('Documentation');
