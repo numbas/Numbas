@@ -481,7 +481,18 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
-newBuiltin('random', [TRange], TNum, math.random, {random:true} );
+newBuiltin('random', [TRange], TNum, null, {
+    evaluate: function(args,scope) {
+        var range = args[0];
+        var n = math.random(range.value);
+        if(util.isInt(range.start) && util.isInt(range.step)) {
+            return new TInt(n);
+        } else {
+            return new TNum(n);
+        }
+    },
+    random:true
+});
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
