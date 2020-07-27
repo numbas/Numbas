@@ -16646,7 +16646,7 @@ newBuiltin('random', [TRange], TNum, null, {
     evaluate: function(args,scope) {
         var range = args[0];
         var n = math.random(range.value);
-        if(util.isInt(range.start) && util.isInt(range.step)) {
+        if(util.isInt(range.start) && util.isInt(range.step) && range.step!=0) {
             return new TInt(n);
         } else {
             return new TNum(n);
