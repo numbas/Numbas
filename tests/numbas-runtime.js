@@ -17867,6 +17867,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
         q.setErrorCarriedForwardBackReferences();
     })
     q.exam = exam;
+    q.tags = [];
     q.group = group;
     q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
     q.number = number;
@@ -18043,6 +18044,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
         q.signals.trigger('functionsLoaded');
 
+        var tagNodes = q.xml.selectNodes('tags/tag');
+        for(var i = 0; i<tagNodes.length; i++) {
+            this.tags.push(tagNodes[i].textContent);
+        }
+
         //make rulesets
         var rulesetNodes = q.xml.selectNodes('rulesets/set');
         for(var i=0; i<rulesetNodes.length; i++) {
@@ -18194,6 +18200,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility','statement','advice'],q);
+
+
+        var tags = tryGet(data,'tags');
+        if(tags) {
+            q.tags = tags.slice();
+        }
+
         var preambles = tryGet(data,'preamble');
         if(preambles) {
             Object.keys(preambles).forEach(function(key) {

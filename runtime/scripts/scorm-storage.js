@@ -265,10 +265,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initPart(p.steps[i]);
         }
     },
-    /** Save all the other stuff that doesn't fit into the standard SCORM data model using the `cmi.suspend_data` string.
+    /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
+     *
+     * @returns {object}
      */
-    setSuspendData: function()
-    {
+    examSuspendData: function() {
         var exam = this.exam;
         if(exam.loading)
             return;
@@ -288,6 +289,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
+        return eobj;
+    },
+    /** Save the exam suspend data using the `cmi.suspend_data` string.
+     */
+    setSuspendData: function()
+    {
+        var eobj = this.examSuspendData();
         var estr = JSON.stringify(eobj);
         if(estr!=this.get('suspend_data')) {
             this.set('suspend_data',estr);

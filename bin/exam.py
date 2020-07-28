@@ -444,6 +444,8 @@ class Question(object):
         self.functions = []
         self.rulesets = {}
 
+        self.tags = []
+
         self.objectives = []
         self.penalties = []
 
@@ -457,6 +459,9 @@ class Question(object):
         question = Question()
         tryLoad(data,['name','statement','advice','maxMarks','objectiveVisibility','penaltyVisibility'],question)
         tryLoad(data,'partsMode',question,'parts_mode')
+
+        if haskey(data,'tags'):
+            question.tags = data['tags'][:]
 
         if haskey(data,'parts'):
             parts = data['parts']
@@ -512,6 +517,7 @@ class Question(object):
                                 ['rulesets'],
                                 ['objectives'],
                                 ['penalties'],
+                                ['tags'],
                             ])
 
         question.attrib = {
@@ -575,6 +581,12 @@ class Question(object):
         penalties = question.find('penalties')
         for penalty in self.penalties:
             penalties.append(penalty.toxml())
+
+        tags = question.find('tags')
+        for tag in self.tags:
+            tag_element = etree.Element('tag')
+            tag_element.text = tag
+            tags.append(tag_element)
 
         return question
 
