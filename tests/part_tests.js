@@ -461,7 +461,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             var p = q.getPart('p0');
             p.storeAnswer('x');
             p.submit();
-            assert.notOk(p.marking_result.finalised_result.valid);
+            assert.notOk(p.marking_result.answered);
         },
         function(err) {
             console.error(err);
