@@ -16623,9 +16623,36 @@ newBuiltin('coth', [TNum], TNum, math.coth );
 newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
 newBuiltin('arccosh', [TNum], TNum, math.arccosh );
 newBuiltin('arctanh', [TNum], TNum, math.arctanh );
-newBuiltin('ceil', [TNum], TNum, math.ceil );
-newBuiltin('floor', [TNum], TNum, math.floor );
-newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('ceil', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.ceil(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
+newBuiltin('floor', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.floor(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
+newBuiltin('round', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.round(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
 newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
