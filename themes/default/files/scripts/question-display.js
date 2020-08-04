@@ -327,6 +327,11 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 q.signals.trigger('HTMLAttached');
             })
         });
+        q.signals.on('HTMLAttached', function() {
+            // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
+            // Deprecated because there's no way of saying
+            $('body').trigger('question-html-attached',[q,qd]);
+        });
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
     {
